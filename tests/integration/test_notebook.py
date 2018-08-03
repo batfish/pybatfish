@@ -2,6 +2,7 @@ from os.path import abspath, join, realpath, pardir, dirname
 
 import nbformat
 import pytest
+from glob import glob
 from nbconvert.preprocessors import ExecutePreprocessor
 from six import PY3
 
@@ -12,8 +13,11 @@ _jupyter_nb_dir = join(_root_dir, 'jupyter_notebooks')
 
 @pytest.fixture(scope='module')
 def notebook():
-    # TODO need to figure out a way to cleanup initialized snapshot(s)
-    return nbformat.read(join(_jupyter_nb_dir, 'Getting started with Batfish.ipynb'), as_version=4)
+    notebooks = glob(_jupyter_nb_dir + '/**/*.ipynb', recursive=True)
+    assert len(notebooks) > 0
+
+    for n in notebooks:
+        yield nbformat.read(n, as_version=4)
 
 
 @pytest.fixture(scope='module')
