@@ -24,13 +24,14 @@ from copy import deepcopy
 from inspect import isfunction, getmembers
 from typing import Set, Optional, Iterable, List, Dict, Union, Any  # noqa: F401
 
+from six import PY3, integer_types, string_types
+
 from pybatfish.client.commands import (
     bf_logger, bf_session, _bf_answer_obj, _bf_get_question_templates)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import (validate_question_name,
                             validate_json_path_regex, get_uuid)
-from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set
@@ -63,7 +64,8 @@ class QuestionMeta(type):
         """Creates a new class for a specific question."""
         new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
 
-        def constructor(self, differential=None, questionName=None, **kwargs):
+        def constructor(self, differential=None, questionName=None,
+                        exclusions=None, **kwargs):
             """Create a new question."""
             # Call super (i.e., QuestionBase)
             super(new_cls, self).__init__(new_cls.template)
@@ -71,6 +73,8 @@ class QuestionMeta(type):
             # Update well-known params, if passed in
             if differential is not None:
                 self._dict['differential'] = differential
+            if exclusions is not None:
+                self._dict['exclusions'] = exclusions
             if questionName:
                 self._dict['instance']['instanceName'] = questionName
             else:
@@ -580,8 +584,7 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable and \
-                            value not in variable['allowedValues']:
+                    elif 'allowedValues' in variable and value not in variable['allowedValues']:
                         valid = False
                         errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
                             variable[
