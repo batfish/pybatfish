@@ -1,8 +1,8 @@
 from os.path import abspath, join, realpath, pardir, dirname
+from os import walk
 
 import nbformat
 import pytest
-from glob import glob
 from nbconvert.preprocessors import ExecutePreprocessor
 from six import PY3
 
@@ -13,16 +13,14 @@ _jupyter_nb_dir = join(_root_dir, 'jupyter_notebooks')
 
 @pytest.fixture(scope='module')
 def notebook():
-    notebooks = glob(_jupyter_nb_dir + '/**/*.ipynb', recursive=True)
-    assert len(notebooks) > 0
-
-    for n in notebooks:
-        yield nbformat.read(n, as_version=4)
+    for root, dirs, files in walk(_jupyter_nb_dir):
+        for f in files:
+            if f.endswith(".ipynb"):
+                yield nbformat.read(join(root, f), as_version=4)
 
 
 @pytest.fixture(scope='module')
-def executed_notebook():
-    notebook = nbformat.read(join(_jupyter_nb_dir, 'Getting started with Batfish.ipynb'), as_version=4)
+def executed_notebook(notebook):
     # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3" if PY3 else "python2")
     ep.preprocess(notebook, resources={})
