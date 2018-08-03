@@ -229,7 +229,8 @@ def get_data_get_analysis_answers(session, analysis_name, snapshot,
     }
     if reference_snapshot is not None:
         json_data[CoordConsts.SVC_KEY_DELTA_TESTRIG_NAME] = reference_snapshot
-        json_data[CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+        json_data[
+            CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
     return json_data
 
@@ -251,7 +252,8 @@ def get_data_get_answer(session, question_name, snapshot,
     }
     if reference_snapshot is not None:
         json_data[CoordConsts.SVC_KEY_DELTA_TESTRIG_NAME] = reference_snapshot
-        json_data[CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+        json_data[
+            CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     return json_data
 
 
@@ -347,7 +349,8 @@ def get_workitem_answer(session, question_name, snapshot,
 
     if reference_snapshot is not None:
         parameters[BfConsts.ARG_DELTA_TESTRIG] = reference_snapshot
-        parameters[BfConsts.ARG_DELTA_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+        parameters[
+            BfConsts.ARG_DELTA_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
         parameters[BfConsts.ARG_DIFFERENTIAL] = ""
 
     work_item.requestParams.update(parameters)
@@ -360,7 +363,8 @@ def get_workitem_generate_dataplane(session, snapshot):
     w_item = WorkItem(session)
     w_item.requestParams[BfConsts.COMMAND_DUMP_DP] = ""
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
-    w_item.requestParams[BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+    w_item.requestParams[
+        BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     return w_item
 
 
@@ -381,7 +385,8 @@ def get_workitem_run_analysis(session, analysis_name, snapshot,
     w_item.requestParams[BfConsts.COMMAND_ANALYZE] = ""
     w_item.requestParams[BfConsts.ARG_ANALYSIS_NAME] = analysis_name
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
-    w_item.requestParams[BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+    w_item.requestParams[
+        BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     if reference_snapshot is not None:
         w_item.requestParams[BfConsts.ARG_DELTA_TESTRIG] = reference_snapshot
         w_item.requestParams[
@@ -430,16 +435,10 @@ def _print_work_status(session, work_status, task_details, now_function):
             return
         obtained_time = _parse_timestamp(json_task["obtained"])
         now = now_function(obtained_time.tzinfo)
-        obtained_delta = relativedelta(now, obtained_time)
-        stale = (now - obtained_time).total_seconds() > session.stale_timeout
         obtained_str = _print_timestamp(obtained_time)
         batches = json_task["batches"] if "batches" in json_task else []
 
-        if False and stale:  # https://github.com/intentionet/pybatfish/issues/196
-            session.logger.warn(
-                ".... worker has not responded to coordinator for %s" % _format_elapsed_time(
-                    obtained_delta))
-        elif batches:
+        if batches:
             # when log level is INFO, we only print the last batch
             # else print all
             lastbatch = batches[-1]

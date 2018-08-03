@@ -13,16 +13,17 @@
 #   limitations under the License.
 
 import datetime
-from dateutil.tz import tzlocal
 import json
+import logging
+
 import pytest
+from dateutil.relativedelta import relativedelta
+from dateutil.tz import tzlocal
 from pytz import UTC
 
+from pybatfish.client.session import Session
 from pybatfish.client.workhelper import _format_elapsed_time, _parse_timestamp, \
     _print_timestamp, _print_work_status
-from dateutil.relativedelta import relativedelta
-from pybatfish.client.session import Session
-import logging
 
 
 @pytest.fixture
@@ -75,23 +76,6 @@ def test_parse_rfc3339_timestamp():
 def test_print_timestamp():
     ref = datetime.datetime(2017, 11, 29, 18, 51, 23, 456000, tzinfo=UTC)
     assert _print_timestamp(ref) == ref.astimezone(tzlocal()).strftime("%c %Z")
-
-
-@pytest.mark.skip(reason="https://github.com/intentionet/pybatfish/issues/196")
-def test_print_workstatus_stale(logger, caplog):
-    session = Session(logger)
-    session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0,
-                                                   session.stale_timeout + 1, 0,
-                                                   tzinfo=tzinfo)
-    workStatus = "TEST"
-    taskDetails = json.dumps({
-        "obtained": "2017-12-20 00:00:00 UTC",
-    })
-    _print_work_status(session, workStatus, taskDetails, nowFunction)
-    assert "status: TEST" in caplog.text
-    assert ".... worker has not responded to coordinator for 00:00:06" \
-           in caplog.text
 
 
 def test_print_workstatus_fresh_task(logger, caplog):
