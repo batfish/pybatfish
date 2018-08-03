@@ -16,6 +16,7 @@
 from typing import List, Dict, Optional  # noqa: F401
 
 import pandas
+
 from pybatfish.datamodel.answer.base import Answer, _get_display_value
 
 __all__ = [
@@ -55,7 +56,7 @@ class TableAnswerElement(Answer):
         self.rows = [Row(row) for row in dictionary.get("rows", [])] \
             # type: List[Row]
         # TODO: row exclusions
-        # (https://github.com/intentionet/pybatfish/issues/232)
+        # (https://github.com/batfish/pybatfish/issues/5)
 
         self.table_headers = self.metadata.get_column_names()  # type: List[str]
         self.table_data = pandas.DataFrame.from_records(
