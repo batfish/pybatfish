@@ -83,7 +83,6 @@ class QuestionMeta(type):
 
             # Validate that we are not accepting invalid kwargs/variables
             instance_vars = self._dict['instance'].get('variables', {})
-            print('instance vars: {}'.format(instance_vars))
             var_difference = set(kwargs.keys()).difference(instance_vars)
             if var_difference:
                 raise QuestionValidationException(
