@@ -11,12 +11,19 @@ _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, 'jupyter_notebooks')
 
 
-@pytest.fixture(scope='module')
-def notebook():
-    for root, dirs, files in walk(_jupyter_nb_dir):
-        for f in files:
-            if f.endswith(".ipynb"):
-                yield nbformat.read(join(root, f), as_version=4)
+notebook_files = [
+    join(root, filename)
+    for root, dirs, files in walk(_jupyter_nb_dir)
+    for filename in files
+    if filename.endswith('.ipynb')
+]
+assert len(notebook_files) > 0
+
+
+@pytest.fixture(scope='module', params=notebook_files)
+def notebook(request):
+    filename = request.param
+    yield nbformat.read(filename, as_version=4)
 
 
 @pytest.fixture(scope='module')
@@ -24,7 +31,7 @@ def executed_notebook(notebook):
     # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3" if PY3 else "python2")
     ep.preprocess(notebook, resources={})
-    return notebook
+    yield notebook
 
 
 def _assert_cell_no_errors(c):
