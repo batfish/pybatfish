@@ -584,8 +584,7 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable and \
-                                    value not in variable['allowedValues']:
+                    elif 'allowedValues' in variable and value not in variable['allowedValues']:
                         valid = False
                         errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
                             variable[
