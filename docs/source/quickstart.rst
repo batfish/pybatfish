@@ -41,7 +41,7 @@ Here, the example network is being uploaded, but this location could also be a f
 
 .. code-block:: python
 
-    >>> node_ans = bfq.nodeProperties(nodeRegex='as1border.*', propertySpec='interfaces').answer()
+    >>> node_ans = bfq.nodeProperties(nodeRegex='as1border.*').answer()
     status: TRYINGTOASSIGN
     .... no task information
     status: TERMINATEDNORMALLY
@@ -115,4 +115,4 @@ Note that that a resulting answer table can be displayed in several ways:
     [1.0.1.1/24]
 
 
-For additional and more in-depth examples, checkout the ``Jupyter notebooks`` **TODO** ADD A LINK.
+For additional and more in-depth examples, checkout the `Jupyter Notebooks <https://github.com/batfish/pybatfish/tree/master/jupyter_notebooks>`_.
