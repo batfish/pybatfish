@@ -1,0 +1,28 @@
+# Python files not to be committed: binaries, eggs, etc.
+build
+.cache
+dist
+*.egg-info
+.eggs
+.mypy_cache
+*.pyc
+.pytest_cache
+
+# Batfish-related directories (and/or symlinks)
+/batfish
+/containers
+/test_rigs
+/questions
+
+# PyCharm files
+.idea/misc.xml
+.idea/workspace.xml
+.idea/tasks.xml
+*.iml
+
+# Virtual environment, for python and python3, if desired.
+.env/
+.env3/
+
+# Misc files 
+.DS_Store

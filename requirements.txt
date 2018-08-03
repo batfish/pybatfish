@@ -1,0 +1,11 @@
+deepdiff
+deprecated
+jsonpickle
+jupyter
+nbconvert
+nbformat
+pandas
+python-dateutil
+requests
+requests-toolbelt
+six
