@@ -446,9 +446,9 @@ def _compute_var_help(var_name, var_data):
         else "list[{}]".format(var_data["type"]),
         required='*Required.*' if not var_data.get('optional', False) else "",
         desc=var_data["description"],
-        allowed="\n\n\tAllowed values: ``{}``".format(
+        allowed="\n\n    Allowed values: ``{}``".format(
             allowed_vals) if allowed_vals else "",
-        default="\n\n\tDefault value: ``{}``".format(
+        default="\n\n    Default value: ``{}``".format(
             default_value) if default_value else ""
     )
 

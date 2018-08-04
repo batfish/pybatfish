@@ -19,25 +19,12 @@
 #
 import sys
 from os.path import abspath, dirname, realpath, join, pardir
-from warnings import warn
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 sys.path.insert(0, _root_dir)
 
 import pybatfish  # noqa: F402
-from pybatfish.question.question import load_dir_questions  # noqa: F402
-
-try:
-    load_dir_questions(join(_root_dir, 'questions', 'stable'))
-except FileNotFoundError:
-    warn("Could not load stable questions templates, "
-         "Documentation will not be generated for questions.")
-try:
-    load_dir_questions(join(_root_dir, 'questions', 'experimental'))
-except FileNotFoundError:
-    warn("Could not load experimental questions templates, "
-         "Documentation will not be generated for questions.")
 
 # -- General configuration ------------------------------------------------
 
