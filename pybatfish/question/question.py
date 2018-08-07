@@ -655,9 +655,9 @@ def _validateType(value, expectedType):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         return validate_json_path_regex(value), None
-    elif expectedType == 'nodeSpec':
-        return isinstance(value, string_types), None
     elif expectedType == 'nodePropertySpec':
+        return isinstance(value, string_types), None
+    elif expectedType == 'nodeSpec':
         return isinstance(value, string_types), None
     elif expectedType == 'prefix':
         if not isinstance(value, string_types):
