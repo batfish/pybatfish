@@ -635,8 +635,8 @@ def bf_list_snapshots(verbose=False):
     :param verbose: If true, return the full output of Batfish, including
         snapshot metadata.
 
-    :return: json response containing snapshots for the current network
-    :rtype: dict
+    :return: a list of snapshot names or the full json response containing
+        snapshots and metadata (if `verbose=True`)
     """
     json_data = workhelper.get_data_list_snapshots(bf_session,
                                                    bf_session.network)
