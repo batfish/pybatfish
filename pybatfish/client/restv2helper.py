@@ -20,6 +20,7 @@ import pybatfish
 import requests
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
+from pybatfish.datamodel.referencelibrary import ReferenceBook
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
@@ -46,7 +47,7 @@ def add_node_role_dimension(session, dimension):
 
 
 def add_reference_book(session, book):
-    # type: (Session, Dict) -> None
+    # type: (Session, ReferenceBook) -> None
     """Adds a new reference book to the active network."""
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     _post(session, urlTail, book)
