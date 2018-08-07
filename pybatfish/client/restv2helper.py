@@ -20,7 +20,7 @@ import pybatfish
 import requests
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.datamodel.referencelibrary import ReferenceBook
+from pybatfish.datamodel.referencelibrary import ReferenceBook  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
