@@ -16,9 +16,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.datamodel.roles.noderolesdata import NodeRolesData
+import pytest
 
 
 def test_noderolesdata():

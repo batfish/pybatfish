@@ -16,23 +16,23 @@
 
 from __future__ import absolute_import, print_function
 
+from copy import deepcopy
+from inspect import getmembers, isfunction
 import json
 import os
+from os.path import join
 import re
 import sys
-from copy import deepcopy
-from inspect import isfunction, getmembers
-from os.path import join
-from typing import Set, Optional, Iterable, List, Dict, Union, Any  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
-from six import PY3, integer_types, string_types
-
-from pybatfish.client.commands import (
-    bf_logger, bf_session, _bf_answer_obj, _bf_get_question_templates)
+from pybatfish.client.commands import (_bf_answer_obj,
+                                       _bf_get_question_templates, bf_logger,
+                                       bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (validate_question_name,
-                            validate_json_path_regex, get_uuid)
+from pybatfish.util import (get_uuid, validate_json_path_regex,
+                            validate_question_name)
+from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set
@@ -586,7 +586,8 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable and value not in variable['allowedValues']:
+                    elif 'allowedValues' in variable and value not in variable[
+                        'allowedValues']:
                         valid = False
                         errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
                             variable[

@@ -12,9 +12,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import List, Union, Dict, Any  # noqa: F401
-
 from collections import namedtuple
+from typing import Any, Dict, List, Union  # noqa: F401
 
 __all__ = ['AddressGroup', 'ReferenceBook', 'ReferenceLibrary']
 
@@ -46,7 +45,9 @@ class ReferenceBook(namedtuple("ReferenceBook", ["name", "addressGroups"])):
         # type: (str, List[Union[AddressGroup, Dict[str, Any]]], Dict[str, Any]) -> ReferenceBook
         """Create a new reference book object."""
         return super(ReferenceBook, cls).__new__(cls, name,
-                                                 [ag if isinstance(ag, AddressGroup) else AddressGroup(**ag) for ag in
+                                                 [ag if isinstance(ag,
+                                                                   AddressGroup) else AddressGroup(
+                                                     **ag) for ag in
                                                   addressGroups])
 
 
@@ -61,5 +62,7 @@ class ReferenceLibrary(namedtuple("ReferenceLibrary", ["books"])):
         # type: (List[Union[ReferenceBook, Dict[str, Any]]], Dict[str, Any]) -> ReferenceLibrary
         """Create a new reference library."""
         return super(ReferenceLibrary, cls).__new__(cls,
-                                                    [book if isinstance(book, ReferenceBook) else ReferenceBook(**book)
+                                                    [book if isinstance(book,
+                                                                        ReferenceBook) else ReferenceBook(
+                                                        **book)
                                                      for book in books])

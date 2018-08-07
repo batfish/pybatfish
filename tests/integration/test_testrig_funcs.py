@@ -12,11 +12,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import pytest
-
-from pybatfish.client.commands import bf_init_network, bf_list_snapshots, \
-    bf_delete_network
+from pybatfish.client.commands import bf_delete_network, bf_init_network, \
+    bf_list_snapshots
 from pybatfish.client.consts import CoordConsts
+import pytest
 
 TEST_NETWORK = 'test_network_pytest'
 

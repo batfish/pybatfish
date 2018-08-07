@@ -27,16 +27,14 @@ To start the service locally, do the following in a new shell:
 
 from __future__ import absolute_import, print_function
 
-from os.path import abspath, join, realpath, pardir, dirname
+from os.path import abspath, dirname, join, pardir, realpath
 
-import pytest
-
-from pybatfish.client.commands import (bf_generate_dataplane,
-                                       bf_init_snapshot,
-                                       bf_delete_network, bf_session,
-                                       bf_init_network)
+from pybatfish.client.commands import (bf_delete_network, bf_generate_dataplane,
+                                       bf_init_network, bf_init_snapshot,
+                                       bf_session)
 from pybatfish.client.consts import BfConsts
 from pybatfish.question.question import load_questions
+import pytest
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -63,6 +61,7 @@ def questions():
 def test_e2e(questions):
     """Run a series of commands against Batfish. The goal is not to crash."""
     bf_init_snapshot(join(_test_rig_dir, 'example'))
-    bf_init_snapshot(join(_test_rig_dir, 'example-with-delta'), 'example-with-delta')
+    bf_init_snapshot(join(_test_rig_dir, 'example-with-delta'),
+                     'example-with-delta')
     bf_generate_dataplane()
     bf_generate_dataplane('example-with-delta')

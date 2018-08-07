@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, Optional, List, Any  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 from pybatfish.datamodel.roles.noderole import NodeRole
 from pybatfish.util import obj_to_str
