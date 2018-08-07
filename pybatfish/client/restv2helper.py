@@ -20,7 +20,7 @@ import pybatfish
 import requests
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.datamodel.referencelibrary import ReferenceBook  # noqa: F401
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, ReferenceBook  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
@@ -40,7 +40,7 @@ _requests_session.mount("http", HTTPAdapter(
 
 
 def add_node_role_dimension(session, dimension):
-    # type: (Session, Dict) -> None
+    # type: (Session, NodeRoleDimension) -> None
     """Adds a new node role dimension to the active network."""
     urlTail = "/containers/{}/noderoles".format(session.network)
     _post(session, urlTail, dimension)

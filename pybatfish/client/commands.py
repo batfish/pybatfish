@@ -18,24 +18,22 @@ from __future__ import absolute_import, print_function
 
 import json
 import logging
-import os
 import sys
-import tempfile
-from imp import new_module
 from typing import Any, Dict, Optional, Union  # noqa: F401
-from warnings import warn
 
+import os
+import tempfile
 from deprecated import deprecated
+from imp import new_module
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
 from pybatfish.datamodel.answer.table import TableAnswerElement
 from pybatfish.datamodel.assertion import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import ReferenceBook, ReferenceLibrary
-from pybatfish.datamodel.roles.noderoledimension import NodeRoleDimension
-from pybatfish.datamodel.roles.noderolesdata import NodeRolesData
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, zip_dir, validate_name)
+from warnings import warn
 
 from . import resthelper
 from . import restv2helper
@@ -125,7 +123,7 @@ def bf_add_node_role_dimension(dimension):
     """
     if dimension.type == "AUTO":
         raise ValueError("Cannot add a dimension of type AUTO")
-    restv2helper.add_node_role_dimension(bf_session, dimension.to_dict())
+    restv2helper.add_node_role_dimension(bf_session, dimension)
 
 
 def bf_add_reference_book(book):
@@ -394,14 +392,14 @@ def bf_get_info():
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the set of node roles for the active network."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_node_role_dimension(bf_session, dimension))
+    return NodeRoleDimension(
+        **restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the set of node roles for the active network."""
-    return NodeRolesData(restv2helper.get_node_roles(bf_session))
+    return NodeRolesData(**restv2helper.get_node_roles(bf_session))
 
 
 def bf_get_reference_book(book_name):

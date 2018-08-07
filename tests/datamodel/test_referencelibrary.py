@@ -17,8 +17,7 @@
 from __future__ import absolute_import, print_function
 
 import pytest
-
-from pybatfish.datamodel.referencelibrary import ReferenceLibrary
+from pybatfish.datamodel.referencelibrary import ReferenceLibrary, NodeRolesData
 
 
 def test_empty_referencelibrary():
@@ -66,6 +65,33 @@ def test_non_empty_referencelibrary():
     assert len(reference_library.books[0].addressGroups) == 2
     assert reference_library.books[0].addressGroups[0].name == "ag1"
     assert len(reference_library.books[0].addressGroups[0].addresses) == 3
+
+
+def test_noderolesdata():
+    """Check proper deserialization for a node roles data."""
+    dict = {
+        "roleDimensions": [
+            {
+                "name": "dim1",
+                "type": "CUSTOM",
+                "roles": [
+                    {
+                        "name": "role1",
+                        "regex": "regex",
+                    },
+                    {
+                        "name": "role2",
+                        "regex": "regex",
+                    },
+                ]
+            },
+        ]
+    }
+    nodeRoleData = NodeRolesData(**dict)
+
+    assert len(nodeRoleData.roleDimensions) == 1
+    assert len(nodeRoleData.roleDimensions[0].roles) == 2
+    assert nodeRoleData.roleDimensions[0].roles[0].name == "role1"
 
 
 if __name__ == "__main__":
