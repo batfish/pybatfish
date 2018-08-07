@@ -15,10 +15,10 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.client.session import Session  # noqa: F401
 import json
 from typing import Dict, Optional  # noqa: F401
 
+from pybatfish.client.session import Session  # noqa: F401
 import pybatfish.util as batfishutils
 
 

@@ -20,11 +20,10 @@ fails.
 """
 
 import operator
+from typing import Any, Dict, Iterable  # noqa: F401
 import warnings
-from typing import Dict, Iterable, Any  # noqa: F401
 
 from deepdiff import DeepDiff
-
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning)

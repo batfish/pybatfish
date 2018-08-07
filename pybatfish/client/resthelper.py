@@ -15,8 +15,12 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Dict, Optional, Any  # noqa: F401
+from typing import Any, Dict, Optional  # noqa: F401
 
+import pybatfish
+from pybatfish.client.consts import CoordConsts
+from pybatfish.client.session import Session  # noqa: F401
+from pybatfish.exception import BatfishException
 import requests
 from requests import Response  # noqa: F401
 from requests.adapters import HTTPAdapter
@@ -24,10 +28,6 @@ from requests_toolbelt.multipart.encoder import MultipartEncoder
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
-import pybatfish
-from pybatfish.client.consts import CoordConsts
-from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.exception import BatfishException
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)

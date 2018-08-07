@@ -12,11 +12,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from os.path import abspath, join, realpath, pardir, dirname
+from os.path import abspath, dirname, join, pardir, realpath
 
+from nbconvert.preprocessors import ExecutePreprocessor
 import nbformat
 import pytest
-from nbconvert.preprocessors import ExecutePreprocessor
 from six import PY3
 
 _this_dir = abspath(dirname(realpath(__file__)))

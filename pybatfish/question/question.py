@@ -16,22 +16,23 @@
 
 from __future__ import absolute_import, print_function
 
+from copy import deepcopy
+from inspect import getmembers, isfunction
 import json
 import os
+from os.path import join
 import re
 import sys
-from copy import deepcopy
-from inspect import isfunction, getmembers
-from typing import Set, Optional, Iterable, List, Dict, Union, Any  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
-from six import PY3, integer_types, string_types
-
-from pybatfish.client.commands import (
-    bf_logger, bf_session, _bf_answer_obj, _bf_get_question_templates)
+from pybatfish.client.commands import (_bf_answer_obj,
+                                       _bf_get_question_templates, bf_logger,
+                                       bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (validate_question_name,
-                            validate_json_path_regex, get_uuid)
+from pybatfish.util import (get_uuid, validate_json_path_regex,
+                            validate_question_name)
+from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set
@@ -281,9 +282,10 @@ def list_tags():
 
 def load_dir_questions(questionDir, moduleName=bfq.__name__):
     questionFilenames = []
-    for filename in os.listdir(questionDir):
-        if filename.endswith(".json"):
-            questionFilenames.append(filename)
+    for dirpath, dirnames, filenames in os.walk(questionDir):
+        for filename in filenames:
+            if filename.endswith(".json"):
+                questionFilenames.append(join(dirpath, filename))
     localQuestions = set([])
     if len(questionFilenames) == 0:
         bf_logger.warn(
@@ -450,9 +452,9 @@ def _compute_var_help(var_name, var_data):
         else "list[{}]".format(var_data["type"]),
         required='*Required.*' if not var_data.get('optional', False) else "",
         desc=var_data["description"],
-        allowed="\n\n\tAllowed values: ``{}``".format(
+        allowed="\n\n    Allowed values: ``{}``".format(
             allowed_vals) if allowed_vals else "",
-        default="\n\n\tDefault value: ``{}``".format(
+        default="\n\n    Default value: ``{}``".format(
             default_value) if default_value else ""
     )
 
@@ -584,7 +586,8 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable and value not in variable['allowedValues']:
+                    elif 'allowedValues' in variable \
+                            and value not in variable['allowedValues']:
                         valid = False
                         errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
                             variable[
