@@ -22,11 +22,10 @@ import os
 import sys
 import tempfile
 from imp import new_module
-from typing import Any, Dict, IO, Optional, Union  # noqa: F401
+from typing import Any, Dict, Optional, Union, List  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
-
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -37,6 +36,7 @@ from pybatfish.datamodel.roles.noderoledimension import NodeRoleDimension
 from pybatfish.datamodel.roles.noderolesdata import NodeRolesData
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, zip_dir, validate_name)
+
 from . import resthelper
 from . import restv2helper
 from . import workhelper
@@ -353,7 +353,8 @@ def bf_generate_dataplane(snapshot=None):
     return answer
 
 
-def bf_get_analysis_answers(analysisName, snapshot=None, reference_snapshot=None):
+def bf_get_analysis_answers(analysisName, snapshot=None,
+                            reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
@@ -472,32 +473,36 @@ def bf_init_container(containerName=None,
 
 
 def bf_init_network(name=None, prefix=Options.default_network_prefix):
+    # type: (str, str) -> str
     """
     Initialize a new network.
 
-    :param name: name of the network to initialize
+    :param name: name of the network to initialize. If `None`, a name will be generated.
     :type name: string
     :param prefix: prefix to prepend to auto-generated network names if name is empty
     :type name: string
+
+    :return: The name of the network, if initialized successfully.
+    :rtype: string
     :raises BatfishException: if batfish response does not specify the initialized network
     """
     if name is None:
         name = Options.default_network_prefix + get_uuid()
     else:
         validate_name(name, "network")
-    jsonData = workhelper.get_data_init_network(bf_session, name,
-                                                prefix)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_INIT_NETWORK,
-                                                jsonData)
+    json_data = workhelper.get_data_init_network(bf_session, name,
+                                                 prefix)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
 
-    if jsonResponse[CoordConsts.SVC_KEY_NETWORK_NAME]:
-        bf_session.network = jsonResponse[CoordConsts.SVC_KEY_NETWORK_NAME]
-        bf_logger.info("Network is now set to " + bf_session.network)
-    else:
+    network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+    if network_name is None:
         raise BatfishException(
-            "Bad json response in init_network; missing expected key: " + CoordConsts.SVC_KEY_NETWORK_NAME,
-            jsonResponse)
+            "Network initialization failed. Server response: {}".format(
+                json_response))
+
+    bf_session.network = network_name
+    return str(network_name)
 
 
 def _bf_init_snapshot(upload, name, background):
@@ -625,7 +630,8 @@ def bf_list_questions():
     return answer
 
 
-def bf_list_snapshots():
+def bf_list_snapshots(verbose=False):
+    # type: (bool) -> Union[List[str], Dict]
     """
     List snapshots for the current network.
 
@@ -637,7 +643,10 @@ def bf_list_snapshots():
     json_response = resthelper.get_json_response(bf_session,
                                                  CoordConsts.SVC_RSC_LIST_SNAPSHOTS,
                                                  json_data)
-    return json_response
+    if verbose:
+        return json_response
+
+    return [s['testrigname'] for s in json_response['snapshotlist']]
 
 
 @deprecated("Deprecated in favor of bf_list_snapshots()")
