@@ -55,6 +55,13 @@ def add_reference_book(session, book):
     _post(session, urlTail, book)
 
 
+def get_network(session, network):
+    # type: (Session, str) -> Dict[str, Any]
+    """Gets information about the specified network."""
+    path = "/containers/{}".format(network)
+    return _get(session, path)
+
+
 def get_node_role_dimension(session, dimension):
     # type: (Session, str) -> Dict
     """Gets the node role dimension for the active network."""

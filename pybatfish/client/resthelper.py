@@ -81,6 +81,7 @@ def get_json_response(session, resource, jsonData=None, useHttpGet=False):
         response = _post_data(session, resource, jsonData)
 
     json_response = response.json()
+    print(response, json_response)
     if json_response[0] != CoordConsts.SVC_KEY_SUCCESS:
         raise BatfishException(
             "Coordinator returned failure: {}".format(json_response[1]))

@@ -26,6 +26,8 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -80,7 +82,6 @@ __all__ = ['bf_add_analysis',
            'bf_get_work_status',
            'bf_init_analysis',
            'bf_init_container',
-           'bf_init_network',
            'bf_init_snapshot',
            'bf_init_testrig',
            'bf_kill_work',
@@ -458,48 +459,15 @@ def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
 
 
-@deprecated("Deprecated in favor of bf_init_network(name, prefix)")
+@deprecated("Deprecated in favor of bf_set_network(name, prefix)")
 def bf_init_container(containerName=None,
                       containerPrefix=Options.default_network_prefix):
     """
     Initialize a new container.
 
-    .. deprecated:: In favor of :py:func:`bf_init_network`
+    .. deprecated:: In favor of :py:func:`bf_set_network`
     """
-    bf_init_network(containerName, containerPrefix)
-
-
-def bf_init_network(name=None, prefix=Options.default_network_prefix):
-    # type: (str, str) -> str
-    """
-    Initialize a new network.
-
-    :param name: name of the network to initialize. If `None`, a name will be generated.
-    :type name: string
-    :param prefix: prefix to prepend to auto-generated network names if name is empty
-    :type name: string
-
-    :return: The name of the network, if initialized successfully.
-    :rtype: string
-    :raises BatfishException: if batfish response does not specify the initialized network
-    """
-    if name is None:
-        name = Options.default_network_prefix + get_uuid()
-    else:
-        validate_name(name, "network")
-    json_data = workhelper.get_data_init_network(bf_session, name,
-                                                 prefix)
-    json_response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
-
-    network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
-    if network_name is None:
-        raise BatfishException(
-            "Network initialization failed. Server response: {}".format(
-                json_response))
-
-    bf_session.network = network_name
-    return str(network_name)
+    bf_set_network(containerName, containerPrefix)
 
 
 def _bf_init_snapshot(upload, name, background):
@@ -511,7 +479,7 @@ def _bf_init_snapshot(upload, name, background):
         file_to_send = tempFile.name
 
     if bf_session.network is None:
-        bf_init_network()
+        bf_set_network()
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
@@ -718,15 +686,44 @@ def bf_set_container(containerName):
     bf_set_network(containerName)
 
 
-def bf_set_network(name):
+def bf_set_network(name=None, prefix=Options.default_network_prefix):
+    # type: (str, str) -> str
     """
-    Set the current network by name.
+    Configure the network used for analysis.
 
-    :param name: name of the network to set as the current network
+    :param name: name of the network to set. If `None`, a name will be generated using prefix.
     :type name: string
+    :param prefix: prefix to prepend to auto-generated network names if name is empty
+    :type name: string
+
+    :return: The name of the configured network, if configured successfully.
+    :rtype: string
+    :raises BatfishException: if configuration fails
     """
-    bf_session.network = name
-    bf_logger.info("Network is now set to " + bf_session.network)
+    if name is None:
+        name = prefix + get_uuid()
+    validate_name(name, "network")
+
+    try:
+        net = restv2helper.get_network(bf_session, name)
+        bf_session.network = str(net['name'])
+        return bf_session.network
+    except HTTPError as e:
+        if e.response.status_code != 404:
+            raise BatfishException('Unknown error accessing network', e)
+
+    json_data = workhelper.get_data_init_network(bf_session, name)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
+
+    network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+    if network_name is None:
+        raise BatfishException(
+            "Network initialization failed. Server response: {}".format(
+                json_response))
+
+    bf_session.network = str(network_name)
+    return network_name
 
 
 def bf_set_snapshot(name):

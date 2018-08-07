@@ -15,7 +15,7 @@
 from os.path import abspath, dirname, join, pardir, realpath
 
 from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
-                                       bf_init_analysis, bf_init_network,
+                                       bf_init_analysis, bf_set_network,
                                        bf_init_snapshot)
 from pybatfish.question import bfq
 from pybatfish.question.question import load_questions
@@ -38,7 +38,7 @@ def network():
         bf_delete_network(TEST_NETWORK)
     except Exception:
         pass
-    bf_init_network(TEST_NETWORK)
+    bf_set_network(TEST_NETWORK)
     yield bf_init_snapshot(_test_rig_dir + "/example", name="example")
     bf_delete_network(TEST_NETWORK)
 
