@@ -15,7 +15,8 @@
 from collections import namedtuple
 from typing import Any, Dict, List, Union  # noqa: F401
 
-__all__ = ['AddressGroup', 'NodeRole', 'NodeRoleDimension', 'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary']
+__all__ = ['AddressGroup', 'NodeRole', 'NodeRoleDimension', 'NodeRolesData',
+           'ReferenceBook', 'ReferenceLibrary']
 
 
 class AddressGroup(namedtuple("AddressGroup", ["name", "addresses"])):
@@ -46,7 +47,8 @@ class NodeRole(namedtuple("NodeRole", ["name", "regex"])):
         return super(NodeRole, cls).__new__(cls, name, regex)
 
 
-class NodeRoleDimension(namedtuple("NodeRoleDimension", ["name", "type", "roles"])):
+class NodeRoleDimension(
+    namedtuple("NodeRoleDimension", ["name", "type", "roles"])):
     """
     Information about a node role dimension.
 
@@ -58,7 +60,9 @@ class NodeRoleDimension(namedtuple("NodeRoleDimension", ["name", "type", "roles"
         # type: (str, str, List[Union[NodeRole, Dict[str, Any]]], Dict[str, Any]) -> NodeRoleDimension
         """Create a new node role dimension object."""
         return super(NodeRoleDimension, cls).__new__(cls, name, type,
-                                                     [role if isinstance(role, NodeRole) else NodeRole(**role) for role
+                                                     [role if isinstance(role,
+                                                                         NodeRole) else NodeRole(
+                                                         **role) for role
                                                       in roles])
 
 
@@ -73,8 +77,10 @@ class NodeRolesData(namedtuple("NodeRolesData", ["roleDimensions"])):
         # type: (List[Union[NodeRoleDimension, Dict[str, Any]]], Dict[str, Any]) -> NodeRolesData
         """Create a new node role dimension object."""
         return super(NodeRolesData, cls).__new__(cls,
-                                                 [dim if isinstance(dim, NodeRoleDimension) else NodeRoleDimension(
-                                                     **dim) for dim in roleDimensions])
+                                                 [dim if isinstance(dim,
+                                                                    NodeRoleDimension) else NodeRoleDimension(
+                                                     **dim) for dim in
+                                                  roleDimensions])
 
 
 # TODO: Extend ReferenceBook other types of references beyond address groups
