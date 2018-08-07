@@ -22,11 +22,10 @@ import os
 import sys
 import tempfile
 from imp import new_module
-from typing import Any, Dict, IO, Optional, Union  # noqa: F401
+from typing import Any, Dict, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
-
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -37,6 +36,7 @@ from pybatfish.datamodel.roles.noderoledimension import NodeRoleDimension
 from pybatfish.datamodel.roles.noderolesdata import NodeRolesData
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, zip_dir, validate_name)
+
 from . import resthelper
 from . import restv2helper
 from . import workhelper
@@ -135,7 +135,7 @@ def bf_add_reference_book(book):
 
     :param book: The ReferenceBook object to add
     """
-    restv2helper.add_reference_book(bf_session, book._asdict())
+    restv2helper.add_reference_book(bf_session, book)
 
 
 def _bf_answer_obj(question_str, parameters_str, question_name,
