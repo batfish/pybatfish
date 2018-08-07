@@ -15,7 +15,7 @@ from os.path import abspath, dirname, join, pardir, realpath
 import uuid
 
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_generate_dataplane, bf_init_network,
+                                       bf_generate_dataplane,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_set_network)
 import pytest
@@ -27,7 +27,7 @@ _snapshot_dir = join(_root_dir, 'test_rigs')
 
 @pytest.fixture()
 def network():
-    name = bf_init_network()
+    name = bf_set_network()
     yield name
     # cleanup
     bf_delete_network(name)

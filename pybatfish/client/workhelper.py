@@ -257,10 +257,9 @@ def get_data_get_answer(session, question_name, snapshot,
     return json_data
 
 
-def get_data_init_network(session, network_name, network_prefix):
+def get_data_init_network(session, network_name):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: network_name,
-                 CoordConsts.SVC_KEY_NETWORK_PREFIX: network_prefix}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: network_name}
     return json_data
 
 
