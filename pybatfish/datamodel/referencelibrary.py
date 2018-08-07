@@ -57,7 +57,7 @@ class NodeRoleDimension(namedtuple("NodeRoleDimension", ["name", "type", "roles"
     roles ('AUTO') or user-defined roles ('CUSTOM'). The 'roles' field has the list of NodeRoles in this dimension.
     """
 
-    def __new__(cls, name, type="CUSTOM", roles, **kwargs):
+    def __new__(cls, name, type="CUSTOM", roles=[], **kwargs):
         # type: (str, str, List[Union[NodeRole, Dict[str, Any]]], Dict[str, Any]) -> NodeRoleDimension
         """Create a new node role dimension object."""
         return super(NodeRoleDimension, cls).__new__(cls, name, type,
@@ -72,7 +72,7 @@ class NodeRolesData(namedtuple("NodeRolesData", ["roleDimensions"])):
     The 'roleDimensions' is a list of NodeRoleDimensions
     """
 
-    def __new__(cls, roleDimensions, **kwargs):
+    def __new__(cls, roleDimensions=[], **kwargs):
         # type: (List[Union[NodeRoleDimension, Dict[str, Any]]], Dict[str, Any]) -> NodeRolesData
         """Create a new node role dimension object."""
         return super(NodeRolesData, cls).__new__(cls,
