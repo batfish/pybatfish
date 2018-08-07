@@ -11,14 +11,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from os.path import abspath, dirname, join, pardir, realpath
 import uuid
-from os.path import abspath, dirname, realpath, pardir, join
 
+from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
+                                       bf_generate_dataplane, bf_init_network,
+                                       bf_init_snapshot, bf_list_snapshots,
+                                       bf_set_network)
 import pytest
-from pybatfish.client.commands import (bf_init_network, bf_list_snapshots,
-                                       bf_delete_network, bf_init_snapshot,
-                                       bf_generate_dataplane,
-                                       bf_delete_snapshot, bf_set_network)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -68,3 +68,4 @@ def test_list_snapshots(network, example_snapshot):
     assert bf_list_snapshots() == [example_snapshot]
     verbose = bf_list_snapshots(verbose=True)
     assert verbose.get('snapshotlist') is not None
+    assert len(verbose.get('snapshotlist')) == 1

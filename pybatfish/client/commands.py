@@ -632,6 +632,9 @@ def bf_list_snapshots(verbose=False):
     """
     List snapshots for the current network.
 
+    :param verbose: If true, return the full output of Batfish, including
+        snapshot metadata.
+
     :return: json response containing snapshots for the current network
     :rtype: dict
     """
