@@ -22,6 +22,7 @@ import re
 import sys
 from copy import deepcopy
 from inspect import isfunction, getmembers
+from os.path import join
 from typing import Set, Optional, Iterable, List, Dict, Union, Any  # noqa: F401
 
 from pybatfish.client.commands import (
@@ -277,9 +278,10 @@ def list_tags():
 
 def load_dir_questions(questionDir, moduleName=bfq.__name__):
     questionFilenames = []
-    for filename in os.listdir(questionDir):
-        if filename.endswith(".json"):
-            questionFilenames.append(filename)
+    for dirpath, dirnames, filenames in os.walk(questionDir):
+        for filename in filenames:
+            if filename.endswith(".json"):
+                questionFilenames.append(join(dirpath, filename))
     localQuestions = set([])
     if len(questionFilenames) == 0:
         bf_logger.warn(

@@ -38,15 +38,11 @@ def _process(line: str) -> str:
 if __name__ == "__main__":
     print(_root_dir)
     # Make some assumptions about where questions live
+    question_dir = join(_root_dir, 'questions')
     try:
-        load_dir_questions(join(_root_dir, 'questions', 'stable'))
+        load_dir_questions(question_dir)
     except FileNotFoundError:
-        warn("Could not load stable questions templates, "
-             "Documentation will not be generated for questions.")
-    try:
-        load_dir_questions(join(_root_dir, 'questions', 'experimental'))
-    except FileNotFoundError:
-        warn("Could not load experimental questions templates, "
+        warn("Could not load question templates from {} ".format(question_dir) +
              "Documentation will not be generated for questions.")
 
     # use extension different from *.rst
