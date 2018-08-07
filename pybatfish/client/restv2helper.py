@@ -14,15 +14,14 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Dict, Any  # noqa: F401
+from typing import Any, Dict  # noqa: F401
 
 import pybatfish
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
+    ReferenceBook  # noqa: F401
 import requests
-from pybatfish.client.consts import CoordConsts
-from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, ReferenceBook  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
