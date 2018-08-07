@@ -1,3 +1,4 @@
+# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,20 +13,18 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pybatfish.client.commands import bf_delete_network, bf_init_network, \
-    bf_list_snapshots
-from pybatfish.client.consts import CoordConsts
-import pytest
-
-TEST_NETWORK = 'test_network_pytest'
+from pybatfish.client.commands import bf_init_network, bf_delete_network
+from pybatfish.client.options import Options
 
 
-@pytest.fixture(scope='module')
-def network():
-    yield bf_init_network(TEST_NETWORK)
-    bf_delete_network(TEST_NETWORK)
+def test_init_network():
+    try:
+        assert bf_init_network('foobar') == 'foobar'
+    finally:
+        bf_delete_network('foobar')
 
-
-def test_list_testrigs(network):
-    """Expect empty list from bf_list_snapshots for an empty current network."""
-    assert not bf_list_snapshots().get(CoordConsts.SVC_KEY_SNAPSHOT_LIST)
+    name = bf_init_network()
+    try:
+        assert name.startswith(Options.default_network_prefix)
+    finally:
+        bf_delete_network(name)
