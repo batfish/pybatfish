@@ -106,6 +106,7 @@ setup(
                       'python-dateutil',
                       'requests',
                       'requests-toolbelt',
+                      'simplejson',
                       'six',
                       ] + (['enum34', 'typing'] if PY2 else []),
 
