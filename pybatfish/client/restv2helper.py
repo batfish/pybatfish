@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Dict  # noqa: F401
+from typing import Dict, Any  # noqa: F401
 
 import pybatfish
 import requests
@@ -111,7 +111,7 @@ def _get(session, urlTail):
 
 
 def _post(session, urlTail, object):
-    # type: (Session, str, Dict) -> None
+    # type: (Session, str, Any) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
