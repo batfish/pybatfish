@@ -47,8 +47,8 @@ class NodeRole(namedtuple("NodeRole", ["name", "regex"])):
         return super(NodeRole, cls).__new__(cls, name, regex)
 
 
-class NodeRoleDimension(
-    namedtuple("NodeRoleDimension", ["name", "type", "roles"])):
+class NodeRoleDimension(namedtuple("NodeRoleDimension",
+                                   ["name", "type", "roles"])):
     """
     Information about a node role dimension.
 

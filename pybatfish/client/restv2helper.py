@@ -19,8 +19,9 @@ from typing import Any, Dict  # noqa: F401
 import pybatfish
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    ReferenceBook  # noqa: F401
+from pybatfish.datamodel.referencelibrary import (  # noqa: F401
+    NodeRoleDimension,
+    ReferenceBook)
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry

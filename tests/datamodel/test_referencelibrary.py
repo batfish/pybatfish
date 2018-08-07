@@ -16,7 +16,7 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.referencelibrary import ReferenceLibrary
+from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
 import pytest
 
 
