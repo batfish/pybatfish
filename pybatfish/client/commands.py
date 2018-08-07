@@ -723,7 +723,7 @@ def bf_set_network(name=None, prefix=Options.default_network_prefix):
                 json_response))
 
     bf_session.network = str(network_name)
-    return network_name
+    return bf_session.network
 
 
 def bf_set_snapshot(name):
