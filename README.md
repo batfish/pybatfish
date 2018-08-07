@@ -38,6 +38,6 @@ pip install -e .
 
 ## Using Pybatfish
 
-### Performing network analysis
+See our [full documentation](https://pybatfish.readthedocs.io/en/latest/) 
+and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html)
 
-**TODO** point to read-the-docs

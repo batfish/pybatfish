@@ -32,6 +32,7 @@ For example:
 
 Run:
 - `cd docs`
+- `python generate_questions_doc.py`
 - `make html` (or other format, such as `make pdf`)
 
 Read (for html format):

@@ -22,6 +22,7 @@ import re
 import sys
 from copy import deepcopy
 from inspect import isfunction, getmembers
+from os.path import join
 from typing import Set, Optional, Iterable, List, Dict, Union, Any  # noqa: F401
 
 from six import PY3, integer_types, string_types
@@ -281,9 +282,10 @@ def list_tags():
 
 def load_dir_questions(questionDir, moduleName=bfq.__name__):
     questionFilenames = []
-    for filename in os.listdir(questionDir):
-        if filename.endswith(".json"):
-            questionFilenames.append(filename)
+    for dirpath, dirnames, filenames in os.walk(questionDir):
+        for filename in filenames:
+            if filename.endswith(".json"):
+                questionFilenames.append(join(dirpath, filename))
     localQuestions = set([])
     if len(questionFilenames) == 0:
         bf_logger.warn(
@@ -450,9 +452,9 @@ def _compute_var_help(var_name, var_data):
         else "list[{}]".format(var_data["type"]),
         required='*Required.*' if not var_data.get('optional', False) else "",
         desc=var_data["description"],
-        allowed="\n\n\tAllowed values: ``{}``".format(
+        allowed="\n\n    Allowed values: ``{}``".format(
             allowed_vals) if allowed_vals else "",
-        default="\n\n\tDefault value: ``{}``".format(
+        default="\n\n    Default value: ``{}``".format(
             default_value) if default_value else ""
     )
 
