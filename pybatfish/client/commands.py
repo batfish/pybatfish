@@ -16,28 +16,27 @@
 
 from __future__ import absolute_import, print_function
 
+from imp import new_module
 import json
 import logging
-import sys
-from typing import Any, Dict, Optional, Union  # noqa: F401
-
 import os
+import sys
 import tempfile
+from typing import Any, Dict, Optional, Union  # noqa: F401
+from warnings import warn
+
 from deprecated import deprecated
-from imp import new_module
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
 from pybatfish.datamodel.answer.table import TableAnswerElement
 from pybatfish.datamodel.assertion import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
+    NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
-from pybatfish.util import (get_uuid, zip_dir, validate_name)
-from warnings import warn
+from pybatfish.util import (get_uuid, validate_name, zip_dir)
 
-from . import resthelper
-from . import restv2helper
-from . import workhelper
+from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
@@ -351,7 +350,8 @@ def bf_generate_dataplane(snapshot=None):
     return answer
 
 
-def bf_get_analysis_answers(analysisName, snapshot=None, reference_snapshot=None):
+def bf_get_analysis_answers(analysisName, snapshot=None,
+                            reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)

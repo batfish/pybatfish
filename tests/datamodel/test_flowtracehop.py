@@ -14,9 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.datamodel.flowtracehop import FlowTraceHop
+import pytest
 
 
 # test if a flowtracehop is deserialized properly and converted to string properly

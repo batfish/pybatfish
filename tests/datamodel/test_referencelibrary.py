@@ -16,8 +16,8 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
 import pytest
-from pybatfish.datamodel.referencelibrary import ReferenceLibrary, NodeRolesData
 
 
 def test_empty_referencelibrary():
