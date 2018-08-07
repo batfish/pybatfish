@@ -39,8 +39,6 @@ class NodeRole(namedtuple("NodeRole", ["name", "regex"])):
 
     A node role has a 'name' and a regular expression 'regex' over node names to describe nodes that belong to this
     role. The regular expression must be a valid JAVA regex.
-
-    TODO: Support Python regular expressions.
     """
 
     def __new__(cls, name, regex, **kwargs):
