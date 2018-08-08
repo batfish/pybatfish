@@ -15,9 +15,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.datamodel.answer.issue import Issue
+import pytest
 
 
 def test_issue_deserialization():

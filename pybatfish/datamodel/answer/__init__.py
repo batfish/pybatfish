@@ -16,7 +16,6 @@
 import json
 
 from pybatfish.datamodel.answer.base import Answer
-
 from pybatfish.datamodel.answer.table import TableAnswerElement
 
 __all__ = ['from_string', 'Answer', 'TableAnswerElement']

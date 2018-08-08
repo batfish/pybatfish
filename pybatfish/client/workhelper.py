@@ -19,16 +19,16 @@ import datetime
 import json
 import logging
 import time
-from typing import Dict, Optional, Any  # noqa: F401
+from typing import Any, Dict, Optional  # noqa: F401
 
-import six
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
-
-from pybatfish.client.consts import BfConsts, WorkStatusCode, CoordConsts
+from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
+import six
+
 from . import resthelper
 from .workitem import WorkItem  # noqa: F401
 
@@ -257,10 +257,9 @@ def get_data_get_answer(session, question_name, snapshot,
     return json_data
 
 
-def get_data_init_network(session, network_name, network_prefix):
+def get_data_init_network(session, network_name):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: network_name,
-                 CoordConsts.SVC_KEY_NETWORK_PREFIX: network_prefix}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: network_name}
     return json_data
 
 

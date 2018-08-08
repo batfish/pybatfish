@@ -1,3 +1,4 @@
+# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,3 +12,19 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+
+from pybatfish.client.commands import bf_delete_network, bf_set_network
+from pybatfish.client.options import Options
+
+
+def test_set_network():
+    try:
+        assert bf_set_network('foobar') == 'foobar'
+    finally:
+        bf_delete_network('foobar')
+
+    name = bf_set_network()
+    try:
+        assert name.startswith(Options.default_network_prefix)
+    finally:
+        bf_delete_network(name)

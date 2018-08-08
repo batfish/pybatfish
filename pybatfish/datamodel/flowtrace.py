@@ -19,7 +19,8 @@ class FlowTrace:
 
     def __init__(self, dictionary):
         self.disposition = dictionary["disposition"]
-        self.flowTraceHops = [FlowTraceHop(hop) for hop in dictionary.get("hops", [])]
+        self.flowTraceHops = [FlowTraceHop(hop) for hop in
+                              dictionary.get("hops", [])]
         self.notes = dictionary["notes"]
 
     def __repr__(self):

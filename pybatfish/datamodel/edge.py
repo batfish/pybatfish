@@ -13,8 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pybatfish.datamodel.interface import Interface
 from typing import Dict  # noqa: F401
+
+from pybatfish.datamodel.interface import Interface
 
 
 class Edge(object):
@@ -23,9 +24,11 @@ class Edge(object):
     def __init__(self, json_object):
         # type: (Dict) -> None
         self.interface1 = Interface({"hostname": json_object["node1"],
-                                     "interface": json_object["node1interface"]})
+                                     "interface": json_object[
+                                         "node1interface"]})
         self.interface2 = Interface({"hostname": json_object["node2"],
-                                     "interface": json_object["node2interface"]})
+                                     "interface": json_object[
+                                         "node2interface"]})
 
     def __repr__(self):
         return str(self.interface1) + " -> " + str(self.interface2)
