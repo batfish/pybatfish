@@ -26,8 +26,6 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
-from requests import HTTPError
-
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -37,6 +35,7 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
+from requests import HTTPError
 
 from . import resthelper, restv2helper, workhelper
 from .options import Options
@@ -564,17 +563,17 @@ def bf_list_containers():
 
 
 def bf_list_networks():
+    # type: () -> List[str]
     """
     List networks the session's API key can access.
 
-    :return: json response containing accessible networks
-    :rtype: dict
+    :return: a list of network names
     """
-    jsonData = workhelper.get_data_list_networks(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_LIST_NETWORKS,
-                                                jsonData)
-    return jsonResponse
+    json_data = workhelper.get_data_list_networks(bf_session)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
+
+    return list(map(str, json_response['networklist']))
 
 
 def bf_list_incomplete_works():
