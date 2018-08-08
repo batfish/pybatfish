@@ -41,7 +41,7 @@ flake8 pybatfish,tests
 echo -e "\n  ..... Running flake8 on jupyter notebooks"
 # Running flake test on generated python script from jupyter notebook(s)
 for file in jupyter_notebooks/*.ipynb; do
-    jupyter nbconvert "$file" --to python --stdout --TemplateExporter.exclude_markdown=True | flake8 - --ignore=E501,W391,D100,F403,F405,F821
+    jupyter nbconvert "$file" --to python --stdout --TemplateExporter.exclude_markdown=True | flake8 - --select=E,W --ignore=E501,W391
 done
 
 
