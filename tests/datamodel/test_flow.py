@@ -14,12 +14,10 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.datamodel.flow import Flow
-
 # test if a flow is deserialized properly and its string is fine
 from pybatfish.datamodel.flowtracehop import FlowTraceHop
+import pytest
 
 
 def testFlowDeserialization():

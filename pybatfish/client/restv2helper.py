@@ -14,16 +14,19 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Dict  # noqa: F401
+from typing import Any, Dict  # noqa: F401
 
+import pybatfish
+from pybatfish.client.consts import CoordConsts
+from pybatfish.client.session import Session  # noqa: F401
+from pybatfish.datamodel.referencelibrary import (  # noqa: F401
+    NodeRoleDimension,
+    ReferenceBook)
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
-import pybatfish
-from pybatfish.client.consts import CoordConsts
-from pybatfish.client.session import Session  # noqa: F401
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
@@ -39,17 +42,24 @@ _requests_session.mount("http", HTTPAdapter(
 
 
 def add_node_role_dimension(session, dimension):
-    # type: (Session, Dict) -> None
+    # type: (Session, NodeRoleDimension) -> None
     """Adds a new node role dimension to the active network."""
     urlTail = "/containers/{}/noderoles".format(session.network)
     _post(session, urlTail, dimension)
 
 
 def add_reference_book(session, book):
-    # type: (Session, Dict) -> None
+    # type: (Session, ReferenceBook) -> None
     """Adds a new reference book to the active network."""
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     _post(session, urlTail, book)
+
+
+def get_network(session, network):
+    # type: (Session, str) -> Dict[str, Any]
+    """Gets information about the specified network."""
+    path = "/containers/{}".format(network)
+    return _get(session, path)
 
 
 def get_node_role_dimension(session, dimension):
@@ -110,7 +120,7 @@ def _get(session, urlTail):
 
 
 def _post(session, urlTail, object):
-    # type: (Session, str, Dict) -> None
+    # type: (Session, str, Any) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed

@@ -47,8 +47,10 @@ class Flow(object):
         # exclude the tag field
         return "{}{}->[{}:{}->{}:{} proto: {} dscp:{} ecn:{} fragOff:{} length:{} state:{} flags: {}".format(
             self.ingressNode,
-            "ingressInterface: {}".format(self.ingressInterface) if hasattr(self, "ingressInterface") else "",
-            "vrf: {}".format(self.ingressVrf) if hasattr(self, "ingressVrf") and self.ingressVrf != "default" else "",
+            "ingressInterface: {}".format(self.ingressInterface) if hasattr(
+                self, "ingressInterface") else "",
+            "vrf: {}".format(self.ingressVrf) if hasattr(self,
+                                                         "ingressVrf") and self.ingressVrf != "default" else "",
             self.srcIp,
             self.srcPort,
             self.dstIp,

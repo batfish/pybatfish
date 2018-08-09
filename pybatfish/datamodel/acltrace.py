@@ -27,7 +27,8 @@ class AclTrace(object):
 
         :param d: initialization dictionary
         """
-        self.trace_events = [TraceEvent(event) for event in d.get("events", [])]  # type: List[TraceEvent]
+        self.trace_events = [TraceEvent(event) for event in
+                             d.get("events", [])]  # type: List[TraceEvent]
 
     def __str__(self):
         # type: () -> str

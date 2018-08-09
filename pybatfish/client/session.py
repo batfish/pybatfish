@@ -16,9 +16,10 @@
 from __future__ import absolute_import, print_function
 
 from logging import Logger  # noqa: F401
-from typing import Dict, Optional, List  # noqa: F401
+from typing import Dict, List, Optional  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts
+
 from .options import Options
 
 

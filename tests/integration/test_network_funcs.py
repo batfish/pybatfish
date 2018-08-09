@@ -13,23 +13,27 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import json
-
-from pybatfish.datamodel.answer.base import Answer
-from pybatfish.datamodel.answer.table import TableAnswerElement
-
-__all__ = ['from_string', 'Answer', 'TableAnswerElement']
+from pybatfish.client.commands import (bf_delete_network, bf_list_networks,
+                                       bf_set_network)
+from pybatfish.client.options import Options
 
 
-def from_string(json_string):
-    # type: (str) -> Answer
-    """Take a string representing a Batfish answer, return answer object.
+def test_set_network():
+    try:
+        assert bf_set_network('foobar') == 'foobar'
+    finally:
+        bf_delete_network('foobar')
 
-    :returns either an old :py:class:`Answer`
-        or new :py:class:`TableAnswerElement` class.
-    """
-    o = json.loads(json_string)
-    if "answerElements" in o and "metadata" in o["answerElements"][0]:
-        return TableAnswerElement(o["answerElements"][0])
-    else:
-        return Answer(o)
+    name = bf_set_network()
+    try:
+        assert name.startswith(Options.default_network_prefix)
+    finally:
+        bf_delete_network(name)
+
+
+def test_list_networks():
+    try:
+        name = bf_set_network()
+        assert name in bf_list_networks()
+    finally:
+        bf_delete_network(name)

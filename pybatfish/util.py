@@ -18,12 +18,11 @@ from __future__ import absolute_import
 
 import os
 import string
+from typing import Sized, Union  # noqa: F401
 import uuid
 import zipfile
-from typing import Union, Sized  # noqa: F401
 
 import jsonpickle
-
 from pybatfish.exception import QuestionValidationException
 
 # Max length of snapshot/question names.

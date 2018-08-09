@@ -43,4 +43,5 @@ class BgpAdvertisement(object):
 
     def __str__(self):
         # skipping the other fields for now
-        return '{}<-{}: {} {})'.format(self.dstNode, self.srcNode, self.network, self.asPath)
+        return '{}<-{}: {} {})'.format(self.dstNode, self.srcNode, self.network,
+                                       self.asPath)

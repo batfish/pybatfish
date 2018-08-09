@@ -16,30 +16,28 @@
 
 from __future__ import absolute_import, print_function
 
+from imp import new_module
 import json
 import logging
 import os
 import sys
 import tempfile
-from imp import new_module
-from typing import Any, Dict, IO, Optional, Union  # noqa: F401
+from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
-
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
 from pybatfish.datamodel.answer.table import TableAnswerElement
 from pybatfish.datamodel.assertion import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import ReferenceBook, ReferenceLibrary
-from pybatfish.datamodel.roles.noderoledimension import NodeRoleDimension
-from pybatfish.datamodel.roles.noderolesdata import NodeRolesData
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
+    NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
-from pybatfish.util import (get_uuid, zip_dir, validate_name)
-from . import resthelper
-from . import restv2helper
-from . import workhelper
+from pybatfish.util import (get_uuid, validate_name, zip_dir)
+from requests import HTTPError
+
+from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
@@ -83,7 +81,6 @@ __all__ = ['bf_add_analysis',
            'bf_get_work_status',
            'bf_init_analysis',
            'bf_init_container',
-           'bf_init_network',
            'bf_init_snapshot',
            'bf_init_testrig',
            'bf_kill_work',
@@ -125,7 +122,7 @@ def bf_add_node_role_dimension(dimension):
     """
     if dimension.type == "AUTO":
         raise ValueError("Cannot add a dimension of type AUTO")
-    restv2helper.add_node_role_dimension(bf_session, dimension.to_dict())
+    restv2helper.add_node_role_dimension(bf_session, dimension)
 
 
 def bf_add_reference_book(book):
@@ -135,7 +132,7 @@ def bf_add_reference_book(book):
 
     :param book: The ReferenceBook object to add
     """
-    restv2helper.add_reference_book(bf_session, book._asdict())
+    restv2helper.add_reference_book(bf_session, book)
 
 
 def _bf_answer_obj(question_str, parameters_str, question_name,
@@ -353,7 +350,8 @@ def bf_generate_dataplane(snapshot=None):
     return answer
 
 
-def bf_get_analysis_answers(analysisName, snapshot=None, reference_snapshot=None):
+def bf_get_analysis_answers(analysisName, snapshot=None,
+                            reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
@@ -394,14 +392,14 @@ def bf_get_info():
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the set of node roles for the active network."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_node_role_dimension(bf_session, dimension))
+    return NodeRoleDimension(
+        **restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the set of node roles for the active network."""
-    return NodeRolesData(restv2helper.get_node_roles(bf_session))
+    return NodeRolesData(**restv2helper.get_node_roles(bf_session))
 
 
 def bf_get_reference_book(book_name):
@@ -460,44 +458,15 @@ def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
 
 
-@deprecated("Deprecated in favor of bf_init_network(name, prefix)")
+@deprecated("Deprecated in favor of bf_set_network(name, prefix)")
 def bf_init_container(containerName=None,
                       containerPrefix=Options.default_network_prefix):
     """
     Initialize a new container.
 
-    .. deprecated:: In favor of :py:func:`bf_init_network`
+    .. deprecated:: In favor of :py:func:`bf_set_network`
     """
-    bf_init_network(containerName, containerPrefix)
-
-
-def bf_init_network(name=None, prefix=Options.default_network_prefix):
-    """
-    Initialize a new network.
-
-    :param name: name of the network to initialize
-    :type name: string
-    :param prefix: prefix to prepend to auto-generated network names if name is empty
-    :type name: string
-    :raises BatfishException: if batfish response does not specify the initialized network
-    """
-    if name is None:
-        name = Options.default_network_prefix + get_uuid()
-    else:
-        validate_name(name, "network")
-    jsonData = workhelper.get_data_init_network(bf_session, name,
-                                                prefix)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_INIT_NETWORK,
-                                                jsonData)
-
-    if jsonResponse[CoordConsts.SVC_KEY_NETWORK_NAME]:
-        bf_session.network = jsonResponse[CoordConsts.SVC_KEY_NETWORK_NAME]
-        bf_logger.info("Network is now set to " + bf_session.network)
-    else:
-        raise BatfishException(
-            "Bad json response in init_network; missing expected key: " + CoordConsts.SVC_KEY_NETWORK_NAME,
-            jsonResponse)
+    bf_set_network(containerName, containerPrefix)
 
 
 def _bf_init_snapshot(upload, name, background):
@@ -509,7 +478,7 @@ def _bf_init_snapshot(upload, name, background):
         file_to_send = tempFile.name
 
     if bf_session.network is None:
-        bf_init_network()
+        bf_set_network()
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
@@ -594,17 +563,17 @@ def bf_list_containers():
 
 
 def bf_list_networks():
+    # type: () -> List[str]
     """
     List networks the session's API key can access.
 
-    :return: json response containing accessible networks
-    :rtype: dict
+    :return: a list of network names
     """
-    jsonData = workhelper.get_data_list_networks(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_LIST_NETWORKS,
-                                                jsonData)
-    return jsonResponse
+    json_data = workhelper.get_data_list_networks(bf_session)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
+
+    return list(map(str, json_response['networklist']))
 
 
 def bf_list_incomplete_works():
@@ -625,19 +594,26 @@ def bf_list_questions():
     return answer
 
 
-def bf_list_snapshots():
+def bf_list_snapshots(verbose=False):
+    # type: (bool) -> Union[List[str], Dict]
     """
     List snapshots for the current network.
 
-    :return: json response containing snapshots for the current network
-    :rtype: dict
+    :param verbose: If true, return the full output of Batfish, including
+        snapshot metadata.
+
+    :return: a list of snapshot names or the full json response containing
+        snapshots and metadata (if `verbose=True`)
     """
     json_data = workhelper.get_data_list_snapshots(bf_session,
                                                    bf_session.network)
     json_response = resthelper.get_json_response(bf_session,
                                                  CoordConsts.SVC_RSC_LIST_SNAPSHOTS,
                                                  json_data)
-    return json_response
+    if verbose:
+        return json_response
+
+    return [s['testrigname'] for s in json_response['snapshotlist']]
 
 
 @deprecated("Deprecated in favor of bf_list_snapshots()")
@@ -709,15 +685,44 @@ def bf_set_container(containerName):
     bf_set_network(containerName)
 
 
-def bf_set_network(name):
+def bf_set_network(name=None, prefix=Options.default_network_prefix):
+    # type: (str, str) -> str
     """
-    Set the current network by name.
+    Configure the network used for analysis.
 
-    :param name: name of the network to set as the current network
+    :param name: name of the network to set. If `None`, a name will be generated using prefix.
     :type name: string
+    :param prefix: prefix to prepend to auto-generated network names if name is empty
+    :type name: string
+
+    :return: The name of the configured network, if configured successfully.
+    :rtype: string
+    :raises BatfishException: if configuration fails
     """
-    bf_session.network = name
-    bf_logger.info("Network is now set to " + bf_session.network)
+    if name is None:
+        name = prefix + get_uuid()
+    validate_name(name, "network")
+
+    try:
+        net = restv2helper.get_network(bf_session, name)
+        bf_session.network = str(net['name'])
+        return bf_session.network
+    except HTTPError as e:
+        if e.response.status_code != 404:
+            raise BatfishException('Unknown error accessing network', e)
+
+    json_data = workhelper.get_data_init_network(bf_session, name)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
+
+    network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+    if network_name is None:
+        raise BatfishException(
+            "Network initialization failed. Server response: {}".format(
+                json_response))
+
+    bf_session.network = str(network_name)
+    return bf_session.network
 
 
 def bf_set_snapshot(name):
