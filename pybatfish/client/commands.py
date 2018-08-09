@@ -734,7 +734,7 @@ def bf_set_snapshot(name=None, index=None):
     if name is not None and index is not None:
         raise ValueError('Only one of name and index can be set')
 
-    snapshots = bf_list_snapshots()  # type: List[str]
+    snapshots = bf_list_snapshots()
 
     # Index specified, simply give the ith snapshot
     if index is not None:
