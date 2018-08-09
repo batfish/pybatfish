@@ -285,27 +285,27 @@ def load_dir_questions(questionDir, moduleName=bfq.__name__):
         for filename in filenames:
             if filename.endswith(".json"):
                 questionFiles.append(os.path.join(dirpath, filename))
-                localQuestions = set([])
-                if len(questionFiles) == 0:
-                    bf_logger.warn(
-                        "WARNING: no .json files found in supplied question directory: {questionDir}".format(
-                            questionDir=questionDir))
-                else:
-                    numQuestions = 0
-                for questionFile in questionFiles:
-                    try:
-                        localQuestions.add(
-                            _load_question_disk(questionFile, module_name=moduleName))
-                        numQuestions += 1
-                    except ValueError as err:
-                        bf_logger.error(
-                            "Could not load question from {questionFile}:{err}".format(
-                                questionFile=questionFile,
-                                err=err))
-        bf_logger.info(
-            "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
-                numQuestions=numQuestions,
-                numQuestionFiles=len(questionFiles)))
+    localQuestions = set([])
+    if len(questionFiles) == 0:
+        bf_logger.warn(
+            "WARNING: no .json files found in supplied question directory: {questionDir}".format(
+                questionDir=questionDir))
+    else:
+        numQuestions = 0
+    for questionFile in questionFiles:
+        try:
+            localQuestions.add(
+                _load_question_disk(questionFile, module_name=moduleName))
+            numQuestions += 1
+        except ValueError as err:
+            bf_logger.error(
+                "Could not load question from {questionFile}:{err}".format(
+                    questionFile=questionFile,
+                    err=err))
+    bf_logger.info(
+        "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
+            numQuestions=numQuestions,
+            numQuestionFiles=len(questionFiles)))
     return localQuestions
 
 
