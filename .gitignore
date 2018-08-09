@@ -24,5 +24,8 @@ dist
 .env/
 .env3/
 
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
 # Misc files 
 .DS_Store
