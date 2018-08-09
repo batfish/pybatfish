@@ -415,14 +415,6 @@ def bf_get_reference_library():
     return ReferenceLibrary(**restv2helper.get_reference_library(bf_session))
 
 
-def _bf_get_snapshot_name_from_list(index):
-    ss_list = bf_list_snapshots()[CoordConsts.SVC_KEY_SNAPSHOT_LIST]
-    if len(ss_list) > index:
-        return ss_list[index][CoordConsts.SVC_KEY_SNAPSHOT_NAME]
-    else:
-        bf_logger.error("Server has only %d snapshots", len(ss_list))
-
-
 def bf_get_work_status(wItemId):
     return get_work_status(wItemId, bf_session)
 
@@ -725,15 +717,45 @@ def bf_set_network(name=None, prefix=Options.default_network_prefix):
     return bf_session.network
 
 
-def bf_set_snapshot(name):
+def bf_set_snapshot(name=None, index=None):
+    # type: (Optional[str], Optional[int]) -> str
     """
-    Set the current snapshot by name.
+    Set the current snapshot by name or index.
 
     :param name: name of the snapshot to set as the current snapshot
     :type name: string
+    :param index: set the current snaphot to the `index`th most recent snapshot
+    :type index: int
+    :return: the name of the successfully set snapshot
+    :rtype: str
     """
-    bf_session.baseSnapshot = name
-    bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
+    if name is None and index is None:
+        raise ValueError('One of name and index must be set')
+    if name is not None and index is not None:
+        raise ValueError('Only one of name and index can be set')
+
+    snapshots = bf_list_snapshots()  # type: List[str]
+
+    # Index specified, simply give the ith snapshot
+    if index is not None:
+        if 0 <= index < len(snapshots):
+            bf_session.baseSnapshot = snapshots[index]
+        raise IndexError(
+            "Server has only {} snapshots: {}".format(
+                len(snapshots), snapshots))
+
+    # Name specified, make sure it exists.
+    else:
+        assert name is not None  # type-hint to Python
+        if name not in snapshots:
+            raise ValueError(
+                'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
+                    name, bf_session.network, snapshots))
+        bf_session.baseSnapshot = name
+
+    bf_logger.info("Default snapshot is now set to %s",
+                   bf_session.baseSnapshot)
+    return bf_session.baseSnapshot
 
 
 @deprecated("Deprecated in favor of bf_set_snapshot(name)")
