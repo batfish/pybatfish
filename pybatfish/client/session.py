@@ -41,8 +41,6 @@ class Session(object):
         self.apiKey = CoordConsts.DEFAULT_API_KEY  # type: str
         self.network = None  # type: Optional[str]
         self.baseSnapshot = None  # type: Optional[str]
-        # Snapshots is a list of snapshot names
-        self.snapshots = []  # type: List[str]
 
         # Additional worker args
         self.additionalArgs = {}  # type: Dict
