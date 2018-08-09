@@ -13,7 +13,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pybatfish.client.commands import bf_delete_network, bf_set_network
+from pybatfish.client.commands import (bf_delete_network, bf_list_networks,
+                                       bf_set_network)
 from pybatfish.client.options import Options
 
 
@@ -26,5 +27,13 @@ def test_set_network():
     name = bf_set_network()
     try:
         assert name.startswith(Options.default_network_prefix)
+    finally:
+        bf_delete_network(name)
+
+
+def test_list_networks():
+    try:
+        name = bf_set_network()
+        assert name in bf_list_networks()
     finally:
         bf_delete_network(name)
