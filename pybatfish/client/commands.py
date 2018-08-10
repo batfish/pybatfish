@@ -461,21 +461,27 @@ def bf_init_container(containerName=None,
     bf_set_network(containerName, containerPrefix)
 
 
-def _bf_init_snapshot(upload, name, background):
-    file_to_send = upload
-
-    if os.path.isdir(upload):
-        tempFile = tempfile.NamedTemporaryFile()
-        zip_dir(upload, tempFile)
-        file_to_send = tempFile.name
-
+def _bf_init_snapshot(upload, name, overwrite, background):
     if bf_session.network is None:
         bf_set_network()
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
-
     validate_name(name)
+
+    if name in bf_list_snapshots():
+        if overwrite:
+            bf_delete_snapshot(name)
+        else:
+            raise ValueError(
+                'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                    name, bf_session.network))
+
+    file_to_send = upload
+    if os.path.isdir(upload):
+        tempFile = tempfile.NamedTemporaryFile()
+        zip_dir(upload, tempFile)
+        file_to_send = tempFile.name
 
     json_data = workhelper.get_data_upload_snapshot(bf_session, name,
                                                     file_to_send)
@@ -493,27 +499,27 @@ def _bf_init_snapshot(upload, name, background):
             bf_session.baseSnapshot = None
             bf_logger.info("Default snapshot is now unset")
         else:
-            bf_session.snapshots.append(name)
-            bf_logger.info("Set bf_session.snapshots[%s] to '%s'",
-                           len(bf_session.snapshots) - 1, name)
             bf_logger.info("Default snapshot is now set to %s",
                            bf_session.baseSnapshot)
     return parse_execute
 
 
-def bf_init_snapshot(upload, name=None, background=False):
+def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     """Initialize a new snapshot.
 
     :param upload: snapshot to upload
     :type upload: zip file or directory
     :param name: name of the snapshot to initialize
     :type name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+       same name
+    :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
     :return: json response containing result of parsing workitem
     :rtype: dict
     """
-    answer_dict = _bf_init_snapshot(upload, name=name, background=background)
+    answer_dict = _bf_init_snapshot(upload, name, overwrite, background)
     return answer_dict['answer'] if not background else answer_dict
 
 
