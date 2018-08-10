@@ -26,6 +26,8 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -35,8 +37,6 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from requests import HTTPError
-
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session

@@ -1,5 +1,6 @@
-from pybatfish.client.commands import bf_set_network, bf_init_snapshot
 import pytest
+
+from pybatfish.client.commands import bf_init_snapshot, bf_set_network
 
 
 def test_network_validation():

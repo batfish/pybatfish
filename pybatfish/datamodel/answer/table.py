@@ -16,6 +16,7 @@
 from typing import Dict, List, Optional  # noqa: F401
 
 import pandas
+
 from pybatfish.datamodel.answer.base import Answer, _get_display_value
 
 __all__ = [
