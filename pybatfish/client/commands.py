@@ -26,6 +26,8 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -35,8 +37,6 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from requests import HTTPError
-
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
@@ -738,11 +738,11 @@ def bf_set_snapshot(name=None, index=None):
 
     # Index specified, simply give the ith snapshot
     if index is not None:
-        if 0 <= index < len(snapshots):
-            bf_session.baseSnapshot = snapshots[index]
-        raise IndexError(
-            "Server has only {} snapshots: {}".format(
-                len(snapshots), snapshots))
+        if not (0 <= index < len(snapshots)):
+            raise IndexError(
+                "Server has only {} snapshots: {}".format(
+                    len(snapshots), snapshots))
+        bf_session.baseSnapshot = snapshots[index]
 
     # Name specified, make sure it exists.
     else:
@@ -753,8 +753,7 @@ def bf_set_snapshot(name=None, index=None):
                     name, bf_session.network, snapshots))
         bf_session.baseSnapshot = name
 
-    bf_logger.info("Default snapshot is now set to %s",
-                   bf_session.baseSnapshot)
+    bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
 
 
