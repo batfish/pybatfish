@@ -17,7 +17,7 @@ from pybatfish.question import question
 from pybatfish.question.question import _compute_docstring, _process_variables
 from pybatfish.util import validate_json_path_regex
 import pytest
-
+import os
 
 def test_validate_json_path_regex():
     assert validate_json_path_regex("/x/")
@@ -68,3 +68,9 @@ def test_compute_docstring():
 
 def test_process_variables():
     assert _process_variables("foo", None) == []
+
+def test_list_questions():
+    current_path = os.path.abspath(os.path.dirname(__file__))
+    question_directory = os.path.join(current_path, "../../questions")
+    question.load_questions(question_dir=question_directory)
+    assert question.list_questions() != []
