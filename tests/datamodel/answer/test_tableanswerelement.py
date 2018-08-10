@@ -16,9 +16,10 @@
 
 from __future__ import absolute_import, print_function
 
+import pytest
+
 from pybatfish.datamodel.answer.base import _get_display_value
 from pybatfish.datamodel.answer.table import TableAnswerElement
-import pytest
 
 
 def test_table_answer_element_no_metadata():
