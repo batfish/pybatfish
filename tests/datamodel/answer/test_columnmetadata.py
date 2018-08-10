@@ -15,8 +15,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.answer.table import ColumnMetadata
 import pytest
+
+from pybatfish.datamodel.answer.table import ColumnMetadata
 
 
 # correct deserialization
