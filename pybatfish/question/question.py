@@ -20,7 +20,6 @@ from copy import deepcopy
 from inspect import getmembers, isfunction
 import json
 import os
-from os.path import join
 import re
 import sys
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
@@ -282,33 +281,32 @@ def list_tags():
 
 
 def load_dir_questions(questionDir, moduleName=bfq.__name__):
-    questionFilenames = []
+    questionFiles = []
     for dirpath, dirnames, filenames in os.walk(questionDir):
         for filename in filenames:
             if filename.endswith(".json"):
-                questionFilenames.append(join(dirpath, filename))
+                questionFiles.append(os.path.join(dirpath, filename))
     localQuestions = set([])
-    if len(questionFilenames) == 0:
+    if len(questionFiles) == 0:
         bf_logger.warn(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
                 questionDir=questionDir))
     else:
         numQuestions = 0
-        for questionFilename in questionFilenames:
-            questionFile = os.path.join(questionDir, questionFilename)
+        for questionFile in questionFiles:
             try:
                 localQuestions.add(
                     _load_question_disk(questionFile, module_name=moduleName))
                 numQuestions += 1
             except ValueError as err:
                 bf_logger.error(
-                    "Could not load question from {questionFilename}:{err}".format(
-                        questionFilename=questionFilename,
+                    "Could not load question from {questionFile}:{err}".format(
+                        questionFile=questionFile,
                         err=err))
         bf_logger.info(
             "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
                 numQuestions=numQuestions,
-                numQuestionFiles=len(questionFilenames)))
+                numQuestionFiles=len(questionFiles)))
     return localQuestions
 
 
