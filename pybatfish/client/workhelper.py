@@ -24,11 +24,11 @@ from typing import Any, Dict, Optional  # noqa: F401
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
+import six
+
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
-import six
-
 from . import resthelper
 from .workitem import WorkItem  # noqa: F401
 

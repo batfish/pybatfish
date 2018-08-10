@@ -14,12 +14,13 @@
 
 from os.path import abspath, dirname, join, pardir, realpath
 
+import pytest
+
 from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
-                                       bf_init_analysis, bf_set_network,
-                                       bf_init_snapshot)
+                                       bf_init_analysis, bf_init_snapshot,
+                                       bf_set_network)
 from pybatfish.question import bfq
 from pybatfish.question.question import load_questions
-import pytest
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
