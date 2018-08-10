@@ -257,7 +257,8 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
     module = sys.modules[question_module]
     # Members of the module are (name,value) pairs so
     # x[1] in the lambda represents the value part.
-    predicate = lambda x: x[1].__class__.__name__ == 'QuestionMeta'
+    # Want members with value of type QuestionMeta
+    predicate = lambda x: isinstance(x[1], QuestionMeta)
     question_functions = filter(predicate, getmembers(module))
 
     matching_questions = []
