@@ -738,7 +738,7 @@ def bf_set_snapshot(name=None, index=None):
 
     # Index specified, simply give the ith snapshot
     if index is not None:
-        if not (0 <= index < len(snapshots)):
+        if not (-len(snapshots) <= index < len(snapshots)):
             raise IndexError(
                 "Server has only {} snapshots: {}".format(
                     len(snapshots), snapshots))
