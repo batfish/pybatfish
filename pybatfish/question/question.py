@@ -25,6 +25,8 @@ import re
 import sys
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
+from six import PY3, integer_types, string_types
+
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
@@ -32,7 +34,6 @@ from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import (get_uuid, validate_json_path_regex,
                             validate_question_name)
-from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set
