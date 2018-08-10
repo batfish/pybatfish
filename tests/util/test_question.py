@@ -12,12 +12,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import pytest
+import os
+
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import question
 from pybatfish.question.question import _compute_docstring, _process_variables
 from pybatfish.util import validate_json_path_regex
-import pytest
-import os
+
+
 
 def test_validate_json_path_regex():
     assert validate_json_path_regex("/x/")
