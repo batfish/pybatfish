@@ -28,6 +28,9 @@ def test_get_display_value_self_describing_object():
     json_object = json.loads("{\"schema\" : \"Integer\", \"value\": 23}")
     assert _get_display_value('SelfDescribing', json_object) == 23
 
+    json_object = json.loads("{\"schema\" : \"Integer\"}")
+    assert _get_display_value('SelfDescribing', json_object) is None
+
 
 def test_get_display_value_integer():
     """Check that Integer values are extracted correctly."""

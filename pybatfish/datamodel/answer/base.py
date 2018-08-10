@@ -155,7 +155,8 @@ def _get_display_value(schema, json_object):
     if schema == "Prefix":
         return str(json_object)
     if schema == "SelfDescribing":
-        return _get_display_value(json_object["schema"], json_object["value"])
+        return _get_display_value(json_object["schema"],
+                                  json_object.get("value"))
     if schema == "String":
         return str(json_object)
     return json_object
