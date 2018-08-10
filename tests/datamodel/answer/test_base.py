@@ -26,7 +26,7 @@ from pybatfish.datamodel.answer.base import _get_display_value
 def test_get_display_value_self_describing_object():
     """Check that SelfDescribingObject is displayed correctly."""
     json_object = json.loads("{\"schema\" : \"Integer\", \"value\": 23}")
-    assert _get_display_value('SelfDescribingObject', json_object) == 23
+    assert _get_display_value('SelfDescribing', json_object) == 23
 
 
 def test_get_display_value_integer():
