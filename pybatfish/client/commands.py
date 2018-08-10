@@ -26,6 +26,8 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -35,8 +37,6 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from requests import HTTPError
-
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
@@ -415,14 +415,6 @@ def bf_get_reference_library():
     return ReferenceLibrary(**restv2helper.get_reference_library(bf_session))
 
 
-def _bf_get_snapshot_name_from_list(index):
-    ss_list = bf_list_snapshots()[CoordConsts.SVC_KEY_SNAPSHOT_LIST]
-    if len(ss_list) > index:
-        return ss_list[index][CoordConsts.SVC_KEY_SNAPSHOT_NAME]
-    else:
-        bf_logger.error("Server has only %d snapshots", len(ss_list))
-
-
 def bf_get_work_status(wItemId):
     return get_work_status(wItemId, bf_session)
 
@@ -469,21 +461,27 @@ def bf_init_container(containerName=None,
     bf_set_network(containerName, containerPrefix)
 
 
-def _bf_init_snapshot(upload, name, background):
-    file_to_send = upload
-
-    if os.path.isdir(upload):
-        tempFile = tempfile.NamedTemporaryFile()
-        zip_dir(upload, tempFile)
-        file_to_send = tempFile.name
-
+def _bf_init_snapshot(upload, name, overwrite, background):
     if bf_session.network is None:
         bf_set_network()
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
-
     validate_name(name)
+
+    if name in bf_list_snapshots():
+        if overwrite:
+            bf_delete_snapshot(name)
+        else:
+            raise ValueError(
+                'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                    name, bf_session.network))
+
+    file_to_send = upload
+    if os.path.isdir(upload):
+        tempFile = tempfile.NamedTemporaryFile()
+        zip_dir(upload, tempFile)
+        file_to_send = tempFile.name
 
     json_data = workhelper.get_data_upload_snapshot(bf_session, name,
                                                     file_to_send)
@@ -501,27 +499,27 @@ def _bf_init_snapshot(upload, name, background):
             bf_session.baseSnapshot = None
             bf_logger.info("Default snapshot is now unset")
         else:
-            bf_session.snapshots.append(name)
-            bf_logger.info("Set bf_session.snapshots[%s] to '%s'",
-                           len(bf_session.snapshots) - 1, name)
             bf_logger.info("Default snapshot is now set to %s",
                            bf_session.baseSnapshot)
     return parse_execute
 
 
-def bf_init_snapshot(upload, name=None, background=False):
+def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     """Initialize a new snapshot.
 
     :param upload: snapshot to upload
     :type upload: zip file or directory
     :param name: name of the snapshot to initialize
     :type name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+       same name
+    :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
     :return: json response containing result of parsing workitem
     :rtype: dict
     """
-    answer_dict = _bf_init_snapshot(upload, name=name, background=background)
+    answer_dict = _bf_init_snapshot(upload, name, overwrite, background)
     return answer_dict['answer'] if not background else answer_dict
 
 
@@ -725,15 +723,44 @@ def bf_set_network(name=None, prefix=Options.default_network_prefix):
     return bf_session.network
 
 
-def bf_set_snapshot(name):
+def bf_set_snapshot(name=None, index=None):
+    # type: (Optional[str], Optional[int]) -> str
     """
-    Set the current snapshot by name.
+    Set the current snapshot by name or index.
 
     :param name: name of the snapshot to set as the current snapshot
     :type name: string
+    :param index: set the current snaphot to the `index`th most recent snapshot
+    :type index: int
+    :return: the name of the successfully set snapshot
+    :rtype: str
     """
-    bf_session.baseSnapshot = name
+    if name is None and index is None:
+        raise ValueError('One of name and index must be set')
+    if name is not None and index is not None:
+        raise ValueError('Only one of name and index can be set')
+
+    snapshots = bf_list_snapshots()
+
+    # Index specified, simply give the ith snapshot
+    if index is not None:
+        if not (-len(snapshots) <= index < len(snapshots)):
+            raise IndexError(
+                "Server has only {} snapshots: {}".format(
+                    len(snapshots), snapshots))
+        bf_session.baseSnapshot = snapshots[index]
+
+    # Name specified, make sure it exists.
+    else:
+        assert name is not None  # type-hint to Python
+        if name not in snapshots:
+            raise ValueError(
+                'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
+                    name, bf_session.network, snapshots))
+        bf_session.baseSnapshot = name
+
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
+    return bf_session.baseSnapshot
 
 
 @deprecated("Deprecated in favor of bf_set_snapshot(name)")

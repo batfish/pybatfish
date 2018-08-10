@@ -18,11 +18,12 @@ import logging
 
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
+import pytest
+from pytz import UTC
+
 from pybatfish.client.session import Session
 from pybatfish.client.workhelper import _format_elapsed_time, _parse_timestamp, \
     _print_timestamp, _print_work_status
-import pytest
-from pytz import UTC
 
 
 @pytest.fixture

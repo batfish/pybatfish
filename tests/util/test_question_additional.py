@@ -14,10 +14,11 @@
 
 from __future__ import absolute_import, print_function
 
+import pytest
+
 # Tests for isSubRange
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import question
-import pytest
 
 
 # These two tests will fail with original code due to typo in the code
