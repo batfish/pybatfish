@@ -15,6 +15,7 @@
 import pytest
 import os
 
+
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import question
 from pybatfish.question.question import _compute_docstring, _process_variables
