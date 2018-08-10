@@ -256,10 +256,13 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
         containing "name", "description", and "tags".
     """
     module = sys.modules[question_module]
-    desired_tags = set(map(str.lower, tags)) if tags else set()
-    question_functions = filter(isfunction, getmembers(module))
+    # Members of the module are (name,value) pairs so
+    # x[1] in the lambda represents the value part.
+    predicate = lambda x: x[1].__class__.__name__ == 'QuestionMeta'
+    question_functions = filter(predicate, getmembers(module))
 
     matching_questions = []
+    desired_tags = set(map(str.lower, tags)) if tags else set()
     for name, question_func in question_functions:
         if desired_tags and not desired_tags.intersection(
                 map(str.lower, question_func.tags)):
