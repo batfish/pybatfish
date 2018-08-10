@@ -55,7 +55,8 @@ def _assert_cell_no_errors(c):
     if c['cell_type'] != 'code':
         return
     errors = ["Error name: {}, Error Value: {}".format(o["ename"], o["evalue"])
-              for o in c['outputs'] if o['output_type'] == 'error']
+              for o in c['outputs']
+              if o['output_type'] == 'error']
 
     assert not errors, errors
 
@@ -73,8 +74,17 @@ def test_notebook_output(notebook, executed_notebook):
         assert cell['cell_type'] == executed_cell['cell_type']
         if cell['cell_type'] == 'code':
             # Collecting all outputs of type "execute_result" as other output type may be undeterministic (like timestamps)
-            original_outputs = [o['data'] for o in cell['outputs'] if
-                                o['output_type'] == 'execute_result']
-            executed_outputs = [o['data'] for o in executed_cell['outputs'] if
-                                o['output_type'] == 'execute_result']
+            original_outputs = [o['data'] for o in cell['outputs']
+                                if o['output_type'] == 'execute_result']
+            executed_outputs = [o['data'] for o in executed_cell['outputs']
+                                if o['output_type'] == 'execute_result']
             assert original_outputs == executed_outputs
+
+
+def test_notebook_execution_count(notebook):
+    _, nb = notebook
+    code_cells = [cell for cell in nb['cells']
+                  if cell['cell_type'] == 'code']
+    for (i, cell) in enumerate(code_cells):
+        assert i + 1 == cell['execution_count'], \
+               'Expected cell {} to have execution count {}'.format(cell, i + 1)
