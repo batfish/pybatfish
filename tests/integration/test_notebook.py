@@ -81,7 +81,8 @@ def test_notebook_output(notebook, executed_notebook):
 
 
 def test__notebook_execution_count(notebook):
-    execution_counts = [cell['execution_count'] for cell in notebook['cells'] if
+    _, nb = notebook
+    execution_counts = [cell['execution_count'] for cell in nb['cells'] if
                         cell['cell_type'] == 'code']
     assert execution_counts == list(range(1, len(
         execution_counts) + 1)), 'Execution counts for cells should start from 1 and should be contiguous'
