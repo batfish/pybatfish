@@ -80,9 +80,11 @@ def test_notebook_output(notebook, executed_notebook):
             assert original_outputs == executed_outputs
 
 
-def test__notebook_execution_count(notebook):
+def test_notebook_execution_count(notebook):
     _, nb = notebook
-    execution_counts = [cell['execution_count'] for cell in nb['cells'] if
-                        cell['cell_type'] == 'code']
-    assert execution_counts == list(range(1, len(
-        execution_counts) + 1)), 'Execution counts for cells should start from 1 and should be contiguous'
+    code_cells = [cell for cell in nb['cells'] if
+                  cell['cell_type'] == 'code']
+    for (i, cell) in enumerate(code_cells):
+        assert i + 1 == cell[
+            'execution_count'], 'Expected cell {} to have execution count {}'.format(
+            cell, i + 1)
