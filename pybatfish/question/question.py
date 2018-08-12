@@ -122,7 +122,7 @@ class QuestionBase(object):
 
     # TODO: document return values once converged on representation
     def answer(self, snapshot=None, reference_snapshot=None,
-               include_one_table_keys=False, background=False):
+               include_one_table_keys=None, background=False):
         """
         Ask and return the answer for this question.
 
@@ -145,7 +145,8 @@ class QuestionBase(object):
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
-        self.setIncludeOneTableKeys(include_one_table_keys)
+        if include_one_table_keys is not None:
+            self.setIncludeOneTableKeys(include_one_table_keys)
         return _bf_answer_obj(self.json(),
                               parameters_str="{}",
                               question_name=self.getName(),
