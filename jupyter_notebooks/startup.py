@@ -9,3 +9,5 @@ import pandas as pd
 bf_logger.setLevel(logging.WARN)
 
 load_questions()
+
+pd.compat.PY3 = True
