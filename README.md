@@ -1,6 +1,6 @@
 # pybatfish
 
-pybatfish is a Python client for [Batfish](https://github.com/batfish/batfish). ![Analytics](https://ga-beacon.appspot.com/UA-100596389-3/open-source/?pixel&useReferer)
+pybatfish is a Python client for [Batfish](https://github.com/batfish/batfish). ![Analytics](https://ga-beacon.appspot.com/UA-100596389-3/open-source/pybatfish?pixel&useReferer)
 It allows you to easily get started exploring and validating your network.
 Run interactively within a python shell or fully automate your network validation pipeline.
 
