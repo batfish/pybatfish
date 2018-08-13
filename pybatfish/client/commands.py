@@ -153,7 +153,8 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
     # Answer the question
     work_item = workhelper.get_workitem_answer(bf_session, question_name,
                                                snapshot, reference_snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session, background)
+    answer_dict = workhelper.execute(work_item, bf_session, snapshot,
+                                     background)
     if background:
         return work_item.id
     return answer.from_string(answer_dict["answer"])
@@ -337,7 +338,7 @@ def bf_extract_answer_summary(answerJson):
 def _bf_generate_dataplane(snapshot):
     # type: (str) -> Dict[str, str]
     workItem = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answerDict = workhelper.execute(workItem, bf_session)
+    answerDict = workhelper.execute(workItem, bf_session, snapshot)
     return answerDict
 
 
@@ -491,7 +492,7 @@ def _bf_init_snapshot(upload, name, overwrite, background):
 
     bf_session.baseSnapshot = name
     work_item = workhelper.get_workitem_parse(bf_session, name)
-    parse_execute = workhelper.execute(work_item, bf_session,
+    parse_execute = workhelper.execute(work_item, bf_session, name,
                                        background=background)
     if not background:
         status = parse_execute["status"]
@@ -667,7 +668,7 @@ def bf_run_analysis(analysisName, snapshot, reference_snapshot=None):
     workItem = workhelper.get_workitem_run_analysis(bf_session, analysisName,
                                                     snapshot,
                                                     reference_snapshot)
-    workAnswer = workhelper.execute(workItem, bf_session)
+    workAnswer = workhelper.execute(workItem, bf_session, snapshot)
     # status = workAnswer["status"]
     answer = workAnswer["answer"]
     return answer

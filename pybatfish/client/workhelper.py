@@ -66,14 +66,16 @@ def _print_timestamp(timestamp):
     return timestamp.astimezone(tzlocal()).strftime("%c %Z")
 
 
-def execute(work_item, session, background=False):
-    # type: (WorkItem, Session, bool) -> Dict[str, str]
+def execute(work_item, session, snapshot, background=False):
+    # type: (WorkItem, Session, Optional[str], bool) -> Dict[str, str]
     """Submit a work item to Batfish.
 
     :param work_item: work to submit
     :type work_item: :py:class:`~pybatfish.client.WorkItem`
     :param session: Batfish session to use.
     :type session: :py:class:`~pybatfish.client.session.Session`
+    :param snapshot: Which snapshot to operate on. 
+    :type snapshot: basestring
     :param background: Whether to background the job. If `True`,
         this function only returns the result of submitting the job.
     :type background: bool
@@ -113,7 +115,8 @@ def execute(work_item, session, background=False):
 
         # get the answer
         answer_file_name = _compute_batfish_answer_file_name(work_item)
-        answer_bytes = resthelper.get_object(session, answer_file_name)
+        answer_bytes = resthelper.get_object(session, answer_file_name,
+                                             snapshot=snapshot)
 
         # In Python 3.x, answer needs to be decoded before it can be used
         # for things like json.loads (<= 3.6).
