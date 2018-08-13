@@ -16,9 +16,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.answer.base import _get_display_value
-from pybatfish.datamodel.answer.table import TableAnswerElement
 import pytest
+
+from pybatfish.datamodel.answer.table import TableAnswerElement
 
 
 def test_table_answer_element_no_metadata():
@@ -83,15 +83,6 @@ def test_table_answer_element_deser_no_rows():
     assert table.metadata.column_metadata[0].name == "col1"
     assert len(table.rows) == 0
     assert table.frame().empty
-
-
-def test_get_display_value():
-    """Check that values are extracted according to schema."""
-    assert _get_display_value('bogus', None) is None
-    assert _get_display_value('Integer', "0") == 0
-    assert _get_display_value('Integer', 0) == 0
-    assert _get_display_value('Integer', -1) == -1
-    assert _get_display_value('Integer', "-1") == -1
 
 
 if __name__ == "__main__":

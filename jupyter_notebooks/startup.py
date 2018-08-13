@@ -5,6 +5,7 @@ from pybatfish.exception import BatfishException  # noqa F401
 import pandas as pd
 
 import logging
+import pandas as pd
 
 bf_logger.setLevel(logging.WARN)
 

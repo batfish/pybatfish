@@ -23,6 +23,7 @@ import uuid
 import zipfile
 
 import jsonpickle
+
 from pybatfish.exception import QuestionValidationException
 
 # Max length of snapshot/question names.

@@ -12,10 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import pytest
+
 from pybatfish.client.asserts import _raise_common
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning)
-import pytest
 
 
 def test_raise_common_default():

@@ -20,10 +20,11 @@ from copy import deepcopy
 from inspect import getmembers, isfunction
 import json
 import os
-from os.path import join
 import re
 import sys
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
+
+from six import PY3, integer_types, string_types
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
@@ -32,7 +33,6 @@ from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import (get_uuid, validate_json_path_regex,
                             validate_question_name)
-from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set
@@ -122,7 +122,7 @@ class QuestionBase(object):
 
     # TODO: document return values once converged on representation
     def answer(self, snapshot=None, reference_snapshot=None,
-               include_one_table_keys=False, background=False):
+               include_one_table_keys=None, background=False):
         """
         Ask and return the answer for this question.
 
@@ -145,7 +145,8 @@ class QuestionBase(object):
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
-        self.setIncludeOneTableKeys(include_one_table_keys)
+        if include_one_table_keys is not None:
+            self.setIncludeOneTableKeys(include_one_table_keys)
         return _bf_answer_obj(self.json(),
                               parameters_str="{}",
                               question_name=self.getName(),
@@ -256,10 +257,14 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
         containing "name", "description", and "tags".
     """
     module = sys.modules[question_module]
-    desired_tags = set(map(str.lower, tags)) if tags else set()
-    question_functions = filter(isfunction, getmembers(module))
+    # Members of the module are (name,value) pairs so
+    # x[1] in the lambda represents the value part.
+    # Want members with value of type QuestionMeta
+    predicate = lambda x: isinstance(x[1], QuestionMeta)
+    question_functions = filter(predicate, getmembers(module))
 
     matching_questions = []
+    desired_tags = set(map(str.lower, tags)) if tags else set()
     for name, question_func in question_functions:
         if desired_tags and not desired_tags.intersection(
                 map(str.lower, question_func.tags)):
@@ -281,33 +286,32 @@ def list_tags():
 
 
 def load_dir_questions(questionDir, moduleName=bfq.__name__):
-    questionFilenames = []
+    questionFiles = []
     for dirpath, dirnames, filenames in os.walk(questionDir):
         for filename in filenames:
             if filename.endswith(".json"):
-                questionFilenames.append(join(dirpath, filename))
+                questionFiles.append(os.path.join(dirpath, filename))
     localQuestions = set([])
-    if len(questionFilenames) == 0:
+    if len(questionFiles) == 0:
         bf_logger.warn(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
                 questionDir=questionDir))
     else:
         numQuestions = 0
-        for questionFilename in questionFilenames:
-            questionFile = os.path.join(questionDir, questionFilename)
+        for questionFile in questionFiles:
             try:
                 localQuestions.add(
                     _load_question_disk(questionFile, module_name=moduleName))
                 numQuestions += 1
             except ValueError as err:
                 bf_logger.error(
-                    "Could not load question from {questionFilename}:{err}".format(
-                        questionFilename=questionFilename,
+                    "Could not load question from {questionFile}:{err}".format(
+                        questionFile=questionFile,
                         err=err))
         bf_logger.info(
             "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
                 numQuestions=numQuestions,
-                numQuestionFiles=len(questionFilenames)))
+                numQuestionFiles=len(questionFiles)))
     return localQuestions
 
 
