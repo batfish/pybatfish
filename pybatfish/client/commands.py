@@ -131,6 +131,7 @@ def bf_add_reference_book(book):
     Adds another reference book to the active network.
 
     :param book: The ReferenceBook object to add
+    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
     """
     restv2helper.add_reference_book(bf_session, book)
 
