@@ -12,6 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from copy import deepcopy
 from os import walk
 from os.path import abspath, dirname, join, pardir, realpath
 
@@ -41,9 +42,12 @@ def notebook(request):
 
 @pytest.fixture(scope='module')
 def executed_notebook(notebook):
-    # Run all cells in the notebook, with a time bound, continuing on errors
-    filename, nb = notebook
+    filename, orig_nb = notebook
+    filename, nb = notebook  # Make a deep copy of the original notebook.
+    # - This is important or else the underlying object gets mutated!!
+    nb = deepcopy(orig_nb)
     exec_path = dirname(filename)
+    # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True,
                              kernel_name="python3" if PY3 else "python2")
     ep.preprocess(nb, resources={'metadata': {'path': exec_path}})
@@ -59,6 +63,17 @@ def _assert_cell_no_errors(c):
               if o['output_type'] == 'error']
 
     assert not errors, errors
+
+
+def _compare_data(data1, data2):
+    if "text/plain" in data1 and "text/plain" in data2:
+        assert data1["text/plain"] == data2["text/plain"]
+    else:
+        assert "text/plain" not in data1 and "text/plain" not in data2
+    if "text/html" in data1 and "text/html" in data2:
+        assert data1["text/html"] == data2["text/html"]
+    else:
+        assert "text/html" not in data1 and "text/html" not in data2
 
 
 def test_notebook_no_errors(executed_notebook):
@@ -78,7 +93,9 @@ def test_notebook_output(notebook, executed_notebook):
                                 if o['output_type'] == 'execute_result']
             executed_outputs = [o['data'] for o in executed_cell['outputs']
                                 if o['output_type'] == 'execute_result']
-            assert original_outputs == executed_outputs
+            assert len(original_outputs) == len(executed_outputs)
+            for data1, data2 in zip(original_outputs, executed_outputs):
+                _compare_data(data1, data2)
 
 
 def test_notebook_execution_count(notebook):
