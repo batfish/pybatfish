@@ -47,8 +47,8 @@ _requests_session.mount("http", HTTPAdapter(
 #                              'https': 'http://127.0.0.1:8888'}
 
 
-def get_object(session, object_name, snapshot=None):
-    # type: (Session, str, Optional[str]) -> bytes
+def get_object(session, snapshot, object_name):
+    # type: (Session, str, str) -> bytes
     """Execute the getObject RPC call to Batfish.
 
     :param session: :py:class:`~pybatfish.client.session.Session` object to use
@@ -56,7 +56,6 @@ def get_object(session, object_name, snapshot=None):
 
     :rtype: bytes
     """
-    snapshot = session.get_snapshot(snapshot)
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
                  CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
                  CoordConsts.SVC_KEY_TESTRIG_NAME: snapshot,

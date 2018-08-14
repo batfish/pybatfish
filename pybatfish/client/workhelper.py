@@ -82,8 +82,15 @@ def execute(work_item, session, background=False):
     a string description of the result. If `background=False`, a dict containing
     "status" and "answer" keys, both strings.
     """
-    json_data = {CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
-                 CoordConsts.SVC_KEY_API_KEY: session.apiKey}
+    snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
+    if snapshot is None:
+        raise ValueError('Work item {} does not include a snapshot name'.format(
+            work_item.to_json()))
+
+    json_data = {
+        CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
+        CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    }
 
     # Submit the work item
     response = resthelper.get_json_response(
@@ -113,7 +120,8 @@ def execute(work_item, session, background=False):
 
         # get the answer
         answer_file_name = _compute_batfish_answer_file_name(work_item)
-        answer_bytes = resthelper.get_object(session, answer_file_name)
+        answer_bytes = resthelper.get_object(session, snapshot,
+                                             answer_file_name)
 
         # In Python 3.x, answer needs to be decoded before it can be used
         # for things like json.loads (<= 3.6).
