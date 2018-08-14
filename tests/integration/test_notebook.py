@@ -20,6 +20,8 @@ import nbformat
 import pytest
 from six import PY3
 
+from copy import deepcopy
+
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, 'jupyter_notebooks')
@@ -41,9 +43,12 @@ def notebook(request):
 
 @pytest.fixture(scope='module')
 def executed_notebook(notebook):
-    # Run all cells in the notebook, with a time bound, continuing on errors
-    filename, nb = notebook
+    filename, orig_nb = notebook
+    # Make a deep copy of the original notebook.
+    # - This is important or else the underlying object gets mutated!!
+    nb = deepcopy(orig_nb)
     exec_path = dirname(filename)
+    # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True,
                              kernel_name="python3" if PY3 else "python2")
     ep.preprocess(nb, resources={'metadata': {'path': exec_path}})
