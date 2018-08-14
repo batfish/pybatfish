@@ -461,7 +461,22 @@ def bf_init_container(containerName=None,
     bf_set_network(containerName, containerPrefix)
 
 
-def _bf_init_snapshot(upload, name, overwrite, background):
+def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
+    # type: (str, Optional[str], bool, bool) -> Union[str, Dict[str, str]]
+    """Initialize a new snapshot.
+
+    :param upload: snapshot to upload
+    :type upload: zip file or directory
+    :param name: name of the snapshot to initialize
+    :type name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+       same name
+    :type overwrite: bool
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+    :rtype: Union[str, Dict]
+    """
     if bf_session.network is None:
         bf_set_network()
 
@@ -479,9 +494,9 @@ def _bf_init_snapshot(upload, name, overwrite, background):
 
     file_to_send = upload
     if os.path.isdir(upload):
-        tempFile = tempfile.NamedTemporaryFile()
-        zip_dir(upload, tempFile)
-        file_to_send = tempFile.name
+        temp_zip_file = tempfile.NamedTemporaryFile()
+        zip_dir(upload, temp_zip_file)
+        file_to_send = temp_zip_file.name
 
     json_data = workhelper.get_data_upload_snapshot(bf_session, name,
                                                     file_to_send)
@@ -489,38 +504,25 @@ def _bf_init_snapshot(upload, name, overwrite, background):
                                  CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
                                  json_data)
 
-    bf_session.baseSnapshot = name
     work_item = workhelper.get_workitem_parse(bf_session, name)
-    parse_execute = workhelper.execute(work_item, bf_session,
-                                       background=background)
-    if not background:
-        status = parse_execute["status"]
-        if WorkStatusCode(status) != WorkStatusCode.TERMINATEDNORMALLY:
-            bf_session.baseSnapshot = None
-            bf_logger.info("Default snapshot is now unset")
-        else:
-            bf_logger.info("Default snapshot is now set to %s",
-                           bf_session.baseSnapshot)
-    return parse_execute
+    answer_dict = workhelper.execute(work_item, bf_session,
+                                     background=background)
+    if background:
+        bf_session.baseSnapshot = name
+        return answer_dict
 
-
-def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
-    """Initialize a new snapshot.
-
-    :param upload: snapshot to upload
-    :type upload: zip file or directory
-    :param name: name of the snapshot to initialize
-    :type name: string
-    :param overwrite: whether or not to overwrite an existing snapshot with the
-       same name
-    :type overwrite: bool
-    :param background: whether or not to run the task in the background
-    :type background: bool
-    :return: json response containing result of parsing workitem
-    :rtype: dict
-    """
-    answer_dict = _bf_init_snapshot(upload, name, overwrite, background)
-    return answer_dict['answer'] if not background else answer_dict
+    status = WorkStatusCode(answer_dict["status"])
+    if status != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException(
+            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
+                ss=name,
+                status=status,
+                msg=answer_dict['answer']))
+    else:
+        bf_session.baseSnapshot = name
+        bf_logger.info("Default snapshot is now set to %s",
+                       bf_session.baseSnapshot)
+        return bf_session.baseSnapshot
 
 
 @deprecated(
