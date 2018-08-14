@@ -45,23 +45,27 @@ class Flow(object):
 
     def __str__(self):
         # exclude the tag field
-        return "{}{}->[{}:{}->{}:{} proto: {} dscp:{} ecn:{} fragOff:{} length:{} state:{} flags: {}".format(
-            self.ingressNode,
-            "ingressInterface: {}".format(self.ingressInterface) if hasattr(
-                self, "ingressInterface") else "",
-            "vrf: {}".format(self.ingressVrf) if hasattr(self,
-                                                         "ingressVrf") and self.ingressVrf != "default" else "",
-            self.srcIp,
-            self.srcPort,
-            self.dstIp,
-            self.dstPort,
-            self.ipProtocol,
-            self.dscp,
-            self.ecn,
-            self.fragmentOffset,
-            self.packetLength,
-            self.state,
-            self.get_flag_str())
+        iface_str = "ingressInterface: {}".format(
+            self.ingressInterface) if hasattr(self, "ingressInterface") else ""
+        vrf_str = "vrf: {}".format(self.ingressVrf) if hasattr(self,
+                                                               "ingressVrf") and self.ingressVrf != "default" else ""
+        return "{node}{iface}{vrf}->[{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
+               " proto: {proto} dscp:{dscp} ecn:{ecn} fragOff:{offset} length" \
+               ":{length} state:{state} flags: {flags}".format(
+            node=self.ingressNode,
+            iface=iface_str,
+            vrf=vrf_str,
+            src_ip=self.srcIp,
+            src_port=self.srcPort,
+            dst_ip=self.dstIp,
+            dst_port=self.dstPort,
+            proto=self.ipProtocol,
+            dscp=self.dscp,
+            ecn=self.ecn,
+            offset=self.fragmentOffset,
+            length=self.packetLength,
+            state=self.state,
+            flags=self.get_flag_str())
 
     def get_flag_str(self):
         if self.ipProtocol == 6:
