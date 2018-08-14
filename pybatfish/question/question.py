@@ -17,7 +17,7 @@
 from __future__ import absolute_import, print_function
 
 from copy import deepcopy
-from inspect import getmembers, isfunction
+from inspect import getmembers
 import json
 import os
 import re

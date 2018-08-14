@@ -18,7 +18,7 @@ from __future__ import absolute_import
 
 import os
 import string
-from typing import Sized, Union  # noqa: F401
+from typing import Any, IO, Sized, Union  # noqa: F401
 import uuid
 import zipfile
 
@@ -154,7 +154,7 @@ def validate_question_name(name):
 
 
 def zip_dir(dir_path, out_file):
-    # type: (str, str) -> None
+    # type: (str, Union[str, IO[Any]]) -> None
     """
     ZIP a specified directory and write it to the given output file path.
 
