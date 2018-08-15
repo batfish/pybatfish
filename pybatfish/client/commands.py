@@ -119,6 +119,7 @@ def bf_add_node_role_dimension(dimension):
     The node list within those roles, if present, is ignored by the server.
 
     :param dimension: The NodeRoleDimension object for the dimension to add
+    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
     """
     if dimension.type == "AUTO":
         raise ValueError("Cannot add a dimension of type AUTO")
@@ -131,6 +132,7 @@ def bf_add_reference_book(book):
     Adds another reference book to the active network.
 
     :param book: The ReferenceBook object to add
+    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
     """
     restv2helper.add_reference_book(bf_session, book)
 
@@ -178,6 +180,7 @@ def bf_configure_question(inQuestion, exceptions=None, assertion=None):
     Get a new question template by adding the supplied exceptions and assertions.
 
     :param inQuestion: The question to use as a starting point
+    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
     :param exceptions: Exceptions to add to the template.
         - `None` means keep the existing set.
         - `[]` means wipe out the existing set
@@ -214,6 +217,7 @@ def bf_create_check(inQuestion, snapshot=None, reference_snapshot=None):
     If the original question had exceptions or assertions, they will be overridden.
 
     :param inQuestion: The question to use as a starting point
+    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
 
     :return: The modified template with exceptions and assertions added.
     """
