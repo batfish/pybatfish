@@ -57,7 +57,7 @@ def testFlowDeserialization():
 
     # check the string representation has the essential elements (without forcing a strict format)
     flowStr = str(flow)
-    assert "5.5.1.1" in flowStr
+    assert "5.5.1.1:0" in flowStr
     assert "intface" in flowStr
     assert "vrfAbc" in flowStr
 
