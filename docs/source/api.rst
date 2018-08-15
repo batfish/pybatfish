@@ -20,3 +20,8 @@ Question API
     
 .. automodule:: pybatfish.question.question
     :members:
+
+Reference Library
+-----------------
+.. automodule:: pybatfish.datamodel.referencelibrary
+    :members:
