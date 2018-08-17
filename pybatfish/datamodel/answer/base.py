@@ -21,6 +21,8 @@ from pybatfish.datamodel.acltrace import AclTrace
 from pybatfish.datamodel.answer.issue import Issue
 from pybatfish.datamodel.environment import Environment
 from pybatfish.datamodel.fileline import FileLine
+
+from pybatfish.datamodel.filelines import FileLines
 from pybatfish.datamodel.flow import Flow
 from pybatfish.datamodel.flowtrace import FlowTrace
 from pybatfish.datamodel.interface import Interface
@@ -136,8 +138,6 @@ def _get_display_value(schema, json_object):
         return AclTrace(json_object)
     if schema == "Environment":
         return Environment(json_object)
-    if schema == "FileLine":
-        return FileLine(json_object)
     if schema == "FileLines":
         return FileLines(json_object)
     if schema == "Flow":
