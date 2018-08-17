@@ -138,6 +138,8 @@ def _get_display_value(schema, json_object):
         return Environment(json_object)
     if schema == "FileLine":
         return FileLine(json_object)
+    if schema == "FileLines":
+        return FileLines(json_object)
     if schema == "Flow":
         return Flow(json_object)
     if schema == "FlowTrace":
