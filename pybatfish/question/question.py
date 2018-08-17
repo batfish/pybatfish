@@ -35,7 +35,7 @@ from pybatfish.util import (get_uuid, validate_json_path_regex,
                             validate_question_name)
 
 # A set of tags across all questions
-_tags = set()  # type: Set
+_tags = set()  # type: Set[str]
 _VALID_VARIABLE_NAME_REGEX = re.compile(r'^\w+$')
 
 __all__ = [
@@ -264,23 +264,24 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
     question_functions = filter(predicate, getmembers(module))
 
     matching_questions = []
-    desired_tags = set(map(str.lower, tags)) if tags else set()
+    desired_tags = set(
+        map(str.lower, tags)) if tags else set()  # type: Set[str]
     for name, question_func in question_functions:
         if desired_tags and not desired_tags.intersection(
                 map(str.lower, question_func.tags)):
             # skip questions that don't have any desired tags
             continue
 
-        matching_questions.append(
-            {'name': name,
-             'description': question_func.description,
-             'tags': question_func.tags
-             })
+        matching_questions.append({
+            'name': name,
+            'description': question_func.description,
+            'tags': question_func.tags,
+        })
     return matching_questions
 
 
 def list_tags():
-    # type: () -> Set
+    # type: () -> Set[str]
     """List tags across all available questions."""
     return _tags
 
@@ -355,15 +356,21 @@ def _load_question_dict(question, question_path=None, module_name=bfq.__name__):
     question_name = str(given_question_name)  # type: str
 
     # description validation
-    question_description = instance_data.get('description')
+    question_description = instance_data.get(
+        'description', '').strip()  # type: str
     if not question_description:
         raise QuestionValidationException(
             "Missing description for question '{}'".format(question_name))
+    if not question_description.endswith('.'):
+        question_description += '.'
 
     # Extend description if we can
-    long_description = instance_data.get('longDescription')
+    long_description = instance_data.get(
+        'longDescription', '').strip()  # type: str
     if long_description:
-        question_description = "\n".join(
+        if not long_description.endswith('.'):
+            long_description += '.'
+        question_description = "\n\n".join(
             [question_description, long_description])
 
     # Extract question tags
@@ -375,7 +382,7 @@ def _load_question_dict(question, question_path=None, module_name=bfq.__name__):
     variables = _process_variables(question_name, ivars)
 
     # Compute docstring
-    docstring = _compute_docstring(question_description, ivars)
+    docstring = _compute_docstring(question_description, variables, ivars)
 
     # Make new Question class and set it in the specified module
     module = sys.modules[module_name]
@@ -403,25 +410,37 @@ def _process_variables(question_name, variables):
     for var_name, var_data in variables.items():
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
-    return sorted(variables.keys())
+
+    def __var_key(name):
+        """Orders required [!optional] vars first, then by name."""
+        return variables[name].get('optional', False), name
+
+    return sorted(variables.keys(), key=__var_key)
 
 
 def _validate_variable_data(question_name, var_name, var_data):
     # type: (str, str, Dict[str, Any]) -> bool
-    """Perform validation on variable metadata.
+    """Perform validation on variable metadata and fix style if necessary.
 
     :raises QuestionValidationException if metadata is invalid.
     """
-    if var_data.get('type') is None:
+    var_type = var_data.get('type', '').strip()
+    if not var_type:
         raise QuestionValidationException(
             "Question {} is missing type for variable {}".format(question_name,
                                                                  var_name))
+    var_data['type'] = var_type
 
-    if var_data.get('description') is None:
+    var_desc = var_data.get('description', '').strip()
+    if not var_desc:
         raise QuestionValidationException(
             "Question {} is missing description for variable {}".format(
                 question_name,
                 var_name))
+    if not var_desc.endswith('.'):
+        var_desc += '.'
+    var_data['description'] = var_desc
+
     return True
 
 
@@ -435,32 +454,38 @@ def _validate_variable_name(question_name, var_name):
     return True
 
 
-def _compute_docstring(base_docstring, variables):
-    # type: (str, Optional[Dict[str, Any]]) -> str
+def _compute_docstring(base_docstring, var_names, variables):
+    # type: (str, List[str], Dict[str, Any]) -> str
     """Compute a docstring for a question, based on the variables."""
-    if variables is None:
+    if not variables:
         return base_docstring
     return "\n".join([base_docstring, "\n"] +
-                     [_compute_var_help(*var) for var in variables.items()])
+                     [_compute_var_help(var, variables[var]) for var in var_names])
 
 
 def _compute_var_help(var_name, var_data):
     # type: (str, Dict[str, Any]) -> str
-    """Create explanation of a singe question variable."""
-    allowed_vals = var_data.get("allowedValues", "")
-    default_value = var_data.get("value", "")
-    return ":param {name}: {required} {desc}. {allowed} {default}\n:type {name}: {type}\n".format(
+    """Create explanation of a single question variable."""
+    # Variable help has 2 sections: param and type. Param section may include
+    # optionally: required (inline), and allowed_values and/or default_value on
+    # their own lines with a leading blank.
+    param_line = ":param {name}: {opt_req}{desc}\n".format(
         name=var_name,
-        type=var_data["type"]
-        if 'minElements' not in var_data
-        else "list[{}]".format(var_data["type"]),
-        required='*Required.*' if not var_data.get('optional', False) else "",
-        desc=var_data["description"],
-        allowed="\n\n    Allowed values: ``{}``".format(
-            allowed_vals) if allowed_vals else "",
-        default="\n\n    Default value: ``{}``".format(
-            default_value) if default_value else ""
-    )
+        opt_req='*Required.* ' if not var_data.get('optional', False) else "",
+        desc=var_data['description'])
+
+    allowed_values = var_data.get("allowedValues", [])
+    if allowed_values:
+        param_line += "\n    Allowed values: ``{}``\n".format(allowed_values)
+
+    default_value = var_data.get("value", "")
+    if default_value:
+        param_line += "\n    Default value: ``{}``\n".format(default_value)
+
+    type_line = ":type {name}: {type}".format(
+        name=var_name, type=var_data["type"])
+
+    return param_line + type_line
 
 
 def load_questions(question_dir=None, from_server=False,
@@ -491,7 +516,7 @@ def load_questions(question_dir=None, from_server=False,
     if over_written_questions > 0:
         bf_logger.info(
             "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
-                overWrittenQuestions=over_written_questions))
+                over_written_questions=over_written_questions))
 
 
 def _load_remote_questions_templates(moduleName=bfq.__name__):
