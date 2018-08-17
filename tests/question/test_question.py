@@ -22,7 +22,6 @@ from pybatfish.question.question import _compute_docstring, _process_variables
 from pybatfish.util import validate_json_path_regex
 
 
-
 def test_validate_json_path_regex():
     assert validate_json_path_regex("/x/")
     assert validate_json_path_regex("/x/i")
@@ -67,11 +66,12 @@ def test_valid_comparator():
 
 
 def test_compute_docstring():
-    assert _compute_docstring("foo", None) == "foo"
+    assert _compute_docstring("foo", [], {}) == "foo"
 
 
 def test_process_variables():
     assert _process_variables("foo", None) == []
+
 
 def test_list_questions():
     current_path = os.path.abspath(os.path.dirname(__file__))
