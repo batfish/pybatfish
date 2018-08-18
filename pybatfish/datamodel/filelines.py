@@ -13,11 +13,12 @@
 #   limitations under the License.
 
 
-class FileLine:
+class FileLines:
+    """A class that represents a set of lines in a file."""
 
-    def __init__(self, jsonObject):
-        self.filename = jsonObject["filename"]
-        self.linenumber = jsonObject["linenumber"]
+    def __init__(self, dictionary):
+        self.filename = dictionary["filename"]
+        self.lines = list(dictionary.get("lines", []))
 
     def __str__(self):
-        return self.filename + ":" + str(self.linenumber)
+        return self.filename + ":" + str(self.lines)
