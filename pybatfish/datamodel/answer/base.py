@@ -20,8 +20,6 @@ from string import Template
 from pybatfish.datamodel.acltrace import AclTrace
 from pybatfish.datamodel.answer.issue import Issue
 from pybatfish.datamodel.environment import Environment
-from pybatfish.datamodel.fileline import FileLine
-
 from pybatfish.datamodel.filelines import FileLines
 from pybatfish.datamodel.flow import Flow
 from pybatfish.datamodel.flowtrace import FlowTrace
