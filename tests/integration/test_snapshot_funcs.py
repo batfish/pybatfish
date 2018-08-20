@@ -23,7 +23,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_snapshot_dir = join(_root_dir, 'networks')
+_snapshot_dir = join(_root_dir, 'jupyter_notebooks', 'networks')
 
 
 @pytest.fixture()

@@ -24,7 +24,7 @@ from pybatfish.question.question import load_questions
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_test_rig_dir = abspath(join(_root_dir, 'networks'))
+_test_rig_dir = abspath(join(_root_dir, 'jupyter_notebooks', 'networks'))
 _stable_question_dir = abspath(join(_root_dir, 'questions', 'stable'))
 _experimental_question_dir = abspath(
     join(_root_dir, 'questions', 'experimental'))

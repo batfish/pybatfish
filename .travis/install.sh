@@ -21,10 +21,6 @@ pushd "$TRAVIS_BUILD_DIR/batfish/projects"
 mvn clean install
 popd 
 
-# Symlink batfish testrigs to make them available to pybatfish
-ln -s "$TRAVIS_BUILD_DIR/batfish/networks" $TRAVIS_BUILD_DIR
-
-
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
    ### install python packages
    echo -e "\n   ............. Installing pip"

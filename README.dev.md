@@ -9,9 +9,7 @@ This installs all the development and test dependencies
 
 - To run unit tests execute `python setup.py test`
 - To run end-to-end tests, start up an instance of batfish, 
-  make it point to `<stable_questions_dir>` (as described above). 
-  Make sure there is a symlink to `<batfish_repository_root>/networks` 
-  folder under root of the pybatfish repository.
+  make it point to `<stable_questions_dir>` (as described above).
 
   Run `py.test tests/integration`
 

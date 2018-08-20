@@ -29,11 +29,11 @@ The following instructions show how to upload and query a network snapshot using
     >>> load_questions()
     Successfully loaded X questions from remote
 
-4. Upload a network snapshot (make sure to replace ``<batfish_repository_root>`` with the path to the root of the ``Batfish`` repo):
+4. Upload a network snapshot:
 
 .. code-block:: python
 
-    bf_init_snapshot('<batfish_repository_root>/networks/example')
+    bf_init_snapshot('jupyter_notebooks/networks/example')
 
 Here, the example network is being uploaded, but this location could also be a folder or a zip containing a custom network snapshot.
 
