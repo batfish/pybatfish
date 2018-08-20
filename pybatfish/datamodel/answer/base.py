@@ -130,8 +130,13 @@ def _get_display_value(schema, json_object):
         if not isinstance(json_object, list):
             raise ValueError("Got non-list value for list/set schema", schema,
                              ":", json_object)
-        return [str(_get_display_value(_get_base_schema(schema), element)) for
-                element in json_object]
+        output_list = [
+            str(_get_display_value(_get_base_schema(schema), element)) for
+            element in json_object]
+        if _get_base_schema(schema) == "FlowTrace":
+            return "\n".join(output_list)
+        else:
+            return output_list
     if schema == "AclTrace":
         return AclTrace(json_object)
     if schema == "Environment":
