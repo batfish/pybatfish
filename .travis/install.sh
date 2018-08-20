@@ -22,7 +22,7 @@ mvn clean install
 popd 
 
 # Symlink batfish testrigs to make them available to pybatfish
-ln -s "$TRAVIS_BUILD_DIR/batfish/test_rigs" $TRAVIS_BUILD_DIR
+ln -s "$TRAVIS_BUILD_DIR/batfish/networks" $TRAVIS_BUILD_DIR
 
 
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
