@@ -3,10 +3,10 @@
 set -x -e
 
 #### Before we begin, install Z3 for Ubuntu 14.04
-Z3_INSTALL_URL="https://raw.githubusercontent.com/batfish/batfish/master/tools/install_z3_ubuntu.sh"
+Z3_INSTALL_URL="https://raw.githubusercontent.com/batfish/batfish/master/tools/install_z3.sh"
 Z3_CMD_NAME=$(basename ${Z3_INSTALL_URL})
 wget ${Z3_INSTALL_URL}
-sudo bash ${Z3_CMD_NAME} /usr
+sudo bash ${Z3_CMD_NAME}
 
 #### Next, install the correct version of Batfish -- either from a branch or TAG
 if [[ ${TRAVIS_BRANCH} =~ ^release.* ]]; then
