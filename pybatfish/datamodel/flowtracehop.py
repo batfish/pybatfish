@@ -25,10 +25,8 @@ class FlowTraceHop:
             transformed_flow) if transformed_flow else None
 
     def __str__(self):
-        return "{}\n    Route(s):\n    {}{}".format(
-            self.edge,
-            "\n    ".join(self.routes),
-            "\n    Transformed flow: " + str(
-                self.transformedFlow) if self.transformedFlow else ""
-
-        )
+        ret_str = "{}\n    Route(s):\n    {}".format(self.edge, "\n    ".join(
+            self.routes))
+        if self.transformedFlow:
+            ret_str += "\n    Transformed flow: {}".format(self.transformedFlow)
+        return ret_str
