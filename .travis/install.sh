@@ -2,7 +2,7 @@
 
 set -x -e
 
-#### Before we begin, install Z3 for Ubuntu 14.04
+#### Before we begin, install Z3
 Z3_INSTALL_URL="https://raw.githubusercontent.com/batfish/batfish/master/tools/install_z3.sh"
 Z3_CMD_NAME=$(basename ${Z3_INSTALL_URL})
 wget ${Z3_INSTALL_URL}
