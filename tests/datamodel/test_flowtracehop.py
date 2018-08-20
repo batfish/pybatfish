@@ -68,7 +68,6 @@ def testFlowTraceHopDeserialization():
     # check the string representation has the essential elements (without forcing a strict format)
     assert str(hop.edge) in hopStr
     assert str(hop.routes[0]) in hopStr
-    assert "transformedFlow" in hopStr
     assert str(hop.transformedFlow) in hopStr
 
 
