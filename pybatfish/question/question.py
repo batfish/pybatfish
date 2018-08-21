@@ -22,9 +22,9 @@ import json
 import os
 import re
 import sys
-from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from six import PY3, integer_types, string_types
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
@@ -65,19 +65,17 @@ class QuestionMeta(type):
         """Creates a new class for a specific question."""
         new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
 
-        def constructor(self, differential=None, questionName=None,
+        def constructor(self, question_name=None,
                         exclusions=None, **kwargs):
             """Create a new question."""
             # Call super (i.e., QuestionBase)
             super(new_cls, self).__init__(new_cls.template)
 
             # Update well-known params, if passed in
-            if differential is not None:
-                self._dict['differential'] = differential
             if exclusions is not None:
                 self._dict['exclusions'] = exclusions
-            if questionName:
-                self._dict['instance']['instanceName'] = questionName
+            if question_name:
+                self._dict['instance']['instanceName'] = question_name
             else:
                 self._dict['instance']['instanceName'] += \
                     "_" + get_uuid()
@@ -95,11 +93,13 @@ class QuestionMeta(type):
 
         # Define signature. Helps with tab completion. Python3 centric
         if PY3:
-            from inspect import Signature, Parameter
-            setattr(constructor, '__signature__', Signature(parameters=[
-                Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-                for param in sorted(dct.get("variables", []) +
-                                    ['differential', 'questionName'])]))
+            from inspect import Signature, Parameter, signature
+            # Merge constructor params with question variables
+            params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
+                      for param in sorted(dct.get("variables", [])) +
+                      [p for p in signature(constructor).parameters if
+                       p not in ('kwargs', 'self')]]
+            setattr(constructor, '__signature__', Signature(parameters=params))
         setattr(new_cls, '__init__', constructor)
         setattr(new_cls, '__doc__', dct.get("docstring", ""))
         setattr(new_cls, '__module__', dct.get("module", "__main__"))
@@ -302,7 +302,8 @@ def load_dir_questions(questionDir, moduleName=bfq.__name__):
         for questionFile in questionFiles:
             try:
                 localQuestions.add(
-                    _load_question_disk(questionFile, module_name=moduleName))
+                    _load_question_disk(questionFile,
+                                        module_name=moduleName))
                 numQuestions += 1
             except ValueError as err:
                 bf_logger.error(
@@ -320,7 +321,8 @@ def _load_question_disk(question_path, module_name=bfq.__name__):
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path, 'r') as question_file:
         question_dict = json.load(question_file)
-        return _load_question_dict(question_dict, question_path=question_path,
+        return _load_question_dict(question_dict,
+                                   question_path=question_path,
                                    module_name=module_name)
 
 
@@ -331,7 +333,8 @@ def _load_question_json(question_str, module_name=bfq.__name__):
                                module_name=module_name)
 
 
-def _load_question_dict(question, question_path=None, module_name=bfq.__name__):
+def _load_question_dict(question, question_path=None,
+                        module_name=bfq.__name__):
     # type: (Dict, Optional[str], str) -> str
     """Create a question from a dictionary which contains a template.
 
@@ -427,8 +430,9 @@ def _validate_variable_data(question_name, var_name, var_data):
     var_type = var_data.get('type', '').strip()
     if not var_type:
         raise QuestionValidationException(
-            "Question {} is missing type for variable {}".format(question_name,
-                                                                 var_name))
+            "Question {} is missing type for variable {}".format(
+                question_name,
+                var_name))
     var_data['type'] = var_type
 
     var_desc = var_data.get('description', '').strip()
@@ -460,7 +464,8 @@ def _compute_docstring(base_docstring, var_names, variables):
     if not variables:
         return base_docstring
     return "\n".join([base_docstring, "\n"] +
-                     [_compute_var_help(var, variables[var]) for var in var_names])
+                     [_compute_var_help(var, variables[var]) for var in
+                      var_names])
 
 
 def _compute_var_help(var_name, var_data):
@@ -471,12 +476,14 @@ def _compute_var_help(var_name, var_data):
     # their own lines with a leading blank.
     param_line = ":param {name}: {opt_req}{desc}\n".format(
         name=var_name,
-        opt_req='*Required.* ' if not var_data.get('optional', False) else "",
+        opt_req='*Required.* ' if not var_data.get('optional',
+                                                   False) else "",
         desc=var_data['description'])
 
     allowed_values = var_data.get("allowedValues", [])
     if allowed_values:
-        param_line += "\n    Allowed values: ``{}``\n".format(allowed_values)
+        param_line += "\n    Allowed values: ``{}``\n".format(
+            allowed_values)
 
     default_value = var_data.get("value", "")
     if default_value:

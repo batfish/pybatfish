@@ -12,13 +12,14 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import pytest
 import os
 
+import pytest
 
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question import question
-from pybatfish.question.question import _compute_docstring, _process_variables
+from pybatfish.question.question import (_compute_docstring, _process_variables,
+                                         _validate, list_questions,
+                                         load_questions)
 from pybatfish.util import validate_json_path_regex
 
 
@@ -48,7 +49,7 @@ def test_min_length():
     }
     expected_message = "\n   Length of value: 'one' for element : 0 of parameter: 'numbers' below minimum length: 4\n"
     with pytest.raises(QuestionValidationException) as err:
-        question._validate(sample_question)
+        _validate(sample_question)
         assert expected_message in err
 
 
@@ -62,7 +63,7 @@ def test_valid_comparator():
             'comparators': comparators
         }
     }
-    assert question._validate(sample_question)
+    assert _validate(sample_question)
 
 
 def test_compute_docstring():
@@ -76,5 +77,5 @@ def test_process_variables():
 def test_list_questions():
     current_path = os.path.abspath(os.path.dirname(__file__))
     question_directory = os.path.join(current_path, "../../questions")
-    question.load_questions(question_dir=question_directory)
-    assert question.list_questions() != []
+    load_questions(question_dir=question_directory)
+    assert list_questions() != []
