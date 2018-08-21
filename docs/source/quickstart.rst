@@ -1,9 +1,9 @@
 Getting started
 ===============
 
-To get started with ``Pybatfish``, you will need a network snapshot.  An example snapshot is packaged with ``Batfish`` at ``<batfish_repository_root>/test_rigs/example`` (`here <https://github.com/batfish/batfish/tree/master/test_rigs/example>`_) and can be used to step through the example below.  Alternatively, you can package a snapshot of your own network as described `here <https://github.com/batfish/batfish/wiki/Packaging-testrigs-for-analysis>`_.
+To get started with ``Pybatfish``, you will need a network snapshot.  An example snapshot is packaged with ``Pybatfish`` (`here <https://github.com/batfish/pybatfish/tree/master/jupyter_notebooks/networks/example>`_) and can be used to step through the example below.  Alternatively, you can package a snapshot of your own network as described `here <https://github.com/batfish/batfish/wiki/Packaging-snapshots-for-analysis>`_.
 
-The following instructions show how to upload and query a network snapshot using `Pybatfish` in an interactive python shell like ``IPython``.  In these instructions, it is assumed that ``Batfish`` is running on the same machine as the ``Pybatfish`` client and the example snasphot included in ``Batfish`` is being analyzed.
+The following instructions show how to upload and query a network snapshot using ``Pybatfish`` in an interactive python shell like ``IPython``.  In these instructions, it is assumed that ``Batfish`` is running on the same machine as the ``Pybatfish`` client and the example snasphot included in ``Batfish`` is being analyzed.
 
 1. Import ``Pybatfish``:
 
@@ -29,11 +29,11 @@ The following instructions show how to upload and query a network snapshot using
     >>> load_questions()
     Successfully loaded X questions from remote
 
-4. Upload a network snapshot (make sure to replace ``<batfish_repository_root>`` with the path to the root of the ``Batfish`` repo):
+4. Upload a network snapshot:
 
 .. code-block:: python
 
-    bf_init_snapshot('<batfish_repository_root>/test_rigs/example')
+    bf_init_snapshot('jupyter_notebooks/networks/example')
 
 Here, the example network is being uploaded, but this location could also be a folder or a zip containing a custom network snapshot.
 
