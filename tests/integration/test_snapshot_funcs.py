@@ -39,7 +39,7 @@ def test_init_snapshot_no_crash(network):
     bf_set_network(network)
     uid = uuid.uuid4().hex
     try:
-        bf_init_snapshot(join(_snapshot_dir, 'example'), uid)
+        bf_init_snapshot(join(_this_dir, 'snapshot'), uid)
         bf_generate_dataplane()
     finally:
         # cleanup
@@ -50,7 +50,7 @@ def test_init_snapshot_no_crash(network):
 def example_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_snapshot_dir, 'example'), name)
+    bf_init_snapshot(join(_this_dir, 'snapshot'), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)

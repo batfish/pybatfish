@@ -24,7 +24,6 @@ from pybatfish.question.question import load_questions
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_test_rig_dir = abspath(join(_root_dir, 'jupyter_notebooks', 'networks'))
 _stable_question_dir = abspath(join(_root_dir, 'questions', 'stable'))
 _experimental_question_dir = abspath(
     join(_root_dir, 'questions', 'experimental'))
@@ -40,7 +39,7 @@ def network():
     except Exception:
         pass
     bf_set_network(TEST_NETWORK)
-    yield bf_init_snapshot(_test_rig_dir + "/example", name="example")
+    yield bf_init_snapshot(join(_this_dir, "snapshot"), name="snapshot")
     bf_delete_network(TEST_NETWORK)
 
 
