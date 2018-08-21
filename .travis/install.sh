@@ -2,11 +2,11 @@
 
 set -x -e
 
-#### Before we begin, install Z3 for Ubuntu 14.04
-Z3_INSTALL_URL="https://raw.githubusercontent.com/batfish/batfish/master/tools/install_z3_ubuntu.sh"
+#### Before we begin, install Z3
+Z3_INSTALL_URL="https://raw.githubusercontent.com/batfish/batfish/master/tools/install_z3.sh"
 Z3_CMD_NAME=$(basename ${Z3_INSTALL_URL})
 wget ${Z3_INSTALL_URL}
-sudo bash ${Z3_CMD_NAME} /usr
+sudo bash ${Z3_CMD_NAME}
 
 #### Next, install the correct version of Batfish -- either from a branch or TAG
 if [[ ${TRAVIS_BRANCH} =~ ^release.* ]]; then
@@ -20,10 +20,6 @@ git clone --depth=1 --branch=${BATFISH_BRANCH} https://github.com/batfish/batfis
 pushd "$TRAVIS_BUILD_DIR/batfish/projects"
 mvn clean install
 popd 
-
-# Symlink batfish testrigs to make them available to pybatfish
-ln -s "$TRAVIS_BUILD_DIR/batfish/test_rigs" $TRAVIS_BUILD_DIR
-
 
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
    ### install python packages

@@ -27,6 +27,8 @@ class FlowTrace:
         return str(self)
 
     def __str__(self):
-        retStr = "\n".join(str(hop) for hop in self.flowTraceHops)
-        retStr = retStr + "\n" + self.notes
-        return retStr
+        ret_str = ""
+        for hop_num, hop in enumerate(self.flowTraceHops):
+            ret_str += "{} {}\n".format(hop_num + 1, hop)
+        ret_str += "{}\n".format(self.notes)
+        return ret_str

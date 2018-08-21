@@ -20,7 +20,7 @@ from string import Template
 from pybatfish.datamodel.acltrace import AclTrace
 from pybatfish.datamodel.answer.issue import Issue
 from pybatfish.datamodel.environment import Environment
-from pybatfish.datamodel.fileline import FileLine
+from pybatfish.datamodel.filelines import FileLines
 from pybatfish.datamodel.flow import Flow
 from pybatfish.datamodel.flowtrace import FlowTrace
 from pybatfish.datamodel.interface import Interface
@@ -130,14 +130,19 @@ def _get_display_value(schema, json_object):
         if not isinstance(json_object, list):
             raise ValueError("Got non-list value for list/set schema", schema,
                              ":", json_object)
-        return [str(_get_display_value(_get_base_schema(schema), element)) for
-                element in json_object]
+        output_list = [
+            str(_get_display_value(_get_base_schema(schema), element)) for
+            element in json_object]
+        if _get_base_schema(schema) == "FlowTrace":
+            return "\n".join(output_list)
+        else:
+            return output_list
     if schema == "AclTrace":
         return AclTrace(json_object)
     if schema == "Environment":
         return Environment(json_object)
-    if schema == "FileLine":
-        return FileLine(json_object)
+    if schema == "FileLines":
+        return FileLines(json_object)
     if schema == "Flow":
         return Flow(json_object)
     if schema == "FlowTrace":
