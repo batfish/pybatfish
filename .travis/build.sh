@@ -36,7 +36,7 @@ fi
 
 echo -e "\n  ..... Running flake8 on pybatfish to check style and docstrings"
 # Additional configuration in setup.cfg
-flake8 pybatfish,tests
+flake8 pybatfish tests
 
 echo -e "\n  ..... Running flake8 on jupyter notebooks"
 # Running flake test on generated python script from jupyter notebook(s)

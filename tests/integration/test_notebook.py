@@ -106,4 +106,4 @@ def test_notebook_execution_count(notebook):
                   if cell['cell_type'] == 'code']
     for (i, cell) in enumerate(code_cells):
         assert i + 1 == cell['execution_count'], \
-               'Expected cell {} to have execution count {}'.format(cell, i + 1)
+            'Expected cell {} to have execution count {}'.format(cell, i + 1)
