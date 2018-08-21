@@ -29,8 +29,9 @@ notebook_files = [
     join(root, filename)
     for root, dirs, files in walk(_jupyter_nb_dir)
     for filename in files
-    if filename.endswith('.ipynb')
+    if '.ipynb_checkpoints' not in root and filename.endswith('.ipynb')
 ]
+
 assert len(notebook_files) > 0
 
 
@@ -65,15 +66,15 @@ def _assert_cell_no_errors(c):
     assert not errors, errors
 
 
-def _compare_data(data1, data2):
-    if "text/plain" in data1 and "text/plain" in data2:
-        assert data1["text/plain"] == data2["text/plain"]
+def _compare_data(original_data, executed_data):
+    if "text/plain" in original_data and "text/plain" in executed_data:
+        assert original_data["text/plain"] == executed_data["text/plain"]
     else:
-        assert "text/plain" not in data1 and "text/plain" not in data2
-    if "text/html" in data1 and "text/html" in data2:
-        assert data1["text/html"] == data2["text/html"]
+        assert "text/plain" not in original_data and "text/plain" not in executed_data
+    if "text/html" in original_data and "text/html" in executed_data:
+        assert original_data["text/html"] == executed_data["text/html"]
     else:
-        assert "text/html" not in data1 and "text/html" not in data2
+        assert "text/html" not in original_data and "text/html" not in executed_data
 
 
 def test_notebook_no_errors(executed_notebook):
@@ -94,8 +95,9 @@ def test_notebook_output(notebook, executed_notebook):
             executed_outputs = [o['data'] for o in executed_cell['outputs']
                                 if o['output_type'] == 'execute_result']
             assert len(original_outputs) == len(executed_outputs)
-            for data1, data2 in zip(original_outputs, executed_outputs):
-                _compare_data(data1, data2)
+            for original_data, executed_data in zip(original_outputs,
+                                                    executed_outputs):
+                _compare_data(original_data, executed_data)
 
 
 def test_notebook_execution_count(notebook):

@@ -11,8 +11,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from os.path import abspath, dirname, join, pardir, realpath
 import uuid
+from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
 
@@ -23,7 +23,6 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_snapshot_dir = join(_root_dir, 'test_rigs')
 
 
 @pytest.fixture()
@@ -39,7 +38,7 @@ def test_init_snapshot_no_crash(network):
     bf_set_network(network)
     uid = uuid.uuid4().hex
     try:
-        bf_init_snapshot(join(_snapshot_dir, 'example'), uid)
+        bf_init_snapshot(join(_this_dir, 'snapshot'), uid)
         bf_generate_dataplane()
     finally:
         # cleanup
@@ -50,7 +49,7 @@ def test_init_snapshot_no_crash(network):
 def example_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_snapshot_dir, 'example'), name)
+    bf_init_snapshot(join(_this_dir, 'snapshot'), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
