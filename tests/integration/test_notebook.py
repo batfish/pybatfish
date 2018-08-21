@@ -25,14 +25,12 @@ _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, 'jupyter_notebooks')
 
-notebook_files = []
-exclude_dirs = {'.ipynb_checkpoints'}
-
-for root, dirs, files in walk((_jupyter_nb_dir)):
-    dirs[:] = [d for d in dirs if d not in exclude_dirs]
-    for filename in files:
-        if filename.endswith('.ipynb'):
-            notebook_files.append(join(root, filename))
+notebook_files = [
+    join(root, filename)
+    for root, dirs, files in walk(_jupyter_nb_dir)
+    for filename in files
+    if '.ipynb_checkpoints' not in root and filename.endswith('.ipynb')
+]
 
 assert len(notebook_files) > 0
 
