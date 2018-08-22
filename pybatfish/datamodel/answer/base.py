@@ -16,6 +16,7 @@
 import json
 import re
 from string import Template
+from typing import Optional  # noqa: F401
 
 from pybatfish.datamodel.acltrace import AclTrace
 from pybatfish.datamodel.answer.issue import Issue
@@ -39,10 +40,9 @@ class Answer(dict):
         self.q_name = q_name  # type: str
 
     def __str__(self):
-        print(self.keys())
         return json.dumps(self, indent=2)
 
-    # Noneable
+    # type: () -> Optional[str]
     def question_name(self):
         return self.q_name
 
