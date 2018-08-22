@@ -42,7 +42,8 @@ class Answer(dict):
         # type: () -> Optional[str]
         if "question" in self and "instance" in self["question"] \
                 and "instanceName" in self["question"]["instance"]:
-            return self["question"]["instance"]["instanceName"]
+            return str(self["question"]["instance"]["instanceName"])
+        return None
 
 
 def get_answer_text(answerJson):
