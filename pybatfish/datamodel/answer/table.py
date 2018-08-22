@@ -47,10 +47,10 @@ class ColumnMetadata(object):
 class TableAnswerElement(Answer):
     """Batfish answer represented as a table."""
 
-    def __init__(self, dictionary):
+    def __init__(self, dictionary, q_name=None):
         if "metadata" not in dictionary:
             raise ValueError("TableMetadata not found in dictionary")
-        super(TableAnswerElement, self).__init__(dictionary)
+        super(TableAnswerElement, self).__init__(dictionary, q_name)
         self.metadata = TableMetadata(dictionary["metadata"]) \
             # type: TableMetadata
         self.rows = [Row(row) for row in dictionary.get("rows", [])] \

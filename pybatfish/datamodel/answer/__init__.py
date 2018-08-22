@@ -29,7 +29,11 @@ def from_string(json_string):
         or new :py:class:`TableAnswerElement` class.
     """
     o = json.loads(json_string)
+    q_name = None
+    if "question" in o and "instance" in o["question"] and "instanceName" in \
+            o["question"]["instance"]:
+        q_name = o["question"]["instance"]["instanceName"]
     if "answerElements" in o and "metadata" in o["answerElements"][0]:
-        return TableAnswerElement(o["answerElements"][0])
+        return TableAnswerElement(o["answerElements"][0], q_name)
     else:
-        return Answer(o)
+        return Answer(o, q_name)
