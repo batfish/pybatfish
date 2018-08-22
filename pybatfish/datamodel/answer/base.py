@@ -42,8 +42,8 @@ class Answer(dict):
     def __str__(self):
         return json.dumps(self, indent=2)
 
-    # type: () -> Optional[str]
     def question_name(self):
+        # type: () -> Optional[str]
         return self.q_name
 
 
