@@ -21,40 +21,53 @@ import pytest
 from pybatfish.datamodel.answer.table import TableAnswerElement
 
 
-def test_table_answer_element_no_metadata():
-    """Exception is raised when metadata field is not present."""
-    answer_element = {
-        "noMetadata": {
-        }
-    }
-    with pytest.raises(ValueError):
-        TableAnswerElement(answer_element)
+def test_table_answer_no_answer_elements():
+    """Exception is raised when answer elements field is not present."""
     with pytest.raises(ValueError):
         TableAnswerElement({})
 
 
+def test_table_answer_element_no_metadata():
+    """Exception is raised when metadata field is not present."""
+    answer = {
+        "answerElements": [
+            {"nometadata": {}}
+        ]
+    }
+    with pytest.raises(ValueError):
+        TableAnswerElement(answer)
+
+    answer = {
+        "answerElements": [{}]
+    }
+    with pytest.raises(ValueError):
+        TableAnswerElement(answer)
+
+
 def test_table_answer_element_deser():
     """Check proper deserialization for a valid table answer."""
-    answer_element = {
-        "metadata": {
-            "columnMetadata":
-                [
-                    {
-                        "name": "col1",
-                        "schema": "String"
-                    },
-                    {
-                        "name": "col2",
-                        "schema": "String"
-                    }
-                ]
-        },
-        "rows": [{
-            "col1": "value1",
-            "col2": "value2"
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata":
+                    [
+                        {
+                            "name": "col1",
+                            "schema": "String"
+                        },
+                        {
+                            "name": "col2",
+                            "schema": "String"
+                        }
+                    ]
+            },
+            "rows": [{
+                "col1": "value1",
+                "col2": "value2"
+            }]
         }]
     }
-    table = TableAnswerElement(answer_element)
+    table = TableAnswerElement(answer)
 
     assert len(table.metadata.column_metadata) == 2
     assert table.metadata.column_metadata[0].name == "col1"
@@ -66,18 +79,20 @@ def test_table_answer_element_deser():
 
 def test_table_answer_element_deser_no_rows():
     """Check deserialization creates empty table when no rows are present."""
-    answer_element = {
-        "metadata": {
-            "columnMetadata":
-                [
-                    {
-                        "name": "col1",
-                        "schema": "Node"
-                    }
-                ]
-        }
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata":
+                    [
+                        {
+                            "name": "col1",
+                            "schema": "Node"
+                        }
+                    ]
+            }
+        }]
     }
-    table = TableAnswerElement(answer_element)
+    table = TableAnswerElement(answer)
 
     assert len(table.metadata.column_metadata) == 1
     assert table.metadata.column_metadata[0].name == "col1"

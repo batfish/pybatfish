@@ -35,16 +35,17 @@ _SET_SCHEMA_PATTERN = re.compile(r'^Set<(.+)>$')
 class Answer(dict):
     """Represents a generic Batfish answer."""
 
-    def __init__(self, dictionary, q_name=None):
+    def __init__(self, dictionary):
         super(Answer, self).__init__(dictionary)
-        self.q_name = q_name  # type: str
 
     def __str__(self):
         return json.dumps(self, indent=2)
 
     def question_name(self):
         # type: () -> Optional[str]
-        return self.q_name
+        if "question" in self and "instance" in self["question"] \
+                and "instanceName" in self["question"]["instance"]:
+            return self["question"]["instance"]["instanceName"]
 
 
 def get_answer_text(answerJson):
