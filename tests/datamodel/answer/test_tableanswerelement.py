@@ -22,9 +22,11 @@ from pybatfish.datamodel.answer.table import TableAnswerElement
 
 
 def test_table_answer_no_answer_elements():
-    """Exception is raised when answer elements field is not present."""
+    """Exception is raised when answer elements are empty or not present."""
     with pytest.raises(ValueError):
         TableAnswerElement({})
+    with pytest.raises(ValueError):
+        TableAnswerElement({"answerElements": []})
 
 
 def test_table_answer_element_no_metadata():
