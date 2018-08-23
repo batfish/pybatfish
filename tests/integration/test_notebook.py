@@ -109,7 +109,7 @@ def test_notebook_output(notebook, executed_notebook):
         with open('{}.testout'.format(filepath), 'w') as f:
             nbformat.write(executed_notebook, f)
             pytest.fail('{} failed output validation:\n{}'.format(filepath, e),
-                        False)
+                        pytrace=False)
 
 
 def test_notebook_execution_count(notebook):

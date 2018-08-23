@@ -1,6 +1,6 @@
 .. py:module:: pybatfish.question.bfq
 
-.. py:class:: aaaAuthenticationLogin(*, differential, nodeRegex, questionName)
+.. py:class:: aaaAuthenticationLogin(*, nodeRegex, question_name, exclusions)
 
    Return nodes that do not require authentication on all lines.
    
@@ -10,7 +10,7 @@
        Default value: ``.*``
    :type nodeRegex: nodeSpec
 
-.. py:class:: aclReachability(*, differential, filterSpecifierInput, nodeSpecifierInput, questionName)
+.. py:class:: aclReachability(*, filterSpecifierInput, nodeSpecifierInput, question_name, exclusions)
 
    Display ACLs/filters with unreachable lines.
    
@@ -22,7 +22,7 @@
    :param nodeSpecifierInput: Name or regex identifying the nodes to restrict the test to.
    :type nodeSpecifierInput: string
 
-.. py:class:: bgpProperties(*, differential, nodeRegex, propertySpec, questionName)
+.. py:class:: bgpProperties(*, nodeRegex, propertySpec, question_name, exclusions)
 
    Return BGP configuration properties.
    
@@ -32,7 +32,7 @@
    :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
    :type propertySpec: bgpPropertySpec
 
-.. py:class:: bgpSessionStatus(*, differential, includeEstablishedCount, node1Regex, node2Regex, questionName, status, type)
+.. py:class:: bgpSessionStatus(*, includeEstablishedCount, node1Regex, node2Regex, status, type, question_name, exclusions)
 
    Return the status of configured BGP sessions.
    
@@ -48,13 +48,13 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: javaRegex
 
-.. py:class:: fileParseStatus(*, differential, questionName)
+.. py:class:: fileParseStatus(*, question_name, exclusions)
 
    Display file parse status.
    
    For each file in a snapshot, returns the host(s) that were produced by the file and the parse status: pass, fail, partially parsed.
 
-.. py:class:: filterTable(*, columns, differential, filter, innerQuestion, questionName)
+.. py:class:: filterTable(*, columns, filter, innerQuestion, question_name, exclusions)
 
    Return subset of answer for a question.
    
@@ -68,7 +68,7 @@
    :param filter: The filter to use.
    :type filter: string
 
-.. py:class:: interfaceMtu(*, comparator, differential, interfaceRegex, mtuBytes, nodeRegex, questionName)
+.. py:class:: interfaceMtu(*, comparator, interfaceRegex, mtuBytes, nodeRegex, question_name, exclusions)
 
    Find interfaces where the configured MTU matches the specified comparator and mtuBytes.
    
@@ -92,7 +92,7 @@
        Default value: ``<``
    :type comparator: comparator
 
-.. py:class:: interfaceProperties(*, differential, interfaceRegex, nodeRegex, propertySpec, questionName)
+.. py:class:: interfaceProperties(*, interfaceRegex, nodeRegex, propertySpec, question_name, exclusions)
 
    Returns configuration properties of interfaces.
    
@@ -104,7 +104,7 @@
    :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
    :type propertySpec: interfacePropertySpec
 
-.. py:class:: ipOwners(*, differential, duplicatesOnly, questionName)
+.. py:class:: ipOwners(*, duplicatesOnly, question_name, exclusions)
 
    Returns the mapping of IP address, interface, node and VRF for all devices in the snapshot.
    
@@ -112,7 +112,7 @@
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
    :type duplicatesOnly: boolean
 
-.. py:class:: neighbors(*, differential, neighborTypes, node1Regex, node2Regex, questionName, roleDimension, style)
+.. py:class:: neighbors(*, neighborTypes, node1Regex, node2Regex, roleDimension, style, question_name, exclusions)
 
    Lists neighbor relationships in the snapshot.
    
@@ -140,7 +140,7 @@
    :param roleDimension: Role dimension to run the question on.
    :type roleDimension: string
 
-.. py:class:: nodeProperties(*, differential, nodeRegex, propertySpec, questionName)
+.. py:class:: nodeProperties(*, nodeRegex, propertySpec, question_name, exclusions)
 
    Return configuration properties of nodes.
    
@@ -150,7 +150,7 @@
    :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
    :type propertySpec: nodePropertySpec
 
-.. py:class:: nodes(*, differential, nodeRegex, nodeTypes, questionName, summary)
+.. py:class:: nodes(*, nodeRegex, nodeTypes, summary, question_name, exclusions)
 
    Return configuration attributes of nodes in the network.
    
@@ -168,7 +168,7 @@
    :param nodeTypes: Only include nodes of the specified types.
    :type nodeTypes: string
 
-.. py:class:: ospfProperties(*, differential, nodeRegex, propertySpec, questionName)
+.. py:class:: ospfProperties(*, nodeRegex, propertySpec, question_name, exclusions)
 
    Return configuration parameters for OSPF routing processes.
    
@@ -178,11 +178,11 @@
    :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
    :type propertySpec: ospfPropertySpec
 
-.. py:class:: parseWarning(*, differential, questionName)
+.. py:class:: parseWarning(*, question_name, exclusions)
 
    Return a table of the Batfish warnings that occurred parsing this snapshot.
 
-.. py:class:: prefixTracer(*, differential, nodeRegex, prefix, questionName)
+.. py:class:: prefixTracer(*, nodeRegex, prefix, question_name, exclusions)
 
    Trace prefix propagation through the network.
    
@@ -192,7 +192,7 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachfilter(*, destinationIpSpaceSpecifierFactory, differential, dst, filterRegex, nodeSpecifierFactory, nodeSpecifierInput, query, questionName, sourceIpSpaceSpecifierFactory, src)
+.. py:class:: reachfilter(*, destinationIpSpaceSpecifierFactory, dst, filterRegex, nodeSpecifierFactory, nodeSpecifierInput, query, sourceIpSpaceSpecifierFactory, src, question_name, exclusions)
 
    Find flows for which a filter takes a particular behavior.
    
@@ -216,7 +216,7 @@
    :param src: Flexible specification of source IpSpace.
    :type src: string
 
-.. py:class:: routes(*, differential, nodeRegex, protocol, questionName, vrfRegex)
+.. py:class:: routes(*, nodeRegex, protocol, vrfRegex, question_name, exclusions)
 
    Show routing tables.
    
@@ -236,7 +236,7 @@
        Allowed values: ``['main', 'bgp', 'bgpmp']``
    :type protocol: string
 
-.. py:class:: specifiers(*, differential, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, questionName)
+.. py:class:: specifiers(*, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, question_name, exclusions)
 
    Find the locations and IpSpaces specified by the input specifiers.
    
@@ -264,7 +264,7 @@
    :param nodeSpecifierInput: Input to the NodeSpecifier.
    :type nodeSpecifierInput: string
 
-.. py:class:: specifiersReachability(*, actions, debug, destinationIpSpaceSpecifierFactory, differential, dst, finalNodesSpecifierFactory, finalNodesSpecifierInput, questionName, sourceLocationSpecifierFactory, src)
+.. py:class:: specifiersReachability(*, actions, debug, destinationIpSpaceSpecifierFactory, dst, finalNodesSpecifierFactory, finalNodesSpecifierInput, sourceLocationSpecifierFactory, src, question_name, exclusions)
 
    Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
    
@@ -288,7 +288,7 @@
    :param sourceLocationSpecifierFactory: Name of the LocationSpecifierFactory to use for the src location.
    :type sourceLocationSpecifierFactory: string
 
-.. py:class:: testfilters(*, differential, dscp, dst, dstPort, dstProtocol, ecn, filterRegex, fragmentOffset, icmpCode, icmpType, ingressInterface, ipProtocol, nodeRegex, packetLength, questionName, srcIp, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg)
+.. py:class:: testfilters(*, dscp, dst, dstPort, dstProtocol, ecn, filterRegex, fragmentOffset, icmpCode, icmpType, ingressInterface, ipProtocol, nodeRegex, packetLength, srcIp, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, question_name, exclusions)
 
    Evaluate the processing of a flow by a given filter/ACL.
    
@@ -352,7 +352,7 @@
    :param tcpUrg: URG bit in TCP flags in TCP header.
    :type tcpUrg: boolean
 
-.. py:class:: traceroute(*, differential, dscp, dst, dstPort, dstProtocol, ecn, fragmentOffset, icmpCode, icmpType, ignoreAcls, ipProtocol, packetLength, questionName, srcIpSpace, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, traceStart)
+.. py:class:: traceroute(*, dscp, dst, dstPort, dstProtocol, ecn, fragmentOffset, icmpCode, icmpType, ignoreAcls, ipProtocol, packetLength, srcIpSpace, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, traceStart, question_name, exclusions)
 
    Trace the path(s) for the specified flow.
    
@@ -411,7 +411,7 @@
    :param tcpUrg: URG bit in TCP flags in TCP header.
    :type tcpUrg: boolean
 
-.. py:class:: undefinedReferences(*, differential, nodeRegex, questionName)
+.. py:class:: undefinedReferences(*, nodeRegex, question_name, exclusions)
 
    Identify undefined references in configuration.
    
@@ -423,7 +423,7 @@
        Default value: ``.*``
    :type nodeRegex: nodeSpec
 
-.. py:class:: unusedStructures(*, differential, nodeRegex, questionName)
+.. py:class:: unusedStructures(*, nodeRegex, question_name, exclusions)
 
    Return nodes with structures such as ACLs, routemaps, etc. that are defined but not used.
    

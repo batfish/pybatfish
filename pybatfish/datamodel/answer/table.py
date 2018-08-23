@@ -48,12 +48,17 @@ class TableAnswerElement(Answer):
     """Batfish answer represented as a table."""
 
     def __init__(self, dictionary):
-        if "metadata" not in dictionary:
+        if "answerElements" not in dictionary:
+            raise ValueError("Answer elements not found in dictionary")
+        if len(dictionary["answerElements"]) == 0:
+            raise ValueError("Empty answer elements list in dictionary")
+        if "metadata" not in dictionary["answerElements"][0]:
             raise ValueError("TableMetadata not found in dictionary")
         super(TableAnswerElement, self).__init__(dictionary)
-        self.metadata = TableMetadata(dictionary["metadata"]) \
+        answer_element = dictionary["answerElements"][0]
+        self.metadata = TableMetadata(answer_element["metadata"]) \
             # type: TableMetadata
-        self.rows = [Row(row) for row in dictionary.get("rows", [])] \
+        self.rows = [Row(row) for row in answer_element.get("rows", [])] \
             # type: List[Row]
         # TODO: row exclusions
         # (https://github.com/batfish/pybatfish/issues/5)
