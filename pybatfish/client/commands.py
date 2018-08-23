@@ -645,7 +645,7 @@ def bf_str_answer(answer_json):
     try:
         if "answerElements" in answer_json and "metadata" in \
                 answer_json["answerElements"][0]:
-            table_answer = TableAnswerElement(answer_json["answerElements"][0])
+            table_answer = TableAnswerElement(answer_json)
             return table_answer.table_data.to_string()
         else:
             return get_answer_text(answer_json)
