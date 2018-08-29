@@ -14,6 +14,7 @@ sudo: true
 # Cache the Maven dependencies installed.
 cache:
   directories:
+  - .batfish_z3_cache
   - $HOME/.m2
 
 install: ./.travis/install.sh
