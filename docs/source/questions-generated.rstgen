@@ -1,48 +1,48 @@
 .. py:module:: pybatfish.question.bfq
 
-.. py:class:: aaaAuthenticationLogin(*, nodeRegex, question_name, exclusions)
+.. py:class:: aaaAuthenticationLogin(*, nodes, question_name, exclusions)
 
    Return nodes that do not require authentication on all lines.
    
    
-   :param nodeRegex: *Required.* Only include nodes that match this regex.
+   :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: nodeSpec
+   :type nodes: nodeSpec
 
-.. py:class:: aclReachability(*, filterSpecifierInput, nodeSpecifierInput, question_name, exclusions)
+.. py:class:: aclReachability(*, filters, nodes, question_name, exclusions)
 
-   Display ACLs/filters with unreachable lines.
+   Identify ACLs/filters with unreachable lines.
    
-   Return ACLs/filters with unreachable lines, along with all of the unreachable lines within each ACL/filter.
+   This question finds all unreachable lines in the specified ACLs/filters.
    
    
-   :param filterSpecifierInput: Name or regex identifying the filter(s) to test.
-   :type filterSpecifierInput: string
-   :param nodeSpecifierInput: Name or regex identifying the nodes to restrict the test to.
-   :type nodeSpecifierInput: string
+   :param filters: Name or regex identifying the filters to test.
+   :type filters: string
+   :param nodes: Examine filters on nodes matching this name or regex.
+   :type nodes: nodeSpec
 
-.. py:class:: bgpProperties(*, nodeRegex, propertySpec, question_name, exclusions)
+.. py:class:: bgpProperties(*, nodes, properties, question_name, exclusions)
 
    Return BGP configuration properties.
    
    
-   :param nodeRegex: Only include nodes that match this regex.
-   :type nodeRegex: nodeSpec
-   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
-   :type propertySpec: bgpPropertySpec
+   :param nodes: Include nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param properties: Include properties matching this regex.
+   :type properties: bgpPropertySpec
 
-.. py:class:: bgpSessionStatus(*, includeEstablishedCount, node1Regex, node2Regex, status, type, question_name, exclusions)
+.. py:class:: bgpSessionStatus(*, includeEstablishedCount, nodes, remoteNodes, status, type, question_name, exclusions)
 
    Return the status of configured BGP sessions.
    
    
    :param includeEstablishedCount: Flag to decide if the count of established neighbors should be included. Primarily used for dynamic BGP sessions.
    :type includeEstablishedCount: boolean
-   :param node1Regex: Only include sessions for which first node's name matches this regex.
-   :type node1Regex: nodeSpec
-   :param node2Regex: Only include sessions for which second node's name matches this regex.
-   :type node2Regex: nodeSpec
+   :param nodes: Include sessions whose first node matches this name or regex.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include sessions whose second node matches this name or regex.
+   :type remoteNodes: nodeSpec
    :param status: Only include sessions for which status matches this regex.
    :type status: javaRegex
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
@@ -68,41 +68,41 @@
    :param filter: The filter to use.
    :type filter: string
 
-.. py:class:: interfaceMtu(*, comparator, interfaceRegex, mtuBytes, nodeRegex, question_name, exclusions)
+.. py:class:: interfaceMtu(*, comparator, interfaces, mtuBytes, nodes, question_name, exclusions)
 
    Find interfaces where the configured MTU matches the specified comparator and mtuBytes.
    
    For example, if comparator is '<' and mtuBytes is 1500, then only interfaces where the configured MTU is less than 1500 bytes will be returned.
    
    
-   :param interfaceRegex: *Required.* Only evaluate interfaces whose name matches this regex.
+   :param interfaces: *Required.* Evaluate interfaces matching this regex.
    
        Default value: ``.*``
-   :type interfaceRegex: javaRegex
+   :type interfaces: javaRegex
    :param mtuBytes: *Required.* The reference MTU in bytes against which to check the configured MTU.
    
        Default value: ``1500``
    :type mtuBytes: integer
-   :param nodeRegex: *Required.* Only include nodes whose name matches this regex.
+   :param nodes: *Required.* Include nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: javaRegex
+   :type nodes: nodeSpec
    :param comparator: Returned devices will satisfy <comparator> <mtuBytes>. Use '<' to find devices that do not have MTU smaller than the specified <mtuBytes> MTU.
    
        Default value: ``<``
    :type comparator: comparator
 
-.. py:class:: interfaceProperties(*, interfaceRegex, nodeRegex, propertySpec, question_name, exclusions)
+.. py:class:: interfaceProperties(*, interfaces, nodes, properties, question_name, exclusions)
 
    Returns configuration properties of interfaces.
    
    
-   :param interfaceRegex: Only include interfaces that match this regex.
-   :type interfaceRegex: javaRegex
-   :param nodeRegex: Only include nodes that match this regex.
-   :type nodeRegex: nodeSpec
-   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
-   :type propertySpec: interfacePropertySpec
+   :param interfaces: Include interfaces matching this regex.
+   :type interfaces: javaRegex
+   :param nodes: Include nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param properties: Include properties matching this regex.
+   :type properties: interfacePropertySpec
 
 .. py:class:: ipOwners(*, duplicatesOnly, question_name, exclusions)
 
@@ -112,21 +112,31 @@
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
    :type duplicatesOnly: boolean
 
-.. py:class:: neighbors(*, neighborTypes, node1Regex, node2Regex, roleDimension, style, question_name, exclusions)
+.. py:class:: namedStructures(*, nodeRegex, propertySpec, question_name, exclusions)
+
+   Return named structure definitions.
+   
+   
+   :param nodeRegex: Only include nodes that match this regex.
+   :type nodeRegex: nodeSpec
+   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
+   :type propertySpec: namedStructureSpec
+
+.. py:class:: neighbors(*, neighborTypes, nodes, remoteNodes, roleDimension, style, question_name, exclusions)
 
    Lists neighbor relationships in the snapshot.
    
-   Return neighbor relationships of the specified type (layer3, eBGP, iBGP, ospf, etc...).
+   Lists neighbor relationships of the specified type (layer3, eBGP, iBGP, ospf, etc.).
    
    
-   :param node1Regex: *Required.* Only include neighbors whose first node's name matches this regex.
-   
-       Default value: ``.*``
-   :type node1Regex: javaRegex
-   :param node2Regex: *Required.* Only include neighbors whose second node's name matches this regex.
+   :param nodes: *Required.* Include neighbors whose first node matches this name or regex.
    
        Default value: ``.*``
-   :type node2Regex: javaRegex
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include neighbors whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
    :param style: *Required.* String indicating the style of information requested about each neighbor.
    
        Allowed values: ``['role', 'summary', 'verbose']``
@@ -140,69 +150,75 @@
    :param roleDimension: Role dimension to run the question on.
    :type roleDimension: string
 
-.. py:class:: nodeProperties(*, nodeRegex, propertySpec, question_name, exclusions)
+.. py:class:: nodeProperties(*, nodes, properties, question_name, exclusions)
 
    Return configuration properties of nodes.
    
    
-   :param nodeRegex: Only include nodes that match this regex.
-   :type nodeRegex: nodeSpec
-   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
-   :type propertySpec: nodePropertySpec
+   :param nodes: Include nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param properties: Include properties matching this regex.
+   :type properties: nodePropertySpec
 
-.. py:class:: nodes(*, nodeRegex, nodeTypes, summary, question_name, exclusions)
+.. py:class:: nodes(*, nodeTypes, nodes, summary, question_name, exclusions)
 
-   Return configuration attributes of nodes in the network.
+   Lists configuration attributes of nodes in the network.
    
-   Returns a JSON dictionary with all (or summary) of the configuration paramters that are stored in the vendor independant data-model.
+   Returns a JSON dictionary with all (or summary) of the configuration parameters that are stored in the vendor independent data-model.
    
    
-   :param nodeRegex: *Required.* Only include nodes whose name matches this regex.
+   :param nodes: *Required.* Include nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: javaRegex
+   :type nodes: nodeSpec
    :param summary: *Required.* Whether to provide only summary information about each node rather than the full data model.
    
        Default value: ``True``
    :type summary: boolean
-   :param nodeTypes: Only include nodes of the specified types.
+   :param nodeTypes: Include nodes of the specified types.
    :type nodeTypes: string
 
-.. py:class:: ospfProperties(*, nodeRegex, propertySpec, question_name, exclusions)
+.. py:class:: ospfProperties(*, nodes, properties, question_name, exclusions)
 
    Return configuration parameters for OSPF routing processes.
    
    
-   :param nodeRegex: Only include nodes that match this regex.
-   :type nodeRegex: nodeSpec
-   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
-   :type propertySpec: ospfPropertySpec
+   :param nodes: Include nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param properties: Include properties matching this regex.
+   :type properties: ospfPropertySpec
 
 .. py:class:: parseWarning(*, question_name, exclusions)
 
    Return a table of the Batfish warnings that occurred parsing this snapshot.
 
-.. py:class:: prefixTracer(*, nodeRegex, prefix, question_name, exclusions)
+.. py:class:: prefixTracer(*, nodes, prefix, question_name, exclusions)
 
    Trace prefix propagation through the network.
    
    
-   :param nodeRegex: Only include prefix tracing information for nodes that match this regex.
-   :type nodeRegex: string
+   :param nodes: Include prefix tracing information for nodes matching this name or regex.
+   :type nodes: nodeSpec
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachfilter(*, destinationIpSpaceSpecifierFactory, dst, filterRegex, nodeSpecifierFactory, nodeSpecifierInput, query, sourceIpSpaceSpecifierFactory, src, question_name, exclusions)
+.. py:class:: reachfilter(*, complementHeaderSpace, destinationIpSpaceSpecifierFactory, dst, dstPorts, dstProtocols, filterRegex, nodeSpecifierFactory, nodeSpecifierInput, query, sourceInterfaces, sourceIpSpaceSpecifierFactory, src, srcPorts, question_name, exclusions)
 
    Find flows for which a filter takes a particular behavior.
    
    This question searches for flows for which a filter (access control list) has a particular behavior. The behaviors can be: that the filter permits the flow (permit), that it denies the flow (deny), or that the flow is matched by a particular line (matchLine <lineNumber>). Filters are selected using node and filter specifiers, which might match multiple filters. In this case, a (possibly different) flow will be found for each filter.
    
    
+   :param complementHeaderSpace: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type complementHeaderSpace: boolean
    :param destinationIpSpaceSpecifierFactory: Name of the IpSpaceSpecifierFactory to use for the destination IpSpace.
    :type destinationIpSpaceSpecifierFactory: string
    :param dst: Flexible specification of destinoation IpSpace.
    :type dst: string
+   :param dstPorts: Destination ports.
+   :type dstPorts: subrange
+   :param dstProtocols: Destination protocols.
+   :type dstProtocols: string
    :param filterRegex: Only evaluate filters that match this regex.
    :type filterRegex: javaRegex
    :param nodeSpecifierFactory: Name of the nodeSpecifierFactory to use.
@@ -211,30 +227,40 @@
    :type nodeSpecifierInput: string
    :param query: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
    :type query: string
+   :param sourceInterfaces: Only consider these interfaces as possible sources.
+   :type sourceInterfaces: string
    :param sourceIpSpaceSpecifierFactory: Name of the IpSpaceSpecifierFactory to use for the source IpSpace.
    :type sourceIpSpaceSpecifierFactory: string
    :param src: Flexible specification of source IpSpace.
    :type src: string
+   :param srcPorts: Source ports.
+   :type srcPorts: subrange
 
-.. py:class:: routes(*, nodeRegex, protocol, vrfRegex, question_name, exclusions)
+.. py:class:: routes(*, network, nodes, protocols, rib, vrfs, question_name, exclusions)
 
    Show routing tables.
    
    Return routes for the specified RIB for specified VRF for specified node(s).
    
    
-   :param nodeRegex: *Required.* Only include routes for nodes whose name matches this regex.
+   :param nodes: *Required.* Examine routes on nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: javaRegex
-   :param vrfRegex: *Required.* Only include routes for VRFs whose name matches this regex.
+   :type nodes: nodeSpec
+   :param protocols: *Required.* Examine routes for protocols matching this name or regex.
    
        Default value: ``.*``
-   :type vrfRegex: javaRegex
-   :param protocol: Only return routes from a given protocol RIB.
+   :type protocols: javaRegex
+   :param vrfs: *Required.* Examine routes on VRFs matching this name or regex.
+   
+       Default value: ``.*``
+   :type vrfs: javaRegex
+   :param network: Examine routes for networks matching this prefix.
+   :type network: prefix
+   :param rib: Only return routes from a given protocol RIB.
    
        Allowed values: ``['main', 'bgp', 'bgpmp']``
-   :type protocol: string
+   :type rib: string
 
 .. py:class:: specifiers(*, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, question_name, exclusions)
 
@@ -288,7 +314,7 @@
    :param sourceLocationSpecifierFactory: Name of the LocationSpecifierFactory to use for the src location.
    :type sourceLocationSpecifierFactory: string
 
-.. py:class:: testfilters(*, dscp, dst, dstPort, dstProtocol, ecn, filterRegex, fragmentOffset, icmpCode, icmpType, ingressInterface, ipProtocol, nodeRegex, packetLength, srcIp, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, question_name, exclusions)
+.. py:class:: testfilters(*, dscp, dst, dstPort, dstProtocol, ecn, filters, fragmentOffset, icmpCode, icmpType, ingressInterface, ipProtocol, nodes, packetLength, srcIp, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, question_name, exclusions)
 
    Evaluate the processing of a flow by a given filter/ACL.
    
@@ -297,14 +323,14 @@
    
    :param dst: *Required.* Destination hostname or IP address.
    :type dst: string
-   :param filterRegex: *Required.* Only consider filters that match this regular expression.
+   :param filters: *Required.* Only consider filters that match this regular expression.
    
        Default value: ``.*``
-   :type filterRegex: javaRegex
-   :param nodeRegex: *Required.* Only consider filters present on nodes that match this regular expression.
+   :type filters: javaRegex
+   :param nodes: *Required.* Examine filters on nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: javaRegex
+   :type nodes: nodeSpec
    :param srcIp: *Required.* Source IP address in IP header.
    :type srcIp: ip
    :param dscp: Applied Differentiated Services Code Point (DSCP) value in IP header.
@@ -411,27 +437,27 @@
    :param tcpUrg: URG bit in TCP flags in TCP header.
    :type tcpUrg: boolean
 
-.. py:class:: undefinedReferences(*, nodeRegex, question_name, exclusions)
+.. py:class:: undefinedReferences(*, nodes, question_name, exclusions)
 
    Identify undefined references in configuration.
    
    This question finds configurations that have references to named structures (e.g., ACLs) that are not defined. Such occurrences indicate errors and can have serious consequences in some cases.
    
    
-   :param nodeRegex: *Required.* Only check nodes that match this specifier.
+   :param nodes: *Required.* Look for undefined references on nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: nodeSpec
+   :type nodes: nodeSpec
 
-.. py:class:: unusedStructures(*, nodeRegex, question_name, exclusions)
+.. py:class:: unusedStructures(*, nodes, question_name, exclusions)
 
    Return nodes with structures such as ACLs, routemaps, etc. that are defined but not used.
    
    Return nodes with structures such as ACLs, routes, etc. that are defined but not used. This may represent a bug in the configuration, which may have occurred because a final step in a template or MOP was not completed. Or it could be harmless extra configuration generated from a master template that is not meant to be used on those nodes.
    
    
-   :param nodeRegex: *Required.* Only include nodes that match this regex.
+   :param nodes: *Required.* Look for unused structures on nodes matching this name or regex.
    
        Default value: ``.*``
-   :type nodeRegex: nodeSpec
+   :type nodes: nodeSpec
 
