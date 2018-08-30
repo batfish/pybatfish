@@ -22,11 +22,11 @@ import logging
 import os
 import sys
 import tempfile
-from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
 from requests import HTTPError
+from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
@@ -252,7 +252,7 @@ def bf_delete_container(containerName):
     """
     Delete container by name.
 
-    .. deprecated:: In favor of :py:func:`bf_delete_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_network`
     """
     bf_delete_network(containerName)
 
@@ -296,7 +296,7 @@ def bf_delete_testrig(testrigName):
     :param testrigName: name of the testrig to delete
     :type testrigName: string
 
-    .. deprecated:: In favor of :py:func:`bf_delete_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_snapshot`
     """
     bf_delete_snapshot(testrigName)
 
@@ -460,7 +460,7 @@ def bf_init_container(containerName=None,
     """
     Initialize a new container.
 
-    .. deprecated:: In favor of :py:func:`bf_set_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
     """
     bf_set_network(containerName, containerPrefix)
 
@@ -536,7 +536,7 @@ def bf_init_testrig(dirOrZipfile, testrigName=None,
     """
     Initialize a new testrig.
 
-    .. deprecated:: In favor of :py:func:`bf_init_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_init_snapshot`
     """
     return bf_init_snapshot(upload=dirOrZipfile, name=testrigName,
                             background=background)
@@ -561,7 +561,7 @@ def bf_list_containers():
     """
     List containers the session's API key can access.
 
-    .. deprecated:: In favor of :py:func:`bf_list_networks`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_networks`
     """
     return bf_list_networks()
 
@@ -625,7 +625,7 @@ def bf_list_testrigs(currentContainerOnly=True):
     """
     List testrigs.
 
-    .. deprecated:: In favor of :py:func:`bf_list_snapshots`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_snapshots`
     """
     container_name = None
 
@@ -684,7 +684,7 @@ def bf_set_container(containerName):
     """
     Set the current container by name.
 
-    .. deprecated:: In favor of :py:func:`bf_set_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
     """
     bf_set_network(containerName)
 
@@ -736,7 +736,7 @@ def bf_set_snapshot(name=None, index=None):
 
     :param name: name of the snapshot to set as the current snapshot
     :type name: string
-    :param index: set the current snaphot to the `index`th most recent snapshot
+    :param index: set the current snapshot to the ``index``-th most recent snapshot
     :type index: int
     :return: the name of the successfully set snapshot
     :rtype: str
@@ -774,7 +774,7 @@ def bf_set_testrig(testrigName):
     """
     Set the current testrig and environment by name.
 
-    .. deprecated:: In favor of :py:func:`bf_set_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_snapshot`
     """
     bf_set_snapshot(testrigName)
 
@@ -804,7 +804,7 @@ def bf_sync_testrigs_sync_now(pluginId, force=False):
     """
     Synchronize snapshots with specified plugin.
 
-    .. deprecated:: In favor of :py:func:`bf_sync_snapshots_sync_now`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_sync_now`
     """
     return bf_sync_snapshots_sync_now(pluginId, force)
 
@@ -835,7 +835,7 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
     """
     Synchronize snapshots with specified plugin.
 
-    .. deprecated:: In favor of :py:func:`bf_sync_snapshots_update_settings`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
     """
     return bf_sync_snapshots_update_settings(pluginId, settingsDict)
 
