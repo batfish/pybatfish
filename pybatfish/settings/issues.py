@@ -14,7 +14,7 @@
 #   limitations under the License.
 
 from collections import namedtuple
-from typing import Dict  # noqa: F401
+from typing import Any, Dict, Optional  # noqa: F401
 
 __all__ = ['IssueConfig']
 

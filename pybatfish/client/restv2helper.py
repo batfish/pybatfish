@@ -27,6 +27,7 @@ from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     ReferenceBook)
+from pybatfish.settings.issues import IssueConfig
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
