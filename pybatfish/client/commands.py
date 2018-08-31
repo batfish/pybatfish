@@ -22,11 +22,11 @@ import logging
 import os
 import sys
 import tempfile
+from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
 from requests import HTTPError
-from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
@@ -36,6 +36,7 @@ from pybatfish.datamodel.assertion import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
+from pybatfish.settings.issueconfig import IssueConfig
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
@@ -58,6 +59,7 @@ else:
     bf_logger.addHandler(logging.NullHandler())
 
 __all__ = ['bf_add_analysis',
+           'bf_add_issue_config',
            'bf_add_node_role_dimension',
            'bf_add_reference_book',
            'bf_auto_complete',
@@ -108,6 +110,17 @@ __all__ = ['bf_add_analysis',
 
 def bf_add_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, False)
+
+
+def bf_add_issue_config(issue_config):
+    # type: (IssueConfig) -> None
+    """
+    Adds issue config to the active network.
+
+    :param dimension: The NodeRoleDimension object for the dimension to add
+    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+    """
+    restv2helper.add_issue_config(bf_session, issue_config)
 
 
 def bf_add_node_role_dimension(dimension):

@@ -41,6 +41,13 @@ _requests_session.mount("http", HTTPAdapter(
         backoff_factor=Options.request_backoff_factor)))
 
 
+def add_issue_config(session, issue_config):
+    # type: (Session, IssueConfig) -> None
+    """Adds the issue configuration to the active network."""
+    urlTail = "/containers/{}/settings/issues".format(session.network)
+    _post(session, urlTail, issue_config)
+
+
 def add_node_role_dimension(session, dimension):
     # type: (Session, NodeRoleDimension) -> None
     """Adds a new node role dimension to the active network."""
