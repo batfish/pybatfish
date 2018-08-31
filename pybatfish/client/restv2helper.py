@@ -27,6 +27,7 @@ from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     ReferenceBook)
+from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
@@ -39,6 +40,13 @@ _requests_session.mount("http", HTTPAdapter(
     max_retries=Retry(
         connect=Options.max_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor)))
+
+
+def add_issue_config(session, issue_config):
+    # type: (Session, IssueConfig) -> None
+    """Adds the issue configuration to the active network."""
+    urlTail = "/containers/{}/settings/issues".format(session.network)
+    _post(session, urlTail, issue_config)
 
 
 def add_node_role_dimension(session, dimension):
