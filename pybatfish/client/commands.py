@@ -36,7 +36,7 @@ from pybatfish.datamodel.assertion import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
-from pybatfish.settings.issueconfig import IssueConfig
+from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
@@ -115,10 +115,10 @@ def bf_add_analysis(analysisName, questionDirectory):
 def bf_add_issue_config(issue_config):
     # type: (IssueConfig) -> None
     """
-    Adds issue config to the active network.
+    Add or update the active network's configuration for an issue .
 
-    :param dimension: The NodeRoleDimension object for the dimension to add
-    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+    :param issue_config: The IssueConfig object to add or update
+    :type issue_config: :class:`pybatfish.settings.issues.IssueConfig`
     """
     restv2helper.add_issue_config(bf_session, issue_config)
 

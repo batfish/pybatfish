@@ -19,8 +19,8 @@ from typing import Any, Dict, Optional  # noqa: F401
 __all__ = ['IssueConfig']
 
 
-class IssueConfig(
-    namedtuple("IssueConfig", ["major", "minor", "severity", "url"])):
+class IssueConfig(namedtuple("IssueConfig",
+                             ["major", "minor", "severity", "url"])):
     """
     Configuration for an Issue.
 
