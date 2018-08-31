@@ -67,6 +67,7 @@ __all__ = ['bf_add_analysis',
            'bf_create_check',
            'bf_delete_analysis',
            'bf_delete_container',
+           'bf_delete_issue_config',
            'bf_delete_network',
            'bf_delete_snapshot',
            'bf_delete_testrig',
@@ -76,6 +77,7 @@ __all__ = ['bf_add_analysis',
            'bf_get_analysis_answers',
            'bf_get_answer',
            'bf_get_info',
+           'bf_get_issue_config',
            'bf_get_node_role_dimension',
            'bf_get_node_roles',
            'bf_get_reference_book',
@@ -270,6 +272,12 @@ def bf_delete_container(containerName):
     bf_delete_network(containerName)
 
 
+def bf_delete_issue_config(major, minor):
+    # type: (str, str) -> None
+    """Deletes the issue config for the active network."""
+    restv2helper.delete_issue_config(bf_session, major, minor)
+
+
 def bf_delete_network(name):
     # type: (str) -> None
     """
@@ -404,6 +412,13 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
 def bf_get_info():
     jsonResponse = resthelper.get_json_response(bf_session, '', useHttpGet=True)
     return jsonResponse
+
+
+def bf_get_issue_config(major, minor):
+    # type: (str, str) -> IssueConfig
+    """Returns the issue config for the active network."""
+    return IssueConfig(
+        **restv2helper.get_issue_config(bf_session, major, minor))
 
 
 def bf_get_node_role_dimension(dimension):
