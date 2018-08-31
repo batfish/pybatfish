@@ -77,8 +77,9 @@ def delete_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to delete issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to delete issue config")
-    urlTail = "/containers/{}/settings/{}/{}".format(session.network, major,
-                                                     minor)
+    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                            major,
+                                                            minor)
     return _delete(session, urlTail)
 
 
@@ -90,8 +91,9 @@ def get_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to get issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to get issue config")
-    urlTail = "/containers/{}/settings/{}/{}".format(session.network, major,
-                                                     minor)
+    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                            major,
+                                                            minor)
     return _get(session, urlTail)
 
 
