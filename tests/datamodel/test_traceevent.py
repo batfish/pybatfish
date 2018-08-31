@@ -14,9 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.acl import AclTraceEvent
 import pytest
-
-from pybatfish.datamodel.traceevent import TraceEvent
 
 
 # test if a trace event with description is deserialized and string-ified properly
@@ -27,8 +26,8 @@ def test_trace_event_with_description():
     }
 
     # check deserialization
-    trace_event = TraceEvent(dict)
-    assert trace_event.classname == "Permitted"
+    trace_event = AclTraceEvent.from_dict(dict)
+    assert trace_event.class_name == "Permitted"
     assert trace_event.description == "aa"
 
     # check str
@@ -44,8 +43,8 @@ def test_trace_event_without_description():
     }
 
     # check deserialization
-    trace_event = TraceEvent(dict)
-    assert trace_event.classname == "Permitted"
+    trace_event = AclTraceEvent.from_dict(dict)
+    assert trace_event.class_name == "Permitted"
     assert trace_event.description is None
 
     # check str

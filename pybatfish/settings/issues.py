@@ -13,22 +13,37 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from collections import namedtuple
-from typing import Any, Dict, Optional  # noqa: F401
+from typing import Optional  # noqa: F401
+
+import attr
 
 __all__ = ['IssueConfig']
 
 
-class IssueConfig(namedtuple("IssueConfig",
-                             ["major", "minor", "severity", "url"])):
-    """
-    Configuration for an Issue.
+@attr.s(frozen=True)
+class IssueConfig(object):
+    """Configuration for an Issue.
 
     The issue is identified using its major and minor types. Its configuration
     includes its severity and an URL that explains what the issue means.
+
+    :ivar major: The major issue type (see `:py:class:~pybatfish.datamodel.IssueType`)
+    :ivar minor: The minor issue type (see `:py:class:~pybatfish.datamodel.IssueType`)
+    :ivar severity: Issue severity (see `:py:class:~pybatfish.datamodel.Issue`)
+    :ivar url: URL that explains what the issue means.
     """
 
-    def __new__(cls, major, minor, severity=None, url=None, **kwargs):
-        # type: (str, str, Optional[int], Optional[str], Dict[str, Any]) -> IssueConfig
-        """Create a new AddressGroup object."""
-        return super(IssueConfig, cls).__new__(cls, major, minor, severity, url)
+    major = attr.ib(type=str)
+    minor = attr.ib(type=str)
+    severity = attr.ib(type=Optional[int])
+    url = attr.ib(type=Optional[int])
+
+    def dict(self):
+        """Return this issue config as a dictionary."""
+        return attr.asdict(self, recurse=True)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return IssueConfig(json_dict["major"], json_dict["minor"],
+                           json_dict.get("severity"),
+                           json_dict.get("url"))

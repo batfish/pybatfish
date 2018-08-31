@@ -14,9 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.acl import AclTrace
 import pytest
-
-from pybatfish.datamodel.acltrace import AclTrace
 
 
 # test if an acl trace is deserialized properly
@@ -27,8 +26,8 @@ def test_acl_trace_deserialization():
     ]}
 
     # check deserialization
-    acl_trace = AclTrace(trace_dict)
-    assert len(acl_trace.trace_events) == 2
+    acl_trace = AclTrace.from_dict(trace_dict)
+    assert len(acl_trace.events) == 2
 
     # check stringification works
     str(acl_trace)
