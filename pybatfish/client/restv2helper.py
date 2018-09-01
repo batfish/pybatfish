@@ -27,6 +27,7 @@ from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     ReferenceBook)
+from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
@@ -41,9 +42,20 @@ _requests_session.mount("http", HTTPAdapter(
         backoff_factor=Options.request_backoff_factor)))
 
 
+def add_issue_config(session, issue_config):
+    # type: (Session, IssueConfig) -> None
+    """Adds the issue configuration to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add issue config")
+    urlTail = "/containers/{}/settings/issues".format(session.network)
+    _post(session, urlTail, issue_config)
+
+
 def add_node_role_dimension(session, dimension):
     # type: (Session, NodeRoleDimension) -> None
     """Adds a new node role dimension to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add node role dimension")
     urlTail = "/containers/{}/noderoles".format(session.network)
     _post(session, urlTail, dimension)
 
@@ -51,8 +63,38 @@ def add_node_role_dimension(session, dimension):
 def add_reference_book(session, book):
     # type: (Session, ReferenceBook) -> None
     """Adds a new reference book to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add reference book")
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     _post(session, urlTail, book)
+
+
+def delete_issue_config(session, major, minor):
+    # type: (Session, str, str) -> None
+    if not session.network:
+        raise ValueError("Network must be set to delete issue config")
+    if not major:
+        raise ValueError("Major issue type must be set to delete issue config")
+    if not minor:
+        raise ValueError("Minor issue type must be set to delete issue config")
+    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                            major,
+                                                            minor)
+    return _delete(session, urlTail)
+
+
+def get_issue_config(session, major, minor):
+    # type: (Session, str, str) -> Dict
+    if not session.network:
+        raise ValueError("Network must be set to get issue config")
+    if not major:
+        raise ValueError("Major issue type must be set to get issue config")
+    if not minor:
+        raise ValueError("Minor issue type must be set to get issue config")
+    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                            major,
+                                                            minor)
+    return _get(session, urlTail)
 
 
 def get_network(session, network):
@@ -77,7 +119,7 @@ def get_node_roles(session):
     # type: (Session) -> Dict
     """Gets the node roles data for the active network."""
     if not session.network:
-        raise ValueError("Container must be set to get node roles")
+        raise ValueError("Network must be set to get node roles")
     urlTail = "/containers/{}/noderoles".format(session.network)
     return _get(session, urlTail)
 
@@ -86,7 +128,7 @@ def get_reference_book(session, book_name):
     # type: (Session, str) -> Dict
     """Gets the reference book for the active network."""
     if not session.network:
-        raise ValueError("Container must be set to get a reference book")
+        raise ValueError("Network must be set to get a reference book")
     if not book_name:
         raise ValueError("Book name must be a non-empty string")
     urlTail = "/containers/{}/referencelibrary/{}".format(session.network,
@@ -98,9 +140,25 @@ def get_reference_library(session):
     # type: (Session) -> Dict
     """Gets the reference library for the active network."""
     if not session.network:
-        raise ValueError("Container must be set to get the reference library")
+        raise ValueError("Network must be set to get the reference library")
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     return _get(session, urlTail)
+
+
+def _delete(session, urlTail):
+    # type: (Session, str) -> None
+    """Make an HTTP(s) DELETE request to Batfish coordinator.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    url = session.get_base_url2() + urlTail
+
+    response = requests.delete(url, headers=headers,
+                               verify=session.verifySslCerts)
+    response.raise_for_status()
 
 
 def _get(session, urlTail):

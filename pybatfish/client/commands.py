@@ -36,6 +36,7 @@ from pybatfish.datamodel.assertion import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
+from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
@@ -58,6 +59,7 @@ else:
     bf_logger.addHandler(logging.NullHandler())
 
 __all__ = ['bf_add_analysis',
+           'bf_add_issue_config',
            'bf_add_node_role_dimension',
            'bf_add_reference_book',
            'bf_auto_complete',
@@ -65,6 +67,7 @@ __all__ = ['bf_add_analysis',
            'bf_create_check',
            'bf_delete_analysis',
            'bf_delete_container',
+           'bf_delete_issue_config',
            'bf_delete_network',
            'bf_delete_snapshot',
            'bf_delete_testrig',
@@ -74,6 +77,7 @@ __all__ = ['bf_add_analysis',
            'bf_get_analysis_answers',
            'bf_get_answer',
            'bf_get_info',
+           'bf_get_issue_config',
            'bf_get_node_role_dimension',
            'bf_get_node_roles',
            'bf_get_reference_book',
@@ -108,6 +112,17 @@ __all__ = ['bf_add_analysis',
 
 def bf_add_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, False)
+
+
+def bf_add_issue_config(issue_config):
+    # type: (IssueConfig) -> None
+    """
+    Add or update the active network's configuration for an issue .
+
+    :param issue_config: The IssueConfig object to add or update
+    :type issue_config: :class:`pybatfish.settings.issues.IssueConfig`
+    """
+    restv2helper.add_issue_config(bf_session, issue_config)
 
 
 def bf_add_node_role_dimension(dimension):
@@ -252,9 +267,15 @@ def bf_delete_container(containerName):
     """
     Delete container by name.
 
-    .. deprecated:: In favor of :py:func:`bf_delete_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_network`
     """
     bf_delete_network(containerName)
+
+
+def bf_delete_issue_config(major, minor):
+    # type: (str, str) -> None
+    """Deletes the issue config for the active network."""
+    restv2helper.delete_issue_config(bf_session, major, minor)
 
 
 def bf_delete_network(name):
@@ -296,7 +317,7 @@ def bf_delete_testrig(testrigName):
     :param testrigName: name of the testrig to delete
     :type testrigName: string
 
-    .. deprecated:: In favor of :py:func:`bf_delete_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_snapshot`
     """
     bf_delete_snapshot(testrigName)
 
@@ -393,6 +414,13 @@ def bf_get_info():
     return jsonResponse
 
 
+def bf_get_issue_config(major, minor):
+    # type: (str, str) -> IssueConfig
+    """Returns the issue config for the active network."""
+    return IssueConfig(
+        **restv2helper.get_issue_config(bf_session, major, minor))
+
+
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the set of node roles for the active network."""
@@ -460,7 +488,7 @@ def bf_init_container(containerName=None,
     """
     Initialize a new container.
 
-    .. deprecated:: In favor of :py:func:`bf_set_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
     """
     bf_set_network(containerName, containerPrefix)
 
@@ -536,7 +564,7 @@ def bf_init_testrig(dirOrZipfile, testrigName=None,
     """
     Initialize a new testrig.
 
-    .. deprecated:: In favor of :py:func:`bf_init_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_init_snapshot`
     """
     return bf_init_snapshot(upload=dirOrZipfile, name=testrigName,
                             background=background)
@@ -561,7 +589,7 @@ def bf_list_containers():
     """
     List containers the session's API key can access.
 
-    .. deprecated:: In favor of :py:func:`bf_list_networks`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_networks`
     """
     return bf_list_networks()
 
@@ -625,7 +653,7 @@ def bf_list_testrigs(currentContainerOnly=True):
     """
     List testrigs.
 
-    .. deprecated:: In favor of :py:func:`bf_list_snapshots`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_snapshots`
     """
     container_name = None
 
@@ -684,7 +712,7 @@ def bf_set_container(containerName):
     """
     Set the current container by name.
 
-    .. deprecated:: In favor of :py:func:`bf_set_network`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
     """
     bf_set_network(containerName)
 
@@ -736,7 +764,7 @@ def bf_set_snapshot(name=None, index=None):
 
     :param name: name of the snapshot to set as the current snapshot
     :type name: string
-    :param index: set the current snaphot to the `index`th most recent snapshot
+    :param index: set the current snapshot to the ``index``-th most recent snapshot
     :type index: int
     :return: the name of the successfully set snapshot
     :rtype: str
@@ -774,7 +802,7 @@ def bf_set_testrig(testrigName):
     """
     Set the current testrig and environment by name.
 
-    .. deprecated:: In favor of :py:func:`bf_set_snapshot`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_snapshot`
     """
     bf_set_snapshot(testrigName)
 
@@ -804,7 +832,7 @@ def bf_sync_testrigs_sync_now(pluginId, force=False):
     """
     Synchronize snapshots with specified plugin.
 
-    .. deprecated:: In favor of :py:func:`bf_sync_snapshots_sync_now`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_sync_now`
     """
     return bf_sync_snapshots_sync_now(pluginId, force)
 
@@ -835,7 +863,7 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
     """
     Synchronize snapshots with specified plugin.
 
-    .. deprecated:: In favor of :py:func:`bf_sync_snapshots_update_settings`
+    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
     """
     return bf_sync_snapshots_update_settings(pluginId, settingsDict)
 
