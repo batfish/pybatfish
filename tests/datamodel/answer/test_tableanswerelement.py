@@ -102,5 +102,35 @@ def test_table_answer_element_deser_no_rows():
     assert table.frame().empty
 
 
+def test_table_answer_element_excluded_rows():
+    """Check deserialization creates empty table when no rows are present."""
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata":
+                    [
+                        {
+                            "name": "col1",
+                            "schema": "String"
+                        }
+                    ]
+            },
+            "excludedRows": [{
+                "exclusionName": "myEx",
+                "rows": [
+                    {
+                        "col1": "stringValue"
+                    }
+                ]
+            }]
+        }]
+    }
+    table = TableAnswerElement(answer)
+
+    assert len(table.excluded_rows) == 1
+    assert len(table.excluded_rows["myEx"]) == 1
+    assert table.excluded_frame("myEx").size == 1
+
+
 if __name__ == "__main__":
     pytest.main()
