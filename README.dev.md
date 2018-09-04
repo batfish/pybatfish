@@ -1,9 +1,14 @@
 ## Developer info
 
-## Installing in dev mode 
+### First steps
+
+#### Setup a virtual environment
+For this purpose, you will likely want [virtualenv](https://virtualenv.pypa.io/en/stable/) or [Anaconda](https://www.anaconda.com/download/)
+
+#### Installing in development mode 
 Run `pip install -e .[dev,test]`
 
-This installs all the development and test dependencies
+This installs all the development and test dependencies.
 
 ### Running tests
 
@@ -13,20 +18,10 @@ This installs all the development and test dependencies
 
   Run `py.test tests/integration`
 
-### Creating a distribution
-
-Run `python setup.py bdist_wheel`. This will create a wheel package inside the `dist` 
-folder suitable for your version of python.
-The wheel can be distributed and later installed using `pip`. 
-For example:
-
-`pip install ./pybatfish-<version>-py3-none-any.whl`
-
 ### Building documentation
 
 1. Ensure pybatfish is installed
-2. Ensure sphinx is installed sphinx 
-   by running `pip install sphinx sphinx_rtd_theme`
+2. Ensure sphinx (the RTD theme) is installed by running `pip install sphinx sphinx_rtd_theme`
 
 Run:
 - `cd docs`
@@ -35,3 +30,13 @@ Run:
 
 Read (for html format):
 - Open `docs/build/html/index.html`
+
+### Creating a distribution
+
+Run `python setup.py bdist_wheel`. This will create a wheel package inside the `dist` 
+folder. The wheel can be distributed and later installed using `pip`. 
+For example:
+
+`pip install ./pybatfish-<version>-py3-none-any.whl`
+
+
