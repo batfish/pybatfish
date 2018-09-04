@@ -60,14 +60,23 @@ class TableAnswerElement(Answer):
             # type: TableMetadata
         self.rows = [Row(row) for row in answer_element.get("rows", [])] \
             # type: List[Row]
-        # TODO: row exclusions
-        # (https://github.com/batfish/pybatfish/issues/5)
 
-        self.table_headers = self.metadata.get_column_names()  # type: List[str]
-        self.table_data = pandas.DataFrame.from_records(
-            [[_get_display_value(cm.schema, row.get(cm.name)) for
-              cm in self.metadata.column_metadata]
-             for row in self.rows], columns=self.table_headers)
+        self.table_data = _rows_to_frame(self.metadata, self.rows)
+
+        self.excluded_rows = {}
+        for exclusion in answer_element.get("excludedRows", []):
+            if "exclusionName" not in exclusion:
+                raise ValueError("Exclusion does not have 'exclusionName'")
+            self.excluded_rows[exclusion["exclusionName"]] = exclusion.get(
+                "rows", [])
+
+    def excluded_frame(self, exclusion_name):
+        # type: (str) -> pandas.DataFrame
+        """Return the excluded data for exclusion_name as a :py:class:`pandas.DataFrame`."""
+        if exclusion_name not in self.excluded_rows:
+            raise ValueError(
+                "Exclusion name {} does not exist".format(exclusion_name))
+        return _rows_to_frame(self.metadata, self.excluded_rows[exclusion_name])
 
     def frame(self):
         """Return answer data as a :py:class:`pandas.DataFrame`."""
@@ -102,3 +111,11 @@ class TableMetadata:
     def get_column_names(self):
         # type: () -> List[str]
         return [cm.name for cm in self.column_metadata]
+
+
+def _rows_to_frame(table_metadata, rows):
+    # type: (TableMetadata, List[Row]) -> pandas.DataFrame
+    return pandas.DataFrame.from_records(
+        [[_get_display_value(cm.schema, row.get(cm.name)) for
+          cm in table_metadata.column_metadata]
+         for row in rows], columns=table_metadata.get_column_names())
