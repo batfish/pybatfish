@@ -52,7 +52,7 @@ class AssertionType(str, Enum):
 
 @attr.s(frozen=True)
 class Assertion(DataModelElement):
-    """A Batfish assertions.
+    """A Batfish assertion.
 
     Assertions are combined with a :py:class:`~pybatfish.question.question.Question`
     to create a Batfish check. An assertion can be on the number of results
