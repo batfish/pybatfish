@@ -14,26 +14,25 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 # test if an acl trace is deserialized properly
-from pybatfish.datamodel.filelines import FileLines
+from pybatfish.datamodel.primitives import FileLines
+import pytest
 
 
 def test_filelines_multiple_lines():
-    filelines = FileLines({"filename": "myfile", "lines": [2, 3]})
+    filelines = FileLines.from_dict({"filename": "myfile", "lines": [2, 3]})
     assert filelines.filename == "myfile"
     assert filelines.lines == [2, 3]
 
 
 def test_filelines_no_lines():
-    filelines = FileLines({"filename": "myfile"})
+    filelines = FileLines.from_dict({"filename": "myfile"})
     assert filelines.filename == "myfile"
     assert len(filelines.lines) == 0
 
 
 def test_filelines_zero_lines():
-    filelines = FileLines({"filename": "myfile", "lines": []})
+    filelines = FileLines.from_dict({"filename": "myfile", "lines": []})
     assert filelines.filename == "myfile"
     assert len(filelines.lines) == 0
 

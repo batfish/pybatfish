@@ -1,10 +1,11 @@
+attrs>=18.1.0
 deepdiff
 deprecated
 jsonpickle
 jupyter
 nbconvert
 nbformat
-pandas
+pandas>=0.23.0
 python-dateutil
 requests
 requests-toolbelt

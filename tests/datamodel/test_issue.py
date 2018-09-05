@@ -15,9 +15,8 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.primitives import Issue
 import pytest
-
-from pybatfish.datamodel.answer.issue import Issue
 
 
 def test_issue_deserialization():
@@ -30,7 +29,7 @@ def test_issue_deserialization():
             "minor": "min"
         }
     }
-    issue = Issue(issue_dict)
+    issue = Issue.from_dict(issue_dict)
 
     assert issue.severity == 100
     assert issue.explanation == "itsme"
@@ -43,21 +42,21 @@ def test_column_metadata_bad_severity():
     issue = {
         "severity": "100",
     }
-    assert Issue(issue).severity == 100
+    assert Issue.from_dict(issue).severity == 100
 
     issue["severity"] = "i_am_string"
     with pytest.raises(ValueError):
-        Issue(issue)
+        Issue.from_dict(issue)
 
 
 def test_column_metadata_no_severity():
     """Exception is thrown if severity is missing."""
     with pytest.raises(ValueError):
-        Issue({"noSeverity": 100})
+        Issue.from_dict({"noSeverity": 100})
     with pytest.raises(ValueError):
-        Issue({})
+        Issue.from_dict({})
     with pytest.raises(TypeError):
-        Issue({"severity": None})
+        Issue.from_dict({"severity": None})
 
 
 def test_column_metadata_optional_fields():
@@ -65,7 +64,7 @@ def test_column_metadata_optional_fields():
     issue_dict = {
         "severity": 100,
     }
-    issue = Issue(issue_dict)
+    issue = Issue.from_dict(issue_dict)
 
     assert issue.explanation
     assert issue.type

@@ -14,8 +14,9 @@ for building and running Batfish service.
 
    quickstart.rst
    questions.rst
+   datamodel.rst
    api.rst
-   dev.rst
+   .. dev.rst
 
 Indices and tables
 ==================
