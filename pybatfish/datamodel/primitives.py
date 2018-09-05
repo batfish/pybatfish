@@ -13,7 +13,7 @@
 #   limitations under the License.
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, List  # noqa: F401
 
 import attr
 
@@ -31,8 +31,8 @@ class DataModelElement(object):
     __metaclass__ = ABCMeta
 
     def dict(self):
-        # type () -> Dict[str, Any]
-        attr.asdict(self, recurse=True)
+        # type: () -> Dict[str, Any]
+        return attr.asdict(self, recurse=True)
 
     @classmethod
     @abstractmethod
@@ -73,7 +73,7 @@ class Assertion(DataModelElement):
 
 
 @attr.s(frozen=True)
-class Interface(object):
+class Interface(DataModelElement):
     """A network interface --- a combination of node and interface names.
 
     :ivar hostname: Node hostname to which this interface belongs
