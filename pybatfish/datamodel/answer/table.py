@@ -16,6 +16,7 @@
 from typing import Dict, List, Optional  # noqa: F401
 
 import pandas
+
 from pybatfish.datamodel.answer.base import Answer, _get_display_value
 
 __all__ = [
@@ -43,7 +44,7 @@ class ColumnMetadata(object):
 
 
 class TableAnswer(Answer):
-    """Batfish answer in a from of a table."""
+    """Batfish answer in a form of a table."""
 
     def __init__(self, dictionary):
         if "answerElements" not in dictionary:

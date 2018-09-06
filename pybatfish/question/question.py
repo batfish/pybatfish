@@ -24,6 +24,8 @@ import re
 import sys
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
+from six import PY3, integer_types, string_types
+
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
@@ -31,7 +33,6 @@ from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import (get_uuid, validate_json_path_regex,
                             validate_question_name)
-from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -135,7 +136,8 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
-        :rtype: :py:class:`~Answer` or :py:class:`~TableAnswer`
+        :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
+            :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
@@ -171,6 +173,10 @@ class QuestionBase(object):
     def get_description(self):
         """Return the short description of this question."""
         return self._dict['instance']['description']
+
+    def get_long_description(self):
+        """Return the long description of this question."""
+        return self._dict['instance']['longDescription']
 
     def get_differential(self):
         """Return whether this question is to be asked differentially."""
