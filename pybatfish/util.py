@@ -23,12 +23,14 @@ import uuid
 import zipfile
 
 from pybatfish.exception import QuestionValidationException
+import simplejson as json
 
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.
 _MAX_FILENAME_LEN = 150
 
 __all__ = [
+    'BfJsonEncoder',
     'conditional_str',
     'get_uuid',
     'validate_json_path_regex',
@@ -36,6 +38,19 @@ __all__ = [
     'validate_question_name',
     'zip_dir',
 ]
+
+
+class BfJsonEncoder(json.JSONEncoder):
+    """A default encoder for Batfish question and datamodel objects."""
+
+    def default(self, obj):
+        try:
+            # Return the dictionary representation, which is supported by
+            # questions and datamodel elements
+            return obj.dict()
+        except AttributeError:
+            # Fall back to default serialization for all other objects.
+            return json.JSONEncoder.default(self, obj)
 
 
 def conditional_str(prefix, obj, suffix):

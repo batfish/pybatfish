@@ -22,17 +22,17 @@ import json
 import os
 import re
 import sys
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from six import PY3, integer_types, string_types
-from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (get_uuid, validate_json_path_regex,
-                            validate_question_name)
+from pybatfish.util import BfJsonEncoder, get_uuid, validate_json_path_regex, \
+    validate_question_name
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -44,18 +44,6 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
-
-
-class _QuestionEncoder(json.JSONEncoder):
-    """A default encoder for Batfish Question objects."""
-
-    def default(self, obj):
-        if isinstance(obj, QuestionBase):
-            # Return the dictionary representation of the Question.
-            return obj.dict()
-
-        # Fall back to default serialization for all other objects.
-        return json.JSONEncoder.default(self, obj)
 
 
 class QuestionMeta(type):
@@ -169,7 +157,7 @@ class QuestionBase(object):
         sort_keys=True and indent=2
         """
         return json.dumps(self._dict, sort_keys=True, indent=2,
-                          cls=_QuestionEncoder, **kwargs)
+                          cls=BfJsonEncoder, **kwargs)
 
     def load(self, moduleName=bfq.__name__):
         """(Re)load this question as a default question."""
