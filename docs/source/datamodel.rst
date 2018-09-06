@@ -31,5 +31,8 @@ Reference Library
 Answers
 -------
 
-.. automodule:: pybatfish.datamodel.answer.base
-.. automodule:: pybatfish.datamodel.answer.table
+.. autoclass:: pybatfish.datamodel.answer.base.Answer
+    :members:
+
+.. autoclass:: pybatfish.datamodel.answer.table.TableAnswer
+    :members:

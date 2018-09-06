@@ -29,7 +29,7 @@ from deprecated import deprecated
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
-from pybatfish.datamodel.answer.table import TableAnswerElement
+from pybatfish.datamodel.answer.table import TableAnswer
 from pybatfish.datamodel.primitives import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
@@ -237,7 +237,7 @@ def bf_create_check(inQuestion, snapshot=None, reference_snapshot=None):
     :return: The modified template with exceptions and assertions added.
     """
     snapshot = bf_session.get_snapshot(snapshot)
-    if reference_snapshot is None and inQuestion.getDifferential():
+    if reference_snapshot is None and inQuestion.get_differential():
         raise ValueError(
             "reference_snapshot argument is required to create a differential check")
 
@@ -673,7 +673,7 @@ def bf_str_answer(answer_json):
     try:
         if "answerElements" in answer_json and "metadata" in \
                 answer_json["answerElements"][0]:
-            table_answer = TableAnswerElement(answer_json)
+            table_answer = TableAnswer(answer_json)
             return table_answer.table_data.to_string()
         else:
             return get_answer_text(answer_json)
