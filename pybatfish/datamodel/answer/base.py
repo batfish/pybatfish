@@ -16,7 +16,7 @@
 import json
 import re
 from string import Template
-from typing import Optional  # noqa: F401
+from typing import Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace
@@ -43,6 +43,7 @@ class Answer(dict):
         return None
 
     def dict(self):
+        # type: () -> Dict
         """A dictionary representation of the full answer."""
         return dict(self)
 
