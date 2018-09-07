@@ -44,7 +44,7 @@ class ColumnMetadata(object):
 
 
 class TableAnswer(Answer):
-    """Batfish answer in a form of a table."""
+    """Batfish answer in the form of a table."""
 
     def __init__(self, dictionary):
         if "answerElements" not in dictionary:
