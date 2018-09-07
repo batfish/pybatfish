@@ -31,8 +31,8 @@ from pybatfish.client.commands import (_bf_answer_obj,
                                        bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (get_uuid, validate_json_path_regex,
-                            validate_question_name)
+from pybatfish.util import BfJsonEncoder, get_uuid, validate_json_path_regex, \
+    validate_question_name
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -44,18 +44,6 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
-
-
-class _QuestionEncoder(json.JSONEncoder):
-    """A default encoder for Batfish Question objects."""
-
-    def default(self, obj):
-        if isinstance(obj, QuestionBase):
-            # Return the dictionary representation of the Question.
-            return obj.dict()
-
-        # Fall back to default serialization for all other objects.
-        return json.JSONEncoder.default(self, obj)
 
 
 class QuestionMeta(type):
@@ -168,7 +156,7 @@ class QuestionBase(object):
         .. deprecated: 0.36.0
         """
         return json.dumps(self._dict, sort_keys=True, indent=2,
-                          cls=_QuestionEncoder, **kwargs)
+                          cls=BfJsonEncoder, **kwargs)
 
     def get_description(self):
         """Return the short description of this question."""
