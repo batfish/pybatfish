@@ -1,7 +1,6 @@
 attrs>=18.1.0
 deepdiff
 deprecated
-jsonpickle
 jupyter
 nbconvert
 nbformat

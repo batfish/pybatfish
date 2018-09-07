@@ -19,7 +19,24 @@
    "cell_type": "code",
    "execution_count": 1,
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/harshverma/sprints/notebooks/pybatfish/venv/lib/python3.6/importlib/_bootstrap.py:219: RuntimeWarning: numpy.dtype size changed, may indicate binary incompatibility. Expected 96, got 88\n",
+      "  return f(*args, **kwds)\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/harshverma/sprints/notebooks/pybatfish/pybatfish/client/commands.py:48: UserWarning: Pybatfish public API is being updated, note that API names and parameters will soon change.\n",
+      "  \"Pybatfish public API is being updated, note that API names and parameters will soon change.\")\n"
+     ]
+    }
+   ],
    "source": [
     "# Import pybatfish and other needed packages\n",
     "%run startup.py"
@@ -87,7 +104,21 @@
    "cell_type": "code",
    "execution_count": 3,
    "metadata": {},
-   "outputs": [],
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Return configuration properties of nodes.\n",
+      "\n",
+      "\n",
+      ":param nodes: Include nodes matching this name or regex.\n",
+      ":type nodes: nodeSpec\n",
+      ":param properties: Include properties matching this regex.\n",
+      ":type properties: nodePropertySpec\n"
+     ]
+    }
+   ],
    "source": [
     "# Load questions from Batfish\n",
     "load_questions()\n",
@@ -99,10 +130,8 @@
     "# uncomment and try on the following line\n",
     "# bfq.\n",
     "\n",
-    "# In IPython and Jupyter you can use the \"?\" shorthand to get help on a question\n",
-    "?bfq.nodeProperties\n",
-    "\n",
-    "# help(bfq.nodeProperties) # in standard Python console"
+    "# You can find out usage for a question by calling .help() on it; note the `()` before .help()\n",
+    "bfq.nodeProperties().help()"
    ]
   },
   {
@@ -1067,28 +1096,28 @@
      "data": {
       "text/html": [
        "<style  type=\"text/css\" >\n",
-       "    #T_ade09268_b2c5_11e8_b7b4_8c8590052a8crow0_col0 {\n",
+       "    #T_201998ba_b225_11e8_b99f_8c8590052a8crow0_col0 {\n",
        "            text-align:  left;\n",
        "            vertical-align:  top;\n",
-       "        }    #T_ade09268_b2c5_11e8_b7b4_8c8590052a8crow0_col1 {\n",
+       "        }    #T_201998ba_b225_11e8_b99f_8c8590052a8crow0_col1 {\n",
        "            text-align:  left;\n",
        "            vertical-align:  top;\n",
        "        }</style>  \n",
-       "<table id=\"T_ade09268_b2c5_11e8_b7b4_8c8590052a8c\" > \n",
+       "<table id=\"T_201998ba_b225_11e8_b99f_8c8590052a8c\" > \n",
        "<thead>    <tr> \n",
        "        <th class=\"blank level0\" ></th> \n",
        "        <th class=\"col_heading level0 col0\" >Flow</th> \n",
        "        <th class=\"col_heading level0 col1\" >Traces</th> \n",
        "    </tr></thead> \n",
        "<tbody>    <tr> \n",
-       "        <th id=\"T_ade09268_b2c5_11e8_b7b4_8c8590052a8clevel0_row0\" class=\"row_heading level0 row0\" >0</th> \n",
-       "        <td id=\"T_ade09268_b2c5_11e8_b7b4_8c8590052a8crow0_col0\" class=\"data row0 col0\" >host1->[2.128.0.101:0->1.0.2.2:0 proto: IP dscp:0 ecn:0 fragOff:0 length:0 state:NEW flags: n/a</td> \n",
-       "        <td id=\"T_ade09268_b2c5_11e8_b7b4_8c8590052a8crow0_col1\" class=\"data row0 col1\" >1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet0/0 -> as2dist1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.101.3,nhint:dynamic>_fnhip:2.34.101.3<br>3 as2dist1:GigabitEthernet0/0 -> as2core1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.11.2<br>4 as2core1:GigabitEthernet0/0 -> as2border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.11.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet0/0 -> as2dist1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.101.3,nhint:dynamic>_fnhip:2.34.101.3<br>3 as2dist1:GigabitEthernet1/0 -> as2core2:GigabitEthernet3/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.21.2<br>4 as2core2:GigabitEthernet1/0 -> as2border1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.12.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet1/0 -> as2dist2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.201.3,nhint:dynamic>_fnhip:2.34.201.3<br>3 as2dist2:GigabitEthernet0/0 -> as2core2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.22.2<br>4 as2core2:GigabitEthernet1/0 -> as2border1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.12.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet1/0 -> as2dist2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.201.3,nhint:dynamic>_fnhip:2.34.201.3<br>3 as2dist2:GigabitEthernet1/0 -> as2core1:GigabitEthernet3/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.12.2<br>4 as2core1:GigabitEthernet0/0 -> as2border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.11.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED</td> \n",
+       "        <th id=\"T_201998ba_b225_11e8_b99f_8c8590052a8clevel0_row0\" class=\"row_heading level0 row0\" >0</th> \n",
+       "        <td id=\"T_201998ba_b225_11e8_b99f_8c8590052a8crow0_col0\" class=\"data row0 col0\" >host1->[2.128.0.101:0->1.0.2.2:0 proto: IP dscp:0 ecn:0 fragOff:0 length:0 state:NEW flags: n/a</td> \n",
+       "        <td id=\"T_201998ba_b225_11e8_b99f_8c8590052a8crow0_col1\" class=\"data row0 col1\" >1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet0/0 -> as2dist1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.101.3,nhint:dynamic>_fnhip:2.34.101.3<br>3 as2dist1:GigabitEthernet0/0 -> as2core1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.11.2<br>4 as2core1:GigabitEthernet0/0 -> as2border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.11.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet0/0 -> as2dist1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.101.3,nhint:dynamic>_fnhip:2.34.101.3<br>3 as2dist1:GigabitEthernet1/0 -> as2core2:GigabitEthernet3/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.21.2<br>4 as2core2:GigabitEthernet1/0 -> as2border1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.12.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet1/0 -> as2dist2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.201.3,nhint:dynamic>_fnhip:2.34.201.3<br>3 as2dist2:GigabitEthernet0/0 -> as2core2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.22.2<br>4 as2core2:GigabitEthernet1/0 -> as2border1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.12.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED<br>1 host1:eth0 -> as2dept1:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;StaticRoute<0.0.0.0/0,nhip:2.128.0.1,nhint:eth0>_fnhip:2.128.0.1<br>2 as2dept1:GigabitEthernet1/0 -> as2dist2:GigabitEthernet2/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:2.34.201.3,nhint:dynamic>_fnhip:2.34.201.3<br>3 as2dist2:GigabitEthernet1/0 -> as2core1:GigabitEthernet3/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.23.12.2<br>4 as2core1:GigabitEthernet0/0 -> as2border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:2.12.11.1<br>5 as2border1:GigabitEthernet0/0 -> as1border1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;BgpRoute<1.0.2.0/24,nhip:10.12.11.1,nhint:dynamic>_fnhip:10.12.11.1<br>6 as1border1:GigabitEthernet0/0 -> as1core1:GigabitEthernet1/0<br>&nbsp;&nbsp;&nbsp;&nbsp;Route(s):<br>&nbsp;&nbsp;&nbsp;&nbsp;OspfIntraAreaRoute<1.0.2.0/24,nhip:1.0.1.2,nhint:dynamic>_fnhip:1.0.1.2<br>ACCEPTED</td> \n",
        "    </tr></tbody> \n",
        "</table> "
       ],
       "text/plain": [
-       "<pandas.io.formats.style.Styler at 0x11d2ff828>"
+       "<pandas.io.formats.style.Styler at 0x1204d5320>"
       ]
      },
      "metadata": {},

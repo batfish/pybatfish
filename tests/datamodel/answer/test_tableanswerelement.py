@@ -16,17 +16,16 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.answer.table import TableAnswer
 import pytest
-
-from pybatfish.datamodel.answer.table import TableAnswerElement
 
 
 def test_table_answer_no_answer_elements():
     """Exception is raised when answer elements are empty or not present."""
     with pytest.raises(ValueError):
-        TableAnswerElement({})
+        TableAnswer({})
     with pytest.raises(ValueError):
-        TableAnswerElement({"answerElements": []})
+        TableAnswer({"answerElements": []})
 
 
 def test_table_answer_element_no_metadata():
@@ -37,13 +36,13 @@ def test_table_answer_element_no_metadata():
         ]
     }
     with pytest.raises(ValueError):
-        TableAnswerElement(answer)
+        TableAnswer(answer)
 
     answer = {
         "answerElements": [{}]
     }
     with pytest.raises(ValueError):
-        TableAnswerElement(answer)
+        TableAnswer(answer)
 
 
 def test_table_answer_element_deser():
@@ -69,7 +68,7 @@ def test_table_answer_element_deser():
             }]
         }]
     }
-    table = TableAnswerElement(answer)
+    table = TableAnswer(answer)
 
     assert len(table.metadata.column_metadata) == 2
     assert table.metadata.column_metadata[0].name == "col1"
@@ -94,7 +93,7 @@ def test_table_answer_element_deser_no_rows():
             }
         }]
     }
-    table = TableAnswerElement(answer)
+    table = TableAnswer(answer)
 
     assert len(table.metadata.column_metadata) == 1
     assert table.metadata.column_metadata[0].name == "col1"
@@ -125,7 +124,7 @@ def test_table_answer_element_excluded_rows():
             }]
         }]
     }
-    table = TableAnswerElement(answer)
+    table = TableAnswer(answer)
 
     assert len(table.excluded_rows) == 1
     assert len(table.excluded_rows["myEx"]) == 1
