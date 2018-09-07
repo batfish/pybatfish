@@ -22,17 +22,17 @@ import json
 import os
 import re
 import sys
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from six import PY3, integer_types, string_types
-from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (get_uuid, validate_json_path_regex,
-                            validate_question_name)
+from pybatfish.util import BfJsonEncoder, get_uuid, validate_json_path_regex, \
+    validate_question_name
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -44,18 +44,6 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
-
-
-class _QuestionEncoder(json.JSONEncoder):
-    """A default encoder for Batfish Question objects."""
-
-    def default(self, obj):
-        if isinstance(obj, QuestionBase):
-            # Return the dictionary representation of the Question.
-            return obj.dict()
-
-        # Fall back to default serialization for all other objects.
-        return json.JSONEncoder.default(self, obj)
 
 
 class QuestionMeta(type):
@@ -120,7 +108,6 @@ class QuestionBase(object):
     def __init__(self, dictionary):
         self._dict = deepcopy(dictionary)
 
-    # TODO: document return values once converged on representation
     def answer(self, snapshot=None, reference_snapshot=None,
                include_one_table_keys=None, background=False):
         """
@@ -137,19 +124,21 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
+        :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
+            :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
         snapshot = bf_session.get_snapshot(snapshot)
-        if reference_snapshot is None and self.getDifferential():
+        if reference_snapshot is None and self.get_differential():
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
         if include_one_table_keys is not None:
-            self.setIncludeOneTableKeys(include_one_table_keys)
+            self._set_include_one_table_keys(include_one_table_keys)
         return _bf_answer_obj(self.json(),
                               parameters_str="{}",
-                              question_name=self.getName(),
+                              question_name=self.get_name(),
                               background=background,
                               snapshot=snapshot,
                               reference_snapshot=reference_snapshot)
@@ -158,90 +147,43 @@ class QuestionBase(object):
         """Return the dictionary representing this question."""
         return self._dict
 
-    def help(self):
-        """Display a help message about this question."""
-        print(self.__doc__)
-
     def json(self, **kwargs):
         """Return the json string representing this question.
 
         Keyword arguments passed to json.dumps with default assignments of
         sort_keys=True and indent=2
+
+        .. deprecated: 0.36.0
         """
         return json.dumps(self._dict, sort_keys=True, indent=2,
-                          cls=_QuestionEncoder, **kwargs)
+                          cls=BfJsonEncoder, **kwargs)
 
-    def load(self, moduleName=bfq.__name__):
-        """(Re)load this question as a default question."""
-        _load_question_dict(self._dict, module_name=moduleName)
-
-    def getDescription(self):
+    def get_description(self):
         """Return the short description of this question."""
         return self._dict['instance']['description']
 
-    def getDifferential(self):
+    def get_long_description(self):
+        """Return the long description of this question."""
+        return self._dict['instance']['longDescription']
+
+    def get_differential(self):
         """Return whether this question is to be asked differentially."""
         if 'differential' in self._dict:
             return self._dict['differential']
         else:
             return False
 
-    def getIncludeOneTableKeys(self):
+    def get_include_one_table_keys(self):
         """Return whether keys present in only one table should be included when computing answer table diffs."""
         return self._dict.get('includeOneTableKeys', False)
 
-    def getLongDescription(self):
-        """Return the long description of this question."""
-        return self._dict['instance']['longDescription']
-
-    def getName(self):
+    def get_name(self):
         """Return the name of this question."""
         return self._dict['instance']['instanceName']
 
-    def setDescription(self, name):
-        """Set the short description of this question.
-
-        You may want to call this before calling 'write' to distinguish this
-        question from its parent.
-        """
-        self._dict['instance']['description'] = name
-
-    def setDifferential(self, differential):
-        """Set the differential nature of this question."""
-        self._dict['differential'] = differential
-
-    def setIncludeOneTableKeys(self, include_one_table_keys):
+    def _set_include_one_table_keys(self, include_one_table_keys):
         """Set if keys present in only table should be included when computing table diffs."""
         self._dict['includeOneTableKeys'] = include_one_table_keys
-
-    def setLongDescription(self, name):
-        """Set the short description of this question.
-
-        You may want to call this before calling 'write' to distinguish this
-        question from its parent.
-        """
-        self._dict['instance']['longDescription'] = name
-
-    def setName(self, name):
-        """Set the name of this question.
-
-        Call this before calling 'write' if you want to add a new question
-        rather than override/overwrite an existing one.
-        """
-        self._dict['instance']['instanceName'] = name
-
-    def write(self, path, **kwargs):
-        """Write the json file representing this question using the provided name.
-
-        Keyword arguments are passed to json.dumps with default assignments of
-        `sort_keys=True` and `indent=2`.
-        Be sure to call :py:meth:`setName` first if you want to add a new
-        question rather than overwrite an existing one.
-
-        :param path: The path to which to write the output JSON file
-        """
-        with open(path, 'w') as outputFile:
-            outputFile.write(self.json(**kwargs))
 
 
 def list_questions(tags=None, question_module='pybatfish.question.bfq'):

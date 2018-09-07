@@ -102,7 +102,6 @@ setup(
     install_requires=['attrs>=18.1.0',
                       'deepdiff',
                       'deprecated',
-                      'jsonpickle',
                       'pandas>=0.23.0',
                       'python-dateutil',
                       'requests',
