@@ -42,11 +42,7 @@ Here, the example network is being uploaded, but this location could also be a f
 .. code-block:: python
 
     >>> ip_owners_ans = bfq.ipOwners().answer()
-    status: TRYINGTOASSIGN
-    .... no task information
-    status: TERMINATEDNORMALLY
-    .... Mon Jul 30 14:55:04 2018 PDT Begin job
-
+    
 ``answer()`` runs the question and returns the answer in a JSON format. See the ``Batfish`` `questions directory <https://github.com/batfish/batfish/tree/master/questions>`_ for the set of questions that can be asked and their parameters.
 
 6. To print the answer in a nice table, call ``frame()`` which wraps the answer as `pandas dataframe <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.html>`_. Calling `head() <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.DataFrame.head.html>`_ on the dataframe will print the first 5 rows. :
