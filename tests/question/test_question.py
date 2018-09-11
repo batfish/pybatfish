@@ -17,9 +17,9 @@ import os
 import pytest
 
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question.question import (_compute_docstring, _process_variables,
-                                         _validate, list_questions,
-                                         load_questions)
+from pybatfish.question.question import (_compute_docstring, _compute_var_help,
+                                         _process_variables, _validate,
+                                         list_questions, load_questions)
 from pybatfish.util import validate_json_path_regex
 
 
@@ -66,8 +66,163 @@ def test_valid_comparator():
     assert _validate(sample_question)
 
 
+def test_validate_allowed_values():
+    # Test that parameter validates based on "values", not "allowedValues"
+    variable = {
+        'allowedValues': ['obsolete value'],
+        'type': 'string',
+        'value': 'v1',
+        'values': [{
+            'name': 'v1'
+        }]
+    }
+    sample_question = {
+        'instance': {
+            'variables': {
+                'v': variable
+            }
+        }
+    }
+    assert _validate(sample_question)
+
+    expected_message = "\n   Value: 'obsolete value' is not among allowed" \
+                       + " values [v1] of parameter: 'v'\n"
+    with pytest.raises(QuestionValidationException) as err:
+        variable['value'] = 'obsolete value'
+        _validate(sample_question)
+        assert expected_message in err
+
+
+def test_validate_old_allowed_values():
+    # Test that parameter with only "allowedValues" validates based on that
+    variable = {
+        'allowedValues': ['v1'],
+        'type': 'string',
+        'value': 'v1'
+    }
+    sample_question = {
+        'instance': {
+            'variables': {
+                'v': variable
+            }
+        }
+    }
+    assert _validate(sample_question)
+
+    expected_message = "\n   Value: 'bad value' is not among allowed values " \
+                       + "[v1] of parameter: 'v'\n"
+    with pytest.raises(QuestionValidationException) as err:
+        variable['value'] = 'bad value'
+        _validate(sample_question)
+        assert expected_message in err
+
+
+def test_validate_allowed_values_list():
+    # Test that list parameter validates based on "values", not "allowedValues"
+    variable = {
+        'minElements': 0,
+        'allowedValues': ['obsolete value'],
+        'type': 'string',
+        'value': ['v1'],
+        'values': [{
+            'name': 'v1'
+        }]
+    }
+    sample_question = {
+        'instance': {
+            'variables': {
+                'v': variable
+            }
+        }
+    }
+    assert _validate(sample_question)
+
+    expected_message = "\n   Value: 'obsolete value' is not among allowed" \
+                       + " values [v1] of parameter: 'v'\n"
+    with pytest.raises(QuestionValidationException) as err:
+        variable['value'][0] = 'obsolete value'
+        _validate(sample_question)
+        assert expected_message in err
+
+
+def test_validate_old_allowed_values_list():
+    # Test that list parameter with only "allowedValues" validates based on that
+    variable = {
+        'minElements': 0,
+        'allowedValues': ['v1'],
+        'type': 'string',
+        'value': ['v1']
+    }
+    sample_question = {
+        'instance': {
+            'variables': {
+                'v': variable
+            }
+        }
+    }
+    assert _validate(sample_question)
+
+    expected_message = "\n   Value: 'bad value' is not among allowed values " \
+                       + "[v1] of parameter: 'v'\n"
+    with pytest.raises(QuestionValidationException) as err:
+        variable['value'][0] = 'bad value'
+        _validate(sample_question)
+        assert expected_message in err
+
+
 def test_compute_docstring():
     assert _compute_docstring("foo", [], {}) == "foo"
+
+
+def test_compute_var_help_with_no_allowed_values():
+    var_data = {
+        "optional": True,
+        "description": "Desc",
+        "type": "boolean"
+    }
+    expected_help = ":param v: Desc\n" \
+                    + ":type v: boolean"
+    assert _compute_var_help("v", var_data) == expected_help
+
+
+def test_compute_var_help_with_allowed_values():
+    var_data = {
+        "optional": True,
+        "description": "Desc",
+        "values": [{"name": "v1", "description": "allowed value desc"}],
+        "type": "boolean"
+    }
+    expected_help = ":param v: Desc\n" \
+                    + "\n    Allowed values: ``[v1: allowed value desc]``\n" \
+                    + ":type v: boolean"
+    assert _compute_var_help("v", var_data) == expected_help
+
+
+def test_compute_var_help_with_new_and_old_allowed_values():
+    var_data = {
+        "allowedValues": ["deprecated v1"],
+        "optional": True,
+        "description": "Desc",
+        "values": [{"name": "v1", "description": "allowed value desc"}],
+        "type": "boolean"
+    }
+    expected_help = ":param v: Desc\n" \
+                    + "\n    Allowed values: ``[v1: allowed value desc]``\n" \
+                    + ":type v: boolean"
+    assert _compute_var_help("v", var_data) == expected_help
+
+
+def test_compute_var_help_with_old_allowed_values():
+    var_data = {
+        "allowedValues": ["v1"],
+        "optional": True,
+        "description": "Desc",
+        "type": "boolean"
+    }
+    expected_help = ":param v: Desc\n" \
+                    + "\n    Allowed values: ``[v1]``\n" \
+                    + ":type v: boolean"
+    assert _compute_var_help("v", var_data) == expected_help
 
 
 def test_process_variables():
