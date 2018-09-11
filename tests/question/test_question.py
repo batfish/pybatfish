@@ -86,7 +86,7 @@ def test_validate_allowed_values():
     assert _validate(sample_question)
 
     expected_message = "\n   Value: 'obsolete value' is not among allowed" \
-                       + " values [v1] of parameter: 'v'\n"
+                       + " values ['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable['value'] = 'obsolete value'
         _validate(sample_question)
@@ -110,7 +110,7 @@ def test_validate_old_allowed_values():
     assert _validate(sample_question)
 
     expected_message = "\n   Value: 'bad value' is not among allowed values " \
-                       + "[v1] of parameter: 'v'\n"
+                       + "['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable['value'] = 'bad value'
         _validate(sample_question)
@@ -138,7 +138,7 @@ def test_validate_allowed_values_list():
     assert _validate(sample_question)
 
     expected_message = "\n   Value: 'obsolete value' is not among allowed" \
-                       + " values [v1] of parameter: 'v'\n"
+                       + " values ['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable['value'][0] = 'obsolete value'
         _validate(sample_question)
@@ -163,7 +163,7 @@ def test_validate_old_allowed_values_list():
     assert _validate(sample_question)
 
     expected_message = "\n   Value: 'bad value' is not among allowed values " \
-                       + "[v1] of parameter: 'v'\n"
+                       + "['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable['value'][0] = 'bad value'
         _validate(sample_question)
@@ -188,13 +188,18 @@ def test_compute_var_help_with_no_allowed_values():
 def test_compute_var_help_with_allowed_values():
     var_data = {
         "optional": True,
-        "description": "Desc",
-        "values": [{"name": "v1", "description": "allowed value desc"}],
+        "description": "variable description",
+        "values": [
+            {"name": "v1", "description": "v1 description"},
+            {"name": "v2", "description": "v2 description"}
+        ],
         "type": "boolean"
     }
-    expected_help = ":param v: Desc\n" \
-                    + "\n    Allowed values: ``[v1: allowed value desc]``\n" \
-                    + ":type v: boolean"
+    expected_help = ":param v: variable description" \
+                    + "\n    Allowed values:"\
+                    + "\n      * v1: v1 description" \
+                    + "\n      * v2: v2 description" \
+                    + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -202,13 +207,14 @@ def test_compute_var_help_with_new_and_old_allowed_values():
     var_data = {
         "allowedValues": ["deprecated v1"],
         "optional": True,
-        "description": "Desc",
-        "values": [{"name": "v1", "description": "allowed value desc"}],
+        "description": "variable description",
+        "values": [{"name": "v1", "description": "allowed value description"}],
         "type": "boolean"
     }
-    expected_help = ":param v: Desc\n" \
-                    + "\n    Allowed values: ``[v1: allowed value desc]``\n" \
-                    + ":type v: boolean"
+    expected_help = ":param v: variable description" \
+                    + "\n    Allowed values:"\
+                    + "\n      * v1: allowed value description" \
+                    + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -216,12 +222,13 @@ def test_compute_var_help_with_old_allowed_values():
     var_data = {
         "allowedValues": ["v1"],
         "optional": True,
-        "description": "Desc",
+        "description": "variable description",
         "type": "boolean"
     }
-    expected_help = ":param v: Desc\n" \
-                    + "\n    Allowed values: ``[v1]``\n" \
-                    + ":type v: boolean"
+    expected_help = ":param v: variable description" \
+                    + "\n    Allowed values:"\
+                    + "\n      * v1" \
+                    + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 

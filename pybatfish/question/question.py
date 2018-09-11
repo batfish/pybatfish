@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 from inspect import getmembers
+import attr
 import json
 import os
 import re
@@ -46,22 +47,18 @@ __all__ = [
 ]
 
 
+@attr.s(frozen=True)
 class AllowedValue:
     """Describes a whitelisted value for a question parameter."""
+    name = attr.ib(type=str)
+    description = attr.ib(type=str, default=None)
 
-    def __init__(self, name, description):
-        """
-        Create an AllowedValue with the given name and description.
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> AllowedValue
+        return AllowedValue(json_dict['name'], json_dict.get('description'))
 
-        :param name: the allowed value described by this object
-        :type name: str
-        :param description: definition of the allowed value
-        :type description: str or None
-        """
-        self.name = name
-        self.description = description
-
-    def __repr__(self):
+    def __str__(self):
         if self.description is not None:
             return "{}: {}".format(self.name, self.description)
         return self.name
@@ -445,8 +442,8 @@ def _compute_var_help(var_name, var_data):
 
     allowed_values = _build_allowed_values(var_data)
     if allowed_values:
-        param_line += "\n    Allowed values: ``{}``\n".format(
-            allowed_values)
+        param_line += "    Allowed values:\n      * {}\n".format(
+            '\n      * '.join([str(v) for v in allowed_values]))
 
     default_value = var_data.get("value", "")
     if default_value:
@@ -459,18 +456,12 @@ def _compute_var_help(var_name, var_data):
 
 
 def _build_allowed_values(var_data):
-    values_dict = var_data.get('values', [])
+    values_dict = var_data.get('values')
     if values_dict:
-        allowed_values = []
-        for v in values_dict:
-            if 'description' in v:
-                allowed_values.append(AllowedValue(v['name'], v['description']))
-            else:
-                allowed_values.append(AllowedValue(v['name'], None))
-        return allowed_values
-    old_values_dict = var_data.get('allowedValues', [])
+        return [AllowedValue.from_dict(v) for v in values_dict]
+    old_values_dict = var_data.get('allowedValues')
     if old_values_dict:
-        return [AllowedValue(v, None) for v in old_values_dict]
+        return [AllowedValue(v) for v in old_values_dict]
     return None
 
 
@@ -587,7 +578,7 @@ def _validate(questionJson):
                                         [v.name for v in allowed_values]:
                                     valid = False
                                     errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
-                                        valueElement, allowed_values, variableName)
+                                        valueElement, [v.name for v in allowed_values], variableName)
 
                 else:
                     typeValid, typeValidErrorMessage = _validateType(value,
@@ -605,7 +596,8 @@ def _validate(questionJson):
                     elif allowed_values is not None and value not in \
                             [v.name for v in allowed_values]:
                         valid = False
-                        errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(value, allowed_values, variableName)
+                        errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
+                            value, [v.name for v in allowed_values], variableName)
     if not valid:
         raise QuestionValidationException(errorMessage)
     return True
