@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 from inspect import getmembers
+import attr
 import json
 import os
 import re
@@ -44,6 +45,24 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
+
+
+@attr.s(frozen=True)
+class AllowedValue(object):
+    """Describes a whitelisted value for a question parameter."""
+
+    name = attr.ib(type=str)
+    description = attr.ib(type=Optional[str], default=None)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> AllowedValue
+        return AllowedValue(json_dict['name'], json_dict.get('description'))
+
+    def __str__(self):
+        if self.description is not None:
+            return "{}: {}".format(self.name, self.description)
+        return self.name
 
 
 class QuestionMeta(type):
@@ -422,10 +441,10 @@ def _compute_var_help(var_name, var_data):
                                                    False) else "",
         desc=var_data['description'])
 
-    allowed_values = var_data.get("allowedValues", [])
+    allowed_values = _build_allowed_values(var_data)
     if allowed_values:
-        param_line += "\n    Allowed values: ``{}``\n".format(
-            allowed_values)
+        param_line += "    Allowed values:\n      * {}\n".format(
+            '\n      * '.join([str(v) for v in allowed_values]))
 
     default_value = var_data.get("value", "")
     if default_value:
@@ -435,6 +454,16 @@ def _compute_var_help(var_name, var_data):
         name=var_name, type=var_data["type"])
 
     return param_line + type_line
+
+
+def _build_allowed_values(var_data):
+    values_dict = var_data.get('values')
+    if values_dict:
+        return [AllowedValue.from_dict(v) for v in values_dict]
+    old_values_dict = var_data.get('allowedValues')
+    if old_values_dict:
+        return [AllowedValue(v) for v in old_values_dict]
+    return None
 
 
 def load_questions(question_dir=None, from_server=False,
@@ -513,6 +542,7 @@ def _validate(questionJson):
                     errorMessage += "   Missing value for mandatory parameter: '" + variableName + "'\n"
 
             # Now do some dynamic type-checking
+            allowed_values = _build_allowed_values(variable)
             if 'value' in variable:
                 value = variable['value']
                 variableType = variable['type']
@@ -545,12 +575,12 @@ def _validate(questionJson):
                                     errorMessage += "   Length of value: '" + valueElement + "' for element : " + str(
                                         i) + " of parameter: '" + variableName + "' below minimum length: " + str(
                                         minLength) + "\n"
-                                elif 'allowedValues' in variable and valueElement not in \
-                                        variable['allowedValues']:
+                                elif allowed_values is not None and valueElement not in \
+                                        [v.name for v in allowed_values]:
                                     valid = False
-                                    errorMessage += "   Value: '" + valueElement + "' is not among allowed values " + json.dumps(
-                                        variable[
-                                            'allowedValues']) + " of parameter: '" + variableName + "'\n"
+                                    errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
+                                        valueElement, [v.name for v in allowed_values], variableName)
+
                 else:
                     typeValid, typeValidErrorMessage = _validateType(value,
                                                                      variableType)
@@ -564,12 +594,11 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable \
-                            and value not in variable['allowedValues']:
+                    elif allowed_values is not None and value not in \
+                            [v.name for v in allowed_values]:
                         valid = False
-                        errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
-                            variable[
-                                'allowedValues']) + " of parameter: '" + variableName + "'\n"
+                        errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
+                            value, [v.name for v in allowed_values], variableName)
     if not valid:
         raise QuestionValidationException(errorMessage)
     return True
