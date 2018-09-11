@@ -50,6 +50,7 @@ __all__ = [
 @attr.s(frozen=True)
 class AllowedValue(object):
     """Describes a whitelisted value for a question parameter."""
+
     name = attr.ib(type=str)
     description = attr.ib(type=Optional[str], default=None)
 
