@@ -50,7 +50,7 @@ def test_min_length():
     expected_message = "\n   Length of value: 'one' for element : 0 of parameter: 'numbers' below minimum length: 4\n"
     with pytest.raises(QuestionValidationException) as err:
         _validate(sample_question)
-        assert expected_message in err
+    assert expected_message == str(err.value)
 
 
 def test_valid_comparator():
@@ -90,7 +90,7 @@ def test_validate_allowed_values():
     with pytest.raises(QuestionValidationException) as err:
         variable['value'] = 'obsolete value'
         _validate(sample_question)
-        assert expected_message in err
+    assert expected_message == str(err.value)
 
 
 def test_validate_old_allowed_values():
@@ -114,7 +114,7 @@ def test_validate_old_allowed_values():
     with pytest.raises(QuestionValidationException) as err:
         variable['value'] = 'bad value'
         _validate(sample_question)
-        assert expected_message in err
+    assert expected_message == str(err.value)
 
 
 def test_validate_allowed_values_list():
@@ -142,7 +142,7 @@ def test_validate_allowed_values_list():
     with pytest.raises(QuestionValidationException) as err:
         variable['value'][0] = 'obsolete value'
         _validate(sample_question)
-        assert expected_message in err
+    assert expected_message == str(err.value)
 
 
 def test_validate_old_allowed_values_list():
@@ -167,7 +167,7 @@ def test_validate_old_allowed_values_list():
     with pytest.raises(QuestionValidationException) as err:
         variable['value'][0] = 'bad value'
         _validate(sample_question)
-        assert expected_message in err
+    assert expected_message == str(err.value)
 
 
 def test_compute_docstring():
