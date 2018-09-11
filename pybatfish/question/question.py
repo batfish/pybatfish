@@ -48,10 +48,10 @@ __all__ = [
 
 
 @attr.s(frozen=True)
-class AllowedValue:
+class AllowedValue(object):
     """Describes a whitelisted value for a question parameter."""
     name = attr.ib(type=str)
-    description = attr.ib(type=str, default=None)
+    description = attr.ib(type=Optional[str], default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
