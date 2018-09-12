@@ -26,6 +26,8 @@ from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
@@ -36,8 +38,6 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from requests import HTTPError
-
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
@@ -417,34 +417,35 @@ def bf_get_info():
 def bf_get_issue_config(major, minor):
     # type: (str, str) -> IssueConfig
     """Returns the issue config for the active network."""
-    return IssueConfig(
-        **restv2helper.get_issue_config(bf_session, major, minor))
+    return IssueConfig.from_dict(
+        restv2helper.get_issue_config(bf_session, major, minor))
 
 
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the set of node roles for the active network."""
-    return NodeRoleDimension(
-        **restv2helper.get_node_role_dimension(bf_session, dimension))
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the set of node roles for the active network."""
-    return NodeRolesData(**restv2helper.get_node_roles(bf_session))
+    return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
 
 
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
     """Returns the reference book with the specified for the active network."""
-    return ReferenceBook(
-        **restv2helper.get_reference_book(bf_session, book_name))
+    return ReferenceBook.from_dict(
+        restv2helper.get_reference_book(bf_session, book_name))
 
 
 def bf_get_reference_library():
     # type: () -> ReferenceLibrary
     """Returns the reference library for the active network."""
-    return ReferenceLibrary(**restv2helper.get_reference_library(bf_session))
+    return ReferenceLibrary.from_dict(
+        restv2helper.get_reference_library(bf_session))
 
 
 def bf_get_work_status(wItemId):
