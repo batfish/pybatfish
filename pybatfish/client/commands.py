@@ -31,8 +31,8 @@ from requests import HTTPError
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer.base import get_answer_text
-from pybatfish.datamodel.answer.table import TableAnswerElement
-from pybatfish.datamodel.assertion import Assertion, AssertionType
+from pybatfish.datamodel.answer.table import TableAnswer
+from pybatfish.datamodel.primitives import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
 from pybatfish.exception import BatfishException
@@ -237,7 +237,7 @@ def bf_create_check(inQuestion, snapshot=None, reference_snapshot=None):
     :return: The modified template with exceptions and assertions added.
     """
     snapshot = bf_session.get_snapshot(snapshot)
-    if reference_snapshot is None and inQuestion.getDifferential():
+    if reference_snapshot is None and inQuestion.get_differential():
         raise ValueError(
             "reference_snapshot argument is required to create a differential check")
 
@@ -417,34 +417,35 @@ def bf_get_info():
 def bf_get_issue_config(major, minor):
     # type: (str, str) -> IssueConfig
     """Returns the issue config for the active network."""
-    return IssueConfig(
-        **restv2helper.get_issue_config(bf_session, major, minor))
+    return IssueConfig.from_dict(
+        restv2helper.get_issue_config(bf_session, major, minor))
 
 
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the set of node roles for the active network."""
-    return NodeRoleDimension(
-        **restv2helper.get_node_role_dimension(bf_session, dimension))
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the set of node roles for the active network."""
-    return NodeRolesData(**restv2helper.get_node_roles(bf_session))
+    return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
 
 
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
     """Returns the reference book with the specified for the active network."""
-    return ReferenceBook(
-        **restv2helper.get_reference_book(bf_session, book_name))
+    return ReferenceBook.from_dict(
+        restv2helper.get_reference_book(bf_session, book_name))
 
 
 def bf_get_reference_library():
     # type: () -> ReferenceLibrary
     """Returns the reference library for the active network."""
-    return ReferenceLibrary(**restv2helper.get_reference_library(bf_session))
+    return ReferenceLibrary.from_dict(
+        restv2helper.get_reference_library(bf_session))
 
 
 def bf_get_work_status(wItemId):
@@ -673,7 +674,7 @@ def bf_str_answer(answer_json):
     try:
         if "answerElements" in answer_json and "metadata" in \
                 answer_json["answerElements"][0]:
-            table_answer = TableAnswerElement(answer_json)
+            table_answer = TableAnswer(answer_json)
             return table_answer.table_data.to_string()
         else:
             return get_answer_text(answer_json)

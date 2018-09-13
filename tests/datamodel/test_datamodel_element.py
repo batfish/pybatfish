@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,24 +11,19 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import json
 
-from enum import Enum
-from typing import Any  # noqa: F401
-
-
-class AssertionType(str, Enum):
-    COUNT_EQUALS = "countequals"
-    COUNT_LESSTHAN = "countlessthan"
-    COUNT_MORETHAN = "countmorethan"
-    EQUALS = "equals"
+from pybatfish.datamodel import Interface, IssueType
+from pybatfish.util import BfJsonEncoder
 
 
-class Assertion(object):
+def test_as_dict():
+    assert Interface(hostname='host', interface='iface').dict() == {
+        'hostname': 'host', 'interface': 'iface'}
+    assert IssueType(major='lazer', minor='coal').dict() == {'major': 'lazer',
+                                                             'minor': 'coal'}
 
-    def __init__(self, assertion_type, expected_value):
-        # type: (AssertionType, Any) -> None
-        self.type = assertion_type
-        self.expect = expected_value
 
-    def __repr__(self):
-        return str(self)
+def test_json_serialization():
+    i = Interface(hostname='host', interface='iface')
+    assert BfJsonEncoder().encode(i) == json.dumps(i.dict())

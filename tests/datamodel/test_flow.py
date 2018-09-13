@@ -14,11 +14,9 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
-from pybatfish.datamodel.flow import Flow
 # test if a flow is deserialized properly and its string is fine
-from pybatfish.datamodel.flowtracehop import FlowTraceHop
+from pybatfish.datamodel.flow import Flow, FlowTraceHop
+import pytest
 
 
 def testFlowDeserialization():
@@ -50,7 +48,7 @@ def testFlowDeserialization():
     }
 
     # check deserialization
-    flow = Flow(hopDict)
+    flow = Flow.from_dict(hopDict)
     assert flow.srcIp == "5.5.1.1"
     assert flow.ingressInterface == "intface"
     assert flow.ingressVrf == "vrfAbc"
@@ -89,7 +87,7 @@ def testFlowDeserializationOptionalMissing():
         "tcpFlagsUrg": 0
     }
     # check deserialization
-    flow = Flow(hopDict)
+    flow = Flow.from_dict(hopDict)
     assert flow.srcIp == "5.5.1.1"
 
     # should convert to string without problems
@@ -98,14 +96,14 @@ def testFlowDeserializationOptionalMissing():
 
 def test_flow_trace_hop_no_transformed_flow():
     """Test we don't crash on missing or None values."""
-    FlowTraceHop(
+    FlowTraceHop.from_dict(
         {'edge': {'node1': 'dummy', 'node1interface': 'eth0',
                   'node2': 'router1', 'node2interface': 'Ethernet1'},
          'filterIn': None, 'filterOut': None, 'routes': [
             'StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1'],
          'transformedFlow': None})
 
-    FlowTraceHop(
+    FlowTraceHop.from_dict(
         {'edge': {'node1': 'dummy', 'node1interface': 'eth0',
                   'node2': 'router1', 'node2interface': 'Ethernet1'},
          'filterIn': None, 'filterOut': None, 'routes': [

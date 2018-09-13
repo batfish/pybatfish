@@ -14,9 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
+from pybatfish.datamodel.flow import FlowTraceHop
 import pytest
-
-from pybatfish.datamodel.flowtracehop import FlowTraceHop
 
 
 # test if a flowtracehop is deserialized properly and converted to string properly
@@ -57,7 +56,7 @@ def testFlowTraceHopDeserialization():
             "tcpFlagsUrg": 0
         }
     }
-    hop = FlowTraceHop(hopDict)
+    hop = FlowTraceHop.from_dict(hopDict)
     hopStr = str(hop)
 
     # check deserialization
@@ -81,7 +80,7 @@ def testFlowTraceHopDeserialization_noRoutes():
             "node2interface": "null_interface"
         }
     }
-    hop = FlowTraceHop(hopDict)
+    hop = FlowTraceHop.from_dict(hopDict)
 
     # check deserialization
     assert hop.routes == []

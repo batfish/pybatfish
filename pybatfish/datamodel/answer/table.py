@@ -21,7 +21,7 @@ from pybatfish.datamodel.answer.base import Answer, _get_display_value
 
 __all__ = [
     "ColumnMetadata",
-    "TableAnswerElement",
+    "TableAnswer",
     "Row",
     "TableMetadata"
 ]
@@ -43,9 +43,8 @@ class ColumnMetadata(object):
         self.isValue = dictionary.get("isValue", True)  # type: bool
 
 
-# TODO: better docstrings for accessible fields
-class TableAnswerElement(Answer):
-    """Batfish answer represented as a table."""
+class TableAnswer(Answer):
+    """Batfish answer in the form of a table."""
 
     def __init__(self, dictionary):
         if "answerElements" not in dictionary:
@@ -54,7 +53,7 @@ class TableAnswerElement(Answer):
             raise ValueError("Empty answer elements list in dictionary")
         if "metadata" not in dictionary["answerElements"][0]:
             raise ValueError("TableMetadata not found in dictionary")
-        super(TableAnswerElement, self).__init__(dictionary)
+        super(TableAnswer, self).__init__(dictionary)
         answer_element = dictionary["answerElements"][0]
         self.metadata = TableMetadata(answer_element["metadata"]) \
             # type: TableMetadata
@@ -98,14 +97,13 @@ class Row(dict):
 class TableMetadata:
     """Metadata for a Batfish table answer.
 
-    (See :py:class:`~pybatfish.datamodel.answers.table.TableAnswerElement`)
+    (See :py:class:`~pybatfish.datamodel.answers.table.TableAnswer`)
     """
 
     def __init__(self, dictionary):
         self.column_metadata = [ColumnMetadata(column) for column in
                                 dictionary.get("columnMetadata", [])] \
             # type: List[ColumnMetadata]
-        # TODO: parse displayHints, only storing for now
         self.hints = dictionary.get("displayHints")  # type: Optional[Dict]
 
     def get_column_names(self):

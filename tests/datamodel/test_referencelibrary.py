@@ -16,9 +16,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
+import pytest
 
 
 def test_empty_referencelibrary():
@@ -59,7 +58,7 @@ def test_non_empty_referencelibrary():
             }
         ]
     }
-    reference_library = ReferenceLibrary(**dict)
+    reference_library = ReferenceLibrary.from_dict(dict)
 
     assert len(reference_library.books) == 2
     assert reference_library.books[0].name == "book1"
@@ -88,7 +87,7 @@ def test_noderolesdata():
             },
         ]
     }
-    nodeRoleData = NodeRolesData(**dict)
+    nodeRoleData = NodeRolesData.from_dict(dict)
 
     assert len(nodeRoleData.roleDimensions) == 1
     assert len(nodeRoleData.roleDimensions[0].roles) == 2

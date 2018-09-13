@@ -22,23 +22,35 @@ from typing import Any, IO, Sized, Union  # noqa: F401
 import uuid
 import zipfile
 
-import jsonpickle
-
 from pybatfish.exception import QuestionValidationException
+import simplejson as json
 
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.
 _MAX_FILENAME_LEN = 150
 
 __all__ = [
+    'BfJsonEncoder',
     'conditional_str',
     'get_uuid',
-    'obj_to_str',
     'validate_json_path_regex',
     'validate_name',
     'validate_question_name',
     'zip_dir',
 ]
+
+
+class BfJsonEncoder(json.JSONEncoder):
+    """A default encoder for Batfish question and datamodel objects."""
+
+    def default(self, obj):
+        try:
+            # Return the dictionary representation, which is supported by
+            # questions and datamodel elements
+            return obj.dict()
+        except AttributeError:
+            # Fall back to default serialization for all other objects.
+            return json.JSONEncoder.default(self, obj)
 
 
 def conditional_str(prefix, obj, suffix):
@@ -57,18 +69,6 @@ def get_uuid():
     # type: () -> str
     """Generate and return a UUID as a string."""
     return str(uuid.uuid4())
-
-
-def obj_to_str(object):
-    # type: (object) -> str
-    """Converts an object into its JSON encoding.
-
-    This function is useful for classes that do not implement their own conversion to str or dict.
-    """
-    jsonpickle.set_encoder_options("json",
-                                   indent=2)  # TODO: figure out how to revert the options
-    ret_str = jsonpickle.encode(object, unpicklable=False)  # type: str
-    return ret_str
 
 
 def validate_json_path_regex(s):

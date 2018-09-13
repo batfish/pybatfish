@@ -16,14 +16,11 @@
 import json
 import re
 from string import Template
-from typing import Optional  # noqa: F401
+from typing import Dict, Optional  # noqa: F401
 
-from pybatfish.datamodel.acltrace import AclTrace
-from pybatfish.datamodel.answer.issue import Issue
-from pybatfish.datamodel.filelines import FileLines
-from pybatfish.datamodel.flow import Flow
-from pybatfish.datamodel.flowtrace import FlowTrace
-from pybatfish.datamodel.interface import Interface
+from pybatfish.datamodel.acl import AclTrace
+from pybatfish.datamodel.flow import Flow, FlowTrace
+from pybatfish.datamodel.primitives import FileLines, Interface, Issue
 
 __all__ = ['Answer']
 
@@ -39,10 +36,16 @@ class Answer(dict):
 
     def question_name(self):
         # type: () -> Optional[str]
+        """Return the name of the question that produced this answer."""
         if "question" in self and "instance" in self["question"] \
                 and "instanceName" in self["question"]["instance"]:
             return str(self["question"]["instance"]["instanceName"])
         return None
+
+    def dict(self):
+        # type: () -> Dict
+        """A dictionary representation of the full answer."""
+        return dict(self)
 
 
 def get_answer_text(answerJson):
@@ -145,21 +148,21 @@ def _get_display_value(schema, json_object):
         else:
             return output_list
     if schema == "AclTrace":
-        return AclTrace(json_object)
+        return AclTrace.from_dict(json_object)
     if schema == "FileLines":
-        return FileLines(json_object)
+        return FileLines.from_dict(json_object)
     if schema == "Flow":
-        return Flow(json_object)
+        return Flow.from_dict(json_object)
     if schema == "FlowTrace":
-        return FlowTrace(json_object)
+        return FlowTrace.from_dict(json_object)
     if schema == "Integer":
         return int(json_object)
     if schema == "Interface":
-        return Interface(json_object)
+        return Interface.from_dict(json_object)
     if schema == "Ip":
         return str(json_object)
     if schema == "Issue":
-        return Issue(json_object)
+        return Issue.from_dict(json_object)
     if schema == "Node":
         return json_object["name"]
     if schema == "Prefix":

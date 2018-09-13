@@ -18,21 +18,22 @@ from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 from inspect import getmembers
+import attr
 import json
 import os
 import re
 import sys
+from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from six import PY3, integer_types, string_types
-from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import (get_uuid, validate_json_path_regex,
-                            validate_question_name)
+from pybatfish.util import BfJsonEncoder, get_uuid, validate_json_path_regex, \
+    validate_question_name
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -46,16 +47,22 @@ __all__ = [
 ]
 
 
-class _QuestionEncoder(json.JSONEncoder):
-    """A default encoder for Batfish Question objects."""
+@attr.s(frozen=True)
+class AllowedValue(object):
+    """Describes a whitelisted value for a question parameter."""
 
-    def default(self, obj):
-        if isinstance(obj, QuestionBase):
-            # Return the dictionary representation of the Question.
-            return obj.dict()
+    name = attr.ib(type=str)
+    description = attr.ib(type=Optional[str], default=None)
 
-        # Fall back to default serialization for all other objects.
-        return json.JSONEncoder.default(self, obj)
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> AllowedValue
+        return AllowedValue(json_dict['name'], json_dict.get('description'))
+
+    def __str__(self):
+        if self.description is not None:
+            return "{}: {}".format(self.name, self.description)
+        return self.name
 
 
 class QuestionMeta(type):
@@ -120,7 +127,6 @@ class QuestionBase(object):
     def __init__(self, dictionary):
         self._dict = deepcopy(dictionary)
 
-    # TODO: document return values once converged on representation
     def answer(self, snapshot=None, reference_snapshot=None,
                include_one_table_keys=None, background=False):
         """
@@ -137,19 +143,21 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
+        :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
+            :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
         snapshot = bf_session.get_snapshot(snapshot)
-        if reference_snapshot is None and self.getDifferential():
+        if reference_snapshot is None and self.get_differential():
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
         if include_one_table_keys is not None:
-            self.setIncludeOneTableKeys(include_one_table_keys)
+            self._set_include_one_table_keys(include_one_table_keys)
         return _bf_answer_obj(self.json(),
                               parameters_str="{}",
-                              question_name=self.getName(),
+                              question_name=self.get_name(),
                               background=background,
                               snapshot=snapshot,
                               reference_snapshot=reference_snapshot)
@@ -158,90 +166,43 @@ class QuestionBase(object):
         """Return the dictionary representing this question."""
         return self._dict
 
-    def help(self):
-        """Display a help message about this question."""
-        print(self.__doc__)
-
     def json(self, **kwargs):
         """Return the json string representing this question.
 
         Keyword arguments passed to json.dumps with default assignments of
         sort_keys=True and indent=2
+
+        .. deprecated: 0.36.0
         """
         return json.dumps(self._dict, sort_keys=True, indent=2,
-                          cls=_QuestionEncoder, **kwargs)
+                          cls=BfJsonEncoder, **kwargs)
 
-    def load(self, moduleName=bfq.__name__):
-        """(Re)load this question as a default question."""
-        _load_question_dict(self._dict, module_name=moduleName)
-
-    def getDescription(self):
+    def get_description(self):
         """Return the short description of this question."""
         return self._dict['instance']['description']
 
-    def getDifferential(self):
+    def get_long_description(self):
+        """Return the long description of this question."""
+        return self._dict['instance']['longDescription']
+
+    def get_differential(self):
         """Return whether this question is to be asked differentially."""
         if 'differential' in self._dict:
             return self._dict['differential']
         else:
             return False
 
-    def getIncludeOneTableKeys(self):
+    def get_include_one_table_keys(self):
         """Return whether keys present in only one table should be included when computing answer table diffs."""
         return self._dict.get('includeOneTableKeys', False)
 
-    def getLongDescription(self):
-        """Return the long description of this question."""
-        return self._dict['instance']['longDescription']
-
-    def getName(self):
+    def get_name(self):
         """Return the name of this question."""
         return self._dict['instance']['instanceName']
 
-    def setDescription(self, name):
-        """Set the short description of this question.
-
-        You may want to call this before calling 'write' to distinguish this
-        question from its parent.
-        """
-        self._dict['instance']['description'] = name
-
-    def setDifferential(self, differential):
-        """Set the differential nature of this question."""
-        self._dict['differential'] = differential
-
-    def setIncludeOneTableKeys(self, include_one_table_keys):
+    def _set_include_one_table_keys(self, include_one_table_keys):
         """Set if keys present in only table should be included when computing table diffs."""
         self._dict['includeOneTableKeys'] = include_one_table_keys
-
-    def setLongDescription(self, name):
-        """Set the short description of this question.
-
-        You may want to call this before calling 'write' to distinguish this
-        question from its parent.
-        """
-        self._dict['instance']['longDescription'] = name
-
-    def setName(self, name):
-        """Set the name of this question.
-
-        Call this before calling 'write' if you want to add a new question
-        rather than override/overwrite an existing one.
-        """
-        self._dict['instance']['instanceName'] = name
-
-    def write(self, path, **kwargs):
-        """Write the json file representing this question using the provided name.
-
-        Keyword arguments are passed to json.dumps with default assignments of
-        `sort_keys=True` and `indent=2`.
-        Be sure to call :py:meth:`setName` first if you want to add a new
-        question rather than overwrite an existing one.
-
-        :param path: The path to which to write the output JSON file
-        """
-        with open(path, 'w') as outputFile:
-            outputFile.write(self.json(**kwargs))
 
 
 def list_questions(tags=None, question_module='pybatfish.question.bfq'):
@@ -480,10 +441,10 @@ def _compute_var_help(var_name, var_data):
                                                    False) else "",
         desc=var_data['description'])
 
-    allowed_values = var_data.get("allowedValues", [])
+    allowed_values = _build_allowed_values(var_data)
     if allowed_values:
-        param_line += "\n    Allowed values: ``{}``\n".format(
-            allowed_values)
+        param_line += "    Allowed values:\n      * {}\n".format(
+            '\n      * '.join([str(v) for v in allowed_values]))
 
     default_value = var_data.get("value", "")
     if default_value:
@@ -493,6 +454,16 @@ def _compute_var_help(var_name, var_data):
         name=var_name, type=var_data["type"])
 
     return param_line + type_line
+
+
+def _build_allowed_values(var_data):
+    values_dict = var_data.get('values')
+    if values_dict:
+        return [AllowedValue.from_dict(v) for v in values_dict]
+    old_values_dict = var_data.get('allowedValues')
+    if old_values_dict:
+        return [AllowedValue(v) for v in old_values_dict]
+    return None
 
 
 def load_questions(question_dir=None, from_server=False,
@@ -571,6 +542,7 @@ def _validate(questionJson):
                     errorMessage += "   Missing value for mandatory parameter: '" + variableName + "'\n"
 
             # Now do some dynamic type-checking
+            allowed_values = _build_allowed_values(variable)
             if 'value' in variable:
                 value = variable['value']
                 variableType = variable['type']
@@ -603,12 +575,12 @@ def _validate(questionJson):
                                     errorMessage += "   Length of value: '" + valueElement + "' for element : " + str(
                                         i) + " of parameter: '" + variableName + "' below minimum length: " + str(
                                         minLength) + "\n"
-                                elif 'allowedValues' in variable and valueElement not in \
-                                        variable['allowedValues']:
+                                elif allowed_values is not None and valueElement not in \
+                                        [v.name for v in allowed_values]:
                                     valid = False
-                                    errorMessage += "   Value: '" + valueElement + "' is not among allowed values " + json.dumps(
-                                        variable[
-                                            'allowedValues']) + " of parameter: '" + variableName + "'\n"
+                                    errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
+                                        valueElement, [v.name for v in allowed_values], variableName)
+
                 else:
                     typeValid, typeValidErrorMessage = _validateType(value,
                                                                      variableType)
@@ -622,12 +594,11 @@ def _validate(questionJson):
                         valid = False
                         errorMessage += "   Length of value: '" + value + "' for parameter: '" + variableName + "' below minimum length: " + str(
                             minLength) + "\n"
-                    elif 'allowedValues' in variable \
-                            and value not in variable['allowedValues']:
+                    elif allowed_values is not None and value not in \
+                            [v.name for v in allowed_values]:
                         valid = False
-                        errorMessage += "   Value: '" + value + "' is not among allowed values " + json.dumps(
-                            variable[
-                                'allowedValues']) + " of parameter: '" + variableName + "'\n"
+                        errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
+                            value, [v.name for v in allowed_values], variableName)
     if not valid:
         raise QuestionValidationException(errorMessage)
     return True

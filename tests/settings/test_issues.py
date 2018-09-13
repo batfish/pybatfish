@@ -16,9 +16,8 @@
 
 from __future__ import absolute_import, print_function
 
-import pytest
-
 from pybatfish.settings.issues import IssueConfig
+import pytest
 
 
 def test_issue_config():
@@ -43,7 +42,7 @@ def test_issue_config_missing_optional():
         "major": "maj",
         "minor": "min"
     }
-    IssueConfig(**dict)  # should not barf
+    IssueConfig.from_dict(dict)  # should not barf
 
 
 if __name__ == "__main__":

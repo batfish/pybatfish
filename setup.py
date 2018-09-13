@@ -27,7 +27,7 @@ from sys import version_info
 
 import pybatfish
 # Always prefer setuptools over distutils
-from setuptools import setup, find_packages
+from setuptools import find_packages, setup
 
 here = path.abspath(path.dirname(__file__))
 PY2 = version_info[0] == 2
@@ -99,10 +99,10 @@ setup(
     # your project is installed. For an analysis of "install_requires" vs pip's
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
-    install_requires=['deepdiff',
+    install_requires=['attrs>=18.1.0',
+                      'deepdiff',
                       'deprecated',
-                      'jsonpickle',
-                      'pandas',
+                      'pandas>=0.23.0',
                       'python-dateutil',
                       'requests',
                       'requests-toolbelt',
