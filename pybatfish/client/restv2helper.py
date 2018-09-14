@@ -123,6 +123,15 @@ def get_node_roles(session):
     urlTail = "/containers/{}/noderoles".format(session.network)
     return _get(session, urlTail)
 
+def get_question_settings(session, questionClass, jsonPath):
+    # type: (Session, string, list) -> Dict
+    """Gets the settings for a question class"""
+    if not session.network:
+        raise ValueError("Network must be set to write question class settings")
+    jsonPathTail = '/'.join(jsonPath) if jsonPath else ""
+    urlTail = "/containers/{}/settings/questions/{}/{}".format(session.network, questionClass, jsonPathTail)
+    return _get(session, urlTail)
+
 
 def get_reference_book(session, book_name):
     # type: (Session, str) -> Dict
@@ -143,6 +152,16 @@ def get_reference_library(session):
         raise ValueError("Network must be set to get the reference library")
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     return _get(session, urlTail)
+
+
+def write_question_settings(session, settings, questionClass, jsonPath):
+    # type: (Session, dict, string, list) -> None
+    """Writes settings for a question class."""
+    if not session.network:
+        raise ValueError("Network must be set to write question class settings")
+    jsonPathTail = '/'.join(jsonPath) if jsonPath else ""
+    urlTail = "/containers/{}/settings/questions/{}/{}".format(session.network, questionClass, jsonPathTail)
+    _put(session, urlTail, settings)
 
 
 def _delete(session, urlTail):
@@ -189,6 +208,23 @@ def _post(session, urlTail, object):
     url = session.get_base_url2() + urlTail
 
     response = requests.post(url, json=object, headers=headers,
+                             verify=session.verifySslCerts)
+    response.raise_for_status()
+    return None
+
+
+def _put(session, urlTail, object):
+    # type: (Session, str, Any) -> None
+    """Make an HTTP(s) PUT request to Batfish coordinator.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    url = session.get_base_url2() + urlTail
+
+    response = requests.put(url, json=object, headers=headers,
                              verify=session.verifySslCerts)
     response.raise_for_status()
     return None
