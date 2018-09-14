@@ -123,15 +123,6 @@ def get_node_roles(session):
     urlTail = "/containers/{}/noderoles".format(session.network)
     return _get(session, urlTail)
 
-def get_question_settings(session, question_class, json_path):
-    # type: (Session, string, list) -> Dict
-    """Gets the settings for a question class"""
-    if not session.network:
-        raise ValueError("Network must be set to write question class settings")
-    json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
-    return _get(session, url_tail)
-
 
 def get_reference_book(session, book_name):
     # type: (Session, str) -> Dict
@@ -152,6 +143,16 @@ def get_reference_library(session):
         raise ValueError("Network must be set to get the reference library")
     urlTail = "/containers/{}/referencelibrary".format(session.network)
     return _get(session, urlTail)
+
+
+def read_question_settings(session, question_class, json_path):
+    # type: (Session, string, list) -> Dict
+    """Retrieves the settings for a question class."""
+    if not session.network:
+        raise ValueError("Network must be set to read question class settings")
+    json_path_tail = '/'.join(json_path) if json_path else ""
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    return _get(session, url_tail)
 
 
 def write_question_settings(session, settings, question_class, json_path):
@@ -225,6 +226,6 @@ def _put(session, url_tail, object):
     url = session.get_base_url2() + url_tail
 
     response = requests.put(url, json=object, headers=headers,
-                             verify=session.verifySslCerts)
+                            verify=session.verifySslCerts)
     response.raise_for_status()
     return None
