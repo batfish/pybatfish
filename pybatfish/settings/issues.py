@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Optional  # noqa: F401
+from typing import Dict, Optional  # noqa: F401
 
 import attr
 
@@ -44,6 +44,7 @@ class IssueConfig(object):
 
     @classmethod
     def from_dict(cls, json_dict):
+        # type: (Dict) -> IssueConfig
         return IssueConfig(json_dict["major"], json_dict["minor"],
                            json_dict.get("severity"),
                            json_dict.get("url"))
