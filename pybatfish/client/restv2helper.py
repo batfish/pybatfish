@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -146,7 +146,7 @@ def get_reference_library(session):
 
 
 def read_question_settings(session, question_class, json_path):
-    # type: (Session, string, list) -> Dict
+    # type: (Session, str, Optional[List[str]]) -> Dict[str, Any]
     """Retrieves the settings for a question class."""
     if not session.network:
         raise ValueError("Network must be set to read question class settings")
@@ -156,7 +156,7 @@ def read_question_settings(session, question_class, json_path):
 
 
 def write_question_settings(session, settings, question_class, json_path):
-    # type: (Session, dict, string, list) -> None
+    # type: (Session, Dict[str, Any], str, Optional[List[str]]) -> None
     """Writes settings for a question class."""
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
@@ -182,7 +182,7 @@ def _delete(session, urlTail):
 
 
 def _get(session, urlTail):
-    # type: (Session, str) -> Dict
+    # type: (Session, str) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed

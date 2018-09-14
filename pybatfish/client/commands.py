@@ -700,6 +700,7 @@ def _bf_get_question_templates():
 
 
 def bf_read_question_settings(question_class, json_path=None):
+    # type: (str, Optional[List[str]]) -> Dict[str, Any]
     """
     Retrieves the network-wide JSON settings tree for the specified question class.
 
@@ -885,6 +886,7 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):
+    # type: (Dict[str, Any], str, Optional[List[str]]) -> None
     """
     Write the network-wide JSON settings tree for the specified question class.
 
