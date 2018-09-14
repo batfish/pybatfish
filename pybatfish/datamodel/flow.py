@@ -209,7 +209,7 @@ class HeaderConstraints(DataModelElement):
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
     :ivar icmpTypes: List of integer ICMP types
-    :ivar flowStates: List of flows states (e.g., "new", "established")
+    :ivar flowStates: List of flow states (e.g., "new", "established")
 
 
     Lists of values in each fields are subject to a logical "OR":
@@ -224,7 +224,7 @@ class HeaderConstraints(DataModelElement):
 
     means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
 
-    Any ``None`` values mean unconstrained values.
+    Any ``None`` values will be treated as unconstrained.
     """
 
     # Order params in likelihood of specification
