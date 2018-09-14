@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import requests
 from requests.adapters import HTTPAdapter
@@ -145,6 +145,26 @@ def get_reference_library(session):
     return _get(session, urlTail)
 
 
+def read_question_settings(session, question_class, json_path):
+    # type: (Session, str, Optional[List[str]]) -> Dict[str, Any]
+    """Retrieves the settings for a question class."""
+    if not session.network:
+        raise ValueError("Network must be set to read question class settings")
+    json_path_tail = '/'.join(json_path) if json_path else ""
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    return _get(session, url_tail)
+
+
+def write_question_settings(session, settings, question_class, json_path):
+    # type: (Session, Dict[str, Any], str, Optional[List[str]]) -> None
+    """Writes settings for a question class."""
+    if not session.network:
+        raise ValueError("Network must be set to write question class settings")
+    json_path_tail = '/'.join(json_path) if json_path else ""
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    _put(session, url_tail, settings)
+
+
 def _delete(session, urlTail):
     # type: (Session, str) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
@@ -162,7 +182,7 @@ def _delete(session, urlTail):
 
 
 def _get(session, urlTail):
-    # type: (Session, str) -> Dict
+    # type: (Session, str) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -190,5 +210,22 @@ def _post(session, urlTail, object):
 
     response = requests.post(url, json=object, headers=headers,
                              verify=session.verifySslCerts)
+    response.raise_for_status()
+    return None
+
+
+def _put(session, url_tail, object):
+    # type: (Session, str, Any) -> None
+    """Make an HTTP(s) PUT request to Batfish coordinator.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    url = session.get_base_url2() + url_tail
+
+    response = requests.put(url, json=object, headers=headers,
+                            verify=session.verifySslCerts)
     response.raise_for_status()
     return None

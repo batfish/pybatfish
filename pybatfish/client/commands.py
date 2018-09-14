@@ -97,6 +97,7 @@ __all__ = ['bf_add_analysis',
            'bf_list_testrigs',
            'bf_logger',
            'bf_print_answer',
+           'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
            'bf_set_container',
@@ -107,7 +108,8 @@ __all__ = ['bf_add_analysis',
            'bf_sync_snapshots_sync_now',
            'bf_sync_snapshots_update_settings',
            'bf_sync_testrigs_sync_now',
-           'bf_sync_testrigs_update_settings']
+           'bf_sync_testrigs_update_settings',
+           'bf_write_question_settings']
 
 
 def bf_add_analysis(analysisName, questionDirectory):
@@ -697,6 +699,20 @@ def _bf_get_question_templates():
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
 
 
+def bf_read_question_settings(question_class, json_path=None):
+    # type: (str, Optional[List[str]]) -> Dict[str, Any]
+    """
+    Retrieves the network-wide JSON settings tree for the specified question class.
+
+    :param question_className: The class of question whose settings are to be read
+    :type question_className: string
+    :param json_path: If supplied, return only the subtree reached by successively
+    traversing each key in json_path starting from the root.
+    :type json_path: list
+    """
+    return restv2helper.read_question_settings(bf_session, question_class, json_path)
+
+
 def bf_run_analysis(analysisName, snapshot, reference_snapshot=None):
     # type: (str, str, Optional[str]) -> str
     workItem = workhelper.get_workitem_run_analysis(bf_session, analysisName,
@@ -867,6 +883,23 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
     .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
     """
     return bf_sync_snapshots_update_settings(pluginId, settingsDict)
+
+
+def bf_write_question_settings(settings, question_class, json_path=None):
+    # type: (Dict[str, Any], str, Optional[List[str]]) -> None
+    """
+    Write the network-wide JSON settings tree for the specified question class.
+
+    :param settings: The JSON representation of the settings to be written
+    :type settings: dict
+    :param question_class: The class of question to configure
+    :type question_class: string
+    :param json_path: If supplied, write settings to the subtree reached by successively
+    traversing each key in json_path starting from the root. Any absent keys along
+    the path will be created.
+    :type json_path: list
+    """
+    restv2helper.write_question_settings(bf_session, settings, question_class, json_path)
 
 
 def _check_network():
