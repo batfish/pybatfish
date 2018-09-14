@@ -16,15 +16,15 @@
 
 from __future__ import absolute_import, print_function
 
-from copy import deepcopy
-from inspect import getmembers
+import json
 import os
 import re
 import sys
+from copy import deepcopy
+from inspect import getmembers
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
 import attr
-import simplejson as json
 from six import PY3, integer_types, string_types
 
 from pybatfish.client.commands import (_bf_answer_obj,

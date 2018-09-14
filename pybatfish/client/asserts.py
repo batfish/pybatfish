@@ -20,8 +20,8 @@ fails.
 """
 
 import operator
-from typing import Any, Dict, Iterable  # noqa: F401
 import warnings
+from typing import Any, Dict, Iterable  # noqa: F401
 
 from deepdiff import DeepDiff
 
