@@ -123,14 +123,14 @@ def get_node_roles(session):
     urlTail = "/containers/{}/noderoles".format(session.network)
     return _get(session, urlTail)
 
-def get_question_settings(session, questionClass, jsonPath):
+def get_question_settings(session, question_class, json_path):
     # type: (Session, string, list) -> Dict
     """Gets the settings for a question class"""
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
-    jsonPathTail = '/'.join(jsonPath) if jsonPath else ""
-    urlTail = "/containers/{}/settings/questions/{}/{}".format(session.network, questionClass, jsonPathTail)
-    return _get(session, urlTail)
+    json_path_tail = '/'.join(json_path) if json_path else ""
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    return _get(session, url_tail)
 
 
 def get_reference_book(session, book_name):
@@ -154,14 +154,14 @@ def get_reference_library(session):
     return _get(session, urlTail)
 
 
-def write_question_settings(session, settings, questionClass, jsonPath):
+def write_question_settings(session, settings, question_class, json_path):
     # type: (Session, dict, string, list) -> None
     """Writes settings for a question class."""
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
-    jsonPathTail = '/'.join(jsonPath) if jsonPath else ""
-    urlTail = "/containers/{}/settings/questions/{}/{}".format(session.network, questionClass, jsonPathTail)
-    _put(session, urlTail, settings)
+    json_path_tail = '/'.join(json_path) if json_path else ""
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    _put(session, url_tail, settings)
 
 
 def _delete(session, urlTail):
@@ -213,7 +213,7 @@ def _post(session, urlTail, object):
     return None
 
 
-def _put(session, urlTail, object):
+def _put(session, url_tail, object):
     # type: (Session, str, Any) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
@@ -222,7 +222,7 @@ def _put(session, urlTail, object):
     """
     headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
-    url = session.get_base_url2() + urlTail
+    url = session.get_base_url2() + url_tail
 
     response = requests.put(url, json=object, headers=headers,
                              verify=session.verifySslCerts)

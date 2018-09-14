@@ -436,18 +436,18 @@ def bf_get_node_roles():
     return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
 
 
-def bf_get_question_settings(questionClass, jsonPath=None):
+def bf_get_question_settings(question_class, json_path=None):
     """
     Gets the network-wide JSON settings for the specified question class at the
     end of the path computed from the specified components. If no components are
     specified, gets all settings for the specified question class.
 
-    :param questionClassName: The class of question whose settings are to be read
-    :type questionClassName: string
-    :param jsonPath: The list of component strings comprising the path from which to read the settings
-    :type jsonPath: list
+    :param question_className: The class of question whose settings are to be read
+    :type question_className: string
+    :param json_path: The list of component strings comprising the path from which to read the settings
+    :type json_path: list
     """
-    return restv2helper.get_question_settings(bf_session, questionClass, jsonPath)
+    return restv2helper.get_question_settings(bf_session, question_class, json_path)
 
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
@@ -883,7 +883,7 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
     """
     return bf_sync_snapshots_update_settings(pluginId, settingsDict)
 
-def bf_write_question_settings(settings, questionClass, jsonPath=None):
+def bf_write_question_settings(settings, question_class, json_path=None):
     """
     Write the network-wide JSON settings for the specified question class at the
     end of the path computed from the specified components. Any absent
@@ -892,12 +892,12 @@ def bf_write_question_settings(settings, questionClass, jsonPath=None):
 
     :param settings: The JSON representation of the settings to be written
     :type settings: dict
-    :param questionClassName: The class of question to configure
-    :type questionClassName: string
-    :param jsonPath: The list of component strings comprising the path at which to write the settings
-    :type jsonPath: list
+    :param question_className: The class of question to configure
+    :type question_className: string
+    :param json_path: The list of component strings comprising the path at which to write the settings
+    :type json_path: list
     """
-    restv2helper.write_question_settings(bf_session, settings, questionClass, jsonPath)
+    restv2helper.write_question_settings(bf_session, settings, question_class, json_path)
 
 def _check_network():
     """Check if current network is set."""
