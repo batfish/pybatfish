@@ -18,13 +18,13 @@ from __future__ import absolute_import, print_function
 
 from copy import deepcopy
 from inspect import getmembers
-import attr
-import json
 import os
 import re
 import sys
 from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
 
+import attr
+import simplejson as json
 from six import PY3, integer_types, string_types
 
 from pybatfish.client.commands import (_bf_answer_obj,
@@ -579,7 +579,9 @@ def _validate(questionJson):
                                         [v.name for v in allowed_values]:
                                     valid = False
                                     errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
-                                        valueElement, [v.name for v in allowed_values], variableName)
+                                        valueElement,
+                                        [v.name for v in allowed_values],
+                                        variableName)
 
                 else:
                     typeValid, typeValidErrorMessage = _validateType(value,
@@ -598,7 +600,8 @@ def _validate(questionJson):
                             [v.name for v in allowed_values]:
                         valid = False
                         errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
-                            value, [v.name for v in allowed_values], variableName)
+                            value, [v.name for v in allowed_values],
+                            variableName)
     if not valid:
         raise QuestionValidationException(errorMessage)
     return True

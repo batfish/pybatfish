@@ -37,7 +37,6 @@ for root, dirs, files in walk(_jupyter_nb_dir):
         if filename.endswith('.testout'):
             remove(join(root, filename))
 
-
 assert len(notebook_files) > 0
 
 
@@ -65,11 +64,13 @@ def _assert_cell_no_errors(c):
     """Asserts that the given cell has no error outputs."""
     if c['cell_type'] != 'code':
         return
-    errors = ["Error name: {}, Error Value: {}".format(o["ename"], o["evalue"])
-              for o in c['outputs']
-              if o['output_type'] == 'error']
+    errors = ["Error name: {}, Error Value: {}, trace: {}".format(
+        o["ename"], o["evalue"], "\n".join(o.get('traceback')))
+        for o in c['outputs']
+        if o['output_type'] == 'error']
 
-    assert not errors, errors
+    if errors:
+        pytest.fail("Found notebook errors: {}".format("\n".join(errors)))
 
 
 def _compare_data(original_data, executed_data):

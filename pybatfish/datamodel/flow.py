@@ -18,7 +18,7 @@ import attr
 
 from .primitives import DataModelElement, Edge
 
-__all__ = ['Flow', 'FlowTrace', 'FlowTraceHop']
+__all__ = ['Flow', 'FlowTrace', 'FlowTraceHop', 'HeaderConstraints']
 
 
 @attr.s(frozen=True)
@@ -190,3 +190,71 @@ class FlowTraceHop(DataModelElement):
             ret_str += "\n    Transformed flow: {}".format(
                 self.transformedFlow)
         return ret_str
+
+
+@attr.s(frozen=True)
+class HeaderConstraints(DataModelElement):
+    """Constraints on an IPv4 packet header space.
+
+    Specify constraints on packet headers by specifying lists of allowed values
+    in each field of IP packet.
+
+    :ivar srcIps: Source location/IP
+    :vartype srcIps: str
+    :ivar dstIPs: Destination location/IP
+    :vartype dstIps: str
+    :ivar srcPorts: Source ports as list of ranges (e.g., ``["22-22", "53-99"]``)
+    :ivar dstPorts: Destination ports as list of ranges, (e.g., ``["22-22", "53-99"]``)
+    :ivar applications: Shorthands for application protocols (e.g., ``SSH``, ``DNS``, ``SNMP``)
+    :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
+    :ivar icmpCodes: List of integer ICMP codes
+    :ivar icmpTypes: List of integer ICMP types
+    :ivar flowStates: List of flow states (e.g., "new", "established")
+
+
+    Lists of values in each fields are subject to a logical "OR":
+
+    >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
+
+    means allow TCP OR UDP.
+
+    Different fields are ANDed together:
+
+    >>> HeaderConstraints(srcIps="1.1.1.1", dstIps="2.2.2.2", applications=["SSH"])
+
+    means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
+
+    Any ``None`` values will be treated as unconstrained.
+    """
+
+    # Order params in likelihood of specification
+    srcIps = attr.ib(default=None, type=Optional[str])
+    dstIps = attr.ib(default=None, type=Optional[str])
+    srcPorts = attr.ib(default=None, type=Optional[List[str]])
+    dstPorts = attr.ib(default=None, type=Optional[List[str]])
+    ipProtocols = attr.ib(default=None, type=Optional[List[str]])
+    applications = attr.ib(default=None, type=Optional[List[str]])
+    icmpCodes = attr.ib(default=None, type=Optional[List[str]])
+    icmpTypes = attr.ib(default=None, type=Optional[List[str]])
+    flowStates = attr.ib(default=None, type=Optional[List[str]])
+    ecns = attr.ib(default=None, type=Optional[List[str]])
+    dscps = attr.ib(default=None, type=Optional[List[str]])
+    packetLengths = attr.ib(default=None, type=Optional[List[str]])
+    fragmentOffsets = attr.ib(default=None, type=Optional[List[str]])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return HeaderConstraints(
+            srcIps=json_dict.get("srcIps"),
+            dstIps=json_dict.get("dstIps"),
+            srcPorts=json_dict.get("srcPorts"),
+            dstPorts=json_dict.get("dstPorts"),
+            ipProtocols=json_dict.get("ipProtocols"),
+            applications=json_dict.get("applications"),
+            icmpCodes=json_dict.get("icmpCodes"),
+            icmpTypes=json_dict.get("icmpTypes"),
+            flowStates=json_dict.get("flowStates"),
+            ecns=json_dict.get("ecns"),
+            dscps=json_dict.get("dscps"),
+            packetLengths=json_dict.get("packetLengths"),
+            fragmentOffsets=json_dict.get("fragmentOffsets"))
