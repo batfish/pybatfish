@@ -44,10 +44,13 @@ for file in jupyter_notebooks/*.ipynb; do
     jupyter nbconvert "$file" --to python --stdout --TemplateExporter.exclude_markdown=True | flake8 - --select=E,W --ignore=E501,W391
 done
 
-
 ### Run unit tests that don't require running instance of batfish
 echo -e "\n  ..... Running unit tests with pytest"
 python setup.py test
+
+### Build docs. This will fail on warnings
+echo -e "\n  ..... Building documentation"
+python setup.py build_sphinx
 
 #### Running integration tests (require batfish)
 echo -e "\n  ..... Running python ref tests with batfish"

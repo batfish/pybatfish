@@ -16,7 +16,6 @@ for building and running Batfish service.
    questions.rst
    datamodel.rst
    api.rst
-   .. dev.rst
 
 Indices and tables
 ==================

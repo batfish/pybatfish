@@ -25,9 +25,10 @@ from codecs import open
 from os import path
 from sys import version_info
 
-import pybatfish
 # Always prefer setuptools over distutils
 from setuptools import find_packages, setup
+
+import pybatfish
 
 here = path.abspath(path.dirname(__file__))
 PY2 = version_info[0] == 2
@@ -115,8 +116,15 @@ setup(
     # for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        'dev': ['check-manifest', 'flake8', 'flake8-docstrings', 'jupyter',
-                'nbformat', 'nbconvert', 'pytz'] + \
+        'dev': ['check-manifest',
+                'flake8',
+                'flake8-docstrings',
+                'jupyter',
+                'nbformat',
+                'nbconvert',
+                'sphinx',
+                'sphinx_rtd_theme',
+                'pytz'] + \
                (['mypy'] if not PY2 else []),
         'test': ['coverage', 'pytz'],
     },
