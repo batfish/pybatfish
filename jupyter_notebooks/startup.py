@@ -25,7 +25,11 @@ def display_html(df):
     left-aligns the text.
     """
     pd.set_option('max_colwidth', -1)
-    display(df.replace('\n', '<br>', regex=True).replace('  ', '&nbsp;&nbsp;',
+    # workaround for Pandas bug in Python 2.7 for empty frames
+    if df.size == 0:
+        display(df)
+    else:
+        display(df.replace('\n', '<br>', regex=True).replace('  ', '&nbsp;&nbsp;',
                                                          regex=True).style.set_properties(
-        **{'text-align': 'left', 'vertical-align': 'top'}))
+            **{'text-align': 'left', 'vertical-align': 'top'}))
     pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
