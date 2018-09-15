@@ -14,9 +14,10 @@
 
 from __future__ import absolute_import, print_function
 
-# test if a flow is deserialized properly and its string is fine
-from pybatfish.datamodel.flow import Flow, FlowTraceHop
+import attr
 import pytest
+
+from pybatfish.datamodel.flow import Flow, FlowTraceHop, HeaderConstraints
 
 
 def testFlowDeserialization():
@@ -108,6 +109,16 @@ def test_flow_trace_hop_no_transformed_flow():
                   'node2': 'router1', 'node2interface': 'Ethernet1'},
          'filterIn': None, 'filterOut': None, 'routes': [
             'StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1']})
+
+
+def test_header_constraints_serialization():
+    hc = HeaderConstraints()
+    hcd = hc.dict()
+    for field in attr.fields(HeaderConstraints):
+        assert hcd[field.name] is None
+
+    hc = HeaderConstraints(srcIps="1.1.1.1")
+    assert hc.dict()["srcIps"] == "1.1.1.1"
 
 
 if __name__ == "__main__":
