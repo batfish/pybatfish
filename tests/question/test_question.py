@@ -196,9 +196,9 @@ def test_compute_var_help_with_allowed_values():
         "type": "boolean"
     }
     expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:"\
-                    + "\n      * v1: v1 description" \
-                    + "\n      * v2: v2 description" \
+                    + "\n    Allowed values:\n" \
+                    + "\n    * v1: v1 description" \
+                    + "\n    * v2: v2 description" \
                     + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
@@ -212,8 +212,8 @@ def test_compute_var_help_with_new_and_old_allowed_values():
         "type": "boolean"
     }
     expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:"\
-                    + "\n      * v1: allowed value description" \
+                    + "\n    Allowed values:\n" \
+                    + "\n    * v1: allowed value description" \
                     + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
@@ -226,8 +226,8 @@ def test_compute_var_help_with_old_allowed_values():
         "type": "boolean"
     }
     expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:"\
-                    + "\n      * v1" \
+                    + "\n    Allowed values:\n" \
+                    + "\n    * v1" \
                     + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
