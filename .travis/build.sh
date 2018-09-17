@@ -53,8 +53,11 @@ echo -e "\n  ..... Building documentation"
 python setup.py build_sphinx
 
 #### Running integration tests (require batfish)
-echo -e "\n  ..... Running python ref tests with batfish"
+echo -e "\n  ..... Running python integration with batfish"
 retcode=0
 py.test tests/integration || retcode=$?
+
+echo -e "\n  ..... Running doctests"
+py.test docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules
 
 exit ${retcode}
