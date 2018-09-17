@@ -28,6 +28,7 @@ from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     ReferenceBook)
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
+from pybatfish.util import BfJsonEncoder
 from .options import Options
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
@@ -151,7 +152,9 @@ def read_question_settings(session, question_class, json_path):
     if not session.network:
         raise ValueError("Network must be set to read question class settings")
     json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network,
+                                                                question_class,
+                                                                json_path_tail)
     return _get(session, url_tail)
 
 
@@ -161,7 +164,9 @@ def write_question_settings(session, settings, question_class, json_path):
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
     json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network, question_class, json_path_tail)
+    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network,
+                                                                question_class,
+                                                                json_path_tail)
     _put(session, url_tail, settings)
 
 
@@ -208,7 +213,9 @@ def _post(session, urlTail, object):
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + urlTail
 
-    response = requests.post(url, json=object, headers=headers,
+    response = requests.post(url,
+                             json=BfJsonEncoder().default(object),
+                             headers=headers,
                              verify=session.verifySslCerts)
     response.raise_for_status()
     return None
@@ -225,7 +232,9 @@ def _put(session, url_tail, object):
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
-    response = requests.put(url, json=object, headers=headers,
+    response = requests.put(url,
+                            json=BfJsonEncoder().default(object),
+                            headers=headers,
                             verify=session.verifySslCerts)
     response.raise_for_status()
     return None
