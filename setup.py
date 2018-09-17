@@ -122,9 +122,10 @@ setup(
                 'jupyter',
                 'nbformat',
                 'nbconvert',
+                'pytz',
                 'sphinx',
                 'sphinx_rtd_theme',
-                'pytz'] + \
+                ] + \
                (['mypy'] if not PY2 else []),
         'test': ['coverage', 'pytz'],
     },
