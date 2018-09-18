@@ -201,7 +201,7 @@ class HeaderConstraints(DataModelElement):
 
     :ivar srcIps: Source location/IP
     :vartype srcIps: str
-    :ivar dstIPs: Destination location/IP
+    :ivar dstIps: Destination location/IP
     :vartype dstIps: str
     :ivar srcPorts: Source ports as list of ranges (e.g., ``["22-22", "53-99"]``)
     :ivar dstPorts: Destination ports as list of ranges, (e.g., ``["22-22", "53-99"]``)
@@ -215,14 +215,16 @@ class HeaderConstraints(DataModelElement):
     Lists of values in each fields are subject to a logical "OR":
 
     >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
-    HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None, icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
+    HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None,
+    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
 
     means allow TCP OR UDP.
 
     Different fields are ANDed together:
 
     >>> HeaderConstraints(srcIps="1.1.1.1", dstIps="2.2.2.2", applications=["SSH"])
-    HeaderConstraints(srcIps='1.1.1.1', dstIps='2.2.2.2', srcPorts=None, dstPorts=None, ipProtocols=None, applications=['SSH'], icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
+    HeaderConstraints(srcIps='1.1.1.1', dstIps='2.2.2.2', srcPorts=None, dstPorts=None, ipProtocols=None, applications=['SSH'],
+    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
 
     means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
 
