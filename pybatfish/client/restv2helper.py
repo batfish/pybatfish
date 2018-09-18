@@ -42,14 +42,22 @@ _requests_session.mount("http", HTTPAdapter(
         connect=Options.max_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor)))
 
+_encoder = BfJsonEncoder()
+
+__all__ = ['add_issue_config', 'add_node_role_dimension', 'add_reference_book',
+           'delete_issue_config', 'get_issue_config', 'get_network',
+           'get_node_role_dimension', 'get_node_roles', 'get_reference_book',
+           'get_reference_library', 'read_question_settings',
+           'write_question_settings']
+
 
 def add_issue_config(session, issue_config):
     # type: (Session, IssueConfig) -> None
     """Adds the issue configuration to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add issue config")
-    urlTail = "/containers/{}/settings/issues".format(session.network)
-    _post(session, urlTail, issue_config)
+    url_tail = "/containers/{}/settings/issues".format(session.network)
+    _post(session, url_tail, issue_config)
 
 
 def add_node_role_dimension(session, dimension):
@@ -57,8 +65,8 @@ def add_node_role_dimension(session, dimension):
     """Adds a new node role dimension to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add node role dimension")
-    urlTail = "/containers/{}/noderoles".format(session.network)
-    _post(session, urlTail, dimension)
+    url_tail = "/containers/{}/noderoles".format(session.network)
+    _post(session, url_tail, dimension)
 
 
 def add_reference_book(session, book):
@@ -66,8 +74,8 @@ def add_reference_book(session, book):
     """Adds a new reference book to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add reference book")
-    urlTail = "/containers/{}/referencelibrary".format(session.network)
-    _post(session, urlTail, book)
+    url_tail = "/containers/{}/referencelibrary".format(session.network)
+    _post(session, url_tail, book)
 
 
 def delete_issue_config(session, major, minor):
@@ -78,10 +86,10 @@ def delete_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to delete issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to delete issue config")
-    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
-                                                            major,
-                                                            minor)
-    return _delete(session, urlTail)
+    url_tail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                             major,
+                                                             minor)
+    return _delete(session, url_tail)
 
 
 def get_issue_config(session, major, minor):
@@ -92,10 +100,10 @@ def get_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to get issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to get issue config")
-    urlTail = "/containers/{}/settings/issues/{}/{}".format(session.network,
-                                                            major,
-                                                            minor)
-    return _get(session, urlTail)
+    url_tail = "/containers/{}/settings/issues/{}/{}".format(session.network,
+                                                             major,
+                                                             minor)
+    return _get(session, url_tail)
 
 
 def get_network(session, network):
@@ -112,8 +120,8 @@ def get_node_role_dimension(session, dimension):
         raise ValueError("Container must be set to get node roles")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
-    urlTail = "/containers/{}/noderoles/{}".format(session.network, dimension)
-    return _get(session, urlTail)
+    url_tail = "/containers/{}/noderoles/{}".format(session.network, dimension)
+    return _get(session, url_tail)
 
 
 def get_node_roles(session):
@@ -121,8 +129,8 @@ def get_node_roles(session):
     """Gets the node roles data for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    urlTail = "/containers/{}/noderoles".format(session.network)
-    return _get(session, urlTail)
+    url_tail = "/containers/{}/noderoles".format(session.network)
+    return _get(session, url_tail)
 
 
 def get_reference_book(session, book_name):
@@ -132,9 +140,9 @@ def get_reference_book(session, book_name):
         raise ValueError("Network must be set to get a reference book")
     if not book_name:
         raise ValueError("Book name must be a non-empty string")
-    urlTail = "/containers/{}/referencelibrary/{}".format(session.network,
-                                                          book_name)
-    return _get(session, urlTail)
+    url_tail = "/containers/{}/referencelibrary/{}".format(session.network,
+                                                           book_name)
+    return _get(session, url_tail)
 
 
 def get_reference_library(session):
@@ -142,8 +150,8 @@ def get_reference_library(session):
     """Gets the reference library for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get the reference library")
-    urlTail = "/containers/{}/referencelibrary".format(session.network)
-    return _get(session, urlTail)
+    url_tail = "/containers/{}/referencelibrary".format(session.network)
+    return _get(session, url_tail)
 
 
 def read_question_settings(session, question_class, json_path):
@@ -170,7 +178,7 @@ def write_question_settings(session, settings, question_class, json_path):
     _put(session, url_tail, settings)
 
 
-def _delete(session, urlTail):
+def _delete(session, url_tail):
     # type: (Session, str) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
 
@@ -179,14 +187,14 @@ def _delete(session, urlTail):
     """
     headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
-    url = session.get_base_url2() + urlTail
+    url = session.get_base_url2() + url_tail
 
     response = requests.delete(url, headers=headers,
                                verify=session.verifySslCerts)
     response.raise_for_status()
 
 
-def _get(session, urlTail):
+def _get(session, url_tail):
     # type: (Session, str) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator.
 
@@ -195,14 +203,14 @@ def _get(session, urlTail):
     """
     headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
-    url = session.get_base_url2() + urlTail
+    url = session.get_base_url2() + url_tail
 
     response = requests.get(url, headers=headers, verify=session.verifySslCerts)
     response.raise_for_status()
     return dict(response.json())
 
 
-def _post(session, urlTail, object):
+def _post(session, url_tail, obj):
     # type: (Session, str, Any) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
@@ -211,17 +219,17 @@ def _post(session, urlTail, object):
     """
     headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
-    url = session.get_base_url2() + urlTail
+    url = session.get_base_url2() + url_tail
 
     response = requests.post(url,
-                             json=BfJsonEncoder().default(object),
+                             json=_encoder.default(obj),
                              headers=headers,
                              verify=session.verifySslCerts)
     response.raise_for_status()
     return None
 
 
-def _put(session, url_tail, object):
+def _put(session, url_tail, obj):
     # type: (Session, str, Any) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
@@ -233,7 +241,7 @@ def _put(session, url_tail, object):
     url = session.get_base_url2() + url_tail
 
     response = requests.put(url,
-                            json=BfJsonEncoder().default(object),
+                            json=_encoder.default(obj),
                             headers=headers,
                             verify=session.verifySslCerts)
     response.raise_for_status()
