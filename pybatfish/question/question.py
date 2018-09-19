@@ -722,6 +722,8 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
+    elif expectedType == 'headerConstraint':
+        return True, None
     else:
         bf_logger.warn(
             "WARNING: skipping validation for unknown argument type {}".format(
