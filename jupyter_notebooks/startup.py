@@ -6,7 +6,8 @@ import pandas as pd
 
 from pybatfish.client.commands import *
 # noinspection PyUnresolvedReferences
-from pybatfish.question import bfq, list_questions, load_questions  # noqa F401
+from pybatfish.datamodel.flow import HeaderConstraints
+from pybatfish.question import bfq, load_questions  # noqa F401
 
 bf_logger.setLevel(logging.WARN)
 
