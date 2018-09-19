@@ -704,13 +704,15 @@ def bf_read_question_settings(question_class, json_path=None):
     """
     Retrieves the network-wide JSON settings tree for the specified question class.
 
-    :param question_className: The class of question whose settings are to be read
-    :type question_className: string
+    :param question_class: The class of question whose settings are to be read
+    :type question_class: string
     :param json_path: If supplied, return only the subtree reached by successively
-    traversing each key in json_path starting from the root.
+        traversing each key in json_path starting from the root.
     :type json_path: list
+
     """
-    return restv2helper.read_question_settings(bf_session, question_class, json_path)
+    return restv2helper.read_question_settings(bf_session, question_class,
+                                               json_path)
 
 
 def bf_run_analysis(analysisName, snapshot, reference_snapshot=None):
@@ -895,11 +897,13 @@ def bf_write_question_settings(settings, question_class, json_path=None):
     :param question_class: The class of question to configure
     :type question_class: string
     :param json_path: If supplied, write settings to the subtree reached by successively
-    traversing each key in json_path starting from the root. Any absent keys along
-    the path will be created.
+        traversing each key in json_path starting from the root. Any absent keys along
+        the path will be created.
     :type json_path: list
+
     """
-    restv2helper.write_question_settings(bf_session, settings, question_class, json_path)
+    restv2helper.write_question_settings(bf_session, settings, question_class,
+                                         json_path)
 
 
 def _check_network():

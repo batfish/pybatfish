@@ -443,8 +443,8 @@ def _compute_var_help(var_name, var_data):
 
     allowed_values = _build_allowed_values(var_data)
     if allowed_values:
-        param_line += "    Allowed values:\n      * {}\n".format(
-            '\n      * '.join([str(v) for v in allowed_values]))
+        param_line += "    Allowed values:\n\n    * {}\n".format(
+            '\n    * '.join([str(v) for v in allowed_values]))
 
     default_value = var_data.get("value", "")
     if default_value:
@@ -722,6 +722,8 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
+    elif expectedType == 'headerConstraint':
+        return True, None
     else:
         bf_logger.warn(
             "WARNING: skipping validation for unknown argument type {}".format(

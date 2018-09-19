@@ -5,6 +5,7 @@ from IPython.display import display
 import pandas as pd
 
 from pybatfish.client.commands import *
+from pybatfish.datamodel.flow import HeaderConstraints
 # noinspection PyUnresolvedReferences
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.question import bfq, load_questions  # noqa F401
