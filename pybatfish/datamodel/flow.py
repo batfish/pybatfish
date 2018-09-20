@@ -95,14 +95,15 @@ class Flow(DataModelElement):
     def __str__(self):
         # type: () -> str
         # exclude the tag field
-        iface_str = "ingressInterface: {}".format(self.ingressInterface) \
+        iface_str = " interface={}".format(self.ingressInterface) \
             if self.ingressInterface is not None else ""
-        vrf_str = "vrf: {}".format(self.ingressVrf) \
+        vrf_str = " vrf={}".format(self.ingressVrf) \
             if self.ingressVrf != "default" else ""
+        ip_proto_str = "ipProtocol=" + self.ipProtocol if self.is_int(
+            self.ipProtocol) else self.ipProtocol
         return \
-            "{node}{iface}{vrf}->[{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
-            " proto: {proto} dscp:{dscp} ecn:{ecn} fragOff:{offset} length" \
-            ":{length} state:{state} flags: {flags}".format(
+            "start={node}{iface}{vrf} [{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
+            " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
                 node=self.ingressNode,
                 iface=iface_str,
                 vrf=vrf_str,
@@ -110,23 +111,37 @@ class Flow(DataModelElement):
                 src_port=self.srcPort,
                 dst_ip=self.dstIp,
                 dst_port=self.dstPort,
-                proto=self.ipProtocol,
-                dscp=self.dscp,
-                ecn=self.ecn,
-                offset=self.fragmentOffset,
-                length=self.packetLength,
-                state=self.state,
-                flags=self.get_flag_str())
+                ip_proto=ip_proto_str,
+                dscp=" dscp={}".format(self.dscp) if self.dscp != 0 else "",
+                ecn=" ecn={}".format(self.ecn) if self.ecn != 0 else "",
+                offset=" fragmentOffset={}".format(self.fragmentOffset) \
+                    if self.fragmentOffset != 0 else "",
+                length=" length={}".format(self.packetLength) \
+                    if self.packetLength != 0 else "",
+                state=" state={}".format(self.state) \
+                    if self.state != "NEW" else "",
+                flags=" tcpFlags={}".format(self.get_flag_str()) \
+                    if self.get_flag_str() != "00000000" and
+                       self.ipProtocol == 6 else "")
 
     def get_flag_str(self):
         # type: () -> str
-        if self.ipProtocol == 6:  # TCP
-            return "{}{}{}{}{}{}{}{}".format(self.tcpFlagsAck, self.tcpFlagsCwr,
-                                             self.tcpFlagsEce, self.tcpFlagsFin,
-                                             self.tcpFlagsPsh, self.tcpFlagsRst,
-                                             self.tcpFlagsSyn, self.tcpFlagsUrg)
-        else:
-            return "n/a"
+        return "{}{}{}{}{}{}{}{}".format(self.tcpFlagsAck,
+                                         self.tcpFlagsCwr,
+                                         self.tcpFlagsEce,
+                                         self.tcpFlagsFin,
+                                         self.tcpFlagsPsh,
+                                         self.tcpFlagsRst,
+                                         self.tcpFlagsSyn,
+                                         self.tcpFlagsUrg)
+
+    def is_int(self, str):
+        # type: (str) -> bool
+        try:
+            int(str)
+            return True
+        except ValueError:
+            return False
 
 
 @attr.s(frozen=True)
