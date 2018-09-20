@@ -121,8 +121,8 @@ class Flow(DataModelElement):
                 state=" state={}".format(self.state) \
                     if self.state != "NEW" else "",
                 flags=" tcpFlags={}".format(self.get_flag_str()) \
-                    if self.get_flag_str() != "00000000" and
-                       self.ipProtocol == 6 else "")
+                    if self.ipProtocol == 6 and
+                       self.get_flag_str() != "00000000" else "")
 
     def get_flag_str(self):
         # type: () -> str
