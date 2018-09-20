@@ -48,54 +48,6 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: javaRegex
 
-.. py:class:: definedStructures(*, names, nodes, types, question_name, exclusions)
-
-   Lists the structures defined in the network.
-   
-   Lists the structures defined in the network, along with the files and line numbers in which they are defined.
-   
-   
-   :param names: Include structures whose name matches this string or regex.
-   
-       Default value: ``.*``
-   :type names: javaRegex
-   :param nodes: Include files used to generate nodes whose name matches this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param types: Include structures whose vendor-specific type matches this string or regex.
-   
-       Default value: ``.*``
-   :type types: javaRegex
-
-.. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name, exclusions)
-
-   Lists different types of edges in a snapshot.
-   
-   Lists neighbor relationships of the specified type (layer3, BGP, ospf, etc. in the form of edges).
-   
-   
-   :param nodes: *Required.* Include edges whose first node matches this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
-   
-       Default value: ``.*``
-   :type remoteNodes: nodeSpec
-   :param edgeType: Types of edges to include.
-       Allowed values:
-   
-       * bgp
-       * eigrp
-       * isis
-       * layer1
-       * layer2
-       * layer3
-       * ospf
-       * rip
-   :type edgeType: string
-
 .. py:class:: fileParseStatus(*, question_name, exclusions)
 
    Display file parse status.
@@ -140,13 +92,11 @@
        Default value: ``<``
    :type comparator: comparator
 
-.. py:class:: interfaceProperties(*, excludeShutInterfaces, interfaces, nodes, properties, question_name, exclusions)
+.. py:class:: interfaceProperties(*, interfaces, nodes, properties, question_name, exclusions)
 
    Returns configuration properties of interfaces.
    
    
-   :param excludeShutInterfaces: Exclude interfaces that are shutdown.
-   :type excludeShutInterfaces: boolean
    :param interfaces: Include interfaces matching this regex.
    :type interfaces: javaRegex
    :param nodes: Include nodes matching this name or regex.
@@ -162,33 +112,15 @@
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
    :type duplicatesOnly: boolean
 
-.. py:class:: ipsecSessionStatus(*, nodes, remoteNodes, status, question_name, exclusions)
-
-   Returns the status of configured IPSec sessions.
-   
-   
-   :param nodes: Include sessions whose first node matches this name or regex.
-   :type nodes: nodeSpec
-   :param remoteNodes: Include sessions whose second node matches this name or regex.
-   :type remoteNodes: nodeSpec
-   :param status: Only include IPSec sessions for which status matches this regex.
-   :type status: javaRegex
-
-.. py:class:: multipathConsistency(*, question_name, exclusions)
-
-   Validate multipath consistency.
-   
-   Finds flows that are treated differently by different paths in the presence of multipath routing.
-
-.. py:class:: namedStructures(*, nodes, properties, question_name, exclusions)
+.. py:class:: namedStructures(*, nodeRegex, propertySpec, question_name, exclusions)
 
    Return named structure definitions.
    
    
-   :param nodes: Include nodes matching this name or regex.
-   :type nodes: nodeSpec
-   :param properties: Include properties matching this regex.
-   :type properties: namedStructureSpec
+   :param nodeRegex: Only include nodes that match this regex.
+   :type nodeRegex: nodeSpec
+   :param propertySpec: Only include properties that match this regex. Default behavior is to return all properties.
+   :type propertySpec: namedStructureSpec
 
 .. py:class:: neighbors(*, neighborTypes, nodes, remoteNodes, roleDimension, style, question_name, exclusions)
 
@@ -281,7 +213,7 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachfilter(*, complementHeaderSpace, dst, dstPorts, dstProtocols, filters, ipProtocols, nodes, query, src, srcPorts, start, question_name, exclusions)
+.. py:class:: reachfilter(*, complementHeaderSpace, destinationIpSpaceSpecifierFactory, dst, dstPorts, dstProtocols, filterRegex, nodeSpecifierFactory, nodeSpecifierInput, query, sourceInterfaces, sourceIpSpaceSpecifierFactory, src, srcPorts, question_name, exclusions)
 
    Find flows for which a filter takes a particular behavior.
    
@@ -290,54 +222,32 @@
    
    :param complementHeaderSpace: Search for packet headers outside the specified headerspace, rather than inside the space.
    :type complementHeaderSpace: boolean
+   :param destinationIpSpaceSpecifierFactory: Name of the IpSpaceSpecifierFactory to use for the destination IpSpace.
+   :type destinationIpSpaceSpecifierFactory: string
    :param dst: Flexible specification of destinoation IpSpace.
    :type dst: string
    :param dstPorts: Destination ports.
    :type dstPorts: subrange
    :param dstProtocols: Destination protocols.
    :type dstProtocols: string
-   :param filters: Only evaluate filters that match this regex.
-   :type filters: javaRegex
-   :param ipProtocols: Restrict space of returned headers to those with IP protocols in this set.
-   :type ipProtocols: string
-   :param nodes: Only evaluate filters present on nodes matching this regex.
-   :type nodes: string
+   :param filterRegex: Only evaluate filters that match this regex.
+   :type filterRegex: javaRegex
+   :param nodeSpecifierFactory: Name of the nodeSpecifierFactory to use.
+   :type nodeSpecifierFactory: string
+   :param nodeSpecifierInput: Only evaluate filters present on nodes matching this regex.
+   :type nodeSpecifierInput: string
    :param query: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
    :type query: string
+   :param sourceInterfaces: Only consider these interfaces as possible sources.
+   :type sourceInterfaces: string
+   :param sourceIpSpaceSpecifierFactory: Name of the IpSpaceSpecifierFactory to use for the source IpSpace.
+   :type sourceIpSpaceSpecifierFactory: string
    :param src: Flexible specification of source IpSpace.
    :type src: string
    :param srcPorts: Source ports.
    :type srcPorts: subrange
-   :param start: Only consider specified locations as possible sources.
-   :type start: string
 
-.. py:class:: reducedReachability(*, question_name, exclusions)
-
-   Detect reduced reachability.
-   
-   Finds flows that are accepted in one snapshot but dropped in another.
-
-.. py:class:: referencedStructures(*, names, nodes, types, question_name, exclusions)
-
-   Lists the references in configuration files to vendor-specific structures.
-   
-   Lists the references in configuration files to vendor-specific structures, along with the line number, the name and the type of the structure referenced, and configuration context in which each reference occurs.
-   
-   
-   :param names: Include structures whose name matches this string or regex.
-   
-       Default value: ``.*``
-   :type names: javaRegex
-   :param nodes: Include files used to generate nodes whose name matches this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param types: Include structures whose vendor-specific type matches this string or regex.
-   
-       Default value: ``.*``
-   :type types: javaRegex
-
-.. py:class:: routes(*, network, nodes, protocols, rib, vrfs, question_name, exclusions)
+.. py:class:: routes(*, nodes, protocol, vrfs, question_name, exclusions)
 
    Show routing tables.
    
@@ -348,23 +258,17 @@
    
        Default value: ``.*``
    :type nodes: nodeSpec
-   :param protocols: *Required.* Examine routes for protocols matching this name or regex.
-   
-       Default value: ``.*``
-   :type protocols: javaRegex
    :param vrfs: *Required.* Examine routes on VRFs matching this name or regex.
    
        Default value: ``.*``
    :type vrfs: javaRegex
-   :param network: Examine routes for networks matching this prefix.
-   :type network: prefix
-   :param rib: Only return routes from a given protocol RIB.
+   :param protocol: Only return routes from a given protocol RIB.
        Allowed values:
    
        * main
        * bgp
        * bgpmp
-   :type rib: string
+   :type protocol: string
 
 .. py:class:: specifiers(*, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, question_name, exclusions)
 
@@ -486,7 +390,7 @@
    :param tcpUrg: URG bit in TCP flags in TCP header.
    :type tcpUrg: boolean
 
-.. py:class:: traceroute(*, headers, ignoreAcls, startLocation, question_name, exclusions)
+.. py:class:: traceroute(*, dscp, dst, dstPort, dstProtocol, ecn, fragmentOffset, icmpCode, icmpType, ignoreAcls, ipProtocol, packetLength, srcIpSpace, srcPort, srcProtocol, state, tcpAck, tcpCwr, tcpEce, tcpFin, tcpPsh, tcpRst, tcpSyn, tcpUrg, traceStart, question_name, exclusions)
 
    Trace the path(s) for the specified flow.
    
@@ -494,12 +398,60 @@
    Unlike a real traceroute, this traceroute is directional. That is, for it to succeed, the reverse connectivity is not needed. This feature can help debug connectivity issues by decoupling the two directions.
    
    
-   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
-   :type startLocation: string
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
+   :param dst: *Required.* Destination hostname or IP address.
+   :type dst: string
+   :param traceStart: *Required.* Location (node and interface combination) to start tracing from.
+   :type traceStart: string
+   :param dscp: Applied Differentiated Services Code Point (DSCP) value in IP header.
+   :type dscp: integer
+   :param dstPort: Destination port in TCP/UDP header.
+   :type dstPort: integer
+   :param dstProtocol: Destination named protocol (can affect IP protocol number; ICMP type/code; TCP/UDP destination port).
+   :type dstProtocol: string
+   :param ecn: Applied Explicit Congestion Notification (ECN) value in TCP header.
+   :type ecn: integer
+   :param fragmentOffset: Fragment offset value in IP header.
+   :type fragmentOffset: integer
+   :param icmpCode: ICMP code in ICMP header.
+   :type icmpCode: integer
+   :param icmpType: ICMP type in ICMP header.
+   :type icmpType: integer
    :param ignoreAcls: If set to True, ACLs encountered along the path are ignored.
    :type ignoreAcls: boolean
+   :param ipProtocol: IP Protocol number in IP header.
+   :type ipProtocol: string
+   :param packetLength: Packet length in IP header.
+   :type packetLength: integer
+   :param srcIpSpace: Specification of source IP address in IP header.
+   :type srcIpSpace: string
+   :param srcPort: Source port in TCP/UDP header.
+   :type srcPort: integer
+   :param srcProtocol: Source named protocol (can affect IP protocol number; ICMP type/code; TCP/UDP source port).
+   :type srcProtocol: string
+   :param state: Non-transitive stateful-firewall state (applies to all protocols, and is independent of TCP flags).
+       Allowed values:
+   
+       * established
+       * invalid
+       * new
+       * related
+   :type state: string
+   :param tcpAck: ACK bit in TCP flags in TCP header.
+   :type tcpAck: boolean
+   :param tcpCwr: CWR bit in TCP flags in TCP header.
+   :type tcpCwr: boolean
+   :param tcpEce: ECE bit in TCP flags in TCP header.
+   :type tcpEce: boolean
+   :param tcpFin: FIN bit in TCP flags in TCP header.
+   :type tcpFin: boolean
+   :param tcpPsh: PSH bit in TCP flags in TCP header.
+   :type tcpPsh: boolean
+   :param tcpRst: RST bit in TCP flags in TCP header.
+   :type tcpRst: boolean
+   :param tcpSyn: SYN bit in TCP flags in TCP header.
+   :type tcpSyn: boolean
+   :param tcpUrg: URG bit in TCP flags in TCP header.
+   :type tcpUrg: boolean
 
 .. py:class:: undefinedReferences(*, nodes, question_name, exclusions)
 
@@ -524,10 +476,4 @@
    
        Default value: ``.*``
    :type nodes: nodeSpec
-
-.. py:class:: viModel(*, question_name, exclusions)
-
-   Lists configuration attributes of nodes and edges in the network.
-   
-   Returns a JSON dictionary with all of the configuration parameters and neighbor relations stored in the vendor independent data-model.
 
