@@ -12,12 +12,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import json
 
 import pytest
 
+from pybatfish.datamodel import Interface
 from pybatfish.exception import QuestionValidationException
-from pybatfish.util import conditional_str, validate_name, \
-    validate_question_name
+from pybatfish.util import (BfJsonEncoder, conditional_str, validate_name,
+                            validate_question_name)
 
 
 def test_conditional_str():
@@ -53,3 +55,26 @@ def test_validate_question_name():
     for name in [42, 'x' * 151, '/', '/etc']:
         with pytest.raises(QuestionValidationException):
             assert validate_question_name(name)
+
+
+def test_encoder_with_primitives():
+    encoder = BfJsonEncoder()
+    assert encoder.default(1) == 1
+    assert encoder.default(3.14) == 3.14
+    assert encoder.default("some_string") == "some_string"
+    assert encoder.default([1, 2, "some_string"]) == [1, 2, "some_string"]
+    assert encoder.default({1})
+    assert json.dumps(
+        {"name": {"nested": "foo"}}, cls=BfJsonEncoder) == json.dumps(
+        {"name": {"nested": "foo"}})
+
+
+def test_encoder_with_datamodel_element():
+    encoder = BfJsonEncoder()
+
+    iface = Interface(hostname='node', interface="iface")
+    assert encoder.default(iface) == iface.dict()
+
+    assert json.dumps(
+        {"name": {"nested": iface}}, cls=BfJsonEncoder) == json.dumps(
+        {"name": {"nested": iface.dict()}})
