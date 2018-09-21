@@ -303,38 +303,6 @@
    :param transitNodes: Flexible specification of transit locations.
    :type transitNodes: string
 
-.. py:class:: reachfilter(*, complementHeaderSpace, dst, dstPorts, dstProtocols, filters, generateExplanations, ipProtocols, nodes, query, src, srcPorts, start, question_name, exclusions)
-
-   Find flows for which a filter takes a particular behavior.
-   
-   This question searches for flows for which a filter (access control list) has a particular behavior. The behaviors can be: that the filter permits the flow (permit), that it denies the flow (deny), or that the flow is matched by a particular line (matchLine <lineNumber>). Filters are selected using node and filter specifiers, which might match multiple filters. In this case, a (possibly different) flow will be found for each filter.
-   
-   
-   :param complementHeaderSpace: Search for packet headers outside the specified headerspace, rather than inside the space.
-   :type complementHeaderSpace: boolean
-   :param dst: Flexible specification of destinoation IpSpace.
-   :type dst: string
-   :param dstPorts: Destination ports.
-   :type dstPorts: subrange
-   :param dstProtocols: Destination protocols.
-   :type dstProtocols: string
-   :param filters: Only evaluate filters that match this regex.
-   :type filters: javaRegex
-   :param generateExplanations: Include a description of the flow space matching the query.
-   :type generateExplanations: boolean
-   :param ipProtocols: Restrict space of returned headers to those with IP protocols in this set.
-   :type ipProtocols: string
-   :param nodes: Only evaluate filters present on nodes matching this regex.
-   :type nodes: string
-   :param query: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
-   :type query: string
-   :param src: Flexible specification of source IpSpace.
-   :type src: string
-   :param srcPorts: Source ports.
-   :type srcPorts: subrange
-   :param start: Only consider specified locations as possible sources.
-   :type start: string
-
 .. py:class:: reducedReachability(*, question_name, exclusions)
 
    Detect reduced reachability.
@@ -389,6 +357,28 @@
        * bgp
        * bgpmp
    :type rib: string
+
+.. py:class:: searchfilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name, exclusions)
+
+   Find flows for which a filter takes a particular behavior.
+   
+   This question searches for flows for which a filter (access control list) has a particular behavior. The behaviors can be: that the filter permits the flow (permit), that it denies the flow (deny), or that the flow is matched by a particular line (matchLine <lineNumber>). Filters are selected using node and filter specifiers, which might match multiple filters. In this case, a (possibly different) flow will be found for each filter.
+   
+   
+   :param action: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
+   :type action: string
+   :param explain: Include a description of the flow space matching the query.
+   :type explain: boolean
+   :param filters: Only evaluate filters that match this regex.
+   :type filters: javaRegex
+   :param headers: Packet header constraints on the flows being searched.
+   :type headers: headerConstraint
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param nodes: Only evaluate filters present on nodes matching this regex.
+   :type nodes: string
+   :param startLocation: Only consider specified locations as possible sources.
+   :type startLocation: string
 
 .. py:class:: specifiers(*, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, question_name, exclusions)
 
