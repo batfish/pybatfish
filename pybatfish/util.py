@@ -18,12 +18,13 @@ from __future__ import absolute_import
 
 import os
 import string
-from typing import Any, IO, Sized, Union  # noqa: F401
 import uuid
 import zipfile
+from typing import Any, IO, Sized, Union  # noqa: F401
+
+import simplejson as json
 
 from pybatfish.exception import QuestionValidationException
-import simplejson as json
 
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.

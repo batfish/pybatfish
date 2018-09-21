@@ -14,8 +14,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.acl import AclTraceEvent
 import pytest
+
+from pybatfish.datamodel.acl import AclTraceEvent
 
 
 # test if a trace event with description is deserialized and string-ified properly

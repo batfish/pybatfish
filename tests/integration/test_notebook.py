@@ -16,9 +16,9 @@ from copy import deepcopy
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
 
-from nbconvert.preprocessors import ExecutePreprocessor
 import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
 from six import PY3
 
 _this_dir = abspath(dirname(realpath(__file__)))

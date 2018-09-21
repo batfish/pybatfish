@@ -119,6 +119,7 @@ setup(
         'dev': ['check-manifest',
                 'flake8',
                 'flake8-docstrings',
+                'flake8-import-order',
                 'jupyter',
                 'nbformat',
                 'nbconvert',

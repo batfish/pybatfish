@@ -16,12 +16,12 @@
 
 from __future__ import absolute_import, print_function
 
-from imp import new_module
 import json
 import logging
 import os
 import sys
 import tempfile
+from imp import new_module
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 

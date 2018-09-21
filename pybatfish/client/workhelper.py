@@ -21,10 +21,10 @@ import logging
 import time
 from typing import Any, Dict, Optional  # noqa: F401
 
+import six
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
-import six
 
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.client.session import Session  # noqa: F401

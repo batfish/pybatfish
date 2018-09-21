@@ -16,8 +16,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.answer.table import TableAnswer
 import pytest
+
+from pybatfish.datamodel.answer.table import TableAnswer
 
 
 def test_table_answer_no_answer_elements():
