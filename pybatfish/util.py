@@ -20,9 +20,11 @@ import os
 import string
 import uuid
 import zipfile
+from collections import Iterable, Mapping
 from typing import Any, IO, Sized, Union  # noqa: F401
 
-import simplejson as json
+import simplejson
+from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
 
@@ -41,17 +43,24 @@ __all__ = [
 ]
 
 
-class BfJsonEncoder(json.JSONEncoder):
+class BfJsonEncoder(simplejson.JSONEncoder):
     """A default encoder for Batfish question and datamodel objects."""
 
     def default(self, obj):
-        try:
-            # Return the dictionary representation, which is supported by
-            # questions and datamodel elements
-            return obj.dict()
-        except AttributeError:
-            # Fall back to default serialization for all other objects.
-            return json.JSONEncoder.default(self, obj)
+        if isinstance(obj, (int, float, bool, string_types)) or obj is None:
+            return obj
+        elif isinstance(obj, Mapping):
+            return {k: self.default(v) for k, v in iteritems(obj)}
+        elif isinstance(obj, Iterable):
+            return list(map(self.default, obj))
+        else:
+            try:
+                # Return the dictionary representation, which is supported by
+                # questions and datamodel elements
+                return self.default(obj.dict())
+            except AttributeError:
+                # Raise
+                super(BfJsonEncoder, self).default(obj)
 
 
 def conditional_str(prefix, obj, suffix):
