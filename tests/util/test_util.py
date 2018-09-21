@@ -64,9 +64,12 @@ def test_encoder_with_primitives():
     assert encoder.default("some_string") == "some_string"
     assert encoder.default([1, 2, "some_string"]) == [1, 2, "some_string"]
     assert encoder.default({1})
+    assert encoder.default(None) is None
     assert json.dumps(
         {"name": {"nested": "foo"}}, cls=BfJsonEncoder) == json.dumps(
         {"name": {"nested": "foo"}})
+    assert json.dumps([{'name': 'value'}], cls=BfJsonEncoder) == json.dumps(
+        [{'name': 'value'}])
 
 
 def test_encoder_with_datamodel_element():
@@ -78,3 +81,11 @@ def test_encoder_with_datamodel_element():
     assert json.dumps(
         {"name": {"nested": iface}}, cls=BfJsonEncoder) == json.dumps(
         {"name": {"nested": iface.dict()}})
+
+
+def test_encoder_invalid_input():
+    class NonSerializable(object):
+        x = 100
+
+    with pytest.raises(TypeError):
+        assert json.dumps(NonSerializable())

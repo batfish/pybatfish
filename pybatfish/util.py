@@ -47,17 +47,17 @@ class BfJsonEncoder(simplejson.JSONEncoder):
     """A default encoder for Batfish question and datamodel objects."""
 
     def default(self, obj):
-        if isinstance(obj, (int, float, bool, string_types)):
+        if isinstance(obj, (int, float, bool, string_types)) or obj is None:
             return obj
-        elif isinstance(obj, Iterable):
-            return list(map(self.default, obj))
         elif isinstance(obj, Mapping):
             return {k: self.default(v) for k, v in iteritems(obj)}
+        elif isinstance(obj, Iterable):
+            return list(map(self.default, obj))
         else:
             try:
                 # Return the dictionary representation, which is supported by
                 # questions and datamodel elements
-                obj.dict()
+                return self.default(obj.dict())
             except AttributeError:
                 # Raise
                 super(BfJsonEncoder, self).default(obj)
