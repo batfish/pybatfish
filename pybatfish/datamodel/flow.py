@@ -112,17 +112,17 @@ class Flow(DataModelElement):
                 dst_ip=self.dstIp,
                 dst_port=self.dstPort,
                 ip_proto=ip_proto_str,
-                dscp=" dscp={}".format(self.dscp) if self.dscp != 0 else "",
-                ecn=" ecn={}".format(self.ecn) if self.ecn != 0 else "",
-                offset=" fragmentOffset={}".format(self.fragmentOffset) \
-                    if self.fragmentOffset != 0 else "",
-                length=" length={}".format(self.packetLength) \
-                    if self.packetLength != 0 else "",
-                state=" state={}".format(self.state) \
-                    if self.state != "NEW" else "",
-                flags=" tcpFlags={}".format(self.get_flag_str()) \
-                    if self.get_flag_str() != "00000000" and
-                       self.ipProtocol == 6 else "")
+                dscp=(" dscp={}".format(self.dscp) if self.dscp != 0 else ""),
+                ecn=(" ecn={}".format(self.ecn) if self.ecn != 0 else ""),
+                offset=(" fragmentOffset={}".format(self.fragmentOffset)
+                        if self.fragmentOffset != 0 else ""),
+                length=(" length={}".format(self.packetLength)
+                        if self.packetLength != 0 else ""),
+                state=(" state={}".format(self.state)
+                       if self.state != "NEW" else ""),
+                flags=(" tcpFlags={}".format(self.get_flag_str()) if
+                       self.ipProtocol == 6 and
+                       self.get_flag_str() != "00000000" else ""))
 
     def get_flag_str(self):
         # type: () -> str
