@@ -137,7 +137,7 @@ class Flow(DataModelElement):
                                          self.tcpFlagsUrg)
 
     def get_ip_protocol_str(self):
-        # type: () -> bool
+        # type: () -> str
         match = self.IP_PROTOCOL_PATTERN.match(self.ipProtocol)
         if match:
             return "ipProtocol=" + match.group(1)
