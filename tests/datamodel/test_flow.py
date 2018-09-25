@@ -111,6 +111,37 @@ def test_flow_trace_hop_no_transformed_flow():
             'StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1']})
 
 
+def test_get_ip_protocol_str():
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingress",
+        "ipProtocol": "UNNAMED_243",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+    assert Flow.from_dict(flowDict).get_ip_protocol_str() == "ipProtocol=243"
+
+    flowDict["ipProtocol"] = "TCP"
+    assert Flow.from_dict(flowDict).get_ip_protocol_str() == "TCP"
+
+
 def test_header_constraints_serialization():
     hc = HeaderConstraints()
     hcd = hc.dict()

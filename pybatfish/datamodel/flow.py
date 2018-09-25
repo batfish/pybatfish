@@ -12,6 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import re
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
@@ -63,6 +64,8 @@ class Flow(DataModelElement):
     tcpFlagsSyn = attr.ib(type=int, converter=int)
     tcpFlagsUrg = attr.ib(type=int, converter=int)
 
+    IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
+
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Flow
@@ -99,8 +102,6 @@ class Flow(DataModelElement):
             if self.ingressInterface is not None else ""
         vrf_str = " vrf={}".format(self.ingressVrf) \
             if self.ingressVrf != "default" else ""
-        ip_proto_str = "ipProtocol=" + self.ipProtocol if self.is_int(
-            self.ipProtocol) else self.ipProtocol
         return \
             "start={node}{iface}{vrf} [{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
             " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
@@ -111,7 +112,7 @@ class Flow(DataModelElement):
                 src_port=self.srcPort,
                 dst_ip=self.dstIp,
                 dst_port=self.dstPort,
-                ip_proto=ip_proto_str,
+                ip_proto=self.get_ip_protocol_str(),
                 dscp=(" dscp={}".format(self.dscp) if self.dscp != 0 else ""),
                 ecn=(" ecn={}".format(self.ecn) if self.ecn != 0 else ""),
                 offset=(" fragmentOffset={}".format(self.fragmentOffset)
@@ -135,13 +136,13 @@ class Flow(DataModelElement):
                                          self.tcpFlagsSyn,
                                          self.tcpFlagsUrg)
 
-    def is_int(self, str):
-        # type: (str) -> bool
-        try:
-            int(str)
-            return True
-        except ValueError:
-            return False
+    def get_ip_protocol_str(self):
+        # type: () -> str
+        match = self.IP_PROTOCOL_PATTERN.match(self.ipProtocol)
+        if match:
+            return "ipProtocol=" + match.group(1)
+        else:
+            return self.ipProtocol
 
 
 @attr.s(frozen=True)
