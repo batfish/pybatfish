@@ -19,7 +19,8 @@ import attr
 
 from .primitives import DataModelElement, Edge
 
-__all__ = ['Flow', 'FlowTrace', 'FlowTraceHop', 'HeaderConstraints']
+__all__ = ['Flow', 'FlowTrace', 'FlowTraceHop', 'HeaderConstraints',
+           'PathConstraints']
 
 
 @attr.s(frozen=True)
@@ -278,3 +279,28 @@ class HeaderConstraints(DataModelElement):
             dscps=json_dict.get("dscps"),
             packetLengths=json_dict.get("packetLengths"),
             fragmentOffsets=json_dict.get("fragmentOffsets"))
+
+
+@attr.s(frozen=True)
+class PathConstraints(DataModelElement):
+    """
+    Constraints on the path of a flow.
+
+    :ivar startLocation: Location description of where a flow is allowed to start
+    :ivar endLocation: Location description of where a flow is allowed to terminate
+    :ivar transitLocation: Location description of where a flow must transit
+    :ivar startLocation: Location description of where a flow is *not* allowed to transit
+    """
+
+    startLocation = attr.ib(default=None, type=Optional[str])
+    endLocation = attr.ib(default=None, type=Optional[str])
+    transitLocations = attr.ib(default=None, type=Optional[str])
+    forbiddenLocations = attr.ib(default=None, type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return PathConstraints(
+            startLocation=json_dict.get("startLocation"),
+            endLocation=json_dict.get("endLocation"),
+            transitLocations=json_dict.get("transitLocations"),
+            forbiddenLocations=json_dict.get("forbiddenLocations"))
