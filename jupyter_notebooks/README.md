@@ -12,4 +12,4 @@ The current list of notebooks are:
 - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb)
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
 
-We'll put out more notebooks in the coming weeks to demonstrate additional capabilities. If there are specific use cases that you are interested in, let us know via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) or by filing a Github issue.
+We will continue to add notebooks demonstrating additional capabilities of Batfish. If there are specific use cases that you are interested in, let us know via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) or by filing a Github issue.
