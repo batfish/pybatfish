@@ -17,7 +17,7 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import requests
-from requests import HTTPError
+from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
