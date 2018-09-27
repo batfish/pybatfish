@@ -17,6 +17,7 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import requests
+from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
@@ -178,6 +179,15 @@ def write_question_settings(session, settings, question_class, json_path):
     _put(session, url_tail, settings)
 
 
+def _check_response_status(response):
+    # type: (Response) -> None
+    """Rethrows the error thrown by Response.raise_for_status() after including the detailed error message inside Response.text."""
+    try:
+        response.raise_for_status()
+    except HTTPError as e:
+        raise HTTPError("{}. {}".format(e, response.text), response=response)
+
+
 def _delete(session, url_tail):
     # type: (Session, str) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
@@ -191,7 +201,7 @@ def _delete(session, url_tail):
 
     response = requests.delete(url, headers=headers,
                                verify=session.verifySslCerts)
-    response.raise_for_status()
+    _check_response_status(response)
 
 
 def _get(session, url_tail):
@@ -206,7 +216,7 @@ def _get(session, url_tail):
     url = session.get_base_url2() + url_tail
 
     response = requests.get(url, headers=headers, verify=session.verifySslCerts)
-    response.raise_for_status()
+    _check_response_status(response)
     return dict(response.json())
 
 
@@ -225,7 +235,7 @@ def _post(session, url_tail, obj):
                              json=_encoder.default(obj),
                              headers=headers,
                              verify=session.verifySslCerts)
-    response.raise_for_status()
+    _check_response_status(response)
     return None
 
 
@@ -244,5 +254,5 @@ def _put(session, url_tail, obj):
                             json=_encoder.default(obj),
                             headers=headers,
                             verify=session.verifySslCerts)
-    response.raise_for_status()
+    _check_response_status(response)
     return None
