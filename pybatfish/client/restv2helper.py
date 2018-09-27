@@ -181,10 +181,7 @@ def write_question_settings(session, settings, question_class, json_path):
 
 def _check_response_status(response):
     # type: (Response) -> None
-    """
-    Rethrows the error thrown by Response.raise_for_status() after including
-    the detailed error message inside Response.text
-    """
+    """Rethrows the error thrown by Response.raise_for_status() after including the detailed error message inside Response.text."""
     try:
         response.raise_for_status()
     except HTTPError as e:
