@@ -32,10 +32,9 @@ class MockResponse(Response):
 def test_check_response_status_error():
     response = MockResponse("error detail")
     response.status_code = 400
-    try:
+    with pytest.raises(HTTPError) as e:
         restv2helper._check_response_status(response)
-    except HTTPError as e:
-        assert "error detail" in str(e)
+    assert "error detail" in str(e)
 
 
 def test_check_response_status_ok():
