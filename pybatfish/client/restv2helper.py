@@ -184,7 +184,7 @@ def _check_response_status(response):
     try:
         response.raise_for_status()
     except HTTPError as e:
-        raise HTTPError("{}. {}".format(e, response.text), response)
+        raise HTTPError("{}. {}".format(e, response.text), response=response)
 
 
 def _delete(session, url_tail):
