@@ -30,8 +30,6 @@ from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.answer.base import get_answer_text
-from pybatfish.datamodel.answer.table import TableAnswer
 from pybatfish.datamodel.primitives import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
@@ -96,7 +94,6 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
-           'bf_print_answer',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
@@ -104,7 +101,6 @@ __all__ = ['bf_add_analysis',
            'bf_set_network',
            'bf_set_snapshot',
            'bf_set_testrig',
-           'bf_str_answer',
            'bf_sync_snapshots_sync_now',
            'bf_sync_snapshots_update_settings',
            'bf_sync_testrigs_sync_now',
@@ -669,26 +665,6 @@ def bf_list_testrigs(currentContainerOnly=True):
                                                  CoordConsts.SVC_RSC_LIST_TESTRIGS,
                                                  json_data)
     return json_response
-
-
-def bf_str_answer(answer_json):
-    """Convert the Json answer to a string."""
-    try:
-        if "answerElements" in answer_json and "metadata" in \
-                answer_json["answerElements"][0]:
-            table_answer = TableAnswer(answer_json)
-            return table_answer.table_data.to_string()
-        else:
-            return get_answer_text(answer_json)
-    except Exception as error:
-        return "Error getting answer text: {}\n Original Json:\n {}".format(
-            error, json.dumps(answer_json, indent=2))
-
-
-def bf_print_answer(answer_json):
-    # type: (Dict) -> None
-    """Print the given answer JSON to console."""
-    print(bf_str_answer(answer_json))
 
 
 def _bf_get_question_templates():

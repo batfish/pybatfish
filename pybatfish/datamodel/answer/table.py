@@ -17,7 +17,7 @@ from typing import Dict, List, Optional  # noqa: F401
 
 import pandas
 
-from pybatfish.datamodel.answer.base import Answer, _get_display_value
+from pybatfish.datamodel.answer.base import Answer, _parse_json_with_schema
 
 __all__ = [
     "ColumnMetadata",
@@ -114,6 +114,6 @@ class TableMetadata:
 def _rows_to_frame(table_metadata, rows):
     # type: (TableMetadata, List[Row]) -> pandas.DataFrame
     return pandas.DataFrame.from_records(
-        [[_get_display_value(cm.schema, row.get(cm.name)) for
+        [[_parse_json_with_schema(cm.schema, row.get(cm.name)) for
           cm in table_metadata.column_metadata]
          for row in rows], columns=table_metadata.get_column_names())
