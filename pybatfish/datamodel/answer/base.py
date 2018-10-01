@@ -15,7 +15,7 @@
 
 import json
 import re
-from typing import Dict, Optional  # noqa: F401
+from typing import Any, Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace
@@ -23,8 +23,7 @@ from pybatfish.datamodel.primitives import FileLines, Interface, Issue
 
 __all__ = ['Answer']
 
-_LIST_SCHEMA_PATTERN = re.compile(r'^List<(.+)>$')
-_SET_SCHEMA_PATTERN = re.compile(r'^Set<(.+)>$')
+_ITERABLE_SCHEMA_PATTERN = re.compile(r'^(List|Set)<(.+)>$', re.IGNORECASE)
 
 
 class Answer(dict):
@@ -48,22 +47,24 @@ class Answer(dict):
 
 
 def _get_base_schema(schema):
-    match = re.match(_LIST_SCHEMA_PATTERN, schema)
+    # type: (str) -> str
+    """Return the underlying base schema for an iterable (list or set)."""
+    match = re.match(_ITERABLE_SCHEMA_PATTERN, schema)
     if match:
-        return match.group(1)
-
-    match = re.match(_SET_SCHEMA_PATTERN, schema)
-    if match:
-        return match.group(1)
+        return match.group(2)
 
     return schema
 
 
 def _parse_json_with_schema(schema, json_object):
-    # type (str, Any) -> Any
+    # type: (str, Any) -> Any
+    """Process JSON object according to its schema."""
     if json_object is None:
+        # Honor null/None values
         return None
-    if _is_list_or_set_schema(schema):
+
+    # See if it's an iterable and we need to process it
+    if _is_iterable_schema(schema):
         if not isinstance(json_object, list):
             raise ValueError("Got non-list value for list/set schema", schema,
                              ":", json_object)
@@ -74,6 +75,8 @@ def _parse_json_with_schema(schema, json_object):
             return "\n".join(output_list)
         else:
             return output_list
+
+    # Handle "primitive" schemas
     if schema == "AclTrace":
         return AclTrace.from_dict(json_object)
     if schema == "FileLines":
@@ -102,6 +105,7 @@ def _parse_json_with_schema(schema, json_object):
     return json_object
 
 
-def _is_list_or_set_schema(schema):
-    return re.match(_LIST_SCHEMA_PATTERN, schema) or re.match(
-        _SET_SCHEMA_PATTERN, schema)
+def _is_iterable_schema(schema):
+    # type: (str) -> bool
+    """Check if a given schema is an iterable/container schema."""
+    return re.match(_ITERABLE_SCHEMA_PATTERN, schema) is not None
