@@ -84,6 +84,9 @@ class TableAnswer(Answer):
     def __repr__(self):
         return repr(self.table_data)
 
+    def _repr_html_(self):
+        return self.table_data._repr_html_()
+
     def __str__(self):
         return str(self.table_data)
 
