@@ -99,10 +99,8 @@ class Flow(DataModelElement):
     def __str__(self):
         # type: () -> str
         # exclude the tag field
-        iface_str = " interface={}".format(self.ingressInterface) \
-            if self.ingressInterface is not None else ""
-        vrf_str = " vrf={}".format(self.ingressVrf) \
-            if self.ingressVrf != "default" else ""
+        iface_str = self._iface_str()
+        vrf_str = self._vrf_str()
         return \
             "start={node}{iface}{vrf} [{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
             " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
@@ -126,6 +124,16 @@ class Flow(DataModelElement):
                        self.ipProtocol == 6 and
                        self.get_flag_str() != "00000000" else ""))
 
+    def _vrf_str(self):
+        vrf_str = " vrf={}".format(self.ingressVrf) \
+            if self.ingressVrf != "default" else ""
+        return vrf_str
+
+    def _iface_str(self):
+        iface_str = " interface={}".format(self.ingressInterface) \
+            if self.ingressInterface is not None else ""
+        return iface_str
+
     def get_flag_str(self):
         # type: () -> str
         return "{}{}{}{}{}{}{}{}".format(self.tcpFlagsAck,
@@ -144,6 +152,17 @@ class Flow(DataModelElement):
             return "ipProtocol=" + match.group(1)
         else:
             return self.ipProtocol
+
+    def _repr_html_(self):
+        return "{src_ip}:{src_port} &rarr; {dst_ip}:{dst_port}<br>start={node}{iface}{vrf}" \
+            .format(node=self.ingressNode,
+                    iface=self._iface_str(),
+                    vrf=self._vrf_str(),
+                    src_ip=self.srcIp,
+                    src_port=self.srcPort,
+                    dst_ip=self.dstIp,
+                    dst_port=self.dstPort,
+                    ip_proto=self.get_ip_protocol_str())
 
 
 @attr.s(frozen=True)
@@ -176,6 +195,25 @@ class FlowTrace(DataModelElement):
                             enumerate(self.hops, start=1)]),
             notes=self.notes)
 
+    def __len__(self):
+        return len(self.hops)
+
+    def __getitem__(self, item):
+        return self.hops[item]
+
+    def _repr_html_(self):
+        return "{notes}<br>{hops}".format(
+            notes=self.format_notes_html(),
+            hops="<br><br>".join(
+                ["<strong>{num}</strong> {hop}".format(num=num,
+                                                       hop=hop._repr_html_())
+                 for num, hop in enumerate(self.hops, start=1)]))
+
+    def format_notes_html(self):
+        color = '#019612' if 'ACCEPTED' in self.notes else '#7c020e'
+        return '<span style="color:{color}; text-weight:bold;">{notes}</span>'.format(
+            color=color, notes=self.notes)
+
 
 @attr.s(frozen=True)
 class FlowTraceHop(DataModelElement):
@@ -183,7 +221,7 @@ class FlowTraceHop(DataModelElement):
 
     :ivar edge: The :py:class:`~Edge` identifying the hop/link
     :ivar routes: The routes which caused this hop
-    :ivar transformed_flow: The transformed version of the flow (if NAT is present)
+    :ivar transformedFlow: The transformed version of the flow (if NAT is present)
     """
 
     edge = attr.ib(type=Edge)
@@ -207,6 +245,16 @@ class FlowTraceHop(DataModelElement):
             ret_str += "\n    Transformed flow: {}".format(
                 self.transformedFlow)
         return ret_str
+
+    def _repr_html_(self):
+        indent = "&nbsp;" * 4
+        result = "{edge}<br>Route(s):<br>{routes}".format(
+            edge=self.edge._repr_html_(),
+            routes=indent + ("<br>" + indent).join(self.routes))
+        if self.transformedFlow:
+            result += "<br>Transformed flow: {}".format(
+                self.transformedFlow)
+        return result
 
 
 @attr.s(frozen=True)

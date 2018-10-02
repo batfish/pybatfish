@@ -35,6 +35,7 @@ _MAX_FILENAME_LEN = 150
 __all__ = [
     'BfJsonEncoder',
     'conditional_str',
+    'get_html',
     'get_uuid',
     'validate_json_path_regex',
     'validate_name',
@@ -183,3 +184,11 @@ def zip_dir(dir_path, out_file):
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
                 zipWriter.write(filename, arcname)
+
+
+def get_html(element):
+    """Attempts to call `_repr_html_()` to get HTML representation of object."""
+    try:
+        return element._repr_html_()
+    except AttributeError:
+        return repr(element)
