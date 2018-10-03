@@ -11,9 +11,6 @@ else
 fi
 
 if [ -n "$TRAVIS_BUILD_DIR" ]; then
-   # Install *older* ipython
-   # See https://github.com/jupyter/jupyter_console/issues/167
-   pip install "ipython<7"
    # Build and install pybatfish
    pip install -e .[dev,test]
    export QUESTIONS_DIR=questions
