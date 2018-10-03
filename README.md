@@ -11,17 +11,21 @@ Run interactively within a python shell or fully automate your network validatio
 
 ## Getting started
 
+There are two main options for running pybatfish, detailed below:
+* **Docker** - simple, stand-alone setup utilizing Jupyter notebooks to interact with Batfish; good for new users working with Batfish
+* **Python** - install pybatfish from source; good for developers or users interested in automation
+
 ### Docker Quickstart
 
-Using the [pre-built Docker image](https://hub.docker.com/r/batfish/allinone/) from Docker Hub is a quick and easy way to get started with pybatfish.  Checkout the [readme](https://github.com/batfish/docker/blob/master/allinone.md) for instructions on using the image.
+Using the [pre-built Docker image](https://hub.docker.com/r/batfish/allinone/) from Docker Hub is a quick and easy way to get started with pybatfish and Batfish, without having to build or install either.  Checkout the [readme](https://github.com/batfish/docker/blob/master/allinone.md) for instructions on using the image.
 
 ### Python Setup
 
 #### Prerequisites
 
 1. Access to a running Batfish service (which could be running locally).
-See [here](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service)
-for building and running Batfish service.
+See the [Batfish Docker image instructions](https://github.com/batfish/docker/blob/master/batfish.md) or [Batfish setup instructions](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service)
+for running Batfish service.
 
 2. Python runtime is required. We **strongly** encourage you to use Python 3.
 While Python 2.7 is still supported, it is nearing end of life,
@@ -45,8 +49,15 @@ To install in development mode, append the -e flag:
 pip install -e .
 ```
 
-## Using Pybatfish
+#### Using pybatfish
 
-See our [full documentation](https://pybatfish.readthedocs.io/en/latest/)
-and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html)
+Once pybatfish is installed, get started right away with the [Jupyter notebooks](https://github.com/batfish/pybatfish/blob/master/jupyter_notebooks/Getting%20started%20with%20Batfish.ipynb):
+```
+pip install jupyter
+cd jupyter_notebooks
+jupyter notebooks
+```
+
+Or see our [pybatfish documentation](https://pybatfish.readthedocs.io/en/latest/)
+and the [introduction to pybatfish](https://pybatfish.readthedocs.io/en/latest/quickstart.html) for more information on how to use pybatfish.
 
