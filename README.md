@@ -12,8 +12,8 @@ Run interactively within a python shell or fully automate your network validatio
 ## Getting started
 
 There are two main options for running pybatfish, detailed below:
-* [Docker](#docker-quickstart) - simple, stand alone setup utilizing Jupyter notebooks to interact with Batfish; good for new users working with Batfish
-* [Python](#python-setup) - install pybatfish from source; good for developers or users interested in automation
+* **Docker** - simple, stand-alone setup utilizing Jupyter notebooks to interact with Batfish; good for new users working with Batfish
+* **Python** - install pybatfish from source; good for developers or users interested in automation
 
 ### Docker Quickstart
 
@@ -49,8 +49,15 @@ To install in development mode, append the -e flag:
 pip install -e .
 ```
 
-## Using Pybatfish
+#### Using pybatfish
 
-See our [full documentation](https://pybatfish.readthedocs.io/en/latest/)
-and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html)
+Once pybatfish is installed, jump right in, exploring with the Jupyter notebooks:
+```
+pip install jupyter
+cd jupyter_notebooks
+jupyter notebooks
+```
+
+Or see our [full documentation](https://pybatfish.readthedocs.io/en/latest/)
+and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html) for more information on how to use pybatfish.
 
