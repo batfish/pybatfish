@@ -51,13 +51,13 @@ pip install -e .
 
 #### Using pybatfish
 
-Once pybatfish is installed, jump right in, exploring with the Jupyter notebooks:
+Once pybatfish is installed, get started right away with the [Jupyter notebooks](https://github.com/batfish/pybatfish/blob/master/jupyter_notebooks/Getting%20started%20with%20Batfish.ipynb):
 ```
 pip install jupyter
 cd jupyter_notebooks
 jupyter notebooks
 ```
 
-Or see our [full documentation](https://pybatfish.readthedocs.io/en/latest/)
-and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html) for more information on how to use pybatfish.
+Or see our [pybatfish documentation](https://pybatfish.readthedocs.io/en/latest/)
+and the [introduction to pybatfish](https://pybatfish.readthedocs.io/en/latest/quickstart.html) for more information on how to use pybatfish.
 
