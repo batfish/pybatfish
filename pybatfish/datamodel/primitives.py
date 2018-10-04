@@ -17,13 +17,17 @@ from typing import Any, Dict, List  # noqa: F401
 
 import attr
 
+from pybatfish.util import escape_html, get_html
+
 __all__ = ['Assertion',
            'AssertionType',
            'Edge',
            'FileLines',
            'Interface',
            'Issue',
-           'IssueType']
+           'IssueType',
+           'ListWrapper',
+           ]
 
 
 @attr.s
@@ -39,6 +43,11 @@ class DataModelElement(object):
     def from_dict(cls, json_dict):
         raise NotImplementedError(
             "Datamodel elements must implement from_dict")
+
+    def _repr_html_(self):
+        # type: () -> str
+        """Override this method to enable custom HTML formatting of the dataclass."""
+        return escape_html(repr(self))
 
 
 class AssertionType(str, Enum):
@@ -92,6 +101,11 @@ class Interface(DataModelElement):
         # type: () -> str
         return "{}:{}".format(self.hostname, self.interface)
 
+    def _repr_html_(self):
+        # type: () -> str
+        return "{}:{}".format(escape_html(self.hostname),
+                              escape_html(self.interface))
+
 
 @attr.s(frozen=True)
 class Edge(DataModelElement):
@@ -116,6 +130,11 @@ class Edge(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "{} -> {}".format(self.interface1, self.interface2)
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "{} &rarr; {}".format(self.interface1._repr_html_(),
+                                     self.interface2._repr_html_())
 
 
 @attr.s(frozen=True)
@@ -195,3 +214,13 @@ class Issue(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "[{}] {}".format(self.severity, self.explanation)
+
+
+class ListWrapper(list):
+    """Helper list class that implements _repr_html_()."""
+
+    def _repr_html_(self):
+        # type: () -> str
+        result = "<br><br>".join(
+            [get_html(element) for element in self])  # type: str
+        return result

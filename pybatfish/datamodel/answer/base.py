@@ -19,7 +19,8 @@ from typing import Any, Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace
-from pybatfish.datamodel.primitives import FileLines, Interface, Issue
+from pybatfish.datamodel.primitives import (FileLines, Interface, Issue,
+                                            ListWrapper)
 
 __all__ = ['Answer']
 
@@ -66,15 +67,12 @@ def _parse_json_with_schema(schema, json_object):
     # See if it's an iterable and we need to process it
     if _is_iterable_schema(schema):
         if not isinstance(json_object, list):
-            raise ValueError("Got non-list value for list/set schema", schema,
-                             ":", json_object)
-        output_list = [
-            str(_parse_json_with_schema(_get_base_schema(schema), element)) for
-            element in json_object]
-        if _get_base_schema(schema) == "FlowTrace":
-            return "\n".join(output_list)
-        else:
-            return output_list
+            raise ValueError(
+                "Got non-list value for list/set schema {schema}. Value: {value}".format(
+                    schema=schema, value=json_object))
+        base_schema = _get_base_schema(schema)
+        return ListWrapper([_parse_json_with_schema(base_schema, element) for
+                            element in json_object])
 
     # Handle "primitive" schemas
     if schema == "AclTrace":
