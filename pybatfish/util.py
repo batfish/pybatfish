@@ -24,6 +24,7 @@ from collections import Iterable, Mapping
 from typing import Any, IO, Sized, Union  # noqa: F401
 
 import simplejson
+import six
 from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
@@ -35,6 +36,7 @@ _MAX_FILENAME_LEN = 150
 __all__ = [
     'BfJsonEncoder',
     'conditional_str',
+    'escape_html',
     'get_html',
     'get_uuid',
     'validate_json_path_regex',
@@ -186,9 +188,19 @@ def zip_dir(dir_path, out_file):
                 zipWriter.write(filename, arcname)
 
 
+def escape_html(s):
+    # type: (str) -> str
+    if six.PY2:
+        from cgi import escape
+        return escape(s, quote=True)
+    else:
+        from html import escape
+        return escape(s)
+
+
 def get_html(element):
     """Attempts to call `_repr_html_()` to get HTML representation of object."""
     try:
         return element._repr_html_()
     except AttributeError:
-        return repr(element)
+        return escape_html(repr(element))

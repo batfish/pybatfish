@@ -26,8 +26,8 @@ def display_html(df):
     Replaces newlines and double-spaces in the input with HTML markup, and
     left-aligns the text.
     """
-    pd.set_option('max_colwidth', -1)
-    pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
+    pd.set_option('display.max_colwidth', -1)
+    pd.set_option('display.max_columns', None)
 
     # workaround for Pandas bug in Python 2.7 for empty frames
     if df.size == 0:

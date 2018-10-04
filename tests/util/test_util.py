@@ -18,8 +18,8 @@ import pytest
 
 from pybatfish.datamodel import Interface
 from pybatfish.exception import QuestionValidationException
-from pybatfish.util import (BfJsonEncoder, conditional_str, validate_name,
-                            validate_question_name)
+from pybatfish.util import (BfJsonEncoder, conditional_str, escape_html,
+                            validate_name, validate_question_name)
 
 
 def test_conditional_str():
@@ -89,3 +89,11 @@ def test_encoder_invalid_input():
 
     with pytest.raises(TypeError):
         assert json.dumps(NonSerializable())
+
+
+def test_escape_html():
+    assert escape_html('') == ''
+    assert escape_html('a') == 'a'
+    assert escape_html('"a"') == '&quot;a&quot;'
+    assert escape_html('a&b') == 'a&amp;b'
+    assert escape_html('a & b') == 'a &amp; b'

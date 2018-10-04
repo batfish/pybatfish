@@ -17,7 +17,7 @@ from typing import Any, Dict, List  # noqa: F401
 
 import attr
 
-from pybatfish.util import get_html
+from pybatfish.util import escape_html, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
@@ -47,7 +47,7 @@ class DataModelElement(object):
     def _repr_html_(self):
         # type: () -> str
         """Override this method to enable custom HTML formatting of the dataclass."""
-        return repr(self)
+        return escape_html(repr(self))
 
 
 class AssertionType(str, Enum):
@@ -101,6 +101,11 @@ class Interface(DataModelElement):
         # type: () -> str
         return "{}:{}".format(self.hostname, self.interface)
 
+    def _repr_html_(self):
+        # type: () -> str
+        return "{}:{}".format(escape_html(self.hostname),
+                              escape_html(self.interface))
+
 
 @attr.s(frozen=True)
 class Edge(DataModelElement):
@@ -127,7 +132,9 @@ class Edge(DataModelElement):
         return "{} -> {}".format(self.interface1, self.interface2)
 
     def _repr_html_(self):
-        return "{} &rarr; {}".format(self.interface1, self.interface2)
+        # type: () -> str
+        return "{} &rarr; {}".format(self.interface1._repr_html_(),
+                                     self.interface2._repr_html_())
 
 
 @attr.s(frozen=True)
@@ -213,4 +220,7 @@ class ListWrapper(list):
     """Helper list class that implements _repr_html_()."""
 
     def _repr_html_(self):
-        return "<br><br>".join([get_html(element) for element in self])
+        # type: () -> str
+        result = "<br><br>".join(
+            [get_html(element) for element in self])  # type: str
+        return result

@@ -17,6 +17,7 @@ from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
 
+from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = ['Flow', 'FlowTrace', 'FlowTraceHop', 'HeaderConstraints',
@@ -154,10 +155,11 @@ class Flow(DataModelElement):
             return self.ipProtocol
 
     def _repr_html_(self):
+        # type: () -> str
         return "{src_ip}:{src_port} &rarr; {dst_ip}:{dst_port}<br>start={node}{iface}{vrf}" \
             .format(node=self.ingressNode,
-                    iface=self._iface_str(),
-                    vrf=self._vrf_str(),
+                    iface=escape_html(self._iface_str()),
+                    vrf=escape_html(self._vrf_str()),
                     src_ip=self.srcIp,
                     src_port=self.srcPort,
                     dst_ip=self.dstIp,
@@ -202,6 +204,7 @@ class FlowTrace(DataModelElement):
         return self.hops[item]
 
     def _repr_html_(self):
+        # type: () -> str
         return "{notes}<br>{hops}".format(
             notes=self.format_notes_html(),
             hops="<br><br>".join(
@@ -210,9 +213,10 @@ class FlowTrace(DataModelElement):
                  for num, hop in enumerate(self.hops, start=1)]))
 
     def format_notes_html(self):
+        # type: () -> str
         color = '#019612' if 'ACCEPTED' in self.notes else '#7c020e'
         return '<span style="color:{color}; text-weight:bold;">{notes}</span>'.format(
-            color=color, notes=self.notes)
+            color=color, notes=escape_html(self.notes))
 
 
 @attr.s(frozen=True)
@@ -247,13 +251,15 @@ class FlowTraceHop(DataModelElement):
         return ret_str
 
     def _repr_html_(self):
+        # type: () -> str
         indent = "&nbsp;" * 4
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
-            routes=indent + ("<br>" + indent).join(self.routes))
+            routes=indent + ("<br>" + indent).join(
+                [escape_html(r) for r in self.routes]))
         if self.transformedFlow:
             result += "<br>Transformed flow: {}".format(
-                self.transformedFlow)
+                self.transformedFlow._repr_html_())
         return result
 
 
