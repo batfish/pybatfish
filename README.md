@@ -11,9 +11,9 @@ Run interactively within a python shell or fully automate your network validatio
 
 ## Getting started
 
-There are two main options for running pybatfish, detailed below:
-* **Docker** - simple, stand-alone setup utilizing Jupyter notebooks to interact with Batfish; good for new users working with Batfish
-* **Python** - install pybatfish from source; good for developers or users interested in automation
+There are two main options for utilizing pybatfish, detailed below:
+* **Docker** - a docker container that combines Batfish with Pybatfish SDK and Jupyter notebooks (iPython notebook). This container has example networks and notebooks, so it is recommended for new users working with Batfish and Pybatfish
+* **Python** - install pybatfish from source; recommended for developers interested in contributing to Batfish/Pybatfish or building network automation solutions.
 
 ### Docker Quickstart
 
@@ -24,7 +24,7 @@ Using the [pre-built Docker image](https://hub.docker.com/r/batfish/allinone/) f
 #### Prerequisites
 
 1. Access to a running Batfish service (which could be running locally).
-See the [Batfish Docker image instructions](https://github.com/batfish/docker/blob/master/batfish.md) or [Batfish setup instructions](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service)
+See the [Batfish Docker image instructions](https://github.com/batfish/docker/blob/master/batfish.md) 
 for running Batfish service.
 
 2. Python runtime is required. We **strongly** encourage you to use Python 3.
