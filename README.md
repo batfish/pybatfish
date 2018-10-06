@@ -19,9 +19,9 @@ Instructions for running this container are [here](https://github.com/batfish/do
 
 ### 2. Python client
 
-Use this option when you have access to a running Batfish service (e.g., via the [`Batfish` docker container](https://github.com/batfish/docker/blob/master/batfish.md) or by [running from sources](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service) and want to analyze your own networks.
+Use this option when you want to analyze your own networks and have access to a running Batfish service (via the [`Batfish` docker container](https://github.com/batfish/docker/blob/master/batfish.md) or [directly from sources](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service)).
 
-To install pybatfish, clone the repository and run `pip install .` from its top-level directory. (We recommend Python 3 as the Python runtime. While Python 2.7 is supported, it is nearing end of life.)
+To install pybatfish, run `pip install .` from the top-level directory of the repository. (We recommend Python 3 as the Python runtime. While Python 2.7 is supported, it is nearing end of life.)
 
 Once pybatfish is installed, you can run the example [Jupyter notebooks](jupyter_notebooks):
 ```
@@ -30,6 +30,6 @@ cd jupyter_notebooks
 jupyter notebooks
 ```
 
-You can then begin analyzing your own networks by modifying the examples and pointing them at your data. 
+You can begin analyzing your own networks by modifying the examples and pointing them at your data. 
 
 Complete documentation of pybatfish APIs is [here](https://pybatfish.readthedocs.io/en/latest/). 
