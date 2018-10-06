@@ -23,9 +23,9 @@ Use this option when you have access to a running Batfish service (e.g., via the
 
 #### Installation
 
-**Prerequisite:** A Python runtime. We recommend Python 3; while Python 2.7 is supported, it is nearing end of life. 
+pybatfish needs a Python runtime. We recommend Python 3. While Python 2.7 is supported, it is nearing end of life.  
 
-Clone the repository and run the following from its top-level directory:
+To install pybatfish, clone the repository and run the following from its top-level directory:
 ```
 pip install .
 ```
@@ -39,4 +39,6 @@ cd jupyter_notebooks
 jupyter notebooks
 ```
 
-To begin analyzing your own data, see [pybatfish documentation](https://pybatfish.readthedocs.io/en/latest/).
+You can then begin analyzing your own networks by modifying the examples and pointing them at your data. 
+
+Complete information on pybatfish APIs is [here](https://pybatfish.readthedocs.io/en/latest/). 
