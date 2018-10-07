@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, Optional  # noqa: F401
 
 import requests
+from deprecated import deprecated
 from requests import Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -25,7 +26,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConsts
+from pybatfish.client.consts import BfConsts, CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from .options import Options
@@ -47,6 +48,7 @@ _requests_session.mount("http", HTTPAdapter(
 #                              'https': 'http://127.0.0.1:8888'}
 
 
+@deprecated
 def get_object(session, snapshot, object_name):
     # type: (Session, str, str) -> bytes
     """Execute the getObject RPC call to Batfish.
@@ -55,6 +57,8 @@ def get_object(session, snapshot, object_name):
     :param object_name: the name of the object to retrieve (in a snapshot)
 
     :rtype: bytes
+
+    .. deprecated:: 0.36.0
     """
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
                  CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
@@ -62,6 +66,21 @@ def get_object(session, snapshot, object_name):
                  CoordConsts.SVC_KEY_OBJECT_NAME: object_name}
 
     return _post_data(session, CoordConsts.SVC_RSC_GET_OBJECT, json_data,
+                      stream=False).content
+
+
+def get_answer(session, snapshot, question_name, reference_snapshot=None):
+    # type: (Session, str, str, Optional[str]) -> bytes
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
+                 CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
+                 CoordConsts.SVC_KEY_ENV_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
+                 CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
+                 }
+    if reference_snapshot is not None:
+        json_data[
+            CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
+    return _post_data(session, CoordConsts.SVC_RSC_GET_ANSWER, json_data,
                       stream=False).content
 
 
