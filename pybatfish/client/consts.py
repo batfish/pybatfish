@@ -220,6 +220,7 @@ class CoordConsts(object):
     SVC_KEY_QUESTION = "question"
     SVC_KEY_QUESTION_LIST = "questionlist"
     SVC_KEY_QUESTION_NAME = "questionname"
+    SVC_KEY_REFERENCE_SNAPSHOT_NAME = "referencesnapshotname"
     SVC_KEY_RESULT = "result"
     SVC_KEY_SETTINGS = "settings"
     SVC_KEY_SNAPSHOT_INFO = "snapshotinfo"
