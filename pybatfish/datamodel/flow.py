@@ -281,6 +281,10 @@ class HeaderConstraints(DataModelElement):
     :ivar icmpCodes: List of integer ICMP codes
     :ivar icmpTypes: List of integer ICMP types
     :ivar flowStates: List of flow states (e.g., "new", "established")
+    :ivar dscps: List of allowed DSCP value ranges
+    :ivar ecns: List of allowed ECN values ranges
+    :ivar packetLengths: List of allowed packet length value ranges
+    :ivar fragmentOffsets: List of allowed fragmentOffset value ranges
 
 
     Lists of values in each fields are subject to a logical "OR":
