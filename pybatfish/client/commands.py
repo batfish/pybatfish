@@ -25,13 +25,12 @@ from imp import new_module
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
+import six
 from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.answer.base import get_answer_text
-from pybatfish.datamodel.answer.table import TableAnswer
 from pybatfish.datamodel.primitives import Assertion, AssertionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData, ReferenceBook, ReferenceLibrary
@@ -97,7 +96,6 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
-           'bf_print_answer',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
@@ -105,7 +103,6 @@ __all__ = ['bf_add_analysis',
            'bf_set_network',
            'bf_set_snapshot',
            'bf_set_testrig',
-           'bf_str_answer',
            'bf_sync_snapshots_sync_now',
            'bf_sync_snapshots_update_settings',
            'bf_sync_testrigs_sync_now',
@@ -173,10 +170,24 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
     # Answer the question
     work_item = workhelper.get_workitem_answer(bf_session, question_name,
                                                snapshot, reference_snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session, background)
+    workhelper.execute(work_item, bf_session, background)
+
     if background:
         return work_item.id
-    return answer.from_string(answer_dict["answer"])
+
+    # get the answer
+    answer_bytes = resthelper.get_answer(bf_session, snapshot, question_name,
+                                         reference_snapshot)
+
+    # In Python 3.x, answer needs to be decoded before it can be used
+    # for things like json.loads (<= 3.6).
+    if six.PY3:
+        answer_string = answer_bytes.decode(encoding="utf-8")
+    else:
+        answer_string = answer_bytes
+    answer_obj = json.loads(answer_string)
+
+    return answer.from_string(answer_obj[1]['answer'])
 
 
 def bf_auto_complete(completionType, query, maxSuggestions=None):
@@ -435,35 +446,27 @@ def bf_fork_snapshot(base_name, name=None,
                              deactivate_nodes=deactivate_nodes)
 
 
-def _bf_generate_dataplane(snapshot):
-    # type: (str) -> Dict[str, str]
-    workItem = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answerDict = workhelper.execute(workItem, bf_session)
-    return answerDict
-
-
 def bf_generate_dataplane(snapshot=None):
     # type: (Optional[str]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
     snapshot = bf_session.get_snapshot(snapshot)
-    answerDict = _bf_generate_dataplane(snapshot)
-    answer = answerDict["answer"]
-    return answer
+
+    work_item = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
+    answer_dict = workhelper.execute(work_item, bf_session)
+    return str(answer_dict["status"].value)
 
 
-def bf_get_analysis_answers(analysisName, snapshot=None,
+def bf_get_analysis_answers(name, snapshot=None,
                             reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
-    jsonData = workhelper.get_data_get_analysis_answers(bf_session,
-                                                        analysisName, snapshot,
-                                                        reference_snapshot)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS,
-                                                jsonData)
-    answersDict = json.loads(jsonResponse['answers'])
-    return answersDict
+    json_data = workhelper.get_data_get_analysis_answers(
+        bf_session, name, snapshot, reference_snapshot)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS, json_data)
+    answers_dict = json.loads(json_response['answers'])
+    return answers_dict
 
 
 def bf_get_answer(questionName, snapshot, reference_snapshot=None):
@@ -745,26 +748,6 @@ def bf_list_testrigs(currentContainerOnly=True):
     return json_response
 
 
-def bf_str_answer(answer_json):
-    """Convert the Json answer to a string."""
-    try:
-        if "answerElements" in answer_json and "metadata" in \
-                answer_json["answerElements"][0]:
-            table_answer = TableAnswer(answer_json)
-            return table_answer.table_data.to_string()
-        else:
-            return get_answer_text(answer_json)
-    except Exception as error:
-        return "Error getting answer text: {}\n Original Json:\n {}".format(
-            error, json.dumps(answer_json, indent=2))
-
-
-def bf_print_answer(answer_json):
-    # type: (Dict) -> None
-    """Print the given answer JSON to console."""
-    print(bf_str_answer(answer_json))
-
-
 def _bf_get_question_templates():
     jsonData = _get_data_get_question_templates(bf_session)
     jsonResponse = resthelper.get_json_response(bf_session,
@@ -789,15 +772,15 @@ def bf_read_question_settings(question_class, json_path=None):
                                                json_path)
 
 
-def bf_run_analysis(analysisName, snapshot, reference_snapshot=None):
-    # type: (str, str, Optional[str]) -> str
-    workItem = workhelper.get_workitem_run_analysis(bf_session, analysisName,
-                                                    snapshot,
-                                                    reference_snapshot)
-    workAnswer = workhelper.execute(workItem, bf_session)
-    # status = workAnswer["status"]
-    answer = workAnswer["answer"]
-    return answer
+def bf_run_analysis(name, snapshot, reference_snapshot=None):
+    # type: (str, str, Optional[str]) -> Any
+    work_item = workhelper.get_workitem_run_analysis(
+        bf_session, name, snapshot, reference_snapshot)
+    work_answer = workhelper.execute(work_item, bf_session)
+    if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException("Failed to run analysis")
+
+    return bf_get_analysis_answers(name, snapshot, reference_snapshot)
 
 
 @deprecated("Deprecated in favor of bf_set_network(name)")

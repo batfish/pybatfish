@@ -27,3 +27,10 @@ def test_as_dict():
 def test_json_serialization():
     i = Interface(hostname='host', interface='iface')
     assert BfJsonEncoder().encode(i) == json.dumps(i.dict())
+
+
+def test_html_interface():
+    i = Interface(hostname='host', interface='special&')
+    assert i._repr_html_() == "host:special&amp;"
+    i = Interface(hostname='host', interface='normal:0/0.0')
+    assert i._repr_html_() == "host:normal:0/0.0"

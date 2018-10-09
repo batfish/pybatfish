@@ -15,17 +15,16 @@
 
 import json
 import re
-from string import Template
-from typing import Dict, Optional  # noqa: F401
+from typing import Any, Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace
-from pybatfish.datamodel.primitives import FileLines, Interface, Issue
+from pybatfish.datamodel.primitives import (FileLines, Interface, Issue,
+                                            ListWrapper)
 
 __all__ = ['Answer']
 
-_LIST_SCHEMA_PATTERN = re.compile(r'^List<(.+)>$')
-_SET_SCHEMA_PATTERN = re.compile(r'^Set<(.+)>$')
+_ITERABLE_SCHEMA_PATTERN = re.compile(r'^(List|Set)<(.+)>$', re.IGNORECASE)
 
 
 class Answer(dict):
@@ -48,105 +47,34 @@ class Answer(dict):
         return dict(self)
 
 
-def get_answer_text(answerJson):
-    if "question" not in answerJson:
-        # strange answer; without a question object
-        return json.dumps(answerJson, indent=2)
-    if "status" not in answerJson or answerJson["status"] != "SUCCESS":
-        # the question was not answered successfully
-        return json.dumps(answerJson, indent=2)
-    question = answerJson["question"]
-    if "JsonPathQuestion" not in question["class"]:
-        # we haven't extended display hints to other question types
-        return json.dumps(answerJson, indent=2)
-    queries = question["paths"]
-    if "displayHints" not in queries[0]:
-        # this jsonpath question template did not have display hints
-        return json.dumps(answerJson, indent=2)
-
-    return _get_display_answer_text(answerJson)
-
-
-def _get_display_answer_text(answerJson):
-    question = answerJson["question"]
-    answerElement = answerJson["answerElements"][0]
-    queries = question["paths"]
-    summary = answerJson["summary"]
-
-    displayText = "Status: " + answerJson["status"] + "\n"
-    displayText += "NumPassed: {} NumFailed: {} NumResults: {}\n".format(
-        summary["numPassed"], summary["numFailed"],
-        summary["numResults"])
-    if summary["numResults"] > 0:
-        displayText += "-" * 30 + "\n"
-        for index, query in enumerate(queries):
-            query = queries[index]
-            displayHints = query["displayHints"]
-
-            displayValues = answerElement["results"][str(index)][
-                "extractedValues"]
-            result = answerElement["results"][str(index)]["result"]
-
-            for resultKey in iter(result):
-                if (resultKey not in displayValues):
-                    raise ValueError("display values not found for result ",
-                                     resultKey)
-                displayText += _get_display_result_text(displayHints,
-                                                        displayValues[
-                                                            resultKey]) + "\n"
-                displayText += "\n" + "-" * 30 + "\n"
-
-    return displayText
-
-
-def _get_display_result_text(displayHints, displayValues):
-    displaySchemas = _get_display_schemas(displayHints)
-    values = {}
-    for varName in displayValues:
-        values[varName] = _get_display_value(displaySchemas[varName],
-                                             displayValues[varName])
-    textTemplate = Template(displayHints["textDesc"])
-    return "  " + textTemplate.substitute(values)
-
-
-def _get_display_schemas(displayHints):
-    schemas = {}
-    if "compositions" in displayHints:
-        for varName in displayHints["compositions"]:
-            schemas[varName] = displayHints["compositions"][varName]["schema"]
-    if "extractions" in displayHints:
-        for varName in displayHints["extractions"]:
-            schemas[varName] = displayHints["extractions"][varName]["schema"]
-    return schemas
-
-
 def _get_base_schema(schema):
-    match = re.match(_LIST_SCHEMA_PATTERN, schema)
+    # type: (str) -> str
+    """Return the underlying base schema for an iterable (list or set)."""
+    match = re.match(_ITERABLE_SCHEMA_PATTERN, schema)
     if match:
-        return match.group(1)
-
-    match = re.match(_SET_SCHEMA_PATTERN, schema)
-    if match:
-        return match.group(1)
+        return match.group(2)
 
     return schema
 
 
-def _get_display_value(schema, json_object):
-    # type (str, Any) -> Any
+def _parse_json_with_schema(schema, json_object):
+    # type: (str, Any) -> Any
+    """Process JSON object according to its schema."""
     if json_object is None:
+        # Honor null/None values
         return None
-    if _is_list_or_set_schema(schema):
+
+    # See if it's an iterable and we need to process it
+    if _is_iterable_schema(schema):
         if not isinstance(json_object, list):
-            raise ValueError("Got non-list value for list/set schema", schema,
-                             ":", json_object)
-        output_list = [
-            str(_get_display_value(_get_base_schema(schema), element)) for
-            element in json_object]
-        if _get_base_schema(schema) == "FlowTrace":
-            return "\n".join(output_list)
-        else:
-            return output_list
+            raise ValueError(
+                "Got non-list value for list/set schema {schema}. Value: {value}".format(
+                    schema=schema, value=json_object))
+        base_schema = _get_base_schema(schema)
+        return ListWrapper([_parse_json_with_schema(base_schema, element) for
+                            element in json_object])
+
+    # Handle "primitive" schemas
     if schema == "AclTrace":
         return AclTrace.from_dict(json_object)
     if schema == "FileLines":
@@ -168,13 +96,14 @@ def _get_display_value(schema, json_object):
     if schema == "Prefix":
         return str(json_object)
     if schema == "SelfDescribing":
-        return _get_display_value(json_object["schema"],
-                                  json_object.get("value"))
+        return _parse_json_with_schema(json_object["schema"],
+                                       json_object.get("value"))
     if schema == "String":
         return str(json_object)
     return json_object
 
 
-def _is_list_or_set_schema(schema):
-    return re.match(_LIST_SCHEMA_PATTERN, schema) or re.match(
-        _SET_SCHEMA_PATTERN, schema)
+def _is_iterable_schema(schema):
+    # type: (str) -> bool
+    """Check if a given schema is an iterable/container schema."""
+    return re.match(_ITERABLE_SCHEMA_PATTERN, schema) is not None

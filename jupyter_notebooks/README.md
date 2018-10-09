@@ -1,4 +1,4 @@
-This folder contains Jupyter notebooks that show how to use Batfish for different analysis and validation tasks. All network snapshots used in the notebooks are in the `networks` subfolder. 
+This folder contains Jupyter notebooks that show how to use Batfish for different analysis and validation tasks. All network snapshots used in the notebooks are in the `networks` subfolder.
 
 The current list of notebooks are:
 - [Getting Started with Batfish](Getting%20started%20with%20Batfish.ipynb)
@@ -12,4 +12,11 @@ The current list of notebooks are:
 - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb)
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
 
-We will continue to add notebooks demonstrating additional capabilities of Batfish. If there are specific use cases that you are interested in, let us know via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) or by filing a Github issue.
+We will continue to add notebooks demonstrating additional capabilities of Batfish. 
+
+------
+
+ - You can reach us via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) for any questions or suggestions for additional use cases. 
+
+ - Video demos of the notebooks are at the [Batfish YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60KvmJYA)
+
