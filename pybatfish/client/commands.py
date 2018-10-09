@@ -38,7 +38,7 @@ from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from . import resthelper, restv2helper, workhelper
+from . import resthelper, restv2helper, workhelper, workv2helper
 from .options import Options
 from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
@@ -73,6 +73,7 @@ __all__ = ['bf_add_analysis',
            'bf_delete_testrig',
            'bf_extract_answer_list',
            'bf_extract_answer_summary',
+           'bf_fork_snapshot',
            'bf_generate_dataplane',
            'bf_get_analysis_answers',
            'bf_get_answer',
@@ -359,6 +360,79 @@ def bf_extract_answer_summary(answerJson):
         bf_logger.error("summary not found in the answer")
         return None
     return answerJson["summary"]
+
+
+def _bf_fork_snapshot(name=None, base_name=None,
+                      background=False, deactivate_interfaces=None,
+                      deactivate_links=None, deactivate_nodes=None):
+    if bf_session.network is None:
+        bf_set_network()
+
+    if name is None:
+        name = Options.default_snapshot_prefix + get_uuid()
+    validate_name(name)
+
+    if name in bf_list_snapshots():
+        raise ValueError(
+            'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                name, bf_session.network))
+
+    json_data = workv2helper.get_data_fork_snapshot(base_name,
+                                                    deactivate_interfaces,
+                                                    deactivate_links,
+                                                    deactivate_nodes)
+    restv2helper.fork_snapshot(bf_session,
+                               name,
+                               json_data)
+
+    work_item = workhelper.get_workitem_parse(bf_session, name)
+    answer_dict = workhelper.execute(work_item, bf_session,
+                                     background=background)
+    if background:
+        bf_session.baseSnapshot = name
+        return answer_dict
+
+    status = WorkStatusCode(answer_dict["status"])
+    if status != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException(
+            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
+                ss=name,
+                status=status,
+                msg=answer_dict['answer']))
+    else:
+        bf_session.baseSnapshot = name
+        bf_logger.info("Default snapshot is now set to %s",
+                       bf_session.baseSnapshot)
+        return bf_session.baseSnapshot
+
+
+def bf_fork_snapshot(base_name, name=None,
+                     background=False, deactivate_interfaces=None,
+                     deactivate_links=None, deactivate_nodes=None):
+    # type: (str, Optional[str], bool, list[Interface], list[Edge], list[str]) -> Union[str, Dict, None]
+    """Copy an existing snapshot and deactivate specified interfaces on the copy.
+
+    :param name: name of the snapshot to initialize
+    :type name: string
+    :param base_name: name of the snapshot to copy
+    :type base_name: string
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :param deactivate_interfaces: list of interfaces to deactivate in the new snapshot
+    :type deactivate_interfaces: list[Interface]
+    :param deactivate_links: list of links to deactivate in the new snapshot
+    :type deactivate_links: list[Edge]
+    :param deactivate_nodes: list of names of nodes to deactivate in the new snapshot
+    :type deactivate_nodes: list[str]
+    :return: name of initialized snapshot, JSON dictionary of task status if background=True, or None if the call fails
+    :rtype: Union[str, Dict, None]
+    """
+    return _bf_fork_snapshot(name=name,
+                             base_name=base_name,
+                             background=background,
+                             deactivate_interfaces=deactivate_interfaces,
+                             deactivate_links=deactivate_links,
+                             deactivate_nodes=deactivate_nodes)
 
 
 def _bf_generate_dataplane(snapshot):

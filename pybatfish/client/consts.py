@@ -292,3 +292,36 @@ class CoordConsts(object):
     SVC_RSC_UPLOAD_QUESTION = "uploadquestion"
     SVC_RSC_UPLOAD_SNAPSHOT = "uploadsnapshot"
     SVC_RSC_UPLOAD_TESTRIG = "uploadtestrig"
+
+
+class CoordConstsV2(object):
+    """
+    Constains constants derived from CoordConstsV2.java in batfish-common.
+
+    **IMPORTANT**:
+    It is crucial to keep the two versions in sync.
+    """
+    # The HTTP Header containing the client's API Key.
+    HTTP_HEADER_BATFISH_APIKEY = "X-Batfish-Apikey"
+    # The HTTP Header containing the client's version.
+    HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
+
+    KEY_DEACTIVATE_INTERFACES = "deactivateinterfaces"
+    KEY_DEACTIVATE_LINKS = "deactivatelinks"
+    KEY_DEACTIVATE_NODES = "deactivatenodes"
+    KEY_NETWORK = "network"
+    KEY_RESULT = "result"
+    KEY_SNAPSHOT = "snapshot"
+    KEY_SNAPSHOT_BASE = "snapshotbase"
+
+    RSC_CONTAINER = "container"
+    RSC_CONTAINERS = "containers"
+    RSC_ISSUES = "issues"
+    RSC_FORK_SNAPSHOT = "forksnapshot"
+    RSC_NETWORK = "network"
+    RSC_NETWORKS = "networks"
+    RSC_NODE_ROLES = "noderoles"
+    RSC_QUESTIONS = "questions"
+    RSC_REFERENCE_LIBRARY = "referencelibrary"
+    RSC_SETTINGS = "settings"
+    RSC_SNAPSHOTS = "snapshots"

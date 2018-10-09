@@ -23,7 +23,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConsts
+from pybatfish.client.consts import CoordConsts, CoordConstsV2
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
@@ -46,10 +46,10 @@ _requests_session.mount("http", HTTPAdapter(
 _encoder = BfJsonEncoder()
 
 __all__ = ['add_issue_config', 'add_node_role_dimension', 'add_reference_book',
-           'delete_issue_config', 'get_issue_config', 'get_network',
-           'get_node_role_dimension', 'get_node_roles', 'get_reference_book',
-           'get_reference_library', 'read_question_settings',
-           'write_question_settings']
+           'delete_issue_config', 'fork_snapshot', 'get_issue_config',
+           'get_network', 'get_node_role_dimension', 'get_node_roles',
+           'get_reference_book', 'get_reference_library',
+           'read_question_settings', 'write_question_settings']
 
 
 def add_issue_config(session, issue_config):
@@ -91,6 +91,18 @@ def delete_issue_config(session, major, minor):
                                                              major,
                                                              minor)
     return _delete(session, url_tail)
+
+
+def fork_snapshot(session, snapshot, obj):
+    # type: (Session, String, Dict[String, String]) -> None
+    if not session.network:
+        raise ValueError("Network must be set to fork a snapshot")
+    if not snapshot:
+        raise ValueError("Snapshot must be set to fork a snapshot")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_SNAPSHOTS, snapshot)
+    return _put(session, url_tail, obj)
 
 
 def get_issue_config(session, major, minor):
