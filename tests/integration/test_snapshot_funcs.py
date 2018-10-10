@@ -55,11 +55,13 @@ def example_snapshot(network):
     bf_delete_snapshot(name)
 
 
-def test_fork_snapshot_no_crash(network, example_snapshot):
+def test_fork_snapshot(network, example_snapshot):
     """Run fork snapshot command."""
     bf_set_network(network)
     assert bf_list_snapshots() == [example_snapshot]
     forked_snapshot = bf_fork_snapshot(example_snapshot)
+
+    # Confirm both snapshots (base and fork) shows up in snapshot list
     assert sorted(bf_list_snapshots()) == sorted(
         [forked_snapshot, example_snapshot])
 
