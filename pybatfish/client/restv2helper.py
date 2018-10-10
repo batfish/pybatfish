@@ -23,7 +23,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConsts, CoordConstsV2
+from pybatfish.client.consts import CoordConstsV2
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
@@ -219,8 +219,8 @@ def _delete(session, url_tail):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.delete(url, headers=headers,
@@ -235,8 +235,8 @@ def _get(session, url_tail):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.get(url, headers=headers, verify=session.verifySslCerts)
@@ -251,8 +251,8 @@ def _post(session, url_tail, obj):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.post(url,
@@ -270,8 +270,8 @@ def _put(session, url_tail, obj):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.put(url,
