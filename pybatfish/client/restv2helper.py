@@ -93,16 +93,15 @@ def delete_issue_config(session, major, minor):
     return _delete(session, url_tail)
 
 
-def fork_snapshot(session, snapshot, obj):
-    # type: (Session, String, Dict[String, String]) -> None
+def fork_snapshot(session, obj):
+    # type: (Session, Dict[String, String]) -> None
     if not session.network:
         raise ValueError("Network must be set to fork a snapshot")
-    if not snapshot:
-        raise ValueError("Snapshot must be set to fork a snapshot")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+    url_tail = "/{}/{}/{}:{}".format(CoordConstsV2.RSC_NETWORKS,
                                      session.network,
-                                     CoordConstsV2.RSC_SNAPSHOTS, snapshot)
-    return _put(session, url_tail, obj)
+                                     CoordConstsV2.RSC_SNAPSHOTS,
+                                     CoordConstsV2.RSC_FORK)
+    return _post(session, url_tail, obj)
 
 
 def get_issue_config(session, major, minor):

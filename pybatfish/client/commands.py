@@ -389,11 +389,11 @@ def _bf_fork_snapshot(name=None, base_name=None,
                 name, bf_session.network))
 
     json_data = workv2helper.get_data_fork_snapshot(base_name,
+                                                    name,
                                                     deactivate_interfaces,
                                                     deactivate_links,
                                                     deactivate_nodes)
     restv2helper.fork_snapshot(bf_session,
-                               name,
                                json_data)
 
     work_item = workhelper.get_workitem_parse(bf_session, name)

@@ -18,9 +18,10 @@ from __future__ import absolute_import, print_function
 from pybatfish.client.consts import CoordConstsV2
 
 
-def get_data_fork_snapshot(base_name, deactivate_interfaces,
+def get_data_fork_snapshot(base_name, new_name, deactivate_interfaces,
                            deactivate_links, deactivate_nodes):
     json_data = {CoordConstsV2.KEY_SNAPSHOT_BASE: base_name,
+                 CoordConstsV2.KEY_SNAPSHOT_NEW: new_name,
                  CoordConstsV2.KEY_DEACTIVATE_INTERFACES: deactivate_interfaces,
                  CoordConstsV2.KEY_DEACTIVATE_LINKS: deactivate_links,
                  CoordConstsV2.KEY_DEACTIVATE_NODES: deactivate_nodes}
