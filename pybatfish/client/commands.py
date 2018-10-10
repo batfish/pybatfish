@@ -375,16 +375,19 @@ def bf_extract_answer_summary(answerJson):
     return answerJson["summary"]
 
 
-def bf_fork_snapshot(base_name, name=None,
+def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
                      deactivate_links=None, deactivate_nodes=None):
-    # type: (str, Optional[str], bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
+    # type: (str, str, bool, bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate specified interfaces on the copy.
 
     :param name: name of the snapshot to initialize
     :type name: string
     :param base_name: name of the snapshot to copy
     :type base_name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+       same name
+    :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
     :param deactivate_interfaces: list of interfaces to deactivate in the new snapshot
@@ -404,9 +407,12 @@ def bf_fork_snapshot(base_name, name=None,
     validate_name(name)
 
     if name in bf_list_snapshots():
-        raise ValueError(
-            'A snapshot named ''{}'' already exists in network ''{}'''.format(
-                name, bf_session.network))
+        if overwrite:
+            bf_delete_snapshot(name)
+        else:
+            raise ValueError(
+                'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                    name, bf_session.network))
 
     json_data = workv2helper.get_data_fork_snapshot(base_name,
                                                     name,
