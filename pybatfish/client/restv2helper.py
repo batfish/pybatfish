@@ -23,7 +23,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConsts
+from pybatfish.client.consts import CoordConstsV2
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
@@ -57,7 +57,10 @@ def add_issue_config(session, issue_config):
     """Adds the issue configuration to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add issue config")
-    url_tail = "/containers/{}/settings/issues".format(session.network)
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_SETTINGS,
+                                     CoordConstsV2.RSC_ISSUES)
     _post(session, url_tail, issue_config)
 
 
@@ -66,7 +69,8 @@ def add_node_role_dimension(session, dimension):
     """Adds a new node role dimension to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add node role dimension")
-    url_tail = "/containers/{}/noderoles".format(session.network)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_NODE_ROLES)
     _post(session, url_tail, dimension)
 
 
@@ -75,7 +79,8 @@ def add_reference_book(session, book):
     """Adds a new reference book to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add reference book")
-    url_tail = "/containers/{}/referencelibrary".format(session.network)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_REFERENCE_LIBRARY)
     _post(session, url_tail, book)
 
 
@@ -87,9 +92,12 @@ def delete_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to delete issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to delete issue config")
-    url_tail = "/containers/{}/settings/issues/{}/{}".format(session.network,
-                                                             major,
-                                                             minor)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SETTINGS,
+                                           CoordConstsV2.RSC_ISSUES,
+                                           major,
+                                           minor)
     return _delete(session, url_tail)
 
 
@@ -101,17 +109,20 @@ def get_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to get issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to get issue config")
-    url_tail = "/containers/{}/settings/issues/{}/{}".format(session.network,
-                                                             major,
-                                                             minor)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SETTINGS,
+                                           CoordConstsV2.RSC_ISSUES,
+                                           major,
+                                           minor)
     return _get(session, url_tail)
 
 
 def get_network(session, network):
     # type: (Session, str) -> Dict[str, Any]
     """Gets information about the specified network."""
-    path = "/containers/{}".format(network)
-    return _get(session, path)
+    url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network)
+    return _get(session, url_tail)
 
 
 def get_node_role_dimension(session, dimension):
@@ -121,7 +132,10 @@ def get_node_role_dimension(session, dimension):
         raise ValueError("Container must be set to get node roles")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
-    url_tail = "/containers/{}/noderoles/{}".format(session.network, dimension)
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_NODE_ROLES,
+                                     dimension)
     return _get(session, url_tail)
 
 
@@ -130,7 +144,8 @@ def get_node_roles(session):
     """Gets the node roles data for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/containers/{}/noderoles".format(session.network)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_NODE_ROLES)
     return _get(session, url_tail)
 
 
@@ -141,8 +156,10 @@ def get_reference_book(session, book_name):
         raise ValueError("Network must be set to get a reference book")
     if not book_name:
         raise ValueError("Book name must be a non-empty string")
-    url_tail = "/containers/{}/referencelibrary/{}".format(session.network,
-                                                           book_name)
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
+                                     book_name)
     return _get(session, url_tail)
 
 
@@ -151,7 +168,8 @@ def get_reference_library(session):
     """Gets the reference library for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get the reference library")
-    url_tail = "/containers/{}/referencelibrary".format(session.network)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_REFERENCE_LIBRARY)
     return _get(session, url_tail)
 
 
@@ -161,9 +179,12 @@ def read_question_settings(session, question_class, json_path):
     if not session.network:
         raise ValueError("Network must be set to read question class settings")
     json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network,
-                                                                question_class,
-                                                                json_path_tail)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SETTINGS,
+                                           CoordConstsV2.RSC_QUESTIONS,
+                                           question_class,
+                                           json_path_tail)
     return _get(session, url_tail)
 
 
@@ -173,9 +194,12 @@ def write_question_settings(session, settings, question_class, json_path):
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
     json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/containers/{}/settings/questions/{}/{}".format(session.network,
-                                                                question_class,
-                                                                json_path_tail)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SETTINGS,
+                                           CoordConstsV2.RSC_QUESTIONS,
+                                           question_class,
+                                           json_path_tail)
     _put(session, url_tail, settings)
 
 
@@ -195,8 +219,8 @@ def _delete(session, url_tail):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.delete(url, headers=headers,
@@ -211,8 +235,8 @@ def _get(session, url_tail):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.get(url, headers=headers, verify=session.verifySslCerts)
@@ -227,8 +251,8 @@ def _post(session, url_tail, obj):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.post(url,
@@ -246,8 +270,8 @@ def _put(session, url_tail, obj):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConsts.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
-               CoordConsts.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
 
     response = requests.put(url,
