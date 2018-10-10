@@ -31,9 +31,11 @@ from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.primitives import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel.primitives import (Assertion,  # noqa: F401
+                                            AssertionType, Edge, Interface)
+from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
+                                                  NodeRolesData, ReferenceBook,
+                                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
@@ -373,9 +375,27 @@ def bf_extract_answer_summary(answerJson):
     return answerJson["summary"]
 
 
-def _bf_fork_snapshot(name=None, base_name=None,
-                      background=False, deactivate_interfaces=None,
-                      deactivate_links=None, deactivate_nodes=None):
+def bf_fork_snapshot(base_name, name=None,
+                     background=False, deactivate_interfaces=None,
+                     deactivate_links=None, deactivate_nodes=None):
+    # type: (str, Optional[str], bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
+    """Copy an existing snapshot and deactivate specified interfaces on the copy.
+
+    :param name: name of the snapshot to initialize
+    :type name: string
+    :param base_name: name of the snapshot to copy
+    :type base_name: string
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :param deactivate_interfaces: list of interfaces to deactivate in the new snapshot
+    :type deactivate_interfaces: list[Interface]
+    :param deactivate_links: list of links to deactivate in the new snapshot
+    :type deactivate_links: list[Edge]
+    :param deactivate_nodes: list of names of nodes to deactivate in the new snapshot
+    :type deactivate_nodes: list[str]
+    :return: name of initialized snapshot, JSON dictionary of task status if background=True, or None if the call fails
+    :rtype: Union[str, Dict, None]
+    """
     if bf_session.network is None:
         bf_set_network()
 
@@ -415,35 +435,6 @@ def _bf_fork_snapshot(name=None, base_name=None,
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
         return bf_session.baseSnapshot
-
-
-def bf_fork_snapshot(base_name, name=None,
-                     background=False, deactivate_interfaces=None,
-                     deactivate_links=None, deactivate_nodes=None):
-    # type: (str, Optional[str], bool, list[Interface], list[Edge], list[str]) -> Union[str, Dict, None]
-    """Copy an existing snapshot and deactivate specified interfaces on the copy.
-
-    :param name: name of the snapshot to initialize
-    :type name: string
-    :param base_name: name of the snapshot to copy
-    :type base_name: string
-    :param background: whether or not to run the task in the background
-    :type background: bool
-    :param deactivate_interfaces: list of interfaces to deactivate in the new snapshot
-    :type deactivate_interfaces: list[Interface]
-    :param deactivate_links: list of links to deactivate in the new snapshot
-    :type deactivate_links: list[Edge]
-    :param deactivate_nodes: list of names of nodes to deactivate in the new snapshot
-    :type deactivate_nodes: list[str]
-    :return: name of initialized snapshot, JSON dictionary of task status if background=True, or None if the call fails
-    :rtype: Union[str, Dict, None]
-    """
-    return _bf_fork_snapshot(name=name,
-                             base_name=base_name,
-                             background=background,
-                             deactivate_interfaces=deactivate_interfaces,
-                             deactivate_links=deactivate_links,
-                             deactivate_nodes=deactivate_nodes)
 
 
 def bf_generate_dataplane(snapshot=None):

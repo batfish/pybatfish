@@ -157,7 +157,7 @@ class WorkStatusCode(str, Enum):
 
 class CoordConsts(object):
     """
-    Constains constants derived from CoordConsts.java in batfish-common.
+    Contains constants derived from CoordConsts.java in batfish-common.
 
     **IMPORTANT**:
     It is crucial to keep the two versions in sync.
@@ -297,11 +297,12 @@ class CoordConsts(object):
 
 class CoordConstsV2(object):
     """
-    Constains constants derived from CoordConstsV2.java in batfish-common.
+    Contains constants derived from CoordConstsV2.java in batfish-common.
 
     **IMPORTANT**:
     It is crucial to keep the two versions in sync.
     """
+
     # The HTTP Header containing the client's API Key.
     HTTP_HEADER_BATFISH_APIKEY = "X-Batfish-Apikey"
     # The HTTP Header containing the client's version.

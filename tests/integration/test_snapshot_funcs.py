@@ -17,7 +17,7 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_generate_dataplane,
+                                       bf_fork_snapshot, bf_generate_dataplane,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_set_network)
 
@@ -53,6 +53,15 @@ def example_snapshot(network):
     yield name
     # cleanup
     bf_delete_snapshot(name)
+
+
+def test_fork_snapshot_no_crash(network, example_snapshot):
+    """Run fork snapshot command."""
+    bf_set_network(network)
+    assert bf_list_snapshots() == [example_snapshot]
+    forked_snapshot = bf_fork_snapshot(example_snapshot)
+    assert sorted(bf_list_snapshots()) == sorted(
+        [forked_snapshot, example_snapshot])
 
 
 def test_list_snapshots_empty(network):
