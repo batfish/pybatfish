@@ -310,6 +310,7 @@ class CoordConstsV2(object):
 
     RSC_CONTAINER = "container"
     RSC_CONTAINERS = "containers"
+    RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
     RSC_ISSUES = "issues"
     RSC_NETWORK = "network"
     RSC_NETWORKS = "networks"
@@ -317,3 +318,4 @@ class CoordConstsV2(object):
     RSC_QUESTIONS = "questions"
     RSC_REFERENCE_LIBRARY = "referencelibrary"
     RSC_SETTINGS = "settings"
+    RSC_SNAPSHOTS = "snapshots"

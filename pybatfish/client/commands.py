@@ -68,6 +68,7 @@ __all__ = ['bf_add_analysis',
            'bf_delete_container',
            'bf_delete_issue_config',
            'bf_delete_network',
+           'bf_delete_node_role_dimension',
            'bf_delete_snapshot',
            'bf_delete_testrig',
            'bf_extract_answer_list',
@@ -81,6 +82,10 @@ __all__ = ['bf_add_analysis',
            'bf_get_node_roles',
            'bf_get_reference_book',
            'bf_get_reference_library',
+           'bf_get_snapshot_inferred_node_role_dimension',
+           'bf_get_snapshot_inferred_node_roles',
+           'bf_get_snapshot_node_role_dimension',
+           'bf_get_snapshot_node_roles',
            'bf_get_work_status',
            'bf_init_analysis',
            'bf_init_container',
@@ -95,6 +100,7 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
+           'bf_put_node_roles',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
@@ -306,6 +312,13 @@ def bf_delete_network(name):
                                  jsonData)
 
 
+def bf_delete_node_role_dimension(dimension):
+    # type: (str) -> None
+    """Deletes the definition of the given role dimension for the active network."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_node_role_dimension(bf_session, dimension))
+
+
 def bf_delete_snapshot(name):
     # type: (str) -> None
     """
@@ -428,14 +441,14 @@ def bf_get_issue_config(major, minor):
 
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
-    """Returns the set of node roles for the active network."""
+    """Returns the definition of the given node role dimension for the active network."""
     return NodeRoleDimension.from_dict(
         restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
-    """Returns the set of node roles for the active network."""
+    """Returns the definitions of node roles for the active network."""
     return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
 
 
@@ -451,6 +464,32 @@ def bf_get_reference_library():
     """Returns the reference library for the active network."""
     return ReferenceLibrary.from_dict(
         restv2helper.get_reference_library(bf_session))
+
+
+def bf_get_snapshot_inferred_node_roles():
+    # type: () -> NodeRolesData
+    """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
+    return NodeRolesData.from_dict(restv2helper.get_snapshot_inferred_node_roles(bf_session))
+
+
+def bf_get_snapshot_inferred_node_role_dimension(dimension):
+    # type: (str) -> NodeRoleDimension
+    """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session, dimension))
+
+
+def bf_get_snapshot_node_roles():
+    # type: () -> NodeRolesData
+    """Returns the definitions and assignments of node roles for the active network and snapshot."""
+    return NodeRolesData.from_dict(restv2helper.get_snapshot_node_roles(bf_session))
+
+
+def bf_get_snapshot_node_role_dimension(dimension):
+    # type: (str) -> NodeRoleDimension
+    """Returns the defintion and assignments of node roles for the given dimension for the active network and snapshot."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_snapshot_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_work_status(wItemId):
@@ -680,6 +719,12 @@ def _bf_get_question_templates():
                                                 CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES,
                                                 jsonData)
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
+
+
+def bf_put_node_roles(node_roles_data):
+    # type: (NodeRolesData) -> None
+    """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
+    restv2helper.put_node_roles(bf_session, node_roles_data)
 
 
 def bf_read_question_settings(question_class, json_path=None):

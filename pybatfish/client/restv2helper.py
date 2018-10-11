@@ -101,6 +101,20 @@ def delete_issue_config(session, major, minor):
     return _delete(session, url_tail)
 
 
+def delete_node_role_dimension(session, dimension):
+    # type: (Session, str) -> None
+    """Deletes the definition of the given node role dimension for the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    if not dimension:
+        raise ValueError("Dimension must be a non-empty string")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_NODE_ROLES,
+                                     dimension)
+    return _delete(session, url_tail)
+
+
 def get_issue_config(session, major, minor):
     # type: (Session, str, str) -> Dict
     if not session.network:
@@ -127,9 +141,9 @@ def get_network(session, network):
 
 def get_node_role_dimension(session, dimension):
     # type: (Session, str) -> Dict
-    """Gets the node role dimension for the active network."""
+    """Gets the defintion of the given node role dimension for the active network."""
     if not session.network:
-        raise ValueError("Container must be set to get node roles")
+        raise ValueError("Network must be set to get node roles")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
     url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
@@ -141,7 +155,7 @@ def get_node_role_dimension(session, dimension):
 
 def get_node_roles(session):
     # type: (Session) -> Dict
-    """Gets the node roles data for the active network."""
+    """Gets the definitions of node roles for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
@@ -171,6 +185,60 @@ def get_reference_library(session):
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_REFERENCE_LIBRARY)
     return _get(session, url_tail)
+
+
+def get_snapshot_inferred_node_roles(session):
+    # type: (Session) -> Dict
+    """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                  CoordConstsV2.RSC_INFERRED_NODE_ROLES)
+    return _get(session, url_tail)
+
+
+def get_snapshot_inferred_node_role_dimension(session, dimension):
+    # type: (Session, str) -> Dict
+    """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                  CoordConstsV2.RSC_INFERRED_NODE_ROLES, dimension)
+    return _get(session, url_tail)
+
+
+def get_snapshot_node_roles(session):
+    # type: (Session) -> Dict
+    """Gets the definitions and assignments of node roles for the active network and snapshot."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                  CoordConstsV2.RSC_NODE_ROLES)
+    return _get(session, url_tail)
+
+
+def get_snapshot_node_role_dimension(session, dimension):
+    # type: (Session, str) -> Dict
+    """Gets the definition and assignments of node roles for the given dimension for the active network and snapshot."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                  CoordConstsV2.RSC_NODE_ROLES, dimension)
+    return _get(session, url_tail)
+
+
+def put_node_roles(session, node_roles_data):
+    # type: (Session, NodeRolesData) -> None
+    """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
+    if not session.network:
+        raise ValueError("Network must be set to get node roles")
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_NODE_ROLES)
+    return _put(session, url_tail, node_roles_data)
 
 
 def read_question_settings(session, question_class, json_path):
