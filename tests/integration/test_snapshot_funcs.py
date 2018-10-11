@@ -19,7 +19,7 @@ import pytest
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_fork_snapshot, bf_generate_dataplane,
                                        bf_init_snapshot, bf_list_snapshots,
-                                       bf_set_network)
+                                       bf_session, bf_set_network)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -57,10 +57,23 @@ def example_snapshot(network):
 
 def test_fork_snapshot(network, example_snapshot):
     """Run fork snapshot command.  The goal is not to crash."""
-    bf_set_network(network)
     name = uuid.uuid4().hex
-    try:
+
+    # Should fail when network is not set
+    bf_session.network = None
+    with pytest.raises(ValueError):
         bf_fork_snapshot(base_name=example_snapshot, name=name)
+
+    # Should fail with non-existent base snapshot
+    with pytest.raises(ValueError):
+        bf_fork_snapshot(base_name="bogus", name=name)
+
+    bf_set_network(network)
+    try:
+        # Should succeed with existent base snapshot and valid name
+        bf_fork_snapshot(base_name=example_snapshot, name=name)
+
+        # Fail using existing snapshot name without specifying overwrite
         with pytest.raises(ValueError):
             bf_fork_snapshot(base_name=example_snapshot, name=name)
     finally:
