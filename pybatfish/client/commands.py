@@ -39,7 +39,7 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from . import resthelper, restv2helper, workhelper, workv2helper
+from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
@@ -414,11 +414,13 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                 'A snapshot named ''{}'' already exists in network ''{}'''.format(
                     name, bf_session.network))
 
-    json_data = workv2helper.get_data_fork_snapshot(base_name,
-                                                    name,
-                                                    deactivate_interfaces,
-                                                    deactivate_links,
-                                                    deactivate_nodes)
+    json_data = {
+        "snapshotBase": base_name,
+        "snapshotNew": name,
+        "deactivateInterfaces": deactivate_interfaces,
+        "deactivateLinks": deactivate_links,
+        "deactivateNodes": deactivate_nodes,
+    }
     restv2helper.fork_snapshot(bf_session,
                                json_data)
 
