@@ -381,22 +381,23 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     # type: (str, str, bool, bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate specified interfaces on the copy.
 
-    :param name: name of the snapshot to initialize
-    :type name: string
     :param base_name: name of the snapshot to copy
     :type base_name: string
+    :param name: name of the snapshot to initialize
+    :type name: string
     :param overwrite: whether or not to overwrite an existing snapshot with the
-       same name
+        same name
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param deactivate_interfaces: list of interfaces to deactivate in the new snapshot
+    :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
     :type deactivate_interfaces: list[Interface]
-    :param deactivate_links: list of links to deactivate in the new snapshot
+    :param deactivate_links: list of links to deactivate in new snapshot
     :type deactivate_links: list[Edge]
-    :param deactivate_nodes: list of names of nodes to deactivate in the new snapshot
+    :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
     :type deactivate_nodes: list[str]
-    :return: name of initialized snapshot, JSON dictionary of task status if background=True, or None if the call fails
+    :return: name of initialized snapshot, JSON dictionary of task status if
+        background=True, or None if the call fails
     :rtype: Union[str, Dict, None]
     """
     if bf_session.network is None:
@@ -431,7 +432,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         bf_session.baseSnapshot = name
         return answer_dict
 
-    status = WorkStatusCode(answer_dict["status"])
+    status = WorkStatusCode(answer_dict['status'])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
             'Forking snapshot {ss} from {base} failed with status {status}: {msg}'.format(
