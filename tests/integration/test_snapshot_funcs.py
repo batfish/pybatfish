@@ -55,14 +55,14 @@ def example_snapshot(network):
     bf_delete_snapshot(name)
 
 
-def test_fork_snapshot(network):
+def test_fork_snapshot(network, example_snapshot):
     """Run fork snapshot command.  The goal is not to crash."""
     bf_set_network(network)
-    uid = uuid.uuid4().hex
+    name = uuid.uuid4().hex
     try:
-        bf_fork_snapshot(base_name=example_snapshot, name=uid)
+        bf_fork_snapshot(base_name=example_snapshot, name=name)
     finally:
-        bf_delete_snapshot(uid)
+        bf_delete_snapshot(name)
 
 
 def test_list_snapshots_empty(network):

@@ -414,7 +414,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                 'A snapshot named ''{}'' already exists in network ''{}'''.format(
                     name, bf_session.network))
 
-    request = {
+    json_data = {
         "snapshotBase": base_name,
         "snapshotNew": name,
         "deactivateInterfaces": deactivate_interfaces,
@@ -422,7 +422,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         "deactivateNodes": deactivate_nodes,
     }
     restv2helper.fork_snapshot(bf_session,
-                               request)
+                               json_data)
 
     work_item = workhelper.get_workitem_parse(bf_session, name)
     answer_dict = workhelper.execute(work_item, bf_session,
