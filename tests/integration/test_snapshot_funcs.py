@@ -15,11 +15,12 @@ import uuid
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
+from requests import HTTPError
 
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_generate_dataplane,
+                                       bf_fork_snapshot, bf_generate_dataplane,
                                        bf_init_snapshot, bf_list_snapshots,
-                                       bf_set_network)
+                                       bf_session, bf_set_network)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -53,6 +54,42 @@ def example_snapshot(network):
     yield name
     # cleanup
     bf_delete_snapshot(name)
+
+
+def test_fork_snapshot(network, example_snapshot):
+    """Run fork snapshot command with valid and invalid inputs."""
+    name = uuid.uuid4().hex
+
+    bf_set_network(network)
+    try:
+        # Should succeed with existent base snapshot and valid name
+        bf_fork_snapshot(base_name=example_snapshot, name=name)
+
+        # Fail using existing snapshot name without specifying overwrite
+        with pytest.raises(ValueError):
+            bf_fork_snapshot(base_name=example_snapshot, name=name)
+    finally:
+        bf_delete_snapshot(name)
+
+
+def test_fork_snapshot_no_base(network):
+    """Run fork snapshot command with a bogus base snapshot."""
+    name = uuid.uuid4().hex
+
+    bf_set_network(network)
+    # Should fail with non-existent base snapshot
+    with pytest.raises(HTTPError):
+        bf_fork_snapshot(base_name="bogus", name=name)
+
+
+def test_fork_snapshot_no_network():
+    """Run fork snapshot command without setting a network."""
+    name = uuid.uuid4().hex
+
+    bf_session.network = None
+    # Should fail when network is not set
+    with pytest.raises(ValueError):
+        bf_fork_snapshot(base_name="base_name", name=name)
 
 
 def test_list_snapshots_empty(network):

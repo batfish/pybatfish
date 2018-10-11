@@ -31,9 +31,11 @@ from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.primitives import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel.primitives import (Assertion,  # noqa: F401
+                                            AssertionType, Edge, Interface)
+from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
+                                                  NodeRolesData, ReferenceBook,
+                                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
@@ -72,6 +74,7 @@ __all__ = ['bf_add_analysis',
            'bf_delete_testrig',
            'bf_extract_answer_list',
            'bf_extract_answer_summary',
+           'bf_fork_snapshot',
            'bf_generate_dataplane',
            'bf_get_analysis_answers',
            'bf_get_answer',
@@ -372,6 +375,77 @@ def bf_extract_answer_summary(answerJson):
     return answerJson["summary"]
 
 
+def bf_fork_snapshot(base_name, name=None, overwrite=False,
+                     background=False, deactivate_interfaces=None,
+                     deactivate_links=None, deactivate_nodes=None):
+    # type: (str, str, bool, bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
+    """Copy an existing snapshot and deactivate specified interfaces on the copy.
+
+    :param base_name: name of the snapshot to copy
+    :type base_name: string
+    :param name: name of the snapshot to initialize
+    :type name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+        same name
+    :type overwrite: bool
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
+    :type deactivate_interfaces: list[Interface]
+    :param deactivate_links: list of links to deactivate in new snapshot
+    :type deactivate_links: list[Edge]
+    :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
+    :type deactivate_nodes: list[str]
+    :return: name of initialized snapshot, JSON dictionary of task status if
+        background=True, or None if the call fails
+    :rtype: Union[str, Dict, None]
+    """
+    if bf_session.network is None:
+        raise ValueError('Network must be set to fork a snapshot.')
+
+    if name is None:
+        name = Options.default_snapshot_prefix + get_uuid()
+    validate_name(name)
+
+    if name in bf_list_snapshots():
+        if overwrite:
+            bf_delete_snapshot(name)
+        else:
+            raise ValueError(
+                'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                    name, bf_session.network))
+
+    json_data = {
+        "snapshotBase": base_name,
+        "snapshotNew": name,
+        "deactivateInterfaces": deactivate_interfaces,
+        "deactivateLinks": deactivate_links,
+        "deactivateNodes": deactivate_nodes,
+    }
+    restv2helper.fork_snapshot(bf_session,
+                               json_data)
+
+    work_item = workhelper.get_workitem_parse(bf_session, name)
+    answer_dict = workhelper.execute(work_item, bf_session,
+                                     background=background)
+    if background:
+        bf_session.baseSnapshot = name
+        return answer_dict
+
+    status = WorkStatusCode(answer_dict['status'])
+    if status != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException(
+            'Forking snapshot {ss} from {base} failed with status {status}'.format(
+                ss=name,
+                base=base_name,
+                status=status))
+    else:
+        bf_session.baseSnapshot = name
+        bf_logger.info("Default snapshot is now set to %s",
+                       bf_session.baseSnapshot)
+        return bf_session.baseSnapshot
+
+
 def bf_generate_dataplane(snapshot=None):
     # type: (Optional[str]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
@@ -552,10 +626,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     status = WorkStatusCode(answer_dict["status"])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
+            'Initializing snapshot {ss} failed with status {status}'.format(
                 ss=name,
-                status=status,
-                msg=answer_dict['answer']))
+                status=status))
     else:
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",

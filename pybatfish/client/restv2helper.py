@@ -46,10 +46,10 @@ _requests_session.mount("http", HTTPAdapter(
 _encoder = BfJsonEncoder()
 
 __all__ = ['add_issue_config', 'add_node_role_dimension', 'add_reference_book',
-           'delete_issue_config', 'get_issue_config', 'get_network',
-           'get_node_role_dimension', 'get_node_roles', 'get_reference_book',
-           'get_reference_library', 'read_question_settings',
-           'write_question_settings']
+           'delete_issue_config', 'fork_snapshot', 'get_issue_config',
+           'get_network', 'get_node_role_dimension', 'get_node_roles',
+           'get_reference_book', 'get_reference_library',
+           'read_question_settings', 'write_question_settings']
 
 
 def add_issue_config(session, issue_config):
@@ -99,6 +99,17 @@ def delete_issue_config(session, major, minor):
                                            major,
                                            minor)
     return _delete(session, url_tail)
+
+
+def fork_snapshot(session, obj):
+    # type: (Session, Dict[str, Any]) -> None
+    if not session.network:
+        raise ValueError("Network must be set to fork a snapshot")
+    url_tail = "/{}/{}/{}:{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_SNAPSHOTS,
+                                     CoordConstsV2.RSC_FORK)
+    return _post(session, url_tail, obj)
 
 
 def get_issue_config(session, major, minor):
