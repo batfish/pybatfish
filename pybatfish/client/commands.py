@@ -414,7 +414,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                 'A snapshot named ''{}'' already exists in network ''{}'''.format(
                     name, bf_session.network))
 
-    json_data = {
+    request = {
         "snapshotBase": base_name,
         "snapshotNew": name,
         "deactivateInterfaces": deactivate_interfaces,
@@ -422,7 +422,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         "deactivateNodes": deactivate_nodes,
     }
     restv2helper.fork_snapshot(bf_session,
-                               json_data)
+                               request)
 
     work_item = workhelper.get_workitem_parse(bf_session, name)
     answer_dict = workhelper.execute(work_item, bf_session,
@@ -434,8 +434,9 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     status = WorkStatusCode(answer_dict["status"])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
+            'Forking snapshot {ss} from {base} failed with status {status}: {msg}'.format(
                 ss=name,
+                base=base_name,
                 status=status,
                 msg=answer_dict['answer']))
     else:

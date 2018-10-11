@@ -308,15 +308,6 @@ class CoordConstsV2(object):
     # The HTTP Header containing the client's version.
     HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
 
-    KEY_DEACTIVATE_INTERFACES = "deactivateInterfaces"
-    KEY_DEACTIVATE_LINKS = "deactivateLinks"
-    KEY_DEACTIVATE_NODES = "deactivateNodes"
-    KEY_NETWORK = "network"
-    KEY_RESULT = "result"
-    KEY_SNAPSHOT = "snapshot"
-    KEY_SNAPSHOT_BASE = "snapshotBase"
-    KEY_SNAPSHOT_NEW = "snapshotNew"
-
     RSC_CONTAINER = "container"
     RSC_CONTAINERS = "containers"
     RSC_FORK = "fork"
