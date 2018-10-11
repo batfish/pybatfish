@@ -115,26 +115,35 @@ class Edge(DataModelElement):
     :ivar interface2: Second interface (as :py:class:`Interface`)
     """
 
-    interface1 = attr.ib(type=Interface)
-    interface2 = attr.ib(type=Interface)
+    def _converter(val):
+        if isinstance(val, Interface):
+            return str(val.interface)
+        else:
+            return val
+
+    node1 = attr.ib(type=str)
+    node1interface = attr.ib(type=str, converter=_converter)
+    node2 = attr.ib(type=str)
+    node2interface = attr.ib(type=str, converter=_converter)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Edge
         return Edge(
-            interface1=Interface(json_dict["node1"],
-                                 json_dict["node1interface"]),
-            interface2=Interface(json_dict["node2"],
-                                 json_dict["node2interface"]))
+            node1=json_dict["node1"],
+            node1interface=json_dict["node1interface"],
+            node2=json_dict["node2"],
+            node2interface=json_dict["node2interface"])
 
     def __str__(self):
         # type: () -> str
-        return "{} -> {}".format(self.interface1, self.interface2)
+        return "{}:{} -> {}:{}".format(self.node1, self.node1interface,
+                                       self.node2, self.node2interface)
 
     def _repr_html_(self):
         # type: () -> str
-        return "{} &rarr; {}".format(self.interface1._repr_html_(),
-                                     self.interface2._repr_html_())
+        return "{}:{} &rarr; {}:{}".format(self.node1, self.node1interface,
+                                           self.node2, self.node2interface)
 
 
 @attr.s(frozen=True)
