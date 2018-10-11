@@ -102,7 +102,7 @@ def delete_issue_config(session, major, minor):
 
 
 def fork_snapshot(session, obj):
-    # type: (Session, Dict[str, str]) -> None
+    # type: (Session, Dict[str, Any]) -> None
     if not session.network:
         raise ValueError("Network must be set to fork a snapshot")
     url_tail = "/{}/{}/{}:{}".format(CoordConstsV2.RSC_NETWORKS,
