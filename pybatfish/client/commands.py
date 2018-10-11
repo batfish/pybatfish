@@ -401,7 +401,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :rtype: Union[str, Dict, None]
     """
     if bf_session.network is None:
-        bf_set_network()
+        raise ValueError('Network must be set to fork a snapshot.')
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
@@ -590,7 +590,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     :rtype: Union[str, Dict]
     """
     if bf_session.network is None:
-        raise ValueError('Network must be set to fork a snapshot.')
+        bf_set_network()
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
