@@ -115,16 +115,16 @@ class Edge(DataModelElement):
     :ivar interface2: Second interface (as :py:class:`Interface`)
     """
 
-    def _converter(val):
+    def _interface_converter(val):
         if isinstance(val, Interface):
             return str(val.interface)
         else:
             return val
 
     node1 = attr.ib(type=str)
-    node1interface = attr.ib(type=str, converter=_converter)
+    node1interface = attr.ib(type=str, converter=_interface_converter)
     node2 = attr.ib(type=str)
-    node2interface = attr.ib(type=str, converter=_converter)
+    node2interface = attr.ib(type=str, converter=_interface_converter)
 
     @classmethod
     def from_dict(cls, json_dict):
