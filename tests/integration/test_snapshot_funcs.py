@@ -56,7 +56,7 @@ def example_snapshot(network):
 
 
 def test_fork_snapshot(network, example_snapshot):
-    """Run fork snapshot command.  The goal is not to crash."""
+    """Run fork snapshot command with valid and invalid inputs."""
     name = uuid.uuid4().hex
 
     # Should fail when network is not set
