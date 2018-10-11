@@ -61,6 +61,8 @@ def test_fork_snapshot(network, example_snapshot):
     name = uuid.uuid4().hex
     try:
         bf_fork_snapshot(base_name=example_snapshot, name=name)
+        with pytest.raises(ValueError):
+            bf_fork_snapshot(base_name=example_snapshot, name=name)
     finally:
         bf_delete_snapshot(name)
 

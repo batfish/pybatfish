@@ -435,11 +435,10 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     status = WorkStatusCode(answer_dict['status'])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
-            'Forking snapshot {ss} from {base} failed with status {status}: {msg}'.format(
+            'Forking snapshot {ss} from {base} failed with status {status}'.format(
                 ss=name,
                 base=base_name,
-                status=status,
-                msg=answer_dict['answer']))
+                status=status))
     else:
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
@@ -591,7 +590,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     :rtype: Union[str, Dict]
     """
     if bf_session.network is None:
-        bf_set_network()
+        raise ValueError('Network must be set to fork a snapshot.')
 
     if name is None:
         name = Options.default_snapshot_prefix + get_uuid()
@@ -627,10 +626,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     status = WorkStatusCode(answer_dict["status"])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
+            'Initializing snapshot {ss} failed with status {status}'.format(
                 ss=name,
-                status=status,
-                msg=answer_dict['answer']))
+                status=status))
     else:
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
