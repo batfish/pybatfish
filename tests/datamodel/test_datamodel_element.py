@@ -23,7 +23,7 @@ def test_as_dict():
     assert IssueType(major='lazer', minor='coal').dict() == {'major': 'lazer',
                                                              'minor': 'coal'}
 
-    # Make Edge dict is right if either string or Interface is passed in
+    # Make sure Edge dict is right if either string or Interface is passed in
     assert Edge(
         node1='r1',
         node1interface='iface1',
