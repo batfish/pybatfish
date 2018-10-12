@@ -107,19 +107,23 @@ class Interface(DataModelElement):
                               escape_html(self.interface))
 
 
+def _interface_converter(val):
+    # type: (Any) -> str
+    if isinstance(val, Interface):
+        return str(val.interface)
+    else:
+        return str(val)
+
+
 @attr.s(frozen=True)
 class Edge(DataModelElement):
     """A network edge (i.e., a link between two node/interface pairs).
 
-    :ivar interface1: First interface (as :py:class:`Interface`)
-    :ivar interface2: Second interface (as :py:class:`Interface`)
+    :ivar node1: First node name
+    :ivar node1interface: First node's interface name
+    :ivar node2: Second node name
+    :ivar node2interface: Second node's interface name
     """
-
-    def _interface_converter(val):
-        if isinstance(val, Interface):
-            return str(val.interface)
-        else:
-            return val
 
     node1 = attr.ib(type=str)
     node1interface = attr.ib(type=str, converter=_interface_converter)
