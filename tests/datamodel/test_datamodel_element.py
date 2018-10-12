@@ -29,10 +29,8 @@ def test_as_dict():
         node1interface='iface1',
         node2='r2',
         node2interface=Interface(hostname='r2', interface='iface2')
-    ).dict() == {
-               'node1': 'r1', 'node1interface': 'iface1',
-               'node2': 'r2', 'node2interface': 'iface2'
-           }
+    ).dict() == {'node1': 'r1', 'node1interface': 'iface1',
+                 'node2': 'r2', 'node2interface': 'iface2'}
 
 
 def test_json_serialization():
