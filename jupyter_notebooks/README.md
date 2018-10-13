@@ -7,7 +7,7 @@ The current list of notebooks are:
    - Shows how you can validate different types of configuration settings (NTP server, TACACS server, AAA, SNMP, etc...) using Batfish. 
 - [Introduction to Route Analysis](Introduction%20to%20Route%20Analysis.ipynb) [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)]
    - Shows how to analyze routing tables computed by Batfish.
-- [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb)
+- [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)]
    - Shows how to use analyze ACLs and firewalls rules using Batfish. 
 - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb)
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
