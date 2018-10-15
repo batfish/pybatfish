@@ -27,6 +27,7 @@ from pybatfish.client.consts import CoordConstsV2
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
+    NodeRolesData,
     ReferenceBook)
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
@@ -214,8 +215,8 @@ def get_snapshot_inferred_node_roles(session):
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                  CoordConstsV2.RSC_INFERRED_NODE_ROLES)
+                                        CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                        CoordConstsV2.RSC_INFERRED_NODE_ROLES)
     return _get(session, url_tail)
 
 
@@ -225,8 +226,8 @@ def get_snapshot_inferred_node_role_dimension(session, dimension):
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                  CoordConstsV2.RSC_INFERRED_NODE_ROLES, dimension)
+                                           CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                           CoordConstsV2.RSC_INFERRED_NODE_ROLES, dimension)
     return _get(session, url_tail)
 
 
@@ -236,8 +237,8 @@ def get_snapshot_node_roles(session):
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                  CoordConstsV2.RSC_NODE_ROLES)
+                                        CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                        CoordConstsV2.RSC_NODE_ROLES)
     return _get(session, url_tail)
 
 
@@ -247,8 +248,8 @@ def get_snapshot_node_role_dimension(session, dimension):
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                  CoordConstsV2.RSC_NODE_ROLES, dimension)
+                                           CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+                                           CoordConstsV2.RSC_NODE_ROLES, dimension)
     return _get(session, url_tail)
 
 

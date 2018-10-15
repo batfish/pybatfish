@@ -318,8 +318,7 @@ def bf_delete_network(name):
 def bf_delete_node_role_dimension(dimension):
     # type: (str) -> None
     """Deletes the definition of the given role dimension for the active network."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_node_role_dimension(bf_session, dimension))
+    restv2helper.delete_node_role_dimension(bf_session, dimension)
 
 
 def bf_delete_snapshot(name):
