@@ -79,7 +79,7 @@ def execute(work_item, session, background=False):
 
     :return: If `background=True`, a dict containing a single key 'result' with
     a string description of the result. If `background=False`, a dict containing
-    "status" and "answer" keys, both strings.
+    a single key 'status' with a string describing work status.
     """
     snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
     if snapshot is None:

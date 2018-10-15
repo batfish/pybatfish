@@ -18,9 +18,9 @@
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
 
-.. py:class:: bgpProperties(*, nodes, properties, question_name, exclusions)
+.. py:class:: bgpProcessConfiguration(*, nodes, properties, question_name, exclusions)
 
-   Return BGP configuration properties.
+   Return BGP process configuration properties.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -28,13 +28,25 @@
    :param properties: Include properties matching this regex.
    :type properties: bgpPropertySpec
 
-.. py:class:: bgpSessionStatus(*, includeEstablishedCount, nodes, remoteNodes, status, type, question_name, exclusions)
+.. py:class:: bgpSessionCompatibility(*, nodes, remoteNodes, status, type, question_name, exclusions)
+
+   Return the status of configured BGP sessions, independent of remote peer configurations.
+   
+   
+   :param nodes: Include sessions whose first node matches this name or regex.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include sessions whose second node matches this name or regex.
+   :type remoteNodes: nodeSpec
+   :param status: Only include sessions for which status matches this regex.
+   :type status: javaRegex
+   :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
+   :type type: javaRegex
+
+.. py:class:: bgpSessionStatus(*, nodes, remoteNodes, status, type, question_name, exclusions)
 
    Return the status of configured BGP sessions.
    
    
-   :param includeEstablishedCount: Flag to decide if the count of established neighbors should be included. Primarily used for dynamic BGP sessions.
-   :type includeEstablishedCount: boolean
    :param nodes: Include sessions whose first node matches this name or regex.
    :type nodes: nodeSpec
    :param remoteNodes: Include sessions whose second node matches this name or regex.
@@ -296,18 +308,28 @@
    
    :param actions: Only return flows for which the disposition is from this set.
    
-       Default value: ``['accept']``
+       Default value: ``success``
    :type actions: string
    :param headers: Packet header constraints.
    :type headers: headerConstraint
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
-.. py:class:: reducedReachability(*, question_name, exclusions)
+.. py:class:: reducedReachability(*, actions, headers, pathConstraints, question_name, exclusions)
 
    Detect reduced reachability.
    
    Finds flows that are accepted in one snapshot but dropped in another.
+   
+   
+   :param actions: Only return flows for which the disposition is from this set.
+   
+       Default value: ``success``
+   :type actions: string
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
 
 .. py:class:: referencedStructures(*, names, nodes, types, question_name, exclusions)
 

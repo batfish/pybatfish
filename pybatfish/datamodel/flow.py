@@ -20,8 +20,14 @@ import attr
 from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
-__all__ = ['Flow', 'FlowTrace', 'FlowTraceHop', 'HeaderConstraints',
-           'PathConstraints']
+__all__ = [
+    'Flow',
+    'FlowTrace',
+    'FlowTraceHop',
+    'HeaderConstraints',
+    'MatchTcpFlags',
+    'PathConstraints',
+    'TcpFlags']
 
 
 @attr.s(frozen=True)
@@ -264,6 +270,86 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class TcpFlags(DataModelElement):
+    """
+    Represents a set of TCP flags in a packet.
+
+    :ivar ack:
+    :ivar cwr:
+    :ivar ece:
+    :ivar fin:
+    :ivar psh:
+    :ivar rst:
+    :ivar syn:
+    :ivar urg:
+    """
+
+    ack = attr.ib(default=False, type=bool)
+    cwr = attr.ib(default=False, type=bool)
+    ece = attr.ib(default=False, type=bool)
+    fin = attr.ib(default=False, type=bool)
+    psh = attr.ib(default=False, type=bool)
+    rst = attr.ib(default=False, type=bool)
+    syn = attr.ib(default=False, type=bool)
+    urg = attr.ib(default=False, type=bool)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return TcpFlags(
+            ack=json_dict['ack'],
+            cwr=json_dict['cwr'],
+            ece=json_dict['ece'],
+            fin=json_dict['fin'],
+            psh=json_dict['psh'],
+            rst=json_dict['rst'],
+            syn=json_dict['syn'],
+            urg=json_dict['urg'])
+
+
+@attr.s(frozen=True)
+class MatchTcpFlags(DataModelElement):
+    """
+    Match given :py:class:`TcpFlags`.
+
+    For each bit in the TCP flags, a `useX`
+    must be set to true, otherwise the bit is treated as "don't care".
+
+    :ivar tcpFlags: tcp flags to match
+    :ivar useAck:
+    :ivar useCwr:
+    :ivar useEce:
+    :ivar useFin:
+    :ivar usePsh:
+    :ivar useRst:
+    :ivar useSyn:
+    :ivar useUrg:
+    """
+
+    tcpFlags = attr.ib(type=TcpFlags)
+    useAck = attr.ib(default=True, type=bool)
+    useCwr = attr.ib(default=True, type=bool)
+    useEce = attr.ib(default=True, type=bool)
+    useFin = attr.ib(default=True, type=bool)
+    usePsh = attr.ib(default=True, type=bool)
+    useRst = attr.ib(default=True, type=bool)
+    useSyn = attr.ib(default=True, type=bool)
+    useUrg = attr.ib(default=True, type=bool)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return MatchTcpFlags(
+            TcpFlags.from_dict(json_dict['tcpFlags']),
+            json_dict['useAck'],
+            json_dict['useCwr'],
+            json_dict['useEce'],
+            json_dict['useFin'],
+            json_dict['usePsh'],
+            json_dict['useRst'],
+            json_dict['useSyn'],
+            json_dict['useUrg'])
+
+
+@attr.s(frozen=True)
 class HeaderConstraints(DataModelElement):
     """Constraints on an IPv4 packet header space.
 
@@ -285,13 +371,15 @@ class HeaderConstraints(DataModelElement):
     :ivar ecns: List of allowed ECN values ranges
     :ivar packetLengths: List of allowed packet length value ranges
     :ivar fragmentOffsets: List of allowed fragmentOffset value ranges
+    :ivar tcpFlags: List of :py:class:`MatchTcpFlags` -- conditions on which
+        TCP flags to match
 
 
     Lists of values in each fields are subject to a logical "OR":
 
     >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
     HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None,
-    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
+    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means allow TCP OR UDP.
 
@@ -299,7 +387,7 @@ class HeaderConstraints(DataModelElement):
 
     >>> HeaderConstraints(srcIps="1.1.1.1", dstIps="2.2.2.2", applications=["SSH"])
     HeaderConstraints(srcIps='1.1.1.1', dstIps='2.2.2.2', srcPorts=None, dstPorts=None, ipProtocols=None, applications=['SSH'],
-    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None)
+    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
 
@@ -320,6 +408,7 @@ class HeaderConstraints(DataModelElement):
     dscps = attr.ib(default=None, type=Optional[List[str]])
     packetLengths = attr.ib(default=None, type=Optional[List[str]])
     fragmentOffsets = attr.ib(default=None, type=Optional[List[str]])
+    tcpFlags = attr.ib(default=None, type=Optional[List[MatchTcpFlags]])
 
     @classmethod
     def from_dict(cls, json_dict):
