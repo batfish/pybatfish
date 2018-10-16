@@ -24,6 +24,7 @@ popd
 if [[ $TRAVIS_OS_NAME == 'linux' ]]; then
    ### install python packages
    echo -e "\n   ............. Installing pip"
+   sudo apt-get update
    sudo -H apt-get -y install python-pip || exit 1
    pip --version || exit 1
 elif [[ $TRAVIS_OS_NAME == 'osx' ]]; then
