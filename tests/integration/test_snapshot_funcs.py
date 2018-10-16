@@ -61,6 +61,7 @@ def example_snapshot(network):
     # cleanup
     bf_delete_snapshot(name)
 
+
 @pytest.fixture()
 def roles_snapshot(network):
     bf_set_network(network)
