@@ -5,10 +5,8 @@ python:
 - 3.6
 
 os: linux
-addons:
-  apt:
-    packages:
-    - oracle-java8-installer
+jdk:
+  - oraclejdk8
 
 sudo: true
 # Cache the Maven dependencies installed.
