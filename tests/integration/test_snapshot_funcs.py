@@ -19,8 +19,14 @@ from requests import HTTPError
 
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_fork_snapshot, bf_generate_dataplane,
+                                       bf_get_snapshot_inferred_node_role_dimension,
+                                       bf_get_snapshot_inferred_node_roles,
+                                       bf_get_snapshot_node_role_dimension,
+                                       bf_get_snapshot_node_roles,
                                        bf_init_snapshot, bf_list_snapshots,
-                                       bf_session, bf_set_network)
+                                       bf_put_node_roles,
+                                       bf_session, bf_set_network, bf_set_snapshot)
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -51,6 +57,16 @@ def example_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
     bf_init_snapshot(join(_this_dir, 'snapshot'), name)
+    yield name
+    # cleanup
+    bf_delete_snapshot(name)
+
+
+@pytest.fixture()
+def roles_snapshot(network):
+    bf_set_network(network)
+    name = uuid.uuid4().hex
+    bf_init_snapshot(join(_this_dir, 'roles_snapshot'), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -106,3 +122,38 @@ def test_list_snapshots(network, example_snapshot):
     verbose = bf_list_snapshots(verbose=True)
     assert verbose.get('snapshotlist') is not None
     assert len(verbose.get('snapshotlist')) == 1
+
+
+def test_get_snapshot_inferred_node_role_dimension(network, roles_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(roles_snapshot)
+    # should not crash
+    bf_get_snapshot_inferred_node_role_dimension('auto1')
+
+
+def test_get_snapshot_inferred_node_roles(network, roles_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(roles_snapshot)
+    # should not be empty
+    assert len(bf_get_snapshot_inferred_node_roles().roleDimensions) > 0
+
+
+def test_get_snapshot_node_role_dimension(network, roles_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(roles_snapshot)
+    node_roles = NodeRolesData([NodeRoleDimension('dim1')])
+    bf_put_node_roles(node_roles)
+    # should not crash
+    bf_get_snapshot_node_role_dimension('dim1')
+
+
+def test_get_snapshot_node_roles(network, roles_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(roles_snapshot)
+    dimension_name = 'dim1'
+    node_roles = NodeRolesData([NodeRoleDimension(dimension_name)])
+    bf_put_node_roles(node_roles)
+    # there should be 1 role dimension
+    snapshot_node_roles = bf_get_snapshot_node_roles()
+    assert len(snapshot_node_roles.roleDimensions) == 1
+    assert snapshot_node_roles.roleDimensions[0].name == dimension_name
