@@ -154,7 +154,7 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(dstPorts=["10-20", "33-33"])
     assert hc.dict()["dstPorts"] == "10-20,33-33"
 
-    hc = HeaderConstraints(dstPorts=["10-20,33"])
+    hc = HeaderConstraints(dstPorts="10-20,33")
     assert hc.dict()["dstPorts"] == "10-20,33"
 
 
