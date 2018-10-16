@@ -16,6 +16,7 @@ import re
 from typing import Any, Dict, Iterable, List, Optional  # noqa: F401
 
 import attr
+import six
 
 from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
@@ -351,7 +352,7 @@ class MatchTcpFlags(DataModelElement):
 
 def _normalize_phc_strings(value):
     # type: (Any) -> Optional[str]
-    if value is None or isinstance(value, str):
+    if value is None or isinstance(value, six.string_types):
         return value
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: str
