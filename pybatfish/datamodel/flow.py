@@ -302,13 +302,11 @@ class Hop(DataModelElement):
 
     node = attr.ib(type=str)
     steps = attr.ib(type=List[Any])
-    transformedFlow = attr.ib(type=Optional[Flow])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Hop
-        transformed_flow = json_dict.get("transformedFlow")
-        return Hop(json_dict["node"], json_dict["steps"])
+        return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
 
 
 
