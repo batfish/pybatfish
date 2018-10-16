@@ -43,6 +43,7 @@ def network():
     yield bf_init_snapshot(join(_this_dir, "snapshot"), name="snapshot")
     bf_delete_network(TEST_NETWORK)
 
+
 @pytest.fixture(scope='module')
 def traceroute_network():
     load_questions(_stable_question_dir)
@@ -54,7 +55,6 @@ def traceroute_network():
     bf_set_network(TEST_NETWORK)
     yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
     bf_delete_network(TEST_NETWORK)
-
 
 
 def test_answer_background(network):
@@ -72,9 +72,10 @@ def test_init_analysis(network):
     """Ensure bf_init_analysis does not crash."""
     bf_init_analysis("test_analysis", _stable_question_dir)
 
+
 def test_answer_traceroute(traceroute_network):
     bf_session.additionalArgs = {'debugflags': 'traceroute'}
-    answer =  bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")).answer().frame()
+    answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")).answer().frame()
     list_traces = answer.iloc[0]['Traces']
     assert len(list_traces) == 1
     trace = list_traces[0]
@@ -82,5 +83,3 @@ def test_answer_traceroute(traceroute_network):
     hops = trace.hops
     assert len(hops) == 2
     assert hops[-1].steps[-1]['action'] == 'TERMINATED'
-
-

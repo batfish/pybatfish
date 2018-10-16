@@ -16,8 +16,8 @@ import re
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
-
 from pybatfish.util import escape_html
+
 from .primitives import DataModelElement, Edge
 
 __all__ = [
@@ -268,6 +268,7 @@ class FlowTraceHop(DataModelElement):
                 self.transformedFlow._repr_html_())
         return result
 
+
 @attr.s(frozen=True)
 class Trace(DataModelElement):
     """A trace of a flow through the network.
@@ -285,8 +286,7 @@ class Trace(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> Trace
         return Trace(json_dict["disposition"],
-                         [Hop.from_dict(hop) for hop in
-                          json_dict.get("hops", [])])
+                     [Hop.from_dict(hop) for hop in json_dict.get("hops", [])])
 
     def __len__(self):
         return len(self.hops)
@@ -307,7 +307,6 @@ class Hop(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> Hop
         return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
-
 
 
 @attr.s(frozen=True)
