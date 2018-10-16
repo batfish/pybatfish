@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import re
-from typing import Any, Dict, Iterable, List, Optional  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 import six
@@ -351,11 +351,11 @@ class MatchTcpFlags(DataModelElement):
 
 
 def _normalize_phc_strings(value):
-    # type: (Any) -> Optional[str]
+    # type: (Any) -> Optional[Text]
     if value is None or isinstance(value, six.string_types):
         return value
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: str
+        result = ",".join(value)  # type: Text
         return result
     raise ValueError("Invalid value {}".format(value))
 
