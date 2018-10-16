@@ -13,9 +13,15 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pybatfish.client.commands import (bf_delete_network, bf_list_networks,
-                                       bf_set_network)
+from pytest import raises
+from requests.exceptions import HTTPError
+
+from pybatfish.client.commands import (bf_add_node_role_dimension, bf_delete_network,
+                                       bf_delete_node_role_dimension, bf_get_node_role_dimension,
+                                       bf_get_node_roles, bf_list_networks,
+                                       bf_put_node_roles, bf_set_network)
 from pybatfish.client.options import Options
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
 
 
 def test_set_network():
@@ -37,3 +43,67 @@ def test_list_networks():
         assert name in bf_list_networks()
     finally:
         bf_delete_network(name)
+
+
+def test_add_node_role_dimension():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        dim_name = 'd1'
+        dim = NodeRoleDimension(dim_name)
+        bf_add_node_role_dimension(dim)
+        assert bf_get_node_role_dimension(dim_name) == dim
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_get_node_role_dimension():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        dim_name = 'd1'
+        with raises(HTTPError, match='404'):
+            bf_get_node_role_dimension(dim_name)
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_get_node_roles():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        assert bf_get_node_roles() == NodeRolesData([])
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_delete_node_role_dimension():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        dim_name = 'd1'
+        dim = NodeRoleDimension(dim_name)
+        bf_add_node_role_dimension(dim)
+        # should not crash
+        bf_get_node_role_dimension(dim_name)
+        bf_delete_node_role_dimension(dim_name)
+        # dimension should no longer exist
+        with raises(HTTPError, match='404'):
+            bf_get_node_role_dimension(dim_name)
+        # second delete should fail
+        with raises(HTTPError, match='404'):
+            bf_delete_node_role_dimension(dim_name)
+
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_put_node_roles():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        node_roles = NodeRolesData([NodeRoleDimension('dim1')])
+        bf_put_node_roles(node_roles)
+        assert bf_get_node_roles() == node_roles
+    finally:
+        bf_delete_network(network_name)
