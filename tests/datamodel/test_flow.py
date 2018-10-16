@@ -151,6 +151,12 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(srcIps="1.1.1.1")
     assert hc.dict()["srcIps"] == "1.1.1.1"
 
+    hc = HeaderConstraints(dstPorts=["10-20", "33-33"])
+    assert hc.dict()["dstPorts"] == "10-20,33-33"
+
+    hc = HeaderConstraints(dstPorts="10-20,33")
+    assert hc.dict()["dstPorts"] == "10-20,33"
+
 
 if __name__ == "__main__":
     pytest.main()
