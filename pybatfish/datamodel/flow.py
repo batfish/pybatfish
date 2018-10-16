@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import re
-from typing import Any, Dict, List, Optional  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional  # noqa: F401
 
 import attr
 
@@ -349,6 +349,16 @@ class MatchTcpFlags(DataModelElement):
             json_dict['useUrg'])
 
 
+def _normalize_phc_strings(value):
+    # type: (Any) -> Optional[str]
+    if value is None or isinstance(value, str):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: str
+        return result
+    raise ValueError("Invalid value {}".format(value))
+
+
 @attr.s(frozen=True)
 class HeaderConstraints(DataModelElement):
     """Constraints on an IPv4 packet header space.
@@ -360,8 +370,8 @@ class HeaderConstraints(DataModelElement):
     :vartype srcIps: str
     :ivar dstIps: Destination location/IP
     :vartype dstIps: str
-    :ivar srcPorts: Source ports as list of ranges (e.g., ``["22-22", "53-99"]``)
-    :ivar dstPorts: Destination ports as list of ranges, (e.g., ``["22-22", "53-99"]``)
+    :ivar srcPorts: Source ports as list of ranges (e.g., ``"22,53-99"``)
+    :ivar dstPorts: Destination ports as list of ranges, (e.g., ``"22,53-99"``)
     :ivar applications: Shorthands for application protocols (e.g., ``SSH``, ``DNS``, ``SNMP``)
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
@@ -397,18 +407,26 @@ class HeaderConstraints(DataModelElement):
     # Order params in likelihood of specification
     srcIps = attr.ib(default=None, type=Optional[str])
     dstIps = attr.ib(default=None, type=Optional[str])
-    srcPorts = attr.ib(default=None, type=Optional[List[str]])
-    dstPorts = attr.ib(default=None, type=Optional[List[str]])
+    srcPorts = attr.ib(default=None, type=Optional[str],
+                       converter=_normalize_phc_strings)
+    dstPorts = attr.ib(default=None, type=Optional[str],
+                       converter=_normalize_phc_strings)
     ipProtocols = attr.ib(default=None, type=Optional[List[str]])
     applications = attr.ib(default=None, type=Optional[List[str]])
-    icmpCodes = attr.ib(default=None, type=Optional[List[str]])
-    icmpTypes = attr.ib(default=None, type=Optional[List[str]])
+    icmpCodes = attr.ib(default=None, type=Optional[str],
+                        converter=_normalize_phc_strings)
+    icmpTypes = attr.ib(default=None, type=Optional[str],
+                        converter=_normalize_phc_strings)
     flowStates = attr.ib(default=None, type=Optional[List[str]])
-    ecns = attr.ib(default=None, type=Optional[List[str]])
-    dscps = attr.ib(default=None, type=Optional[List[str]])
-    packetLengths = attr.ib(default=None, type=Optional[List[str]])
-    fragmentOffsets = attr.ib(default=None, type=Optional[List[str]])
-    tcpFlags = attr.ib(default=None, type=Optional[List[MatchTcpFlags]])
+    ecns = attr.ib(default=None, type=Optional[str],
+                   converter=_normalize_phc_strings)
+    dscps = attr.ib(default=None, type=Optional[str],
+                    converter=_normalize_phc_strings)
+    packetLengths = attr.ib(default=None, type=Optional[str],
+                            converter=_normalize_phc_strings)
+    fragmentOffsets = attr.ib(default=None, type=Optional[str],
+                              converter=_normalize_phc_strings)
+    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
 
     @classmethod
     def from_dict(cls, json_dict):
