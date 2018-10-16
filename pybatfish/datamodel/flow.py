@@ -270,34 +270,11 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
-class Trace(DataModelElement):
-    """A trace of a flow through the network.
-
-        A Trace is a combination of hops and flow fate (i.e., disposition).
-
-        :ivar disposition: Flow disposition
-        :ivar hops: A list of hops (:py:class:`Hop`) the flow took
-        """
-
-    disposition = attr.ib()
-    hops = attr.ib()
-
-    @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> Trace
-        return Trace(json_dict["disposition"],
-                     [Hop.from_dict(hop) for hop in json_dict.get("hops", [])])
-
-    def __len__(self):
-        return len(self.hops)
-
-
-@attr.s(frozen=True)
 class Hop(DataModelElement):
     """A single hop in a flow trace.
 
-    :ivar node: Node considered as the Hop
-    :ivar steps: List of steps taken in this Hop
+    :ivar node: Name of node considered as the Hop
+    :ivar steps: List of steps taken at this Hop
     """
 
     node = attr.ib(type=str)
@@ -307,6 +284,29 @@ class Hop(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> Hop
         return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
+
+
+@attr.s(frozen=True)
+class Trace(DataModelElement):
+    """A trace of a flow through the network.
+
+    A Trace is a combination of hops and flow fate (i.e., disposition).
+
+    :ivar disposition: Flow disposition
+    :ivar hops: A list of hops (:py:class:`Hop`) the flow took
+    """
+
+    disposition = attr.ib(type=str)
+    hops = attr.ib(type=List[Hop])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> Trace
+        return Trace(json_dict["disposition"],
+                     [Hop.from_dict(hop) for hop in json_dict.get("hops", [])])
+
+    def __len__(self):
+        return len(self.hops)
 
 
 @attr.s(frozen=True)
