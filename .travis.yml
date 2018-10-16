@@ -5,6 +5,7 @@ python:
 - 3.6
 
 os: linux
+dist: xenial
 jdk:
   - oraclejdk8
 
