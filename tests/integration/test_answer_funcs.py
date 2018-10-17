@@ -82,4 +82,4 @@ def test_answer_traceroute(traceroute_network):
     assert trace.disposition == "ACCEPTED"
     hops = trace.hops
     assert len(hops) == 2
-    assert hops[-1].steps[-1]['action'] == 'TERMINATED'
+    assert hops[-1].steps[-1]['action'] == 'RECEIVED'
