@@ -26,9 +26,12 @@ __all__ = [
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
+    'Hop',
     'MatchTcpFlags',
     'PathConstraints',
-    'TcpFlags']
+    'TcpFlags',
+    'Trace'
+]
 
 
 @attr.s(frozen=True)
@@ -286,6 +289,18 @@ class Hop(DataModelElement):
         # type: (Dict) -> Hop
         return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
 
+    def __len__(self):
+        return len(self.steps)
+
+    def __getitem__(self, item):
+        return self.steps[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.steps:
+            return None
+        return self.steps[-1].get('detail')
+
 
 @attr.s(frozen=True)
 class Trace(DataModelElement):
@@ -308,6 +323,15 @@ class Trace(DataModelElement):
 
     def __len__(self):
         return len(self.hops)
+
+    def __getitem__(self, item):
+        return self.hops[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.hops:
+            return None
+        return self.hops[-1].final_detail()
 
 
 @attr.s(frozen=True)
