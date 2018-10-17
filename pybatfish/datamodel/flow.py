@@ -134,7 +134,7 @@ class Flow(DataModelElement):
 
     def _vrf_str(self):
         vrf_str = " vrf={}".format(self.ingressVrf) \
-            if self.ingressVrf != "default" else ""
+            if self.ingressVrf not in ["default", None] else ""
         return vrf_str
 
     def _iface_str(self):
