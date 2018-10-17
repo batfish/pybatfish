@@ -17,7 +17,8 @@ from __future__ import absolute_import, print_function
 import attr
 import pytest
 
-from pybatfish.datamodel.flow import Flow, FlowTraceHop, HeaderConstraints
+from pybatfish.datamodel.flow import (Flow, FlowTraceHop, HeaderConstraints,
+                                      Hop, Trace)
 
 
 def testFlowDeserialization():
@@ -156,6 +157,25 @@ def test_header_constraints_serialization():
 
     hc = HeaderConstraints(dstPorts="10-20,33")
     assert hc.dict()["dstPorts"] == "10-20,33"
+
+
+def test_trace():
+    trace = Trace(disposition='accepted', hops=[])
+    assert len(trace) == 0
+    with pytest.raises(IndexError):
+        assert trace[0]
+
+    trace = Trace(disposition='accepted', hops=[Hop('node1', [])])
+    assert len(trace) == 1
+    assert len(trace[0]) == 0
+
+    trace = Trace(disposition='accepted',
+                  hops=[Hop('node1', [{'some': 'step'}])])
+    assert trace.final_detail() is None
+
+    trace = Trace(disposition='accepted',
+                  hops=[Hop('node1', [{'some': 'step', 'detail': 'secret'}])])
+    assert trace.final_detail() == 'secret'
 
 
 if __name__ == "__main__":
