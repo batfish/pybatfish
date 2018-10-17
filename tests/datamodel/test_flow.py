@@ -170,11 +170,13 @@ def test_trace():
     assert len(trace[0]) == 0
 
     trace = Trace(disposition='accepted',
-                  hops=[Hop('node1', [{'some': 'step'}])])
+                  hops=[Hop('node1',
+                            [{'action': 'secret_action'}])])
     assert trace.final_detail() is None
 
     trace = Trace(disposition='accepted',
-                  hops=[Hop('node1', [{'some': 'step', 'detail': 'secret'}])])
+                  hops=[Hop('node1',
+                            [{'action': 'secret_action', 'detail': 'secret'}])])
     assert trace.final_detail() == 'secret'
 
 

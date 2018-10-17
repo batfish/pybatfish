@@ -26,9 +26,12 @@ __all__ = [
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
+    'Hop',
     'MatchTcpFlags',
     'PathConstraints',
-    'TcpFlags']
+    'TcpFlags',
+    'Trace'
+]
 
 
 @attr.s(frozen=True)
