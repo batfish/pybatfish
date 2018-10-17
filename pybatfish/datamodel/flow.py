@@ -293,7 +293,7 @@ class Hop(DataModelElement):
         return self.steps[item]
 
     def final_detail(self):
-        # type: () -> Optional[Dict]
+        # type: () -> Any
         if not self.steps:
             return None
         return self.steps[-1].get('detail')
@@ -325,7 +325,7 @@ class Trace(DataModelElement):
         return self.hops[item]
 
     def final_detail(self):
-        # type: () -> Optional[Dict]
+        # type: () -> Any
         if not self.hops:
             return None
         return self.hops[-1].final_detail()
