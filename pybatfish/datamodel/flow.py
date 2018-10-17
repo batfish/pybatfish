@@ -19,7 +19,6 @@ import attr
 import six
 
 from pybatfish.util import escape_html
-
 from .primitives import DataModelElement, Edge
 
 __all__ = [
