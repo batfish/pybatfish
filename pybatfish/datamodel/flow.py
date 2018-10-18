@@ -295,11 +295,28 @@ class Hop(DataModelElement):
     def __getitem__(self, item):
         return self.steps[item]
 
+    def final_action(self):
+        # type: () -> Any
+        if not self.steps:
+            return None
+        return self.steps[-1].get('action')
+
     def final_detail(self):
         # type: () -> Any
         if not self.steps:
             return None
-        return self.steps[-1].get('detail')
+        return self.steps[-1].get('detail', {})
+
+    def get_filters(self):
+        # type: () -> List[str]
+        filters = []  # type: List[str]
+        if not self.steps:
+            return filters
+        for step in self.steps:
+            detail = step.get('detail', {})
+            if "inputFilter" in detail or "outputFilter" in detail:
+                filters.append(detail.get("inputFilter", detail.get("outputFilter")))
+        return filters
 
     def __str__(self):
         # type: () -> str
@@ -345,18 +362,13 @@ class Trace(DataModelElement):
     def __getitem__(self, item):
         return self.hops[item]
 
-    def final_detail(self):
-        # type: () -> Any
-        if not self.hops:
-            return None
-        return self.hops[-1].final_detail()
-
     def __str__(self):
         # type: () -> str
         return "{disposition}\n{hops}".format(
             disposition=self.disposition,
-            hops="\n".join(["{num}. {hop}".format(num=num, hop=hop) for num, hop in
-                            enumerate(self.hops, start=1)]))
+            hops="\n".join(
+                ["{num}. {hop}".format(num=num, hop=hop) for num, hop in
+                 enumerate(self.hops, start=1)]))
 
     def _repr_html_(self):
         # type: () -> str
@@ -366,6 +378,62 @@ class Trace(DataModelElement):
                 ["<strong>{num}</strong>. {hop}".format(num=num,
                                                         hop=hop._repr_html_())
                  for num, hop in enumerate(self.hops, start=1)]))
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.hops:
+            return None
+        return self.hops[-1].final_detail()
+
+    def disposition_reason(self):
+        # type: () -> str
+        response = ""
+        if self.disposition == "ACCEPTED":
+            response += "Flow was ACCEPTED"
+            return response
+        final_action = self.final_action()
+        final_interface = self.final_interface()
+        if final_action in {"BLOCKED", "DROPPED"} and final_interface:
+            response += "Flow was {action} at {interface}".format(
+                action=final_action, interface=final_interface)
+            final_filter = self.final_filter()
+            if final_filter:
+                response += " by filter {final_filter}".format(
+                    final_filter=final_filter)
+        return response
+
+    def get_all_filters(self):
+        # type: () -> List[str]
+        filters = []  # type: List[str]
+        if not self.hops:
+            return filters
+        for hop in self.hops:
+            filters.extend(hop.get_filters())
+        return filters
+
+    def final_action(self):
+        # type: () -> Any
+        if not self.hops:
+            return None
+        return self.hops[-1].final_action()
+
+    def final_interface(self):
+        final_detail = self.final_detail()
+        if not final_detail:
+            return None
+        if "inputInterface" in final_detail or "outputInterface" in final_detail:
+            return final_detail.get("inputInterface",
+                                    final_detail.get("outputInterface"))
+        return None
+
+    def final_filter(self):
+        final_detail = self.final_detail()
+        if not final_detail:
+            return None
+        if "inputFilter" in final_detail or "outputFilter" in final_detail:
+            return final_detail.get("inputFilter",
+                                    final_detail.get("outputFilter"))
+        return None
 
 
 @attr.s(frozen=True)

@@ -180,5 +180,30 @@ def test_trace():
     assert trace.final_detail() == 'secret'
 
 
+def test_disposition_detail():
+    trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [
+        {'action': 'BLOCKED', 'detail': {'inputInterface': 'in_iface1',
+                                         'inputFilter': 'in_filter1'}}])])
+    assert trace.disposition_reason() == "Flow was BLOCKED at in_iface1 by filter in_filter1"
+
+
+def test_get_all_filters():
+    trace = Trace(disposition="ACCEPTED", hops=[
+        Hop('node1', [
+            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface1',
+                                             'inputFilter': 'in_filter1'}},
+            {'action': 'FORWARDED', 'detail': {'routes': []}},
+            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface1',
+                                              'outputFilter': 'out_filter1'}}]),
+        Hop('node2', [
+            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface2',
+                                             'inputFilter': 'in_filter2'}},
+            {'action': 'FORWARDED', 'detail': {'routes': []}},
+            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface2',
+                                              'outputFilter': 'out_filter2'}}])
+    ])
+    assert trace.get_all_filters() == ['in_filter1', 'out_filter1', 'in_filter2', 'out_filter2']
+
+
 if __name__ == "__main__":
     pytest.main()
