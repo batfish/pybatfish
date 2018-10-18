@@ -764,7 +764,7 @@ def bf_list_questions():
 
 
 def bf_list_snapshots(verbose=False):
-    # type: (bool) -> Union[List[str], Dict]
+    # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
     """
     List snapshots for the current network.
 
@@ -774,15 +774,7 @@ def bf_list_snapshots(verbose=False):
     :return: a list of snapshot names or the full json response containing
         snapshots and metadata (if `verbose=True`)
     """
-    json_data = workhelper.get_data_list_snapshots(bf_session,
-                                                   bf_session.network)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_LIST_SNAPSHOTS,
-                                                 json_data)
-    if verbose:
-        return json_response
-
-    return [s['testrigname'] for s in json_response['snapshotlist']]
+    return restv2helper.list_snapshots(bf_session, verbose)
 
 
 @deprecated("Deprecated in favor of bf_list_snapshots()")
@@ -921,7 +913,7 @@ def bf_set_snapshot(name=None, index=None):
             raise IndexError(
                 "Server has only {} snapshots: {}".format(
                     len(snapshots), snapshots))
-        bf_session.baseSnapshot = snapshots[index]
+        bf_session.baseSnapshot = str(snapshots[index])
 
     # Name specified, make sure it exists.
     else:

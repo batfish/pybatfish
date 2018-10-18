@@ -74,6 +74,8 @@ class BfConsts(object):
 
     KEY_BGP_ANNOUNCEMENTS = "Announcements"
 
+    PROP_METADATA = "metadata"
+    PROP_NAME = "name"
     PROP_QUESTION_PLUGIN_DIR = "batfishQuestionPluginDir"
 
     RELPATH_ANSWER_HTML = "answer.html"
@@ -307,6 +309,8 @@ class CoordConstsV2(object):
     HTTP_HEADER_BATFISH_APIKEY = "X-Batfish-Apikey"
     # The HTTP Header containing the client's version.
     HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
+
+    QP_VERBOSE = "verbose"
 
     RSC_CONTAINER = "container"
     RSC_CONTAINERS = "containers"
