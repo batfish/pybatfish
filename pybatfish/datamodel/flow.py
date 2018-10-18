@@ -13,9 +13,10 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import re
-from typing import Any, Dict, List, Optional  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
+import six
 
 from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
@@ -25,9 +26,12 @@ __all__ = [
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
+    'Hop',
     'MatchTcpFlags',
     'PathConstraints',
-    'TcpFlags']
+    'TcpFlags',
+    'Trace'
+]
 
 
 @attr.s(frozen=True)
@@ -133,7 +137,7 @@ class Flow(DataModelElement):
 
     def _vrf_str(self):
         vrf_str = " vrf={}".format(self.ingressVrf) \
-            if self.ingressVrf != "default" else ""
+            if self.ingressVrf not in ["default", None] else ""
         return vrf_str
 
     def _iface_str(self):
@@ -270,6 +274,101 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class Hop(DataModelElement):
+    """A single hop in a flow trace.
+
+    :ivar node: Name of node considered as the Hop
+    :ivar steps: List of steps taken at this Hop
+    """
+
+    node = attr.ib(type=str)
+    steps = attr.ib(type=List[Any])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> Hop
+        return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
+
+    def __len__(self):
+        return len(self.steps)
+
+    def __getitem__(self, item):
+        return self.steps[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.steps:
+            return None
+        return self.steps[-1].get('detail')
+
+    def __str__(self):
+        # type: () -> str
+        return "node: {node}\n steps: {steps}".format(
+            node=self.node,
+            steps=" -> ".join(map(Hop._get_step_data_, self.steps)))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "node: {node}<br>steps: {steps}".format(
+            node=self.node,
+            steps=" &rarr; ".join(map(Hop._get_step_data_, self.steps)))
+
+    @staticmethod
+    def _get_step_data_(step):
+        # type: (Dict) -> str
+        return "{type}({action})".format(type=step.get("type"),
+                                         action=step.get("action"))
+
+
+@attr.s(frozen=True)
+class Trace(DataModelElement):
+    """A trace of a flow through the network.
+
+    A Trace is a combination of hops and flow fate (i.e., disposition).
+
+    :ivar disposition: Flow disposition
+    :ivar hops: A list of hops (:py:class:`Hop`) the flow took
+    """
+
+    disposition = attr.ib(type=str)
+    hops = attr.ib(type=List[Hop])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> Trace
+        return Trace(json_dict["disposition"],
+                     [Hop.from_dict(hop) for hop in json_dict.get("hops", [])])
+
+    def __len__(self):
+        return len(self.hops)
+
+    def __getitem__(self, item):
+        return self.hops[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.hops:
+            return None
+        return self.hops[-1].final_detail()
+
+    def __str__(self):
+        # type: () -> str
+        return "{disposition}\n{hops}".format(
+            disposition=self.disposition,
+            hops="\n".join(["{num}. {hop}".format(num=num, hop=hop) for num, hop in
+                            enumerate(self.hops, start=1)]))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "{disposition}<br>{hops}".format(
+            disposition=self.disposition,
+            hops="<br>".join(
+                ["<strong>{num}</strong>. {hop}".format(num=num,
+                                                        hop=hop._repr_html_())
+                 for num, hop in enumerate(self.hops, start=1)]))
+
+
+@attr.s(frozen=True)
 class TcpFlags(DataModelElement):
     """
     Represents a set of TCP flags in a packet.
@@ -349,6 +448,16 @@ class MatchTcpFlags(DataModelElement):
             json_dict['useUrg'])
 
 
+def _normalize_phc_strings(value):
+    # type: (Any) -> Optional[Text]
+    if value is None or isinstance(value, six.string_types):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: Text
+        return result
+    raise ValueError("Invalid value {}".format(value))
+
+
 @attr.s(frozen=True)
 class HeaderConstraints(DataModelElement):
     """Constraints on an IPv4 packet header space.
@@ -360,8 +469,8 @@ class HeaderConstraints(DataModelElement):
     :vartype srcIps: str
     :ivar dstIps: Destination location/IP
     :vartype dstIps: str
-    :ivar srcPorts: Source ports as list of ranges (e.g., ``["22-22", "53-99"]``)
-    :ivar dstPorts: Destination ports as list of ranges, (e.g., ``["22-22", "53-99"]``)
+    :ivar srcPorts: Source ports as list of ranges (e.g., ``"22,53-99"``)
+    :ivar dstPorts: Destination ports as list of ranges, (e.g., ``"22,53-99"``)
     :ivar applications: Shorthands for application protocols (e.g., ``SSH``, ``DNS``, ``SNMP``)
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
@@ -397,18 +506,26 @@ class HeaderConstraints(DataModelElement):
     # Order params in likelihood of specification
     srcIps = attr.ib(default=None, type=Optional[str])
     dstIps = attr.ib(default=None, type=Optional[str])
-    srcPorts = attr.ib(default=None, type=Optional[List[str]])
-    dstPorts = attr.ib(default=None, type=Optional[List[str]])
+    srcPorts = attr.ib(default=None, type=Optional[str],
+                       converter=_normalize_phc_strings)
+    dstPorts = attr.ib(default=None, type=Optional[str],
+                       converter=_normalize_phc_strings)
     ipProtocols = attr.ib(default=None, type=Optional[List[str]])
     applications = attr.ib(default=None, type=Optional[List[str]])
-    icmpCodes = attr.ib(default=None, type=Optional[List[str]])
-    icmpTypes = attr.ib(default=None, type=Optional[List[str]])
+    icmpCodes = attr.ib(default=None, type=Optional[str],
+                        converter=_normalize_phc_strings)
+    icmpTypes = attr.ib(default=None, type=Optional[str],
+                        converter=_normalize_phc_strings)
     flowStates = attr.ib(default=None, type=Optional[List[str]])
-    ecns = attr.ib(default=None, type=Optional[List[str]])
-    dscps = attr.ib(default=None, type=Optional[List[str]])
-    packetLengths = attr.ib(default=None, type=Optional[List[str]])
-    fragmentOffsets = attr.ib(default=None, type=Optional[List[str]])
-    tcpFlags = attr.ib(default=None, type=Optional[List[MatchTcpFlags]])
+    ecns = attr.ib(default=None, type=Optional[str],
+                   converter=_normalize_phc_strings)
+    dscps = attr.ib(default=None, type=Optional[str],
+                    converter=_normalize_phc_strings)
+    packetLengths = attr.ib(default=None, type=Optional[str],
+                            converter=_normalize_phc_strings)
+    fragmentOffsets = attr.ib(default=None, type=Optional[str],
+                              converter=_normalize_phc_strings)
+    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
 
     @classmethod
     def from_dict(cls, json_dict):

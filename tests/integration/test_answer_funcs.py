@@ -18,7 +18,8 @@ import pytest
 
 from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
                                        bf_init_analysis, bf_init_snapshot,
-                                       bf_set_network)
+                                       bf_session, bf_set_network)
+from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.question import bfq
 from pybatfish.question.question import load_questions
 
@@ -43,6 +44,19 @@ def network():
     bf_delete_network(TEST_NETWORK)
 
 
+@pytest.fixture(scope='module')
+def traceroute_network():
+    load_questions(_stable_question_dir)
+    load_questions(_experimental_question_dir)
+    try:
+        bf_delete_network(TEST_NETWORK)
+    except Exception:
+        pass
+    bf_set_network(TEST_NETWORK)
+    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
+    bf_delete_network(TEST_NETWORK)
+
+
 def test_answer_background(network):
     """Expect a GUID when running in background, which can be fed to bf_get_work_status."""
     work_item_id = bfq.ipOwners().answer(background=True)
@@ -57,3 +71,15 @@ def test_answer_foreground(network):
 def test_init_analysis(network):
     """Ensure bf_init_analysis does not crash."""
     bf_init_analysis("test_analysis", _stable_question_dir)
+
+
+def test_answer_traceroute(traceroute_network):
+    bf_session.additionalArgs = {'debugflags': 'traceroute'}
+    answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")).answer().frame()
+    list_traces = answer.iloc[0]['Traces']
+    assert len(list_traces) == 1
+    trace = list_traces[0]
+    assert trace.disposition == "ACCEPTED"
+    hops = trace.hops
+    assert len(hops) == 2
+    assert hops[-1].steps[-1]['action'] == 'RECEIVED'
