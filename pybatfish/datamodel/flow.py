@@ -309,10 +309,9 @@ class Hop(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        # indent = "&nbsp;" * 4
         return "node: {node}<br>steps: {steps}".format(
             node=self.node,
-            steps=" -> ".join(map(Hop._get_step_data_, self.steps)))
+            steps=" &rarr; ".join(map(Hop._get_step_data_, self.steps)))
 
     @staticmethod
     def _get_step_data_(step):
