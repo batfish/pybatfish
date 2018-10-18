@@ -27,8 +27,8 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_put_node_roles,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData
+from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
+                                                  NodeRolesData)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
