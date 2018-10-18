@@ -16,6 +16,7 @@
 
 from __future__ import absolute_import, print_function
 
+import base64
 import json
 import logging
 import os
@@ -389,8 +390,9 @@ def bf_extract_answer_summary(answerJson):
 
 def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
-                     deactivate_links=None, deactivate_nodes=None):
-    # type: (str, str, bool, bool, List[Interface], List[Edge], List[str]) -> Union[str, Dict, None]
+                     deactivate_links=None, deactivate_nodes=None,
+                     add_files=None):
+    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate specified interfaces on the copy.
 
     :param base_name: name of the snapshot to copy
@@ -408,6 +410,8 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type deactivate_links: list[Edge]
     :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
     :type deactivate_nodes: list[str]
+    :param add_files: path to zip file or directory containing files to add
+    :type add_files: str
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
     :rtype: Union[str, Dict, None]
@@ -427,12 +431,25 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                 'A snapshot named ''{}'' already exists in network ''{}'''.format(
                     name, bf_session.network))
 
+    encoded_file = None
+    if add_files is not None:
+        file_to_send = add_files
+        if os.path.isdir(add_files):
+            temp_zip_file = tempfile.NamedTemporaryFile()
+            zip_dir(add_files, temp_zip_file)
+            file_to_send = temp_zip_file.name
+
+        if os.path.isfile(file_to_send):
+            with open(file_to_send, "rb") as f:
+                encoded_file = base64.b64encode(f.read()).decode('ascii')
+
     json_data = {
         "snapshotBase": base_name,
         "snapshotNew": name,
         "deactivateInterfaces": deactivate_interfaces,
         "deactivateLinks": deactivate_links,
         "deactivateNodes": deactivate_nodes,
+        "zipFile": encoded_file
     }
     restv2helper.fork_snapshot(bf_session,
                                json_data)
@@ -542,20 +559,23 @@ def bf_get_reference_library():
 def bf_get_snapshot_inferred_node_roles():
     # type: () -> NodeRolesData
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
-    return NodeRolesData.from_dict(restv2helper.get_snapshot_inferred_node_roles(bf_session))
+    return NodeRolesData.from_dict(
+        restv2helper.get_snapshot_inferred_node_roles(bf_session))
 
 
 def bf_get_snapshot_inferred_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     return NodeRoleDimension.from_dict(
-        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session, dimension))
+        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session,
+                                                               dimension))
 
 
 def bf_get_snapshot_node_roles():
     # type: () -> NodeRolesData
     """Returns the definitions and assignments of node roles for the active network and snapshot."""
-    return NodeRolesData.from_dict(restv2helper.get_snapshot_node_roles(bf_session))
+    return NodeRolesData.from_dict(
+        restv2helper.get_snapshot_node_roles(bf_session))
 
 
 def bf_get_snapshot_node_role_dimension(dimension):
