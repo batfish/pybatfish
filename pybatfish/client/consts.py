@@ -308,6 +308,8 @@ class CoordConstsV2(object):
     # The HTTP Header containing the client's version.
     HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
 
+    QP_VERBOSE = "verbose"
+
     RSC_CONTAINER = "container"
     RSC_CONTAINERS = "containers"
     RSC_FORK = "fork"

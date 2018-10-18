@@ -128,16 +128,16 @@ def test_list_snapshots_empty(network):
     bf_set_network(network)
     assert not bf_list_snapshots()
     verbose = bf_list_snapshots(verbose=True)
-    assert verbose
-    assert verbose['snapshotlist'] == []
+    assert verbose == []
 
 
 def test_list_snapshots(network, example_snapshot):
     bf_set_network(network)
     assert bf_list_snapshots() == [example_snapshot]
     verbose = bf_list_snapshots(verbose=True)
-    assert verbose.get('snapshotlist') is not None
-    assert len(verbose.get('snapshotlist')) == 1
+    assert verbose
+    assert len(verbose) == 1
+    assert verbose[0]['name'] == example_snapshot
 
 
 def test_get_snapshot_inferred_node_role_dimension(network, roles_snapshot):
