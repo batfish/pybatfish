@@ -26,9 +26,12 @@ __all__ = [
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
+    'Hop',
     'MatchTcpFlags',
     'PathConstraints',
-    'TcpFlags']
+    'TcpFlags',
+    'Trace'
+]
 
 
 @attr.s(frozen=True)
@@ -134,7 +137,7 @@ class Flow(DataModelElement):
 
     def _vrf_str(self):
         vrf_str = " vrf={}".format(self.ingressVrf) \
-            if self.ingressVrf != "default" else ""
+            if self.ingressVrf not in ["default", None] else ""
         return vrf_str
 
     def _iface_str(self):
@@ -286,6 +289,36 @@ class Hop(DataModelElement):
         # type: (Dict) -> Hop
         return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
 
+    def __len__(self):
+        return len(self.steps)
+
+    def __getitem__(self, item):
+        return self.steps[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.steps:
+            return None
+        return self.steps[-1].get('detail')
+
+    def __str__(self):
+        # type: () -> str
+        return "node: {node}\n steps: {steps}".format(
+            node=self.node,
+            steps=" -> ".join(map(Hop._get_step_data_, self.steps)))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "node: {node}<br>steps: {steps}".format(
+            node=self.node,
+            steps=" &rarr; ".join(map(Hop._get_step_data_, self.steps)))
+
+    @staticmethod
+    def _get_step_data_(step):
+        # type: (Dict) -> str
+        return "{type}({action})".format(type=step.get("type"),
+                                         action=step.get("action"))
+
 
 @attr.s(frozen=True)
 class Trace(DataModelElement):
@@ -308,6 +341,31 @@ class Trace(DataModelElement):
 
     def __len__(self):
         return len(self.hops)
+
+    def __getitem__(self, item):
+        return self.hops[item]
+
+    def final_detail(self):
+        # type: () -> Any
+        if not self.hops:
+            return None
+        return self.hops[-1].final_detail()
+
+    def __str__(self):
+        # type: () -> str
+        return "{disposition}\n{hops}".format(
+            disposition=self.disposition,
+            hops="\n".join(["{num}. {hop}".format(num=num, hop=hop) for num, hop in
+                            enumerate(self.hops, start=1)]))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "{disposition}<br>{hops}".format(
+            disposition=self.disposition,
+            hops="<br>".join(
+                ["<strong>{num}</strong>. {hop}".format(num=num,
+                                                        hop=hop._repr_html_())
+                 for num, hop in enumerate(self.hops, start=1)]))
 
 
 @attr.s(frozen=True)
