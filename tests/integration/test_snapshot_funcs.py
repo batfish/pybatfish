@@ -27,6 +27,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_put_node_roles,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
+from pybatfish.client.consts import BfConsts
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData)
 
@@ -137,7 +138,7 @@ def test_list_snapshots(network, example_snapshot):
     verbose = bf_list_snapshots(verbose=True)
     assert verbose
     assert len(verbose) == 1
-    assert verbose[0]['name'] == example_snapshot
+    assert verbose[0][BfConsts.PROP_NAME] == example_snapshot
 
 
 def test_get_snapshot_inferred_node_role_dimension(network, roles_snapshot):

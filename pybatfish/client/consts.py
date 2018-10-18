@@ -74,6 +74,8 @@ class BfConsts(object):
 
     KEY_BGP_ANNOUNCEMENTS = "Announcements"
 
+    PROP_METADATA = "metadata"
+    PROP_NAME = "name"
     PROP_QUESTION_PLUGIN_DIR = "batfishQuestionPluginDir"
 
     RELPATH_ANSWER_HTML = "answer.html"
