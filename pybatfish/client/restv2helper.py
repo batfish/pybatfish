@@ -214,8 +214,10 @@ def get_snapshot_inferred_node_roles(session):
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_SNAPSHOTS,
+                                        session.baseSnapshot,
                                         CoordConstsV2.RSC_INFERRED_NODE_ROLES)
     return _get(session, url_tail)
 
@@ -225,9 +227,12 @@ def get_snapshot_inferred_node_role_dimension(session, dimension):
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                           CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                           CoordConstsV2.RSC_INFERRED_NODE_ROLES, dimension)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SNAPSHOTS,
+                                           session.baseSnapshot,
+                                           CoordConstsV2.RSC_INFERRED_NODE_ROLES,
+                                           dimension)
     return _get(session, url_tail)
 
 
@@ -236,8 +241,10 @@ def get_snapshot_node_roles(session):
     """Gets the definitions and assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_SNAPSHOTS,
+                                        session.baseSnapshot,
                                         CoordConstsV2.RSC_NODE_ROLES)
     return _get(session, url_tail)
 
@@ -247,9 +254,12 @@ def get_snapshot_node_role_dimension(session, dimension):
     """Gets the definition and assignments of node roles for the given dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                           CoordConstsV2.RSC_SNAPSHOTS, session.baseSnapshot,
-                                           CoordConstsV2.RSC_NODE_ROLES, dimension)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                           session.network,
+                                           CoordConstsV2.RSC_SNAPSHOTS,
+                                           session.baseSnapshot,
+                                           CoordConstsV2.RSC_NODE_ROLES,
+                                           dimension)
     return _get(session, url_tail)
 
 

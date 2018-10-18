@@ -25,8 +25,10 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_get_snapshot_node_roles,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_put_node_roles,
-                                       bf_session, bf_set_network, bf_set_snapshot)
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
+                                       bf_session, bf_set_network,
+                                       bf_set_snapshot)
+from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
+                                                  NodeRolesData)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -84,6 +86,20 @@ def test_fork_snapshot(network, example_snapshot):
         # Fail using existing snapshot name without specifying overwrite
         with pytest.raises(ValueError):
             bf_fork_snapshot(base_name=example_snapshot, name=name)
+    finally:
+        bf_delete_snapshot(name)
+
+
+def test_fork_snapshot_add_files(network, example_snapshot):
+    """Run fork snapshot command that adds files."""
+    name = uuid.uuid4().hex
+
+    bf_set_network(network)
+    try:
+        # Should succeed uploading a zip with a new file
+        bf_fork_snapshot(base_name=example_snapshot, name=name,
+                         add_files=join(_this_dir, 'fork'))
+
     finally:
         bf_delete_snapshot(name)
 
