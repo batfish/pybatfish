@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional  # noqa: F401
+from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -112,6 +112,18 @@ def delete_issue_config(session, major, minor):
     return _delete(session, url_tail)
 
 
+def list_snapshots(session, verbose):
+    # type: (Session, bool) -> Union[List[str], List[Dict[str,str]]]
+    if not session.network:
+        raise ValueError("Network must be set to fork a snapshot")
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                  session.network,
+                                  CoordConstsV2.RSC_SNAPSHOTS)
+    params = {}
+    params[CoordConstsV2.QP_VERBOSE] = verbose
+    return _get_list(session, url_tail, params)
+
+
 def fork_snapshot(session, obj):
     # type: (Session, Dict[str, Any]) -> None
     if not session.network:
@@ -151,14 +163,14 @@ def get_issue_config(session, major, minor):
                                            CoordConstsV2.RSC_ISSUES,
                                            major,
                                            minor)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_network(session, network):
     # type: (Session, str) -> Dict[str, Any]
     """Gets information about the specified network."""
     url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_node_role_dimension(session, dimension):
@@ -172,7 +184,7 @@ def get_node_role_dimension(session, dimension):
                                      session.network,
                                      CoordConstsV2.RSC_NODE_ROLES,
                                      dimension)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_node_roles(session):
@@ -182,7 +194,7 @@ def get_node_roles(session):
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_NODE_ROLES)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_reference_book(session, book_name):
@@ -196,7 +208,7 @@ def get_reference_book(session, book_name):
                                      session.network,
                                      CoordConstsV2.RSC_REFERENCE_LIBRARY,
                                      book_name)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_reference_library(session):
@@ -206,7 +218,7 @@ def get_reference_library(session):
         raise ValueError("Network must be set to get the reference library")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_REFERENCE_LIBRARY)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_snapshot_inferred_node_roles(session):
@@ -219,7 +231,7 @@ def get_snapshot_inferred_node_roles(session):
                                         CoordConstsV2.RSC_SNAPSHOTS,
                                         session.baseSnapshot,
                                         CoordConstsV2.RSC_INFERRED_NODE_ROLES)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_snapshot_inferred_node_role_dimension(session, dimension):
@@ -233,7 +245,7 @@ def get_snapshot_inferred_node_role_dimension(session, dimension):
                                            session.baseSnapshot,
                                            CoordConstsV2.RSC_INFERRED_NODE_ROLES,
                                            dimension)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_snapshot_node_roles(session):
@@ -246,7 +258,7 @@ def get_snapshot_node_roles(session):
                                         CoordConstsV2.RSC_SNAPSHOTS,
                                         session.baseSnapshot,
                                         CoordConstsV2.RSC_NODE_ROLES)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def get_snapshot_node_role_dimension(session, dimension):
@@ -260,7 +272,7 @@ def get_snapshot_node_role_dimension(session, dimension):
                                            session.baseSnapshot,
                                            CoordConstsV2.RSC_NODE_ROLES,
                                            dimension)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def put_node_roles(session, node_roles_data):
@@ -285,7 +297,7 @@ def read_question_settings(session, question_class, json_path):
                                            CoordConstsV2.RSC_QUESTIONS,
                                            question_class,
                                            json_path_tail)
-    return _get(session, url_tail)
+    return _get_dict(session, url_tail)
 
 
 def write_question_settings(session, settings, question_class, json_path):
@@ -312,8 +324,8 @@ def _check_response_status(response):
         raise HTTPError("{}. {}".format(e, response.text), response=response)
 
 
-def _delete(session, url_tail):
-    # type: (Session, str) -> None
+def _delete(session, url_tail, params={}):
+    # type: (Session, str, Dict[str, Any]) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -322,14 +334,15 @@ def _delete(session, url_tail):
     headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
-
-    response = requests.delete(url, headers=headers,
+    response = requests.delete(url,
+                               headers=headers,
+                               params=params,
                                verify=session.verifySslCerts)
     _check_response_status(response)
 
 
-def _get(session, url_tail):
-    # type: (Session, str) -> Dict[str, Any]
+def _get(session, url_tail, params):
+    # type: (Session, str, Dict[str, Any]) -> Any
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -338,14 +351,38 @@ def _get(session, url_tail):
     headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
-
-    response = requests.get(url, headers=headers, verify=session.verifySslCerts)
+    response = requests.get(url,
+                            headers=headers,
+                            params=params,
+                            verify=session.verifySslCerts)
     _check_response_status(response)
+    return response
+
+
+def _get_dict(session, url_tail, params={}):
+    # type: (Session, str, Dict[str, Any]) -> Dict[str, Any]
+    """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    response = _get(session, url_tail, params)
     return dict(response.json())
 
 
-def _post(session, url_tail, obj):
-    # type: (Session, str, Any) -> None
+def _get_list(session, url_tail, params={}):
+    # type: (Session, str, Dict[str, Any]) -> List
+    """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON list.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    response = _get(session, url_tail, params)
+    return list(response.json())
+
+
+def _post(session, url_tail, obj, params={}):
+    # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -354,17 +391,17 @@ def _post(session, url_tail, obj):
     headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
-
     response = requests.post(url,
                              json=_encoder.default(obj),
                              headers=headers,
+                             params=params,
                              verify=session.verifySslCerts)
     _check_response_status(response)
     return None
 
 
-def _put(session, url_tail, obj):
-    # type: (Session, str, Any) -> None
+def _put(session, url_tail, obj, params={}):
+    # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -373,10 +410,10 @@ def _put(session, url_tail, obj):
     headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
-
     response = requests.put(url,
                             json=_encoder.default(obj),
                             headers=headers,
-                            verify=session.verifySslCerts)
+                            verify=session.verifySslCerts,
+                            params=params)
     _check_response_status(response)
     return None
