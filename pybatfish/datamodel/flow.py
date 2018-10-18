@@ -301,6 +301,24 @@ class Hop(DataModelElement):
             return None
         return self.steps[-1].get('detail')
 
+    def __str__(self):
+        # type: () -> str
+        return "node: {node}\n steps: {steps}".format(
+            node=self.node,
+            steps=" -> ".join(map(Hop._get_step_data_, self.steps)))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "node: {node}<br>steps: {steps}".format(
+            node=self.node,
+            steps=" &rarr; ".join(map(Hop._get_step_data_, self.steps)))
+
+    @staticmethod
+    def _get_step_data_(step):
+        # type: (Dict) -> str
+        return "{type}({action})".format(type=step.get("type"),
+                                         action=step.get("action"))
+
 
 @attr.s(frozen=True)
 class Trace(DataModelElement):
@@ -332,6 +350,22 @@ class Trace(DataModelElement):
         if not self.hops:
             return None
         return self.hops[-1].final_detail()
+
+    def __str__(self):
+        # type: () -> str
+        return "{disposition}\n{hops}".format(
+            disposition=self.disposition,
+            hops="\n".join(["{num}. {hop}".format(num=num, hop=hop) for num, hop in
+                            enumerate(self.hops, start=1)]))
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "{disposition}<br>{hops}".format(
+            disposition=self.disposition,
+            hops="<br>".join(
+                ["<strong>{num}</strong>. {hop}".format(num=num,
+                                                        hop=hop._repr_html_())
+                 for num, hop in enumerate(self.hops, start=1)]))
 
 
 @attr.s(frozen=True)
