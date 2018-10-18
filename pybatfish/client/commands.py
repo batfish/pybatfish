@@ -392,7 +392,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
                      deactivate_links=None, deactivate_nodes=None,
                      add_files=None):
-    # type: (str, str, bool, bool, List[Interface], List[Edge], List[str], str) -> Union[str, Dict, None]
+    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate specified interfaces on the copy.
 
     :param base_name: name of the snapshot to copy
