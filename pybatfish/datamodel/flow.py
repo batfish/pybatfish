@@ -352,7 +352,7 @@ class Hop(DataModelElement):
     def _get_step_data_(step):
         # type: (Dict) -> str
         return "{type} ({action})".format(type=step.get("type"),
-                                         action=step.get("action"))
+                                          action=step.get("action"))
 
 
 @attr.s(frozen=True)
