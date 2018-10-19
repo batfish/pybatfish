@@ -355,8 +355,9 @@ class Trace(DataModelElement):
         # type: () -> str
         return "{disposition}\n{hops}".format(
             disposition=self.disposition,
-            hops="\n".join(["{num}. {hop}".format(num=num, hop=hop) for num, hop in
-                            enumerate(self.hops, start=1)]))
+            hops="\n".join(
+                ["{num}. {hop}".format(num=num, hop=hop) for num, hop in
+                 enumerate(self.hops, start=1)]))
 
     def _repr_html_(self):
         # type: () -> str
@@ -458,6 +459,20 @@ def _normalize_phc_strings(value):
     raise ValueError("Invalid value {}".format(value))
 
 
+def _normalize_phc_list(value):
+    # type: (Any) -> Optional[List[Text]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, six.string_types):
+        # only collect truthy values
+        alist = [v for v in [v.strip() for v in value.split(",")] if v]
+        if not alist:
+            # reject empty list values
+            raise ValueError("Invalid value {}".format(value))
+        return alist
+    raise ValueError("Invalid value {}".format(value))
+
+
 @attr.s(frozen=True)
 class HeaderConstraints(DataModelElement):
     """Constraints on an IPv4 packet header space.
@@ -510,13 +525,16 @@ class HeaderConstraints(DataModelElement):
                        converter=_normalize_phc_strings)
     dstPorts = attr.ib(default=None, type=Optional[str],
                        converter=_normalize_phc_strings)
-    ipProtocols = attr.ib(default=None, type=Optional[List[str]])
-    applications = attr.ib(default=None, type=Optional[List[str]])
+    ipProtocols = attr.ib(default=None, type=Optional[List[str]],
+                          converter=_normalize_phc_list)
+    applications = attr.ib(default=None, type=Optional[List[str]],
+                           converter=_normalize_phc_list)
     icmpCodes = attr.ib(default=None, type=Optional[str],
                         converter=_normalize_phc_strings)
     icmpTypes = attr.ib(default=None, type=Optional[str],
                         converter=_normalize_phc_strings)
-    flowStates = attr.ib(default=None, type=Optional[List[str]])
+    flowStates = attr.ib(default=None, type=Optional[List[str]],
+                         converter=_normalize_phc_list)
     ecns = attr.ib(default=None, type=Optional[str],
                    converter=_normalize_phc_strings)
     dscps = attr.ib(default=None, type=Optional[str],
