@@ -182,8 +182,9 @@ def test_trace():
 
 def test_disposition_detail():
     trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [
-        {'action': 'BLOCKED', 'detail': {'inputInterface': 'in_iface1',
-                                         'inputFilter': 'in_filter1'}}])])
+        {'action': 'BLOCKED', 'detail': {
+            'inputInterface': {'interface': 'in_iface1', 'hostname': 'node1'},
+            'inputFilter': 'in_filter1'}}])])
     assert trace.disposition_reason() == "Flow was BLOCKED at in_iface1 by filter in_filter1"
 
 
@@ -203,6 +204,22 @@ def test_get_all_filters():
                                               'outputFilter': 'out_filter2'}}])
     ])
     assert trace.get_all_filters() == ['in_filter1', 'out_filter1', 'in_filter2', 'out_filter2']
+
+
+def test_hop_repr_str():
+    hop = Hop('node1', [
+        {'type': 'EnterInputInterface', 'action': 'SENT_IN', 'detail': {
+            'inputInterface': {'interface': 'in_iface1', 'hostname': 'node1'},
+            'inputFilter': 'in_filter1'}},
+        {'type': 'Routing', 'action': 'FORWARDED', 'detail': {
+            'routes': [{'network': '1.1.1.1/24', 'protocol': 'bgp',
+                        'nextHopIp': '1.2.3.4'},
+                       {'network': '1.1.1.2/24', 'protocol': 'static',
+                        'nextHopIp': '1.2.3.5'}
+                       ]}}
+    ])
+    assert str(
+        hop) == "node: node1\n steps: SENT_IN (in_iface1) -> FORWARDED (Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])"
 
 
 if __name__ == "__main__":

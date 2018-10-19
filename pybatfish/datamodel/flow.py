@@ -351,8 +351,34 @@ class Hop(DataModelElement):
     @staticmethod
     def _get_step_data_(step):
         # type: (Dict) -> str
-        return "{type} ({action})".format(type=step.get("type"),
-                                          action=step.get("action"))
+        step_data = step.get("action", "")  # type: str
+        detail = step.get("detail")
+        if detail is not None:
+            step_data += " ("
+            if step.get("type") == "Routing":
+                step_data += "Routes: "
+                step_data += ",".join(
+                    Hop._get_routes_data(detail.get("routes")))
+            else:
+                if "inputInterface" in detail or "outputInterface" in detail:
+                    node_interface_pair = detail.get("inputInterface",
+                                                     detail.get(
+                                                         'outputInterface'))
+                    step_data += node_interface_pair["interface"]
+            step_data += ")"
+        return step_data
+
+    @staticmethod
+    def _get_routes_data(routes):
+        # type: (List[Dict]) -> List[str]
+        routes_str = []  # type: List[str]
+        for route in routes:
+            routes_str.append(
+                "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
+                    protocol=route.get("protocol"),
+                    network=route.get("network"),
+                    next_hop_ip=route.get("nextHopIp")))
+        return routes_str
 
 
 @attr.s(frozen=True)
@@ -464,8 +490,10 @@ class Trace(DataModelElement):
         if not final_detail:
             return None
         if "inputInterface" in final_detail or "outputInterface" in final_detail:
-            return final_detail.get("inputInterface",
-                                    final_detail.get("outputInterface"))
+            node_interface_pair = final_detail.get("inputInterface",
+                                                   final_detail.get(
+                                                       "outputInterface"))
+            return node_interface_pair["interface"]
 
     def _final_filter(self):
         final_detail = self.final_detail()
