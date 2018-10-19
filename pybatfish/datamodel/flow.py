@@ -297,18 +297,36 @@ class Hop(DataModelElement):
 
     def final_action(self):
         # type: () -> Any
+        """
+        Gets the action of the final step of this hop.
+
+        :returns: Action of the final step of this hop or None if not available
+        :rtype: str
+        """
         if not self.steps:
             return None
         return self.steps[-1].get('action')
 
     def final_detail(self):
         # type: () -> Any
+        """
+        Gets the detail of the final step of this hop.
+
+        :returns: Detail of the final step of this hop or None if not available
+        :rtype: dict
+        """
         if not self.steps:
             return None
         return self.steps[-1].get('detail', {})
 
     def get_filters(self):
         # type: () -> List[str]
+        """
+        Gets a list of all filters encountered in this Hop in order.
+
+        :returns: List of filter names
+        :rtype: list
+        """
         filters = []  # type: List[str]
         if not self.steps:
             return filters
@@ -379,31 +397,37 @@ class Trace(DataModelElement):
                                                         hop=hop._repr_html_())
                  for num, hop in enumerate(self.hops, start=1)]))
 
-    def final_detail(self):
-        # type: () -> Any
-        if not self.hops:
-            return None
-        return self.hops[-1].final_detail()
-
     def disposition_reason(self):
         # type: () -> str
-        response = ""
+        """
+        Gets the reason for the disposition if not ACCEPTED, contains filter and interface.
+
+        :returns: Reason for the disposition
+        :rtype: str
+        """
+        reason = ""
         if self.disposition == "ACCEPTED":
-            response += "Flow was ACCEPTED"
-            return response
+            reason += "Flow was ACCEPTED"
+            return reason
         final_action = self.final_action()
-        final_interface = self.final_interface()
+        final_interface = self._final_interface()
         if final_action in {"BLOCKED", "DROPPED"} and final_interface:
-            response += "Flow was {action} at {interface}".format(
+            reason += "Flow was {action} at {interface}".format(
                 action=final_action, interface=final_interface)
-            final_filter = self.final_filter()
+            final_filter = self._final_filter()
             if final_filter:
-                response += " by filter {final_filter}".format(
+                reason += " by filter {final_filter}".format(
                     final_filter=final_filter)
-        return response
+        return reason
 
     def get_all_filters(self):
         # type: () -> List[str]
+        """
+        Gets a list of all filters encountered in the Trace in order.
+
+        :returns: List of filter names
+        :rtype: list
+        """
         filters = []  # type: List[str]
         if not self.hops:
             return filters
@@ -413,27 +437,43 @@ class Trace(DataModelElement):
 
     def final_action(self):
         # type: () -> Any
+        """
+        Gets the action of the final step of the final hop.
+
+        :returns: Action of the final step of the final hop or None if not available
+        :rtype: str
+        """
         if not self.hops:
             return None
         return self.hops[-1].final_action()
 
-    def final_interface(self):
+    def final_detail(self):
+        # type: () -> Any
+        """
+        Gets the detail of the final step of the final hop.
+
+        :returns: Detail of the final step of the final hop or None if not available
+        :rtype: dict
+        """
+        if not self.hops:
+            return None
+        return self.hops[-1].final_detail()
+
+    def _final_interface(self):
         final_detail = self.final_detail()
         if not final_detail:
             return None
         if "inputInterface" in final_detail or "outputInterface" in final_detail:
             return final_detail.get("inputInterface",
                                     final_detail.get("outputInterface"))
-        return None
 
-    def final_filter(self):
+    def _final_filter(self):
         final_detail = self.final_detail()
         if not final_detail:
             return None
         if "inputFilter" in final_detail or "outputFilter" in final_detail:
             return final_detail.get("inputFilter",
                                     final_detail.get("outputFilter"))
-        return None
 
 
 @attr.s(frozen=True)

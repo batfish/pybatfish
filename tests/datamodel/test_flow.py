@@ -172,7 +172,7 @@ def test_trace():
     trace = Trace(disposition='accepted',
                   hops=[Hop('node1',
                             [{'action': 'secret_action'}])])
-    assert trace.final_detail() is None
+    assert trace.final_detail() == {}
 
     trace = Trace(disposition='accepted',
                   hops=[Hop('node1',
