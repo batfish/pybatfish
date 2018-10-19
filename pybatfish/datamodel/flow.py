@@ -351,7 +351,7 @@ class Hop(DataModelElement):
     @staticmethod
     def _get_step_data_(step):
         # type: (Dict) -> str
-        return "{type}({action})".format(type=step.get("type"),
+        return "{type} ({action})".format(type=step.get("type"),
                                          action=step.get("action"))
 
 
