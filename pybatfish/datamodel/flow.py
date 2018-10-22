@@ -491,26 +491,6 @@ class Hop(DataModelElement):
             steps=" &rarr; ".join([step._repr_html_() for step in self.steps]))
 
     @staticmethod
-    def _get_step_data_(step):
-        # type: (Dict) -> str
-        step_data = step.get("action", "")  # type: str
-        detail = step.get("detail")
-        if detail is not None:
-            step_data += " ("
-            if step.get("type") == "Routing":
-                step_data += "Routes: "
-                step_data += ",".join(
-                    Hop._get_routes_data(detail.get("routes")))
-            else:
-                if "inputInterface" in detail or "outputInterface" in detail:
-                    node_interface_pair = detail.get("inputInterface",
-                                                     detail.get(
-                                                         'outputInterface'))
-                    step_data += node_interface_pair["interface"]
-            step_data += ")"
-        return step_data
-
-    @staticmethod
     def _get_routes_data(routes):
         # type: (List[Dict]) -> List[str]
         routes_str = []  # type: List[str]
