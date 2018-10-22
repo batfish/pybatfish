@@ -17,8 +17,10 @@ from __future__ import absolute_import, print_function
 import attr
 import pytest
 
-from pybatfish.datamodel.flow import (Flow, FlowTraceHop, HeaderConstraints,
-                                      Hop, Trace)
+from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
+                                      ExitOutputIfaceStepDetail, Flow,
+                                      FlowTraceHop, HeaderConstraints, Hop,
+                                      RoutingStepDetail, Step, Trace)
 
 
 def testFlowDeserialization():
@@ -171,23 +173,22 @@ def test_trace():
 
     trace = Trace(disposition='accepted',
                   hops=[Hop('node1',
-                            [{'action': 'secret_action'}])])
-    assert trace.final_detail() == {}
+                            [Step(None, "secret_action")])])
+    assert trace.final_detail() is None
 
     trace = Trace(disposition='accepted',
                   hops=[Hop('node1',
-                            [{'action': 'secret_action', 'detail': 'secret'}])])
-    assert trace.final_detail() == 'secret'
+                            [Step(EnterInputIfaceStepDetail("iface", "vrf", "filter"), "secret")])])
+    assert trace.final_detail() == EnterInputIfaceStepDetail("iface", "vrf", "filter")
 
 
+@pytest.mark.skip(reason="disposition_reason() will be removed in a folllowing PR")
 def test_disposition_detail():
-    trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [
-        {'action': 'BLOCKED', 'detail': {
-            'inputInterface': {'interface': 'in_iface1', 'hostname': 'node1'},
-            'inputFilter': 'in_filter1'}}])])
+    trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [Step(EnterInputIfaceStepDetail("in_iface1", "in_vrf1", "in_filter1"), "BLOCKED")])])
     assert trace.disposition_reason() == "Flow was BLOCKED at in_iface1 by filter in_filter1"
 
 
+@pytest.mark.skip(reason="get_all_filters() will be removed in a folllowing PR")
 def test_get_all_filters():
     trace = Trace(disposition="ACCEPTED", hops=[
         Hop('node1', [
@@ -207,19 +208,20 @@ def test_get_all_filters():
 
 
 def test_hop_repr_str():
-    hop = Hop('node1', [
-        {'type': 'EnterInputInterface', 'action': 'SENT_IN', 'detail': {
-            'inputInterface': {'interface': 'in_iface1', 'hostname': 'node1'},
-            'inputFilter': 'in_filter1'}},
-        {'type': 'Routing', 'action': 'FORWARDED', 'detail': {
-            'routes': [{'network': '1.1.1.1/24', 'protocol': 'bgp',
-                        'nextHopIp': '1.2.3.4'},
-                       {'network': '1.1.1.2/24', 'protocol': 'static',
-                        'nextHopIp': '1.2.3.5'}
-                       ]}}
+    hop = Hop("node1", [
+        Step(
+            EnterInputIfaceStepDetail("in_iface1", "in_vrf1", "in_filter1"),
+            "SENT_IN"),
+        Step(RoutingStepDetail(
+            [{"network": "1.1.1.1/24", "protocol": "bgp",
+              "nextHopIp": "1.2.3.4"},
+             {"network": "1.1.1.2/24", "protocol": "static",
+              "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
+        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
+             "SENT_OUT")
     ])
     assert str(
-        hop) == "node: node1\n steps: SENT_IN (in_iface1) -> FORWARDED (Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])"
+        hop) == "node: node1\n steps: SENT_IN(in_iface1: in_filter1) -> FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5]) -> SENT_OUT(out_iface1: out_filter1)"
 
 
 if __name__ == "__main__":
