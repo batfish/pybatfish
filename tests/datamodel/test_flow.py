@@ -20,9 +20,7 @@ import pytest
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail, Flow,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      RoutingStepDetail, Step, Trace)
-from pybatfish.datamodel.flow import (Flow, FlowTraceHop, HeaderConstraints,
-                                      )
+                                      RoutingStepDetail, Step)
 
 
 def testFlowDeserialization():

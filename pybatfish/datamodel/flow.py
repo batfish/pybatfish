@@ -282,9 +282,9 @@ class EnterInputIfaceStepDetail(DataModelElement):
     :ivar inputVrf: VRF associated with the input interface
     """
 
-    inputInterface = attr.ib(type=str, converter=str)
-    inputVrf = attr.ib(type=str, converter=str)
-    inputFilter = attr.ib(type=str, converter=str)
+    inputInterface = attr.ib(type=str)
+    inputVrf = attr.ib(type=Optional[str])
+    inputFilter = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -310,9 +310,9 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
-    outputInterface = attr.ib(type=str, converter=str)
-    outputFilter = attr.ib(type=str, converter=str)
-    transformedFlow = attr.ib(type=str, converter=str)
+    outputInterface = attr.ib(type=str)
+    outputFilter = attr.ib(type=Optional[str])
+    transformedFlow = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -330,13 +330,13 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
-class InbounStepDetail(DataModelElement):
+class InboundStepDetail(DataModelElement):
     """Details of a step representing the receiving (acceptance) of a flow into a Hop."""
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> InbounStepDetail
-        return InbounStepDetail()  # Currently has no attributes
+        # type: (Dict) -> InboundStepDetail
+        return InboundStepDetail()  # Currently has no attributes
 
     def __str__(self):
         return "InboundStep"
@@ -349,7 +349,7 @@ class RoutingStepDetail(DataModelElement):
     :ivar routes: List of routes which were considered to select the output interface
     """
 
-    routes = attr.ib(type=List)
+    routes = attr.ib(type=List[Any])
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -393,7 +393,7 @@ class Step(DataModelElement):
             return Step(RoutingStepDetail.from_dict(detail),
                         json_dict.get("action"))
         elif json_dict.get("type") == "Inbound":
-            return Step(InbounStepDetail(), json_dict.get("action"))
+            return Step(InboundStepDetail(), json_dict.get("action"))
         return None
 
     def __str__(self):
