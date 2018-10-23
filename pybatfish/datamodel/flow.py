@@ -386,17 +386,15 @@ class Step(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> Optional[Step]
         detail = json_dict.get("detail", {})
+        action = json_dict.get("action")
         if json_dict.get("type") == "EnterInputInterface":
-            return Step(EnterInputIfaceStepDetail.from_dict(detail),
-                        json_dict.get("action"))
+            return Step(EnterInputIfaceStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "ExitOutputInterface":
-            return Step(ExitOutputIfaceStepDetail.from_dict(detail),
-                        json_dict.get("action"))
+            return Step(ExitOutputIfaceStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "Routing":
-            return Step(RoutingStepDetail.from_dict(detail),
-                        json_dict.get("action"))
+            return Step(RoutingStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "Inbound":
-            return Step(InboundStepDetail(), json_dict.get("action"))
+            return Step(InboundStepDetail(), action)
         return None
 
     def __str__(self):
@@ -408,7 +406,7 @@ class Step(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return self.__str__()
+        return str(self)
 
 
 @attr.s(frozen=True)
@@ -446,9 +444,10 @@ class Hop(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "node: {node}<br>steps: {steps}".format(
+        return "node: {node}<br>&nbsp;&nbsp;{steps}".format(
             node=self.node,
-            steps=" &rarr; ".join([step._repr_html_() for step in self.steps]))
+            steps="<br>&nbsp;&nbsp;".join(
+                [step._repr_html_() for step in self.steps]))
 
     @staticmethod
     def _get_routes_data(routes):
