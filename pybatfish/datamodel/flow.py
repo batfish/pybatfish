@@ -289,9 +289,10 @@ class EnterInputIfaceStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> EnterInputIfaceStepDetail
-        return EnterInputIfaceStepDetail(json_dict.get("inputInterface", {}).get("interface"),
-                                         json_dict.get("inputVrf"),
-                                         json_dict.get("inputFilter"))
+        return EnterInputIfaceStepDetail(
+            json_dict.get("inputInterface", {}).get("interface"),
+            json_dict.get("inputVrf"),
+            json_dict.get("inputFilter"))
 
     def __str__(self):
         # type: () -> str
@@ -317,9 +318,10 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ExitOutputIfaceStepDetail
-        return ExitOutputIfaceStepDetail(json_dict.get("outputInterface", {}).get("interface"),
-                                         json_dict.get("outputFilter"),
-                                         json_dict.get("transformedFlow"))
+        return ExitOutputIfaceStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("outputFilter"),
+            json_dict.get("transformedFlow"))
 
     def __str__(self):
         # type: () -> str
@@ -354,7 +356,8 @@ class RoutingStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoutingStepDetail
-        return RoutingStepDetail([route for route in json_dict.get("routes", [])])
+        return RoutingStepDetail(
+            [route for route in json_dict.get("routes", [])])
 
     def __str__(self):
         # type: () -> str
@@ -496,7 +499,8 @@ class Trace(DataModelElement):
     def _repr_html_(self):
         # type: () -> str
         disposition_span = '<span style="color:{color}; text-weight:bold;">{disposition}</span>'.format(
-            color=_get_color_for_disposition(self.disposition), disposition=self.disposition)
+            color=_get_color_for_disposition(self.disposition),
+            disposition=self.disposition)
         return "{disposition_span}<br>{hops}".format(
             disposition_span=disposition_span,
             hops="<br>".join(
@@ -587,7 +591,7 @@ class MatchTcpFlags(DataModelElement):
 
 def _get_color_for_disposition(disposition):
     # type: (str) -> str
-    success_dispositions = {"ACCEPTED"}
+    success_dispositions = {"ACCEPTED", "DELIVERED", "EXITS_NETWORK"}
     if disposition in success_dispositions:
         return "#019612"
     else:
