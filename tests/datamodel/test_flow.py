@@ -17,8 +17,10 @@ from __future__ import absolute_import, print_function
 import attr
 import pytest
 
-from pybatfish.datamodel.flow import (Flow, FlowTraceHop, HeaderConstraints,
-                                      Hop, Trace)
+from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
+                                      ExitOutputIfaceStepDetail, Flow,
+                                      FlowTraceHop, HeaderConstraints, Hop,
+                                      RoutingStepDetail, Step)
 
 
 def testFlowDeserialization():
@@ -158,51 +160,37 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(dstPorts="10-20,33")
     assert hc.dict()["dstPorts"] == "10-20,33"
 
+    hc = HeaderConstraints(applications="dns,ssh")
+    assert hc.dict()["applications"] == ['dns', 'ssh']
 
-def test_trace():
-    trace = Trace(disposition='accepted', hops=[])
-    assert len(trace) == 0
-    with pytest.raises(IndexError):
-        assert trace[0]
+    hc = HeaderConstraints(applications=['dns', 'ssh'])
+    assert hc.dict()["applications"] == ['dns', 'ssh']
 
-    trace = Trace(disposition='accepted', hops=[Hop('node1', [])])
-    assert len(trace) == 1
-    assert len(trace[0]) == 0
+    hc = HeaderConstraints(ipProtocols="  ,  dns,")
+    assert hc.dict()["ipProtocols"] == ['dns']
 
-    trace = Trace(disposition='accepted',
-                  hops=[Hop('node1',
-                            [{'action': 'secret_action'}])])
-    assert trace.final_detail() == {}
+    hc = HeaderConstraints(ipProtocols=['tcp', 'udp'])
+    assert hc.dict()["ipProtocols"] == ['tcp', 'udp']
 
-    trace = Trace(disposition='accepted',
-                  hops=[Hop('node1',
-                            [{'action': 'secret_action', 'detail': 'secret'}])])
-    assert trace.final_detail() == 'secret'
+    with pytest.raises(ValueError):
+        HeaderConstraints(applications="")
 
 
-def test_disposition_detail():
-    trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [
-        {'action': 'BLOCKED', 'detail': {'inputInterface': 'in_iface1',
-                                         'inputFilter': 'in_filter1'}}])])
-    assert trace.disposition_reason() == "Flow was BLOCKED at in_iface1 by filter in_filter1"
-
-
-def test_get_all_filters():
-    trace = Trace(disposition="ACCEPTED", hops=[
-        Hop('node1', [
-            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface1',
-                                             'inputFilter': 'in_filter1'}},
-            {'action': 'FORWARDED', 'detail': {'routes': []}},
-            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface1',
-                                              'outputFilter': 'out_filter1'}}]),
-        Hop('node2', [
-            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface2',
-                                             'inputFilter': 'in_filter2'}},
-            {'action': 'FORWARDED', 'detail': {'routes': []}},
-            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface2',
-                                              'outputFilter': 'out_filter2'}}])
+def test_hop_repr_str():
+    hop = Hop("node1", [
+        Step(
+            EnterInputIfaceStepDetail("in_iface1", "in_vrf1", "in_filter1"),
+            "SENT_IN"),
+        Step(RoutingStepDetail(
+            [{"network": "1.1.1.1/24", "protocol": "bgp",
+              "nextHopIp": "1.2.3.4"},
+             {"network": "1.1.1.2/24", "protocol": "static",
+              "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
+        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
+             "SENT_OUT")
     ])
-    assert trace.get_all_filters() == ['in_filter1', 'out_filter1', 'in_filter2', 'out_filter2']
+    assert str(
+        hop) == "node: node1\n steps: SENT_IN(in_iface1: in_filter1) -> FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5]) -> SENT_OUT(out_iface1: out_filter1)"
 
 
 if __name__ == "__main__":
