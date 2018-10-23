@@ -495,8 +495,11 @@ class Trace(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "{disposition}<br>{hops}".format(
-            disposition=self.disposition,
+        color = "#019612" if self.disposition == "ACCEPTED" else "#7c020e"
+        disposition_span = '<span style="color:{color}; text-weight:bold;">{disposition}</span>'.format(
+            color=color, disposition=self.disposition)
+        return "{disposition_span}<br>{hops}".format(
+            disposition_span=disposition_span,
             hops="<br>".join(
                 ["<strong>{num}</strong>. {hop}".format(num=num,
                                                         hop=hop._repr_html_())
