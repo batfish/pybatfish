@@ -274,6 +274,141 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class EnterInputIfaceStepDetail(DataModelElement):
+    """Details of a step representing the entering of a flow into a Hop.
+
+    :ivar inputInterface: Interface of the Hop on which this flow enters
+    :ivar inputFilter: Filter associated with the input interface
+    :ivar inputVrf: VRF associated with the input interface
+    """
+
+    inputInterface = attr.ib(type=str)
+    inputVrf = attr.ib(type=Optional[str])
+    inputFilter = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> EnterInputIfaceStepDetail
+        return EnterInputIfaceStepDetail(json_dict.get("inputInterface", {}).get("interface"),
+                                         json_dict.get("inputVrf"),
+                                         json_dict.get("inputFilter"))
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.inputInterface)
+        if self.inputFilter:
+            str_output += ": {}".format(self.inputFilter)
+        return str_output
+
+
+@attr.s(frozen=True)
+class ExitOutputIfaceStepDetail(DataModelElement):
+    """Details of a step representing the exiting of a flow out of a Hop.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar outputFilter: Filter associated with the output interface
+    :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
+    """
+
+    outputInterface = attr.ib(type=str)
+    outputFilter = attr.ib(type=Optional[str])
+    transformedFlow = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ExitOutputIfaceStepDetail
+        return ExitOutputIfaceStepDetail(json_dict.get("outputInterface", {}).get("interface"),
+                                         json_dict.get("outputFilter"),
+                                         json_dict.get("transformedFlow"))
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.outputInterface)
+        if self.outputFilter:
+            str_output += ": {}".format(self.outputFilter)
+        return str_output
+
+
+@attr.s(frozen=True)
+class InboundStepDetail(DataModelElement):
+    """Details of a step representing the receiving (acceptance) of a flow into a Hop."""
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> InboundStepDetail
+        return InboundStepDetail()  # Currently has no attributes
+
+    def __str__(self):
+        return "InboundStep"
+
+
+@attr.s(frozen=True)
+class RoutingStepDetail(DataModelElement):
+    """Details of a step representing the routing from input interface to output interface.
+
+    :ivar routes: List of routes which were considered to select the output interface
+    """
+
+    routes = attr.ib(type=List[Any])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> RoutingStepDetail
+        return RoutingStepDetail([route for route in json_dict.get("routes", [])])
+
+    def __str__(self):
+        # type: () -> str
+        routes_str = []  # type: List[str]
+        for route in self.routes:
+            routes_str.append(
+                "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
+                    protocol=route.get("protocol"),
+                    network=route.get("network"),
+                    next_hop_ip=route.get("nextHopIp")))
+        return "Routes: " + ",".join(routes_str)
+
+
+@attr.s(frozen=True)
+class Step(DataModelElement):
+    """Represents a step in a hop.
+
+    :ivar detail: Details about the step
+    :ivar action: Action taken in this step
+    """
+
+    detail = attr.ib(type=Any)
+    action = attr.ib(type=str, converter=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> Optional[Step]
+        detail = json_dict.get("detail", {})
+        if json_dict.get("type") == "EnterInputInterface":
+            return Step(EnterInputIfaceStepDetail.from_dict(detail),
+                        json_dict.get("action"))
+        elif json_dict.get("type") == "ExitOutputInterface":
+            return Step(ExitOutputIfaceStepDetail.from_dict(detail),
+                        json_dict.get("action"))
+        elif json_dict.get("type") == "Routing":
+            return Step(RoutingStepDetail.from_dict(detail),
+                        json_dict.get("action"))
+        elif json_dict.get("type") == "Inbound":
+            return Step(InboundStepDetail(), json_dict.get("action"))
+        return None
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.action)
+        if self.detail:
+            str_output += "({detail})".format(detail=str(self.detail))
+        return str_output
+
+    def _repr_html_(self):
+        # type: () -> str
+        return self.__str__()
+
+
+@attr.s(frozen=True)
 class Hop(DataModelElement):
     """A single hop in a flow trace.
 
@@ -282,12 +417,17 @@ class Hop(DataModelElement):
     """
 
     node = attr.ib(type=str)
-    steps = attr.ib(type=List[Any])
+    steps = attr.ib(type=List[Step])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Hop
-        return Hop(json_dict.get('node', {}).get('name'), json_dict["steps"])
+        steps = []  # type: List[Step]
+        for step in json_dict["steps"]:
+            step_obj = Step.from_dict(step)
+            if step_obj is not None:
+                steps.append(step_obj)
+        return Hop(json_dict.get('node', {}).get('name'), steps)
 
     def __len__(self):
         return len(self.steps)
@@ -299,19 +439,25 @@ class Hop(DataModelElement):
         # type: () -> str
         return "node: {node}\n steps: {steps}".format(
             node=self.node,
-            steps=" -> ".join(map(Hop._get_step_data_, self.steps)))
+            steps=" -> ".join(map(str, self.steps)))
 
     def _repr_html_(self):
         # type: () -> str
         return "node: {node}<br>steps: {steps}".format(
             node=self.node,
-            steps=" &rarr; ".join(map(Hop._get_step_data_, self.steps)))
+            steps=" &rarr; ".join([step._repr_html_() for step in self.steps]))
 
     @staticmethod
-    def _get_step_data_(step):
-        # type: (Dict) -> str
-        return "{type} ({action})".format(type=step.get("type"),
-                                          action=step.get("action"))
+    def _get_routes_data(routes):
+        # type: (List[Dict]) -> List[str]
+        routes_str = []  # type: List[str]
+        for route in routes:
+            routes_str.append(
+                "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
+                    protocol=route.get("protocol"),
+                    network=route.get("network"),
+                    next_hop_ip=route.get("nextHopIp")))
+        return routes_str
 
 
 @attr.s(frozen=True)
