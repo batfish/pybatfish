@@ -435,49 +435,6 @@ class Hop(DataModelElement):
     def __getitem__(self, item):
         return self.steps[item]
 
-    def final_action(self):
-        # type: () -> Any
-        """
-        Gets the action of the final step of this hop.
-
-        :returns: Action of the final step of this hop or None if not available
-        :rtype: str
-        """
-        if not self.steps:
-            return None
-        return self.steps[-1].action
-
-    def final_detail(self):
-        # type: () -> Any
-        """
-        Gets the detail of the final step of this hop.
-
-        :returns: Detail of the final step of this hop or None if not available
-        :rtype: dict
-        """
-        if not self.steps:
-            return None
-        return self.steps[-1].detail
-
-    def get_filters(self):
-        # type: () -> List[str]
-        """
-        Gets a list of all filters encountered in this Hop in order.
-
-        :returns: List of filter names
-        :rtype: list
-        """
-        filters = []  # type: List[str]
-        if not self.steps:
-            return filters
-        for step in self.steps:
-            detail = step.detail
-            if detail.inputFilter:
-                filters.append(detail.inputFilter)
-            elif detail.outputFilter:
-                filters.append(detail.outputFilter)
-        return filters
-
     def __str__(self):
         # type: () -> str
         return "node: {node}\n steps: {steps}".format(
@@ -544,86 +501,6 @@ class Trace(DataModelElement):
                 ["<strong>{num}</strong>. {hop}".format(num=num,
                                                         hop=hop._repr_html_())
                  for num, hop in enumerate(self.hops, start=1)]))
-
-    def disposition_reason(self):
-        # type: () -> str
-        """
-        Gets the reason for the disposition if not ACCEPTED, contains filter and interface.
-
-        :returns: Reason for the disposition
-        :rtype: str
-        """
-        reason = ""
-        if self.disposition == "ACCEPTED":
-            reason += "Flow was ACCEPTED"
-            return reason
-        final_action = self.final_action()
-        final_interface = self._final_interface()
-        if final_action in {"BLOCKED", "DROPPED"} and final_interface:
-            reason += "Flow was {action} at {interface}".format(
-                action=final_action, interface=final_interface)
-            final_filter = self._final_filter()
-            if final_filter:
-                reason += " by filter {final_filter}".format(
-                    final_filter=final_filter)
-        return reason
-
-    def get_all_filters(self):
-        # type: () -> List[str]
-        """
-        Gets a list of all filters encountered in the Trace in order.
-
-        :returns: List of filter names
-        :rtype: list
-        """
-        filters = []  # type: List[str]
-        if not self.hops:
-            return filters
-        for hop in self.hops:
-            filters.extend(hop.get_filters())
-        return filters
-
-    def final_action(self):
-        # type: () -> Any
-        """
-        Gets the action of the final step of the final hop.
-
-        :returns: Action of the final step of the final hop or None if not available
-        :rtype: str
-        """
-        if not self.hops:
-            return None
-        return self.hops[-1].final_action()
-
-    def final_detail(self):
-        # type: () -> Any
-        """
-        Gets the detail of the final step of the final hop.
-
-        :returns: Detail of the final step of the final hop or None if not available
-        :rtype: dict
-        """
-        if not self.hops:
-            return None
-        return self.hops[-1].final_detail()
-
-    def _final_interface(self):
-        final_detail = self.final_detail()
-        if not final_detail:
-            return None
-        if "inputInterface" in final_detail or "outputInterface" in final_detail:
-            node_interface_pair = final_detail.get("inputInterface",
-                                                   final_detail.get(
-                                                       "outputInterface"))
-            return node_interface_pair["interface"]
-
-    def _final_filter(self):
-        final_detail = self.final_detail()
-        if not final_detail:
-            return None
-        if "inputFilter" in final_detail or "outputFilter" in final_detail:
-            return final_detail.get("inputFilter",
-                                    final_detail.get("outputFilter"))
 
 
 @attr.s(frozen=True)
@@ -716,6 +593,20 @@ def _normalize_phc_strings(value):
     raise ValueError("Invalid value {}".format(value))
 
 
+def _normalize_phc_list(value):
+    # type: (Any) -> Optional[List[Text]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, six.string_types):
+        # only collect truthy values
+        alist = [v for v in [v.strip() for v in value.split(",")] if v]
+        if not alist:
+            # reject empty list values
+            raise ValueError("Invalid value {}".format(value))
+        return alist
+    raise ValueError("Invalid value {}".format(value))
+
+
 @attr.s(frozen=True)
 class HeaderConstraints(DataModelElement):
     """Constraints on an IPv4 packet header space.
@@ -768,13 +659,16 @@ class HeaderConstraints(DataModelElement):
                        converter=_normalize_phc_strings)
     dstPorts = attr.ib(default=None, type=Optional[str],
                        converter=_normalize_phc_strings)
-    ipProtocols = attr.ib(default=None, type=Optional[List[str]])
-    applications = attr.ib(default=None, type=Optional[List[str]])
+    ipProtocols = attr.ib(default=None, type=Optional[List[str]],
+                          converter=_normalize_phc_list)
+    applications = attr.ib(default=None, type=Optional[List[str]],
+                           converter=_normalize_phc_list)
     icmpCodes = attr.ib(default=None, type=Optional[str],
                         converter=_normalize_phc_strings)
     icmpTypes = attr.ib(default=None, type=Optional[str],
                         converter=_normalize_phc_strings)
-    flowStates = attr.ib(default=None, type=Optional[List[str]])
+    flowStates = attr.ib(default=None, type=Optional[List[str]],
+                         converter=_normalize_phc_list)
     ecns = attr.ib(default=None, type=Optional[str],
                    converter=_normalize_phc_strings)
     dscps = attr.ib(default=None, type=Optional[str],

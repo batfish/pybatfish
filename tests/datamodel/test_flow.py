@@ -21,6 +21,8 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail, Flow,
                                       FlowTraceHop, HeaderConstraints, Hop,
                                       RoutingStepDetail, Step, Trace)
+from pybatfish.datamodel.flow import (Flow, FlowTraceHop, HeaderConstraints,
+                                      )
 
 
 def testFlowDeserialization():
@@ -160,51 +162,20 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(dstPorts="10-20,33")
     assert hc.dict()["dstPorts"] == "10-20,33"
 
+    hc = HeaderConstraints(applications="dns,ssh")
+    assert hc.dict()["applications"] == ['dns', 'ssh']
 
-def test_trace():
-    trace = Trace(disposition='accepted', hops=[])
-    assert len(trace) == 0
-    with pytest.raises(IndexError):
-        assert trace[0]
+    hc = HeaderConstraints(applications=['dns', 'ssh'])
+    assert hc.dict()["applications"] == ['dns', 'ssh']
 
-    trace = Trace(disposition='accepted', hops=[Hop('node1', [])])
-    assert len(trace) == 1
-    assert len(trace[0]) == 0
+    hc = HeaderConstraints(ipProtocols="  ,  dns,")
+    assert hc.dict()["ipProtocols"] == ['dns']
 
-    trace = Trace(disposition='accepted',
-                  hops=[Hop('node1',
-                            [Step(None, "secret_action")])])
-    assert trace.final_detail() is None
+    hc = HeaderConstraints(ipProtocols=['tcp', 'udp'])
+    assert hc.dict()["ipProtocols"] == ['tcp', 'udp']
 
-    trace = Trace(disposition='accepted',
-                  hops=[Hop('node1',
-                            [Step(EnterInputIfaceStepDetail("iface", "vrf", "filter"), "secret")])])
-    assert trace.final_detail() == EnterInputIfaceStepDetail("iface", "vrf", "filter")
-
-
-@pytest.mark.skip(reason="disposition_reason() will be removed in a folllowing PR")
-def test_disposition_detail():
-    trace = Trace(disposition="DENIED_IN", hops=[Hop('node1', [Step(EnterInputIfaceStepDetail("in_iface1", "in_vrf1", "in_filter1"), "BLOCKED")])])
-    assert trace.disposition_reason() == "Flow was BLOCKED at in_iface1 by filter in_filter1"
-
-
-@pytest.mark.skip(reason="get_all_filters() will be removed in a folllowing PR")
-def test_get_all_filters():
-    trace = Trace(disposition="ACCEPTED", hops=[
-        Hop('node1', [
-            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface1',
-                                             'inputFilter': 'in_filter1'}},
-            {'action': 'FORWARDED', 'detail': {'routes': []}},
-            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface1',
-                                              'outputFilter': 'out_filter1'}}]),
-        Hop('node2', [
-            {'action': 'SENT_IN', 'detail': {'inputInterface': 'in_iface2',
-                                             'inputFilter': 'in_filter2'}},
-            {'action': 'FORWARDED', 'detail': {'routes': []}},
-            {'action': 'SENT_OUT', 'detail': {'outputInterface': 'out_iface2',
-                                              'outputFilter': 'out_filter2'}}])
-    ])
-    assert trace.get_all_filters() == ['in_filter1', 'out_filter1', 'in_filter2', 'out_filter2']
+    with pytest.raises(ValueError):
+        HeaderConstraints(applications="")
 
 
 def test_hop_repr_str():
