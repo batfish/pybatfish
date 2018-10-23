@@ -224,9 +224,9 @@ class FlowTrace(DataModelElement):
 
     def format_notes_html(self):
         # type: () -> str
-        color = '#019612' if 'ACCEPTED' in self.notes else '#7c020e'
         return '<span style="color:{color}; text-weight:bold;">{notes}</span>'.format(
-            color=color, notes=escape_html(self.notes))
+            color=_get_color_for_disposition(self.disposition),
+            notes=escape_html(self.notes))
 
 
 @attr.s(frozen=True)
@@ -495,8 +495,10 @@ class Trace(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "{disposition}<br>{hops}".format(
-            disposition=self.disposition,
+        disposition_span = '<span style="color:{color}; text-weight:bold;">{disposition}</span>'.format(
+            color=_get_color_for_disposition(self.disposition), disposition=self.disposition)
+        return "{disposition_span}<br>{hops}".format(
+            disposition_span=disposition_span,
             hops="<br>".join(
                 ["<strong>{num}</strong>. {hop}".format(num=num,
                                                         hop=hop._repr_html_())
@@ -581,6 +583,15 @@ class MatchTcpFlags(DataModelElement):
             json_dict['useRst'],
             json_dict['useSyn'],
             json_dict['useUrg'])
+
+
+def _get_color_for_disposition(disposition):
+    # type: (str) -> str
+    success_dispositions = {"ACCEPTED"}
+    if disposition in success_dispositions:
+        return "#019612"
+    else:
+        return "#7c020e"
 
 
 def _normalize_phc_strings(value):
