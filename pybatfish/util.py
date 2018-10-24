@@ -39,7 +39,6 @@ __all__ = [
     'escape_html',
     'get_html',
     'get_uuid',
-    'validate_json_path_regex',
     'validate_name',
     'validate_question_name',
     'zip_dir',
@@ -82,26 +81,6 @@ def get_uuid():
     # type: () -> str
     """Generate and return a UUID as a string."""
     return str(uuid.uuid4())
-
-
-def validate_json_path_regex(s):
-    # type: (str) -> bool
-    """Check if the given string is a valid JsonPath regex.
-
-    :param s: string to check
-    :type s: str
-    :return True if `s` is valid
-    :raises QuestionValidationException if `s` is not valid
-    """
-    if not s.startswith('/'):
-        raise QuestionValidationException(
-            "Expected '/' at the start of JsonPath regex")
-
-    if not (s.endswith('/i') or s.endswith('/')):
-        raise QuestionValidationException(
-            "JsonPath regex must end with either '/' or '/i'")
-
-    return True
 
 
 def validate_name(name, entity_type="snapshot"):
