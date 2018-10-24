@@ -166,7 +166,7 @@ class Flow(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "{src_ip}:{src_port} &rarr; {dst_ip}:{dst_port}<br>start={node}{iface}{vrf}" \
+        return "Src IP: {src_ip}<br>Src Port: {src_port}<br>Dst IP: {dst_ip}<br>Dst Port: {dst_port}<br>IP Protocol: {ip_protocol}<br>Start Location: {node}{iface}{vrf}" \
             .format(node=self.ingressNode,
                     iface=escape_html(self._iface_str()),
                     vrf=escape_html(self._vrf_str()),
@@ -174,7 +174,7 @@ class Flow(DataModelElement):
                     src_port=self.srcPort,
                     dst_ip=self.dstIp,
                     dst_port=self.dstPort,
-                    ip_proto=self.get_ip_protocol_str())
+                    ip_protocol=self.get_ip_protocol_str())
 
 
 @attr.s(frozen=True)
