@@ -32,8 +32,7 @@ from pybatfish.client.commands import (_bf_answer_obj,
                                        bf_session)
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
-from pybatfish.util import BfJsonEncoder, get_uuid, validate_json_path_regex, \
-    validate_question_name
+from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -662,7 +661,7 @@ def _validateType(value, expectedType):
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
-        return validate_json_path_regex(value), None
+        return True, None
     elif expectedType == 'long':
         INT64_MIN = -2 ** 64
         INT64_MAX = 2 ** 64 - 1
