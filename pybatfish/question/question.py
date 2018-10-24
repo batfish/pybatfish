@@ -721,7 +721,8 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
-    elif expectedType in ['headerConstraint', 'pathConstraint']:
+    elif expectedType in ['headerConstraint', 'pathConstraint',
+                          'dispositionSpec']:
         return True, None
     else:
         bf_logger.warn(
