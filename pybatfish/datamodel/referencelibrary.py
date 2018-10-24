@@ -16,10 +16,10 @@ from typing import Dict, List  # noqa: F401
 
 import attr
 
-from .primitives import DataModelElement
+from .primitives import DataModelElement, Interface
 
-__all__ = ['AddressGroup', 'NodeRole', 'NodeRoleDimension', 'NodeRolesData',
-           'ReferenceBook', 'ReferenceLibrary']
+__all__ = ['AddressGroup', 'InterfaceGroup', 'NodeRole', 'NodeRoleDimension',
+           'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary']
 
 
 @attr.s(frozen=True)
@@ -40,6 +40,26 @@ class AddressGroup(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> AddressGroup
         return AddressGroup(json_dict["name"], json_dict.get("addresses", []))
+
+
+@attr.s(frozen=True)
+class InterfaceGroup(DataModelElement):
+    """
+    Information about an interface group.
+
+    :ivar name: The name of the group
+    :ivar interfaces: a list of interfaces, of type :py:class:`~Interface`.
+    """
+
+    name = attr.ib(type=str)
+    interfaces = attr.ib(type=List[Interface], factory=list)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> InterfaceGroup
+        return InterfaceGroup(json_dict["name"],
+                              [Interface.from_dict(d) for d in
+                               json_dict.get('interfaces', [])])
 
 
 @attr.s(frozen=True)
@@ -111,17 +131,21 @@ class ReferenceBook(DataModelElement):
 
     :ivar name: Name of the reference book.
     :ivar addressGroups: A list of groups, of type :py:class:`~AddressGroup`.
+    :ivar interfaceGroups: A list of groups, of type :py:class:`~InterfaceGroup`.
     """
 
     name = attr.ib(type=str)
     addressGroups = attr.ib(type=List[AddressGroup], factory=list)
+    interfaceGroups = attr.ib(type=List[InterfaceGroup], factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ReferenceBook
         return ReferenceBook(json_dict["name"],
                              [AddressGroup.from_dict(d) for d in
-                              json_dict.get("addressGroups", [])])
+                              json_dict.get("addressGroups", [])],
+                             [InterfaceGroup.from_dict(d) for d in
+                              json_dict.get("interfaceGroups", [])])
 
 
 @attr.s(frozen=True)
