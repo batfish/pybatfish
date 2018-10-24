@@ -17,7 +17,6 @@ from __future__ import absolute_import, print_function
 import pytest
 
 # Tests for isSubRange
-from pybatfish.exception import QuestionValidationException
 from pybatfish.question import question
 
 
@@ -354,20 +353,6 @@ def testValidJsonPathValidateType():
                                     'jsonPath')
     assert result[0]
     assert result[1] is None
-
-
-def testInvalidStartJsonPathRegexValidateType():
-    with pytest.raises(QuestionValidationException):
-        question._validateType('jsonPathRegex/', 'jsonPathRegex')
-
-
-def testInvalidEndJsonPathRegexValidateType():
-    with pytest.raises(QuestionValidationException):
-        question._validateType('/jsonPathRegex', 'jsonPathRegex')
-
-
-def testValidJsonPathRegexValidateType():
-    assert question._validateType('/jsonPathRegex/', 'jsonPathRegex')
 
 
 def testInvalidTypeSubRangeValidateType():
