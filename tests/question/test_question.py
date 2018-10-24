@@ -20,17 +20,6 @@ from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (_compute_docstring, _compute_var_help,
                                          _process_variables, _validate,
                                          list_questions, load_questions)
-from pybatfish.util import validate_json_path_regex
-
-
-def test_validate_json_path_regex():
-    assert validate_json_path_regex("/x/")
-    assert validate_json_path_regex("/x/i")
-    assert validate_json_path_regex("/\w+\d.*/i")
-    with pytest.raises(QuestionValidationException):
-        assert validate_json_path_regex("foo")
-    with pytest.raises(QuestionValidationException):
-        assert validate_json_path_regex("/foo")
 
 
 def test_min_length():
