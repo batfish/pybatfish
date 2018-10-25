@@ -345,6 +345,26 @@ class InboundStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class OriginateStepDetail(DataModelElement):
+    """Details of a step representing the originating of a flow in a Hop.
+
+    :ivar originatingVrf: VRF from which the Flow originates
+    """
+
+    originatingVrf = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> OriginateStepDetail
+        return OriginateStepDetail(
+            json_dict.get("originatingVrf", ""))
+
+    def __str__(self):
+        # type: () -> str
+        return str(self.originatingVrf)
+
+
+@attr.s(frozen=True)
 class RoutingStepDetail(DataModelElement):
     """Details of a step representing the routing from input interface to output interface.
 
@@ -395,6 +415,8 @@ class Step(DataModelElement):
             return Step(RoutingStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "Inbound":
             return Step(InboundStepDetail(), action)
+        elif json_dict.get("type") == "Originate":
+            return Step(OriginateStepDetail.from_dict(detail), action)
         return None
 
     def __str__(self):
