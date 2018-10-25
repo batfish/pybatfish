@@ -189,8 +189,9 @@ def test_hop_repr_str():
         Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
              "SENT_OUT")
     ])
+
     assert str(
-        hop) == "node: node1\n steps: SENT_IN(in_iface1: in_filter1) -> FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5]) -> SENT_OUT(out_iface1: out_filter1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  SENT_OUT(out_iface1: out_filter1)"
 
 
 if __name__ == "__main__":
