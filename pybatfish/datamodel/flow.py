@@ -460,9 +460,9 @@ class Hop(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "node: {node}\n  {steps}".format(
+        return "node: {node}\n steps: {steps}".format(
             node=self.node,
-            steps="\n  ".join(map(str, self.steps)))
+            steps=" -> ".join(map(str, self.steps)))
 
     def _repr_html_(self):
         # type: () -> str
