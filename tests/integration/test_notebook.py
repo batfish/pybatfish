@@ -39,6 +39,8 @@ for root, dirs, files in walk(_jupyter_nb_dir):
 
 assert len(notebook_files) > 0
 
+_check_cell_types = ['execute_result', 'display_data']
+
 
 @pytest.fixture(scope='module', params=notebook_files)
 def notebook(request):
@@ -99,9 +101,9 @@ def test_notebook_output(notebook, executed_notebook):
             if cell['cell_type'] == 'code':
                 # Collecting all outputs of type "execute_result" as other output type may be undeterministic (like timestamps)
                 original_outputs = [o['data'] for o in cell['outputs']
-                                    if o['output_type'] == 'execute_result']
+                                    if o['output_type'] in _check_cell_types]
                 executed_outputs = [o['data'] for o in executed_cell['outputs']
-                                    if o['output_type'] == 'execute_result']
+                                    if o['output_type'] in _check_cell_types]
                 assert len(original_outputs) == len(executed_outputs)
                 for original_data, executed_data in zip(original_outputs,
                                                         executed_outputs):
