@@ -18,6 +18,8 @@ pd.compat.PY3 = True
 PD_DEFAULT_COLWIDTH = 250
 pd.set_option('max_colwidth', PD_DEFAULT_COLWIDTH)
 
+# UUID for CSS styles used by pandas styler. 
+# Keeps our notebook HTML deterministic when displaying dataframes
 _STYLE_UUID = "33a69916-5a4a-44df-b58d-02eda0e67e63"
 
 
