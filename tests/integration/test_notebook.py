@@ -109,7 +109,7 @@ def test_notebook_output(notebook, executed_notebook):
                                                         executed_outputs):
                     _compare_data(original_data, executed_data)
     except AssertionError as e:
-        with open('{}.testout'.format(filepath), 'w') as f:
+        with open('{}.testout'.format(filepath), 'w', encoding='utf-8') as f:
             nbformat.write(executed_notebook, f)
             pytest.fail('{} failed output validation:\n{}'.format(filepath, e),
                         pytrace=False)
