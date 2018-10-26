@@ -12,6 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import io
 from copy import deepcopy
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
@@ -109,7 +110,7 @@ def test_notebook_output(notebook, executed_notebook):
                                                         executed_outputs):
                     _compare_data(original_data, executed_data)
     except AssertionError as e:
-        with open('{}.testout'.format(filepath), 'w', encoding='utf-8') as f:
+        with io.open('{}.testout'.format(filepath), 'w', encoding='utf-8') as f:
             nbformat.write(executed_notebook, f)
             pytest.fail('{} failed output validation:\n{}'.format(filepath, e),
                         pytrace=False)
