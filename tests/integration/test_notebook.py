@@ -14,6 +14,7 @@
 #   limitations under the License.
 import io
 from copy import deepcopy
+from difflib import Differ
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
 
@@ -77,12 +78,15 @@ def _assert_cell_no_errors(c):
 
 
 def _compare_data(original_data, executed_data):
+    d = Differ()
     if "text/plain" in original_data and "text/plain" in executed_data:
-        assert original_data["text/plain"] == executed_data["text/plain"]
+        assert d.compare(original_data["text/plain"].splitlines(),
+                         executed_data["text/plain"].splitlines())
     else:
         assert "text/plain" not in original_data and "text/plain" not in executed_data
     if "text/html" in original_data and "text/html" in executed_data:
-        assert original_data["text/html"] == executed_data["text/html"]
+        assert d.compare(original_data["text/html"].splitlines(),
+                         executed_data["text/html"].splitlines())
     else:
         assert "text/html" not in original_data and "text/html" not in executed_data
 

@@ -1,6 +1,5 @@
 # Importing required libraries, setting up logging, and loading questions
 import logging
-from collections import OrderedDict
 
 import pandas as pd
 from IPython.display import display
@@ -47,5 +46,4 @@ def display_html(df):
     df = df.replace('\n', '<br>', regex=True).replace('  ', '&nbsp;&nbsp;',
                                                       regex=True)
     display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
-            .set_properties(**OrderedDict(
-        [('text-align', 'left'), ('vertical-align', 'top')])))
+            .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))
