@@ -75,7 +75,7 @@ def _assert_cell_no_errors(c):
         pytest.fail("Found notebook errors: {}".format("\n".join(errors)))
 
 
-def _compare_data(original_data, executed_data):
+def _compare_data(original_data, executed_data, cell_type):
     if "text/plain" in original_data and "text/plain" in executed_data:
         assert original_data["text/plain"] == executed_data["text/plain"]
     else:
