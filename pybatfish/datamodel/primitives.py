@@ -78,7 +78,10 @@ class Assertion(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Assertion
-        return Assertion(json_dict["type"], json_dict["expect"])
+        return Assertion(AssertionType[json_dict["type"]], json_dict["expect"])
+
+    def dict(self):
+        return dict(type=str(self.type), expect=self.expect)
 
 
 @attr.s(frozen=True)

@@ -32,8 +32,8 @@ from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.primitives import (Assertion,  # noqa: F401
-                                            AssertionType, Edge, Interface)
+from pybatfish.datamodel.primitives import (  # noqa: F401
+    Edge, Interface)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
@@ -65,8 +65,6 @@ __all__ = ['bf_add_analysis',
            'bf_add_node_role_dimension',
            'bf_add_reference_book',
            'bf_auto_complete',
-           'bf_configure_question',
-           'bf_create_check',
            'bf_delete_analysis',
            'bf_delete_container',
            'bf_delete_issue_config',
@@ -74,7 +72,6 @@ __all__ = ['bf_add_analysis',
            'bf_delete_node_role_dimension',
            'bf_delete_snapshot',
            'bf_delete_testrig',
-           'bf_extract_answer_list',
            'bf_extract_answer_summary',
            'bf_fork_snapshot',
            'bf_generate_dataplane',
@@ -213,70 +210,6 @@ def bf_auto_complete(completionType, query, maxSuggestions=None):
         return None
 
 
-def bf_configure_question(inQuestion, exceptions=None, assertion=None):
-    """
-    Get a new question template by adding the supplied exceptions and assertions.
-
-    :param inQuestion: The question to use as a starting point
-    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
-    :param exceptions: Exceptions to add to the template.
-        - `None` means keep the existing set.
-        - `[]` means wipe out the existing set
-    :param assertion: Assertion to add to the template.
-        - `None` means keep the original one.
-        - empty string means wipe out the existing set
-
-    :return: The changed template. If both exceptions and assertion are `None`,
-        you may still not get back the original
-        template but get a "flattened" version where the parameter values have
-        been inlined.
-    """
-    jsonData = workhelper.get_data_configure_question_template(bf_session,
-                                                               inQuestion,
-                                                               exceptions,
-                                                               assertion)
-    response = resthelper.get_json_response(bf_session,
-                                            CoordConsts.SVC_RSC_CONFIGURE_QUESTION_TEMPLATE,
-                                            jsonData)
-    if CoordConsts.SVC_KEY_QUESTION in response:
-        return response[CoordConsts.SVC_KEY_QUESTION]
-    else:
-        bf_logger.error("Unexpected response: " + str(response))
-        return None
-
-
-def bf_create_check(inQuestion, snapshot=None, reference_snapshot=None):
-    """
-    Turn a question into a check.
-
-    1) Adds answers on the current base (and delta if differential) testrig as exceptions.
-    2) Asserts that the new count of answers is zero.
-
-    If the original question had exceptions or assertions, they will be overridden.
-
-    :param inQuestion: The question to use as a starting point
-    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
-
-    :return: The modified template with exceptions and assertions added.
-    """
-    snapshot = bf_session.get_snapshot(snapshot)
-    if reference_snapshot is None and inQuestion.get_differential():
-        raise ValueError(
-            "reference_snapshot argument is required to create a differential check")
-
-    # override exceptions before asking the question so we get all the answers
-    inQuestionWithoutExceptions = bf_configure_question(inQuestion,
-                                                        exceptions=[])
-    inAnswer = _bf_answer_obj(inQuestionWithoutExceptions, snapshot=snapshot,
-                              reference_snapshot=reference_snapshot).dict()
-    exceptions = bf_extract_answer_list(inAnswer)
-    assertion = Assertion(AssertionType.COUNT_EQUALS, 0)
-    outQuestion = bf_configure_question(inQuestionWithoutExceptions,
-                                        exceptions=exceptions,
-                                        assertion=assertion)
-    return outQuestion
-
-
 def bf_delete_analysis(analysisName):
     jsonData = workhelper.get_data_delete_analysis(bf_session, analysisName)
     jsonResponse = resthelper.get_json_response(bf_session,
@@ -351,41 +284,28 @@ def bf_delete_testrig(testrigName):
     bf_delete_snapshot(testrigName)
 
 
-def bf_extract_answer_list(answerJson, includeKeys=None):
-    if "question" not in answerJson:
-        bf_logger.error("question not found in answerJson")
-        return None
-    if "status" not in answerJson or answerJson["status"] != "SUCCESS":
-        bf_logger.error("question was not answered successfully")
-        return None
-    question = answerJson["question"]
-    if "JsonPathQuestion" not in question["class"]:
-        bf_logger.error("exception creation only works to jsonpath questions")
-        return None
-    if "answerElements" not in answerJson or "results" not in \
-            answerJson["answerElements"][0]:
-        bf_logger.error(
-            "unexpected packaging of answer: answerElements does not exist of is not (non-empty) list")
-        return None
-    '''
-    Jsonpath questions/answers are annoyingly flexible: they allow for multiple answerElements and multiple path queries
-    following usage in templates, we pick the first answerElement and the response for the first query.
-    When the answer has no results, the "result" field is missing
-    '''
-    result = answerJson["answerElements"][0]["results"]["0"].get("result", {})
+def _extract_answer_list(answer_dict, include_keys=None):
+    if "question" not in answer_dict:
+        raise BatfishException("Malformed answer")
+    if "status" not in answer_dict or answer_dict["status"] != "SUCCESS":
+        raise BatfishException("Question was not answered successfully")
+    if "answerElements" not in answer_dict or "results" not in \
+            answer_dict["answerElements"][0]:
+        raise BatfishException("Wrong answer format: no answerElements")
+    # We pick the first answerElement and the response for the first query.
+    # When the answer has no results, the "result" field is missing
+    result = answer_dict["answerElements"][0]["results"]["0"].get("result", {})
     return [val for key, val in result.items() if
-            includeKeys is None or key in includeKeys]
+            include_keys is None or key in include_keys]
 
 
-def bf_extract_answer_summary(answerJson):
+def bf_extract_answer_summary(answer_dict):
     """Get the answer for a previously asked question."""
-    if "status" not in answerJson or answerJson["status"] != "SUCCESS":
-        bf_logger.error("question was not answered successfully")
-        return None
-    if "summary" not in answerJson:
-        bf_logger.error("summary not found in the answer")
-        return None
-    return answerJson["summary"]
+    if "status" not in answer_dict or answer_dict["status"] != "SUCCESS":
+        raise BatfishException("Question was not answered successfully")
+    if "summary" not in answer_dict:
+        raise BatfishException("Summary not found in the answer")
+    return answer_dict["summary"]
 
 
 def bf_fork_snapshot(base_name, name=None, overwrite=False,

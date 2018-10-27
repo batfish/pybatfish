@@ -30,6 +30,7 @@ from six import PY3, integer_types, string_types
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
                                        bf_session)
+from pybatfish.datamodel import Assertion, AssertionType  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
@@ -202,6 +203,18 @@ class QuestionBase(object):
     def _set_include_one_table_keys(self, include_one_table_keys):
         """Set if keys present in only table should be included when computing table diffs."""
         self._dict['includeOneTableKeys'] = include_one_table_keys
+
+    def add_assertion(self, assertion):
+        # type: (Assertion) -> QuestionBase
+        """Set an assertion for a given question."""
+        self._dict['assertion'] = assertion.dict()
+        return self
+
+    def make_check(self):
+        # type: () -> QuestionBase
+        """Make this question a check that assert there are no results."""
+        self.add_assertion(Assertion(AssertionType.COUNT_EQUALS, 0))
+        return self
 
 
 def list_questions(tags=None, question_module='pybatfish.question.bfq'):
