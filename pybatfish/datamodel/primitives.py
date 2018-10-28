@@ -81,7 +81,7 @@ class Assertion(DataModelElement):
         return Assertion(AssertionType[json_dict["type"]], json_dict["expect"])
 
     def dict(self):
-        return dict(type=str(self.type), expect=self.expect)
+        return dict(type=self.type.value, expect=self.expect)
 
 
 @attr.s(frozen=True)
