@@ -26,7 +26,7 @@ from pybatfish.question.question import (_compute_docstring, _compute_var_help,
 
 @pytest.fixture(scope='module')
 def question_dir():
-    """Path to directory with questions"""
+    """Path to directory with questions."""
     current_path = os.path.abspath(os.path.dirname(__file__))
     return os.path.join(current_path, "../../questions")
 
@@ -240,7 +240,7 @@ def test_list_questions(question_dir):
 
 
 def test_make_check(question_dir):
-    """Make a check out of first available question."""
+    """Make a check out of the first available question."""
     load_questions(question_dir=question_dir)
     q = list_questions()[0]['name']
     qdict = getattr(bfq, q)().make_check().dict()
