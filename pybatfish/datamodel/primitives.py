@@ -16,6 +16,7 @@ from enum import Enum
 from typing import Any, Dict, List  # noqa: F401
 
 import attr
+from pandas.core.indexes.frozen import FrozenList
 
 from pybatfish.util import escape_html, get_html
 
@@ -229,7 +230,7 @@ class Issue(DataModelElement):
         return "[{}] {}".format(self.severity, self.explanation)
 
 
-class ListWrapper(list):
+class ListWrapper(FrozenList):
     """Helper list class that implements _repr_html_()."""
 
     def _repr_html_(self):
