@@ -284,21 +284,6 @@ def bf_delete_testrig(testrigName):
     bf_delete_snapshot(testrigName)
 
 
-def _extract_answer_list(answer_dict, include_keys=None):
-    if "question" not in answer_dict:
-        raise BatfishException("Malformed answer")
-    if "status" not in answer_dict or answer_dict["status"] != "SUCCESS":
-        raise BatfishException("Question was not answered successfully")
-    if "answerElements" not in answer_dict or "results" not in \
-            answer_dict["answerElements"][0]:
-        raise BatfishException("Wrong answer format: no answerElements")
-    # We pick the first answerElement and the response for the first query.
-    # When the answer has no results, the "result" field is missing
-    result = answer_dict["answerElements"][0]["results"]["0"].get("result", {})
-    return [val for key, val in result.items() if
-            include_keys is None or key in include_keys]
-
-
 def bf_extract_answer_summary(answer_dict):
     """Get the answer for a previously asked question."""
     if "status" not in answer_dict or answer_dict["status"] != "SUCCESS":
