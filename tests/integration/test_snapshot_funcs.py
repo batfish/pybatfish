@@ -106,6 +106,19 @@ def test_fork_snapshot_add_files(network, example_snapshot):
         bf_delete_snapshot(name)
 
 
+def test_fork_snapshot_bad_deactivation(network, example_snapshot):
+    """Run fork snapshot with invalid restore item."""
+    fail_name = uuid.uuid4().hex
+    node = 'as2border1'
+
+    bf_set_network(network)
+    # Should fail when trying to restore an item that was never deactivated
+    # in base snapshot
+    with pytest.raises(HTTPError):
+        bf_fork_snapshot(base_name=example_snapshot, name=fail_name,
+                         restore_nodes=[node])
+
+
 def test_fork_snapshot_deactivation(network, example_snapshot):
     """Use fork snapshot to deactivate and restore items."""
     deactivate_name = uuid.uuid4().hex
