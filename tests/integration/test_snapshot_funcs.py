@@ -106,7 +106,7 @@ def test_fork_snapshot_add_files(network, example_snapshot):
         bf_delete_snapshot(name)
 
 
-def test_fork_snapshot_bad_deactivation(network, example_snapshot):
+def test_fork_snapshot_bad_restoration(network, example_snapshot):
     """Run fork snapshot with invalid restore item."""
     fail_name = uuid.uuid4().hex
     node = 'as2border1'
