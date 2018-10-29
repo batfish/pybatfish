@@ -28,6 +28,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
 from pybatfish.client.consts import BfConsts
+from pybatfish.datamodel import Edge, Interface
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData)
 
@@ -103,6 +104,32 @@ def test_fork_snapshot_add_files(network, example_snapshot):
 
     finally:
         bf_delete_snapshot(name)
+
+
+def test_fork_snapshot_deactivation(network, example_snapshot):
+    """Use fork snapshot to deactivate and restore items."""
+    deactivate_name = uuid.uuid4().hex
+    restore_name = uuid.uuid4().hex
+    node = 'as2border1'
+    interface = Interface(hostname='as1border1', interface='GigabitEthernet1/0')
+    link = Edge(node1='as2core1', node1interface='GigabitEthernet1/0',
+                node2='as2border2', node2interface='GigabitEthernet2/0')
+
+    bf_set_network(network)
+    try:
+        # Should succeed with deactivations
+        bf_fork_snapshot(base_name=example_snapshot, name=deactivate_name,
+                         deactivate_interfaces=[interface],
+                         deactivate_links=[link],
+                         deactivate_nodes=[node])
+
+        # Should succeed with valid restorations from snapshot with deactivation
+        bf_fork_snapshot(base_name=deactivate_name, name=restore_name,
+                         restore_interfaces=[interface], restore_links=[link],
+                         restore_nodes=[node])
+    finally:
+        bf_delete_snapshot(deactivate_name)
+        bf_delete_snapshot(restore_name)
 
 
 def test_fork_snapshot_no_base(network):
