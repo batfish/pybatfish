@@ -394,7 +394,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      restore_interfaces=None, restore_links=None,
                      restore_nodes=None, add_files=None):
     # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str]) -> Union[str, Dict, None]
-    """Copy an existing snapshot and deactivate specified interfaces on the copy.
+    """Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
     :param base_name: name of the snapshot to copy
     :type base_name: string
@@ -411,11 +411,11 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type deactivate_links: list[Edge]
     :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
     :type deactivate_nodes: list[str]
-    :param restore_interfaces: list of interfaces to restore (undo deactivation)
+    :param restore_interfaces: list of interfaces to reactivate
     :type restore_interfaces: list[Interface]
-    :param restore_links: list of links to restore (undo deactivation)
+    :param restore_links: list of links to reactivate
     :type restore_links: list[Edge]
-    :param restore_nodes: list of names of nodes to restore (undo deactivation)
+    :param restore_nodes: list of names of nodes to reactivate
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
