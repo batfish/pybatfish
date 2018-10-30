@@ -671,8 +671,8 @@ class HeaderConstraints(DataModelElement):
 
     Lists of values in each fields are subject to a logical "OR":
 
-    >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
-    HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None,
+    >>> HeaderConstraints(ipProtocols="TCP,UDP")
+    HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols='TCP,UDP', applications=None,
     icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means allow TCP OR UDP.
@@ -695,8 +695,8 @@ class HeaderConstraints(DataModelElement):
                        converter=_normalize_phc_strings)
     dstPorts = attr.ib(default=None, type=Optional[str],
                        converter=_normalize_phc_strings)
-    ipProtocols = attr.ib(default=None, type=Optional[List[str]],
-                          converter=_normalize_phc_list)
+    ipProtocols = attr.ib(default=None, type=Optional[str],
+                          converter=_normalize_phc_strings)
     applications = attr.ib(default=None, type=Optional[List[str]],
                            converter=_normalize_phc_list)
     icmpCodes = attr.ib(default=None, type=Optional[str],

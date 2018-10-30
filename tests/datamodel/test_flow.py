@@ -166,11 +166,11 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(applications=['dns', 'ssh'])
     assert hc.dict()["applications"] == ['dns', 'ssh']
 
-    hc = HeaderConstraints(ipProtocols="  ,  dns,")
-    assert hc.dict()["ipProtocols"] == ['dns']
+    hc = HeaderConstraints(ipProtocols="tcp, udp")
+    assert hc.dict()["ipProtocols"] == 'tcp, udp'
 
     hc = HeaderConstraints(ipProtocols=['tcp', 'udp'])
-    assert hc.dict()["ipProtocols"] == ['tcp', 'udp']
+    assert hc.dict()["ipProtocols"] == 'tcp,udp'
 
     with pytest.raises(ValueError):
         HeaderConstraints(applications="")
