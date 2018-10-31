@@ -204,16 +204,19 @@ class QuestionBase(object):
         """Set if keys present in only table should be included when computing table diffs."""
         self._dict['includeOneTableKeys'] = include_one_table_keys
 
-    def add_assertion(self, assertion):
+    def set_assertion(self, assertion):
         # type: (Assertion) -> QuestionBase
-        """Set an assertion for a given question."""
+        """Set an assertion for a given question.
+
+        Overwrites any previous assertions.
+        """
         self._dict['assertion'] = assertion.dict()
         return self
 
     def make_check(self):
         # type: () -> QuestionBase
-        """Make this question a check that assert there are no results."""
-        self.add_assertion(Assertion(AssertionType.COUNT_EQUALS, 0))
+        """Make this question a check which asserts that there are no results."""
+        self.set_assertion(Assertion(AssertionType.COUNT_EQUALS, 0))
         return self
 
 
