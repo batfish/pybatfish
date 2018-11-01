@@ -149,7 +149,10 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints()
     hcd = hc.dict()
     for field in attr.fields(HeaderConstraints):
-        assert hcd[field.name] is None
+        # handle client-side renames of fields
+        if field.name != 'firewallClassifications':
+            assert hcd[field.name] is None
+        assert hcd['flowStates'] is None
 
     hc = HeaderConstraints(srcIps="1.1.1.1")
     assert hc.dict()["srcIps"] == "1.1.1.1"
