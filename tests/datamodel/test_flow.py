@@ -20,7 +20,8 @@ import pytest
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail, Flow,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      RoutingStepDetail, Step)
+                                      MatchTcpFlags, RoutingStepDetail, Step,
+                                      TcpFlags)
 
 
 def testFlowDeserialization():
@@ -192,6 +193,16 @@ def test_hop_repr_str():
 
     assert str(
         hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  SENT_OUT(out_iface1: out_filter1)"
+
+
+def test_match_tcp_generators():
+    assert MatchTcpFlags.match_ack() == MatchTcpFlags(
+        TcpFlags(ack=True), useAck=True)
+    assert MatchTcpFlags.match_rst() == MatchTcpFlags(
+        TcpFlags(rst=True), useRst=True)
+    assert len(MatchTcpFlags.match_established()) == 2
+    assert MatchTcpFlags.match_established() == [MatchTcpFlags.match_ack(),
+                                                 MatchTcpFlags.match_rst()]
 
 
 if __name__ == "__main__":
