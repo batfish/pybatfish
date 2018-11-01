@@ -9,7 +9,7 @@ The current list of notebooks are:
    - Shows how to analyze routing tables computed by Batfish.
 - [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)]
    - Shows how to use analyze ACLs and firewalls rules using Batfish. 
-- [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb)[[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)]
+- [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb) [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)]
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
 
 We will continue adding notebooks that demonstrating additional use cases of Batfish. 
