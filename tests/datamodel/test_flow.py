@@ -14,6 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
+from operator import attrgetter
+
 import attr
 import pytest
 
@@ -148,8 +150,10 @@ def test_get_ip_protocol_str():
 def test_header_constraints_serialization():
     hc = HeaderConstraints()
     hcd = hc.dict()
-    for field in attr.fields(HeaderConstraints):
-        assert hcd[field.name] is None
+    fields = (set(map(attrgetter('name'), attr.fields(HeaderConstraints))) -
+              {'firewallClassifications'} | {'flowStates'})
+    for field in fields:
+        assert hcd[field] is None
 
     hc = HeaderConstraints(srcIps="1.1.1.1")
     assert hc.dict()["srcIps"] == "1.1.1.1"

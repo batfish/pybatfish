@@ -660,7 +660,7 @@ class HeaderConstraints(DataModelElement):
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
     :ivar icmpTypes: List of integer ICMP types
-    :ivar flowStates: List of flow states (e.g., "new", "established")
+    :ivar firewallClassifications: List of flow states as classified by a stateful firewall (e.g., "new", "established")
     :ivar dscps: List of allowed DSCP value ranges
     :ivar ecns: List of allowed ECN values ranges
     :ivar packetLengths: List of allowed packet length value ranges
@@ -673,7 +673,7 @@ class HeaderConstraints(DataModelElement):
 
     >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
     HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None,
-    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
+    icmpCodes=None, icmpTypes=None, firewallClassifications=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means allow TCP OR UDP.
 
@@ -681,7 +681,7 @@ class HeaderConstraints(DataModelElement):
 
     >>> HeaderConstraints(srcIps="1.1.1.1", dstIps="2.2.2.2", applications=["SSH"])
     HeaderConstraints(srcIps='1.1.1.1', dstIps='2.2.2.2', srcPorts=None, dstPorts=None, ipProtocols=None, applications=['SSH'],
-    icmpCodes=None, icmpTypes=None, flowStates=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
+    icmpCodes=None, icmpTypes=None, firewallClassifications=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
 
@@ -703,8 +703,8 @@ class HeaderConstraints(DataModelElement):
                         converter=_normalize_phc_strings)
     icmpTypes = attr.ib(default=None, type=Optional[str],
                         converter=_normalize_phc_strings)
-    flowStates = attr.ib(default=None, type=Optional[List[str]],
-                         converter=_normalize_phc_list)
+    firewallClassifications = attr.ib(default=None, type=Optional[List[str]],
+                                      converter=_normalize_phc_list)
     ecns = attr.ib(default=None, type=Optional[str],
                    converter=_normalize_phc_strings)
     dscps = attr.ib(default=None, type=Optional[str],
@@ -726,11 +726,18 @@ class HeaderConstraints(DataModelElement):
             applications=json_dict.get("applications"),
             icmpCodes=json_dict.get("icmpCodes"),
             icmpTypes=json_dict.get("icmpTypes"),
-            flowStates=json_dict.get("flowStates"),
+            firewallClassifications=json_dict.get("flowStates"),
             ecns=json_dict.get("ecns"),
             dscps=json_dict.get("dscps"),
             packetLengths=json_dict.get("packetLengths"),
             fragmentOffsets=json_dict.get("fragmentOffsets"))
+
+    def dict(self):
+        d = super(HeaderConstraints, self).dict()
+        # Rename firewallClassifications to flowStates (expected on the backend)
+        d['flowStates'] = d['firewallClassifications']
+        del d['firewallClassifications']
+        return d
 
 
 @attr.s(frozen=True)
