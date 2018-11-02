@@ -76,6 +76,30 @@
        Default value: ``.*``
    :type types: javaRegex
 
+.. py:class:: detectLoops(*, question_name, exclusions)
+
+   Detect forwarding loops.
+   
+   Finds forwarding loops.
+
+.. py:class:: differentialReachability(*, actions, headers, ignoreFilters, pathConstraints, question_name, exclusions)
+
+   Detect differential reachability.
+   
+   Finds flows that are accepted in one snapshot but dropped in another.
+   
+   
+   :param actions: Only return flows for which the disposition is from this set.
+   
+       Default value: ``success``
+   :type actions: dispositionSpec
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   :type ignoreFilters: boolean
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+
 .. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name, exclusions)
 
    Lists different types of edges in a snapshot.
@@ -194,11 +218,17 @@
    :param status: Only include IPSec sessions for which status matches this regex.
    :type status: javaRegex
 
-.. py:class:: multipathConsistency(*, question_name, exclusions)
+.. py:class:: multipathConsistency(*, headers, pathConstraints, question_name, exclusions)
 
    Validate multipath consistency.
    
    Finds flows that are treated differently by different paths in the presence of multipath routing.
+   
+   
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
 
 .. py:class:: namedStructures(*, nodes, properties, question_name, exclusions)
 
@@ -301,7 +331,7 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachability(*, actions, headers, pathConstraints, question_name, exclusions)
+.. py:class:: reachability(*, actions, headers, ignoreFilters, pathConstraints, question_name, exclusions)
 
    Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
    
@@ -309,25 +339,11 @@
    :param actions: Only return flows for which the disposition is from this set.
    
        Default value: ``success``
-   :type actions: string
+   :type actions: dispositionSpec
    :param headers: Packet header constraints.
    :type headers: headerConstraint
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
-
-.. py:class:: reducedReachability(*, actions, headers, pathConstraints, question_name, exclusions)
-
-   Detect reduced reachability.
-   
-   Finds flows that are accepted in one snapshot but dropped in another.
-   
-   
-   :param actions: Only return flows for which the disposition is from this set.
-   
-       Default value: ``success``
-   :type actions: string
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
+   :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   :type ignoreFilters: boolean
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
@@ -350,6 +366,60 @@
    
        Default value: ``.*``
    :type types: javaRegex
+
+.. py:class:: resolveFilterSpecifier(*, filters, nodes, question_name, exclusions)
+
+   Show the resolved values for filter specifier.
+   
+   
+   :param filters: Input to the FilterSpecifier.
+   :type filters: string
+   :param nodes: Input to the NodeSpecifier.
+   :type nodes: string
+
+.. py:class:: resolveInterfaceSpecifier(*, interfaces, nodes, question_name, exclusions)
+
+   Show the resolved values for interface specifier.
+   
+   
+   :param interfaces: Input to the interfaceSpecifier.
+   :type interfaces: string
+   :param nodes: Input to the NodeSpecifier.
+   :type nodes: string
+
+.. py:class:: resolveIpSpecifier(*, ips, question_name, exclusions)
+
+   Show the resolved values for IP specifier.
+   
+   
+   :param ips: Input to the IpSpaceSpecifier.
+   
+       Default value: ``0.0.0.0/0``
+   :type ips: string
+
+.. py:class:: resolveIpsOfLocationSpecifier(*, locations, question_name, exclusions)
+
+   Show IPs that are auto-assigned to locations.
+   
+   
+   :param locations: Input to the LocationSpecifier.
+   :type locations: string
+
+.. py:class:: resolveLocationSpecifier(*, locations, question_name, exclusions)
+
+   Show the resolved values for location specifier.
+   
+   
+   :param locations: Input to the LocationSpecifier.
+   :type locations: string
+
+.. py:class:: resolveNodeSpecifier(*, nodes, question_name, exclusions)
+
+   Show the resolved values for node specifier.
+   
+   
+   :param nodes: Input to the NodeSpecifier.
+   :type nodes: string
 
 .. py:class:: routes(*, network, nodes, protocols, rib, vrfs, question_name, exclusions)
 
@@ -402,34 +472,6 @@
    :param startLocation: Only consider specified locations as possible sources.
    :type startLocation: string
 
-.. py:class:: specifiers(*, filterSpecifierFactory, filterSpecifierInput, interfaceSpecifierFactory, interfaceSpecifierInput, ipSpaceSpecifierFactory, ipSpaceSpecifierInput, locationSpecifierFactory, locationSpecifierInput, nodeSpecifierFactory, nodeSpecifierInput, queryType, question_name, exclusions)
-
-   Find the locations and IpSpaces specified by the input specifiers.
-   
-   
-   :param queryType: *Required.* The type of query to perform. Should be one of FILTER, INTERFACE, IP_SPACE, LOCATION, NODE.
-   :type queryType: string
-   :param filterSpecifierFactory: Name of the FilterSpecifierFactory to use.
-   :type filterSpecifierFactory: string
-   :param filterSpecifierInput: Input to the FilterSpecifier.
-   :type filterSpecifierInput: string
-   :param interfaceSpecifierFactory: Name of the InterfaceSpecifierFactory to use.
-   :type interfaceSpecifierFactory: string
-   :param interfaceSpecifierInput: Input to the interfaceSpecifier.
-   :type interfaceSpecifierInput: string
-   :param ipSpaceSpecifierFactory: Name of the IpSpaceSpecifierFactory to use.
-   :type ipSpaceSpecifierFactory: string
-   :param ipSpaceSpecifierInput: Input to the IpSpaceSpecifier.
-   :type ipSpaceSpecifierInput: string
-   :param locationSpecifierFactory: Name of the LocationSpecifierFactory to use.
-   :type locationSpecifierFactory: string
-   :param locationSpecifierInput: Input to the LocationSpecifier.
-   :type locationSpecifierInput: string
-   :param nodeSpecifierFactory: Name of the NodeSpecifierFactory to use.
-   :type nodeSpecifierFactory: string
-   :param nodeSpecifierInput: Input to the NodeSpecifier.
-   :type nodeSpecifierInput: string
-
 .. py:class:: testfilters(*, filters, headers, nodes, startLocation, question_name, exclusions)
 
    Evaluate the processing of a flow by a given filter/ACL.
@@ -450,7 +492,7 @@
    :param startLocation: Location to start tracing from.
    :type startLocation: string
 
-.. py:class:: traceroute(*, headers, ignoreAcls, startLocation, question_name, exclusions)
+.. py:class:: traceroute(*, headers, ignoreAcls, maxTraces, startLocation, question_name, exclusions)
 
    Trace the path(s) for the specified flow.
    
@@ -464,6 +506,8 @@
    :type headers: headerConstraint
    :param ignoreAcls: If set to True, ACLs encountered along the path are ignored.
    :type ignoreAcls: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
 
 .. py:class:: undefinedReferences(*, nodes, question_name, exclusions)
 
