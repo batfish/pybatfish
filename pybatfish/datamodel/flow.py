@@ -47,7 +47,7 @@ class Flow(DataModelElement):
     :ivar ipProtocol: the IP protocol of the flow
         (as integer, e.g., 1=ICMP, 6=TCP, 17=UDP)
     :ivar ingressNode: the node where the flow started (or entered the network)
-    :ivar ingressInteface: the interface name where the flow started (or entered the network)
+    :ivar ingressInterface: the interface name where the flow started (or entered the network)
     :ivar ingressVrf: the VRF name where the flow started (or entered the network)
     """
 
