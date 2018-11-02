@@ -16,10 +16,19 @@ import os
 
 import pytest
 
+from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
+from pybatfish.question import bfq
 from pybatfish.question.question import (_compute_docstring, _compute_var_help,
                                          _process_variables, _validate,
                                          list_questions, load_questions)
+
+
+@pytest.fixture(scope='module')
+def question_dir():
+    """Path to directory with questions."""
+    current_path = os.path.abspath(os.path.dirname(__file__))
+    return os.path.join(current_path, "../../questions")
 
 
 def test_min_length():
@@ -225,8 +234,15 @@ def test_process_variables():
     assert _process_variables("foo", None) == []
 
 
-def test_list_questions():
-    current_path = os.path.abspath(os.path.dirname(__file__))
-    question_directory = os.path.join(current_path, "../../questions")
-    load_questions(question_dir=question_directory)
+def test_list_questions(question_dir):
+    load_questions(question_dir=question_dir)
     assert list_questions() != []
+
+
+def test_make_check(question_dir):
+    """Make a check out of the first available question."""
+    load_questions(question_dir=question_dir)
+    q = list_questions()[0]['name']
+    qdict = getattr(bfq, q)().make_check().dict()
+    assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
+                                               0).dict()
