@@ -609,6 +609,24 @@ class MatchTcpFlags(DataModelElement):
             json_dict['useSyn'],
             json_dict['useUrg'])
 
+    @staticmethod
+    def match_ack():
+        # type: () -> MatchTcpFlags
+        """Return match conditions checking that ACK bit is set."""
+        return MatchTcpFlags(TcpFlags(ack=True), useAck=True)
+
+    @staticmethod
+    def match_rst():
+        # type: () -> MatchTcpFlags
+        """Return match conditions checking that RST bit is set."""
+        return MatchTcpFlags(TcpFlags(rst=True), useRst=True)
+
+    @staticmethod
+    def match_established():
+        # type: () -> List[MatchTcpFlags]
+        """Return a list of match conditions matching an established flow (ACK or RST bit set)."""
+        return [MatchTcpFlags.match_ack(), MatchTcpFlags.match_rst()]
+
 
 def _get_color_for_disposition(disposition):
     # type: (str) -> str
