@@ -84,8 +84,9 @@ class QuestionMeta(type):
             if question_name:
                 self._dict['instance']['instanceName'] = question_name
             else:
-                self._dict['instance']['instanceName'] += \
-                    "_" + get_uuid()
+                self._dict['instance']['instanceName'] = (
+                    "__{}_{}".format(
+                        self._dict['instance']['instanceName'], get_uuid()))
 
             # Validate that we are not accepting invalid kwargs/variables
             instance_vars = self._dict['instance'].get('variables', {})
