@@ -20,6 +20,7 @@ from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.question.question import (_compute_docstring, _compute_var_help,
+                                         _load_question_dict,
                                          _process_variables, _validate,
                                          list_questions, load_questions)
 
@@ -246,3 +247,19 @@ def test_make_check(question_dir):
     qdict = getattr(bfq, q)().make_check().dict()
     assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
                                                0).dict()
+
+
+def test_question_name():
+    """Test user-set and default question names."""
+    _load_question_dict({
+        'instance': {
+            'instanceName': 'testQuestionName',
+            'description': 'a test question',
+        },
+    })
+
+    has_name = bfq.testQuestionName(question_name="manually set")
+    assert has_name.get_name() == "manually set"
+
+    inferred_name = bfq.testQuestionName()
+    assert inferred_name.get_name().startswith('__testQuestionName_')
