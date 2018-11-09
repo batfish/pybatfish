@@ -17,6 +17,7 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
 
 import requests
+import six
 from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
@@ -276,7 +277,7 @@ def get_snapshot_node_role_dimension(session, dimension):
 
 
 def get_work_log(session, snapshot, work_id):
-    # type: (Session, Text, Text) -> str
+    # type: (Session, str, str) -> Text
     """Retrieve the log for a work item with a given ID."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
@@ -286,7 +287,7 @@ def get_work_log(session, snapshot, work_id):
         CoordConstsV2.RSC_SNAPSHOTS, snapshot,
         CoordConstsV2.RSC_WORK_LOG, work_id)
 
-    return str(_get(session, url_tail, dict()).text)
+    return six.u(_get(session, url_tail, dict()).text)
 
 
 def put_node_roles(session, node_roles_data):
