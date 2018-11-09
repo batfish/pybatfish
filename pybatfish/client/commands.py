@@ -598,10 +598,10 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
 
     status = WorkStatusCode(answer_dict["status"])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
+        init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
         raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}'.format(
-                ss=name,
-                status=status))
+            'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
+                ss=name, status=status, log=init_log))
     else:
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",

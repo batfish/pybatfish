@@ -269,6 +269,7 @@ class CoordConsts(object):
     SVC_RSC_GET_PARSING_RESULTS = "getparsingresults"
     SVC_RSC_GET_PARSING_WORK = "getparsingwork"
     SVC_RSC_GET_QUESTION_TEMPLATES = "getquestiontemplates"
+    SVC_RSC_GET_WORKLOG = "getworklog"
     SVC_RSC_GET_WORKSTATUS = "getworkstatus"
     SVC_RSC_GETSTATUS = "getstatus"
     SVC_RSC_INIT_CONTAINER = "initcontainer"
@@ -324,3 +325,4 @@ class CoordConstsV2(object):
     RSC_REFERENCE_LIBRARY = "referencelibrary"
     RSC_SETTINGS = "settings"
     RSC_SNAPSHOTS = "snapshots"
+    RSC_WORK_LOG = "worklog"
