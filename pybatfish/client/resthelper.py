@@ -18,7 +18,6 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, Optional  # noqa: F401
 
 import requests
-from deprecated import deprecated
 from requests import Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from requests_toolbelt.multipart.encoder import MultipartEncoder
@@ -46,27 +45,6 @@ _requests_session.mount("http", HTTPAdapter(
 # uncomment line below if you want http capture by fiddler
 # _requests_session.proxies = {'http': 'http://127.0.0.1:8888',
 #                              'https': 'http://127.0.0.1:8888'}
-
-
-@deprecated
-def get_object(session, snapshot, object_name):
-    # type: (Session, str, str) -> bytes
-    """Execute the getObject RPC call to Batfish.
-
-    :param session: :py:class:`~pybatfish.client.session.Session` object to use
-    :param object_name: the name of the object to retrieve (in a snapshot)
-
-    :rtype: bytes
-
-    .. deprecated:: 0.36.0
-    """
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
-                 CoordConsts.SVC_KEY_TESTRIG_NAME: snapshot,
-                 CoordConsts.SVC_KEY_OBJECT_NAME: object_name}
-
-    return _post_data(session, CoordConsts.SVC_RSC_GET_OBJECT, json_data,
-                      stream=False).content
 
 
 def get_answer(session, snapshot, question_name, reference_snapshot=None):
