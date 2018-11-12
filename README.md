@@ -3,44 +3,33 @@
 # pybatfish
 
 pybatfish is a Python client for [Batfish](https://github.com/batfish/batfish). ![Analytics](https://ga-beacon.appspot.com/UA-100596389-3/open-source/pybatfish?pixel&useReferer)
-It allows you to easily get started exploring and validating your network.
-Run interactively within a python shell or fully automate your network validation pipeline.
+It allows you to interactively explore or validate your network and embed validation in your automation pipeline.
 
-
-## *Warning: Pybatfish public API is being updated, note that API names and parameters will soon change.*
+#### Note: pybatfish APIs are undergoing revision, and some API names and parameters may change.
 
 ## Getting started
 
-### Prerequisites
+There are two options for running pybatfish.
 
-1. Access to a running Batfish service (which could be running locally).
-See [here](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service) 
-for building and running Batfish service.
+### 1. `Allinone` docker container
 
-2. Python runtime is required. We **strongly** encourage you to use Python 3.
-While Python 2.7 is still supported, it is nearing end of life,
-and so is our support for it.
+This container bundles Batfish and pybatfish. Use this option if you want to just play with [example networks and Jupyter notebooks](jupyter_notebooks).
+ 
+Instructions for running this container are [here](https://github.com/batfish/docker/blob/master/allinone.md).
 
-3. For interactive use, we **strongly** encourage you to use [IPython](https://ipython.org/)
-or a [Jupyter notebook](https://jupyter.org/)
+### 2. Python client
 
+Use this option when you want to analyze your own networks and have access to a running Batfish service (via the [`Batfish` docker container](https://github.com/batfish/docker/blob/master/batfish.md) or [directly from sources](https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service)).
 
-### Installation
+To install pybatfish, run `pip install .` from the top-level directory of the repository. (We recommend Python 3 as the Python runtime. While Python 2.7 is supported, it is nearing end of life.)
 
-#### To install pybatfish from source:
-
-Run the following from the top-level directory of the repository:
+Once pybatfish is installed, you can run the example [Jupyter notebooks](jupyter_notebooks):
 ```
-pip install .
+pip install jupyter
+cd jupyter_notebooks
+jupyter notebooks
 ```
 
-To install in development mode, append the -e flag:
-```
-pip install -e .
-```
+You can begin analyzing your own networks by modifying the examples and pointing them at your data. 
 
-## Using Pybatfish
-
-See our [full documentation](https://pybatfish.readthedocs.io/en/latest/) 
-and the [getting started guide](https://pybatfish.readthedocs.io/en/latest/quickstart.html)
-
+Complete documentation of pybatfish APIs is [here](https://pybatfish.readthedocs.io/en/latest/). 

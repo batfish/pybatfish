@@ -14,8 +14,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.acl import AclTrace
 import pytest
+
+from pybatfish.datamodel.acl import AclTrace
 
 
 # test if an acl trace is deserialized properly

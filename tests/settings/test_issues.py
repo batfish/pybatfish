@@ -16,8 +16,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.settings.issues import IssueConfig
 import pytest
+
+from pybatfish.settings.issues import IssueConfig
 
 
 def test_issue_config():

@@ -31,7 +31,7 @@ from pybatfish.question import load_dir_questions  # noqa: 402
 from pybatfish.question import bfq  # noqa: 402
 
 
-def _process(line: str) -> str:
+def _process(line):
     return "   " + line
 
 

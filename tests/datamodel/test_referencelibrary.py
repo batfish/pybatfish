@@ -16,8 +16,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
 import pytest
+
+from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
 
 
 def test_empty_referencelibrary():
@@ -33,8 +34,8 @@ def test_empty_referencelibrary():
     assert len(reference_library.books) == 0
 
 
-def test_non_empty_referencelibrary():
-    """Check proper deserialization for a reference library dict."""
+def test_referencelibrary_addressgroups():
+    """Test deserialization for a reference library with address groups."""
     dict = {
         "books": [
             {
@@ -65,6 +66,45 @@ def test_non_empty_referencelibrary():
     assert len(reference_library.books[0].addressGroups) == 2
     assert reference_library.books[0].addressGroups[0].name == "ag1"
     assert len(reference_library.books[0].addressGroups[0].addresses) == 3
+
+
+def test_referencelibrary_interfacegroups():
+    """Test deserialization for a reference library with interface groups."""
+    dict = {
+        "books": [
+            {
+                "name": "book1",
+                "interfaceGroups": [
+                    {
+                        "name": "g1",
+                        "interfaces": [
+                            {
+                                "hostname": "h1",
+                                "interface": "i1"
+                            },
+                            {
+                                "hostname": "h2",
+                                "interface": "i2"
+                            }
+                        ]
+                    },
+                    {
+                        "name": "g2"
+                    }
+                ]
+            },
+            {
+                "name": "book2",
+            }
+        ]
+    }
+    reference_library = ReferenceLibrary.from_dict(dict)
+
+    assert len(reference_library.books) == 2
+    assert reference_library.books[0].name == "book1"
+    assert len(reference_library.books[0].interfaceGroups) == 2
+    assert reference_library.books[0].interfaceGroups[0].name == "g1"
+    assert len(reference_library.books[0].interfaceGroups[0].interfaces) == 2
 
 
 def test_noderolesdata():

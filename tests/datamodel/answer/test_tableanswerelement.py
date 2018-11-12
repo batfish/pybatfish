@@ -16,8 +16,10 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.answer.table import TableAnswer
 import pytest
+
+from pybatfish.datamodel import ListWrapper
+from pybatfish.datamodel.answer.table import TableAnswer
 
 
 def test_table_answer_no_answer_elements():
@@ -116,11 +118,9 @@ def test_table_answer_element_excluded_rows():
             },
             "excludedRows": [{
                 "exclusionName": "myEx",
-                "rows": [
-                    {
-                        "col1": "stringValue"
-                    }
-                ]
+                "rows": [{
+                    "col1": "stringValue"
+                }]
             }]
         }]
     }
@@ -129,6 +129,25 @@ def test_table_answer_element_excluded_rows():
     assert len(table.excluded_rows) == 1
     assert len(table.excluded_rows["myEx"]) == 1
     assert table.excluded_frame("myEx").size == 1
+
+
+def test_table_answer_immutable_lists():
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata": [{
+                    "name": "col1",
+                    "schema": "List<String>"
+                }]
+            },
+            "rows": [{
+                "col1": ['e1', 'e2', 'e3']
+            }]
+        }]
+    }
+
+    table = TableAnswer(answer)
+    assert isinstance(table.frame().loc[0]['col1'], ListWrapper)
 
 
 if __name__ == "__main__":

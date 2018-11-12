@@ -16,28 +16,30 @@
 
 from __future__ import absolute_import, print_function
 
-from imp import new_module
+import base64
 import json
 import logging
 import os
 import sys
 import tempfile
+from imp import new_module
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
+import six
 from deprecated import deprecated
+from requests import HTTPError
+
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.answer.base import get_answer_text
-from pybatfish.datamodel.answer.table import TableAnswer
-from pybatfish.datamodel.primitives import Assertion, AssertionType
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel.primitives import (  # noqa: F401
+    Edge, Interface)
+from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
+                                                  NodeRolesData, ReferenceBook,
+                                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (get_uuid, validate_name, zip_dir)
-from requests import HTTPError
-
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
@@ -63,16 +65,15 @@ __all__ = ['bf_add_analysis',
            'bf_add_node_role_dimension',
            'bf_add_reference_book',
            'bf_auto_complete',
-           'bf_configure_question',
-           'bf_create_check',
            'bf_delete_analysis',
            'bf_delete_container',
            'bf_delete_issue_config',
            'bf_delete_network',
+           'bf_delete_node_role_dimension',
            'bf_delete_snapshot',
            'bf_delete_testrig',
-           'bf_extract_answer_list',
            'bf_extract_answer_summary',
+           'bf_fork_snapshot',
            'bf_generate_dataplane',
            'bf_get_analysis_answers',
            'bf_get_answer',
@@ -82,6 +83,10 @@ __all__ = ['bf_add_analysis',
            'bf_get_node_roles',
            'bf_get_reference_book',
            'bf_get_reference_library',
+           'bf_get_snapshot_inferred_node_role_dimension',
+           'bf_get_snapshot_inferred_node_roles',
+           'bf_get_snapshot_node_role_dimension',
+           'bf_get_snapshot_node_roles',
            'bf_get_work_status',
            'bf_init_analysis',
            'bf_init_container',
@@ -96,18 +101,19 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
-           'bf_print_answer',
+           'bf_put_node_roles',
+           'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
            'bf_set_container',
            'bf_set_network',
            'bf_set_snapshot',
            'bf_set_testrig',
-           'bf_str_answer',
            'bf_sync_snapshots_sync_now',
            'bf_sync_snapshots_update_settings',
            'bf_sync_testrigs_sync_now',
-           'bf_sync_testrigs_update_settings']
+           'bf_sync_testrigs_update_settings',
+           'bf_write_question_settings']
 
 
 def bf_add_analysis(analysisName, questionDirectory):
@@ -170,10 +176,24 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
     # Answer the question
     work_item = workhelper.get_workitem_answer(bf_session, question_name,
                                                snapshot, reference_snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session, background)
+    workhelper.execute(work_item, bf_session, background)
+
     if background:
         return work_item.id
-    return answer.from_string(answer_dict["answer"])
+
+    # get the answer
+    answer_bytes = resthelper.get_answer(bf_session, snapshot, question_name,
+                                         reference_snapshot)
+
+    # In Python 3.x, answer needs to be decoded before it can be used
+    # for things like json.loads (<= 3.6).
+    if six.PY3:
+        answer_string = answer_bytes.decode(encoding="utf-8")
+    else:
+        answer_string = answer_bytes
+    answer_obj = json.loads(answer_string)
+
+    return answer.from_string(answer_obj[1]['answer'])
 
 
 def bf_auto_complete(completionType, query, maxSuggestions=None):
@@ -188,70 +208,6 @@ def bf_auto_complete(completionType, query, maxSuggestions=None):
     else:
         bf_logger.error("Unexpected response: " + str(response))
         return None
-
-
-def bf_configure_question(inQuestion, exceptions=None, assertion=None):
-    """
-    Get a new question template by adding the supplied exceptions and assertions.
-
-    :param inQuestion: The question to use as a starting point
-    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
-    :param exceptions: Exceptions to add to the template.
-        - `None` means keep the existing set.
-        - `[]` means wipe out the existing set
-    :param assertion: Assertion to add to the template.
-        - `None` means keep the original one.
-        - empty string means wipe out the existing set
-
-    :return: The changed template. If both exceptions and assertion are `None`,
-        you may still not get back the original
-        template but get a "flattened" version where the parameter values have
-        been inlined.
-    """
-    jsonData = workhelper.get_data_configure_question_template(bf_session,
-                                                               inQuestion,
-                                                               exceptions,
-                                                               assertion)
-    response = resthelper.get_json_response(bf_session,
-                                            CoordConsts.SVC_RSC_CONFIGURE_QUESTION_TEMPLATE,
-                                            jsonData)
-    if CoordConsts.SVC_KEY_QUESTION in response:
-        return response[CoordConsts.SVC_KEY_QUESTION]
-    else:
-        bf_logger.error("Unexpected response: " + str(response))
-        return None
-
-
-def bf_create_check(inQuestion, snapshot=None, reference_snapshot=None):
-    """
-    Turn a question into a check.
-
-    1) Adds answers on the current base (and delta if differential) testrig as exceptions.
-    2) Asserts that the new count of answers is zero.
-
-    If the original question had exceptions or assertions, they will be overridden.
-
-    :param inQuestion: The question to use as a starting point
-    :type inQuestion: :class:`pybatfish.question.question.QuestionBase`
-
-    :return: The modified template with exceptions and assertions added.
-    """
-    snapshot = bf_session.get_snapshot(snapshot)
-    if reference_snapshot is None and inQuestion.get_differential():
-        raise ValueError(
-            "reference_snapshot argument is required to create a differential check")
-
-    # override exceptions before asking the question so we get all the answers
-    inQuestionWithoutExceptions = bf_configure_question(inQuestion,
-                                                        exceptions=[])
-    inAnswer = _bf_answer_obj(inQuestionWithoutExceptions, snapshot=snapshot,
-                              reference_snapshot=reference_snapshot).dict()
-    exceptions = bf_extract_answer_list(inAnswer)
-    assertion = Assertion(AssertionType.COUNT_EQUALS, 0)
-    outQuestion = bf_configure_question(inQuestionWithoutExceptions,
-                                        exceptions=exceptions,
-                                        assertion=assertion)
-    return outQuestion
 
 
 def bf_delete_analysis(analysisName):
@@ -293,6 +249,12 @@ def bf_delete_network(name):
                                  jsonData)
 
 
+def bf_delete_node_role_dimension(dimension):
+    # type: (str) -> None
+    """Deletes the definition of the given role dimension for the active network."""
+    restv2helper.delete_node_role_dimension(bf_session, dimension)
+
+
 def bf_delete_snapshot(name):
     # type: (str) -> None
     """
@@ -322,72 +284,133 @@ def bf_delete_testrig(testrigName):
     bf_delete_snapshot(testrigName)
 
 
-def bf_extract_answer_list(answerJson, includeKeys=None):
-    if "question" not in answerJson:
-        bf_logger.error("question not found in answerJson")
-        return None
-    if "status" not in answerJson or answerJson["status"] != "SUCCESS":
-        bf_logger.error("question was not answered successfully")
-        return None
-    question = answerJson["question"]
-    if "JsonPathQuestion" not in question["class"]:
-        bf_logger.error("exception creation only works to jsonpath questions")
-        return None
-    if "answerElements" not in answerJson or "results" not in \
-            answerJson["answerElements"][0]:
-        bf_logger.error(
-            "unexpected packaging of answer: answerElements does not exist of is not (non-empty) list")
-        return None
-    '''
-    Jsonpath questions/answers are annoyingly flexible: they allow for multiple answerElements and multiple path queries
-    following usage in templates, we pick the first answerElement and the response for the first query.
-    When the answer has no results, the "result" field is missing
-    '''
-    result = answerJson["answerElements"][0]["results"]["0"].get("result", {})
-    return [val for key, val in result.items() if
-            includeKeys is None or key in includeKeys]
-
-
-def bf_extract_answer_summary(answerJson):
+def bf_extract_answer_summary(answer_dict):
     """Get the answer for a previously asked question."""
-    if "status" not in answerJson or answerJson["status"] != "SUCCESS":
-        bf_logger.error("question was not answered successfully")
-        return None
-    if "summary" not in answerJson:
-        bf_logger.error("summary not found in the answer")
-        return None
-    return answerJson["summary"]
+    if "status" not in answer_dict or answer_dict["status"] != "SUCCESS":
+        raise BatfishException("Question was not answered successfully")
+    if "summary" not in answer_dict:
+        raise BatfishException("Summary not found in the answer")
+    return answer_dict["summary"]
 
 
-def _bf_generate_dataplane(snapshot):
-    # type: (str) -> Dict[str, str]
-    workItem = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answerDict = workhelper.execute(workItem, bf_session)
-    return answerDict
+def bf_fork_snapshot(base_name, name=None, overwrite=False,
+                     background=False, deactivate_interfaces=None,
+                     deactivate_links=None, deactivate_nodes=None,
+                     restore_interfaces=None, restore_links=None,
+                     restore_nodes=None, add_files=None):
+    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str]) -> Union[str, Dict, None]
+    """Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
+
+    :param base_name: name of the snapshot to copy
+    :type base_name: string
+    :param name: name of the snapshot to initialize
+    :type name: string
+    :param overwrite: whether or not to overwrite an existing snapshot with the
+        same name
+    :type overwrite: bool
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
+    :type deactivate_interfaces: list[Interface]
+    :param deactivate_links: list of links to deactivate in new snapshot
+    :type deactivate_links: list[Edge]
+    :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
+    :type deactivate_nodes: list[str]
+    :param restore_interfaces: list of interfaces to reactivate
+    :type restore_interfaces: list[Interface]
+    :param restore_links: list of links to reactivate
+    :type restore_links: list[Edge]
+    :param restore_nodes: list of names of nodes to reactivate
+    :type restore_nodes: list[str]
+    :param add_files: path to zip file or directory containing files to add
+    :type add_files: str
+    :return: name of initialized snapshot, JSON dictionary of task status if
+        background=True, or None if the call fails
+    :rtype: Union[str, Dict, None]
+    """
+    if bf_session.network is None:
+        raise ValueError('Network must be set to fork a snapshot.')
+
+    if name is None:
+        name = Options.default_snapshot_prefix + get_uuid()
+    validate_name(name)
+
+    if name in bf_list_snapshots():
+        if overwrite:
+            bf_delete_snapshot(name)
+        else:
+            raise ValueError(
+                'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                    name, bf_session.network))
+
+    encoded_file = None
+    if add_files is not None:
+        file_to_send = add_files
+        if os.path.isdir(add_files):
+            temp_zip_file = tempfile.NamedTemporaryFile()
+            zip_dir(add_files, temp_zip_file)
+            file_to_send = temp_zip_file.name
+
+        if os.path.isfile(file_to_send):
+            with open(file_to_send, "rb") as f:
+                encoded_file = base64.b64encode(f.read()).decode('ascii')
+
+    json_data = {
+        "snapshotBase": base_name,
+        "snapshotNew": name,
+        "deactivateInterfaces": deactivate_interfaces,
+        "deactivateLinks": deactivate_links,
+        "deactivateNodes": deactivate_nodes,
+        "restoreInterfaces": restore_interfaces,
+        "restoreLinks": restore_links,
+        "restoreNodes": restore_nodes,
+        "zipFile": encoded_file
+    }
+    restv2helper.fork_snapshot(bf_session,
+                               json_data)
+
+    work_item = workhelper.get_workitem_parse(bf_session, name)
+    answer_dict = workhelper.execute(work_item, bf_session,
+                                     background=background)
+    if background:
+        bf_session.baseSnapshot = name
+        return answer_dict
+
+    status = WorkStatusCode(answer_dict['status'])
+    if status != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException(
+            'Forking snapshot {ss} from {base} failed with status {status}'.format(
+                ss=name,
+                base=base_name,
+                status=status))
+    else:
+        bf_session.baseSnapshot = name
+        bf_logger.info("Default snapshot is now set to %s",
+                       bf_session.baseSnapshot)
+        return bf_session.baseSnapshot
 
 
 def bf_generate_dataplane(snapshot=None):
     # type: (Optional[str]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
     snapshot = bf_session.get_snapshot(snapshot)
-    answerDict = _bf_generate_dataplane(snapshot)
-    answer = answerDict["answer"]
-    return answer
+
+    work_item = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
+    answer_dict = workhelper.execute(work_item, bf_session)
+    return str(answer_dict["status"].value)
 
 
-def bf_get_analysis_answers(analysisName, snapshot=None,
+def bf_get_analysis_answers(name, snapshot=None,
                             reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
-    jsonData = workhelper.get_data_get_analysis_answers(bf_session,
-                                                        analysisName, snapshot,
-                                                        reference_snapshot)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS,
-                                                jsonData)
-    answersDict = json.loads(jsonResponse['answers'])
-    return answersDict
+    json_data = workhelper.get_data_get_analysis_answers(
+        bf_session, name, snapshot, reference_snapshot)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS, json_data)
+    answers_dict = json.loads(json_response['answers'])
+    return answers_dict
 
 
 def bf_get_answer(questionName, snapshot, reference_snapshot=None):
@@ -417,34 +440,64 @@ def bf_get_info():
 def bf_get_issue_config(major, minor):
     # type: (str, str) -> IssueConfig
     """Returns the issue config for the active network."""
-    return IssueConfig(
-        **restv2helper.get_issue_config(bf_session, major, minor))
+    return IssueConfig.from_dict(
+        restv2helper.get_issue_config(bf_session, major, minor))
 
 
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
-    """Returns the set of node roles for the active network."""
-    return NodeRoleDimension(
-        **restv2helper.get_node_role_dimension(bf_session, dimension))
+    """Returns the definition of the given node role dimension for the active network."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
-    """Returns the set of node roles for the active network."""
-    return NodeRolesData(**restv2helper.get_node_roles(bf_session))
+    """Returns the definitions of node roles for the active network."""
+    return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
 
 
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
     """Returns the reference book with the specified for the active network."""
-    return ReferenceBook(
-        **restv2helper.get_reference_book(bf_session, book_name))
+    return ReferenceBook.from_dict(
+        restv2helper.get_reference_book(bf_session, book_name))
 
 
 def bf_get_reference_library():
     # type: () -> ReferenceLibrary
     """Returns the reference library for the active network."""
-    return ReferenceLibrary(**restv2helper.get_reference_library(bf_session))
+    return ReferenceLibrary.from_dict(
+        restv2helper.get_reference_library(bf_session))
+
+
+def bf_get_snapshot_inferred_node_roles():
+    # type: () -> NodeRolesData
+    """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
+    return NodeRolesData.from_dict(
+        restv2helper.get_snapshot_inferred_node_roles(bf_session))
+
+
+def bf_get_snapshot_inferred_node_role_dimension(dimension):
+    # type: (str) -> NodeRoleDimension
+    """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session,
+                                                               dimension))
+
+
+def bf_get_snapshot_node_roles():
+    # type: () -> NodeRolesData
+    """Returns the definitions and assignments of node roles for the active network and snapshot."""
+    return NodeRolesData.from_dict(
+        restv2helper.get_snapshot_node_roles(bf_session))
+
+
+def bf_get_snapshot_node_role_dimension(dimension):
+    # type: (str) -> NodeRoleDimension
+    """Returns the defintion and assignments of node roles for the given dimension for the active network and snapshot."""
+    return NodeRoleDimension.from_dict(
+        restv2helper.get_snapshot_node_role_dimension(bf_session, dimension))
 
 
 def bf_get_work_status(wItemId):
@@ -545,11 +598,10 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
 
     status = WorkStatusCode(answer_dict["status"])
     if status != WorkStatusCode.TERMINATEDNORMALLY:
+        init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
         raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}: {msg}'.format(
-                ss=name,
-                status=status,
-                msg=answer_dict['answer']))
+            'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
+                ss=name, status=status, log=init_log))
     else:
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
@@ -627,7 +679,7 @@ def bf_list_questions():
 
 
 def bf_list_snapshots(verbose=False):
-    # type: (bool) -> Union[List[str], Dict]
+    # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
     """
     List snapshots for the current network.
 
@@ -637,15 +689,7 @@ def bf_list_snapshots(verbose=False):
     :return: a list of snapshot names or the full json response containing
         snapshots and metadata (if `verbose=True`)
     """
-    json_data = workhelper.get_data_list_snapshots(bf_session,
-                                                   bf_session.network)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_LIST_SNAPSHOTS,
-                                                 json_data)
-    if verbose:
-        return json_response
-
-    return [s['testrigname'] for s in json_response['snapshotlist']]
+    return restv2helper.list_snapshots(bf_session, verbose)
 
 
 @deprecated("Deprecated in favor of bf_list_snapshots()")
@@ -668,26 +712,6 @@ def bf_list_testrigs(currentContainerOnly=True):
     return json_response
 
 
-def bf_str_answer(answer_json):
-    """Convert the Json answer to a string."""
-    try:
-        if "answerElements" in answer_json and "metadata" in \
-                answer_json["answerElements"][0]:
-            table_answer = TableAnswer(answer_json)
-            return table_answer.table_data.to_string()
-        else:
-            return get_answer_text(answer_json)
-    except Exception as error:
-        return "Error getting answer text: {}\n Original Json:\n {}".format(
-            error, json.dumps(answer_json, indent=2))
-
-
-def bf_print_answer(answer_json):
-    # type: (Dict) -> None
-    """Print the given answer JSON to console."""
-    print(bf_str_answer(answer_json))
-
-
 def _bf_get_question_templates():
     jsonData = _get_data_get_question_templates(bf_session)
     jsonResponse = resthelper.get_json_response(bf_session,
@@ -696,15 +720,37 @@ def _bf_get_question_templates():
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
 
 
-def bf_run_analysis(analysisName, snapshot, reference_snapshot=None):
-    # type: (str, str, Optional[str]) -> str
-    workItem = workhelper.get_workitem_run_analysis(bf_session, analysisName,
-                                                    snapshot,
-                                                    reference_snapshot)
-    workAnswer = workhelper.execute(workItem, bf_session)
-    # status = workAnswer["status"]
-    answer = workAnswer["answer"]
-    return answer
+def bf_put_node_roles(node_roles_data):
+    # type: (NodeRolesData) -> None
+    """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
+    restv2helper.put_node_roles(bf_session, node_roles_data)
+
+
+def bf_read_question_settings(question_class, json_path=None):
+    # type: (str, Optional[List[str]]) -> Dict[str, Any]
+    """
+    Retrieves the network-wide JSON settings tree for the specified question class.
+
+    :param question_class: The class of question whose settings are to be read
+    :type question_class: string
+    :param json_path: If supplied, return only the subtree reached by successively
+        traversing each key in json_path starting from the root.
+    :type json_path: list
+
+    """
+    return restv2helper.read_question_settings(bf_session, question_class,
+                                               json_path)
+
+
+def bf_run_analysis(name, snapshot, reference_snapshot=None):
+    # type: (str, str, Optional[str]) -> Any
+    work_item = workhelper.get_workitem_run_analysis(
+        bf_session, name, snapshot, reference_snapshot)
+    work_answer = workhelper.execute(work_item, bf_session)
+    if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
+        raise BatfishException("Failed to run analysis")
+
+    return bf_get_analysis_answers(name, snapshot, reference_snapshot)
 
 
 @deprecated("Deprecated in favor of bf_set_network(name)")
@@ -782,7 +828,7 @@ def bf_set_snapshot(name=None, index=None):
             raise IndexError(
                 "Server has only {} snapshots: {}".format(
                     len(snapshots), snapshots))
-        bf_session.baseSnapshot = snapshots[index]
+        bf_session.baseSnapshot = str(snapshots[index])
 
     # Name specified, make sure it exists.
     else:
@@ -866,6 +912,25 @@ def bf_sync_testrigs_update_settings(pluginId, settingsDict):
     .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
     """
     return bf_sync_snapshots_update_settings(pluginId, settingsDict)
+
+
+def bf_write_question_settings(settings, question_class, json_path=None):
+    # type: (Dict[str, Any], str, Optional[List[str]]) -> None
+    """
+    Write the network-wide JSON settings tree for the specified question class.
+
+    :param settings: The JSON representation of the settings to be written
+    :type settings: dict
+    :param question_class: The class of question to configure
+    :type question_class: string
+    :param json_path: If supplied, write settings to the subtree reached by successively
+        traversing each key in json_path starting from the root. Any absent keys along
+        the path will be created.
+    :type json_path: list
+
+    """
+    restv2helper.write_question_settings(bf_session, settings, question_class,
+                                         json_path)
 
 
 def _check_network():

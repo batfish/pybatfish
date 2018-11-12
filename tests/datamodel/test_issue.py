@@ -15,8 +15,9 @@
 
 from __future__ import absolute_import, print_function
 
-from pybatfish.datamodel.primitives import Issue
 import pytest
+
+from pybatfish.datamodel.primitives import Issue
 
 
 def test_issue_deserialization():

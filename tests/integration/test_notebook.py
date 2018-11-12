@@ -12,13 +12,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import io
 from copy import deepcopy
+from difflib import Differ
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
 
-from nbconvert.preprocessors import ExecutePreprocessor
 import nbformat
 import pytest
+from nbconvert.preprocessors import ExecutePreprocessor
 from six import PY3
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -37,8 +39,9 @@ for root, dirs, files in walk(_jupyter_nb_dir):
         if filename.endswith('.testout'):
             remove(join(root, filename))
 
-
 assert len(notebook_files) > 0
+
+_check_cell_types = ['execute_result', 'display_data']
 
 
 @pytest.fixture(scope='module', params=notebook_files)
@@ -65,20 +68,25 @@ def _assert_cell_no_errors(c):
     """Asserts that the given cell has no error outputs."""
     if c['cell_type'] != 'code':
         return
-    errors = ["Error name: {}, Error Value: {}".format(o["ename"], o["evalue"])
-              for o in c['outputs']
-              if o['output_type'] == 'error']
+    errors = ["Error name: {}, Error Value: {}, trace: {}".format(
+        o["ename"], o["evalue"], "\n".join(o.get('traceback')))
+        for o in c['outputs']
+        if o['output_type'] == 'error']
 
-    assert not errors, errors
+    if errors:
+        pytest.fail("Found notebook errors: {}".format("\n".join(errors)))
 
 
 def _compare_data(original_data, executed_data):
+    d = Differ()
     if "text/plain" in original_data and "text/plain" in executed_data:
-        assert original_data["text/plain"] == executed_data["text/plain"]
+        assert d.compare(original_data["text/plain"].splitlines(),
+                         executed_data["text/plain"].splitlines())
     else:
         assert "text/plain" not in original_data and "text/plain" not in executed_data
     if "text/html" in original_data and "text/html" in executed_data:
-        assert original_data["text/html"] == executed_data["text/html"]
+        assert d.compare(original_data["text/html"].splitlines(),
+                         executed_data["text/html"].splitlines())
     else:
         assert "text/html" not in original_data and "text/html" not in executed_data
 
@@ -98,15 +106,15 @@ def test_notebook_output(notebook, executed_notebook):
             if cell['cell_type'] == 'code':
                 # Collecting all outputs of type "execute_result" as other output type may be undeterministic (like timestamps)
                 original_outputs = [o['data'] for o in cell['outputs']
-                                    if o['output_type'] == 'execute_result']
+                                    if o['output_type'] in _check_cell_types]
                 executed_outputs = [o['data'] for o in executed_cell['outputs']
-                                    if o['output_type'] == 'execute_result']
+                                    if o['output_type'] in _check_cell_types]
                 assert len(original_outputs) == len(executed_outputs)
                 for original_data, executed_data in zip(original_outputs,
                                                         executed_outputs):
                     _compare_data(original_data, executed_data)
     except AssertionError as e:
-        with open('{}.testout'.format(filepath), 'w') as f:
+        with io.open('{}.testout'.format(filepath), 'w', encoding='utf-8') as f:
             nbformat.write(executed_notebook, f)
             pytest.fail('{} failed output validation:\n{}'.format(filepath, e),
                         pytrace=False)

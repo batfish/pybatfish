@@ -18,12 +18,16 @@ from __future__ import absolute_import
 
 import os
 import string
-from typing import Any, IO, Sized, Union  # noqa: F401
 import uuid
 import zipfile
+from collections import Iterable, Mapping
+from typing import Any, IO, Sized, Union  # noqa: F401
+
+import simplejson
+import six
+from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
-import simplejson as json
 
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.
@@ -32,25 +36,33 @@ _MAX_FILENAME_LEN = 150
 __all__ = [
     'BfJsonEncoder',
     'conditional_str',
+    'escape_html',
+    'get_html',
     'get_uuid',
-    'validate_json_path_regex',
     'validate_name',
     'validate_question_name',
     'zip_dir',
 ]
 
 
-class BfJsonEncoder(json.JSONEncoder):
+class BfJsonEncoder(simplejson.JSONEncoder):
     """A default encoder for Batfish question and datamodel objects."""
 
     def default(self, obj):
-        try:
-            # Return the dictionary representation, which is supported by
-            # questions and datamodel elements
-            return obj.dict()
-        except AttributeError:
-            # Fall back to default serialization for all other objects.
-            return json.JSONEncoder.default(self, obj)
+        if isinstance(obj, (int, float, bool, string_types)) or obj is None:
+            return obj
+        elif isinstance(obj, Mapping):
+            return {k: self.default(v) for k, v in iteritems(obj)}
+        elif isinstance(obj, Iterable):
+            return list(map(self.default, obj))
+        else:
+            try:
+                # Return the dictionary representation, which is supported by
+                # questions and datamodel elements
+                return self.default(obj.dict())
+            except AttributeError:
+                # Raise
+                super(BfJsonEncoder, self).default(obj)
 
 
 def conditional_str(prefix, obj, suffix):
@@ -69,26 +81,6 @@ def get_uuid():
     # type: () -> str
     """Generate and return a UUID as a string."""
     return str(uuid.uuid4())
-
-
-def validate_json_path_regex(s):
-    # type: (str) -> bool
-    """Check if the given string is a valid JsonPath regex.
-
-    :param s: string to check
-    :type s: str
-    :return True if `s` is valid
-    :raises QuestionValidationException if `s` is not valid
-    """
-    if not s.startswith('/'):
-        raise QuestionValidationException(
-            "Expected '/' at the start of JsonPath regex")
-
-    if not (s.endswith('/i') or s.endswith('/')):
-        raise QuestionValidationException(
-            "JsonPath regex must end with either '/' or '/i'")
-
-    return True
 
 
 def validate_name(name, entity_type="snapshot"):
@@ -173,3 +165,21 @@ def zip_dir(dir_path, out_file):
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
                 zipWriter.write(filename, arcname)
+
+
+def escape_html(s):
+    # type: (str) -> str
+    if six.PY2:
+        from cgi import escape
+        return escape(s, quote=True)
+    else:
+        from html import escape
+        return escape(s)
+
+
+def get_html(element):
+    """Attempts to call `_repr_html_()` to get HTML representation of object."""
+    try:
+        return element._repr_html_()
+    except AttributeError:
+        return escape_html(repr(element))

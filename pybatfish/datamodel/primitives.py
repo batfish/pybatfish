@@ -16,6 +16,9 @@ from enum import Enum
 from typing import Any, Dict, List  # noqa: F401
 
 import attr
+from pandas.core.indexes.frozen import FrozenList
+
+from pybatfish.util import escape_html, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
@@ -23,7 +26,9 @@ __all__ = ['Assertion',
            'FileLines',
            'Interface',
            'Issue',
-           'IssueType']
+           'IssueType',
+           'ListWrapper',
+           ]
 
 
 @attr.s
@@ -39,6 +44,11 @@ class DataModelElement(object):
     def from_dict(cls, json_dict):
         raise NotImplementedError(
             "Datamodel elements must implement from_dict")
+
+    def _repr_html_(self):
+        # type: () -> str
+        """Override this method to enable custom HTML formatting of the dataclass."""
+        return escape_html(repr(self))
 
 
 class AssertionType(str, Enum):
@@ -69,7 +79,10 @@ class Assertion(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Assertion
-        return Assertion(json_dict["type"], json_dict["expect"])
+        return Assertion(AssertionType[json_dict["type"]], json_dict["expect"])
+
+    def dict(self):
+        return dict(type=self.type.value, expect=self.expect)
 
 
 @attr.s(frozen=True)
@@ -92,30 +105,53 @@ class Interface(DataModelElement):
         # type: () -> str
         return "{}:{}".format(self.hostname, self.interface)
 
+    def _repr_html_(self):
+        # type: () -> str
+        return "{}:{}".format(escape_html(self.hostname),
+                              escape_html(self.interface))
+
+
+def _interface_converter(val):
+    # type: (Any) -> str
+    if isinstance(val, Interface):
+        return str(val.interface)
+    else:
+        return str(val)
+
 
 @attr.s(frozen=True)
 class Edge(DataModelElement):
     """A network edge (i.e., a link between two node/interface pairs).
 
-    :ivar interface1: First interface (as :py:class:`Interface`)
-    :ivar interface2: Second interface (as :py:class:`Interface`)
+    :ivar node1: First node name
+    :ivar node1interface: First node's interface name
+    :ivar node2: Second node name
+    :ivar node2interface: Second node's interface name
     """
 
-    interface1 = attr.ib(type=Interface)
-    interface2 = attr.ib(type=Interface)
+    node1 = attr.ib(type=str)
+    node1interface = attr.ib(type=str, converter=_interface_converter)
+    node2 = attr.ib(type=str)
+    node2interface = attr.ib(type=str, converter=_interface_converter)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Edge
         return Edge(
-            interface1=Interface(json_dict["node1"],
-                                 json_dict["node1interface"]),
-            interface2=Interface(json_dict["node2"],
-                                 json_dict["node2interface"]))
+            node1=json_dict["node1"],
+            node1interface=json_dict["node1interface"],
+            node2=json_dict["node2"],
+            node2interface=json_dict["node2interface"])
 
     def __str__(self):
         # type: () -> str
-        return "{} -> {}".format(self.interface1, self.interface2)
+        return "{}:{} -> {}:{}".format(self.node1, self.node1interface,
+                                       self.node2, self.node2interface)
+
+    def _repr_html_(self):
+        # type: () -> str
+        return "{}:{} &rarr; {}:{}".format(self.node1, self.node1interface,
+                                           self.node2, self.node2interface)
 
 
 @attr.s(frozen=True)
@@ -195,3 +231,13 @@ class Issue(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "[{}] {}".format(self.severity, self.explanation)
+
+
+class ListWrapper(FrozenList):
+    """Helper list class that implements _repr_html_()."""
+
+    def _repr_html_(self):
+        # type: () -> str
+        result = "<br><br>".join(
+            [get_html(element) for element in self])  # type: str
+        return result

@@ -14,9 +14,10 @@
 
 from __future__ import absolute_import, print_function
 
+import pytest
+
 # test if an acl trace is deserialized properly
 from pybatfish.datamodel.primitives import FileLines
-import pytest
 
 
 def test_filelines_multiple_lines():

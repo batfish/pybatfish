@@ -16,9 +16,9 @@ import datetime
 import json
 import logging
 
+import pytest
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
-import pytest
 from pytz import UTC
 
 from pybatfish.client.session import Session

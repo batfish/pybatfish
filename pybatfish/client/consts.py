@@ -74,6 +74,8 @@ class BfConsts(object):
 
     KEY_BGP_ANNOUNCEMENTS = "Announcements"
 
+    PROP_METADATA = "metadata"
+    PROP_NAME = "name"
     PROP_QUESTION_PLUGIN_DIR = "batfishQuestionPluginDir"
 
     RELPATH_ANSWER_HTML = "answer.html"
@@ -157,7 +159,7 @@ class WorkStatusCode(str, Enum):
 
 class CoordConsts(object):
     """
-    Constains constants derived from CoordConsts.java in batfish-common.
+    Contains constants derived from CoordConsts.java in batfish-common.
 
     **IMPORTANT**:
     It is crucial to keep the two versions in sync.
@@ -220,6 +222,7 @@ class CoordConsts(object):
     SVC_KEY_QUESTION = "question"
     SVC_KEY_QUESTION_LIST = "questionlist"
     SVC_KEY_QUESTION_NAME = "questionname"
+    SVC_KEY_REFERENCE_SNAPSHOT_NAME = "referencesnapshotname"
     SVC_KEY_RESULT = "result"
     SVC_KEY_SETTINGS = "settings"
     SVC_KEY_SNAPSHOT_INFO = "snapshotinfo"
@@ -266,6 +269,7 @@ class CoordConsts(object):
     SVC_RSC_GET_PARSING_RESULTS = "getparsingresults"
     SVC_RSC_GET_PARSING_WORK = "getparsingwork"
     SVC_RSC_GET_QUESTION_TEMPLATES = "getquestiontemplates"
+    SVC_RSC_GET_WORKLOG = "getworklog"
     SVC_RSC_GET_WORKSTATUS = "getworkstatus"
     SVC_RSC_GETSTATUS = "getstatus"
     SVC_RSC_INIT_CONTAINER = "initcontainer"
@@ -292,3 +296,33 @@ class CoordConsts(object):
     SVC_RSC_UPLOAD_QUESTION = "uploadquestion"
     SVC_RSC_UPLOAD_SNAPSHOT = "uploadsnapshot"
     SVC_RSC_UPLOAD_TESTRIG = "uploadtestrig"
+
+
+class CoordConstsV2(object):
+    """
+    Contains constants derived from CoordConstsV2.java in batfish-common.
+
+    **IMPORTANT**:
+    It is crucial to keep the two versions in sync.
+    """
+
+    # The HTTP Header containing the client's API Key.
+    HTTP_HEADER_BATFISH_APIKEY = "X-Batfish-Apikey"
+    # The HTTP Header containing the client's version.
+    HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
+
+    QP_VERBOSE = "verbose"
+
+    RSC_CONTAINER = "container"
+    RSC_CONTAINERS = "containers"
+    RSC_FORK = "fork"
+    RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
+    RSC_ISSUES = "issues"
+    RSC_NETWORK = "network"
+    RSC_NETWORKS = "networks"
+    RSC_NODE_ROLES = "noderoles"
+    RSC_QUESTIONS = "questions"
+    RSC_REFERENCE_LIBRARY = "referencelibrary"
+    RSC_SETTINGS = "settings"
+    RSC_SNAPSHOTS = "snapshots"
+    RSC_WORK_LOG = "worklog"

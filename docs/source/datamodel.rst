@@ -16,8 +16,8 @@ ACL traces
     :members:
 
 
-Flow objects
-------------
+Flows and packets
+-----------------
 .. automodule:: pybatfish.datamodel.flow
     :members:
 

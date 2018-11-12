@@ -24,7 +24,6 @@ from typing import Any, Dict, Optional  # noqa: F401
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
-import six
 
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.client.session import Session  # noqa: F401
@@ -67,7 +66,7 @@ def _print_timestamp(timestamp):
 
 
 def execute(work_item, session, background=False):
-    # type: (WorkItem, Session, bool) -> Dict[str, str]
+    # type: (WorkItem, Session, bool) -> Dict[str, Any]
     """Submit a work item to Batfish.
 
     :param work_item: work to submit
@@ -80,7 +79,7 @@ def execute(work_item, session, background=False):
 
     :return: If `background=True`, a dict containing a single key 'result' with
     a string description of the result. If `background=False`, a dict containing
-    "status" and "answer" keys, both strings.
+    a single key 'status' with a string describing work status.
     """
     snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
     if snapshot is None:
@@ -97,6 +96,8 @@ def execute(work_item, session, background=False):
         session, CoordConsts.SVC_RSC_QUEUE_WORK, json_data)
 
     if background:
+        # TODO: this is ugly and messes with return types: design and write async replacement
+        # After we drop 2.7 support
         return {"result": str(response["result"])}
 
     try:
@@ -117,19 +118,7 @@ def execute(work_item, session, background=False):
             raise BatfishException(
                 "Work finished with status {}\n{}".format(status,
                                                           work_item.to_json()))
-
-        # get the answer
-        answer_file_name = _compute_batfish_answer_file_name(work_item)
-        answer_bytes = resthelper.get_object(session, snapshot,
-                                             answer_file_name)
-
-        # In Python 3.x, answer needs to be decoded before it can be used
-        # for things like json.loads (<= 3.6).
-        if six.PY3:
-            answer_string = answer_bytes.decode(encoding="utf-8")
-        else:
-            answer_string = answer_bytes
-        return {"status": status, "answer": answer_string}
+        return {"status": status}
 
     except KeyboardInterrupt:
         response = kill_work(session, work_item.id)

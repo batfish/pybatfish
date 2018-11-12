@@ -19,7 +19,6 @@ from logging import Logger  # noqa: F401
 from typing import Dict, Optional  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts
-
 from .options import Options
 
 
@@ -27,8 +26,8 @@ class Session(object):
     """Keeps session configuration needed to connect to a Batfish server.
 
     :ivar coordinatorHost: The host of the batfish service
-    :ivar coordinatorPort: The port batfish service is running on (9996 by default)
-    :ivar coordinatorPort2: The additional port of batfish service (9997 by default)
+    :ivar coordinatorPort: The port batfish service is running on (9997 by default)
+    :ivar coordinatorPort2: The additional port of batfish service (9996 by default)
     :ivar useSsl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar apiKey: Your API key
     """
