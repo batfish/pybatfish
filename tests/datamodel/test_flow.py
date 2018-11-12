@@ -62,7 +62,7 @@ def testFlowDeserialization():
 
     # check the string representation has the essential elements (without forcing a strict format)
     flowStr = str(flow)
-    assert "5.5.1.1:0" in flowStr
+    assert "5.5.1.1" in flowStr
     assert "intface" in flowStr
     assert "vrfAbc" in flowStr
 
@@ -207,6 +207,76 @@ def test_match_tcp_generators():
     assert len(MatchTcpFlags.match_established()) == 2
     assert MatchTcpFlags.match_established() == [MatchTcpFlags.match_ack(),
                                                  MatchTcpFlags.match_rst()]
+
+
+def test_flow_repr_html_ports():
+    # ICMP flows do not have ports
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingress",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+    assert("Port" not in Flow.from_dict(flowDict)._repr_html_())
+
+    # UDP
+    flowDict['ipProtocol'] = "UDP"
+    assert ("Port" in Flow.from_dict(flowDict)._repr_html_())
+
+
+def test_flow_str_ports():
+    # ICMP flows do not have ports
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 1234,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingress",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 2345,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+    str = repr(Flow.from_dict(flowDict))
+    assert("2.1.1.1:1234" not in str)
+    assert("5.5.1.1:2345" not in str)
+
+    # UDP
+    flowDict['ipProtocol'] = "UDP"
+    str = repr(Flow.from_dict(flowDict))
+    assert("2.1.1.1:1234" not in str)
+    assert("5.5.1.1:2345" not in str)
 
 
 if __name__ == "__main__":
