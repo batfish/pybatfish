@@ -163,18 +163,19 @@ class Flow(DataModelElement):
             return self.ipProtocol
 
     def _has_ports(self):
+        # type: () -> bool
         return self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
 
     def _repr_html_(self):
         # type: () -> str
         lines = []
-        lines.append('Src IP: ' + self.srcIp)
+        lines.append('Src IP: %s' % self.srcIp)
         if self._has_ports():
             lines.append('Src Port: %d' % self.srcPort)
-        lines.append('Dst IP: ' + self.dstIp)
+        lines.append('Dst IP: %s' % self.dstIp)
         if self._has_ports():
             lines.append('Dst Port: %d' % self.dstPort)
-        lines.append('IP Protocol: ' + self.get_ip_protocol_str())
+        lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
         lines.append('Start Location: {node}{iface}{vrf}'.format(
             node=self.ingressNode,
             iface=self.ingressInterface,
@@ -182,6 +183,7 @@ class Flow(DataModelElement):
         return '<br>'.join(lines)
 
     def _ip_port(self, ip, port):
+        # type: (str, str) -> str
         if self._has_ports():
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
