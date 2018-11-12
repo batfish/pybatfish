@@ -183,7 +183,7 @@ class Flow(DataModelElement):
         return '<br>'.join(lines)
 
     def _ip_port(self, ip, port):
-        # type: (str, str) -> str
+        # type: (str, int) -> str
         if self._has_ports():
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
