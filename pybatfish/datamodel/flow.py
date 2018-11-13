@@ -171,7 +171,7 @@ class Flow(DataModelElement):
         return '<br>'.join(self._repr_html_lines())
 
     def _repr_html_lines(self):
-        # type: () -> list[str]
+        # type: () -> List[str]
         lines = []
         lines.append('Src IP: %s' % self.srcIp)
         if self._has_ports():
