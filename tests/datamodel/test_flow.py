@@ -278,7 +278,6 @@ def test_flow_repr_html_start_location():
     assert("Start Location: ingressNode ingressIface" in flow._repr_html_())
 
 
-
 def test_flow_str_ports():
     # ICMP flows do not have ports
     flowDict = {
