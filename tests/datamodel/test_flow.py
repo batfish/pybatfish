@@ -253,7 +253,7 @@ def test_flow_repr_html_start_location():
         "icmpCode": 255,
         "icmpVar": 255,
         "ingressNode": "ingressNode",
-        "ingressVrf": "ingressVrf",
+        "ingressVrf": "default",
         "ipProtocol": "ICMP",
         "packetLength": 0,
         "srcIp": "5.5.1.1",
@@ -269,13 +269,17 @@ def test_flow_repr_html_start_location():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    assert("Start Location: ingressNode ingressVrf" in Flow.from_dict(flowDict)._repr_html_())
+
+    assert("Start Location: ingressNode" in Flow.from_dict(flowDict)._repr_html_lines())
+
+    flowDict['ingressVrf'] = "ingressVrf"
+    assert("Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(flowDict)._repr_html_lines())
 
     del flowDict['ingressVrf']
     flowDict['ingressInterface'] = "ingressIface"
 
     flow = Flow.from_dict(flowDict)
-    assert("Start Location: ingressNode ingressIface" in flow._repr_html_())
+    assert("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
 
 
 def test_flow_str_ports():
