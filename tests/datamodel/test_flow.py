@@ -242,6 +242,46 @@ def test_flow_repr_html_ports():
     assert ("Port" in Flow.from_dict(flowDict)._repr_html_())
 
 
+def test_flow_repr_html_start_location():
+    # ICMP flows do not have ports
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingressNode",
+        "ingressVrf": "default",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+
+    assert("Start Location: ingressNode" in Flow.from_dict(flowDict)._repr_html_lines())
+
+    flowDict['ingressVrf'] = "ingressVrf"
+    assert("Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(flowDict)._repr_html_lines())
+
+    del flowDict['ingressVrf']
+    flowDict['ingressInterface'] = "ingressIface"
+
+    flow = Flow.from_dict(flowDict)
+    assert("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
+
+
 def test_flow_str_ports():
     # ICMP flows do not have ports
     flowDict = {

@@ -168,6 +168,10 @@ class Flow(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
+        return '<br>'.join(self._repr_html_lines())
+
+    def _repr_html_lines(self):
+        # type: () -> List[str]
         lines = []
         lines.append('Src IP: %s' % self.srcIp)
         if self._has_ports():
@@ -178,9 +182,9 @@ class Flow(DataModelElement):
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
         lines.append('Start Location: {node}{iface}{vrf}'.format(
             node=self.ingressNode,
-            iface=self.ingressInterface,
-            vrf=self.ingressVrf))
-        return '<br>'.join(lines)
+            iface=self._iface_str(),
+            vrf=self._vrf_str()))
+        return lines
 
     def _ip_port(self, ip, port):
         # type: (str, int) -> str
