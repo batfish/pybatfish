@@ -176,10 +176,11 @@ class Flow(DataModelElement):
         if self._has_ports():
             lines.append('Dst Port: %d' % self.dstPort)
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
-        lines.append('Start Location: {node}{iface}{vrf}'.format(
+        lines.append('Start Location: {node} {ifaceOrVrf}'.format(
             node=self.ingressNode,
-            iface=self.ingressInterface,
-            vrf=self.ingressVrf))
+            ifaceOrVrf=(self.ingressInterface
+                        if self.ingressInterface is not None
+                        else self.ingressVrf)))
         return '<br>'.join(lines)
 
     def _ip_port(self, ip, port):
