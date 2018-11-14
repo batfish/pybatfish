@@ -1,5 +1,5 @@
 {
-	"hostname" : "host1",
+	"hostname" : "db",
 	"iptablesFile" : "iptables/host1.iptables",
 	"hostInterfaces" : {
 		"eth0" : {
