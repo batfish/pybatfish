@@ -425,8 +425,8 @@ def print_work_status(session, work_status, task_details):
 
 
 def _print_work_status(session, work_status, task_details, now_function):
-    effective_level = session.logger.getEffectiveLevel()
-    if effective_level in [logging.INFO, logging.DEBUG]:
+    if session.logger.getEffectiveLevel() == logging.INFO \
+            or session.logger.getEffectiveLevel() == logging.DEBUG:
         session.logger.info("status: {}".format(work_status))
 
         json_task = json.loads(task_details)
