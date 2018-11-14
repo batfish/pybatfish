@@ -114,10 +114,14 @@ def execute(work_item, session, background=False):
 
         print_work_status(session, status, task_details)
 
-        if status == WorkStatusCode.ASSIGNMENTERROR:
+        if status in [WorkStatusCode.ASSIGNMENTERROR,
+                      WorkStatusCode.REQUEUEFAILURE]:
             raise BatfishException(
-                "Work finished with status {}\n{}".format(status,
-                                                          work_item.to_json()))
+                "Work finished with status {}\nwork_item: {}\ntask_details: {}".format(
+                    status,
+                    work_item.to_json(),
+                    json.loads(
+                        task_details)))
         return {"status": status}
 
     except KeyboardInterrupt:
