@@ -310,7 +310,7 @@ def load_dir_questions(questionDir, moduleName=bfq.__name__):
 
 
 def _load_question_disk(question_path):
-    # type: (str) -> (str, QuestionMeta)
+    # type: (str) -> Tuple[str, QuestionMeta]
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path, 'r') as question_file:
         question_dict = json.load(question_file)
@@ -322,7 +322,7 @@ def _load_question_disk(question_path):
 
 
 def _load_question_dict(question):
-    # type: (Dict[str, Any]) -> (str, QuestionMeta)
+    # type: (Dict[str, Any]) -> Tuple[str, QuestionMeta]
     """Create a question from a dictionary which contains a template.
 
     :return the name of the question
@@ -373,14 +373,14 @@ def _load_question_dict(question):
     docstring = _compute_docstring(question_description, variables, ivars)
 
     # Make new Question class
-    question = QuestionMeta(question_name, (QuestionBase,), {
+    question_class = QuestionMeta(question_name, (QuestionBase,), {
         'docstring': docstring,
         'description': question_description,
         'tags': tags,
         'template': deepcopy(question),
         'variables': variables,
     })
-    return (question_name, question)
+    return question_name, question_class
 
 
 def _process_variables(question_name, variables):
@@ -500,7 +500,7 @@ def load_questions(question_dir=None, from_server=False,
     :param module_name: the name of the module where questions should be loaded.
         Default is :py:mod:`pybatfish.question.bfq`
     """
-    new_names = set()
+    new_names = set()  # type: Set[str]
     if not question_dir or from_server:
         remote_questions = _load_remote_questions_templates()
         _install_questions_in_module(remote_questions, module_name)
