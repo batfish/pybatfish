@@ -1,5 +1,5 @@
 {
-	"hostname" : "www",
+	"hostname" : "host-www",
 	"iptablesFile" : "iptables/host2.iptables",
 	"hostInterfaces" : {
 		"eth0" : {
