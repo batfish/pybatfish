@@ -22,12 +22,11 @@ import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
+from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple, Union)  # noqa: F401
 
 import attr
 import six
 from six import PY3, integer_types, string_types
-from typing import (
-    Any, Dict, Iterable, List, Optional, Set, Tuple, Union)  # noqa: F401
 
 from pybatfish.client.commands import (_bf_answer_obj,
                                        _bf_get_question_templates, bf_logger,
