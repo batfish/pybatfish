@@ -20,9 +20,7 @@ import base64
 import json
 import logging
 import os
-import sys
 import tempfile
-from imp import new_module
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 from warnings import warn
 
@@ -39,7 +37,7 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from pybatfish.util import (get_uuid, validate_name, zip_dir)
+from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
@@ -505,27 +503,19 @@ def bf_get_work_status(wItemId):
 
 
 def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
-    from pybatfish.question.question import load_dir_questions
+    from pybatfish.question.question import _load_questions_from_dir
     _check_network()
-    module_name = 'pybatfish.util.anonymous_module'
-    module = new_module(module_name)
-    sys.modules[module_name] = module
-    q_names = load_dir_questions(questionDirectory, moduleName=module_name)
-    questions = [(qname, getattr(module, qname)) for qname in q_names]
-    analysis = dict()
-    for o in questions:
-        question_name = o[0]
-        question_class = o[1]
-        question = question_class().dict()
-        analysis[question_name] = question
-    analysis_str = json.dumps(analysis, indent=2, sort_keys=True)
+    questions = _load_questions_from_dir(questionDirectory)
+    analysis = {
+        question_name: question_class(question_name=question_name)
+        for question_name, question_class in six.iteritems(questions)
+    }
     with tempfile.NamedTemporaryFile() as tempFile:
-        analysis_filename = tempFile.name
-        with open(analysis_filename, 'w') as analysisFile:
-            analysisFile.write(analysis_str)
-            analysisFile.flush()
+        with open(tempFile.name, 'w') as analysisFile:
+            json.dump(analysis, analysisFile, indent=2, sort_keys=True,
+                      cls=BfJsonEncoder)
         json_data = workhelper.get_data_configure_analysis(
-            bf_session, newAnalysis, analysisName, analysis_filename, None)
+            bf_session, newAnalysis, analysisName, tempFile.name, None)
         json_response = resthelper.get_json_response(
             bf_session, CoordConsts.SVC_RSC_CONFIGURE_ANALYSIS, json_data)
     return json_response
