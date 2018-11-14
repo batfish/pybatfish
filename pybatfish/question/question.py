@@ -272,41 +272,42 @@ def _install_questions_in_module(questions, module_name):
         setattr(module, name, question_class)
 
 
-def load_dir_questions(questionDir, moduleName=bfq.__name__):
-    # type: (str, str) -> Iterable[str]
-    """Load question templates from a directory on disk and install them in the given module."""
-    # Find all files with questions in them.
+def _load_questions_from_dir(question_dir):
+    # type: (str) -> Dict[str, QuestionMeta]
     question_files = []
-    for dirpath, dirnames, filenames in os.walk(questionDir):
+    for dirpath, dirnames, filenames in os.walk(question_dir):
         for filename in filenames:
             if filename.endswith(".json"):
                 question_files.append(os.path.join(dirpath, filename))
     if len(question_files) == 0:
         bf_logger.warn(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
-                questionDir=questionDir))
-        return set()
+                questionDir=question_dir))
+        return {}
 
-    num_questions = 0
-    local_questions = {}
+    questions = {}
     for questionFile in question_files:
         try:
             (qname, qclass) = _load_question_disk(questionFile)
-            local_questions[qname] = qclass
-            num_questions += 1
+            questions[qname] = qclass
         except Exception as err:
             bf_logger.error(
                 "Could not load question from {questionFile}:{err}".format(
                     questionFile=questionFile,
                     err=err))
-    _install_questions_in_module(six.iteritems(local_questions), moduleName)
-
     bf_logger.info(
         "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
-            numQuestions=num_questions,
-            numQuestionFiles=len(question_files)))
+            numQuestions=len(questions), numQuestionFiles=len(question_files)))
+    return questions
 
-    return local_questions.keys()
+
+def load_dir_questions(questionDir, moduleName=bfq.__name__):
+    # type: (str, str) -> Iterable[str]
+    """Load question templates from a directory on disk and install them in the given module."""
+    # Find all files with questions in them.
+    questions = _load_questions_from_dir(questionDir)
+    _install_questions_in_module(six.iteritems(questions), moduleName)
+    return questions.keys()
 
 
 def _load_question_disk(question_path):

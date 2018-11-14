@@ -19,6 +19,7 @@ from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (_compute_docstring, _compute_var_help,
                                          _load_question_dict,
+                                         _load_questions_from_dir,
                                          _process_variables, _validate,
                                          list_questions, load_questions)
 
@@ -232,6 +233,18 @@ def test_compute_var_help_with_old_allowed_values():
 
 def test_process_variables():
     assert _process_variables("foo", None) == []
+
+
+def test_load_dir_questions(tmpdir):
+    dir = tmpdir.mkdir("questions")
+    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    assert list(loaded.keys()) == [TEST_QUESTION_NAME]
+
+    # test fault tolerance to bad questions
+    dir.join("badq.json").write('{')
+    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
 
 def test_list_questions(tmpdir):
