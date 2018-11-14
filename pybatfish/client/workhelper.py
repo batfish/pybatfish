@@ -28,7 +28,7 @@ from dateutil.tz import tzlocal
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
-from . import resthelper
+from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
 
 
@@ -118,6 +118,15 @@ def execute(work_item, session, background=False):
             raise BatfishException(
                 "Work finished with status {}\n{}".format(status,
                                                           work_item.to_json()))
+
+        if status != WorkStatusCode.TERMINATEDNORMALLY:
+            log = restv2helper.get_work_log(session, snapshot, work_item.id)
+            raise BatfishException(
+                'Work item for snapshot {ss} failed with status {status}\n{log}'.format(
+                    ss=snapshot,
+                    status=status,
+                    log=log))
+
         return {"status": status}
 
     except KeyboardInterrupt:
