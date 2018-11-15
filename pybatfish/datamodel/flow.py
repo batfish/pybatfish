@@ -113,15 +113,13 @@ class Flow(DataModelElement):
         iface_str = self._iface_str()
         vrf_str = self._vrf_str()
         return \
-            "start={node}{iface}{vrf} [{src_ip}:{src_port}->{dst_ip}:{dst_port}" \
+            "start={node}{iface}{vrf} [{src}->{dst}" \
             " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
                 node=self.ingressNode,
                 iface=iface_str,
                 vrf=vrf_str,
-                src_ip=self.srcIp,
-                src_port=self.srcPort,
-                dst_ip=self.dstIp,
-                dst_port=self.dstPort,
+                src=self._ip_port(self.srcIp, self.srcPort),
+                dst=self._ip_port(self.dstIp, self.dstPort),
                 ip_proto=self.get_ip_protocol_str(),
                 dscp=(" dscp={}".format(self.dscp) if self.dscp != 0 else ""),
                 ecn=(" ecn={}".format(self.ecn) if self.ecn != 0 else ""),
@@ -164,17 +162,36 @@ class Flow(DataModelElement):
         else:
             return self.ipProtocol
 
+    def _has_ports(self):
+        # type: () -> bool
+        return self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
+
     def _repr_html_(self):
         # type: () -> str
-        return "Src IP: {src_ip}<br>Src Port: {src_port}<br>Dst IP: {dst_ip}<br>Dst Port: {dst_port}<br>IP Protocol: {ip_protocol}<br>Start Location: {node}{iface}{vrf}" \
-            .format(node=self.ingressNode,
-                    iface=escape_html(self._iface_str()),
-                    vrf=escape_html(self._vrf_str()),
-                    src_ip=self.srcIp,
-                    src_port=self.srcPort,
-                    dst_ip=self.dstIp,
-                    dst_port=self.dstPort,
-                    ip_protocol=self.get_ip_protocol_str())
+        return '<br>'.join(self._repr_html_lines())
+
+    def _repr_html_lines(self):
+        # type: () -> List[str]
+        lines = []
+        lines.append('Start Location: {node}{iface}{vrf}'.format(
+            node=self.ingressNode,
+            iface=self._iface_str(),
+            vrf=self._vrf_str()))
+        lines.append('Src IP: %s' % self.srcIp)
+        if self._has_ports():
+            lines.append('Src Port: %d' % self.srcPort)
+        lines.append('Dst IP: %s' % self.dstIp)
+        if self._has_ports():
+            lines.append('Dst Port: %d' % self.dstPort)
+        lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
+        return lines
+
+    def _ip_port(self, ip, port):
+        # type: (str, int) -> str
+        if self._has_ports():
+            return "{ip}:{port}".format(ip=ip, port=port)
+        else:
+            return self.srcIp
 
 
 @attr.s(frozen=True)
