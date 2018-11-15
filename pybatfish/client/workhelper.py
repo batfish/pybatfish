@@ -114,18 +114,23 @@ def execute(work_item, session, background=False):
 
         print_work_status(session, status, task_details)
 
-        if status == WorkStatusCode.ASSIGNMENTERROR:
+        # Handle fail conditions not producing logs
+        if status in [WorkStatusCode.ASSIGNMENTERROR,
+                      WorkStatusCode.REQUEUEFAILURE]:
             raise BatfishException(
-                "Work finished with status {}\n{}".format(status,
-                                                          work_item.to_json()))
+                "Work finished with status {}\nwork_item: {}\ntask_details: {}".format(
+                    status,
+                    work_item.to_json(),
+                    json.loads(
+                        task_details)))
 
-        if status != WorkStatusCode.TERMINATEDNORMALLY:
+        # Handle fail condition with logs
+        if status == WorkStatusCode.TERMINATEDABNORMALLY:
             log = restv2helper.get_work_log(session, snapshot, work_item.id)
             raise BatfishException(
-                'Work item for snapshot {ss} failed with status {status}\n{log}'.format(
-                    ss=snapshot,
-                    status=status,
-                    log=log))
+                'Work terminated abnormally\nwork_item: {}\nlog: {}'.format(
+                    work_item.to_json(),
+                    log))
 
         return {"status": status}
 
