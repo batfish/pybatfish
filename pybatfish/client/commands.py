@@ -77,6 +77,7 @@ __all__ = ['bf_add_analysis',
            'bf_get_answer',
            'bf_get_info',
            'bf_get_issue_config',
+           'bf_get_network_object',
            'bf_get_node_role_dimension',
            'bf_get_node_roles',
            'bf_get_reference_book',
@@ -99,6 +100,7 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
+           'bf_put_network_object',
            'bf_put_node_roles',
            'bf_read_question_settings',
            'bf_run_analysis',
@@ -442,6 +444,11 @@ def bf_get_issue_config(major, minor):
         restv2helper.get_issue_config(bf_session, major, minor))
 
 
+def bf_get_network_object(key):
+    #type: (str) -> any
+    """Returns the content of the network object with specified key"""
+    return restv2helper.get_network_object(bf_session, key)
+
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the definition of the given node role dimension for the active network."""
@@ -708,6 +715,12 @@ def _bf_get_question_templates():
                                                 CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES,
                                                 jsonData)
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
+
+
+def bf_put_network_object(key, data):
+    #type: (str, any) -> None
+    """Puts data as the network object with specified key"""
+    restv2helper.put_network_object(bf_session, key, data)
 
 
 def bf_put_node_roles(node_roles_data):
