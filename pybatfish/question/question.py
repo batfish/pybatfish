@@ -188,10 +188,7 @@ class QuestionBase(object):
 
     def get_differential(self):
         """Return whether this question is to be asked differentially."""
-        if 'differential' in self._dict:
-            return self._dict['differential']
-        else:
-            return False
+        return self._dict.get('differential', False)
 
     def get_include_one_table_keys(self):
         """Return whether keys present in only one table should be included when computing answer table diffs."""
