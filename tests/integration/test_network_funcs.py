@@ -13,15 +13,26 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from pytest import raises
+from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
 from pybatfish.client.commands import (bf_add_node_role_dimension, bf_delete_network,
-                                       bf_delete_node_role_dimension, bf_get_node_role_dimension,
+                                       bf_delete_node_role_dimension,
+                                       bf_get_network_object_text,
+                                       bf_get_node_role_dimension,
                                        bf_get_node_roles, bf_list_networks,
+                                       bf_put_network_object,
                                        bf_put_node_roles, bf_set_network)
 from pybatfish.client.options import Options
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
+
+
+@fixture()
+def network():
+    name = bf_set_network()
+    yield name
+    # cleanup
+    bf_delete_network(name)
 
 
 def test_set_network():
@@ -55,6 +66,15 @@ def test_add_node_role_dimension():
         assert bf_get_node_role_dimension(dim_name) == dim
     finally:
         bf_delete_network(network_name)
+
+
+def test_get_network_object(network):
+    # non-existent object should yield 404
+    with raises(HTTPError, match='404'):
+        bf_get_network_object_text('missing_object')
+    # object should exist after being placed
+    bf_put_network_object('new_object', 'goodbye')
+    assert bf_get_network_object_text('new_object') == 'goodbye'
 
 
 def test_get_node_role_dimension():

@@ -60,7 +60,10 @@ __all__ = [
     'get_node_roles',
     'get_reference_book',
     'get_reference_library',
+    'get_snapshot_input_object',
+    'get_snapshot_object',
     'put_network_object',
+    'put_snapshot_object',
     'read_question_settings',
     'write_question_settings'
 ]
@@ -177,10 +180,32 @@ def get_network(session, network):
 
 
 def get_network_object(session, key):
-    # type: (Session, str) -> any
-    """Gets extended object with given key for the specified network."""
+    # type: (Session, str) -> Any
+    """Gets extended object with given key for the current network."""
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
-    return _get_string(session, url_tail, {CoordConstsV2.QP_KEY:key})
+    return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
+
+
+def get_snapshot_input_object(session, key):
+    # type: (Session, str) -> Any
+    """Gets input object with given key for the current snapshot."""
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_SNAPSHOTS,
+                                        session.baseSnapshot,
+                                        CoordConstsV2.RSC_INPUT)
+    return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
+
+
+def get_snapshot_object(session, key):
+    # type: (Session, str) -> Any
+    """Gets extended object with given key for the current snapshot."""
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_SNAPSHOTS,
+                                        session.baseSnapshot,
+                                        CoordConstsV2.RSC_OBJECTS)
+    return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
 def get_node_role_dimension(session, dimension):
@@ -300,10 +325,10 @@ def get_work_log(session, snapshot, work_id):
 
 
 def put_network_object(session, key, data):
-    # type: (Session, str, str) -> None
-    """Put data as extended object with given key for the specified network."""
+    # type: (Session, str, Any) -> None
+    """Put data as extended object with given key for the current network."""
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
-    _put(session, url_tail, data, {CoordConstsV2.QP_KEY:key})
+    _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
 
 def put_node_roles(session, node_roles_data):
@@ -314,6 +339,17 @@ def put_node_roles(session, node_roles_data):
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_NODE_ROLES)
     return _put_json(session, url_tail, node_roles_data)
+
+
+def put_snapshot_object(session, key, data):
+    # type: (Session, str, Any) -> None
+    """Put data as extended object with given key for the current snapshot."""
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_SNAPSHOTS,
+                                        session.baseSnapshot,
+                                        CoordConstsV2.RSC_OBJECTS)
+    _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
 
 def read_question_settings(session, question_class, json_path):
@@ -372,8 +408,8 @@ def _delete(session, url_tail, params={}):
     _check_response_status(response)
 
 
-def _get(session, url_tail, params):
-    # type: (Session, str, Dict[str, Any]) -> Any
+def _get(session, url_tail, params, stream=False):
+    # type: (Session, str, Dict[str, Any], bool) -> Any
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -385,6 +421,7 @@ def _get(session, url_tail, params):
     response = requests.get(url,
                             headers=headers,
                             params=params,
+                            stream=stream,
                             verify=session.verifySslCerts)
     _check_response_status(response)
     return response
@@ -412,15 +449,16 @@ def _get_list(session, url_tail, params={}):
     return list(response.json())
 
 
-def _get_string(session, url_tail, params={}):
-    # type: (Session, str, Dict[str, Any]) -> List
-    """Make an HTTP(s) GET request to Batfish coordinator that should return a string.
+def _get_stream(session, url_tail, params={}):
+    # type: (Session, str, Dict[str, Any]) -> Any
+    """Make an HTTP(s) GET request to Batfish coordinator that should return a raw stream.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    response = _get(session, url_tail, params)
-    return str(response.content)
+    response = _get(session, url_tail, params, stream=True)
+    response.raw.decode_content = True
+    return response.raw
 
 
 def _post(session, url_tail, obj, params={}):
@@ -442,8 +480,8 @@ def _post(session, url_tail, obj, params={}):
     return None
 
 
-def _put(session, url_tail, obj, params={}, json=None):
-    # type: (Session, str, Any, Dict[str, Any]) -> None
+def _put(session, url_tail, obj, params={}, json=None, stream=None):
+    # type: (Session, str, Any, Dict[str, Any], Any) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -451,9 +489,12 @@ def _put(session, url_tail, obj, params={}, json=None):
     """
     headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    if stream:
+        headers['Content-Type'] = 'application/octet-stream'
     url = session.get_base_url2() + url_tail
     response = requests.put(url,
                             json=json,
+                            data=stream,
                             headers=headers,
                             verify=session.verifySslCerts,
                             params=params)
@@ -469,3 +510,13 @@ def _put_json(session, url_tail, obj, params={}):
     :raises ConnectionError if the coordinator is not available
     """
     _put(session, url_tail, obj, params=params, json=_encoder.default(obj))
+
+
+def _put_stream(session, url_tail, stream, params={}):
+    # type: (Session, str, Any, Dict[str, Any]) -> None
+    """Make an HTTP(s) PUT request to Batfish coordinator.
+
+    :raises SSLError if SSL connection failed
+    :raises ConnectionError if the coordinator is not available
+    """
+    _put(session, url_tail, stream, params=params, stream=stream)

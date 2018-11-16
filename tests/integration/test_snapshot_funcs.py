@@ -21,10 +21,13 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_fork_snapshot, bf_generate_dataplane,
                                        bf_get_snapshot_inferred_node_role_dimension,
                                        bf_get_snapshot_inferred_node_roles,
+                                       bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_node_role_dimension,
                                        bf_get_snapshot_node_roles,
+                                       bf_get_snapshot_object_text,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_put_node_roles,
+                                       bf_put_snapshot_object,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
 from pybatfish.client.consts import BfConsts
@@ -195,6 +198,16 @@ def test_get_snapshot_inferred_node_roles(network, roles_snapshot):
     assert len(bf_get_snapshot_inferred_node_roles().roleDimensions) > 0
 
 
+def test_get_snapshot_input_object(network, example_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(example_snapshot)
+    # non-existent input object should yield 404
+    with pytest.raises(HTTPError, match='404'):
+        bf_get_snapshot_input_object_text('missing_object')
+    # should be able to retrieve input object text
+    assert bf_get_snapshot_input_object_text('other_dir/other_file') == 'hello'
+
+
 def test_get_snapshot_node_role_dimension(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
@@ -214,3 +227,14 @@ def test_get_snapshot_node_roles(network, roles_snapshot):
     snapshot_node_roles = bf_get_snapshot_node_roles()
     assert len(snapshot_node_roles.roleDimensions) == 1
     assert snapshot_node_roles.roleDimensions[0].name == dimension_name
+
+
+def test_get_snapshot_object(network, example_snapshot):
+    bf_set_network(network)
+    bf_set_snapshot(example_snapshot)
+    # non-existent object should yield 404
+    with pytest.raises(HTTPError, match='404'):
+        bf_get_snapshot_object_text('missing_object')
+    # object should exist after being placed
+    bf_put_snapshot_object('new_object', 'goodbye')
+    assert bf_get_snapshot_object_text('new_object') == 'goodbye'
