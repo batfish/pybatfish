@@ -77,20 +77,14 @@ __all__ = ['bf_add_analysis',
            'bf_get_answer',
            'bf_get_info',
            'bf_get_issue_config',
-           'bf_get_network_object_stream',
-           'bf_get_network_object_text',
            'bf_get_node_role_dimension',
            'bf_get_node_roles',
            'bf_get_reference_book',
            'bf_get_reference_library',
            'bf_get_snapshot_inferred_node_role_dimension',
            'bf_get_snapshot_inferred_node_roles',
-           'bf_get_snapshot_input_object_stream',
-           'bf_get_snapshot_input_object_text',
            'bf_get_snapshot_node_role_dimension',
            'bf_get_snapshot_node_roles',
-           'bf_get_snapshot_object_stream',
-           'bf_get_snapshot_object_text',
            'bf_get_work_status',
            'bf_init_analysis',
            'bf_init_container',
@@ -105,9 +99,7 @@ __all__ = ['bf_add_analysis',
            'bf_list_snapshots',
            'bf_list_testrigs',
            'bf_logger',
-           'bf_put_network_object',
            'bf_put_node_roles',
-           'bf_put_snapshot_object',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
@@ -450,20 +442,6 @@ def bf_get_issue_config(major, minor):
         restv2helper.get_issue_config(bf_session, major, minor))
 
 
-def bf_get_network_object_stream(key):
-    # type: (str) -> Any
-    """Returns a binary stream of the content of the network object with specified key."""
-    return restv2helper.get_network_object(bf_session, key)
-
-
-def bf_get_network_object_text(key, encoding='utf-8'):
-    # type: (str, str) -> str
-    """Returns the text content of the network object with specified key."""
-    with bf_get_network_object_stream(key) as stream:
-        text = stream.read().decode(encoding)
-    return str(text)
-
-
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the definition of the given node role dimension for the active network."""
@@ -506,20 +484,6 @@ def bf_get_snapshot_inferred_node_role_dimension(dimension):
                                                                dimension))
 
 
-def bf_get_snapshot_input_object_stream(key):
-    # type: (str) -> Any
-    """Returns a binary stream of the content of the snapshot input object with specified key."""
-    return restv2helper.get_snapshot_input_object(bf_session, key)
-
-
-def bf_get_snapshot_input_object_text(key, encoding='utf-8'):
-    # type: (str, str) -> str
-    """Returns the text content of the snapshot input object with specified key."""
-    with bf_get_snapshot_input_object_stream(key) as stream:
-        text = stream.read().decode(encoding)
-    return str(text)
-
-
 def bf_get_snapshot_node_roles():
     # type: () -> NodeRolesData
     """Returns the definitions and assignments of node roles for the active network and snapshot."""
@@ -532,20 +496,6 @@ def bf_get_snapshot_node_role_dimension(dimension):
     """Returns the defintion and assignments of node roles for the given dimension for the active network and snapshot."""
     return NodeRoleDimension.from_dict(
         restv2helper.get_snapshot_node_role_dimension(bf_session, dimension))
-
-
-def bf_get_snapshot_object_stream(key):
-    # type: (str) -> Any
-    """Returns a binary stream of the content of the snapshot object with specified key."""
-    return restv2helper.get_snapshot_object(bf_session, key)
-
-
-def bf_get_snapshot_object_text(key, encoding='utf-8'):
-    # type: (str, str) -> str
-    """Returns the text content of the snapshot object with specified key."""
-    with bf_get_snapshot_object_stream(key) as stream:
-        text = stream.read().decode(encoding)
-    return str(text)
 
 
 def bf_get_work_status(wItemId):
@@ -760,22 +710,10 @@ def _bf_get_question_templates():
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
 
 
-def bf_put_network_object(key, data):
-    # type: (str, Any) -> None
-    """Puts data as the network object with specified key."""
-    restv2helper.put_network_object(bf_session, key, data)
-
-
 def bf_put_node_roles(node_roles_data):
     # type: (NodeRolesData) -> None
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
     restv2helper.put_node_roles(bf_session, node_roles_data)
-
-
-def bf_put_snapshot_object(key, data):
-    # type: (str, Any) -> None
-    """Puts data as the snapshot object with specified key."""
-    restv2helper.put_snapshot_object(bf_session, key, data)
 
 
 def bf_read_question_settings(question_class, json_path=None):

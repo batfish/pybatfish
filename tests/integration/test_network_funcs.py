@@ -18,11 +18,11 @@ from requests.exceptions import HTTPError
 
 from pybatfish.client.commands import (bf_add_node_role_dimension, bf_delete_network,
                                        bf_delete_node_role_dimension,
-                                       bf_get_network_object_text,
                                        bf_get_node_role_dimension,
                                        bf_get_node_roles, bf_list_networks,
-                                       bf_put_network_object,
                                        bf_put_node_roles, bf_set_network)
+from pybatfish.client.extended import (bf_get_network_object_text,
+                                       bf_put_network_object)
 from pybatfish.client.options import Options
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
 
