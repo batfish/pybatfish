@@ -461,7 +461,7 @@ def bf_get_network_object_text(key, encoding='utf-8'):
     """Returns the text content of the network object with specified key."""
     with bf_get_network_object_stream(key) as stream:
         text = stream.read().decode(encoding)
-    return text
+    return str(text)
 
 
 def bf_get_node_role_dimension(dimension):
@@ -517,7 +517,7 @@ def bf_get_snapshot_input_object_text(key, encoding='utf-8'):
     """Returns the text content of the snapshot input object with specified key."""
     with bf_get_snapshot_input_object_stream(key) as stream:
         text = stream.read().decode(encoding)
-    return text
+    return str(text)
 
 
 def bf_get_snapshot_node_roles():
@@ -545,7 +545,7 @@ def bf_get_snapshot_object_text(key, encoding='utf-8'):
     """Returns the text content of the snapshot object with specified key."""
     with bf_get_snapshot_object_stream(key) as stream:
         text = stream.read().decode(encoding)
-    return text
+    return str(text)
 
 
 def bf_get_work_status(wItemId):
