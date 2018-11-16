@@ -481,7 +481,7 @@ def _post(session, url_tail, obj, params={}):
 
 
 def _put(session, url_tail, obj, params={}, json=None, stream=None):
-    # type: (Session, str, Any, Dict[str, Any], Any) -> None
+    # type: (Session, str, Any, Dict[str, Any], Any, Any) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
