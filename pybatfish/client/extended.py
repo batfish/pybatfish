@@ -18,6 +18,8 @@ from __future__ import absolute_import, print_function
 
 from typing import Any  # noqa: F401
 
+from pybatfish.client import resthelper, workhelper
+from pybatfish.client.consts import CoordConsts
 from .commands import (bf_session, restv2helper)
 
 __all__ = ['bf_get_network_object_stream',
@@ -82,3 +84,42 @@ def bf_put_snapshot_object(key, data):
     # type: (str, Any) -> None
     """Puts data as the snapshot object with specified key."""
     restv2helper.put_snapshot_object(bf_session, key, data)
+
+
+def bf_sync_snapshots_sync_now(plugin, force=False):
+    """
+    Synchronize snapshots with specified plugin.
+
+    :param plugin: name of the plugin to sync snapshots with
+    :type plugin: string
+    :param force: whether or not to overwrite any conflicts
+    :type force: bool
+    :return: json response containing result of snapshot sync from Batfish service
+    :rtype: dict
+    """
+    json_data = workhelper.get_data_sync_snapshots_sync_now(bf_session, plugin,
+                                                            force)
+    json_response = resthelper.get_json_response(bf_session,
+                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_SYNC_NOW,
+                                                 json_data)
+    return json_response
+
+
+def bf_sync_snapshots_update_settings(plugin, settings):
+    """
+    Update snapshot sync settings for the specified plugin.
+
+    :param plugin: name of the plugin to update
+    :type plugin: string
+    :param settings: settings to update
+    :type settings: dict
+    :return: json response containing result of settings update from Batfish service
+    :rtype: dict
+    """
+    json_data = workhelper.get_data_sync_snapshots_update_settings(bf_session,
+                                                                   plugin,
+                                                                   settings)
+    json_response = resthelper.get_json_response(bf_session,
+                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_UPDATE_SETTINGS,
+                                                 json_data)
+    return json_response
