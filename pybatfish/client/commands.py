@@ -63,6 +63,7 @@ __all__ = ['bf_add_analysis',
            'bf_delete_issue_config',
            'bf_delete_network',
            'bf_delete_node_role_dimension',
+           'bf_delete_reference_book',
            'bf_delete_snapshot',
            'bf_extract_answer_summary',
            'bf_fork_snapshot',
@@ -229,6 +230,12 @@ def bf_delete_node_role_dimension(dimension):
     # type: (str) -> None
     """Deletes the definition of the given role dimension for the active network."""
     restv2helper.delete_node_role_dimension(bf_session, dimension)
+
+
+def bf_delete_reference_book(book_name):
+    # type: (str) -> None
+    """Deletes the reference book with the specified name for the active network."""
+    restv2helper.delete_reference_book(bf_session, book_name)
 
 
 def bf_delete_snapshot(name):
