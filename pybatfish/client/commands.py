@@ -22,7 +22,6 @@ import logging
 import os
 import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
-from warnings import warn
 
 import six
 from deprecated import deprecated
@@ -44,9 +43,6 @@ from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
                          kill_work)
 
-warn(
-    "Pybatfish public API is being updated, note that API names and parameters will soon change.")
-
 # TODO: normally libraries don't configure logging in code
 _bfDebug = True
 bf_logger = logging.getLogger("pybatfish.client")
@@ -64,12 +60,10 @@ __all__ = ['bf_add_analysis',
            'bf_add_reference_book',
            'bf_auto_complete',
            'bf_delete_analysis',
-           'bf_delete_container',
            'bf_delete_issue_config',
            'bf_delete_network',
            'bf_delete_node_role_dimension',
            'bf_delete_snapshot',
-           'bf_delete_testrig',
            'bf_extract_answer_summary',
            'bf_fork_snapshot',
            'bf_generate_dataplane',
@@ -87,26 +81,20 @@ __all__ = ['bf_add_analysis',
            'bf_get_snapshot_node_roles',
            'bf_get_work_status',
            'bf_init_analysis',
-           'bf_init_container',
            'bf_init_snapshot',
-           'bf_init_testrig',
            'bf_kill_work',
            'bf_list_analyses',
-           'bf_list_containers',
            'bf_list_networks',
            'bf_list_incomplete_works',
            'bf_list_questions',
            'bf_list_snapshots',
-           'bf_list_testrigs',
            'bf_logger',
            'bf_put_node_roles',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
-           'bf_set_container',
            'bf_set_network',
            'bf_set_snapshot',
-           'bf_set_testrig',
            'bf_sync_snapshots_sync_now',
            'bf_sync_snapshots_update_settings',
            'bf_sync_testrigs_sync_now',
@@ -216,16 +204,6 @@ def bf_delete_analysis(analysisName):
     return jsonResponse
 
 
-@deprecated("Deprecated in favor of bf_delete_network(name)")
-def bf_delete_container(containerName):
-    """
-    Delete container by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_network`
-    """
-    bf_delete_network(containerName)
-
-
 def bf_delete_issue_config(major, minor):
     # type: (str, str) -> None
     """Deletes the issue config for the active network."""
@@ -267,19 +245,6 @@ def bf_delete_snapshot(name):
     json_data = workhelper.get_data_delete_snapshot(bf_session, name)
     resthelper.get_json_response(bf_session, CoordConsts.SVC_RSC_DEL_SNAPSHOT,
                                  json_data)
-
-
-@deprecated("Deprecated in favor of bf_delete_snapshot(name)")
-def bf_delete_testrig(testrigName):
-    """
-    Delete named testrig from current network.
-
-    :param testrigName: name of the testrig to delete
-    :type testrigName: string
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_snapshot`
-    """
-    bf_delete_snapshot(testrigName)
 
 
 def bf_extract_answer_summary(answer_dict):
@@ -525,17 +490,6 @@ def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
 
 
-@deprecated("Deprecated in favor of bf_set_network(name, prefix)")
-def bf_init_container(containerName=None,
-                      containerPrefix=Options.default_network_prefix):
-    """
-    Initialize a new container.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
-    """
-    bf_set_network(containerName, containerPrefix)
-
-
 def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     # type: (str, Optional[str], bool, bool) -> Union[str, Dict[str, str]]
     """Initialize a new snapshot.
@@ -599,19 +553,6 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         return bf_session.baseSnapshot
 
 
-@deprecated(
-    "Deprecated in favor of bf_init_snapshot(upload, delta, name, background)")
-def bf_init_testrig(dirOrZipfile, testrigName=None,
-                    background=False):
-    """
-    Initialize a new testrig.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_init_snapshot`
-    """
-    return bf_init_snapshot(upload=dirOrZipfile, name=testrigName,
-                            background=background)
-
-
 def bf_kill_work(wItemId):
     return kill_work(bf_session, wItemId)
 
@@ -624,16 +565,6 @@ def bf_list_analyses():
                                                 jsonData)
     answer = jsonResponse['analysislist']
     return answer
-
-
-@deprecated("Deprecated in favor of bf_list_networks()")
-def bf_list_containers():
-    """
-    List containers the session's API key can access.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_networks`
-    """
-    return bf_list_networks()
 
 
 def bf_list_networks():
@@ -682,26 +613,6 @@ def bf_list_snapshots(verbose=False):
     return restv2helper.list_snapshots(bf_session, verbose)
 
 
-@deprecated("Deprecated in favor of bf_list_snapshots()")
-def bf_list_testrigs(currentContainerOnly=True):
-    """
-    List testrigs.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_snapshots`
-    """
-    container_name = None
-
-    if currentContainerOnly:
-        _check_network()
-        container_name = bf_session.network
-
-    json_data = workhelper.get_data_list_testrigs(bf_session, container_name)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_LIST_TESTRIGS,
-                                                 json_data)
-    return json_response
-
-
 def _bf_get_question_templates():
     jsonData = _get_data_get_question_templates(bf_session)
     jsonResponse = resthelper.get_json_response(bf_session,
@@ -741,16 +652,6 @@ def bf_run_analysis(name, snapshot, reference_snapshot=None):
         raise BatfishException("Failed to run analysis")
 
     return bf_get_analysis_answers(name, snapshot, reference_snapshot)
-
-
-@deprecated("Deprecated in favor of bf_set_network(name)")
-def bf_set_container(containerName):
-    """
-    Set the current container by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
-    """
-    bf_set_network(containerName)
 
 
 def bf_set_network(name=None, prefix=Options.default_network_prefix):
@@ -831,16 +732,6 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
-
-
-@deprecated("Deprecated in favor of bf_set_snapshot(name)")
-def bf_set_testrig(testrigName):
-    """
-    Set the current testrig and environment by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_snapshot`
-    """
-    bf_set_snapshot(testrigName)
 
 
 def bf_sync_snapshots_sync_now(plugin, force=False):
