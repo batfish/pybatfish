@@ -52,6 +52,8 @@ __all__ = [
     'add_node_role_dimension',
     'add_reference_book',
     'delete_issue_config',
+    'delete_node_role_dimension',
+    'delete_reference_book',
     'fork_snapshot',
     'get_issue_config',
     'get_network',
@@ -145,13 +147,27 @@ def delete_node_role_dimension(session, dimension):
     # type: (Session, str) -> None
     """Deletes the definition of the given node role dimension for the active network."""
     if not session.network:
-        raise ValueError("Network must be set to get node roles")
+        raise ValueError("Network must be set to delete a node role dimension")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
     url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                      session.network,
                                      CoordConstsV2.RSC_NODE_ROLES,
                                      dimension)
+    return _delete(session, url_tail)
+
+
+def delete_reference_book(session, book_name):
+    # type: (Session, str) -> None
+    """Deletes the definition of the given reference book name."""
+    if not session.network:
+        raise ValueError("Network must be set to delete a reference book")
+    if not book_name:
+        raise ValueError("Book name must be a non-empty string")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
+                                     book_name)
     return _delete(session, url_tail)
 
 
