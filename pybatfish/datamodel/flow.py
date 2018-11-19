@@ -191,7 +191,7 @@ class Flow(DataModelElement):
         if self._has_ports():
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
-            return self.srcIp
+            return ip
 
 
 @attr.s(frozen=True)
