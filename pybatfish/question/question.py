@@ -642,10 +642,22 @@ def _validateType(value, expectedType):
         return isinstance(value, float), None
     elif expectedType == 'double':
         return isinstance(value, float), None
-    elif expectedType == 'interfacePropertySpec':
-        return isinstance(value, string_types), None
-    elif expectedType == 'interfaceSpec':
-        return isinstance(value, string_types), None
+    elif expectedType in [
+        'bgpPeerPropertySpec',
+        'bgpProcessPropertySpec',
+        'interfacePropertySpec',
+        'interfaceSpec',
+        'javaRegex',
+        'jsonPathRegex',
+        'namedStructureSpec',
+        'nodePropertySpec',
+        'nodeSpec',
+        'ospfPropertySpec',
+    ]:
+        if not isinstance(value, string_types):
+            return False, "A Batfish {} must be a string".format(
+                expectedType)
+        return True, None
     elif expectedType == 'ip':
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
@@ -658,28 +670,14 @@ def _validateType(value, expectedType):
                 expectedType)
         else:
             return _isIpWildcard(value)
-    elif expectedType == 'javaRegex':
-        if not isinstance(value, string_types):
-            return False, "A Batfish {} must be a string".format(
-                expectedType)
-        return True, None
     elif expectedType == 'jsonPath':
         return _isJsonPath(value)
-    elif expectedType == 'jsonPathRegex':
-        if not isinstance(value, string_types):
-            return False, "A Batfish {} must be a string".format(
-                expectedType)
-        return True, None
     elif expectedType == 'long':
         INT64_MIN = -2 ** 64
         INT64_MAX = 2 ** 64 - 1
         valid = (isinstance(value, integer_types) and
                  INT64_MIN <= value <= INT64_MAX)
         return valid, None
-    elif expectedType == 'nodePropertySpec':
-        return isinstance(value, string_types), None
-    elif expectedType == 'nodeSpec':
-        return isinstance(value, string_types), None
     elif expectedType == 'prefix':
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
@@ -729,8 +727,12 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
-    elif expectedType in ['headerConstraint', 'pathConstraint',
-                          'dispositionSpec']:
+    elif expectedType in [
+        'answerElement',
+        'dispositionSpec',
+        'headerConstraint',
+        'pathConstraint',
+    ]:
         return True, None
     else:
         bf_logger.warn(
