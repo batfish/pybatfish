@@ -24,7 +24,6 @@ import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 import six
-from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
@@ -96,10 +95,6 @@ __all__ = ['bf_add_analysis',
            'bf_session',
            'bf_set_network',
            'bf_set_snapshot',
-           'bf_sync_snapshots_sync_now',
-           'bf_sync_snapshots_update_settings',
-           'bf_sync_testrigs_sync_now',
-           'bf_sync_testrigs_update_settings',
            'bf_write_question_settings']
 
 
@@ -739,67 +734,6 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
-
-
-def bf_sync_snapshots_sync_now(plugin, force=False):
-    """
-    Synchronize snapshots with specified plugin.
-
-    :param plugin: name of the plugin to sync snapshots with
-    :type plugin: string
-    :param force: whether or not to overwrite any conflicts
-    :type force: bool
-    :return: json response containing result of snapshot sync from Batfish service
-    :rtype: dict
-    """
-    json_data = workhelper.get_data_sync_snapshots_sync_now(bf_session, plugin,
-                                                            force)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_SYNC_NOW,
-                                                 json_data)
-    return json_response
-
-
-@deprecated(
-    "Deprecated in favor of bf_sync_snapshots_sync_now(plugin_id, force)")
-def bf_sync_testrigs_sync_now(pluginId, force=False):
-    """
-    Synchronize snapshots with specified plugin.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_sync_now`
-    """
-    return bf_sync_snapshots_sync_now(pluginId, force)
-
-
-def bf_sync_snapshots_update_settings(plugin, settings):
-    """
-    Update snapshot sync settings for the specified plugin.
-
-    :param plugin: name of the plugin to update
-    :type plugin: string
-    :param settings: settings to update
-    :type settings: dict
-    :return: json response containing result of settings update from Batfish service
-    :rtype: dict
-    """
-    json_data = workhelper.get_data_sync_snapshots_update_settings(bf_session,
-                                                                   plugin,
-                                                                   settings)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_UPDATE_SETTINGS,
-                                                 json_data)
-    return json_response
-
-
-@deprecated(
-    "Deprecated in favor of bf_sync_snapshots_update_settings(plugin_id, settings)")
-def bf_sync_testrigs_update_settings(pluginId, settingsDict):
-    """
-    Synchronize snapshots with specified plugin.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
-    """
-    return bf_sync_snapshots_update_settings(pluginId, settingsDict)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):
