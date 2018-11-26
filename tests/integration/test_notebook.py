@@ -13,8 +13,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import io
+import sys
 from copy import deepcopy
-from difflib import Differ
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
 
@@ -50,6 +50,11 @@ def notebook(request):
     return filepath, nbformat.read(filepath, as_version=4)
 
 
+def _is_warning_output(o):
+    WARN_STRING = "UserWarning: Pybatfish public API is being updated"
+    return o.get("name", "") == "stderr" and WARN_STRING in o.get("text", "")
+
+
 @pytest.fixture(scope='module')
 def executed_notebook(notebook):
     filepath, orig_nb = notebook
@@ -60,7 +65,15 @@ def executed_notebook(notebook):
     # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True,
                              kernel_name="python3" if PY3 else "python2")
-    ep.preprocess(nb, resources={'metadata': {'path': exec_path}})
+    ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
+
+    # Filter out the deprecation warning, if it exists
+    for cell in nb["cells"]:
+        outputs = [o for o in cell.get("outputs", [])
+                   if not _is_warning_output(o)]
+        if len(outputs) != len(cell.get("outputs", [])):
+            cell["outputs"] = outputs
+
     return nb
 
 
@@ -77,18 +90,24 @@ def _assert_cell_no_errors(c):
         pytest.fail("Found notebook errors: {}".format("\n".join(errors)))
 
 
+def _compare_data_str(text1, text2):
+    assert text1.splitlines() == text2.splitlines()
+
+
 def _compare_data(original_data, executed_data):
-    d = Differ()
-    if "text/plain" in original_data and "text/plain" in executed_data:
-        assert d.compare(original_data["text/plain"].splitlines(),
-                         executed_data["text/plain"].splitlines())
-    else:
-        assert "text/plain" not in original_data and "text/plain" not in executed_data
+    assert ("text/plain" in original_data) == ("text/plain" in executed_data)
+    assert ("text/html" in original_data) == ("text/html" in executed_data)
+
+    if sys.version_info[:2] < (3, 6):
+        # Output is inconsistent across versions, so only test latest.
+        # (We still test the notebook runs without errors on all versions)
+        return
+    if "text/plain" in original_data:
+        _compare_data_str(original_data["text/plain"],
+                          executed_data["text/plain"])
     if "text/html" in original_data and "text/html" in executed_data:
-        assert d.compare(original_data["text/html"].splitlines(),
-                         executed_data["text/html"].splitlines())
-    else:
-        assert "text/html" not in original_data and "text/html" not in executed_data
+        _compare_data_str(original_data["text/html"],
+                          executed_data["text/html"])
 
 
 def test_notebook_no_errors(executed_notebook):

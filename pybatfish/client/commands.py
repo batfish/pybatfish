@@ -20,14 +20,10 @@ import base64
 import json
 import logging
 import os
-import sys
 import tempfile
-from imp import new_module
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
-from warnings import warn
 
 import six
-from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
@@ -39,15 +35,12 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from pybatfish.util import (get_uuid, validate_name, zip_dir)
+from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
 from .workhelper import (_get_data_get_question_templates, get_work_status,
                          kill_work)
-
-warn(
-    "Pybatfish public API is being updated, note that API names and parameters will soon change.")
 
 # TODO: normally libraries don't configure logging in code
 _bfDebug = True
@@ -66,12 +59,11 @@ __all__ = ['bf_add_analysis',
            'bf_add_reference_book',
            'bf_auto_complete',
            'bf_delete_analysis',
-           'bf_delete_container',
            'bf_delete_issue_config',
            'bf_delete_network',
            'bf_delete_node_role_dimension',
+           'bf_delete_reference_book',
            'bf_delete_snapshot',
-           'bf_delete_testrig',
            'bf_extract_answer_summary',
            'bf_fork_snapshot',
            'bf_generate_dataplane',
@@ -89,30 +81,20 @@ __all__ = ['bf_add_analysis',
            'bf_get_snapshot_node_roles',
            'bf_get_work_status',
            'bf_init_analysis',
-           'bf_init_container',
            'bf_init_snapshot',
-           'bf_init_testrig',
            'bf_kill_work',
            'bf_list_analyses',
-           'bf_list_containers',
            'bf_list_networks',
            'bf_list_incomplete_works',
            'bf_list_questions',
            'bf_list_snapshots',
-           'bf_list_testrigs',
            'bf_logger',
            'bf_put_node_roles',
            'bf_read_question_settings',
            'bf_run_analysis',
            'bf_session',
-           'bf_set_container',
            'bf_set_network',
            'bf_set_snapshot',
-           'bf_set_testrig',
-           'bf_sync_snapshots_sync_now',
-           'bf_sync_snapshots_update_settings',
-           'bf_sync_testrigs_sync_now',
-           'bf_sync_testrigs_update_settings',
            'bf_write_question_settings']
 
 
@@ -218,16 +200,6 @@ def bf_delete_analysis(analysisName):
     return jsonResponse
 
 
-@deprecated("Deprecated in favor of bf_delete_network(name)")
-def bf_delete_container(containerName):
-    """
-    Delete container by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_network`
-    """
-    bf_delete_network(containerName)
-
-
 def bf_delete_issue_config(major, minor):
     # type: (str, str) -> None
     """Deletes the issue config for the active network."""
@@ -255,6 +227,12 @@ def bf_delete_node_role_dimension(dimension):
     restv2helper.delete_node_role_dimension(bf_session, dimension)
 
 
+def bf_delete_reference_book(book_name):
+    # type: (str) -> None
+    """Deletes the reference book with the specified name for the active network."""
+    restv2helper.delete_reference_book(bf_session, book_name)
+
+
 def bf_delete_snapshot(name):
     # type: (str) -> None
     """
@@ -269,19 +247,6 @@ def bf_delete_snapshot(name):
     json_data = workhelper.get_data_delete_snapshot(bf_session, name)
     resthelper.get_json_response(bf_session, CoordConsts.SVC_RSC_DEL_SNAPSHOT,
                                  json_data)
-
-
-@deprecated("Deprecated in favor of bf_delete_snapshot(name)")
-def bf_delete_testrig(testrigName):
-    """
-    Delete named testrig from current network.
-
-    :param testrigName: name of the testrig to delete
-    :type testrigName: string
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_delete_snapshot`
-    """
-    bf_delete_snapshot(testrigName)
 
 
 def bf_extract_answer_summary(answer_dict):
@@ -505,27 +470,19 @@ def bf_get_work_status(wItemId):
 
 
 def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
-    from pybatfish.question.question import load_dir_questions
+    from pybatfish.question.question import _load_questions_from_dir
     _check_network()
-    module_name = 'pybatfish.util.anonymous_module'
-    module = new_module(module_name)
-    sys.modules[module_name] = module
-    q_names = load_dir_questions(questionDirectory, moduleName=module_name)
-    questions = [(qname, getattr(module, qname)) for qname in q_names]
-    analysis = dict()
-    for o in questions:
-        question_name = o[0]
-        question_class = o[1]
-        question = question_class().dict()
-        analysis[question_name] = question
-    analysis_str = json.dumps(analysis, indent=2, sort_keys=True)
+    questions = _load_questions_from_dir(questionDirectory)
+    analysis = {
+        question_name: question_class(question_name=question_name)
+        for question_name, question_class in six.iteritems(questions)
+    }
     with tempfile.NamedTemporaryFile() as tempFile:
-        analysis_filename = tempFile.name
-        with open(analysis_filename, 'w') as analysisFile:
-            analysisFile.write(analysis_str)
-            analysisFile.flush()
+        with open(tempFile.name, 'w') as analysisFile:
+            json.dump(analysis, analysisFile, indent=2, sort_keys=True,
+                      cls=BfJsonEncoder)
         json_data = workhelper.get_data_configure_analysis(
-            bf_session, newAnalysis, analysisName, analysis_filename, None)
+            bf_session, newAnalysis, analysisName, tempFile.name, None)
         json_response = resthelper.get_json_response(
             bf_session, CoordConsts.SVC_RSC_CONFIGURE_ANALYSIS, json_data)
     return json_response
@@ -533,17 +490,6 @@ def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
 
 def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
-
-
-@deprecated("Deprecated in favor of bf_set_network(name, prefix)")
-def bf_init_container(containerName=None,
-                      containerPrefix=Options.default_network_prefix):
-    """
-    Initialize a new container.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
-    """
-    bf_set_network(containerName, containerPrefix)
 
 
 def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
@@ -609,19 +555,6 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         return bf_session.baseSnapshot
 
 
-@deprecated(
-    "Deprecated in favor of bf_init_snapshot(upload, delta, name, background)")
-def bf_init_testrig(dirOrZipfile, testrigName=None,
-                    background=False):
-    """
-    Initialize a new testrig.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_init_snapshot`
-    """
-    return bf_init_snapshot(upload=dirOrZipfile, name=testrigName,
-                            background=background)
-
-
 def bf_kill_work(wItemId):
     return kill_work(bf_session, wItemId)
 
@@ -634,16 +567,6 @@ def bf_list_analyses():
                                                 jsonData)
     answer = jsonResponse['analysislist']
     return answer
-
-
-@deprecated("Deprecated in favor of bf_list_networks()")
-def bf_list_containers():
-    """
-    List containers the session's API key can access.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_networks`
-    """
-    return bf_list_networks()
 
 
 def bf_list_networks():
@@ -692,26 +615,6 @@ def bf_list_snapshots(verbose=False):
     return restv2helper.list_snapshots(bf_session, verbose)
 
 
-@deprecated("Deprecated in favor of bf_list_snapshots()")
-def bf_list_testrigs(currentContainerOnly=True):
-    """
-    List testrigs.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_list_snapshots`
-    """
-    container_name = None
-
-    if currentContainerOnly:
-        _check_network()
-        container_name = bf_session.network
-
-    json_data = workhelper.get_data_list_testrigs(bf_session, container_name)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_LIST_TESTRIGS,
-                                                 json_data)
-    return json_response
-
-
 def _bf_get_question_templates():
     jsonData = _get_data_get_question_templates(bf_session)
     jsonResponse = resthelper.get_json_response(bf_session,
@@ -751,16 +654,6 @@ def bf_run_analysis(name, snapshot, reference_snapshot=None):
         raise BatfishException("Failed to run analysis")
 
     return bf_get_analysis_answers(name, snapshot, reference_snapshot)
-
-
-@deprecated("Deprecated in favor of bf_set_network(name)")
-def bf_set_container(containerName):
-    """
-    Set the current container by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_network`
-    """
-    bf_set_network(containerName)
 
 
 def bf_set_network(name=None, prefix=Options.default_network_prefix):
@@ -841,77 +734,6 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
-
-
-@deprecated("Deprecated in favor of bf_set_snapshot(name)")
-def bf_set_testrig(testrigName):
-    """
-    Set the current testrig and environment by name.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_set_snapshot`
-    """
-    bf_set_snapshot(testrigName)
-
-
-def bf_sync_snapshots_sync_now(plugin, force=False):
-    """
-    Synchronize snapshots with specified plugin.
-
-    :param plugin: name of the plugin to sync snapshots with
-    :type plugin: string
-    :param force: whether or not to overwrite any conflicts
-    :type force: bool
-    :return: json response containing result of snapshot sync from Batfish service
-    :rtype: dict
-    """
-    json_data = workhelper.get_data_sync_snapshots_sync_now(bf_session, plugin,
-                                                            force)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_SYNC_NOW,
-                                                 json_data)
-    return json_response
-
-
-@deprecated(
-    "Deprecated in favor of bf_sync_snapshots_sync_now(plugin_id, force)")
-def bf_sync_testrigs_sync_now(pluginId, force=False):
-    """
-    Synchronize snapshots with specified plugin.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_sync_now`
-    """
-    return bf_sync_snapshots_sync_now(pluginId, force)
-
-
-def bf_sync_snapshots_update_settings(plugin, settings):
-    """
-    Update snapshot sync settings for the specified plugin.
-
-    :param plugin: name of the plugin to update
-    :type plugin: string
-    :param settings: settings to update
-    :type settings: dict
-    :return: json response containing result of settings update from Batfish service
-    :rtype: dict
-    """
-    json_data = workhelper.get_data_sync_snapshots_update_settings(bf_session,
-                                                                   plugin,
-                                                                   settings)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_UPDATE_SETTINGS,
-                                                 json_data)
-    return json_response
-
-
-@deprecated(
-    "Deprecated in favor of bf_sync_snapshots_update_settings(plugin_id, settings)")
-def bf_sync_testrigs_update_settings(pluginId, settingsDict):
-    """
-    Synchronize snapshots with specified plugin.
-
-    .. deprecated:: 0.36.0 In favor of :py:func:`bf_sync_snapshots_update_settings`
-    """
-    return bf_sync_snapshots_update_settings(pluginId, settingsDict)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):

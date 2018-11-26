@@ -31,7 +31,7 @@ class MyStyler(Styler):
         return repr(self.data)
 
 
-def display_html(df):
+def show(df):
     """
     Displays a dataframe as HTML table.
 

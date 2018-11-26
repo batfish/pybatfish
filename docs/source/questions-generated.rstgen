@@ -10,13 +10,15 @@
        Default value: ``.*``
    :type nodes: nodeSpec
 
-.. py:class:: bgpPeerConfiguration(*, nodes, question_name, exclusions)
+.. py:class:: bgpPeerConfiguration(*, nodes, properties, question_name, exclusions)
 
    Return BGP peer configuration properties.
    
    
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
+   :param properties: Include properties matching this regex.
+   :type properties: bgpPeerPropertySpec
 
 .. py:class:: bgpProcessConfiguration(*, nodes, properties, question_name, exclusions)
 
@@ -26,7 +28,7 @@
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
    :param properties: Include properties matching this regex.
-   :type properties: bgpPropertySpec
+   :type properties: bgpProcessPropertySpec
 
 .. py:class:: bgpSessionCompatibility(*, nodes, remoteNodes, status, type, question_name, exclusions)
 
@@ -76,13 +78,17 @@
        Default value: ``.*``
    :type types: javaRegex
 
-.. py:class:: detectLoops(*, question_name, exclusions)
+.. py:class:: detectLoops(*, maxTraces, question_name, exclusions)
 
    Detect forwarding loops.
    
    Finds forwarding loops.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
 
-.. py:class:: differentialReachability(*, actions, headers, ignoreFilters, pathConstraints, question_name, exclusions)
+.. py:class:: differentialReachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name, exclusions)
 
    Detect differential reachability.
    
@@ -97,6 +103,10 @@
    :type headers: headerConstraint
    :param ignoreFilters: Do not apply filters/ACLs during analysis.
    :type ignoreFilters: boolean
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
@@ -218,7 +228,7 @@
    :param status: Only include IPSec sessions for which status matches this regex.
    :type status: javaRegex
 
-.. py:class:: multipathConsistency(*, headers, pathConstraints, question_name, exclusions)
+.. py:class:: multipathConsistency(*, headers, maxTraces, pathConstraints, question_name, exclusions)
 
    Validate multipath consistency.
    
@@ -227,6 +237,8 @@
    
    :param headers: Packet header constraints.
    :type headers: headerConstraint
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
@@ -331,7 +343,7 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachability(*, actions, headers, ignoreFilters, pathConstraints, question_name, exclusions)
+.. py:class:: reachability(*, actions, headers, ignoreFilters, maxTraces, pathConstraints, question_name, exclusions)
 
    Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
    
@@ -344,6 +356,8 @@
    :type headers: headerConstraint
    :param ignoreFilters: Do not apply filters/ACLs during analysis.
    :type ignoreFilters: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
@@ -450,7 +464,7 @@
        * bgpmp
    :type rib: string
 
-.. py:class:: searchfilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name, exclusions)
+.. py:class:: searchFilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name, exclusions)
 
    Find flows for which a filter takes a particular behavior.
    
@@ -472,7 +486,7 @@
    :param startLocation: Only consider specified locations as possible sources.
    :type startLocation: string
 
-.. py:class:: testfilters(*, filters, headers, nodes, startLocation, question_name, exclusions)
+.. py:class:: testFilters(*, filters, headers, nodes, startLocation, question_name, exclusions)
 
    Evaluate the processing of a flow by a given filter/ACL.
    
@@ -483,16 +497,16 @@
    
        Default value: ``.*``
    :type filters: javaRegex
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
    :param nodes: *Required.* Only examine filters on nodes matching this name or regex.
    
        Default value: ``.*``
    :type nodes: nodeSpec
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
    :param startLocation: Location to start tracing from.
    :type startLocation: string
 
-.. py:class:: traceroute(*, headers, ignoreAcls, maxTraces, startLocation, question_name, exclusions)
+.. py:class:: traceroute(*, headers, ignoreFilters, maxTraces, startLocation, question_name, exclusions)
 
    Trace the path(s) for the specified flow.
    
@@ -500,12 +514,12 @@
    Unlike a real traceroute, this traceroute is directional. That is, for it to succeed, the reverse connectivity is not needed. This feature can help debug connectivity issues by decoupling the two directions.
    
    
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
    :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
    :type startLocation: string
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
-   :param ignoreAcls: If set to True, ACLs encountered along the path are ignored.
-   :type ignoreAcls: boolean
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
 

@@ -22,9 +22,10 @@ import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
-from typing import Any, Dict, Iterable, List, Optional, Set, Union  # noqa: F401
+from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple, Union)  # noqa: F401
 
 import attr
+import six
 from six import PY3, integer_types, string_types
 
 from pybatfish.client.commands import (_bf_answer_obj,
@@ -110,7 +111,6 @@ class QuestionMeta(type):
             setattr(constructor, '__signature__', Signature(parameters=params))
         setattr(new_cls, '__init__', constructor)
         setattr(new_cls, '__doc__', dct.get("docstring", ""))
-        setattr(new_cls, '__module__', dct.get("module", "__main__"))
         new_cls.description = dct.get("description", "")
         new_cls.tags = dct.get("tags", [])
         new_cls.template = dct.get('template', {})
@@ -188,10 +188,7 @@ class QuestionBase(object):
 
     def get_differential(self):
         """Return whether this question is to be asked differentially."""
-        if 'differential' in self._dict:
-            return self._dict['differential']
-        else:
-            return False
+        return self._dict.get('differential', False)
 
     def get_include_one_table_keys(self):
         """Return whether keys present in only one table should be included when computing answer table diffs."""
@@ -263,56 +260,67 @@ def list_tags():
     return _tags
 
 
-def load_dir_questions(questionDir, moduleName=bfq.__name__):
-    questionFiles = []
-    for dirpath, dirnames, filenames in os.walk(questionDir):
+def _install_questions_in_module(questions, module_name):
+    # type: (Iterable[Tuple[str, QuestionMeta]], str) -> None
+    """Install the given questions in the specified module."""
+    module = sys.modules[module_name]
+    for (name, question_class) in questions:
+        setattr(question_class, '__module__', module_name)
+        setattr(module, name, question_class)
+
+
+def _load_questions_from_dir(question_dir):
+    # type: (str) -> Dict[str, QuestionMeta]
+    question_files = []
+    for dirpath, dirnames, filenames in os.walk(question_dir):
         for filename in filenames:
             if filename.endswith(".json"):
-                questionFiles.append(os.path.join(dirpath, filename))
-    localQuestions = set([])
-    if len(questionFiles) == 0:
+                question_files.append(os.path.join(dirpath, filename))
+    if len(question_files) == 0:
         bf_logger.warn(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
-                questionDir=questionDir))
-    else:
-        numQuestions = 0
-        for questionFile in questionFiles:
-            try:
-                localQuestions.add(
-                    _load_question_disk(questionFile,
-                                        module_name=moduleName))
-                numQuestions += 1
-            except ValueError as err:
-                bf_logger.error(
-                    "Could not load question from {questionFile}:{err}".format(
-                        questionFile=questionFile,
-                        err=err))
-        bf_logger.info(
-            "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
-                numQuestions=numQuestions,
-                numQuestionFiles=len(questionFiles)))
-    return localQuestions
+                questionDir=question_dir))
+        return {}
+
+    questions = {}
+    for questionFile in question_files:
+        try:
+            (qname, qclass) = _load_question_disk(questionFile)
+            questions[qname] = qclass
+        except Exception as err:
+            bf_logger.error(
+                "Could not load question from {questionFile}:{err}".format(
+                    questionFile=questionFile,
+                    err=err))
+    bf_logger.info(
+        "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
+            numQuestions=len(questions), numQuestionFiles=len(question_files)))
+    return questions
 
 
-def _load_question_disk(question_path, module_name=bfq.__name__):
+def load_dir_questions(questionDir, moduleName=bfq.__name__):
+    # type: (str, str) -> Iterable[str]
+    """Load question templates from a directory on disk and install them in the given module."""
+    # Find all files with questions in them.
+    questions = _load_questions_from_dir(questionDir)
+    _install_questions_in_module(six.iteritems(questions), moduleName)
+    return questions.keys()
+
+
+def _load_question_disk(question_path):
+    # type: (str) -> Tuple[str, QuestionMeta]
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path, 'r') as question_file:
         question_dict = json.load(question_file)
-        return _load_question_dict(question_dict,
-                                   question_path=question_path,
-                                   module_name=module_name)
+    try:
+        return _load_question_dict(question_dict)
+    except QuestionValidationException as e:
+        raise QuestionValidationException(
+            "Error loading question from {}".format(question_path), e)
 
 
-def _load_question_json(question_str, module_name=bfq.__name__):
-    """Load a question template from a valid JSON string and instantiate a new `:py:class:Question`."""
-    question = json.loads(question_str)
-    return _load_question_dict(question, question_path=None,
-                               module_name=module_name)
-
-
-def _load_question_dict(question, question_path=None,
-                        module_name=bfq.__name__):
-    # type: (Dict, Optional[str], str) -> str
+def _load_question_dict(question):
+    # type: (Dict[str, Any]) -> Tuple[str, QuestionMeta]
     """Create a question from a dictionary which contains a template.
 
     :return the name of the question
@@ -323,9 +331,7 @@ def _load_question_dict(question, question_path=None,
     # Check has instance data
     instance_data = question.get('instance')
     if not instance_data:
-        raise QuestionValidationException(
-            "Missing instance data in question (file: {})".format(
-                question_path))
+        raise QuestionValidationException("Missing instance data")
 
     # name validation
     given_question_name = instance_data.get('instanceName')
@@ -364,19 +370,15 @@ def _load_question_dict(question, question_path=None,
     # Compute docstring
     docstring = _compute_docstring(question_description, variables, ivars)
 
-    # Make new Question class and set it in the specified module
-    module = sys.modules[module_name]
-    setattr(module, question_name,
-            QuestionMeta(question_name, (QuestionBase,), {
-                'docstring': docstring,
-                'description': question_description,
-                'module': module_name,
-                'tags': tags,
-                'template': deepcopy(question),
-                'variables': variables,
-            }))
-
-    return question_name
+    # Make new Question class
+    question_class = QuestionMeta(question_name, (QuestionBase,), {
+        'docstring': docstring,
+        'description': question_description,
+        'tags': tags,
+        'template': deepcopy(question),
+        'variables': variables,
+    })
+    return question_name, question_class
 
 
 def _process_variables(question_name, variables):
@@ -484,61 +486,50 @@ def _build_allowed_values(var_data):
 
 def load_questions(question_dir=None, from_server=False,
                    module_name=bfq.__name__):
+    # type: (Optional[str], bool, str) -> None
     """Load questions from directory or batfish service.
 
     :param question_dir: Load questions from this local directory instead of
         remote questions from the batfish service.
     :type question_dir: str
-    :param from_server: if true, also load questions from service.
-        Ignored if `question_dir` is `None`
+    :param from_server: if true or `question_dir` is None, load questions from
+        service.
     :type from_server: bool
     :param module_name: the name of the module where questions should be loaded.
         Default is :py:mod:`pybatfish.question.bfq`
     """
-    questions = set()
-    over_written_questions = 0
+    new_names = set()  # type: Set[str]
     if not question_dir or from_server:
-        remote_questions = _load_remote_questions_templates(
-            moduleName=module_name)
-        over_written_questions += _merge_questions(remote_questions,
-                                                   questions)
+        remote_questions = _load_remote_questions_templates()
+        _install_questions_in_module(remote_questions, module_name)
+        new_names |= set(name for name, q in remote_questions)
     if question_dir:
         local_questions = load_dir_questions(question_dir,
                                              moduleName=module_name)
-        over_written_questions += _merge_questions(local_questions,
-                                                   questions)
-    if over_written_questions > 0:
-        bf_logger.info(
-            "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
-                over_written_questions=over_written_questions))
+        over_written_questions = len(set(local_questions) & new_names)
+        if over_written_questions > 0:
+            bf_logger.info(
+                "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
+                    over_written_questions=over_written_questions))
 
 
-def _load_remote_questions_templates(moduleName=bfq.__name__):
-    numQuestions = 0
-    remoteQuestions = set([])
-    questionsDict = _bf_get_question_templates()
-    for (key, value) in questionsDict.items():
+def _load_remote_questions_templates():
+    # type: () -> Set[Tuple[str, QuestionMeta]]
+    num_questions = 0
+    remote_questions = set()
+    questions_dict = _bf_get_question_templates()
+    for (key, value) in questions_dict.items():
         try:
-            remoteQuestions.add(
-                _load_question_json(value, module_name=moduleName))
-            numQuestions += 1
+            remote_questions.add(_load_question_dict(json.loads(value)))
+            num_questions += 1
         except Exception as err:
             bf_logger.error(
                 "Could not load question {name} : {err}".format(name=key,
                                                                 err=err))
     bf_logger.info(
         "Successfully loaded {numQuestions} questions from remote".format(
-            numQuestions=numQuestions))
-    return remoteQuestions
-
-
-def _merge_questions(sourceQuestions, destinationQuestions):
-    overWrittenQuestions = 0
-    for remoteQuestion in sourceQuestions:
-        if remoteQuestion in destinationQuestions:
-            overWrittenQuestions += 1
-        destinationQuestions.add(remoteQuestion)
-    return overWrittenQuestions
+            numQuestions=num_questions))
+    return remote_questions
 
 
 def _validate(questionJson):
@@ -651,10 +642,22 @@ def _validateType(value, expectedType):
         return isinstance(value, float), None
     elif expectedType == 'double':
         return isinstance(value, float), None
-    elif expectedType == 'interfacePropertySpec':
-        return isinstance(value, string_types), None
-    elif expectedType == 'interfaceSpec':
-        return isinstance(value, string_types), None
+    elif expectedType in [
+        'bgpPeerPropertySpec',
+        'bgpProcessPropertySpec',
+        'interfacePropertySpec',
+        'interfaceSpec',
+        'javaRegex',
+        'jsonPathRegex',
+        'namedStructureSpec',
+        'nodePropertySpec',
+        'nodeSpec',
+        'ospfPropertySpec',
+    ]:
+        if not isinstance(value, string_types):
+            return False, "A Batfish {} must be a string".format(
+                expectedType)
+        return True, None
     elif expectedType == 'ip':
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
@@ -667,28 +670,14 @@ def _validateType(value, expectedType):
                 expectedType)
         else:
             return _isIpWildcard(value)
-    elif expectedType == 'javaRegex':
-        if not isinstance(value, string_types):
-            return False, "A Batfish {} must be a string".format(
-                expectedType)
-        return True, None
     elif expectedType == 'jsonPath':
         return _isJsonPath(value)
-    elif expectedType == 'jsonPathRegex':
-        if not isinstance(value, string_types):
-            return False, "A Batfish {} must be a string".format(
-                expectedType)
-        return True, None
     elif expectedType == 'long':
         INT64_MIN = -2 ** 64
         INT64_MAX = 2 ** 64 - 1
         valid = (isinstance(value, integer_types) and
                  INT64_MIN <= value <= INT64_MAX)
         return valid, None
-    elif expectedType == 'nodePropertySpec':
-        return isinstance(value, string_types), None
-    elif expectedType == 'nodeSpec':
-        return isinstance(value, string_types), None
     elif expectedType == 'prefix':
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
@@ -738,8 +727,12 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
-    elif expectedType in ['headerConstraint', 'pathConstraint',
-                          'dispositionSpec']:
+    elif expectedType in [
+        'answerElement',
+        'dispositionSpec',
+        'headerConstraint',
+        'pathConstraint',
+    ]:
         return True, None
     else:
         bf_logger.warn(

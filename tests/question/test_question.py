@@ -11,25 +11,25 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
-import os
+import json
 
 import pytest
 
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question import bfq
 from pybatfish.question.question import (_compute_docstring, _compute_var_help,
                                          _load_question_dict,
+                                         _load_questions_from_dir,
                                          _process_variables, _validate,
                                          list_questions, load_questions)
 
-
-@pytest.fixture(scope='module')
-def question_dir():
-    """Path to directory with questions."""
-    current_path = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(current_path, "../../questions")
+TEST_QUESTION_NAME = 'testQuestionName'
+TEST_QUESTION_DICT = {
+    'instance': {
+        'instanceName': TEST_QUESTION_NAME,
+        'description': 'a test question',
+    }
+}
 
 
 def test_min_length():
@@ -235,31 +235,41 @@ def test_process_variables():
     assert _process_variables("foo", None) == []
 
 
-def test_list_questions(question_dir):
-    load_questions(question_dir=question_dir)
-    assert list_questions() != []
+def test_load_dir_questions(tmpdir):
+    dir = tmpdir.mkdir("questions")
+    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    assert list(loaded.keys()) == [TEST_QUESTION_NAME]
+
+    # test fault tolerance to bad questions
+    dir.join("badq.json").write('{')
+    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
 
-def test_make_check(question_dir):
+def test_list_questions(tmpdir):
+    dir = tmpdir.mkdir("questions")
+    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+    load_questions(question_dir=dir.strpath)
+    names = [q['name'] for q in list_questions()]
+    assert names == [TEST_QUESTION_NAME]
+
+
+def test_make_check():
     """Make a check out of the first available question."""
-    load_questions(question_dir=question_dir)
-    q = list_questions()[0]['name']
-    qdict = getattr(bfq, q)().make_check().dict()
+    name, q = _load_question_dict(TEST_QUESTION_DICT)
+    qdict = q().make_check().dict()
     assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
                                                0).dict()
 
 
 def test_question_name():
     """Test user-set and default question names."""
-    _load_question_dict({
-        'instance': {
-            'instanceName': 'testQuestionName',
-            'description': 'a test question',
-        },
-    })
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
 
-    has_name = bfq.testQuestionName(question_name="manually set")
+    has_name = qclass(question_name="manually set")
     assert has_name.get_name() == "manually set"
 
-    inferred_name = bfq.testQuestionName()
-    assert inferred_name.get_name().startswith('__testQuestionName_')
+    inferred_name = qclass()
+    assert inferred_name.get_name().startswith(
+        '__{}_'.format(TEST_QUESTION_NAME))

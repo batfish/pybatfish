@@ -24,6 +24,7 @@ dist
 
 # Virtual environment, for python and python3, if desired.
 .env/
+.env2/
 .env3/
 
 # Jupyter checkpoints
