@@ -1,6 +1,5 @@
 {
-	"hostname" : "host1",
-	"iptablesFile" : "iptables/host1.iptables",
+	"hostname" : "PoP",
 	"hostInterfaces" : {
 		"eth0" : {
 			"name": "eth0",
