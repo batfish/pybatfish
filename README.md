@@ -7,6 +7,8 @@ Pybatfish is a Python client for [Batfish](https://github.com/batfish/batfish). 
 
 ## What is Batfish?
 
+[![Getting to know Batfish](batfish_video.png)](https://www.youtube.com/watch?v=Ca7kPAtfFqo)
+
 Batfish is a network validation tool that provides correctness guarantees for security, reliability, and compliance by analyzing the configuration of network devices. 
 
 The primary use case for Batfish is to evaluate planned configuration changes in order to understand the impact of the change. Pre-deployment validation is a critical gap in existing network automation workflows. 
@@ -29,17 +31,16 @@ See [www.batfish.org](http://www.batfish.org) for technical information on how i
 Batfish can provide correctness guarantees for a wide range of network behaviors and device configuration attributes, for example:
 #### Configuration Compliance
 * Flag undefined-but-referenced or defined-but-unreferenced structures (e.g., ACLs, route maps)
-* Configuration settings for MTUs, AAA, NTP, logging, etc. match templates
+* Validate configuration settings for MTUs, AAA, NTP, logging, etc. [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)]
 * Devices can only be accessed using SSHv2 and password is not null
-#### Reliability
-* End-to-end reachability is not impacted for any flow after any single-link or single-device failure
-* Certain services (e.g., DNS) are globally reachable
-#### Security
-* Sensitive services can be reached only from specific subnets or devices
-* Paths between endpoints are as expected (e.g., traverse a firewall, have at least 2 way ECMP, etc...)
-#### Change Analysis
+#### Security and Availability
+* ACLs and firewalls block all and only disallowed traffic [[video](https://youtu.be/KixQYEDh33s)]
+* Compute and compare the routes learned by each node [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)]
+* Smart traceroute and end-to-end reachability validation (e.g., DNS is globally reachable, sensitive services can only be reached from specific subnets) [[video](https://youtu.be/yaJBH3ZZ5Dw)]
+#### Change and Failure Analysis
 * End-to-end reachability is identical across the current and a planned configuration
-* Planned ACL or firewall changes are provably correct and causes no collateral damage for other traffic
+* End-to-end reachability is identical in the face of a single-link or single-device failure
+* Planned ACL or firewall changes are provably correct and cause no collateral damage for other traffic [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)]
 * Two configurations, potentially from different vendors, are functionally equivalent
 
   
