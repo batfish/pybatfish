@@ -28,18 +28,18 @@ See [www.batfish.org](http://www.batfish.org) for technical information on how i
 
 ## What kinds of correctness checks does Batfish support?
 
-Batfish can provide correctness guarantees for a wide range of network behaviors and device configuration attributes, for example:
+Batfish makes it easy to explore and validate a wide range of network behaviors and device configuration attributes, for example:
 #### Configuration Compliance
 * Flag undefined-but-referenced or defined-but-unreferenced structures (e.g., ACLs, route maps)
 * Validate configuration settings for MTUs, AAA, NTP, logging, etc. [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)]
-* Devices can only be accessed using SSHv2 and password is not null
-#### Security and Availability
+* Ensure devices can only be accessed using SSHv2 and password is not null
+#### Security and Availability Validation
 * ACLs and firewalls block all and only disallowed traffic [[video](https://youtu.be/KixQYEDh33s)]
 * Compute and compare the routes learned by each node [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)]
-* Smart traceroute and end-to-end reachability validation (e.g., DNS is globally reachable, sensitive services can only be reached from specific subnets) [[video](https://youtu.be/yaJBH3ZZ5Dw)]
+* Smart traceroute and end-to-end reachability correctness (e.g., DNS is globally reachable, sensitive services can only be reached from specific subnets) [[video](https://youtu.be/yaJBH3ZZ5Dw)]
 #### Change and Failure Analysis
 * End-to-end reachability is identical across the current and a planned configuration
-* End-to-end reachability is identical in the face of a single-link or single-device failure
+* End-to-end reachability is identical in the face of link/device failure scenarios
 * Planned ACL or firewall changes are provably correct and cause no collateral damage for other traffic [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)]
 * Two configurations, potentially from different vendors, are functionally equivalent
 
