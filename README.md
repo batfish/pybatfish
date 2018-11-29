@@ -44,7 +44,7 @@ Batfish can provide correctness guarantees for a wide range of network behaviors
 * Planned ACL or firewall changes are provably correct and causes no collateral damage for other traffic
 * Two configurations, potentially from different vendors, are functionally equivalent
 
-Batfish's [YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60KvmJYA) has videos that illustrate many of these use cases.
+Batfish's [YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60KvmJYA/videos) has videos that illustrate many of these use cases.
   
 ## How do I get started?
 
