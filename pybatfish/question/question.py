@@ -17,20 +17,21 @@
 from __future__ import absolute_import, print_function
 
 import json
+import logging
 import os
 import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
-from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple, Union)  # noqa: F401
+from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple,
+                    Union)  # noqa: F401
 
 import attr
 import six
 from six import PY3, integer_types, string_types
 
-from pybatfish.client.commands import (_bf_answer_obj,
-                                       _bf_get_question_templates, bf_logger,
-                                       bf_session)
+from pybatfish.client.internal import (_bf_answer_obj,
+                                       _bf_get_question_templates)
 from pybatfish.datamodel import Assertion, AssertionType  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
@@ -46,6 +47,8 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
+
+bf_logger = logging.getLogger("pybatfish.client")
 
 
 @attr.s(frozen=True)
@@ -149,6 +152,7 @@ class QuestionBase(object):
 
         :raises QuestionValidationException: if the question is malformed
         """
+        from pybatfish.client.commands import bf_session
         snapshot = bf_session.get_snapshot(snapshot)
         if reference_snapshot is None and self.get_differential():
             raise ValueError(
