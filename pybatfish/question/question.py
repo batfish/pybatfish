@@ -23,8 +23,8 @@ import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
-from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple,
-                    Union)  # noqa: F401
+from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
+                    Tuple, Union)
 
 import attr
 import six
