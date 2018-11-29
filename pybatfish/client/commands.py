@@ -34,6 +34,7 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
 from pybatfish.exception import BatfishException
+from pybatfish.question.question import QuestionBase
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
@@ -734,6 +735,43 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
+
+
+def bf_upload_init_info(dry_run=True):
+    questions = [
+        QuestionBase({
+            "class": "org.batfish.question.initialization.ParseWarningQuestion",
+            "differential": False,
+            "instance": {
+                "instanceName": "__parseWarning_{}".format(get_uuid()),
+            }
+        }),
+        QuestionBase({
+            "class": "org.batfish.question.initialization.FileParseStatusQuestion",
+            "differential": False,
+            "instance": {
+                "instanceName": "__fileParseStatus_{}".format(get_uuid()),
+            }
+        }),
+        QuestionBase({
+            "class": "org.batfish.question.initialization.ConversionWarningQuestion",
+            "differential": False,
+            "instance": {
+                "instanceName": "__viConversionWarning_{}".format(get_uuid()),
+            }
+        }),
+    ]
+
+    for q in questions:
+        instance_name = q["instance"]["instanceName"]
+        try:
+            answer = q.answer().dict()
+        except BatfishException:
+            bf_logger.warning(
+                "Failed to answer question {}".format(instance_name))
+            continue
+
+        print("{}: {}".format(instance_name, answer))
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):
