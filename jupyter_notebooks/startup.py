@@ -47,3 +47,5 @@ def show(df):
                                                       regex=True)
     display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
             .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))
+
+from pybatfish.datamodel import Interface, Edge
