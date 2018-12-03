@@ -11,6 +11,9 @@ from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints
 from pybatfish.question import bfq, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
+from pybatfish.datamodel import Interface, Edge
+import random
+
 bf_logger.setLevel(logging.WARN)
 
 load_questions()
@@ -47,5 +50,3 @@ def show(df):
                                                       regex=True)
     display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
             .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))
-
-from pybatfish.datamodel import Interface, Edge
