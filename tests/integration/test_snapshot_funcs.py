@@ -15,6 +15,7 @@ import uuid
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
+import requests
 from requests import HTTPError
 
 from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
@@ -26,7 +27,8 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_put_node_roles,
                                        bf_session, bf_set_network,
-                                       bf_set_snapshot)
+                                       bf_set_snapshot, bf_upload_init_info,
+                                       _INIT_INFO_QUESTIONS)
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
@@ -37,6 +39,9 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
+
+_S3_BUCKET = "test-world-writeable-bucket"
+_S3_REGION = "us-west-2"
 
 
 @pytest.fixture()
@@ -238,3 +243,21 @@ def test_get_snapshot_object(network, example_snapshot):
     # object should exist after being placed
     bf_put_snapshot_object('new_object', 'goodbye')
     assert bf_get_snapshot_object_text('new_object') == 'goodbye'
+
+
+def test_upload_init_info(network, example_snapshot):
+    """Upload initialization information for example snapshot."""
+    resource_url = bf_upload_init_info(_S3_BUCKET, _S3_REGION, dry_run=False)
+
+    try:
+        # Confirm files exist for each of the init info questions
+        for q in _INIT_INFO_QUESTIONS:
+            r = requests.get('{}/{}'.format(resource_url, q.get_name()))
+            assert (r.status_code == 200)
+    finally:
+        # Cleanup any successfully uploaded questions
+        for q in _INIT_INFO_QUESTIONS:
+            try:
+                requests.delete('{}/{}'.format(resource_url, q.get_name()))
+            except Exception:
+                pass

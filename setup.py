@@ -128,7 +128,7 @@ setup(
                 'sphinx_rtd_theme',
                 ] + \
                (['mypy'] if not PY2 else []),
-        'test': ['coverage', 'pytz'],
+        'test': ['coverage', 'pytz', 'responses'],
     },
 
     # List pytest requirements for running unit tests
