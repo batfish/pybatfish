@@ -720,7 +720,7 @@ def bf_set_snapshot(name=None, index=None):
 
 
 def bf_upload_init_info(bucket, region, dry_run=True,
-                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
+                        netconan_config=None):
     # type: (str, str, bool, str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
