@@ -697,8 +697,6 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
 
     This runs a series of diagnostic questions on the current snapshot (including collecting parsing and conversion information).  The information collected is anonymized with Netconan which either anonymizes passwords and IP addresses (default) or uses the settings in the provided config.  The anonymous information is then either saved locally (if dry_run is True) or uploaded to an S3 bucket Batfish devs have access to (if dry_run is False).
 
-    This function is useful when
-
     :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to the specified S3 bucket
     :type dry_run: bool
     :param netconan_config: path to Netconan configuration file
