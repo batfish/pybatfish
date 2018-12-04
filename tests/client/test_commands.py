@@ -21,8 +21,8 @@ import uuid
 import pytest
 import responses
 
-from pybatfish.client.commands import _generate_s3_url, \
-    _anonymize_dir, _upload_dir_to_url
+from pybatfish.client.commands import (_anonymize_dir, _generate_s3_url,
+                                       _upload_dir_to_url)
 from pybatfish.client.commands import (bf_fork_snapshot, bf_init_snapshot,
                                        bf_set_network)
 
@@ -70,7 +70,6 @@ def test_anonymize(config_dir, tmp_dir):
 
 def test_anonymize_custom(config_dir, tmp_dir):
     """Confirm custom anonymization removes only what is specified in config."""
-
     # Generate Netconan config which will anonymize passwords but NOT IP addresses
     with tempfile.NamedTemporaryFile(mode='w') as f:
         f.write("anonymize-passwords\n")

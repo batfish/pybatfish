@@ -18,8 +18,9 @@ import pytest
 import requests
 from requests import HTTPError
 
-from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_fork_snapshot, bf_generate_dataplane,
+from pybatfish.client.commands import (_INIT_INFO_QUESTIONS, bf_delete_network,
+                                       bf_delete_snapshot, bf_fork_snapshot,
+                                       bf_generate_dataplane,
                                        bf_get_snapshot_inferred_node_role_dimension,
                                        bf_get_snapshot_inferred_node_roles,
                                        bf_get_snapshot_node_role_dimension,
@@ -27,8 +28,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_put_node_roles,
                                        bf_session, bf_set_network,
-                                       bf_set_snapshot, bf_upload_init_info,
-                                       _INIT_INFO_QUESTIONS)
+                                       bf_set_snapshot, bf_upload_init_info)
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,

@@ -781,8 +781,7 @@ def bf_upload_init_info(bucket, region, dry_run=True,
 def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     # type: (str, str, str) -> None
     """
-    Anonymize files in input dir and save to output dir, using provided Netconan configuration file.
-    If no configuration is provided, IP addresses and password will be anonymized.
+    Anonymize files in input dir and save to output dir, using provided Netconan configuration file.  If no configuration is provided, IP addresses and password will be anonymized.
 
     :param input_dir: directory containing files to anonymize
     :type input_dir: string
@@ -828,7 +827,7 @@ def _generate_s3_url(bucket, region, resource):
 def _upload_dir_to_url(base_url, src_dir):
     # type: (str, str) -> None
     """
-    Recursively put files from the specified directory to the specified URL
+    Recursively put files from the specified directory to the specified URL.
 
     :param base_url: URL to put files to
     :type base_url: string
