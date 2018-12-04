@@ -40,7 +40,7 @@ def config_dir():
 
     with open(os.path.join(tmp_dir, _CONFIG_FILE), 'w') as f:
         f.write(_CONFIG_CONTENT)
-        f.seek(0)
+        f.flush()
         yield tmp_dir
 
     shutil.rmtree(tmp_dir)
