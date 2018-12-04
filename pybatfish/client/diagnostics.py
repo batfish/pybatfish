@@ -80,7 +80,8 @@ def upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     """
     from pybatfish.client.commands import bf_session
 
-    with tempfile.TemporaryDirectory() as tmp_dir:
+    tmp_dir = tempfile.mkdtemp()
+    try:
         for q in questions:
             instance_name = q.get_name()
             try:
@@ -95,6 +96,8 @@ def upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
 
         tmp_dir_anon = tempfile.mkdtemp()
         _anonymize_dir(tmp_dir, tmp_dir_anon, netconan_config)
+    finally:
+        shutil.rmtree(tmp_dir)
 
     if dry_run:
         bf_logger.info(

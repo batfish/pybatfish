@@ -45,10 +45,10 @@ def config_dir():
 
 def test_anonymize(config_dir, tmpdir):
     """Confirm default anonymization removes password and IP address."""
-    _anonymize_dir(config_dir, tmpdir)
+    _anonymize_dir(config_dir, str(tmpdir))
 
     # Confirm the password is anonymized but IP address is left alone, per anonymization config
-    with open(os.path.join(tmpdir, _CONFIG_FILE), 'r') as f:
+    with open(os.path.join(str(tmpdir), _CONFIG_FILE), 'r') as f:
         anon_text = f.read()
         assert (_CONFIG_PASSWORD not in anon_text)
         assert (_CONFIG_IP_ADDR not in anon_text)
@@ -60,11 +60,11 @@ def test_anonymize_custom(config_dir, tmpdir):
     with tempfile.NamedTemporaryFile(mode='w') as f:
         f.write("anonymize-passwords\n")
         f.seek(0)
-        _anonymize_dir(config_dir, tmpdir,
+        _anonymize_dir(config_dir, str(tmpdir),
                        netconan_config=f.name)
 
     # Confirm the password is anonymized but IP address is left alone, per anonymization config
-    with open(os.path.join(tmpdir, _CONFIG_FILE), 'r') as f:
+    with open(os.path.join(str(tmpdir), _CONFIG_FILE), 'r') as f:
         anon_text = f.read()
         assert (_CONFIG_PASSWORD not in anon_text)
         assert (_CONFIG_IP_ADDR in anon_text)
