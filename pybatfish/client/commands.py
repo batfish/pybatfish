@@ -691,7 +691,7 @@ def bf_set_snapshot(name=None, index=None):
 
 
 def bf_upload_diagnostics(dry_run=True, netconan_config=None):
-    # type: (bool, str, Optional[str], Optional[str]) -> str
+    # type: (bool, str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
