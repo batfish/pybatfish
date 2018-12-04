@@ -245,7 +245,6 @@ def test_get_snapshot_object(network, example_snapshot):
 
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
-    # Use public bucket to dump test files to
     resource_url = bf_upload_diagnostics(dry_run=False)
 
     try:
@@ -257,7 +256,6 @@ def test_upload_diagnostics(network, example_snapshot):
         # Cleanup any successfully uploaded questions
         for q in _INIT_INFO_QUESTIONS:
             try:
-                pass
-                # requests.delete('{}/{}'.format(resource_url, q.get_name()))
+                requests.delete('{}/{}'.format(resource_url, q.get_name()))
             except Exception:
                 pass
