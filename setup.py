@@ -103,6 +103,7 @@ setup(
     install_requires=['attrs>=18.1.0',
                       'deepdiff',
                       'deprecated',
+                      'netconan',
                       'pandas>=0.23.0',
                       'python-dateutil',
                       'requests',

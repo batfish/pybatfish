@@ -720,7 +720,7 @@ def bf_set_snapshot(name=None, index=None):
 
 
 def bf_upload_init_info(bucket, region, dry_run=True,
-                        netconan_config=None):
+                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
     # type: (str, str, bool, str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
@@ -741,14 +741,13 @@ def bf_upload_init_info(bucket, region, dry_run=True,
     for q in _INIT_INFO_QUESTIONS:
         instance_name = q.get_name()
         try:
-            answer = q.answer().dict()
+            content = json.dumps(q.answer().dict(), indent=4, sort_keys=True)
         except BatfishException as e:
-            bf_logger.warning(
-                "Failed to answer question {}: {}".format(instance_name, e))
-            continue
+            content = "Failed to answer {}: {}".format(instance_name, e)
+            bf_logger.warning(content)
 
         with open(os.path.join(tmp_dir, instance_name), 'w') as f:
-            f.write(json.dumps(answer, indent=4, sort_keys=True))
+            f.write(content)
 
     tmp_dir_anon = tempfile.mkdtemp()
     _anonymize_dir(tmp_dir, tmp_dir_anon, netconan_config)
