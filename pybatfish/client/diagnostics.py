@@ -20,6 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
+from typing import List  # noqa: F401
 
 import requests
 from netconan import netconan
