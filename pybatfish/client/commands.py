@@ -780,7 +780,9 @@ def bf_upload_init_info(bucket, region, dry_run=True,
 def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     # type: (str, str, str) -> None
     """
-    Anonymize files in input dir and save to output dir, using provided Netconan configuration file.  If no configuration is provided, IP addresses and password will be anonymized.
+    Anonymize files in input dir and save to output dir.
+
+    Uses Netconan with the provided configuration file to perform anonymization.  If no configuration is provided, only IP addresses and password will be anonymized.
 
     :param input_dir: directory containing files to anonymize
     :type input_dir: string

@@ -33,9 +33,6 @@ _CONFIG_FILE = "file.cfg"
 _CONFIG_CONTENT = "username blah password {password}\nsomething {ip}\n".format(
     password=_CONFIG_PASSWORD, ip=_CONFIG_IP_ADDR)
 
-_S3_BUCKET = "bucket-name"
-_S3_REGION = "region"
-
 
 @pytest.fixture()
 def config_dir():
@@ -103,7 +100,7 @@ def test_fork_snapshot_validation():
 def test_upload_to_url(config_dir):
     """Confirm config file is uploaded to a fake S3 bucket."""
     dir_name = uuid.uuid4().hex
-    base_url = _generate_s3_url(_S3_BUCKET, region=_S3_REGION,
+    base_url = _generate_s3_url("bucket", region="region",
                                 resource=dir_name)
     resource_url = '{}/{}'.format(base_url, _CONFIG_FILE)
     uploads = {}

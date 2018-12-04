@@ -40,6 +40,7 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 
+# Public bucket to dump test files to
 _S3_BUCKET = "test-world-writeable-bucket"
 _S3_REGION = "us-west-2"
 
