@@ -35,7 +35,9 @@ def test_as_dict():
 
 def test_json_serialization():
     i = Interface(hostname='host', interface='iface')
-    assert BfJsonEncoder().encode(i) == json.dumps(i.dict())
+    # Load into dict from json to ignore key ordering
+    assert json.loads(BfJsonEncoder().encode(i)) == json.loads(
+        json.dumps(i.dict()))
 
 
 def test_html_interface():
