@@ -28,7 +28,9 @@ from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel.primitives import (  # noqa: F401
-    AutoCompletionType, Edge, Interface)
+    AutoCompleteSuggestion,
+    AutoCompletionType, Edge,
+    Interface)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
@@ -140,7 +142,7 @@ def bf_add_reference_book(book):
 
 
 def bf_auto_complete(completionType, query, maxSuggestions=None):
-    # type: (AutoCompletionType, str, Optional[int]) -> Any
+    # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """Auto complete the partial query based on its type."""
     jsonData = workhelper.get_data_auto_complete(bf_session, completionType,
                                                  query, maxSuggestions)
@@ -148,7 +150,10 @@ def bf_auto_complete(completionType, query, maxSuggestions=None):
                                             CoordConsts.SVC_RSC_AUTO_COMPLETE,
                                             jsonData)
     if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-        return response[CoordConsts.SVC_KEY_SUGGESTIONS]
+        suggestions = [AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                       for suggestion in
+                       response[CoordConsts.SVC_KEY_SUGGESTIONS]]
+        return suggestions
 
     raise BatfishException("Unexpected response: {}.".format(response))
 
