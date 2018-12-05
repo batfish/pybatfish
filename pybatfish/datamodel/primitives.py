@@ -60,6 +60,18 @@ class AssertionType(str, Enum):
     EQUALS = "equals"  #: Result equals to value (list of rows). **Experimental**
 
 
+class AutoCompletionType(str, Enum):
+    """Auto completion type."""
+
+    BGP_PEER_PROPERTY = "bgp_peer_property"  #: bgp peer properties
+    BGP_PROCESS_PROPERTY = "bgp_process_property"  #: bgp process properties
+    INTERFACE_PROPERTY = "interface_property"  #: interface properties
+    NAMED_STRUCTURE = "named_structure"  #: named structure type
+    NODE = "node"  #: names of nodes
+    NODE_PROPERTY = "node_property"  #: node properties
+    OSPF_PROPERTY = "ospf_property"  #: ospf property
+
+
 @attr.s(frozen=True)
 class Assertion(DataModelElement):
     """A Batfish assertion.
