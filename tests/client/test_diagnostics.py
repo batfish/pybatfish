@@ -32,7 +32,7 @@ _CONFIG_CONTENT = "username blah password {password}\nsomething {ip}\n".format(
 
 @pytest.fixture()
 def config_dir(tmpdir):
-    dir_path = tmpdir.mkdir('config')
+    dir_path = str(tmpdir.mkdir('config'))
     with open(os.path.join(dir_path, _CONFIG_FILE), 'w') as f:
         f.write(_CONFIG_CONTENT)
         f.flush()
