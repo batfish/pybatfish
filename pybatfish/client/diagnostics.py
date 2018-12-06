@@ -59,8 +59,8 @@ _S3_REGION = 'us-west-2'
 bf_logger = logging.getLogger("pybatfish.client")
 
 
-def upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
-                       netconan_config=None, questions=_INIT_INFO_QUESTIONS):
+def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
+                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
     # type: (str, str, bool, str, List[QuestionBase]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
@@ -105,22 +105,25 @@ def upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
                 tmp_dir_anon))
         return tmp_dir_anon
 
-    if bucket is None:
-        raise ValueError('Bucket must be set to upload init info.')
-    if region is None:
-        raise ValueError('Region must be set to upload init info.')
+    try:
+        if bucket is None:
+            raise ValueError('Bucket must be set to upload init info.')
+        if region is None:
+            raise ValueError('Region must be set to upload init info.')
 
-    # Generate anonymous S3 subdirectory name
-    anon_dir_name = md5(
-        '{}{}{}'.format(bf_session.network,
-                        bf_session.baseSnapshot,
-                        uuid.uuid4().hex).encode()).hexdigest()
-    upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
-        bucket=bucket, region=region, resource=anon_dir_name)
+        # Generate anonymous S3 subdirectory name
+        anon_dir_name = md5(
+            '{}{}{}'.format(bf_session.network,
+                            bf_session.baseSnapshot,
+                            uuid.uuid4().hex).encode()).hexdigest()
+        upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
+            bucket=bucket, region=region, resource=anon_dir_name)
 
-    _upload_dir_to_url(upload_dest, tmp_dir_anon)
-    bf_logger.info('Uploaded files to: {}'.format(upload_dest))
-    shutil.rmtree(tmp_dir_anon)
+        _upload_dir_to_url(upload_dest, tmp_dir_anon)
+        bf_logger.info('Uploaded files to: {}'.format(upload_dest))
+    finally:
+        shutil.rmtree(tmp_dir_anon)
+
     return upload_dest
 
 

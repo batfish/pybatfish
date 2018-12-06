@@ -14,7 +14,6 @@
 #   limitations under the License.
 import json
 import os
-import shutil
 import tempfile
 import uuid
 
@@ -32,15 +31,12 @@ _CONFIG_CONTENT = "username blah password {password}\nsomething {ip}\n".format(
 
 
 @pytest.fixture()
-def config_dir():
-    tmp_dir = tempfile.mkdtemp()
-
-    with open(os.path.join(tmp_dir, _CONFIG_FILE), 'w') as f:
+def config_dir(tmpdir):
+    dir_path = tmpdir.mkdir('config')
+    with open(os.path.join(dir_path, _CONFIG_FILE), 'w') as f:
         f.write(_CONFIG_CONTENT)
         f.flush()
-        yield tmp_dir
-
-    shutil.rmtree(tmp_dir)
+        yield dir_path
 
 
 def test_anonymize(config_dir, tmpdir):
