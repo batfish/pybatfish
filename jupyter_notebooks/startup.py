@@ -1,5 +1,6 @@
 # Importing required libraries, setting up logging, and loading questions
 import logging
+import random
 
 import pandas as pd
 from IPython.display import display
@@ -7,6 +8,7 @@ from pandas.io.formats.style import Styler
 
 from pybatfish.client.commands import *
 # noinspection PyUnresolvedReferences
+from pybatfish.datamodel import Interface, Edge
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints
 from pybatfish.question import bfq, load_questions  # noqa: F401
 from pybatfish.util import get_html
