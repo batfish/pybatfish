@@ -53,7 +53,7 @@ _INIT_INFO_QUESTIONS = [
     }),
 ]
 
-_S3_BUCKET = 'public-batfish-diagnostics'
+_S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
 
 bf_logger = logging.getLogger("pybatfish.client")
@@ -75,7 +75,7 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     :type netconan_config: string
     :param questions: list of questions to run and upload
     :type questions: list[QuestionBase]
-    :return: location of anonymized files (local directory if doing dry run, otherwise S3 resource URL)
+    :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
     from pybatfish.client.commands import bf_session
@@ -120,11 +120,11 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
             bucket=bucket, region=region, resource=anon_dir_name)
 
         _upload_dir_to_url(upload_dest, tmp_dir_anon)
-        bf_logger.info('Uploaded files to: {}'.format(upload_dest))
+        bf_logger.debug('Uploaded files to: {}'.format(upload_dest))
     finally:
         shutil.rmtree(tmp_dir_anon)
 
-    return upload_dest
+    return anon_dir_name
 
 
 def _anonymize_dir(input_dir, output_dir, netconan_config=None):

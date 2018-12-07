@@ -30,7 +30,8 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
-from pybatfish.client.diagnostics import _INIT_INFO_QUESTIONS
+from pybatfish.client.diagnostics import _INIT_INFO_QUESTIONS, _S3_REGION, \
+    _S3_BUCKET
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
@@ -245,17 +246,12 @@ def test_get_snapshot_object(network, example_snapshot):
 
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
-    resource_url = bf_upload_diagnostics(dry_run=False)
+    # This call raises an exception if any file upload results in HTTP status != 200
+    resource = bf_upload_diagnostics(dry_run=False)
+    base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
+        bucket=_S3_BUCKET, region=_S3_REGION)
 
-    try:
-        # Confirm files exist for each of the init info questions
-        for q in _INIT_INFO_QUESTIONS:
-            r = requests.get('{}/{}'.format(resource_url, q.get_name()))
-            assert (r.status_code == 200)
-    finally:
-        # Cleanup any successfully uploaded questions
-        for q in _INIT_INFO_QUESTIONS:
-            try:
-                requests.delete('{}/{}'.format(resource_url, q.get_name()))
-            except Exception:
-                pass
+    # Confirm none of the uploaded questions are accessible
+    for q in _INIT_INFO_QUESTIONS:
+        r = requests.get('{}/{}/{}'.format(base_url, resource, q.get_name()))
+        assert (r.status_code == 403)

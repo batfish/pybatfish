@@ -706,7 +706,7 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     :type dry_run: bool
     :param netconan_config: path to Netconan configuration file
     :type netconan_config: string
-    :return: location of anonymized files (local directory if doing dry run, otherwise resource URL)
+    :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
     return _upload_diagnostics(dry_run=dry_run, netconan_config=netconan_config)
