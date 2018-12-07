@@ -103,6 +103,7 @@ setup(
     install_requires=['attrs>=18.1.0',
                       'deepdiff',
                       'deprecated',
+                      'netconan',
                       'pandas>=0.23.0',
                       'python-dateutil',
                       'requests',
@@ -128,7 +129,7 @@ setup(
                 'sphinx_rtd_theme',
                 ] + \
                (['mypy'] if not PY2 else []),
-        'test': ['coverage', 'pytz'],
+        'test': ['coverage', 'pytz', 'responses'],
     },
 
     # List pytest requirements for running unit tests

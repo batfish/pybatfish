@@ -15,10 +15,12 @@ import uuid
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
+import requests
 from requests import HTTPError
 
-from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_fork_snapshot, bf_generate_dataplane,
+from pybatfish.client.commands import (bf_delete_network,
+                                       bf_delete_snapshot, bf_fork_snapshot,
+                                       bf_generate_dataplane,
                                        bf_get_snapshot_inferred_node_role_dimension,
                                        bf_get_snapshot_inferred_node_roles,
                                        bf_get_snapshot_node_role_dimension,
@@ -26,8 +28,10 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_init_snapshot, bf_list_snapshots,
                                        bf_put_node_roles,
                                        bf_session, bf_set_network,
-                                       bf_set_snapshot)
+                                       bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
+from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
+                                          _S3_REGION)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
@@ -238,3 +242,16 @@ def test_get_snapshot_object(network, example_snapshot):
     # object should exist after being placed
     bf_put_snapshot_object('new_object', 'goodbye')
     assert bf_get_snapshot_object_text('new_object') == 'goodbye'
+
+
+def test_upload_diagnostics(network, example_snapshot):
+    """Upload initialization information for example snapshot."""
+    # This call raises an exception if any file upload results in HTTP status != 200
+    resource = bf_upload_diagnostics(dry_run=False)
+    base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
+        bucket=_S3_BUCKET, region=_S3_REGION)
+
+    # Confirm none of the uploaded questions are accessible
+    for q in _INIT_INFO_QUESTIONS:
+        r = requests.get('{}/{}/{}'.format(base_url, resource, q.get_name()))
+        assert (r.status_code == 403)
