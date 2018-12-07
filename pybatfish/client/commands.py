@@ -696,9 +696,13 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     """
     Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
-    This runs a series of diagnostic questions on the current snapshot (including collecting parsing and conversion information).  The information collected is anonymized with `Netconan <https://github.com/intentionet/netconan>`_ which either anonymizes passwords and IP addresses (default) or uses the settings in the provided `netconan_config`.  The anonymous information is then either saved locally (if `dry_run` is True) or uploaded to Batfish devs (if `dry_run` is False).
+    This runs a series of diagnostic questions on the current snapshot (including collecting parsing and conversion information).
 
-    :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish devs
+    The information collected is anonymized with `Netconan <https://github.com/intentionet/netconan>`_ which either anonymizes passwords and IP addresses (default) or uses the settings in the provided `netconan_config`.
+
+    The anonymous information is then either saved locally (if `dry_run` is True) or uploaded to Batfish developers (if `dry_run` is False).
+
+    :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
     :type dry_run: bool
     :param netconan_config: path to Netconan configuration file
     :type netconan_config: string
