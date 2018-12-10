@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
-from typing import List  # noqa: F401
+from typing import Dict, List, Optional  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -119,7 +119,8 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
         upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
             bucket=bucket, region=region, resource=anon_dir_name)
 
-        _upload_dir_to_url(upload_dest, tmp_dir_anon)
+        _upload_dir_to_url(upload_dest, tmp_dir_anon,
+                           headers={'x-amz-acl': 'bucket-owner-full-control'})
         bf_logger.debug('Uploaded files to: {}'.format(upload_dest))
     finally:
         shutil.rmtree(tmp_dir_anon)
@@ -157,8 +158,8 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     netconan.main(args)
 
 
-def _upload_dir_to_url(base_url, src_dir):
-    # type: (str, str) -> None
+def _upload_dir_to_url(base_url, src_dir, headers=None):
+    # type: (str, str, Optional[Dict]) -> None
     """
     Recursively put files from the specified directory to the specified URL.
 
@@ -173,7 +174,7 @@ def _upload_dir_to_url(base_url, src_dir):
             rel_path = os.path.relpath(path, src_dir)
             with open(path, 'rb') as data:
                 resource = '{}/{}'.format(base_url, rel_path)
-                r = requests.put(resource, data=data)
+                r = requests.put(resource, data=data, headers=headers)
                 if r.status_code != 200:
                     raise HTTPError(
                         'Failed to upload resource: {} with status code {}'.format(
