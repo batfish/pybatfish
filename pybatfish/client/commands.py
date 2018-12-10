@@ -710,7 +710,9 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     the provided `netconan_config`.
 
     The anonymous information is then either saved locally (if `dry_run` is
-    True) or uploaded to Batfish developers (if `dry_run` is False).
+    True) or uploaded to Batfish developers (if `dry_run` is False).  The
+    uploaded information will be accessible only to Batfish developers and will
+    be used to help diagnose any issues you encounter.
 
     :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
     :type dry_run: bool
