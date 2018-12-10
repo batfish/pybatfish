@@ -15,7 +15,9 @@ The current list of notebooks are:
    - Shows how forwarding paths can be analyzed using traceroute and reachability queries.
 - [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb) [[video](https://youtu.be/Yje70Q8R79w)]
    - Shows a workflow to ensure that changes to the network do not impact packet forwarding.
-   
+- [Analyzing the Impact of Failures](Analyzing%20the%20Impact%20of%20Failures.ipynb)
+   - Shows how to analyze the impact of failures on the network and conduct Chaos Monkey style testing.
+  
 We will continue adding notebooks that demonstrating additional use cases of Batfish. 
 
 ------
