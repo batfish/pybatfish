@@ -13,7 +13,7 @@ The current list of notebooks are:
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
 - [Introduction to Forwarding Analysis](Introduction%20to%20Forwarding%20Analysis.ipynb) [[video](https://youtu.be/yaJBH3ZZ5Dw)]
    - Shows how forwarding paths can be analyzed using traceroute and reachability queries.
-- [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb)
+- [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb) [[video](https://youtu.be/Yje70Q8R79w)]
    - Shows a workflow to ensure that changes to the network do not impact packet forwarding.
    
 We will continue adding notebooks that demonstrating additional use cases of Batfish. 

@@ -27,9 +27,11 @@ import six
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.datamodel import answer
+from pybatfish.client.diagnostics import _upload_diagnostics
 from pybatfish.datamodel.primitives import (  # noqa: F401
-    Edge, Interface)
+    AutoCompleteSuggestion,
+    AutoCompletionType, Edge,
+    Interface)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
@@ -39,7 +41,7 @@ from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
-from .workhelper import (_get_data_get_question_templates, get_work_status,
+from .workhelper import (get_work_status,
                          kill_work)
 
 # TODO: normally libraries don't configure logging in code
@@ -95,6 +97,7 @@ __all__ = ['bf_add_analysis',
            'bf_session',
            'bf_set_network',
            'bf_set_snapshot',
+           'bf_upload_diagnostics',
            'bf_write_question_settings']
 
 
@@ -140,45 +143,8 @@ def bf_add_reference_book(book):
     restv2helper.add_reference_book(bf_session, book)
 
 
-def _bf_answer_obj(question_str, parameters_str, question_name,
-                   background, snapshot, reference_snapshot):
-    # type: (str, str, str, bool, str, Optional[str]) -> Union[str, Dict]
-
-    json.loads(parameters_str)  # a syntactic check for parametersStr
-    if not question_name:
-        question_name = Options.default_question_prefix + "_" + get_uuid()
-
-    # Upload the question
-    json_data = workhelper.get_data_upload_question(bf_session, question_name,
-                                                    question_str,
-                                                    parameters_str)
-    resthelper.get_json_response(bf_session,
-                                 CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data)
-
-    # Answer the question
-    work_item = workhelper.get_workitem_answer(bf_session, question_name,
-                                               snapshot, reference_snapshot)
-    workhelper.execute(work_item, bf_session, background)
-
-    if background:
-        return work_item.id
-
-    # get the answer
-    answer_bytes = resthelper.get_answer(bf_session, snapshot, question_name,
-                                         reference_snapshot)
-
-    # In Python 3.x, answer needs to be decoded before it can be used
-    # for things like json.loads (<= 3.6).
-    if six.PY3:
-        answer_string = answer_bytes.decode(encoding="utf-8")
-    else:
-        answer_string = answer_bytes
-    answer_obj = json.loads(answer_string)
-
-    return answer.from_string(answer_obj[1]['answer'])
-
-
 def bf_auto_complete(completionType, query, maxSuggestions=None):
+    # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """Auto complete the partial query based on its type."""
     jsonData = workhelper.get_data_auto_complete(bf_session, completionType,
                                                  query, maxSuggestions)
@@ -186,10 +152,12 @@ def bf_auto_complete(completionType, query, maxSuggestions=None):
                                             CoordConsts.SVC_RSC_AUTO_COMPLETE,
                                             jsonData)
     if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-        return response[CoordConsts.SVC_KEY_SUGGESTIONS]
-    else:
-        bf_logger.error("Unexpected response: " + str(response))
-        return None
+        suggestions = [AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                       for suggestion in
+                       response[CoordConsts.SVC_KEY_SUGGESTIONS]]
+        return suggestions
+
+    raise BatfishException("Unexpected response: {}.".format(response))
 
 
 def bf_delete_analysis(analysisName):
@@ -615,14 +583,6 @@ def bf_list_snapshots(verbose=False):
     return restv2helper.list_snapshots(bf_session, verbose)
 
 
-def _bf_get_question_templates():
-    jsonData = _get_data_get_question_templates(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES,
-                                                jsonData)
-    return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
-
-
 def bf_put_node_roles(node_roles_data):
     # type: (NodeRolesData) -> None
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
@@ -734,6 +694,32 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
+
+
+def bf_upload_diagnostics(dry_run=True, netconan_config=None):
+    # type: (bool, str) -> str
+    """
+    Fetch, anonymize, and optionally upload snapshot diagnostics information.
+
+    This runs a series of diagnostic questions on the current snapshot
+    (including collecting parsing and conversion information).
+
+    The information collected is anonymized with
+    `Netconan <https://github.com/intentionet/netconan>`_ which either
+    anonymizes passwords and IP addresses (default) or uses the settings in
+    the provided `netconan_config`.
+
+    The anonymous information is then either saved locally (if `dry_run` is
+    True) or uploaded to Batfish developers (if `dry_run` is False).
+
+    :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
+    :type dry_run: bool
+    :param netconan_config: path to Netconan configuration file
+    :type netconan_config: string
+    :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
+    :rtype: string
+    """
+    return _upload_diagnostics(dry_run=dry_run, netconan_config=netconan_config)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):

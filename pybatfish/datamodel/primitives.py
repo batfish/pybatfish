@@ -85,6 +85,49 @@ class Assertion(DataModelElement):
         return dict(type=self.type.value, expect=self.expect)
 
 
+class AutoCompletionType(str, Enum):
+    """Auto completion type."""
+
+    BGP_PEER_PROPERTY = "bgp_peer_property"  #: bgp peer properties
+    BGP_PROCESS_PROPERTY = "bgp_process_property"  #: bgp process properties
+    INTERFACE_PROPERTY = "interface_property"  #: interface properties
+    NAMED_STRUCTURE = "named_structure"  #: named structure type
+    NODE = "node"  #: names of nodes
+    NODE_PROPERTY = "node_property"  #: node properties
+    OSPF_PROPERTY = "ospf_property"  #: ospf property
+
+
+@attr.s(frozen=True)
+class AutoCompleteSuggestion(DataModelElement):
+    """Represent one auto complete suggestion.
+
+    Auto complete suggestions are returned by Batfish for auto complete queries.
+
+    :ivar description: A description of the suggestion (optional)
+    :ivar is_partial: Whether this suggestion represents partial or full text
+    :ivar rank: Batfish may assign a rank to the suggestion
+    :ivar text: The actual suggested text
+    """
+
+    description = attr.ib(type=str)
+    is_partial = attr.ib(type=bool)
+    rank = attr.ib(type=int)
+    text = attr.ib(type=str)
+
+    DEFAULT_RANK = 0x7fffffff
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> AutoCompleteSuggestion
+        return AutoCompleteSuggestion(json_dict.get("description", None),
+                                      json_dict["isPartial"],
+                                      json_dict["rank"], json_dict["text"])
+
+    def dict(self):
+        return dict(description=self.description, is_partial=self.is_partial,
+                    rank=self.rank, text=self.text)
+
+
 @attr.s(frozen=True)
 class Interface(DataModelElement):
     """A network interface --- a combination of node and interface names.

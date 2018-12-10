@@ -16,7 +16,9 @@
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
-from pybatfish.client.commands import (bf_add_node_role_dimension, bf_delete_network,
+from pybatfish.client.commands import (bf_add_node_role_dimension,
+                                       bf_auto_complete,
+                                       bf_delete_network,
                                        bf_delete_node_role_dimension,
                                        bf_get_node_role_dimension,
                                        bf_get_node_roles, bf_list_networks,
@@ -24,7 +26,10 @@ from pybatfish.client.commands import (bf_add_node_role_dimension, bf_delete_net
 from pybatfish.client.extended import (bf_get_network_object_text,
                                        bf_put_network_object)
 from pybatfish.client.options import Options
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, NodeRolesData
+from pybatfish.datamodel.primitives import AutoCompleteSuggestion, \
+    AutoCompletionType
+from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
+    NodeRolesData
 
 
 @fixture()
@@ -127,3 +132,12 @@ def test_put_node_roles():
         assert bf_get_node_roles() == node_roles
     finally:
         bf_delete_network(network_name)
+
+
+def test_auto_complete():
+    try:
+        name = bf_set_network()
+        suggestions = bf_auto_complete(AutoCompletionType.NODE_PROPERTY, ".*")
+        assert isinstance(suggestions[0], AutoCompleteSuggestion)
+    finally:
+        bf_delete_network(name)
