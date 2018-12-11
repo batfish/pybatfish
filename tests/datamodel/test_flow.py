@@ -20,10 +20,9 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
-                                      PreSourceNatOutgoingFilterStepDetail,
                                       ExitOutputIfaceStepDetail, Flow,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags, RoutingStepDetail, Step,
+                                      MatchTcpFlags, PreSourceNatOutgoingFilterStepDetail, RoutingStepDetail, Step,
                                       TcpFlags)
 
 

@@ -417,8 +417,8 @@ class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
     :ivar filter: preSourceNatFilter
     """
 
-    inputInterface = attr.ib(type=str)
-    outputInterface = attr.ib(type=str)
+    inputInterface = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=Optional[str])
     filter = attr.ib(type=Optional[str])
 
     @classmethod
@@ -465,7 +465,8 @@ class Step(DataModelElement):
         elif json_dict.get("type") == "Originate":
             return Step(OriginateStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
-            return
+            return Step(PreSourceNatOutgoingFilterStepDetail.from_dict(detail),
+                        action)
         return None
 
     def __str__(self):
