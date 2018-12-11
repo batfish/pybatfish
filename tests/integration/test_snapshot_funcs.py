@@ -30,9 +30,8 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
-from pybatfish.client.diagnostics import (_check_if_snapshot_passed,
-                                          _INIT_INFO_QUESTIONS, _S3_BUCKET,
-                                          _S3_REGION)
+from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
+                                          _S3_REGION, _check_if_snapshot_passed)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
