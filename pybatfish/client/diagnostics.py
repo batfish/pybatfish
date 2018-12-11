@@ -29,7 +29,8 @@ from requests import HTTPError
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
-_INIT_INFO_QUESTIONS = [
+# Note: this is a Tuple to enforce immutability.
+_INIT_INFO_QUESTIONS = (
     QuestionBase({
         "class": "org.batfish.question.initialization.ParseWarningQuestion",
         "differential": False,
@@ -51,7 +52,7 @@ _INIT_INFO_QUESTIONS = [
             "instanceName": "__viConversionWarning",
         }
     }),
-]
+)
 
 _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
@@ -60,7 +61,7 @@ bf_logger = logging.getLogger("pybatfish.client")
 
 
 def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
-                        netconan_config=None, questions=None):
+                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
     # type: (str, str, bool, Optional[str], Optional[List[QuestionBase]]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
@@ -79,8 +80,6 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     :rtype: string
     """
     from pybatfish.client.commands import bf_session
-    if questions is None:
-        questions = _INIT_INFO_QUESTIONS
 
     tmp_dir = tempfile.mkdtemp()
     try:
