@@ -172,7 +172,7 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
 
 
 def _check_if_snapshot_passed():
-    # type: (None) -> bool
+    # type: () -> bool
     """
     Check if current snapshot passed parsing and conversion.
 
