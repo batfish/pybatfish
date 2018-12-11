@@ -65,11 +65,11 @@ def test_encoder_with_primitives():
     assert encoder.default([1, 2, "some_string"]) == [1, 2, "some_string"]
     assert encoder.default({1})
     assert encoder.default(None) is None
-    assert json.dumps(
-        {"name": {"nested": "foo"}}, cls=BfJsonEncoder) == json.dumps(
-        {"name": {"nested": "foo"}})
-    assert json.dumps([{'name': 'value'}], cls=BfJsonEncoder) == json.dumps(
-        [{'name': 'value'}])
+    assert json.loads(
+        json.dumps({"name": {"nested": "foo"}}, cls=BfJsonEncoder)) == {
+               "name": {"nested": "foo"}}
+    assert json.loads(json.dumps([{'name': 'value'}], cls=BfJsonEncoder)) == [
+        {'name': 'value'}]
 
 
 def test_encoder_with_datamodel_element():
@@ -78,9 +78,9 @@ def test_encoder_with_datamodel_element():
     iface = Interface(hostname='node', interface="iface")
     assert encoder.default(iface) == iface.dict()
 
-    assert json.dumps(
-        {"name": {"nested": iface}}, cls=BfJsonEncoder) == json.dumps(
-        {"name": {"nested": iface.dict()}})
+    assert json.loads(json.dumps(
+        {"name": {"nested": iface}}, cls=BfJsonEncoder)) == {
+               "name": {"nested": iface.dict()}}
 
 
 def test_encoder_invalid_input():
