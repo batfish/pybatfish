@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
-from typing import Dict, List, Optional  # noqa: F401
+from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -58,6 +58,7 @@ _PARSE_WARNINGS_QUESTION = QuestionBase({
     }
 })
 
+# Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
     _INIT_INFO_QUESTION,
     _PARSE_WARNINGS_QUESTION,
@@ -73,7 +74,7 @@ bf_logger = logging.getLogger("pybatfish.client")
 
 def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
                         netconan_config=None, questions=_INIT_INFO_QUESTIONS):
-    # type: (str, str, bool, str, List[QuestionBase]) -> str
+    # type: (str, str, bool, Optional[str], Iterable[QuestionBase]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
@@ -190,7 +191,6 @@ def _check_if_snapshot_passed():
     for key in statuses:
         if statuses[key] != 'PASSED':
             return False
-    # return sum(1 for key in statuses if statuses[key] != 'PASSED') == 0
     return True
 
 
