@@ -409,6 +409,36 @@ class RoutingStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
+    """Details of a step representing the pre-source nat filter step.
+
+    :ivar inputInterface: Input interface
+    :ivar outputInterface: Output interface
+    :ivar filter: preSourceNatFilter
+    """
+
+    inputInterface = attr.ib(type=str)
+    outputInterface = attr.ib(type=str)
+    filter = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> PreSourceNatOutgoingFilterStepDetail
+        return PreSourceNatOutgoingFilterStepDetail(
+            json_dict.get("inputInterface"),
+            json_dict.get("outputInterface"),
+            json_dict.get("preSourceNatFilter"))
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.inputInterface)
+        str_output += ": {}".format(self.outputInterface)
+        if self.filter:
+            str_output += ": {}".format(self.filter)
+        return str_output
+
+
+@attr.s(frozen=True)
 class Step(DataModelElement):
     """Represents a step in a hop.
 
@@ -434,6 +464,8 @@ class Step(DataModelElement):
             return Step(InboundStepDetail(), action)
         elif json_dict.get("type") == "Originate":
             return Step(OriginateStepDetail.from_dict(detail), action)
+        elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
+            return
         return None
 
     def __str__(self):
