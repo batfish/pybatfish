@@ -407,7 +407,7 @@ def _check_response_status(response):
         raise HTTPError("{}. {}".format(e, response.text), response=response)
 
 
-def _delete(session, url_tail, params={}):
+def _delete(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
 
@@ -443,7 +443,7 @@ def _get(session, url_tail, params, stream=False):
     return response
 
 
-def _get_dict(session, url_tail, params={}):
+def _get_dict(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
 
@@ -454,7 +454,7 @@ def _get_dict(session, url_tail, params={}):
     return dict(response.json())
 
 
-def _get_list(session, url_tail, params={}):
+def _get_list(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> List
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON list.
 
@@ -465,7 +465,7 @@ def _get_list(session, url_tail, params={}):
     return list(response.json())
 
 
-def _get_stream(session, url_tail, params={}):
+def _get_stream(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> Any
     """Make an HTTP(s) GET request to Batfish coordinator that should return a raw stream.
 
@@ -477,7 +477,7 @@ def _get_stream(session, url_tail, params={}):
     return response.raw
 
 
-def _post(session, url_tail, obj, params={}):
+def _post(session, url_tail, obj, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
@@ -496,8 +496,8 @@ def _post(session, url_tail, obj, params={}):
     return None
 
 
-def _put(session, url_tail, obj, params={}, json=None, stream=None):
-    # type: (Session, str, Any, Dict[str, Any], Any, Any) -> None
+def _put(session, url_tail, params=None, json=None, stream=None):
+    # type: (Session, str, Optional[Dict[str, Any]], Optional[Any], Optional[Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -518,21 +518,21 @@ def _put(session, url_tail, obj, params={}, json=None, stream=None):
     return None
 
 
-def _put_json(session, url_tail, obj, params={}):
+def _put_json(session, url_tail, obj, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    _put(session, url_tail, obj, params=params, json=_encoder.default(obj))
+    _put(session, url_tail, params=params, json=_encoder.default(obj))
 
 
-def _put_stream(session, url_tail, stream, params={}):
+def _put_stream(session, url_tail, stream, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    _put(session, url_tail, stream, params=params, stream=stream)
+    _put(session, url_tail, params=params, stream=stream)
