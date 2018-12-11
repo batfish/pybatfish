@@ -27,7 +27,8 @@ import six
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import _upload_diagnostics
+from pybatfish.client.diagnostics import (_check_if_snapshot_passed,
+                                          _upload_diagnostics)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     AutoCompletionType, Edge,
@@ -43,6 +44,8 @@ from .options import Options
 from .session import Session
 from .workhelper import (get_work_status,
                          kill_work)
+
+_UPLOAD_DIAGNOSTICS_MESSAGE = 'Consider running: bf_upload_diagnostics(dry_run=False)\nThis uploads anonymous diagnostics information to developers to help diagnose and fix this issue.'
 
 # TODO: normally libraries don't configure logging in code
 _bfDebug = True
@@ -310,6 +313,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         return answer_dict
 
     status = WorkStatusCode(answer_dict['status'])
+
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException(
             'Forking snapshot {ss} from {base} failed with status {status}'.format(
@@ -320,6 +324,9 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
+        if not _check_if_snapshot_passed():
+            bf_logger.warning('At least one snapshot file was not completely '
+                              'recognized.\n' + _UPLOAD_DIAGNOSTICS_MESSAGE)
         return bf_session.baseSnapshot
 
 
@@ -511,6 +518,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         return answer_dict
 
     status = WorkStatusCode(answer_dict["status"])
+
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
         raise BatfishException(
@@ -520,6 +528,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
+        if not _check_if_snapshot_passed():
+            bf_logger.warning('At least one snapshot file was not completely '
+                              'recognized.\n' + _UPLOAD_DIAGNOSTICS_MESSAGE)
         return bf_session.baseSnapshot
 
 

@@ -29,29 +29,41 @@ from requests import HTTPError
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
-_INIT_INFO_QUESTIONS = [
-    QuestionBase({
-        "class": "org.batfish.question.initialization.ParseWarningQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__parseWarning",
-        }
-    }),
-    QuestionBase({
-        "class": "org.batfish.question.initialization.FileParseStatusQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__fileParseStatus",
-        }
-    }),
-    QuestionBase({
-        "class": "org.batfish.question.initialization.ConversionWarningQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__viConversionWarning",
-        }
-    }),
-]
+_CONVERSION_WARNINGS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.ConversionWarningQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__viConversionWarning",
+    }
+})
+_FILE_PARSE_STATUS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.FileParseStatusQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__fileParseStatus",
+    }
+})
+_INIT_INFO_QUESTION = QuestionBase({
+    "class": "org.batfish.question.InitInfoQuestionPlugin$InitInfoQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__initInfo"
+    },
+})
+_PARSE_WARNINGS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.ParseWarningQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__parseWarning",
+    }
+})
+
+_INIT_INFO_QUESTIONS = (
+    _INIT_INFO_QUESTION,
+    _PARSE_WARNINGS_QUESTION,
+    _FILE_PARSE_STATUS_QUESTION,
+    _CONVERSION_WARNINGS_QUESTION,
+)
 
 _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
@@ -156,6 +168,30 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
             '-p',
         ])
     netconan.main(args)
+
+
+def _check_if_snapshot_passed():
+    # type: (None) -> bool
+    """
+    Check if current snapshot passed parsing and conversion.
+
+    :return: boolean indicating if current snapshot passed
+    :rtype: bool
+    """
+    try:
+        answer = _INIT_INFO_QUESTION.answer()
+    except BatfishException as e:
+        bf_logger.warning(
+            "Failed to check snapshot init info: {}".format(e))
+        return False
+
+    # These statuses contain parse and conversion status
+    statuses = answer['answerElements'][0]['parseStatus']
+    for key in statuses:
+        if statuses[key] != 'PASSED':
+            return False
+    # return sum(1 for key in statuses if statuses[key] != 'PASSED') == 0
+    return True
 
 
 def _upload_dir_to_url(base_url, src_dir, headers=None):

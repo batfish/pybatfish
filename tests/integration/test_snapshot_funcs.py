@@ -30,7 +30,8 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
-from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
+from pybatfish.client.diagnostics import (_check_if_snapshot_passed,
+                                          _INIT_INFO_QUESTIONS, _S3_BUCKET,
                                           _S3_REGION)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
@@ -74,6 +75,26 @@ def example_snapshot(network):
 
 
 @pytest.fixture()
+def fully_recognized_snapshot(network):
+    bf_set_network(network)
+    name = uuid.uuid4().hex
+    bf_init_snapshot(join(_this_dir, 'snapshot_fully_recognized'), name)
+    yield name
+    # cleanup
+    bf_delete_snapshot(name)
+
+
+@pytest.fixture()
+def partially_unrecognized_snapshot(network):
+    bf_set_network(network)
+    name = uuid.uuid4().hex
+    bf_init_snapshot(join(_this_dir, 'snapshot_partially_unrecognized'), name)
+    yield name
+    # cleanup
+    bf_delete_snapshot(name)
+
+
+@pytest.fixture()
 def roles_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
@@ -81,6 +102,17 @@ def roles_snapshot(network):
     yield name
     # cleanup
     bf_delete_snapshot(name)
+
+
+def test_check_snapshot_parse_success(network, fully_recognized_snapshot):
+    """Confirm basic snapshot registers as successfully parsed."""
+    assert _check_if_snapshot_passed()
+
+
+def test_check_snapshot_parse_success_unrecognized(network,
+                                                   partially_unrecognized_snapshot):
+    """Confirm partly unrecognized snapshot registers as such."""
+    assert not _check_if_snapshot_passed()
 
 
 def test_fork_snapshot(network, example_snapshot):
