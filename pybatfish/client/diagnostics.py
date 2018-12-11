@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
-from typing import Dict, List, Optional  # noqa: F401
+from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -29,7 +29,8 @@ from requests import HTTPError
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
-_INIT_INFO_QUESTIONS = [
+# Note: this is a Tuple to enforce immutability.
+_INIT_INFO_QUESTIONS = (
     QuestionBase({
         "class": "org.batfish.question.initialization.ParseWarningQuestion",
         "differential": False,
@@ -51,7 +52,7 @@ _INIT_INFO_QUESTIONS = [
             "instanceName": "__viConversionWarning",
         }
     }),
-]
+)
 
 _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
@@ -61,7 +62,7 @@ bf_logger = logging.getLogger("pybatfish.client")
 
 def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
                         netconan_config=None, questions=_INIT_INFO_QUESTIONS):
-    # type: (str, str, bool, str, List[QuestionBase]) -> str
+    # type: (str, str, bool, Optional[str], Iterable[QuestionBase]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
