@@ -105,13 +105,13 @@ def roles_snapshot(network):
 
 
 def test_check_snapshot_parse_success(network, fully_recognized_snapshot):
-    """Confirm basic snapshot registers as successfully parsed."""
+    """Confirm fully recognized snapshot registers as passed."""
     assert _check_if_snapshot_passed()
 
 
 def test_check_snapshot_parse_success_unrecognized(network,
                                                    partially_unrecognized_snapshot):
-    """Confirm partly unrecognized snapshot registers as such."""
+    """Confirm partly unrecognized snapshot does not register as passed."""
     assert not _check_if_snapshot_passed()
 
 

@@ -176,7 +176,7 @@ def _check_if_snapshot_passed():
     """
     Check if current snapshot passed parsing and conversion.
 
-    :return: boolean indicating if current snapshot passed
+    :return: boolean indicating if all files and nodes in current snapshot passed parsing and conversion
     :rtype: bool
     """
     try:
