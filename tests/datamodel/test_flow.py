@@ -193,13 +193,13 @@ def test_hop_repr_str():
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
         Step(PreSourceNatOutgoingFilterStepDetail("in_iface1", "out_iface1", "preSourceNat_filter"),
-             "RECEIVED"),
+             "PERMITTED"),
         Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
              "SENT_OUT")
     ])
 
     assert str(
-        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  RECEIVED(in_iface1: out_iface1: preSourceNat_filter)\n  SENT_OUT(out_iface1: out_filter1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(in_iface1: out_iface1: preSourceNat_filter)\n  SENT_OUT(out_iface1: out_filter1)"
 
 
 def test_match_tcp_generators():
