@@ -78,9 +78,9 @@ def test_encoder_with_datamodel_element():
     iface = Interface(hostname='node', interface="iface")
     assert encoder.default(iface) == iface.dict()
 
-    assert json.dumps(
-        {"name": {"nested": iface}}, cls=BfJsonEncoder) == json.dumps(
-        {"name": {"nested": iface.dict()}})
+    input = {"name": {"nested": iface}}
+    expected = {"name": {"nested": iface.dict()}}
+    assert expected == json.loads(json.dumps(input, cls=BfJsonEncoder))
 
 
 def test_encoder_invalid_input():
