@@ -425,7 +425,7 @@ def _delete(session, url_tail, params=None):
 
 
 def _get(session, url_tail, params, stream=False):
-    # type: (Session, str, Dict[str, Any], bool) -> Any
+    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Any
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -444,7 +444,7 @@ def _get(session, url_tail, params, stream=False):
 
 
 def _get_dict(session, url_tail, params=None):
-    # type: (Session, str, Dict[str, Any]) -> Dict[str, Any]
+    # type: (Session, str, Optional[Dict[str, Any]]) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
 
     :raises SSLError if SSL connection failed
