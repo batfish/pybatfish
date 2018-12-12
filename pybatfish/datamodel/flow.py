@@ -196,7 +196,7 @@ class Flow(DataModelElement):
 
 @attr.s(frozen=True)
 class FlowDiff(DataModelElement):
-    """A difference between two Flows
+    """A difference between two Flows.
 
     :ivar fieldName: A Flow field name that has changed.
     :ivar oldValue: The old value of the field.
