@@ -412,12 +412,10 @@ class RoutingStepDetail(DataModelElement):
 class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
     """Details of a step representing the pre-source nat filter step.
 
-    :ivar inputInterface: Input interface
     :ivar outputInterface: Output interface
     :ivar filter: preSourceNatFilter
     """
 
-    inputInterface = attr.ib(type=Optional[str])
     outputInterface = attr.ib(type=Optional[str])
     filter = attr.ib(type=Optional[str])
 
@@ -425,14 +423,12 @@ class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> PreSourceNatOutgoingFilterStepDetail
         return PreSourceNatOutgoingFilterStepDetail(
-            json_dict.get("inputInterface"),
             json_dict.get("outputInterface"),
             json_dict.get("preSourceNatFilter"))
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.inputInterface)
-        str_output += ": {}".format(self.outputInterface)
+        str_output = str(self.outputInterface)
         if self.filter:
             str_output += ": {}".format(self.filter)
         return str_output
