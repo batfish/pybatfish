@@ -353,7 +353,7 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
     :ivar outputFilter: Filter associated with the output interface
-    :ivar flowDiff: HeaderSpace of changed flow fields
+    :ivar flowDiff: Set of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
@@ -376,7 +376,7 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         str_output = str(self.outputInterface)
         if self.outputFilter:
             str_output += ": {}".format(self.outputFilter)
-        if self.flowDiffs and len(self.flowDiffs) > 0:
+        if self.flowDiffs:
             str_output += " " + ", ".join(
                 [str(flowDiff) for flowDiff in self.flowDiffs])
         return str_output

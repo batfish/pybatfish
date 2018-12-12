@@ -222,9 +222,8 @@ def test_hop_repr_str():
               "nextHopIp": "1.2.3.4"},
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
-        Step(PreSourceNatOutgoingFilterStepDetail(
-            "out_iface1",
-            "preSourceNat_filter"),
+        Step(PreSourceNatOutgoingFilterStepDetail("out_iface1",
+                                                  "preSourceNat_filter"),
              "PERMITTED"),
         Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None, None),
              "SENT_OUT")
