@@ -45,8 +45,6 @@ from .session import Session
 from .workhelper import (get_work_status,
                          kill_work)
 
-_UPLOAD_DIAGNOSTICS_MESSAGE = 'Consider running: bf_upload_diagnostics(dry_run=False)\nThis uploads anonymous diagnostics information to developers to help diagnose and fix this issue.'
-
 # TODO: normally libraries don't configure logging in code
 _bfDebug = True
 bf_logger = logging.getLogger("pybatfish.client")
@@ -305,29 +303,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     restv2helper.fork_snapshot(bf_session,
                                json_data)
 
-    work_item = workhelper.get_workitem_parse(bf_session, name)
-    answer_dict = workhelper.execute(work_item, bf_session,
-                                     background=background)
-    if background:
-        bf_session.baseSnapshot = name
-        return answer_dict
-
-    status = WorkStatusCode(answer_dict['status'])
-
-    if status != WorkStatusCode.TERMINATEDNORMALLY:
-        raise BatfishException(
-            'Forking snapshot {ss} from {base} failed with status {status}'.format(
-                ss=name,
-                base=base_name,
-                status=status))
-    else:
-        bf_session.baseSnapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.baseSnapshot)
-        if not _check_if_snapshot_passed():
-            bf_logger.warning('At least one snapshot file was not completely '
-                              'recognized.\n' + _UPLOAD_DIAGNOSTICS_MESSAGE)
-        return bf_session.baseSnapshot
+    return _parse_snapshot(name, background)
 
 
 def bf_generate_dataplane(snapshot=None):
@@ -510,6 +486,20 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
                                  CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
                                  json_data)
 
+    return _parse_snapshot(name, background)
+
+
+def _parse_snapshot(name, background):
+    # type: (str, bool) -> Union[str, Dict[str, str]]
+    """Parse specified snapshot.
+
+    :param name: name of the snapshot to initialize
+    :type name: str
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+    :rtype: Union[str, Dict]
+    """
     work_item = workhelper.get_workitem_parse(bf_session, name)
     answer_dict = workhelper.execute(work_item, bf_session,
                                      background=background)
@@ -528,9 +518,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
-        if not _check_if_snapshot_passed():
-            bf_logger.warning('At least one snapshot file was not completely '
-                              'recognized.\n' + _UPLOAD_DIAGNOSTICS_MESSAGE)
+        if bf_session.enable_diagnostics and not _check_if_snapshot_passed():
+            bf_logger.warning(
+                'One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:\n\nbf_upload_diagnostics(dry_run=False)\n\nto share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics')
         return bf_session.baseSnapshot
 
 

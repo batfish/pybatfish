@@ -181,17 +181,14 @@ def _check_if_snapshot_passed():
     """
     try:
         answer = _INIT_INFO_QUESTION.answer()
-    except BatfishException as e:
-        bf_logger.warning(
-            "Failed to check snapshot init info: {}".format(e))
-        return False
 
-    # These statuses contain parse and conversion status
-    statuses = answer['answerElements'][0]['parseStatus']
-    for key in statuses:
-        if statuses[key] != 'PASSED':
-            return False
-    return True
+        # These statuses contain parse and conversion status
+        statuses = answer['answerElements'][0]['parseStatus']
+        return all([statuses[key] == 'PASSED' for key in statuses])
+
+    except BatfishException as e:
+        bf_logger.warning("Failed to check snapshot init info: %s", e)
+        return False
 
 
 def _upload_dir_to_url(base_url, src_dir, headers=None):
