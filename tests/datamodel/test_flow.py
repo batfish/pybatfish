@@ -27,15 +27,32 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
 
 
 def testExitOutputIfaceStepDetail_str():
-    detail = ExitOutputIfaceStepDetail(
-        "out_iface",
-        "out_filter",
+    noDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        None,
+        None)
+    oneDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        [FlowDiff("field", "old", "new")],
+        None)
+    twoDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
         [FlowDiff("field1", "old1", "new1"),
          FlowDiff("field2", "old2", "new2")],
         None)
-    step = Step(detail, "ACTION")
+
+    step = Step(noDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter)"
+
+    step = Step(oneDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter field: old -> new)"
+
+    step = Step(twoDiffDetail, "ACTION")
     assert str(step) == ''.join([
-        "ACTION(out_iface: out_filter ",
+        "ACTION(iface: filter ",
         "field1: old1 -> new1, ",
         "field2: old2 -> new2)"])
 
