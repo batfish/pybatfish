@@ -191,6 +191,26 @@ def _check_if_snapshot_passed():
         return False
 
 
+def _check_if_snapshot_failed():
+    # type: () -> bool
+    """
+    Check if any file in current snapshot failed parsing or conversion.
+
+    :return: boolean indicating if any file or node in current snapshot failed parsing or conversion
+    :rtype: bool
+    """
+    try:
+        answer = _INIT_INFO_QUESTION.answer()
+
+        # These statuses contain parse and conversion status
+        statuses = answer['answerElements'][0]['parseStatus']
+        return any([statuses[key] == 'FAILED' for key in statuses])
+
+    except BatfishException as e:
+        bf_logger.warning("Failed to check snapshot init info: %s", e)
+        return False
+
+
 def _upload_dir_to_url(base_url, src_dir, headers=None):
     # type: (str, str, Optional[Dict]) -> None
     """
@@ -212,3 +232,22 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
                     raise HTTPError(
                         'Failed to upload resource: {} with status code {}'.format(
                             resource, r.status_code))
+
+
+def _warn_on_snapshot_failure():
+    # type: () -> None
+    """Check if snapshot passed and warn about any parsing or conversion issues."""
+    if _check_if_snapshot_failed():
+        bf_logger.warning("""\
+Batfish failed to understand one or more input files, so some analyses will be incorrect. Please consider sharing error logs with the Batfish developers by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics""")
+    elif not _check_if_snapshot_passed():
+        bf_logger.warning("""\
+One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics""")

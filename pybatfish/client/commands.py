@@ -27,8 +27,8 @@ import six
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_check_if_snapshot_passed,
-                                          _upload_diagnostics)
+from pybatfish.client.diagnostics import (_upload_diagnostics,
+                                          _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     AutoCompletionType, Edge,
@@ -518,17 +518,9 @@ def _parse_snapshot(name, background):
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
-        if bf_session.enable_diagnostics and not _check_if_snapshot_passed():
-            bf_logger.warning(
-                'One or more input files were not fully recognized by Batfish. '
-                'Some unrecognized configuration snippets are not uncommon for '
-                'new networks, and it is often fine to proceed with further '
-                'analysis. You can help the Batfish developers improve support '
-                'for your network by running:\n\n\tbf_upload_diagnostics('
-                'dry_run=False)\n\nto share private, anonymized information. '
-                'For more information, see the documentation at https://'
-                'pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.'
-                'commands.bf_upload_diagnostics')
+        if bf_session.enable_diagnostics:
+            _warn_on_snapshot_failure()
+
         return bf_session.baseSnapshot
 
 
