@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
-from typing import Any, Dict, Iterable, Optional  # noqa: F401
+from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -172,13 +172,14 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
 
 
 def _get_snapshot_parse_status():
-    # type: () -> Any
+    # type: () -> Dict[str, str]
     """
     Get parsing and conversion status for files and nodes in the current snapshot.
 
     :return: dictionary of files and nodes to parse/convert status
-    :rtype: None or dict
+    :rtype: dict
     """
+    parse_status = {}  # type: Dict[str, str]
     try:
         answer = _INIT_INFO_QUESTION.answer()
         if 'answerElements' not in answer:
@@ -186,12 +187,12 @@ def _get_snapshot_parse_status():
         answer_elements = answer['answerElements']
         if not len(answer_elements):
             raise BatfishException('Invalid answer format for init info')
+        # These statuses contain parse and conversion status
+        parse_status = answer_elements[0].get('parseStatus', {})
     except BatfishException as e:
         bf_logger.warning("Failed to check snapshot init info: %s", e)
-        return {}
 
-    # These statuses contain parse and conversion status
-    return answer_elements[0].get('parseStatus', {})
+    return parse_status
 
 
 def _check_if_all_passed(statuses):
