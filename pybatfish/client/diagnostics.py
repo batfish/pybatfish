@@ -20,7 +20,7 @@ import shutil
 import tempfile
 import uuid
 from hashlib import md5
-from typing import Dict, Iterable, Optional  # noqa: F401
+from typing import Any, Dict, Iterable, Optional  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -171,44 +171,53 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     netconan.main(args)
 
 
-def _check_if_snapshot_passed():
-    # type: () -> bool
+def _get_snapshot_parse_status():
+    # type: () -> Any
     """
-    Check if current snapshot passed parsing and conversion.
+    Get parsing and conversion status for files and nodes in the current snapshot.
 
+    :return: dictionary of files and nodes to parse/convert status
+    :rtype: None or dict
+    """
+    try:
+        answer = _INIT_INFO_QUESTION.answer()
+        if 'answerElements' not in answer:
+            raise BatfishException('Invalid answer format for init info')
+        answer_elements = answer['answerElements']
+        if not len(answer_elements):
+            raise BatfishException('Invalid answer format for init info')
+    except BatfishException as e:
+        bf_logger.warning("Failed to check snapshot init info: %s", e)
+        return {}
+
+    # These statuses contain parse and conversion status
+    return answer_elements[0].get('parseStatus', {})
+
+
+def _check_if_all_passed(statuses):
+    # type: (Dict[str, str]) -> bool
+    """
+    Check if all items in supplied `statuses` dict passed parsing and conversion.
+
+    :param statuses: dictionary init info statuses (files/nodes to their status)
+    :type statuses: dict
     :return: boolean indicating if all files and nodes in current snapshot passed parsing and conversion
     :rtype: bool
     """
-    try:
-        answer = _INIT_INFO_QUESTION.answer()
-
-        # These statuses contain parse and conversion status
-        statuses = answer['answerElements'][0]['parseStatus']
-        return all([statuses[key] == 'PASSED' for key in statuses])
-
-    except BatfishException as e:
-        bf_logger.warning("Failed to check snapshot init info: %s", e)
-        return False
+    return all(statuses[key] == 'PASSED' for key in statuses)
 
 
-def _check_if_snapshot_failed():
-    # type: () -> bool
+def _check_if_any_failed(statuses):
+    # type: (Dict[str, str]) -> bool
     """
-    Check if any file in current snapshot failed parsing or conversion.
+    Check if any item in supplied `statuses` dict failed parsing or conversion.
 
+    :param statuses: dictionary init info statuses (files/nodes to their status)
+    :type statuses: dict
     :return: boolean indicating if any file or node in current snapshot failed parsing or conversion
     :rtype: bool
     """
-    try:
-        answer = _INIT_INFO_QUESTION.answer()
-
-        # These statuses contain parse and conversion status
-        statuses = answer['answerElements'][0]['parseStatus']
-        return any([statuses[key] == 'FAILED' for key in statuses])
-
-    except BatfishException as e:
-        bf_logger.warning("Failed to check snapshot init info: %s", e)
-        return False
+    return any(statuses[key] == 'FAILED' for key in statuses)
 
 
 def _upload_dir_to_url(base_url, src_dir, headers=None):
@@ -237,14 +246,15 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
 def _warn_on_snapshot_failure():
     # type: () -> None
     """Check if snapshot passed and warn about any parsing or conversion issues."""
-    if _check_if_snapshot_failed():
+    statuses = _get_snapshot_parse_status()
+    if _check_if_any_failed(statuses):
         bf_logger.warning("""\
 Batfish failed to understand one or more input files, so some analyses will be incorrect. Please consider sharing error logs with the Batfish developers by running:
 
     bf_upload_diagnostics(dry_run=False)
 
 to share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics""")
-    elif not _check_if_snapshot_passed():
+    elif not _check_if_all_passed(statuses):
         bf_logger.warning("""\
 One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 

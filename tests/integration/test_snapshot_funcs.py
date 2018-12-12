@@ -31,7 +31,8 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
-                                          _S3_REGION, _check_if_snapshot_passed)
+                                          _S3_REGION,
+                                          _get_snapshot_parse_status)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
@@ -103,15 +104,13 @@ def roles_snapshot(network):
     bf_delete_snapshot(name)
 
 
-def test_check_snapshot_parse_success(network, fully_recognized_snapshot):
-    """Confirm fully recognized snapshot registers as passed."""
-    assert _check_if_snapshot_passed()
-
-
-def test_check_snapshot_parse_success_unrecognized(network,
-                                                   partially_unrecognized_snapshot):
-    """Confirm partly unrecognized snapshot does not register as passed."""
-    assert not _check_if_snapshot_passed()
+def test_get_snapshot_file_status(network, example_snapshot):
+    """Confirm we get correct init info statuses for example snapshot."""
+    statuses = _get_snapshot_parse_status()
+    assert (statuses == {
+        'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
+        'configs/recognized.cfg': 'PASSED',
+    })
 
 
 def test_fork_snapshot(network, example_snapshot):

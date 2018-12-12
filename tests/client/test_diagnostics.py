@@ -20,7 +20,8 @@ import uuid
 import pytest
 import responses
 
-from pybatfish.client.diagnostics import _anonymize_dir, _upload_dir_to_url
+from pybatfish.client.diagnostics import _anonymize_dir, _upload_dir_to_url, \
+    _check_if_all_passed, _check_if_any_failed
 
 # Config file constants for anonymization and upload
 _CONFIG_IP_ADDR = "1.2.3.4"
@@ -64,6 +65,24 @@ def test_anonymize_custom(config_dir, tmpdir):
         anon_text = f.read()
         assert (_CONFIG_PASSWORD not in anon_text)
         assert (_CONFIG_IP_ADDR in anon_text)
+
+
+def test_check_if_snapshot_passed():
+    """Test checking init info statuses for PASSED status."""
+    # Confirm result is True iff all values are PASSED
+    assert _check_if_all_passed({'a': 'PASSED', 'b': 'PASSED'})
+    assert not _check_if_all_passed({'a': 'PASSED', 'b': 'FAILED'})
+    assert not _check_if_all_passed({'a': 'PASSED', 'b': 'WARNINGS'})
+    assert not _check_if_all_passed({'a': 'FAILED', 'b': 'FAILED'})
+
+
+def test_check_if_snapshot_failed():
+    """Test checking init info statuses for FAILED status."""
+    # Confirm result is False iff at least one value is FAILED
+    assert not _check_if_any_failed({'a': 'PASSED', 'b': 'PASSED'})
+    assert not _check_if_any_failed({'a': 'PASSED', 'b': 'EMPTY'})
+    assert _check_if_any_failed({'a': 'PASSED', 'b': 'FAILED'})
+    assert _check_if_any_failed({'a': 'FAILED', 'b': 'FAILED'})
 
 
 @responses.activate
