@@ -195,6 +195,34 @@ class Flow(DataModelElement):
 
 
 @attr.s(frozen=True)
+class FlowDiff(DataModelElement):
+    """A difference between two Flows
+
+    :ivar fieldName: A Flow field name that has changed.
+    :ivar oldValue: The old value of the field.
+    :ivar newValue: The new value of the field.
+    """
+
+    fieldName = attr.ib(type=str)
+    oldValue = attr.ib(type=str)
+    newValue = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> FlowDiff
+        return FlowDiff(json_dict["fieldName"],
+                        json_dict["oldValue"],
+                        json_dict["newValue"])
+
+    def __str__(self):
+        # type: () -> str
+        return "{fieldName}: {oldValue} -> {newValue}".format(
+            fieldName=self.fieldName,
+            oldValue=self.oldValue,
+            newValue=self.newValue)
+
+
+@attr.s(frozen=True)
 class FlowTrace(DataModelElement):
     """A trace of a flow through the network.
 
@@ -325,11 +353,13 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
     :ivar outputFilter: Filter associated with the output interface
+    :ivar flowDiff: HeaderSpace of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
     outputInterface = attr.ib(type=str)
     outputFilter = attr.ib(type=Optional[str])
+    flowDiffs = attr.ib(type=List[FlowDiff])
     transformedFlow = attr.ib(type=Optional[str])
 
     @classmethod
@@ -338,6 +368,7 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("outputFilter"),
+            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
             json_dict.get("transformedFlow"))
 
     def __str__(self):
@@ -345,6 +376,9 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         str_output = str(self.outputInterface)
         if self.outputFilter:
             str_output += ": {}".format(self.outputFilter)
+        if self.flowDiffs and len(self.flowDiffs) > 0:
+            str_output += " " + ", ".join(
+                [str(flowDiff) for flowDiff in self.flowDiffs])
         return str_output
 
 

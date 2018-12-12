@@ -20,10 +20,24 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
-                                      ExitOutputIfaceStepDetail, Flow,
+                                      ExitOutputIfaceStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
                                       MatchTcpFlags, RoutingStepDetail, Step,
                                       TcpFlags)
+
+
+def testExitOutputIfaceStepDetail_str():
+    detail = ExitOutputIfaceStepDetail(
+        "out_iface",
+        "out_filter",
+        [FlowDiff("field1", "old1", "new1"),
+         FlowDiff("field2", "old2", "new2")],
+        None)
+    step = Step(detail, "ACTION")
+    assert str(step) == ''.join([
+        "ACTION(out_iface: out_filter ",
+        "field1: old1 -> new1, ",
+        "field2: old2 -> new2)"])
 
 
 def testFlowDeserialization():
