@@ -520,7 +520,15 @@ def _parse_snapshot(name, background):
                        bf_session.baseSnapshot)
         if bf_session.enable_diagnostics and not _check_if_snapshot_passed():
             bf_logger.warning(
-                'One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:\n\nbf_upload_diagnostics(dry_run=False)\n\nto share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics')
+                'One or more input files were not fully recognized by Batfish. '
+                'Some unrecognized configuration snippets are not uncommon for '
+                'new networks, and it is often fine to proceed with further '
+                'analysis. You can help the Batfish developers improve support '
+                'for your network by running:\n\n\tbf_upload_diagnostics('
+                'dry_run=False)\n\nto share private, anonymized information. '
+                'For more information, see the documentation at https://'
+                'pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.'
+                'commands.bf_upload_diagnostics')
         return bf_session.baseSnapshot
 
 
