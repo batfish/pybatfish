@@ -253,11 +253,15 @@ Batfish failed to understand one or more input files, so some analyses will be i
 
     bf_upload_diagnostics(dry_run=False)
 
-to share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics""")
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")
     elif not _check_if_all_passed(statuses):
         bf_logger.warning("""\
 One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
 
-to share private, anonymized information. For more information, see the documentation at https://pybatfish.readthedocs.io/en/latest/api.html#pybatfish.client.commands.bf_upload_diagnostics""")
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")
