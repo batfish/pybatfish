@@ -19,7 +19,6 @@ import os
 import shutil
 import tempfile
 import uuid
-from hashlib import md5
 from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
@@ -73,8 +72,9 @@ bf_logger = logging.getLogger("pybatfish.client")
 
 
 def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
-                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
-    # type: (str, str, bool, Optional[str], Iterable[QuestionBase]) -> str
+                        netconan_config=None, questions=_INIT_INFO_QUESTIONS,
+                        resource_prefix=''):
+    # type: (str, str, bool, Optional[str], Iterable[QuestionBase], str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
@@ -88,11 +88,11 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     :type netconan_config: string
     :param questions: list of questions to run and upload
     :type questions: list[QuestionBase]
+    :param resource_prefix: prefix to append to any uploaded resources
+    :type resource_prefix: str
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-    from pybatfish.client.commands import bf_session
-
     tmp_dir = tempfile.mkdtemp()
     try:
         for q in questions:
@@ -125,12 +125,9 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
             raise ValueError('Region must be set to upload init info.')
 
         # Generate anonymous S3 subdirectory name
-        anon_dir_name = md5(
-            '{}{}{}'.format(bf_session.network,
-                            bf_session.baseSnapshot,
-                            uuid.uuid4().hex).encode()).hexdigest()
+        anon_dir = '{}{}'.format(resource_prefix, uuid.uuid4().hex)
         upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
-            bucket=bucket, region=region, resource=anon_dir_name)
+            bucket=bucket, region=region, resource=anon_dir)
 
         _upload_dir_to_url(upload_dest, tmp_dir_anon,
                            headers={'x-amz-acl': 'bucket-owner-full-control'})
@@ -138,7 +135,7 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     finally:
         shutil.rmtree(tmp_dir_anon)
 
-    return anon_dir_name
+    return anon_dir
 
 
 def _anonymize_dir(input_dir, output_dir, netconan_config=None):
