@@ -355,13 +355,11 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
     :ivar outputFilter: Filter associated with the output interface
-    :ivar flowDiff: Set of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
     outputInterface = attr.ib(type=str)
     outputFilter = attr.ib(type=Optional[str])
-    flowDiffs = attr.ib(type=List[FlowDiff])
     transformedFlow = attr.ib(type=Optional[str])
 
     @classmethod
@@ -370,7 +368,6 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("outputFilter"),
-            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
             json_dict.get("transformedFlow"))
 
     def __str__(self):
@@ -378,9 +375,6 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         str_output = str(self.outputInterface)
         if self.outputFilter:
             str_output += ": {}".format(self.outputFilter)
-        if self.flowDiffs:
-            str_output += " " + ", ".join(
-                [str(flowDiff) for flowDiff in self.flowDiffs])
         return str_output
 
 
@@ -471,6 +465,33 @@ class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class TransformationStepDetail(DataModelElement):
+    """Details of a step representation a packet transformation.
+
+    :ivar transformationType: The type of the transformation
+    :ivar flowDiffs: Set of changed flow fields
+    """
+
+    transformationType = attr.ib(type=str)
+    flowDiffs = attr.ib(type=List[FlowDiff])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> TransformationStepDetail
+        return TransformationStepDetail(
+            json_dict["transformationType"],
+            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])])
+
+    def __str__(self):
+        # type: () -> str
+        if not self.flowDiffs:
+            return self.transformationType
+        return "{type} {diffs}".format(
+            type=self.transformationType,
+            diffs=', '.join(str(flowDiff) for flowDiff in self.flowDiffs))
+
+
+@attr.s(frozen=True)
 class Step(DataModelElement):
     """Represents a step in a hop.
 
@@ -484,22 +505,24 @@ class Step(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Optional[Step]
-        detail = json_dict.get("detail", {})
+
+        detailClasses = {
+            "EnterInputInterface": EnterInputIfaceStepDetail,
+            "ExitOutputInterface": ExitOutputIfaceStepDetail,
+            "Inbound": InboundStepDetail,
+            "Originate": OriginateStepDetail,
+            "PreSourceNatOutgoingFilter": PreSourceNatOutgoingFilterStepDetail,
+            "Transformation": TransformationStepDetail
+        }
+
         action = json_dict.get("action")
-        if json_dict.get("type") == "EnterInputInterface":
-            return Step(EnterInputIfaceStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "ExitOutputInterface":
-            return Step(ExitOutputIfaceStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "Routing":
-            return Step(RoutingStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "Inbound":
-            return Step(InboundStepDetail(), action)
-        elif json_dict.get("type") == "Originate":
-            return Step(OriginateStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
-            return Step(PreSourceNatOutgoingFilterStepDetail.from_dict(detail),
-                        action)
-        return None
+        detail = json_dict.get("detail", {})
+        type = json_dict.get("type")
+
+        if type not in detailClasses:
+            return None
+        else:
+            return Step(detailClasses[type].from_dict(detail), action)
 
     def __str__(self):
         # type: () -> str

@@ -22,39 +22,34 @@ import pytest
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags, PreSourceNatOutgoingFilterStepDetail, RoutingStepDetail, Step,
-                                      TcpFlags)
+                                      MatchTcpFlags,
+                                      PreSourceNatOutgoingFilterStepDetail,
+                                      RoutingStepDetail, Step,
+                                      TcpFlags, TransformationStepDetail)
 
 
 def testExitOutputIfaceStepDetail_str():
-    noDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        "filter",
-        None,
-        None)
-    oneDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        "filter",
-        [FlowDiff("field", "old", "new")],
-        None)
-    twoDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        "filter",
-        [FlowDiff("field1", "old1", "new1"),
-         FlowDiff("field2", "old2", "new2")],
-        None)
+    detail = ExitOutputIfaceStepDetail("iface", "filter", None)
 
-    step = Step(noDiffDetail, "ACTION")
+    step = Step(detail, "ACTION")
     assert str(step) == "ACTION(iface: filter)"
 
-    step = Step(oneDiffDetail, "ACTION")
-    assert str(step) == "ACTION(iface: filter field: old -> new)"
 
-    step = Step(twoDiffDetail, "ACTION")
-    assert str(step) == ''.join([
-        "ACTION(iface: filter ",
-        "field1: old1 -> new1, ",
-        "field2: old2 -> new2)"])
+def testTransformationStepDetail_str():
+    noDiffs = TransformationStepDetail("type", [])
+    oneDiff = TransformationStepDetail("type", [FlowDiff("field", "old", "new")])
+    twoDiffs = TransformationStepDetail("type",
+                                        [FlowDiff("field1", "old1", "new1"),
+                                         FlowDiff("field2", "old2", "new2")])
+
+    step = Step(noDiffs, "ACTION")
+    assert str(step) == "ACTION(type)"
+
+    step = Step(oneDiff, "ACTION")
+    assert str(step) == "ACTION(type field: old -> new)"
+
+    step = Step(twoDiffs, "ACTION")
+    assert str(step) == "ACTION(type field1: old1 -> new1, field2: old2 -> new2)"
 
 
 def testFlowDeserialization():
