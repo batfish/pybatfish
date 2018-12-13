@@ -20,10 +20,41 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
-                                      ExitOutputIfaceStepDetail, Flow,
+                                      ExitOutputIfaceStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
                                       MatchTcpFlags, PreSourceNatOutgoingFilterStepDetail, RoutingStepDetail, Step,
                                       TcpFlags)
+
+
+def testExitOutputIfaceStepDetail_str():
+    noDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        None,
+        None)
+    oneDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        [FlowDiff("field", "old", "new")],
+        None)
+    twoDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        [FlowDiff("field1", "old1", "new1"),
+         FlowDiff("field2", "old2", "new2")],
+        None)
+
+    step = Step(noDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter)"
+
+    step = Step(oneDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter field: old -> new)"
+
+    step = Step(twoDiffDetail, "ACTION")
+    assert str(step) == ''.join([
+        "ACTION(iface: filter ",
+        "field1: old1 -> new1, ",
+        "field2: old2 -> new2)"])
 
 
 def testFlowDeserialization():
@@ -191,9 +222,10 @@ def test_hop_repr_str():
               "nextHopIp": "1.2.3.4"},
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
-        Step(PreSourceNatOutgoingFilterStepDetail("out_iface1", "preSourceNat_filter"),
+        Step(PreSourceNatOutgoingFilterStepDetail("out_iface1",
+                                                  "preSourceNat_filter"),
              "PERMITTED"),
-        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
+        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None, None),
              "SENT_OUT")
     ])
 
