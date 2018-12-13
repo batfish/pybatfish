@@ -184,6 +184,8 @@ class Flow(DataModelElement):
         if self._has_ports():
             lines.append('Dst Port: %d' % self.dstPort)
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
+        if self.state != "NEW":
+            lines.append('Firewall Classification: %s' % self.state)
         return lines
 
     def _ip_port(self, ip, port):

@@ -316,6 +316,39 @@ def test_flow_repr_html_start_location():
     assert("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
 
 
+def test_flow_repr_html_state():
+    # ICMP flows do not have ports
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingress",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+    assert("Firewall Classification" not in Flow.from_dict(flowDict)._repr_html_())
+
+    # ESTABLISHED
+    flowDict['state'] = "ESTABLISHED"
+    assert ("Firewall Classification: ESTABLISHED" in Flow.from_dict(flowDict)._repr_html_())
+
+
 def test_flow_str_ports():
     # ICMP flows do not have ports
     flowDict = {
