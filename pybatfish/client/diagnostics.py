@@ -125,8 +125,7 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
             raise ValueError('Region must be set to upload init info.')
 
         # Generate anonymous S3 subdirectory name
-        anon_dir = '{}{}'.format(resource_prefix,
-                                 uuid.uuid4().hex)
+        anon_dir = '{}{}'.format(resource_prefix, uuid.uuid4().hex)
         upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
             bucket=bucket, region=region, resource=anon_dir)
 
