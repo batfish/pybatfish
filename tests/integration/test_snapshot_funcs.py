@@ -75,20 +75,10 @@ def example_snapshot(network):
 
 
 @pytest.fixture()
-def fully_recognized_snapshot(network):
+def file_status_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'snapshot_fully_recognized'), name)
-    yield name
-    # cleanup
-    bf_delete_snapshot(name)
-
-
-@pytest.fixture()
-def partially_unrecognized_snapshot(network):
-    bf_set_network(network)
-    name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'snapshot_partially_unrecognized'), name)
+    bf_init_snapshot(join(_this_dir, 'snapshot_file_status'), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -104,7 +94,7 @@ def roles_snapshot(network):
     bf_delete_snapshot(name)
 
 
-def test_get_snapshot_file_status(network, example_snapshot):
+def test_get_snapshot_file_status(network, file_status_snapshot):
     """Confirm we get correct init info statuses for example snapshot."""
     statuses = _get_snapshot_parse_status()
     assert (statuses == {
