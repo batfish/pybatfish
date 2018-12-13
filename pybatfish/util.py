@@ -18,6 +18,7 @@ from __future__ import absolute_import
 
 import os
 import string
+import tempfile
 import uuid
 import zipfile
 from collections import Iterable, Mapping
@@ -32,6 +33,10 @@ from pybatfish.exception import QuestionValidationException
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.
 _MAX_FILENAME_LEN = 150
+
+# Minimum timestamp supported by ZIP format
+# See issue https://bugs.python.org/issue34097
+_MIN_ZIP_TIMESTAMP = 315561600.0
 
 __all__ = [
     'BfJsonEncoder',
@@ -164,7 +169,19 @@ def zip_dir(dir_path, out_file):
             for f in files:
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
-                zipWriter.write(filename, arcname)
+
+                print('{}: {}'.format(filename, os.path.getmtime(filename)))
+                # Zipped files must be modified in 1980 or later
+                # So copy any file older than that to a tempfile to bump the timestamp
+                if os.path.getmtime(filename) < _MIN_ZIP_TIMESTAMP:
+                    with tempfile.NamedTemporaryFile('w+b') as temp_file, open(
+                            filename, 'rb') as file_src:
+                        temp_file.write(file_src.read())
+                        temp_file.flush()
+                        print('temp: {}'.format(temp_file.name))
+                        zipWriter.write(temp_file.name, arcname)
+                else:
+                    zipWriter.write(filename, arcname)
 
 
 def escape_html(s):
