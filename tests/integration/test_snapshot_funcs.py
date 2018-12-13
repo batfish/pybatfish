@@ -31,7 +31,8 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_set_snapshot, bf_upload_diagnostics)
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
-                                          _S3_REGION)
+                                          _S3_REGION,
+                                          _get_snapshot_parse_status)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
@@ -74,6 +75,16 @@ def example_snapshot(network):
 
 
 @pytest.fixture()
+def file_status_snapshot(network):
+    bf_set_network(network)
+    name = uuid.uuid4().hex
+    bf_init_snapshot(join(_this_dir, 'snapshot_file_status'), name)
+    yield name
+    # cleanup
+    bf_delete_snapshot(name)
+
+
+@pytest.fixture()
 def roles_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
@@ -81,6 +92,15 @@ def roles_snapshot(network):
     yield name
     # cleanup
     bf_delete_snapshot(name)
+
+
+def test_get_snapshot_file_status(network, file_status_snapshot):
+    """Confirm we get correct init info statuses for example snapshot."""
+    statuses = _get_snapshot_parse_status()
+    assert (statuses == {
+        'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
+        'configs/recognized.cfg': 'PASSED',
+    })
 
 
 def test_fork_snapshot(network, example_snapshot):
