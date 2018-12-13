@@ -94,7 +94,6 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-
     tmp_dir = tempfile.mkdtemp()
     try:
         for q in questions:
