@@ -506,23 +506,23 @@ class Step(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> Optional[Step]
 
-        detailClasses = {
-            "EnterInputInterface": EnterInputIfaceStepDetail,
-            "ExitOutputInterface": ExitOutputIfaceStepDetail,
-            "Inbound": InboundStepDetail,
-            "Originate": OriginateStepDetail,
-            "PreSourceNatOutgoingFilter": PreSourceNatOutgoingFilterStepDetail,
-            "Transformation": TransformationStepDetail
+        from_dicts = {
+            "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
+            "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
+            "Inbound": InboundStepDetail.from_dict,
+            "Originate": OriginateStepDetail.from_dict,
+            "PreSourceNatOutgoingFilter": PreSourceNatOutgoingFilterStepDetail.from_dict,
+            "Transformation": TransformationStepDetail.from_dict
         }
 
         action = json_dict.get("action")
         detail = json_dict.get("detail", {})
         type = json_dict.get("type")
 
-        if type not in detailClasses:
+        if type not in from_dicts:
             return None
         else:
-            return Step(detailClasses[type].from_dict(detail), action)
+            return Step(from_dicts[type](detail), action)
 
     def __str__(self):
         # type: () -> str
