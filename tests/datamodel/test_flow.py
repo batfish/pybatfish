@@ -220,7 +220,7 @@ def test_hop_repr_str():
         Step(PreSourceNatOutgoingFilterStepDetail("out_iface1",
                                                   "preSourceNat_filter"),
              "PERMITTED"),
-        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None, None),
+        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
              "SENT_OUT")
     ])
 
