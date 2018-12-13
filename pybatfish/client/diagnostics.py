@@ -19,7 +19,6 @@ import os
 import shutil
 import tempfile
 import uuid
-from hashlib import md5
 from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
@@ -127,7 +126,7 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
 
         # Generate anonymous S3 subdirectory name
         anon_dir = '{}{}'.format(resource_prefix,
-                                 md5(uuid.uuid4().hex.encode()).hexdigest())
+                                 uuid.uuid4().hex)
         upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
             bucket=bucket, region=region, resource=anon_dir)
 
