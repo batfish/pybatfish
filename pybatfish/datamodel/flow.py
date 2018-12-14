@@ -480,7 +480,7 @@ class Step(DataModelElement):
             return Step(InboundStepDetail(), action)
         elif json_dict.get("type") == "Originate":
             return Step(OriginateStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
+        elif json_dict.get("type") == "Filter":
             return Step(FilterStepDetail.from_dict(detail),
                         action)
         return None
