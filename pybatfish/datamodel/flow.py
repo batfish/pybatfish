@@ -531,12 +531,11 @@ class Step(DataModelElement):
     def __str__(self):
         # type: () -> str
         action_str = str(self.action)
-        if self.detail:
-            detail_str = str(self.detail)
-            if len(detail_str) > 0:
-                return "{}({})".format(action_str, detail_str)
-            else:
-                return action_str
+        detail_str = str(self.detail) if self.detail else None
+        if detail_str:
+            return "{}({})".format(action_str, detail_str)
+        else:
+            return action_str
 
     def _repr_html_(self):
         # type: () -> str
