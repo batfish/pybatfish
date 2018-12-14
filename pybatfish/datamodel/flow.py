@@ -712,7 +712,7 @@ class MatchTcpFlags(DataModelElement):
 
 def _get_color_for_disposition(disposition):
     # type: (str) -> str
-    success_dispositions = {"ACCEPTED", "DELIVERED", "EXITS_NETWORK"}
+    success_dispositions = {"ACCEPTED", "DELIVERED_TO_SUBNET", "EXITS_NETWORK"}
     if disposition in success_dispositions:
         return "#019612"
     else:
