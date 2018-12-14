@@ -126,21 +126,28 @@ def _assert_zip_contents(zip_file, file_sub_path, contents, tmpdir):
 
 def test_zip_dir(tmpdir):
     """Make sure zipping dir works."""
-    in_dir_path = str(tmpdir.mkdir('dirname'))
-    _make_config(in_dir_path, 'filename', 'file contents')
+    dirname = 'dirname'
+    filename = 'filename'
+    contents = 'file contents'
+    in_dir_path = str(tmpdir.mkdir(dirname))
+    _make_config(in_dir_path, filename, contents)
     zip_file = str(tmpdir.join('file.zip'))
 
     zip_dir(in_dir_path, zip_file)
 
-    _assert_zip_contents(zip_file, os.path.join('dirname', 'filename'),
-                         'file contents', tmpdir)
+    # Make sure the zip contains the file with the correct contents
+    _assert_zip_contents(zip_file, os.path.join(dirname, filename), contents,
+                         tmpdir)
 
 
 def test_zip_dir_bad_file_time(tmpdir):
-    """Make sure zipping really old files works - even though zip format doesn't support files that old."""
-    in_dir_path = str(tmpdir.mkdir('dirname'))
-    _make_config(in_dir_path, 'filename', 'file contents')
-    in_file_path = os.path.join(in_dir_path, 'filename')
+    """Make sure zipping pre-1980 file works - even though zip format doesn't support files that old."""
+    dirname = 'dirname'
+    filename = 'filename'
+    contents = 'file contents'
+    in_dir_path = str(tmpdir.mkdir(dirname))
+    _make_config(in_dir_path, filename, contents)
+    in_file_path = os.path.join(in_dir_path, filename)
     zip_file = str(tmpdir.join('file.zip'))
 
     # Set accessed and modified time of file we're about to zip to some time in the past
@@ -149,5 +156,6 @@ def test_zip_dir_bad_file_time(tmpdir):
 
     zip_dir(in_dir_path, zip_file)
 
-    _assert_zip_contents(zip_file, os.path.join('dirname', 'filename'),
-                         'file contents', tmpdir)
+    # Make sure the zip contains the file with the correct contents
+    _assert_zip_contents(zip_file, os.path.join(dirname, filename), contents,
+                         tmpdir)

@@ -170,7 +170,7 @@ def zip_dir(dir_path, out_file):
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
 
-                # Zipped files must be modified in 1980 or later
+                # Zipped files must be from 1980 or later
                 # So copy any file older than that to a tempfile to bump the timestamp
                 if os.path.getmtime(filename) < _MIN_ZIP_TIMESTAMP:
                     with tempfile.NamedTemporaryFile('w+b') as temp_file, open(
