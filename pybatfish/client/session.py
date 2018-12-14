@@ -55,6 +55,7 @@ class Session(object):
 
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int
+        self.enable_diagnostics = True  # type: bool
 
         # cache _baseUrl
         self._base_url = self.get_base_url()  # type: str

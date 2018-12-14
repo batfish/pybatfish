@@ -27,7 +27,8 @@ import six
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import _upload_diagnostics
+from pybatfish.client.diagnostics import (_upload_diagnostics,
+                                          _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     AutoCompletionType, Edge,
@@ -302,25 +303,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     restv2helper.fork_snapshot(bf_session,
                                json_data)
 
-    work_item = workhelper.get_workitem_parse(bf_session, name)
-    answer_dict = workhelper.execute(work_item, bf_session,
-                                     background=background)
-    if background:
-        bf_session.baseSnapshot = name
-        return answer_dict
-
-    status = WorkStatusCode(answer_dict['status'])
-    if status != WorkStatusCode.TERMINATEDNORMALLY:
-        raise BatfishException(
-            'Forking snapshot {ss} from {base} failed with status {status}'.format(
-                ss=name,
-                base=base_name,
-                status=status))
-    else:
-        bf_session.baseSnapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.baseSnapshot)
-        return bf_session.baseSnapshot
+    return _parse_snapshot(name, background)
 
 
 def bf_generate_dataplane(snapshot=None):
@@ -503,6 +486,20 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
                                  CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
                                  json_data)
 
+    return _parse_snapshot(name, background)
+
+
+def _parse_snapshot(name, background):
+    # type: (str, bool) -> Union[str, Dict[str, str]]
+    """Parse specified snapshot.
+
+    :param name: name of the snapshot to initialize
+    :type name: str
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+    :rtype: Union[str, Dict]
+    """
     work_item = workhelper.get_workitem_parse(bf_session, name)
     answer_dict = workhelper.execute(work_item, bf_session,
                                      background=background)
@@ -511,6 +508,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         return answer_dict
 
     status = WorkStatusCode(answer_dict["status"])
+
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
         raise BatfishException(
@@ -520,6 +518,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
+        if bf_session.enable_diagnostics:
+            _warn_on_snapshot_failure()
+
         return bf_session.baseSnapshot
 
 

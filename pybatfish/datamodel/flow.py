@@ -184,6 +184,8 @@ class Flow(DataModelElement):
         if self._has_ports():
             lines.append('Dst Port: %d' % self.dstPort)
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
+        if self.state != "NEW":
+            lines.append('Firewall Classification: %s' % self.state)
         return lines
 
     def _ip_port(self, ip, port):
@@ -192,6 +194,34 @@ class Flow(DataModelElement):
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
             return ip
+
+
+@attr.s(frozen=True)
+class FlowDiff(DataModelElement):
+    """A difference between two Flows.
+
+    :ivar fieldName: A Flow field name that has changed.
+    :ivar oldValue: The old value of the field.
+    :ivar newValue: The new value of the field.
+    """
+
+    fieldName = attr.ib(type=str)
+    oldValue = attr.ib(type=str)
+    newValue = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> FlowDiff
+        return FlowDiff(json_dict["fieldName"],
+                        json_dict["oldValue"],
+                        json_dict["newValue"])
+
+    def __str__(self):
+        # type: () -> str
+        return "{fieldName}: {oldValue} -> {newValue}".format(
+            fieldName=self.fieldName,
+            oldValue=self.oldValue,
+            newValue=self.newValue)
 
 
 @attr.s(frozen=True)
@@ -325,11 +355,13 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
     :ivar outputFilter: Filter associated with the output interface
+    :ivar flowDiff: Set of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
     outputInterface = attr.ib(type=str)
     outputFilter = attr.ib(type=Optional[str])
+    flowDiffs = attr.ib(type=List[FlowDiff])
     transformedFlow = attr.ib(type=Optional[str])
 
     @classmethod
@@ -338,6 +370,7 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("outputFilter"),
+            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
             json_dict.get("transformedFlow"))
 
     def __str__(self):
@@ -345,6 +378,9 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         str_output = str(self.outputInterface)
         if self.outputFilter:
             str_output += ": {}".format(self.outputFilter)
+        if self.flowDiffs:
+            str_output += " " + ", ".join(
+                [str(flowDiff) for flowDiff in self.flowDiffs])
         return str_output
 
 
@@ -409,6 +445,32 @@ class RoutingStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
+    """Details of a step representing the pre-source nat filter step.
+
+    :ivar outputInterface: Output interface
+    :ivar filter: preSourceNatFilter
+    """
+
+    outputInterface = attr.ib(type=Optional[str])
+    filter = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> PreSourceNatOutgoingFilterStepDetail
+        return PreSourceNatOutgoingFilterStepDetail(
+            json_dict.get("outputInterface"),
+            json_dict.get("preSourceNatFilter"))
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.outputInterface)
+        if self.filter:
+            str_output += ": {}".format(self.filter)
+        return str_output
+
+
+@attr.s(frozen=True)
 class Step(DataModelElement):
     """Represents a step in a hop.
 
@@ -434,6 +496,9 @@ class Step(DataModelElement):
             return Step(InboundStepDetail(), action)
         elif json_dict.get("type") == "Originate":
             return Step(OriginateStepDetail.from_dict(detail), action)
+        elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
+            return Step(PreSourceNatOutgoingFilterStepDetail.from_dict(detail),
+                        action)
         return None
 
     def __str__(self):

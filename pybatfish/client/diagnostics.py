@@ -19,7 +19,6 @@ import os
 import shutil
 import tempfile
 import uuid
-from hashlib import md5
 from typing import Dict, Iterable, Optional  # noqa: F401
 
 import requests
@@ -29,29 +28,41 @@ from requests import HTTPError
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
+_CONVERSION_WARNINGS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.ConversionWarningQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__viConversionWarning",
+    }
+})
+_FILE_PARSE_STATUS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.FileParseStatusQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__fileParseStatus",
+    }
+})
+_INIT_INFO_QUESTION = QuestionBase({
+    "class": "org.batfish.question.InitInfoQuestionPlugin$InitInfoQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__initInfo"
+    },
+})
+_PARSE_WARNINGS_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.ParseWarningQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__parseWarning",
+    }
+})
+
 # Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
-    QuestionBase({
-        "class": "org.batfish.question.initialization.ParseWarningQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__parseWarning",
-        }
-    }),
-    QuestionBase({
-        "class": "org.batfish.question.initialization.FileParseStatusQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__fileParseStatus",
-        }
-    }),
-    QuestionBase({
-        "class": "org.batfish.question.initialization.ConversionWarningQuestion",
-        "differential": False,
-        "instance": {
-            "instanceName": "__viConversionWarning",
-        }
-    }),
+    _INIT_INFO_QUESTION,
+    _PARSE_WARNINGS_QUESTION,
+    _FILE_PARSE_STATUS_QUESTION,
+    _CONVERSION_WARNINGS_QUESTION,
 )
 
 _S3_BUCKET = 'batfish-diagnostics'
@@ -61,8 +72,9 @@ bf_logger = logging.getLogger("pybatfish.client")
 
 
 def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
-                        netconan_config=None, questions=_INIT_INFO_QUESTIONS):
-    # type: (str, str, bool, Optional[str], Iterable[QuestionBase]) -> str
+                        netconan_config=None, questions=_INIT_INFO_QUESTIONS,
+                        resource_prefix=''):
+    # type: (str, str, bool, Optional[str], Iterable[QuestionBase], str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
@@ -76,11 +88,11 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     :type netconan_config: string
     :param questions: list of questions to run and upload
     :type questions: list[QuestionBase]
+    :param resource_prefix: prefix to append to any uploaded resources
+    :type resource_prefix: str
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-    from pybatfish.client.commands import bf_session
-
     tmp_dir = tempfile.mkdtemp()
     try:
         for q in questions:
@@ -113,12 +125,9 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
             raise ValueError('Region must be set to upload init info.')
 
         # Generate anonymous S3 subdirectory name
-        anon_dir_name = md5(
-            '{}{}{}'.format(bf_session.network,
-                            bf_session.baseSnapshot,
-                            uuid.uuid4().hex).encode()).hexdigest()
+        anon_dir = '{}{}'.format(resource_prefix, uuid.uuid4().hex)
         upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
-            bucket=bucket, region=region, resource=anon_dir_name)
+            bucket=bucket, region=region, resource=anon_dir)
 
         _upload_dir_to_url(upload_dest, tmp_dir_anon,
                            headers={'x-amz-acl': 'bucket-owner-full-control'})
@@ -126,7 +135,7 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
     finally:
         shutil.rmtree(tmp_dir_anon)
 
-    return anon_dir_name
+    return anon_dir
 
 
 def _anonymize_dir(input_dir, output_dir, netconan_config=None):
@@ -159,6 +168,56 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     netconan.main(args)
 
 
+def _get_snapshot_parse_status():
+    # type: () -> Dict[str, str]
+    """
+    Get parsing and conversion status for files and nodes in the current snapshot.
+
+    :return: dictionary of files and nodes to parse/convert status
+    :rtype: dict
+    """
+    parse_status = {}  # type: Dict[str, str]
+    try:
+        answer = _INIT_INFO_QUESTION.answer()
+        if 'answerElements' not in answer:
+            raise BatfishException('Invalid answer format for init info')
+        answer_elements = answer['answerElements']
+        if not len(answer_elements):
+            raise BatfishException('Invalid answer format for init info')
+        # These statuses contain parse and conversion status
+        parse_status = answer_elements[0].get('parseStatus', {})
+    except BatfishException as e:
+        bf_logger.warning("Failed to check snapshot init info: %s", e)
+
+    return parse_status
+
+
+def _check_if_all_passed(statuses):
+    # type: (Dict[str, str]) -> bool
+    """
+    Check if all items in supplied `statuses` dict passed parsing and conversion.
+
+    :param statuses: dictionary init info statuses (files/nodes to their status)
+    :type statuses: dict
+    :return: boolean indicating if all files and nodes in current snapshot passed parsing and conversion
+    :rtype: bool
+    """
+    return all(statuses[key] == 'PASSED' for key in statuses)
+
+
+def _check_if_any_failed(statuses):
+    # type: (Dict[str, str]) -> bool
+    """
+    Check if any item in supplied `statuses` dict failed parsing or conversion.
+
+    :param statuses: dictionary init info statuses (files/nodes to their status)
+    :type statuses: dict
+    :return: boolean indicating if any file or node in current snapshot failed parsing or conversion
+    :rtype: bool
+    """
+    return any(statuses[key] == 'FAILED' for key in statuses)
+
+
 def _upload_dir_to_url(base_url, src_dir, headers=None):
     # type: (str, str, Optional[Dict]) -> None
     """
@@ -180,3 +239,27 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
                     raise HTTPError(
                         'Failed to upload resource: {} with status code {}'.format(
                             resource, r.status_code))
+
+
+def _warn_on_snapshot_failure():
+    # type: () -> None
+    """Check if snapshot passed and warn about any parsing or conversion issues."""
+    statuses = _get_snapshot_parse_status()
+    if _check_if_any_failed(statuses):
+        bf_logger.warning("""\
+Batfish failed to understand one or more input files, so some analyses will be incorrect. Please consider sharing error logs with the Batfish developers by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")
+    elif not _check_if_all_passed(statuses):
+        bf_logger.warning("""\
+One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")

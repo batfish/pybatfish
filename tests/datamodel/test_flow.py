@@ -20,10 +20,41 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
-                                      ExitOutputIfaceStepDetail, Flow,
+                                      ExitOutputIfaceStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags, RoutingStepDetail, Step,
+                                      MatchTcpFlags, PreSourceNatOutgoingFilterStepDetail, RoutingStepDetail, Step,
                                       TcpFlags)
+
+
+def testExitOutputIfaceStepDetail_str():
+    noDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        None,
+        None)
+    oneDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        [FlowDiff("field", "old", "new")],
+        None)
+    twoDiffDetail = ExitOutputIfaceStepDetail(
+        "iface",
+        "filter",
+        [FlowDiff("field1", "old1", "new1"),
+         FlowDiff("field2", "old2", "new2")],
+        None)
+
+    step = Step(noDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter)"
+
+    step = Step(oneDiffDetail, "ACTION")
+    assert str(step) == "ACTION(iface: filter field: old -> new)"
+
+    step = Step(twoDiffDetail, "ACTION")
+    assert str(step) == ''.join([
+        "ACTION(iface: filter ",
+        "field1: old1 -> new1, ",
+        "field2: old2 -> new2)"])
 
 
 def testFlowDeserialization():
@@ -191,12 +222,15 @@ def test_hop_repr_str():
               "nextHopIp": "1.2.3.4"},
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
-        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
+        Step(PreSourceNatOutgoingFilterStepDetail("out_iface1",
+                                                  "preSourceNat_filter"),
+             "PERMITTED"),
+        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None, None),
              "SENT_OUT")
     ])
 
     assert str(
-        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  SENT_OUT(out_iface1: out_filter1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(out_iface1: preSourceNat_filter)\n  SENT_OUT(out_iface1: out_filter1)"
 
 
 def test_match_tcp_generators():
@@ -280,6 +314,39 @@ def test_flow_repr_html_start_location():
 
     flow = Flow.from_dict(flowDict)
     assert("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
+
+
+def test_flow_repr_html_state():
+    # ICMP flows do not have ports
+    flowDict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 0,
+        "icmpVar": 0,
+        "ingressNode": "ingress",
+        "ipProtocol": "TCP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "state": "NEW",
+        "tag": "BASE",
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0
+    }
+    assert("Firewall Classification" not in Flow.from_dict(flowDict)._repr_html_())
+
+    # ESTABLISHED
+    flowDict['state'] = "ESTABLISHED"
+    assert ("Firewall Classification: ESTABLISHED" in Flow.from_dict(flowDict)._repr_html_())
 
 
 def test_flow_str_ports():
