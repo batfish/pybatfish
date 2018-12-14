@@ -228,6 +228,11 @@ def test_hop_repr_str():
         hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(out_iface1: preSourceNat_filter)\n  SENT_OUT(out_iface1: out_filter1)"
 
 
+def test_no_route():
+    step = Step(RoutingStepDetail([]), "NO_ROUTE")
+    assert str(step) == "NO_ROUTE"
+
+
 def test_match_tcp_generators():
     assert MatchTcpFlags.match_ack() == MatchTcpFlags(
         TcpFlags(ack=True), useAck=True)

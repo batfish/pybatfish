@@ -428,6 +428,9 @@ class RoutingStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
+        if not self.routes:
+            return ""
+
         routes_str = []  # type: List[str]
         for route in self.routes:
             routes_str.append(
@@ -512,6 +515,7 @@ class Step(DataModelElement):
             "Inbound": InboundStepDetail.from_dict,
             "Originate": OriginateStepDetail.from_dict,
             "PreSourceNatOutgoingFilter": PreSourceNatOutgoingFilterStepDetail.from_dict,
+            "Routing": RoutingStepDetail.from_dict,
             "Transformation": TransformationStepDetail.from_dict
         }
 
@@ -526,10 +530,13 @@ class Step(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.action)
+        action_str = str(self.action)
         if self.detail:
-            str_output += "({detail})".format(detail=str(self.detail))
-        return str_output
+            detail_str = str(self.detail)
+            if len(detail_str) > 0:
+                return "{}({})".format(action_str, detail_str)
+            else:
+                return action_str
 
     def _repr_html_(self):
         # type: () -> str
