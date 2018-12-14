@@ -1,6 +1,6 @@
 {
 	"hostname" : "host-db",
-	"iptablesFile" : "iptables/host1.iptables",
+	"iptablesFile" : "iptables/host-www.iptables",
 	"hostInterfaces" : {
 		"eth0" : {
 			"name": "eth0",
