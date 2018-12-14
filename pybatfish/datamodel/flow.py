@@ -325,27 +325,22 @@ class EnterInputIfaceStepDetail(DataModelElement):
     """Details of a step representing the entering of a flow into a Hop.
 
     :ivar inputInterface: Interface of the Hop on which this flow enters
-    :ivar inputFilter: Filter associated with the input interface
     :ivar inputVrf: VRF associated with the input interface
     """
 
     inputInterface = attr.ib(type=str)
     inputVrf = attr.ib(type=Optional[str])
-    inputFilter = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> EnterInputIfaceStepDetail
         return EnterInputIfaceStepDetail(
             json_dict.get("inputInterface", {}).get("interface"),
-            json_dict.get("inputVrf"),
-            json_dict.get("inputFilter"))
+            json_dict.get("inputVrf"))
 
     def __str__(self):
         # type: () -> str
         str_output = str(self.inputInterface)
-        if self.inputFilter:
-            str_output += ": {}".format(self.inputFilter)
         return str_output
 
 
@@ -354,13 +349,11 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     """Details of a step representing the exiting of a flow out of a Hop.
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
-    :ivar outputFilter: Filter associated with the output interface
     :ivar flowDiff: Set of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
     outputInterface = attr.ib(type=str)
-    outputFilter = attr.ib(type=Optional[str])
     flowDiffs = attr.ib(type=List[FlowDiff])
     transformedFlow = attr.ib(type=Optional[str])
 
@@ -369,15 +362,12 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         # type: (Dict) -> ExitOutputIfaceStepDetail
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            json_dict.get("outputFilter"),
             [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
             json_dict.get("transformedFlow"))
 
     def __str__(self):
         # type: () -> str
         str_output = str(self.outputInterface)
-        if self.outputFilter:
-            str_output += ": {}".format(self.outputFilter)
         if self.flowDiffs:
             str_output += " " + ", ".join(
                 [str(flowDiff) for flowDiff in self.flowDiffs])
@@ -445,28 +435,22 @@ class RoutingStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
-class PreSourceNatOutgoingFilterStepDetail(DataModelElement):
+class FilterStepDetail(DataModelElement):
     """Details of a step representing the pre-source nat filter step.
 
-    :ivar outputInterface: Output interface
-    :ivar filter: preSourceNatFilter
+    :ivar filter: filter name
     """
 
-    outputInterface = attr.ib(type=Optional[str])
     filter = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> PreSourceNatOutgoingFilterStepDetail
-        return PreSourceNatOutgoingFilterStepDetail(
-            json_dict.get("outputInterface"),
-            json_dict.get("preSourceNatFilter"))
+        # type: (Dict) -> FilterStepDetail
+        return FilterStepDetail(json_dict.get("filter"))
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.outputInterface)
-        if self.filter:
-            str_output += ": {}".format(self.filter)
+        str_output = str(self.filter)
         return str_output
 
 
@@ -497,7 +481,7 @@ class Step(DataModelElement):
         elif json_dict.get("type") == "Originate":
             return Step(OriginateStepDetail.from_dict(detail), action)
         elif json_dict.get("type") == "PreSourceNatOutgoingFilter":
-            return Step(PreSourceNatOutgoingFilterStepDetail.from_dict(detail),
+            return Step(FilterStepDetail.from_dict(detail),
                         action)
         return None
 
