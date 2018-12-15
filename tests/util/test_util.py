@@ -141,7 +141,11 @@ def test_zip_dir(tmpdir):
 
 
 def test_zip_dir_bad_file_time(tmpdir):
-    """Make sure zipping pre-1980 file works - even though zip format doesn't support files that old."""
+    """
+    Make sure zipping pre-1980 file works - even though zip format doesn't support files that old.
+
+    See issue here https://bugs.python.org/issue34097
+    """
     dirname = 'dirname'
     filename = 'filename'
     contents = 'file contents'
@@ -150,7 +154,7 @@ def test_zip_dir_bad_file_time(tmpdir):
     in_file_path = os.path.join(in_dir_path, filename)
     zip_file = str(tmpdir.join('file.zip'))
 
-    # Set accessed and modified time of file we're about to zip to some time in the past
+    # Set accessed and modified time of file we're about to zip to some time pre-1980
     _1960_01_01 = -315590400.0
     os.utime(in_file_path, (_1960_01_01, _1960_01_01))
 
