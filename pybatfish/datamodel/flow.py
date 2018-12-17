@@ -450,6 +450,7 @@ class FilterStepDetail(DataModelElement):
         # type: () -> str
         return "Filter name: {}, Filter type: {}".format(self.filter, self.filterType)
 
+
 @attr.s(frozen=True)
 class TransformationStepDetail(DataModelElement):
     """Details of a step representation a packet transformation.
