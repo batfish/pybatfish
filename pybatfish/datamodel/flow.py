@@ -349,12 +349,10 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     """Details of a step representing the exiting of a flow out of a Hop.
 
     :ivar outputInterface: Interface of the Hop from which the flow exits
-    :ivar flowDiff: Set of changed flow fields
     :ivar transformedFlow: Transformed Flow if a source NAT was applied on the Flow
     """
 
     outputInterface = attr.ib(type=str)
-    flowDiffs = attr.ib(type=List[FlowDiff])
     transformedFlow = attr.ib(type=Optional[str])
 
     @classmethod
@@ -362,15 +360,11 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         # type: (Dict) -> ExitOutputIfaceStepDetail
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
             json_dict.get("transformedFlow"))
 
     def __str__(self):
         # type: () -> str
         str_output = str(self.outputInterface)
-        if self.flowDiffs:
-            str_output += " " + ", ".join(
-                [str(flowDiff) for flowDiff in self.flowDiffs])
         return str_output
 
 
@@ -424,6 +418,9 @@ class RoutingStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
+        if not self.routes:
+            return ""
+
         routes_str = []  # type: List[str]
         for route in self.routes:
             routes_str.append(
@@ -455,6 +452,33 @@ class FilterStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class TransformationStepDetail(DataModelElement):
+    """Details of a step representation a packet transformation.
+
+    :ivar transformationType: The type of the transformation
+    :ivar flowDiffs: Set of changed flow fields
+    """
+
+    transformationType = attr.ib(type=str)
+    flowDiffs = attr.ib(type=List[FlowDiff])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> TransformationStepDetail
+        return TransformationStepDetail(
+            json_dict["transformationType"],
+            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])])
+
+    def __str__(self):
+        # type: () -> str
+        if not self.flowDiffs:
+            return self.transformationType
+        return "{type} {diffs}".format(
+            type=self.transformationType,
+            diffs=', '.join(str(flowDiff) for flowDiff in self.flowDiffs))
+
+
+@attr.s(frozen=True)
 class Step(DataModelElement):
     """Represents a step in a hop.
 
@@ -468,29 +492,35 @@ class Step(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Optional[Step]
-        detail = json_dict.get("detail", {})
+
+        from_dicts = {
+            "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
+            "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
+            "Inbound": InboundStepDetail.from_dict,
+            "Originate": OriginateStepDetail.from_dict,
+            "Routing": RoutingStepDetail.from_dict,
+            "Transformation": TransformationStepDetail.from_dict,
+            "Filter": FilterStepDetail.from_dict
+        }
+
         action = json_dict.get("action")
-        if json_dict.get("type") == "EnterInputInterface":
-            return Step(EnterInputIfaceStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "ExitOutputInterface":
-            return Step(ExitOutputIfaceStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "Routing":
-            return Step(RoutingStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "Inbound":
-            return Step(InboundStepDetail(), action)
-        elif json_dict.get("type") == "Originate":
-            return Step(OriginateStepDetail.from_dict(detail), action)
-        elif json_dict.get("type") == "Filter":
-            return Step(FilterStepDetail.from_dict(detail),
-                        action)
-        return None
+
+        detail = json_dict.get("detail", {})
+        type = json_dict.get("type")
+
+        if type not in from_dicts:
+            return None
+        else:
+            return Step(from_dicts[type](detail), action)
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.action)
-        if self.detail:
-            str_output += "({detail})".format(detail=str(self.detail))
-        return str_output
+        action_str = str(self.action)
+        detail_str = str(self.detail) if self.detail else None
+        if detail_str:
+            return "{}({})".format(action_str, detail_str)
+        else:
+            return action_str
 
     def _repr_html_(self):
         # type: () -> str
@@ -696,7 +726,7 @@ class MatchTcpFlags(DataModelElement):
 
 def _get_color_for_disposition(disposition):
     # type: (str) -> str
-    success_dispositions = {"ACCEPTED", "DELIVERED", "EXITS_NETWORK"}
+    success_dispositions = {"ACCEPTED", "DELIVERED_TO_SUBNET", "EXITS_NETWORK"}
     if disposition in success_dispositions:
         return "#019612"
     else:

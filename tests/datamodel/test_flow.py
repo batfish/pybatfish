@@ -24,35 +24,31 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       FilterStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
                                       MatchTcpFlags, RoutingStepDetail, Step,
-                                      TcpFlags)
+                                      TcpFlags, TransformationStepDetail)
 
 
 def testExitOutputIfaceStepDetail_str():
-    noDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        None,
-        None)
-    oneDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        [FlowDiff("field", "old", "new")],
-        None)
-    twoDiffDetail = ExitOutputIfaceStepDetail(
-        "iface",
-        [FlowDiff("field1", "old1", "new1"),
-         FlowDiff("field2", "old2", "new2")],
-        None)
+    detail = ExitOutputIfaceStepDetail("iface", None)
 
-    step = Step(noDiffDetail, "ACTION")
-    assert str(step) == "ACTION(iface)"
+    step = Step(detail, "ACTION")
+    assert str(step) == "ACTION(iface: filter)"
 
-    step = Step(oneDiffDetail, "ACTION")
-    assert str(step) == "ACTION(iface field: old -> new)"
 
-    step = Step(twoDiffDetail, "ACTION")
-    assert str(step) == ''.join([
-        "ACTION(iface ",
-        "field1: old1 -> new1, ",
-        "field2: old2 -> new2)"])
+def testTransformationStepDetail_str():
+    noDiffs = TransformationStepDetail("type", [])
+    oneDiff = TransformationStepDetail("type", [FlowDiff("field", "old", "new")])
+    twoDiffs = TransformationStepDetail("type",
+                                        [FlowDiff("field1", "old1", "new1"),
+                                         FlowDiff("field2", "old2", "new2")])
+
+    step = Step(noDiffs, "ACTION")
+    assert str(step) == "ACTION(type)"
+
+    step = Step(oneDiff, "ACTION")
+    assert str(step) == "ACTION(type field: old -> new)"
+
+    step = Step(twoDiffs, "ACTION")
+    assert str(step) == "ACTION(type field1: old1 -> new1, field2: old2 -> new2)"
 
 
 def testFlowDeserialization():
@@ -222,12 +218,17 @@ def test_hop_repr_str():
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
         Step(FilterStepDetail("preSourceNat_filter"),
              "PERMITTED"),
-        Step(ExitOutputIfaceStepDetail("out_iface1", None, None),
+        Step(ExitOutputIfaceStepDetail("out_iface1", None),
              "SENT_OUT")
     ])
 
     assert str(
         hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter)\n  SENT_OUT(out_iface1)"
+
+
+def test_no_route():
+    step = Step(RoutingStepDetail([]), "NO_ROUTE")
+    assert str(step) == "NO_ROUTE"
 
 
 def test_match_tcp_generators():
