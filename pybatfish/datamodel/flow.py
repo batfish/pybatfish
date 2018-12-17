@@ -364,8 +364,7 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.outputInterface)
-        return str_output
+        return str(self.outputInterface)
 
 
 @attr.s(frozen=True)
@@ -433,23 +432,23 @@ class RoutingStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class FilterStepDetail(DataModelElement):
-    """Details of a step representing the pre-source nat filter step.
+    """Details of a step representing a filter step.
 
     :ivar filter: filter name
+    :ivar type: filter type
     """
 
     filter = attr.ib(type=Optional[str])
+    filterType = attr.ib(type=str)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        return FilterStepDetail(json_dict.get("filter"))
+        return FilterStepDetail(json_dict.get("filter"), json_dict["type"])
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.filter)
-        return str_output
-
+        return "Filter name: {}, Filter type: {}".format(self.filter, self.filterType)
 
 @attr.s(frozen=True)
 class TransformationStepDetail(DataModelElement):

@@ -31,7 +31,7 @@ def testExitOutputIfaceStepDetail_str():
     detail = ExitOutputIfaceStepDetail("iface", None)
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(iface: filter)"
+    assert str(step) == "ACTION(iface)"
 
 
 def testTransformationStepDetail_str():
@@ -216,14 +216,14 @@ def test_hop_repr_str():
               "nextHopIp": "1.2.3.4"},
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
-        Step(FilterStepDetail("preSourceNat_filter"),
+        Step(FilterStepDetail("preSourceNat_filter", "PRENAT"),
              "PERMITTED"),
         Step(ExitOutputIfaceStepDetail("out_iface1", None),
              "SENT_OUT")
     ])
 
     assert str(
-        hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter)\n  SENT_OUT(out_iface1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(Filter name: preSourceNat_filter, Filter type: PRENAT)\n  SENT_OUT(out_iface1)"
 
 
 def test_no_route():
