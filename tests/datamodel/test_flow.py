@@ -223,7 +223,7 @@ def test_hop_repr_str():
     ])
 
     assert str(
-        hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(Filter name: preSourceNat_filter, Filter type: PRENAT)\n  SENT_OUT(out_iface1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
 
 
 def test_no_route():

@@ -438,17 +438,17 @@ class FilterStepDetail(DataModelElement):
     :ivar type: filter type
     """
 
-    filter = attr.ib(type=Optional[str])
+    filter = attr.ib(type=str)
     filterType = attr.ib(type=str)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        return FilterStepDetail(json_dict.get("filter"), json_dict["type"])
+        return FilterStepDetail(json_dict.get("filter", ""), json_dict.get("type", ""))
 
     def __str__(self):
         # type: () -> str
-        return "Filter name: {}, Filter type: {}".format(self.filter, self.filterType)
+        return "{} ({})".format(self.filter, self.filterType)
 
 
 @attr.s(frozen=True)
