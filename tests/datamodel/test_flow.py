@@ -20,19 +20,18 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
-                                      ExitOutputIfaceStepDetail, Flow, FlowDiff,
+                                      ExitOutputIfaceStepDetail,
+                                      FilterStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags,
-                                      PreSourceNatOutgoingFilterStepDetail,
-                                      RoutingStepDetail, Step,
+                                      MatchTcpFlags, RoutingStepDetail, Step,
                                       TcpFlags, TransformationStepDetail)
 
 
 def testExitOutputIfaceStepDetail_str():
-    detail = ExitOutputIfaceStepDetail("iface", "filter", None)
+    detail = ExitOutputIfaceStepDetail("iface", None)
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(iface: filter)"
+    assert str(step) == "ACTION(iface)"
 
 
 def testTransformationStepDetail_str():
@@ -210,22 +209,21 @@ def test_header_constraints_serialization():
 def test_hop_repr_str():
     hop = Hop("node1", [
         Step(
-            EnterInputIfaceStepDetail("in_iface1", "in_vrf1", "in_filter1"),
+            EnterInputIfaceStepDetail("in_iface1", "in_vrf1"),
             "SENT_IN"),
         Step(RoutingStepDetail(
             [{"network": "1.1.1.1/24", "protocol": "bgp",
               "nextHopIp": "1.2.3.4"},
              {"network": "1.1.1.2/24", "protocol": "static",
               "nextHopIp": "1.2.3.5"}]), "FORWARDED"),
-        Step(PreSourceNatOutgoingFilterStepDetail("out_iface1",
-                                                  "preSourceNat_filter"),
+        Step(FilterStepDetail("preSourceNat_filter", "PRENAT"),
              "PERMITTED"),
-        Step(ExitOutputIfaceStepDetail("out_iface1", "out_filter1", None),
+        Step(ExitOutputIfaceStepDetail("out_iface1", None),
              "SENT_OUT")
     ])
 
     assert str(
-        hop) == "node: node1\n  SENT_IN(in_iface1: in_filter1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(out_iface1: preSourceNat_filter)\n  SENT_OUT(out_iface1: out_filter1)"
+        hop) == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
 
 
 def test_no_route():
@@ -269,7 +267,7 @@ def test_flow_repr_html_ports():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    assert("Port" not in Flow.from_dict(flowDict)._repr_html_())
+    assert ("Port" not in Flow.from_dict(flowDict)._repr_html_())
 
     # UDP
     flowDict['ipProtocol'] = "UDP"
@@ -304,16 +302,18 @@ def test_flow_repr_html_start_location():
         "tcpFlagsUrg": 0
     }
 
-    assert("Start Location: ingressNode" in Flow.from_dict(flowDict)._repr_html_lines())
+    assert ("Start Location: ingressNode" in Flow.from_dict(
+        flowDict)._repr_html_lines())
 
     flowDict['ingressVrf'] = "ingressVrf"
-    assert("Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(flowDict)._repr_html_lines())
+    assert ("Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(
+        flowDict)._repr_html_lines())
 
     del flowDict['ingressVrf']
     flowDict['ingressInterface'] = "ingressIface"
 
     flow = Flow.from_dict(flowDict)
-    assert("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
+    assert ("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
 
 
 def test_flow_repr_html_state():
@@ -342,11 +342,13 @@ def test_flow_repr_html_state():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    assert("Firewall Classification" not in Flow.from_dict(flowDict)._repr_html_())
+    assert ("Firewall Classification" not in Flow.from_dict(
+        flowDict)._repr_html_())
 
     # ESTABLISHED
     flowDict['state'] = "ESTABLISHED"
-    assert ("Firewall Classification: ESTABLISHED" in Flow.from_dict(flowDict)._repr_html_())
+    assert ("Firewall Classification: ESTABLISHED" in Flow.from_dict(
+        flowDict)._repr_html_())
 
 
 def test_flow_str_ports():
@@ -376,14 +378,14 @@ def test_flow_str_ports():
         "tcpFlagsUrg": 0
     }
     str = repr(Flow.from_dict(flowDict))
-    assert("2.1.1.1:1234" not in str)
-    assert("5.5.1.1:2345" not in str)
+    assert ("2.1.1.1:1234" not in str)
+    assert ("5.5.1.1:2345" not in str)
 
     # UDP
     flowDict['ipProtocol'] = "UDP"
     str = repr(Flow.from_dict(flowDict))
-    assert("2.1.1.1:1234" not in str)
-    assert("5.5.1.1:2345" not in str)
+    assert ("2.1.1.1:1234" not in str)
+    assert ("5.5.1.1:2345" not in str)
 
 
 if __name__ == "__main__":
