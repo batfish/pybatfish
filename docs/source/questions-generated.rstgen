@@ -144,7 +144,7 @@
    
    For each file in a snapshot, returns the host(s) that were produced by the file and the parse status: pass, fail, partially parsed.
 
-.. py:class:: filterLineReachability(*, filters, nodes, question_name, exclusions)
+.. py:class:: filterLineReachability(*, filters, ignoreComposites, nodes, question_name, exclusions)
 
    Identify ACLs/filters with unreachable lines.
    
@@ -153,6 +153,8 @@
    
    :param filters: Name or regex identifying the filters to test.
    :type filters: string
+   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   :type ignoreComposites: boolean
    :param nodes: Examine filters on nodes matching this name or regex.
    :type nodes: nodeSpec
 
@@ -228,6 +230,16 @@
    :param status: Only include IPSec sessions for which status matches this regex.
    :type status: javaRegex
 
+.. py:class:: loopbackMultipathConsistency(*, maxTraces, question_name, exclusions)
+
+   Validate multipath consistency between all pairs of loopbacks.
+   
+   Finds flows between loopbacks that are treated differently by different paths in the presence of multipath routing.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
 .. py:class:: multipathConsistency(*, headers, maxTraces, pathConstraints, question_name, exclusions)
 
    Validate multipath consistency.
@@ -242,15 +254,23 @@
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
-.. py:class:: namedStructures(*, nodes, properties, question_name, exclusions)
+.. py:class:: namedStructures(*, ignoreGenerated, indicatePresence, nodes, structureNames, structureTypes, question_name, exclusions)
 
    Return named structure definitions.
    
    
+   :param ignoreGenerated: Whether to ignore auto-generated structures.
+   
+       Default value: ``True``
+   :type ignoreGenerated: boolean
+   :param indicatePresence: Output if the structure is present or absent.
+   :type indicatePresence: boolean
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
-   :param properties: Include properties matching this regex.
-   :type properties: namedStructureSpec
+   :param structureNames: Include structures matching this name or regex.
+   :type structureNames: javaRegex
+   :param structureTypes: Include structures of this type.
+   :type structureTypes: namedStructureSpec
 
 .. py:class:: neighbors(*, neighborTypes, nodes, remoteNodes, roleDimension, style, question_name, exclusions)
 
@@ -343,7 +363,7 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachability(*, actions, headers, ignoreFilters, maxTraces, pathConstraints, question_name, exclusions)
+.. py:class:: reachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name, exclusions)
 
    Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
    
@@ -356,6 +376,8 @@
    :type headers: headerConstraint
    :param ignoreFilters: Do not apply filters/ACLs during analysis.
    :type ignoreFilters: boolean
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
@@ -486,6 +508,16 @@
    :param startLocation: Only consider specified locations as possible sources.
    :type startLocation: string
 
+.. py:class:: subnetMultipathConsistency(*, maxTraces, question_name, exclusions)
+
+   Validate multipath consistency between all pairs of subnets.
+   
+   Finds flows between subnets that are treated differently by different paths in the presence of multipath routing.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
 .. py:class:: testFilters(*, filters, headers, nodes, startLocation, question_name, exclusions)
 
    Evaluate the processing of a flow by a given filter/ACL.
@@ -546,6 +578,16 @@
    
        Default value: ``.*``
    :type nodes: nodeSpec
+
+.. py:class:: viConversionStatus(*, question_name, exclusions)
+
+   Display vendor independent conversion status.
+   
+   For each node in a snapshot, returns the vendor independent conversion status: pass, fail, converted with warnings.
+
+.. py:class:: viConversionWarning(*, question_name, exclusions)
+
+   Return Batfish warnings that occurred when converting to vendor independent model.
 
 .. py:class:: viModel(*, question_name, exclusions)
 
