@@ -273,3 +273,10 @@ def test_question_name():
     inferred_name = qclass()
     assert inferred_name.get_name().startswith(
         '__{}_'.format(TEST_QUESTION_NAME))
+
+
+def test_question_positional_args():
+    """Test that a question constructor rejects positional arguments."""
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
+    with pytest.raises(TypeError):
+        qclass("positional")
