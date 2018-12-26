@@ -15,6 +15,7 @@ for building and running Batfish service.
    quickstart.rst
    questions.rst
    datamodel.rst
+   asserts.rst
    api.rst
 
 Indices and tables

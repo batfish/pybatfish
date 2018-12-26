@@ -53,7 +53,8 @@ def traceroute_network():
     except Exception:
         pass
     bf_set_network(TEST_NETWORK)
-    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
+    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"),
+                           name="snapshot_tracert")
     bf_delete_network(TEST_NETWORK)
 
 
@@ -75,7 +76,8 @@ def test_init_analysis(network):
 
 def test_answer_traceroute(traceroute_network):
     bf_session.additionalArgs = {'debugflags': 'traceroute'}
-    answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")).answer().frame()
+    answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(
+        dstIps="1.0.0.2")).answer().frame()
     list_traces = answer.iloc[0]['Traces']
     assert len(list_traces) == 1
     trace = list_traces[0]
