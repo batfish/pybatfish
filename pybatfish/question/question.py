@@ -76,17 +76,21 @@ class QuestionMeta(type):
         """Creates a new class for a specific question."""
         new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
 
-        def constructor(self, question_name=None,
-                        exclusions=None, **kwargs):
+        def constructor(self, *args, **kwargs):
             """Create a new question."""
+            # Reject positional args; this way is PY2-compliant
+            if args:
+                raise TypeError("Please use keyword arguments")
+
             # Call super (i.e., QuestionBase)
             super(new_cls, self).__init__(new_cls.template)
 
             # Update well-known params, if passed in
-            if exclusions is not None:
-                self._dict['exclusions'] = exclusions
-            if question_name:
-                self._dict['instance']['instanceName'] = question_name
+            if "exclusions" in kwargs:
+                self._dict['exclusions'] = kwargs.get("exclusions")
+            if "question_name" in kwargs:
+                self._dict['instance']['instanceName'] = kwargs.get(
+                    "question_name")
             else:
                 self._dict['instance']['instanceName'] = (
                     "__{}_{}".format(
@@ -94,14 +98,18 @@ class QuestionMeta(type):
 
             # Validate that we are not accepting invalid kwargs/variables
             instance_vars = self._dict['instance'].get('variables', {})
-            var_difference = set(kwargs.keys()).difference(instance_vars)
+            additional_kwargs = {'exclusions', 'question_name'}
+            allowed_kwargs = set(instance_vars)
+            allowed_kwargs.update(additional_kwargs)
+            var_difference = set(kwargs.keys()).difference(allowed_kwargs)
             if var_difference:
                 raise QuestionValidationException(
                     "Received unsupported parameters/variables: {}".format(
                         var_difference))
             # Set question-specific parameters
             for var_name, var_value in kwargs.items():
-                instance_vars[var_name]['value'] = var_value
+                if var_name not in additional_kwargs:
+                    instance_vars[var_name]['value'] = var_value
 
         # Define signature. Helps with tab completion. Python3 centric
         if PY3:
