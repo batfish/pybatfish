@@ -98,7 +98,7 @@ def test_filter_denies():
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_permits('filter', headers)
+            assert_filter_denies('filter', headers, startLocation='Ethernet1')
             # Ensure found answer is printed
             assert str(mock_df) in str(excinfo)
         mock_search_filters.assert_called_with(filters='filter',
