@@ -32,8 +32,8 @@ from pybatfish.exception import (BatfishAssertException,
 from pybatfish.question import bfq
 
 __all__ = [
-    'assert_acl_denies',
-    'assert_acl_permits',
+    'assert_filter_denies',
+    'assert_filter_permits',
     'assert_dict_match',
     'assert_has_no_route',
     'assert_has_route',
@@ -193,13 +193,13 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     return True
 
 
-def assert_acl_permits(acl_name, headers, startLocation=None, soft=False):
+def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
     # type: (str, HeaderConstraints, str, bool) -> bool
     """
     Check if a named ACL permits a specified set of flows.
 
-    :param acl_name: the name of ACL to check
-    :param headers: :py:class:`~pybafish.datamodel.flow.HeaderConstraints`
+    :param filter_name: the name of ACL to check
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
@@ -208,24 +208,24 @@ def assert_acl_permits(acl_name, headers, startLocation=None, soft=False):
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    kwargs = dict(filters=acl_name, headers=headers, action="deny")
+    kwargs = dict(filters=filter_name, headers=headers, action="deny")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
     df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
-        _raise_common(
+        return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
                 df), soft)
     return True
 
 
-def assert_acl_denies(acl_name, headers, startLocation=None, soft=False):
+def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
     # type: (str, HeaderConstraints, str, bool) -> bool
     """
     Check if a named ACL denies a specified set of flows.
 
-    :param acl_name: the name of ACL to check
-    :param headers: :py:class:`~pybafish.datamodel.flow.HeaderConstraints`
+    :param filter_name: the name of ACL to check
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
@@ -234,13 +234,13 @@ def assert_acl_denies(acl_name, headers, startLocation=None, soft=False):
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    kwargs = dict(filters=acl_name, headers=headers, action="permit")
+    kwargs = dict(filters=filter_name, headers=headers, action="permit")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
     df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
-        _raise_common(
+        return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
                 df), soft)
     return True

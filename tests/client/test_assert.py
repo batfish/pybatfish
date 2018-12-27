@@ -15,8 +15,8 @@ import pytest
 import six
 from pandas import DataFrame
 
-from pybatfish.client.asserts import (_raise_common, assert_acl_denies,
-                                      assert_acl_permits)
+from pybatfish.client.asserts import (_raise_common, assert_filter_denies,
+                                      assert_filter_permits)
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.exception import (BatfishAssertException,
@@ -61,12 +61,12 @@ class MockQuestion(QuestionBase):
         return self._answer
 
 
-def test_acl_permits():
+def test_filter_permits():
     headers = HeaderConstraints(srcIps='1.1.1.1')
     with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
-        assert_acl_permits('filter', headers)
+        assert_filter_permits('filter', headers)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='deny')
@@ -75,21 +75,21 @@ def test_acl_permits():
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_acl_permits('filter', headers, startLocation='Ethernet1')
+            assert_filter_permits('filter', headers, startLocation='Ethernet1')
             # Ensure found answer is printed
             assert str(mock_df) in str(excinfo)
-            mock_search_filters.assert_called_with(filters='filter',
-                                                   headers=headers,
-                                                   startLocation='Ethernet1',
-                                                   action='deny')
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='deny')
 
 
-def test_acl_denies():
+def test_filter_denies():
     headers = HeaderConstraints(srcIps='1.1.1.1')
     with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
-        assert_acl_denies('filter', headers)
+        assert_filter_denies('filter', headers)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='permit')
@@ -98,10 +98,10 @@ def test_acl_denies():
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_acl_permits('filter', headers)
+            assert_filter_permits('filter', headers)
             # Ensure found answer is printed
             assert str(mock_df) in str(excinfo)
-            mock_search_filters.assert_called_with(filters='filter',
-                                                   headers=headers,
-                                                   startLocation='Ethernet1',
-                                                   action='permit')
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='permit')
