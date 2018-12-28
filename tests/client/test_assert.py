@@ -42,7 +42,8 @@ def test_raise_common_default():
 
 def test_raise_common_warn():
     with pytest.warns(BatfishAssertWarning):
-        _raise_common("foobar", True)
+        result = _raise_common("foobar", True)
+    assert not result
 
 
 class MockTableAnswer(TableAnswer):
@@ -76,8 +77,8 @@ def test_filter_permits():
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_permits('filter', headers, startLocation='Ethernet1')
-            # Ensure found answer is printed
-            assert str(mock_df) in str(excinfo)
+        # Ensure found answer is printed
+        assert str(mock_df) in str(excinfo)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
@@ -99,8 +100,8 @@ def test_filter_denies():
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_denies('filter', headers, startLocation='Ethernet1')
-            # Ensure found answer is printed
-            assert str(mock_df) in str(excinfo)
+        # Ensure found answer is printed
+        assert str(mock_df) in str(excinfo)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
