@@ -215,7 +215,7 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
-                df), soft)
+                df.to_string()), soft)
     return True
 
 
@@ -242,5 +242,5 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
-                df), soft)
+                df.to_string()), soft)
     return True

@@ -78,7 +78,7 @@ def test_filter_permits():
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_permits('filter', headers, startLocation='Ethernet1')
         # Ensure found answer is printed
-        assert str(mock_df) in str(excinfo)
+        assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
@@ -101,7 +101,7 @@ def test_filter_denies():
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_denies('filter', headers, startLocation='Ethernet1')
         # Ensure found answer is printed
-        assert str(mock_df) in str(excinfo)
+        assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
