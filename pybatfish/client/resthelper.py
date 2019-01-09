@@ -52,7 +52,6 @@ def get_answer(session, snapshot, question_name, reference_snapshot=None):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
-                 CoordConsts.SVC_KEY_ENV_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
                  CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
                  }
     if reference_snapshot is not None:

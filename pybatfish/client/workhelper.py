@@ -162,7 +162,7 @@ def get_data_upload_question(session, question_name, question_json,
     # type: (Session, str, str, str) -> Dict
     """Create the form parameters needed to upload the given question."""
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
                  CoordConsts.SVC_KEY_FILE: ('question', question_json),
                  CoordConsts.SVC_KEY_FILE2: ('parameters', parameters_json)}
@@ -171,8 +171,8 @@ def get_data_upload_question(session, question_name, question_json,
 
 def get_data_auto_complete(session, completion_type, query, max_suggestions):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
-                 CoordConsts.SVC_KEY_TESTRIG_NAME: session.baseSnapshot,
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
+                 CoordConsts.SVC_KEY_SNAPSHOT_NAME: session.baseSnapshot,
                  CoordConsts.SVC_KEY_COMPLETION_TYPE: completion_type,
                  CoordConsts.SVC_KEY_QUERY: query}
     if max_suggestions:
@@ -183,7 +183,7 @@ def get_data_auto_complete(session, completion_type, query, max_suggestions):
 def get_data_configure_analysis(session, new_analysis, analysis_name,
                                 add_questions_filename, del_questions_str):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     if new_analysis:
         json_data[CoordConsts.SVC_KEY_NEW_ANALYSIS] = "new"
     json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
@@ -211,7 +211,7 @@ def get_data_configure_question_template(session, in_question, exceptions,
 
 def get_data_delete_analysis(session, analysis_name):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_ANALYSIS_NAME: analysis_name}
     return json_data
 
@@ -234,14 +234,11 @@ def get_data_get_analysis_answers(session, analysis_name, snapshot,
     # type: (Session, str, str, Optional[str]) -> Dict
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-        CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
-        CoordConsts.SVC_KEY_TESTRIG_NAME: snapshot,
-        CoordConsts.SVC_KEY_ENV_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
+        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
+        CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
     }
     if reference_snapshot is not None:
-        json_data[CoordConsts.SVC_KEY_DELTA_TESTRIG_NAME] = reference_snapshot
-        json_data[
-            CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+        json_data[CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
     json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
     return json_data
 
@@ -256,15 +253,12 @@ def get_data_get_answer(session, question_name, snapshot,
     # type: (Session, str, str, Optional[str]) -> Dict
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-        CoordConsts.SVC_KEY_CONTAINER_NAME: session.network,
-        CoordConsts.SVC_KEY_TESTRIG_NAME: snapshot,
-        CoordConsts.SVC_KEY_ENV_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
+        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
+        CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
         CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
     }
     if reference_snapshot is not None:
-        json_data[CoordConsts.SVC_KEY_DELTA_TESTRIG_NAME] = reference_snapshot
-        json_data[
-            CoordConsts.SVC_KEY_DELTA_ENV_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
+        json_data[CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
     return json_data
 
 
@@ -282,7 +276,7 @@ def get_data_kill_work(session, workId):
 
 def get_data_list_analyses(session):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
@@ -293,13 +287,13 @@ def get_data_list_networks(session):
 
 def get_data_list_incomplete_work(session):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
 def get_data_list_questions(session):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
-                 CoordConsts.SVC_KEY_CONTAINER_NAME: session.network}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
@@ -313,7 +307,7 @@ def get_data_list_snapshots(session, network):
 def get_data_list_testrigs(session, network):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey}
     if network is not None:
-        json_data[CoordConsts.SVC_KEY_CONTAINER_NAME] = network
+        json_data[CoordConsts.SVC_KEY_NETWORK_NAME] = network
     return json_data
 
 
@@ -354,13 +348,10 @@ def get_workitem_answer(session, question_name, snapshot,
         BfConsts.COMMAND_ANSWER: "",
         BfConsts.ARG_QUESTION_NAME: question_name,
         BfConsts.ARG_TESTRIG: snapshot,
-        BfConsts.ARG_ENVIRONMENT_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
     }
 
     if reference_snapshot is not None:
         parameters[BfConsts.ARG_DELTA_TESTRIG] = reference_snapshot
-        parameters[
-            BfConsts.ARG_DELTA_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
         parameters[BfConsts.ARG_DIFFERENTIAL] = ""
 
     work_item.requestParams.update(parameters)
@@ -373,8 +364,6 @@ def get_workitem_generate_dataplane(session, snapshot):
     w_item = WorkItem(session)
     w_item.requestParams[BfConsts.COMMAND_DUMP_DP] = ""
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
-    w_item.requestParams[
-        BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     return w_item
 
 
@@ -395,12 +384,8 @@ def get_workitem_run_analysis(session, analysis_name, snapshot,
     w_item.requestParams[BfConsts.COMMAND_ANALYZE] = ""
     w_item.requestParams[BfConsts.ARG_ANALYSIS_NAME] = analysis_name
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
-    w_item.requestParams[
-        BfConsts.ARG_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
     if reference_snapshot is not None:
         w_item.requestParams[BfConsts.ARG_DELTA_TESTRIG] = reference_snapshot
-        w_item.requestParams[
-            BfConsts.ARG_DELTA_ENVIRONMENT_NAME] = BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME
         w_item.requestParams[BfConsts.ARG_DIFFERENTIAL] = ""
     return w_item
 
