@@ -88,13 +88,28 @@ class Assertion(DataModelElement):
 class AutoCompletionType(str, Enum):
     """Auto completion type."""
 
-    BGP_PEER_PROPERTY = "bgp_peer_property"  #: bgp peer properties
-    BGP_PROCESS_PROPERTY = "bgp_process_property"  #: bgp process properties
-    INTERFACE_PROPERTY = "interface_property"  #: interface properties
-    NAMED_STRUCTURE = "named_structure"  #: named structure type
-    NODE = "node"  #: names of nodes
-    NODE_PROPERTY = "node_property"  #: node properties
-    OSPF_PROPERTY = "ospf_property"  #: ospf property
+    ADDRESS_BOOK = "addressBook"  #: names of address books
+    ADDRESS_GROUP = "addressGroup"  #: names of address groups
+    BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
+    BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
+    BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
+    BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
+    FILTER = "filter"  #: names of filters
+    FLOW_STATE = "flowState"  #: flow states
+    INTERFACE = "interface"  #: names of interfaces
+    INTERFACE_PROPERTY_SPEC = "interfacePropertySpec"  #: interface properties
+    IP = "ip"  #: ips
+    IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
+    NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
+    NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties
+    NODE_ROLE_DIMENSION = "nodeRoleDimension"  #: names of node role dimensions
+    NODE_SPEC = "nodeSpec"  #: names of nodes
+    OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
+    PREFIX = "prefix"  #: prefixes
+    PROTOCOL = "protocol"  #: application-level protocols
+    STRUCTURE_NAME = "structureName"  #: names of structures
+    VRF = "vrf"  #: names of vrfs
+    ZONE = "zone"  #: names of zones
 
 
 @attr.s(frozen=True)

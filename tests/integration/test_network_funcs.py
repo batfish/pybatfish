@@ -137,7 +137,7 @@ def test_put_node_roles():
 def test_auto_complete():
     try:
         name = bf_set_network()
-        suggestions = bf_auto_complete(AutoCompletionType.NODE_PROPERTY, ".*")
+        suggestions = bf_auto_complete(AutoCompletionType.NODE_PROPERTY_SPEC, ".*")
         assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
         bf_delete_network(name)
