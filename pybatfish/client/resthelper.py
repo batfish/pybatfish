@@ -25,7 +25,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import BfConsts, CoordConsts
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from .options import Options
