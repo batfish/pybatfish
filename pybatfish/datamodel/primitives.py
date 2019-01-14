@@ -94,6 +94,7 @@ class AutoCompletionType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
     BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
+    DISPOSITION_SPECIFIER = "dispositionSpecifier"  #: dispositions
     FILTER = "filter"  #: names of filters
     FLOW_STATE = "flowState"  #: flow states
     INTERFACE = "interface"  #: names of interfaces
@@ -107,6 +108,7 @@ class AutoCompletionType(str, Enum):
     OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
     PREFIX = "prefix"  #: prefixes
     PROTOCOL = "protocol"  #: application-level protocols
+    ROUTING_PROTOCOL_SPEC = "routingProtocolSpec"  #: routing protocols
     STRUCTURE_NAME = "structureName"  #: names of structures
     VRF = "vrf"  #: names of vrfs
     ZONE = "zone"  #: names of zones
