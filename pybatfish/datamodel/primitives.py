@@ -94,7 +94,7 @@ class AutoCompletionType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
     BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
-    DISPOSITION_SPECIFIER = "dispositionSpecifier"  #: dispositions
+    DISPOSITION_SPECIFIER = "dispositionSpec"  #: dispositions
     FILTER = "filter"  #: names of filters
     FLOW_STATE = "flowState"  #: flow states
     INTERFACE = "interface"  #: names of interfaces

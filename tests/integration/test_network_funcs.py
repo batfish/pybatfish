@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+from os.path import abspath, dirname, join, realpath
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
@@ -21,8 +21,9 @@ from pybatfish.client.commands import (bf_add_node_role_dimension,
                                        bf_delete_network,
                                        bf_delete_node_role_dimension,
                                        bf_get_node_role_dimension,
-                                       bf_get_node_roles, bf_list_networks,
-                                       bf_put_node_roles, bf_set_network)
+                                       bf_get_node_roles, bf_init_snapshot,
+                                       bf_list_networks, bf_put_node_roles,
+                                       bf_set_network)
 from pybatfish.client.extended import (bf_get_network_object_text,
                                        bf_put_network_object)
 from pybatfish.client.options import Options
@@ -30,6 +31,8 @@ from pybatfish.datamodel.primitives import AutoCompleteSuggestion, \
     AutoCompletionType
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData
+
+_this_dir = abspath(dirname(realpath(__file__)))
 
 
 @fixture()
@@ -137,7 +140,12 @@ def test_put_node_roles():
 def test_auto_complete():
     try:
         name = bf_set_network()
-        suggestions = bf_auto_complete(AutoCompletionType.NODE_PROPERTY_SPEC, ".*")
-        assert isinstance(suggestions[0], AutoCompleteSuggestion)
+        bf_init_snapshot(join(_this_dir, 'snapshot'))
+        for completionType in AutoCompletionType:
+            suggestions = bf_auto_complete(completionType, ".*")
+            # not all completion types will have suggestions since this test snapshot only contains one empty config
+            # if a completion type is unsupported an error is thrown so this will test that no errors are thrown
+            if len(suggestions) > 0:
+                assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
         bf_delete_network(name)

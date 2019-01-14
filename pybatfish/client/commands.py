@@ -146,7 +146,16 @@ def bf_add_reference_book(book):
 
 def bf_auto_complete(completionType, query, maxSuggestions=None):
     # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
-    """Auto complete the partial query based on its type."""
+    """
+    Auto complete the partial query based on its type.
+    
+    :param completionType: The type of parameter to suggest autocompletions for
+    :type completionType: :class:`pybatfish.datamodel.primitives.AutoCompletionType`
+    :param query: The partial string to match suggestions on
+    :type query: string
+    :param maxSuggestions: Optional max number of suggestions to be returned
+    :type maxSuggestions: int
+    """
     jsonData = workhelper.get_data_auto_complete(bf_session, completionType,
                                                  query, maxSuggestions)
     response = resthelper.get_json_response(bf_session,
