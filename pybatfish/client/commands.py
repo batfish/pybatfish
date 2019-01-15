@@ -31,8 +31,8 @@ from pybatfish.client.diagnostics import (_upload_diagnostics,
                                           _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
-    VariableType, Edge,
-    Interface)
+    Edge, Interface,
+    VariableType)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
