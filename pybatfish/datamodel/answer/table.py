@@ -116,7 +116,18 @@ class TableMetadata:
 
 def _rows_to_frame(table_metadata, rows):
     # type: (TableMetadata, List[Row]) -> pandas.DataFrame
-    return pandas.DataFrame.from_records(
-        [[_parse_json_with_schema(cm.schema, row.get(cm.name)) for
-          cm in table_metadata.column_metadata]
-         for row in rows], columns=table_metadata.get_column_names())
+    row_based = [[_parse_json_with_schema(cm.schema, row.get(cm.name))
+                  for cm in table_metadata.column_metadata]
+                 for row in rows]
+    column_names = table_metadata.get_column_names()
+    # convert data to column format and force dtype=object on Series
+    # This gets us consistent `None` values across columns -- no columns
+    # are treated as numeric.
+    col_based = {column_names[i]: pandas.Series(column, dtype='object')
+                 for i, column in enumerate(zip(*row_based))}
+    df = pandas.DataFrame.from_dict(col_based, orient='columns',
+                                    dtype='object')
+    # Force column names even if there is no data
+    if len(df.columns) == 0:
+        df = df.reindex_axis(labels=column_names, axis='columns')
+    return df

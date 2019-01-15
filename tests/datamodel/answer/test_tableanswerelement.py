@@ -16,6 +16,8 @@
 
 from __future__ import absolute_import, print_function
 
+from operator import attrgetter
+
 import pytest
 
 from pybatfish.datamodel import ListWrapper
@@ -101,6 +103,8 @@ def test_table_answer_element_deser_no_rows():
     assert table.metadata.column_metadata[0].name == "col1"
     assert len(table.rows) == 0
     assert table.frame().empty
+    assert table.frame().columns == list(
+        map(attrgetter('name'), table.metadata.column_metadata))
 
 
 def test_table_answer_element_excluded_rows():
@@ -148,6 +152,49 @@ def test_table_answer_immutable_lists():
 
     table = TableAnswer(answer)
     assert isinstance(table.frame().loc[0]['col1'], ListWrapper)
+
+
+def test_table_answer_dtype_object():
+    """
+    Ensure table answer frames have dtype of object.
+
+    This also means converting missing values to None (and not ``numpy.nan``)
+    """
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata": [
+                    {
+                        "name": "col1",
+                        "schema": "String"
+                    },
+                    {
+                        "name": "col2",
+                        "schema": "Integer"
+                    }
+                ]
+            },
+            "rows": [{
+                "col1": "v1",
+                "col2": 1
+            }, {
+                "col1": "v2",
+                "col2": None
+            }, {
+                "col1": "v3",
+                "col2": -1
+            }, {
+                "col1": "v4",
+                "col2": "-1"
+            }]
+        }]
+    }
+
+    df = TableAnswer(answer).frame()
+    assert df['col1'].dtype == 'object'
+    assert df['col2'].dtype == 'object'
+    assert df['col2'][1] is None
+    assert str(df['col2'][1]) == 'None'
 
 
 if __name__ == "__main__":
