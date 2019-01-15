@@ -144,20 +144,20 @@ def bf_add_reference_book(book):
     restv2helper.add_reference_book(bf_session, book)
 
 
-def bf_auto_complete(completionType, query, maxSuggestions=None):
+def bf_auto_complete(completion_type, query, max_suggestions=None):
     # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """
     Auto complete the partial query based on its type.
-    
-    :param completionType: The type of parameter to suggest autocompletions for
-    :type completionType: :class:`pybatfish.datamodel.primitives.AutoCompletionType`
+
+    :param completion_type: The type of parameter to suggest autocompletions for
+    :type completion_type: :class:`~pybatfish.datamodel.primitives.AutoCompletionType`
     :param query: The partial string to match suggestions on
-    :type query: string
-    :param maxSuggestions: Optional max number of suggestions to be returned
-    :type maxSuggestions: int
+    :type query: str
+    :param max_suggestions: Optional max number of suggestions to be returned
+    :type max_suggestions: int
     """
-    jsonData = workhelper.get_data_auto_complete(bf_session, completionType,
-                                                 query, maxSuggestions)
+    jsonData = workhelper.get_data_auto_complete(bf_session, completion_type,
+                                                 query, max_suggestions)
     response = resthelper.get_json_response(bf_session,
                                             CoordConsts.SVC_RSC_AUTO_COMPLETE,
                                             jsonData)
