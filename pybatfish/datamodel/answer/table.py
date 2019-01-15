@@ -129,5 +129,5 @@ def _rows_to_frame(table_metadata, rows):
                                     dtype='object')
     # Force column names even if there is no data
     if len(df.columns) == 0:
-        df = df.reindex_axis(labels=column_names, axis='columns')
+        df = df.reindex(labels=column_names, axis='columns')
     return df

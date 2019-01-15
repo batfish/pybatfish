@@ -40,12 +40,12 @@ Calling `head() <https://pandas.pydata.org/pandas-docs/stable/generated/pandas.D
 on the dataframe will print the first 5 rows:
 
 >>> ip_owners_ans.frame().head()
-         Node      VRF           Interface          IP  Mask  Active
-0    as2dist2  default           Loopback0     2.1.3.2    32    True
-1    as2dist1  default           Loopback0     2.1.3.1    32    True
-2    as2dept1  default  GigabitEthernet1/0  2.34.201.4    24    True
-3    as2dept1  default           Loopback0     2.1.1.2    32    True
-4  as3border2  default  GigabitEthernet1/0     3.0.2.1    24    True
+         Node      VRF           Interface          IP Mask Active
+0    as2dist2  default           Loopback0     2.1.3.2   32   True
+1    as2dist1  default           Loopback0     2.1.3.1   32   True
+2    as2dept1  default  GigabitEthernet1/0  2.34.201.4   24   True
+3    as2dept1  default           Loopback0     2.1.1.2   32   True
+4  as3border2  default  GigabitEthernet1/0     3.0.2.1   24   True
 
 7. Next, let's ask a question about interfaces. For example, to see all prefixes present on the interface
 ``GigabitEthernet0/0`` of the node ``as1border1`` we can use the ``interfaceProperties`` question like below:
