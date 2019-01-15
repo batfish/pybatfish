@@ -22,6 +22,8 @@ from pybatfish.util import escape_html, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
+           'AutoCompletionType',
+           'AutoCompleteSuggestion',
            'Edge',
            'FileLines',
            'Interface',
