@@ -135,7 +135,7 @@ def execute(work_item, session, background=False):
             if len(log) > MAX_LOG_LENGTH:
                 log_file = tempfile.NamedTemporaryFile().name
                 with open(log_file, 'w') as log_file_handle:
-                    log_file_handle.write(log)
+                    log_file_handle.write(str(log))
                 log_file_msg = "Full log written to {}\n".format(log_file)
             raise BatfishException(
                 'Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {log}{suffix}'.format(
