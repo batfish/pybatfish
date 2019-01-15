@@ -127,7 +127,7 @@ def _rows_to_frame(table_metadata, rows):
                  for i, column in enumerate(zip(*row_based))}
     df = pandas.DataFrame.from_dict(col_based, orient='columns',
                                     dtype='object')
-    # Force column names even if there is no data
-    if len(df.columns) == 0:
-        df = df.reindex(labels=column_names, axis='columns')
-    return df
+    # Re-index to:
+    # 1. Force ordering of columns
+    # 2. Set columns even if the dataframe is empty
+    return df.reindex(labels=column_names, axis='columns')
