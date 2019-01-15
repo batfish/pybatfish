@@ -17,9 +17,9 @@ from __future__ import absolute_import, print_function
 import pytest
 
 # Tests for isSubRange
-from pybatfish.client.consts import COMPLETION_TYPES
 from pybatfish.datamodel.primitives import VariableType
 from pybatfish.question import question
+from tests.integration.test_network_funcs import COMPLETION_TYPES
 
 
 # These two tests will fail with original code due to typo in the code

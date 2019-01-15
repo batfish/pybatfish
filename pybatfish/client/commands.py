@@ -146,19 +146,20 @@ def bf_add_reference_book(book):
 
 def bf_auto_complete(completion_type, query, max_suggestions=None):
     # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+
     """
     Get a list of autocomplete suggestions that match the provided query based on the completion type.
-    If the provided completion type is not supported a BatfishException will be raised
+    If the provided completion type is not supported a BatfishException will be raised.
 
     Usage Example::
 
-        >>> from pypatfish.client.commands import bf_auto_complete, bf_set_network
+        >>> from pybatfish.client.commands import bf_auto_complete, bf_set_network
         >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
-        >>> bf_set_network()
+        >>> name = bf_set_network()
         >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b")
-        [<AutoCompleteSuggestion description=None, is_partial=False, rank=2147483647, text='bgp'>,
-            <AutoCompleteSuggestion description=None, is_partial=False, rank=2147483647, text='ebgp'>,
-            <AutoCompleteSuggestion description=None, is_partial=False, rank=2147483647, text='ibgp'>]
+        [AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='bgp'),
+            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ebgp'),
+            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ibgp')]
 
     :param completion_type: The type of parameter to suggest autocompletions for
     :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
