@@ -25,11 +25,11 @@ from pybatfish.client.commands import (bf_add_node_role_dimension,
                                        bf_get_node_roles, bf_init_snapshot,
                                        bf_list_networks, bf_put_node_roles,
                                        bf_set_network)
+from pybatfish.client.consts import COMPLETION_TYPES
 from pybatfish.client.extended import (bf_get_network_object_text,
                                        bf_put_network_object)
 from pybatfish.client.options import Options
-from pybatfish.datamodel.primitives import AutoCompleteSuggestion, \
-    AutoCompletionType
+from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
     NodeRolesData
 
@@ -142,7 +142,7 @@ def test_auto_complete():
     try:
         name = bf_set_network()
         bf_init_snapshot(join(_this_dir, 'snapshot'))
-        for completion_type in AutoCompletionType:
+        for completion_type in COMPLETION_TYPES:
             suggestions = bf_auto_complete(completion_type, ".*")
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.

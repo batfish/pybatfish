@@ -31,7 +31,7 @@ from pybatfish.client.diagnostics import (_upload_diagnostics,
                                           _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
-    AutoCompletionType, Edge,
+    VariableType, Edge,
     Interface)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
@@ -145,12 +145,12 @@ def bf_add_reference_book(book):
 
 
 def bf_auto_complete(completion_type, query, max_suggestions=None):
-    # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+    # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """
     Auto complete the partial query based on its type.
 
     :param completion_type: The type of parameter to suggest autocompletions for
-    :type completion_type: :class:`~pybatfish.datamodel.primitives.AutoCompletionType`
+    :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
     :param query: The partial string to match suggestions on
     :type query: str
     :param max_suggestions: Optional max number of suggestions to be returned
