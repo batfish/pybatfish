@@ -655,16 +655,30 @@ def _validateType(value, expectedType):
     elif expectedType == 'double':
         return isinstance(value, float), None
     elif expectedType in [
+        'addressBook',
+        'addressGroup',
         'bgpPeerPropertySpec',
         'bgpProcessPropertySpec',
+        'bgpSessionStatus',
+        'bgpSessionType',
+        'dispositionSpec',
+        'filter',
+        'flowState',
+        'interface',
         'interfacePropertySpec',
         'interfaceSpec',
+        'ipsecSessionStatus',
         'javaRegex',
         'jsonPathRegex',
         'namedStructureSpec',
         'nodePropertySpec',
+        'nodeRoleDimension',
         'nodeSpec',
         'ospfPropertySpec',
+        'routingProtocolSpec',
+        'structureName',
+        'vrf',
+        'zone',
     ]:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
@@ -741,7 +755,6 @@ def _validateType(value, expectedType):
                 return True, None
     elif expectedType in [
         'answerElement',
-        'dispositionSpec',
         'headerConstraint',
         'pathConstraint',
     ]:

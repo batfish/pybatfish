@@ -18,6 +18,7 @@ import pytest
 
 # Tests for isSubRange
 from pybatfish.question import question
+from pybatfish.datamodel.primitives import AutoCompletionType
 
 
 # These two tests will fail with original code due to typo in the code
@@ -406,6 +407,26 @@ def testValidIntegerIpProtocolValidateType():
     result = question._validateType('10', 'ipProtocol')
     assert result[0]
     assert result[1] is None
+
+
+def testInvalidCompletionTypes():
+    for completion_type in AutoCompletionType:
+        result = question._validateType(5, completion_type)
+        expectMessage = "A Batfish " + completion_type + " must be a string"
+        assert not result[0]
+        assert result[1] == expectMessage
+
+
+def testValidCompletionTypes():
+    values = {
+        AutoCompletionType.IP: "1.2.3.4",
+        AutoCompletionType.PREFIX: "1.2.3.4/24",
+        AutoCompletionType.PROTOCOL: "ssh"
+    }
+    for completion_type in AutoCompletionType:
+        result = question._validateType(values.get(completion_type, ".*"), completion_type)
+        assert result[0]
+        assert result[1] is None
 
 
 if __name__ == "__main__":
