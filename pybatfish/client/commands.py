@@ -31,8 +31,8 @@ from pybatfish.client.diagnostics import (_upload_diagnostics,
                                           _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
-    AutoCompletionType, Edge,
-    Interface)
+    Edge, Interface,
+    VariableType)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
@@ -145,12 +145,24 @@ def bf_add_reference_book(book):
 
 
 def bf_auto_complete(completion_type, query, max_suggestions=None):
-    # type: (AutoCompletionType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+    # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """
-    Auto complete the partial query based on its type.
+    Get a list of autocomplete suggestions that match the provided query based on the variable type.
+
+    If completion is not supported for the provied variable type a BatfishException will be raised.
+
+    Usage Example::
+
+        >>> from pybatfish.client.commands import bf_auto_complete, bf_set_network
+        >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
+        >>> name = bf_set_network()
+        >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b")
+        [AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='bgp'),
+            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ebgp'),
+            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ibgp')]
 
     :param completion_type: The type of parameter to suggest autocompletions for
-    :type completion_type: :class:`~pybatfish.datamodel.primitives.AutoCompletionType`
+    :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
     :param query: The partial string to match suggestions on
     :type query: str
     :param max_suggestions: Optional max number of suggestions to be returned

@@ -32,7 +32,7 @@ from six import PY3, integer_types, string_types
 
 from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
-from pybatfish.datamodel import Assertion, AssertionType  # noqa: F401
+from pybatfish.datamodel import Assertion, AssertionType, VariableType  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
@@ -635,78 +635,94 @@ def _validateType(value, expectedType):
 
     :raises QuestionValidationException
     """
-    if expectedType == 'boolean':
+    if expectedType == VariableType.BOOLEAN:
         return isinstance(value, bool), None
-    elif expectedType == 'comparator':
+    elif expectedType == VariableType.COMPARATOR:
         validComparators = ['<', '<=', '==', '>=', '>', '!=']
         if value not in validComparators:
             return False, "'{}' is not a known comparator. Valid options are: '{}'".format(
                 value,
                 ", ".join(validComparators))
         return True, None
-    elif expectedType == 'integer':
+    elif expectedType == VariableType.INTEGER:
         INT32_MIN = -2 ** 32
         INT32_MAX = 2 ** 32 - 1
         valid = (isinstance(value, integer_types) and
                  INT32_MIN <= value <= INT32_MAX)
         return valid, None
-    elif expectedType == 'float':
+    elif expectedType == VariableType.FLOAT:
         return isinstance(value, float), None
-    elif expectedType == 'double':
+    elif expectedType == VariableType.DOUBLE:
         return isinstance(value, float), None
     elif expectedType in [
-        'bgpPeerPropertySpec',
-        'bgpProcessPropertySpec',
-        'interfacePropertySpec',
-        'interfaceSpec',
-        'javaRegex',
-        'jsonPathRegex',
-        'namedStructureSpec',
-        'nodePropertySpec',
-        'nodeSpec',
-        'ospfPropertySpec',
+        VariableType.ADDRESS_BOOK,
+        VariableType.ADDRESS_GROUP,
+        VariableType.BGP_PEER_PROPERTY_SPEC,
+        VariableType.BGP_PROCESS_PROPERTY_SPEC,
+        VariableType.BGP_SESSION_STATUS,
+        VariableType.BGP_SESSION_TYPE,
+        VariableType.DISPOSITION_SPEC,
+        VariableType.FILTER,
+        VariableType.FLOW_STATE,
+        VariableType.INTEGER_SPACE,
+        VariableType.INTERFACE,
+        VariableType.INTERFACE_PROPERTY_SPEC,
+        VariableType.INTERFACES_SPEC,
+        VariableType.IPSEC_SESSION_STATUS,
+        VariableType.JAVA_REGEX,
+        VariableType.JSON_PATH_REGEX,
+        VariableType.NAMED_STRUCTURE_SPEC,
+        VariableType.NODE_PROPERTY_SPEC,
+        VariableType.NODE_ROLE_DIMENSION,
+        VariableType.NODE_SPEC,
+        VariableType.OSPF_PROPERTY_SPEC,
+        VariableType.ROUTING_PROTOCOL_SPEC,
+        VariableType.STRUCTURE_NAME,
+        VariableType.VRF,
+        VariableType.VXLAN_VNI_PROPERTY_SPEC,
+        VariableType.ZONE,
     ]:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         return True, None
-    elif expectedType == 'ip':
+    elif expectedType == VariableType.IP:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isIp(value)
-    elif expectedType == 'ipWildcard':
+    elif expectedType == VariableType.IP_WILDCARD:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isIpWildcard(value)
-    elif expectedType == 'jsonPath':
+    elif expectedType == VariableType.JSON_PATH:
         return _isJsonPath(value)
-    elif expectedType == 'long':
+    elif expectedType == VariableType.LONG:
         INT64_MIN = -2 ** 64
         INT64_MAX = 2 ** 64 - 1
         valid = (isinstance(value, integer_types) and
                  INT64_MIN <= value <= INT64_MAX)
         return valid, None
-    elif expectedType == 'prefix':
+    elif expectedType == VariableType.PREFIX:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isPrefix(value)
-    elif expectedType == 'prefixRange':
+    elif expectedType == VariableType.PREFIX_RANGE:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isPrefixRange(value)
-    elif expectedType == 'question':
+    elif expectedType == VariableType.QUESTION:
         return isinstance(value, QuestionBase), None
-    elif expectedType == 'string':
+    elif expectedType == VariableType.STRING:
         return isinstance(value, string_types), None
-    elif expectedType == 'subrange':
+    elif expectedType == VariableType.SUBRANGE:
         if isinstance(value, int):
             return True, None
         elif isinstance(value, string_types):
@@ -714,7 +730,7 @@ def _validateType(value, expectedType):
         else:
             return False, "A Batfish {} must either be a string or an integer".format(
                 expectedType)
-    elif expectedType == 'protocol':
+    elif expectedType == VariableType.PROTOCOL:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
@@ -725,7 +741,7 @@ def _validateType(value, expectedType):
                     value,
                     ", ".join(validProtocols))
             return True, None
-    elif expectedType == 'ipProtocol':
+    elif expectedType == VariableType.IP_PROTOCOL:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
@@ -740,10 +756,9 @@ def _validateType(value, expectedType):
                 # TODO: Should be validated at server side
                 return True, None
     elif expectedType in [
-        'answerElement',
-        'dispositionSpec',
-        'headerConstraint',
-        'pathConstraint',
+        VariableType.ANSWER_ELEMENT,
+        VariableType.HEADER_CONSTRAINT,
+        VariableType.PATH_CONSTRAINT,
     ]:
         return True, None
     else:
