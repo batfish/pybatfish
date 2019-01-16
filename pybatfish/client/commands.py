@@ -147,8 +147,8 @@ def bf_add_reference_book(book):
 def bf_auto_complete(completion_type, query, max_suggestions=None):
     # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """
-
     Get a list of autocomplete suggestions that match the provided query based on the variable type.
+    
     If completion is not supported for the provied variable type a BatfishException will be raised.
 
     Usage Example::

@@ -15,9 +15,8 @@
 from os.path import abspath, dirname, join, realpath
 
 from pytest import fixture, raises
-from requests.exceptions import HTTPError
-
 from conftest import COMPLETION_TYPES
+from requests.exceptions import HTTPError
 
 from pybatfish.client.commands import (bf_add_node_role_dimension,
                                        bf_auto_complete,
