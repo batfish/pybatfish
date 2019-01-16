@@ -17,10 +17,11 @@ from __future__ import absolute_import, print_function
 import pytest
 
 # Tests for isSubRange
+# from tests.integration.test_network_funcs import COMPLETION_TYPES
+from conftest import COMPLETION_TYPES
+
 from pybatfish.datamodel.primitives import VariableType
 from pybatfish.question import question
-from tests.integration.test_network_funcs import COMPLETION_TYPES
-
 
 # These two tests will fail with original code due to typo in the code
 
@@ -419,12 +420,14 @@ def testInvalidCompletionTypes():
 
 
 def testValidCompletionTypes():
+    print("test the thing")
     values = {
         VariableType.IP: "1.2.3.4",
         VariableType.PREFIX: "1.2.3.4/24",
         VariableType.PROTOCOL: "ssh"
     }
     for completion_type in COMPLETION_TYPES:
+        print(completion_type)
         result = question._validateType(values.get(completion_type, ".*"), completion_type)
         assert result[0]
         assert result[1] is None
