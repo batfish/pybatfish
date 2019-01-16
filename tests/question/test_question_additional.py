@@ -419,14 +419,12 @@ def testInvalidCompletionTypes():
 
 
 def testValidCompletionTypes():
-    print("test the thing")
     values = {
         VariableType.IP: "1.2.3.4",
         VariableType.PREFIX: "1.2.3.4/24",
         VariableType.PROTOCOL: "ssh"
     }
     for completion_type in COMPLETION_TYPES:
-        print(completion_type)
         result = question._validateType(values.get(completion_type, ".*"), completion_type)
         assert result[0]
         assert result[1] is None
