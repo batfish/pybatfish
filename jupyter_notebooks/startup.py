@@ -17,7 +17,6 @@ bf_logger.setLevel(logging.WARN)
 
 load_questions()
 
-pd.compat.PY3 = True
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', None)
 
