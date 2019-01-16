@@ -18,7 +18,6 @@ import pytest
 from conftest import COMPLETION_TYPES
 
 # Tests for isSubRange
-# from tests.integration.test_network_funcs import COMPLETION_TYPES
 
 from pybatfish.datamodel.primitives import VariableType
 from pybatfish.question import question
