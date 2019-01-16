@@ -14,8 +14,8 @@
 #   limitations under the License.
 from os.path import abspath, dirname, join, realpath
 
-from pytest import fixture, raises
 from conftest import COMPLETION_TYPES
+from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
 from pybatfish.client.commands import (bf_add_node_role_dimension,
