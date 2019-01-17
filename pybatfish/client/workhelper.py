@@ -138,11 +138,11 @@ def execute(work_item, session, background=False):
                     log_file_handle.write(str(log))
                 log_file_msg = "Full log written to {}\n".format(log_file)
             raise BatfishException(
-                'Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {log}{suffix}'.format(
+                'Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {prefix}{log}'.format(
                     item=work_item.to_json(),
                     msg=log_file_msg,
-                    log=log[:MAX_LOG_LENGTH],
-                    suffix="..." if log_file_msg else ""))
+                    log=log[-MAX_LOG_LENGTH:],
+                    prefix="..." if log_file_msg else ""))
 
         return {"status": status}
 
