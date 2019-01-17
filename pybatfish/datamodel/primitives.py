@@ -22,7 +22,7 @@ from pybatfish.util import escape_html, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
-           'AutoCompletionType',
+           'VariableType',
            'AutoCompleteSuggestion',
            'Edge',
            'FileLines',
@@ -87,32 +87,53 @@ class Assertion(DataModelElement):
         return dict(type=self.type.value, expect=self.expect)
 
 
-class AutoCompletionType(str, Enum):
+class VariableType(str, Enum):
     """Auto completion type."""
 
     ADDRESS_BOOK = "addressBook"  #: names of address books
     ADDRESS_GROUP = "addressGroup"  #: names of address groups
+    ANSWER_ELEMENT = "answerElement"  #: answer elements
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
     BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
-    DISPOSITION_SPECIFIER = "dispositionSpec"  #: dispositions
+    BOOLEAN = "boolean"  #: boolean values
+    COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
+    DOUBLE = "double"  #: double values
+    DISPOSITION_SPEC = "dispositionSpec"  #: dispositions
     FILTER = "filter"  #: names of filters
+    FLOAT = "float"  #: float values
     FLOW_STATE = "flowState"  #: flow states
+    HEADER_CONSTRAINT = "headerConstraint"  #: packet header constraints
+    INTEGER = "integer"  #: integer values
+    INTEGER_SPACE = "integerSpace"  #: integer spaces
     INTERFACE = "interface"  #: names of interfaces
     INTERFACE_PROPERTY_SPEC = "interfacePropertySpec"  #: interface properties
+    INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
     IP = "ip"  #: ips
+    IP_PROTOCOL = "ipProtocol"  #: ip protocols
+    IP_WILDCARD = "ipWildcard"  #: ip protocols
     IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
+    JAVA_REGEX = "javaRegex"  #: java regex
+    JSON_PATH = "jsonPath"  #: json path
+    JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
+    LONG = "long"  #: long values
     NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
     NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties
     NODE_ROLE_DIMENSION = "nodeRoleDimension"  #: names of node role dimensions
     NODE_SPEC = "nodeSpec"  #: names of nodes
     OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
+    PATH_CONSTRAINT = "pathConstraint"  #: path constraints
     PREFIX = "prefix"  #: prefixes
+    PREFIX_RANGE = "prefixRange"  #: prefix ranges
     PROTOCOL = "protocol"  #: application-level protocols
+    QUESTION = "question"  #: questions
     ROUTING_PROTOCOL_SPEC = "routingProtocolSpec"  #: routing protocols
+    STRING = "string"  #: string values
     STRUCTURE_NAME = "structureName"  #: names of structures
+    SUBRANGE = "subrange"  #: subranges
     VRF = "vrf"  #: names of vrfs
+    VXLAN_VNI_PROPERTY_SPEC = "vxlanVniPropertySpec"  #: vxlan vni properties
     ZONE = "zone"  #: names of zones
 
 
