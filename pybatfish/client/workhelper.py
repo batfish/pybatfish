@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function
 import datetime
 import json
 import logging
+import tempfile
 import time
 from typing import Any, Dict, Optional  # noqa: F401
 
@@ -30,6 +31,9 @@ from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
+
+# Maximum log length to display on execution errors, so we don't overload user with a huge log string
+MAX_LOG_LENGTH = 64 * 1024
 
 
 def _batch_to_string(json_batch, elapsed):
@@ -127,10 +131,18 @@ def execute(work_item, session, background=False):
         # Handle fail condition with logs
         if status == WorkStatusCode.TERMINATEDABNORMALLY:
             log = restv2helper.get_work_log(session, snapshot, work_item.id)
+            log_file_msg = ""
+            if len(log) > MAX_LOG_LENGTH:
+                log_file = tempfile.NamedTemporaryFile().name
+                with open(log_file, 'w') as log_file_handle:
+                    log_file_handle.write(str(log))
+                log_file_msg = "Full log written to {}\n".format(log_file)
             raise BatfishException(
-                'Work terminated abnormally\nwork_item: {}\nlog: {}'.format(
-                    work_item.to_json(),
-                    log))
+                'Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {prefix}{log}'.format(
+                    item=work_item.to_json(),
+                    msg=log_file_msg,
+                    log=log[-MAX_LOG_LENGTH:],
+                    prefix="..." if log_file_msg else ""))
 
         return {"status": status}
 
@@ -238,7 +250,8 @@ def get_data_get_analysis_answers(session, analysis_name, snapshot,
         CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
     }
     if reference_snapshot is not None:
-        json_data[CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
+        json_data[
+            CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
     json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
     return json_data
 
@@ -258,7 +271,8 @@ def get_data_get_answer(session, question_name, snapshot,
         CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
     }
     if reference_snapshot is not None:
-        json_data[CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
+        json_data[
+            CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
     return json_data
 
 
