@@ -32,7 +32,8 @@ from six import PY3, integer_types, string_types
 
 from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
-from pybatfish.datamodel import Assertion, AssertionType, VariableType  # noqa: F401
+from pybatfish.datamodel import Assertion, AssertionType, \
+    VariableType  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
@@ -75,6 +76,7 @@ class QuestionMeta(type):
     def __new__(cls, name, base, dct):
         """Creates a new class for a specific question."""
         new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
+        additional_kwargs = {'question_name'}
 
         def constructor(self, *args, **kwargs):
             """Create a new question."""
@@ -98,7 +100,6 @@ class QuestionMeta(type):
 
             # Validate that we are not accepting invalid kwargs/variables
             instance_vars = self._dict['instance'].get('variables', {})
-            additional_kwargs = {'exclusions', 'question_name'}
             allowed_kwargs = set(instance_vars)
             allowed_kwargs.update(additional_kwargs)
             var_difference = set(kwargs.keys()).difference(allowed_kwargs)
@@ -113,11 +114,11 @@ class QuestionMeta(type):
 
         # Define signature. Helps with tab completion. Python3 centric
         if PY3:
-            from inspect import Signature, Parameter, signature
+            from inspect import Signature, Parameter
             # Merge constructor params with question variables
             params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
                       for param in sorted(dct.get("variables", [])) +
-                      [p for p in signature(constructor).parameters if
+                      [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
             setattr(constructor, '__signature__', Signature(parameters=params))
         setattr(new_cls, '__init__', constructor)
