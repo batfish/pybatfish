@@ -19,6 +19,8 @@ load_questions()
 
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', None)
+# Prevent special formatting for text with '$' in it
+pd.set_option('display.html.use_mathjax', False)
 
 # UUID for CSS styles used by pandas styler.
 # Keeps our notebook HTML deterministic when displaying dataframes
