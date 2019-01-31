@@ -90,6 +90,10 @@ class TableAnswer(Answer):
     def __str__(self):
         return str(self.table_data)
 
+    def __len__(self):
+        # type: () -> int
+        return len(self.table_data)
+
 
 class Row(dict):
     """Represents a table row."""
