@@ -22,15 +22,24 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
+    'EnterInputIfaceStepDetail',
+    'ExitOutputIfaceStepDetail',
+    'FilterStepDetail',
     'Flow',
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
     'Hop',
+    'InboundStepDetail',
+    'MatchSessionStepDetail',
     'MatchTcpFlags',
+    'OriginateStepDetail',
+    'RoutingStepDetail',
+    'SetupSessionStepDetail',
     'PathConstraints',
     'TcpFlags',
-    'Trace'
+    'Trace',
+    'TransformationStepDetail'
 ]
 
 
