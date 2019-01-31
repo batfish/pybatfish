@@ -382,8 +382,7 @@ class InboundStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class MatchSessionStepDetail(DataModelElement):
-    """Details of a step for when a flow matches a firewall session.
-    """
+    """Details of a step for when a flow matches a firewall session."""
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -447,8 +446,7 @@ class RoutingStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class SetupSessionStepDetail(DataModelElement):
-    """Details of a step for when a firewall session is created.
-    """
+    """Details of a step for when a firewall session is created."""
 
     @classmethod
     def from_dict(cls, json_dict):
