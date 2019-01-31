@@ -23,10 +23,9 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail,
                                       FilterStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags, RoutingStepDetail, Step,
-                                      TcpFlags, TransformationStepDetail,
-                                      MatchSessionStepDetail,
-                                      SetupSessionStepDetail)
+                                      MatchSessionStepDetail, MatchTcpFlags,
+                                      RoutingStepDetail, SetupSessionStepDetail,
+                                      Step, TcpFlags, TransformationStepDetail)
 
 
 def testExitOutputIfaceStepDetail_str():
