@@ -381,6 +381,21 @@ class InboundStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class MatchSessionStepDetail(DataModelElement):
+    """Details of a step for when a flow matches a firewall session.
+    """
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> MatchSessionStepDetail
+        return MatchSessionStepDetail()
+
+    def __str__(self):
+        # type: () -> str
+        return ""
+
+
+@attr.s(frozen=True)
 class OriginateStepDetail(DataModelElement):
     """Details of a step representing the originating of a flow in a Hop.
 
@@ -428,6 +443,21 @@ class RoutingStepDetail(DataModelElement):
                     network=route.get("network"),
                     next_hop_ip=route.get("nextHopIp")))
         return "Routes: " + ",".join(routes_str)
+
+
+@attr.s(frozen=True)
+class SetupSessionStepDetail(DataModelElement):
+    """Details of a step for when a firewall session is created.
+    """
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> SetupSessionStepDetail
+        return SetupSessionStepDetail()
+
+    def __str__(self):
+        # type: () -> str
+        return ""
 
 
 @attr.s(frozen=True)
@@ -497,8 +527,10 @@ class Step(DataModelElement):
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
+            "MatchSession": MatchSessionStepDetail.from_dict,
             "Originate": OriginateStepDetail.from_dict,
             "Routing": RoutingStepDetail.from_dict,
+            "SetupSession": SetupSessionStepDetail.from_dict,
             "Transformation": TransformationStepDetail.from_dict,
             "Filter": FilterStepDetail.from_dict
         }

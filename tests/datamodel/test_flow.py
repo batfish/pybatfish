@@ -24,7 +24,9 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       FilterStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
                                       MatchTcpFlags, RoutingStepDetail, Step,
-                                      TcpFlags, TransformationStepDetail)
+                                      TcpFlags, TransformationStepDetail,
+                                      MatchSessionStepDetail,
+                                      SetupSessionStepDetail)
 
 
 def testExitOutputIfaceStepDetail_str():
@@ -386,6 +388,24 @@ def test_flow_str_ports():
     str = repr(Flow.from_dict(flowDict))
     assert ("2.1.1.1:1234" not in str)
     assert ("5.5.1.1:2345" not in str)
+
+
+def test_SetupSessionStepDetail_from_dict():
+    dict = {'type': 'SetupSession', 'action': 'SETUP_SESSION'}
+    assert SetupSessionStepDetail.from_dict(dict) == SetupSessionStepDetail()
+
+
+def test_SetupSessionStepDetail_str():
+    assert str(SetupSessionStepDetail()) == ""
+
+
+def test_MatchSessionStepDetail_from_dict():
+    dict = {'type': 'MatchSession', 'action': 'MATCHED_SESSION'}
+    assert MatchSessionStepDetail.from_dict(dict) == MatchSessionStepDetail()
+
+
+def test_MatchSessionStepDetail_str():
+    assert str(MatchSessionStepDetail()) == ""
 
 
 if __name__ == "__main__":
