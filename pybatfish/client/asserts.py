@@ -21,20 +21,21 @@ fails.
 
 import operator
 import warnings
-from typing import Any, Dict, Iterable  # noqa: F401
+from typing import Any, Dict, Iterable, Union  # noqa: F401
 
 from deepdiff import DeepDiff
+from pandas import DataFrame
 
 from pybatfish.datamodel import HeaderConstraints  # noqa: F401
-from pybatfish.datamodel.answer import Answer  # noqa: F401
+from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning)
 from pybatfish.question import bfq
 
 __all__ = [
+    'assert_dict_match',
     'assert_filter_denies',
     'assert_filter_permits',
-    'assert_dict_match',
     'assert_has_no_route',
     'assert_has_route',
     'assert_num_results',
@@ -43,11 +44,10 @@ __all__ = [
 
 
 def assert_zero_results(answer, soft=False):
-    # type: (Answer, bool) -> bool
+    # type: (Union[Answer, TableAnswer, DataFrame], bool) -> bool
     """Assert no results were returned.
 
-    :param answer: Batfish answer
-    :type answer: :py:class:`~pybatfish.datamodel.answer.Answer`
+    :param answer: Batfish answer or DataFrame
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :type soft: bool
@@ -56,11 +56,10 @@ def assert_zero_results(answer, soft=False):
 
 
 def assert_num_results(answer, num, soft=False):
-    # type: (Answer, int, bool) -> bool
+    # type: (Union[Answer, TableAnswer, DataFrame], int, bool) -> bool
     """Assert an exact number of results were returned.
 
-    :param answer: Batfish answer
-    :type answer: :py:class:`~pybatfish.datamodel.answer.Answer`
+    :param answer: Batfish answer or DataFrame
     :param num: expected number of results
     :type num: int
     :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -69,7 +68,14 @@ def assert_num_results(answer, num, soft=False):
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
-    actual = answer['summary']['numResults']
+    if isinstance(answer, DataFrame):
+        actual = len(answer)
+    elif isinstance(answer, TableAnswer):
+        actual = len(answer.frame())
+    elif isinstance(answer, Answer):
+        actual = answer['summary']['numResults']
+    else:
+        raise TypeError("Unrecognized answer type")
     if not actual == num:
         err_text = "Expected {} results, found: {}\nFull answer:\n{}".format(
             num, actual, answer)
@@ -94,6 +100,8 @@ def _is_dict_match(actual, expected):
 def _raise_common(err_text, soft=False):
     # type: (str, bool) -> bool
     """Utility function for soft/hard exception raising."""
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
     if soft:
         warnings.warn(err_text, category=BatfishAssertWarning)
         return False
