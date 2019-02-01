@@ -19,7 +19,7 @@ load_questions()
 
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', None)
-# Prevent special formatting for text with '$' in it
+# Prevent rendering text between '$' as MathJax expressions
 pd.set_option('display.html.use_mathjax', False)
 
 # UUID for CSS styles used by pandas styler.
