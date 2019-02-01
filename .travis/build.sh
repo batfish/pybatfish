@@ -12,7 +12,7 @@ fi
 
 if [ -n "$TRAVIS_BUILD_DIR" ]; then
    # Build and install pybatfish
-   pip install -e .[dev,test]
+   pip install -e .[dev]
    export QUESTIONS_DIR=questions
 else
    export QUESTIONS_DIR=../batfish/questions
@@ -55,9 +55,9 @@ python setup.py build_sphinx
 #### Running integration tests (require batfish)
 echo -e "\n  ..... Running python integration with batfish"
 retcode=0
-py.test tests/integration || retcode=$?
+pytest tests/integration || retcode=$?
 
 echo -e "\n  ..... Running doctests"
-py.test docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules
+pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules
 
 exit ${retcode}

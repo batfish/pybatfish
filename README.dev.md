@@ -6,7 +6,7 @@
 For this purpose, you will likely want [virtualenv](https://virtualenv.pypa.io/en/stable/) or [Anaconda](https://www.anaconda.com/download/)
 
 #### Installing in development mode 
-Run `pip install -e .[dev,test]`
+Run `pip install -e .[dev]`
 
 This installs all the development and test dependencies.
 
