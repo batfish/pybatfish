@@ -280,3 +280,7 @@ def test_question_positional_args():
     qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
     with pytest.raises(TypeError):
         qclass("positional")
+
+
+if __name__ == "__main__":
+    pytest.main()
