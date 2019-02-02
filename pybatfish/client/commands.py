@@ -24,6 +24,7 @@ import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 import six
+from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
@@ -92,8 +93,10 @@ __all__ = ['bf_add_analysis',
            'bf_list_questions',
            'bf_list_snapshots',
            'bf_logger',
+           'bf_put_node_role_dimension',
            'bf_put_node_roles',
            'bf_read_question_settings',
+           'bf_put_reference_book',
            'bf_run_analysis',
            'bf_session',
            'bf_set_network',
@@ -117,31 +120,14 @@ def bf_add_issue_config(issue_config):
     restv2helper.add_issue_config(bf_session, issue_config)
 
 
+@deprecated(reason="Use bf_put_node_role_dimension")
 def bf_add_node_role_dimension(dimension):
-    # type: (NodeRoleDimension) -> None
-    """
-    Adds another role dimension to the active network.
-
-    Individual roles within the dimension must have a valid (java) regex.
-    The node list within those roles, if present, is ignored by the server.
-
-    :param dimension: The NodeRoleDimension object for the dimension to add
-    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
-    """
-    if dimension.type == "AUTO":
-        raise ValueError("Cannot add a dimension of type AUTO")
-    restv2helper.add_node_role_dimension(bf_session, dimension)
+    bf_put_node_role_dimension(dimension)
 
 
+@deprecated(reason="Use bf_put_reference_book")
 def bf_add_reference_book(book):
-    # type: (ReferenceBook) -> None
-    """
-    Adds another reference book to the active network.
-
-    :param book: The ReferenceBook object to add
-    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
-    """
-    restv2helper.add_reference_book(bf_session, book)
+    bf_put_reference_book(book)
 
 
 def bf_auto_complete(completion_type, query, max_suggestions=None):
@@ -603,6 +589,37 @@ def bf_list_snapshots(verbose=False):
         snapshots and metadata (if `verbose=True`)
     """
     return restv2helper.list_snapshots(bf_session, verbose)
+
+
+def bf_put_reference_book(book):
+    # type: (ReferenceBook) -> None
+    """
+    Put a reference book in the active network.
+
+    If a book with the same name exists, it is overwritten.
+
+    :param book: The ReferenceBook object to add
+    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
+    """
+    restv2helper.put_reference_book(bf_session, book)
+
+
+def bf_put_node_role_dimension(dimension):
+    # type: (NodeRoleDimension) -> None
+    """
+    Put a role dimension in the active network.
+
+    Overwrites the old dimension if one of the same name already exists.
+
+    Individual roles within the dimension must have a valid (java) regex.
+    The node list within those roles, if present, is ignored by the server.
+
+    :param dimension: The NodeRoleDimension object for the dimension to add
+    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+    """
+    if dimension.type == "AUTO":
+        raise ValueError("Cannot put a dimension of type AUTO")
+    restv2helper.put_node_role_dimension(bf_session, dimension)
 
 
 def bf_put_node_roles(node_roles_data):

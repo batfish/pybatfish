@@ -23,15 +23,20 @@ from pybatfish.client.commands import (bf_add_node_role_dimension,
                                        bf_delete_network,
                                        bf_delete_node_role_dimension,
                                        bf_get_node_role_dimension,
-                                       bf_get_node_roles, bf_init_snapshot,
-                                       bf_list_networks, bf_put_node_roles,
+                                       bf_get_node_roles,
+                                       bf_get_reference_book,
+                                       bf_init_snapshot,
+                                       bf_list_networks,
+                                       bf_put_node_role_dimension,
+                                       bf_put_node_roles,
+                                       bf_put_reference_book,
                                        bf_set_network)
 from pybatfish.client.extended import (bf_get_network_object_text,
                                        bf_put_network_object)
 from pybatfish.client.options import Options
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData
+    NodeRolesData, ReferenceBook
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -127,6 +132,21 @@ def test_delete_node_role_dimension():
         bf_delete_network(network_name)
 
 
+def test_put_node_role_dimension():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        dim_name = 'd1'
+        dim = NodeRoleDimension(dim_name)
+        bf_put_node_role_dimension(dim)
+        assert bf_get_node_role_dimension(dim_name) == dim
+        # put again to check for idempotence
+        bf_put_node_role_dimension(dim)
+        assert bf_get_node_role_dimension(dim_name) == dim
+    finally:
+        bf_delete_network(network_name)
+
+
 def test_put_node_roles():
     try:
         network_name = 'n1'
@@ -134,6 +154,21 @@ def test_put_node_roles():
         node_roles = NodeRolesData([NodeRoleDimension('dim1')])
         bf_put_node_roles(node_roles)
         assert bf_get_node_roles() == node_roles
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_put_reference_book():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        book_name = 'b1'
+        book = ReferenceBook(book_name)
+        bf_put_reference_book(book)
+        assert bf_get_reference_book(book_name) == book
+        # put again to check for idempotence
+        bf_put_reference_book(book)
+        assert bf_get_reference_book(book_name) == book
     finally:
         bf_delete_network(network_name)
 

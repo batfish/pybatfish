@@ -49,8 +49,6 @@ _encoder = BfJsonEncoder()
 
 __all__ = [
     'add_issue_config',
-    'add_node_role_dimension',
-    'add_reference_book',
     'delete_issue_config',
     'delete_node_role_dimension',
     'delete_reference_book',
@@ -65,6 +63,8 @@ __all__ = [
     'get_snapshot_input_object',
     'get_snapshot_object',
     'put_network_object',
+    'put_node_role_dimension',
+    'put_reference_book',
     'put_snapshot_object',
     'read_question_settings',
     'write_question_settings'
@@ -81,26 +81,6 @@ def add_issue_config(session, issue_config):
                                      CoordConstsV2.RSC_SETTINGS,
                                      CoordConstsV2.RSC_ISSUES)
     _post(session, url_tail, issue_config)
-
-
-def add_node_role_dimension(session, dimension):
-    # type: (Session, NodeRoleDimension) -> None
-    """Adds a new node role dimension to the active network."""
-    if not session.network:
-        raise ValueError("Network must be set to add node role dimension")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_NODE_ROLES)
-    _post(session, url_tail, dimension)
-
-
-def add_reference_book(session, book):
-    # type: (Session, ReferenceBook) -> None
-    """Adds a new reference book to the active network."""
-    if not session.network:
-        raise ValueError("Network must be set to add reference book")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_REFERENCE_LIBRARY)
-    _post(session, url_tail, book)
 
 
 def delete_issue_config(session, major, minor):
@@ -198,7 +178,8 @@ def get_network(session, network):
 def get_network_object(session, key):
     # type: (Session, str) -> Any
     """Gets extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
@@ -343,8 +324,21 @@ def get_work_log(session, snapshot, work_id):
 def put_network_object(session, key, data):
     # type: (Session, str, Any) -> None
     """Put data as extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
+
+
+def put_node_role_dimension(session, dimension):
+    # type: (Session, NodeRoleDimension) -> None
+    """Adds a new node role dimension to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add node role dimension")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_NODE_ROLES,
+                                     dimension.name)
+    _put_json(session, url_tail, dimension)
 
 
 def put_node_roles(session, node_roles_data):
@@ -355,6 +349,18 @@ def put_node_roles(session, node_roles_data):
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_NODE_ROLES)
     return _put_json(session, url_tail, node_roles_data)
+
+
+def put_reference_book(session, book):
+    # type: (Session, ReferenceBook) -> None
+    """Put a reference book to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add reference book")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
+                                     book.name)
+    _put_json(session, url_tail, book)
 
 
 def put_snapshot_object(session, key, data):
