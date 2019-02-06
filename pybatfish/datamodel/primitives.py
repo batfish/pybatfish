@@ -144,12 +144,14 @@ class AutoCompleteSuggestion(DataModelElement):
     Auto complete suggestions are returned by Batfish for auto complete queries.
 
     :ivar description: A description of the suggestion (optional)
+    :ivar insertion_index: Index in original input string where suggested text should be inserted
     :ivar is_partial: Whether this suggestion represents partial or full text
     :ivar rank: Batfish may assign a rank to the suggestion
     :ivar text: The actual suggested text
     """
 
     description = attr.ib(type=str)
+    insertion_index = attr.ib(type=int)
     is_partial = attr.ib(type=bool)
     rank = attr.ib(type=int)
     text = attr.ib(type=str)
@@ -160,11 +162,12 @@ class AutoCompleteSuggestion(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> AutoCompleteSuggestion
         return AutoCompleteSuggestion(json_dict.get("description", None),
+                                      json_dict["insertionIndex"],
                                       json_dict["isPartial"],
                                       json_dict["rank"], json_dict["text"])
 
     def dict(self):
-        return dict(description=self.description, is_partial=self.is_partial,
+        return dict(description=self.description, insertion_index=self.insertion_index, is_partial=self.is_partial,
                     rank=self.rank, text=self.text)
 
 
