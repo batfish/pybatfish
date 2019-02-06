@@ -19,10 +19,10 @@ cat <<EOF
   - label: "Build batfish jar"
     command:
       - "mkdir workspace"
-      - "BF_DIR=$$(mktemp -d)"
-      - "git clone https://github.com/batfish/batfish $${BF_DIR}"
-      - "mvn -f $${BF_DIR}/batfish/projects package"
-      - "cp $${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
+      - "BF_DIR=\$(mktemp -d)"
+      - "git clone https://github.com/batfish/batfish \${BF_DIR}"
+      - "mvn -f \${BF_DIR}/batfish/projects package"
+      - "cp \${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
     artifact_paths:
       - workspace/allinone.jar
     plugins:
@@ -73,22 +73,6 @@ cat <<EOF
           always-pull: true
 EOF
 done
-
-cat <<EOF
-  - label: "Build batfish jar"
-    command:
-      - "mkdir workspace"
-      - "BF_DIR=$$(mktemp -d)"
-      - "git clone https://github.com/batfish/batfish $${BF_DIR}"
-      - "mvn -f $${BF_DIR}/batfish/projects package"
-      - "cp $${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
-    artifact_paths:
-      - workspace/allinone.jar
-    plugins:
-      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: "python:${version}"
-          always-pull: true
-EOF
 
 ###### After unit tests pass, run integration tests
 cat <<EOF
