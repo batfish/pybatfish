@@ -104,7 +104,7 @@ setup(
                       'deepdiff',
                       'deprecated',
                       'netconan>=0.9.2',
-                      'pandas>=0.24.0,<0.25.0',
+                      'pandas>=0.24.1,<0.25.0',
                       'python-dateutil',
                       'requests',
                       'requests-toolbelt',
