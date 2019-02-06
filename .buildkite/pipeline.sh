@@ -18,6 +18,7 @@ EOF
 cat <<EOF
   - label: "Build batfish jar"
     command:
+      - "set -euo pipefail"
       - "mkdir workspace"
       - "BF_DIR=\$(mktemp -d)"
       - "git clone https://github.com/batfish/batfish \${BF_DIR}"
