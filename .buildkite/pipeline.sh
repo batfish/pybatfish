@@ -89,6 +89,8 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
+          download: workspace/allinone.jar
 EOF
 done
 
