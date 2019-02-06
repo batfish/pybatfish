@@ -22,8 +22,8 @@ from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 from pytz import UTC
 
-from client.consts import BfConsts
 from pybatfish.client import resthelper
+from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
 from pybatfish.client.workhelper import _format_elapsed_time, _parse_timestamp, \
     _print_timestamp, _print_work_status, execute
