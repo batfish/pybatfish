@@ -82,10 +82,9 @@ for version in 2.7 3.5 3.6 3.7; do
 cat <<EOF
   - label: "Python ${version} integration tests"
     command:
-      - "apt -qq update && apt -qq install -y openjdk-8-jre-headless"
+      - "apt update -qq && apt -qq install -y openjdk-8-jre-headless"
       - "tar -xzf workspace/questions.tgz -C workspace"
-      - "ls -R workspace"
-      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions periodassignworkms=5' &"
+      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions -periodassignworkms=5' &"
       - "pip install -e .[dev] -q"
       - "pytest tests/integration"
     plugins:
