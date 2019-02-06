@@ -248,7 +248,7 @@ def _warn_on_snapshot_failure():
     statuses = _get_snapshot_parse_status()
     if _check_if_any_failed(statuses):
         bf_logger.warning("""\
-Batfish failed to understand one or more input files, so some analyses will be incorrect. Please consider sharing error logs with the Batfish developers by running:
+Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
 
@@ -257,7 +257,7 @@ to share private, anonymized information. For more information, see the document
     help(bf_upload_diagnostics)""")
     elif not _check_if_all_passed(statuses):
         bf_logger.warning("""\
-One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
 
