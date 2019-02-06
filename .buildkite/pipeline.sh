@@ -93,8 +93,9 @@ cat <<EOF
           image: "python:${version}"
           always-pull: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
-          download: workspace/allinone.jar
-          download: workspace/questions.tgz
+          download:
+            - workspace/allinone.jar
+            - workspace/questions.tgz
 EOF
 done
 
