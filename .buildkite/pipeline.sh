@@ -64,7 +64,7 @@ cat <<EOF
       - "python setup.py test"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: "python:${version}-slim-jessie"
+          image: "python:${version}"
           always-pull: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
           download: dist/pybatfish-*.whl
