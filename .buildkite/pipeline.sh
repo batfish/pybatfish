@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-### Build and quick lint
 set -euo pipefail
 
 BATFISH_ARTIFACTS_PLUGIN_VERSION="${BATFISH_ARTIFACTS_PLUGIN_VERSION:-v1.2.0}"
