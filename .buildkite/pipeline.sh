@@ -18,11 +18,22 @@ EOF
 ###### Initial checks plus building the jar
 cat <<EOF
   - label: "Flake8"
-    command: 
+    command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
       - "python3 -m pip install flake8"
       - "flake8 pybatfish tests"
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
+          always-pull: true
+  - label: "Mypy"
+    command:
+      - "python3 -m virtualenv .venv"
+      - ". .venv/bin/activate"
+      - "python3 -m pip install mypy"
+      - "mypy pybatfish"
+      - "mypy --py2 pybatfish"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
