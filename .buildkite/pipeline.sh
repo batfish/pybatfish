@@ -84,7 +84,7 @@ cat <<EOF
     command:
       - "apt update -qq && apt -qq install -y openjdk-8-jre-headless"
       - "tar -xzf workspace/questions.tgz"
-      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' &"
+      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > workspace/batfish.log &"
       - "pip install -e .[dev] -q"
       - "pytest tests/integration"
     plugins:
@@ -95,6 +95,8 @@ cat <<EOF
           download:
             - workspace/allinone.jar
             - workspace/questions.tgz
+    artifact_paths:
+      - workspace/batfish.log
 EOF
 done
 
