@@ -15,7 +15,7 @@ cat <<EOF
   - wait
 EOF
 
-###### Initial checks plus building the jar
+###### Initial checks plus building the wheel and jar
 cat <<EOF
   - label: "Format detection with flake8"
     command:
@@ -52,7 +52,25 @@ cat <<EOF
           always-pull: true
 EOF
 
-###### WAIT for jar to be built and format checks to pass before heavier tests
+###### WAIT for wheel and jar to be built and format checks to pass before heavier tests
 cat <<EOF
   - wait
 EOF
+
+for version in "2.7 3.5 3.6 3.7"; do
+cat <<EOF
+  - label: "Python ${version}"
+    command:
+      - "python${version} -m virtualenv .venv"
+      - ". .venv/bin/activate"
+      - "python -m pip install dist/pybatfish-*.whl"
+      - "python -m pip install pytest"
+      - "pytest tests"
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
+          always-pull: true
+      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
+          download: dist/pybatfish-*.whl
+EOF
+done
