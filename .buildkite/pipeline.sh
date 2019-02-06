@@ -15,6 +15,22 @@ cat <<EOF
   - wait
 EOF
 
+cat <<EOF
+  - label: "Build batfish jar"
+    command:
+      - "mkdir workspace"
+      - "BF_DIR=$$(mktemp -d)"
+      - "git clone https://github.com/batfish/batfish $${BF_DIR}"
+      - "mvn -f $${BF_DIR}/batfish/projects package"
+      - "cp $${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
+    artifact_paths:
+      - workspace/allinone.jar
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
+          always-pull: true
+EOF
+
 ###### Initial checks plus building the wheel and jar
 cat <<EOF
   - label: "Format detection with flake8"
@@ -38,21 +54,9 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
           always-pull: true
-  - label: "Build pybatfish wheel"
-    command:
-      - "python3 -m virtualenv .venv"
-      - ". .venv/bin/activate"
-      - "python3 setup.py sdist bdist_wheel"
-      - "ls dist"
-    artifact_paths:
-      - dist/pybatfish-*-py2.py3-none-any.whl
-    plugins:
-      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
-          always-pull: true
 EOF
 
-###### WAIT for wheel and jar to be built and format checks to pass before heavier tests
+###### WAIT for simole checks before starting heavier ones.
 cat <<EOF
   - wait
 EOF
@@ -67,7 +71,27 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
-      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
-          download: dist/pybatfish-*.whl
 EOF
 done
+
+cat <<EOF
+  - label: "Build batfish jar"
+    command:
+      - "mkdir workspace"
+      - "BF_DIR=$$(mktemp -d)"
+      - "git clone https://github.com/batfish/batfish $${BF_DIR}"
+      - "mvn -f $${BF_DIR}/batfish/projects package"
+      - "cp $${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
+    artifact_paths:
+      - workspace/allinone.jar
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: "python:${version}"
+          always-pull: true
+EOF
+
+###### After unit tests pass, run integration tests
+cat <<EOF
+  - wait
+EOF
+
