@@ -69,8 +69,8 @@ def _print_timestamp(timestamp):
     return timestamp.astimezone(tzlocal()).strftime("%c %Z")
 
 
-def execute(work_item, session, background=False):
-    # type: (WorkItem, Session, bool) -> Dict[str, Any]
+def execute(work_item, session, background=False, extra_args=None):
+    # type: (WorkItem, Session, bool, Optional[Dict[str, Any]]) -> Dict[str, Any]
     """Submit a work item to Batfish.
 
     :param work_item: work to submit
@@ -80,11 +80,16 @@ def execute(work_item, session, background=False):
     :param background: Whether to background the job. If `True`,
         this function only returns the result of submitting the job.
     :type background: bool
+    :param extra_args: extra arguments to be passed to Batfish. See bf_session.additionalArgs.
+    :type extra_args: dict
 
     :return: If `background=True`, a dict containing a single key 'result' with
     a string description of the result. If `background=False`, a dict containing
     a single key 'status' with a string describing work status.
     """
+    if extra_args is not None:
+        work_item.requestParams.update(extra_args)
+
     snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
     if snapshot is None:
         raise ValueError('Work item {} does not include a snapshot name'.format(

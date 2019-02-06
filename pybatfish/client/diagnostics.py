@@ -25,6 +25,7 @@ import requests
 from netconan import netconan
 from requests import HTTPError
 
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
@@ -98,8 +99,8 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
         for q in questions:
             instance_name = q.get_name()
             try:
-                content = json.dumps(q.answer().dict(), indent=4,
-                                     sort_keys=True)
+                ans = q.answer()  # type: Answer
+                content = json.dumps(ans.dict(), indent=4, sort_keys=True)
             except BatfishException as e:
                 content = "Failed to answer {}: {}".format(instance_name, e)
                 bf_logger.warning(content)
@@ -178,7 +179,7 @@ def _get_snapshot_parse_status():
     """
     parse_status = {}  # type: Dict[str, str]
     try:
-        answer = _INIT_INFO_QUESTION.answer()
+        answer = _INIT_INFO_QUESTION.answer()  # type: Answer
         if 'answerElements' not in answer:
             raise BatfishException('Invalid answer format for init info')
         answer_elements = answer['answerElements']
