@@ -86,7 +86,7 @@ cat <<EOF
       - "tar -xzf workspace/questions.tgz -C workspace"
       - "ls -R workspace"
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions periodassignworkms=5' &"
-      - "pip install -e .[dev]"
+      - "pip install -e .[dev] -q"
       - "pytest tests/integration"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
