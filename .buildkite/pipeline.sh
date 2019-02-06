@@ -84,6 +84,7 @@ cat <<EOF
     command:
       - "apt -qq update && apt -qq install -y openjdk-8-jre-headless"
       - "tar -xzf workspace/questions.tgz -C workspace"
+      - "ls -R workspace"
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions periodassignworkms=5' &"
       - "pip install -e .[dev]"
       - "pytest tests/integration"
