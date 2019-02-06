@@ -44,6 +44,8 @@ cat <<EOF
       - ". .venv/bin/activate"
       - "python3 setup.py sdist bdist_wheel"
       - "ls dist"
+    artifact_paths:
+      - dist/pybatfish-*-py2.py3-none-any.whl
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
