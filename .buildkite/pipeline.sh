@@ -18,12 +18,8 @@ EOF
 cat <<EOF
   - label: "Build batfish jar"
     command:
-      - "set -euo pipefail"
       - "mkdir workspace"
-      - "BF_DIR=\$(mktemp -d)"
-      - "git clone https://github.com/batfish/batfish \${BF_DIR}"
-      - "mvn -f \${BF_DIR}/batfish/projects package"
-      - "cp \${BF_DIR}/batfish/projects/allinone/target/allinone-bundle-*.jar workspace/allinone.jar"
+      - ".buildkite/build_batfish.sh"
     artifact_paths:
       - workspace/allinone.jar
     plugins:
