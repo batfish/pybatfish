@@ -52,7 +52,7 @@ cat <<EOF
       - ".buildkite/build_batfish.sh"
     artifact_paths:
       - workspace/allinone.jar
-      - workspace/questions/**
+      - workspace/questions.tgz
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
@@ -82,7 +82,8 @@ for version in 2.7 3.5 3.6 3.7; do
 cat <<EOF
   - label: "Python ${version} integration tests"
     command:
-      - "apt update && apt install -y openjdk-8-jre-headless"
+      - "apt -qq update && apt -qq install -y openjdk-8-jre-headless"
+      - "tar -C workspace -xzf questions.tgz"
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions periodassignworkms=5' &"
       - "pip install -e .[dev]"
       - "pytest tests/integration"
@@ -92,7 +93,7 @@ cat <<EOF
           always-pull: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
           download: workspace/allinone.jar
-          download: workspace/questions/**
+          download: workspace/questions.tgz
 EOF
 done
 
