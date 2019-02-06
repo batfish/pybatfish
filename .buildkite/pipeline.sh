@@ -61,6 +61,7 @@ for version in 2.7 3.5 3.6 3.7; do
 cat <<EOF
   - label: "Python ${version}"
     command:
+      - "pip install -r requirements.txt"
       - "python setup.py test"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
