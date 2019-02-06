@@ -39,7 +39,7 @@ cat <<EOF
           always-pull: true
 EOF
 
-###### WAIT for simole checks before starting heavier ones.
+###### WAIT for simple checks before starting heavier ones.
 cat <<EOF
   - wait
 EOF
