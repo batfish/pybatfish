@@ -135,7 +135,7 @@ setup(
                (['mypy'] if not PY2 else []),
     },
 
-    # Enabled python setup.py test after pip install -r requirements.txt
+    # List pytest requirements for running unit tests
     setup_requires=['pytest-runner'],
 
     # If there are data files included in your packages that need to be
