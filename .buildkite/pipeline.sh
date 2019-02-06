@@ -15,19 +15,6 @@ cat <<EOF
   - wait
 EOF
 
-cat <<EOF
-  - label: "Build batfish jar"
-    command:
-      - "mkdir workspace"
-      - ".buildkite/build_batfish.sh"
-    artifact_paths:
-      - workspace/allinone.jar
-    plugins:
-      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
-          always-pull: true
-EOF
-
 ###### Initial checks plus building the wheel and jar
 cat <<EOF
   - label: "Format detection with flake8"
@@ -58,9 +45,22 @@ cat <<EOF
   - wait
 EOF
 
+cat <<EOF
+  - label: "Build batfish jar"
+    command:
+      - "mkdir workspace"
+      - ".buildkite/build_batfish.sh"
+    artifact_paths:
+      - workspace/allinone.jar
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
+          always-pull: true
+EOF
+
 for version in 2.7 3.5 3.6 3.7; do
 cat <<EOF
-  - label: "Python ${version}"
+  - label: "Python ${version} unit tests"
     command:
       - "pip install -e .[dev]"
       - "pytest tests"
@@ -75,4 +75,19 @@ done
 cat <<EOF
   - wait
 EOF
+
+###### Integration tests
+for version in 2.7 3.5 3.6 3.7; do
+cat <<EOF
+  - label: "Python ${version} integration tests"
+    command:
+      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions periodassignworkms=5' &"
+      - "pip install -e .[dev]"
+      - "pytest tests/integration"
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: "python:${version}"
+          always-pull: true
+EOF
+done
 
