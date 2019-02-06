@@ -4,6 +4,7 @@ set -euo pipefail
 BATFISH_ARTIFACTS_PLUGIN_VERSION="${BATFISH_ARTIFACTS_PLUGIN_VERSION:-v1.2.0}"
 BATFISH_DOCKER_PLUGIN_VERSION="${BATFISH_DOCKER_PLUGIN_VERSION:-v2.2.0}"
 BATFISH_DOCKER_CI_BASE_IMAGE="${BATFISH_DOCKER_CI_BASE_IMAGE:-batfish/ci-base:latest}"
+PYBATFISH_PYTHON_TEST_VERSIONS=(2.7 3.5 3.6 3.7)
 
 cat <<EOF
 steps:
@@ -58,7 +59,7 @@ cat <<EOF
           always-pull: true
 EOF
 
-for version in 2.7 3.5 3.6 3.7; do
+for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} unit tests"
     command:
@@ -77,7 +78,7 @@ cat <<EOF
 EOF
 
 ###### Integration tests
-for version in 2.7 3.5 3.6 3.7; do
+for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} integration tests"
     command:
