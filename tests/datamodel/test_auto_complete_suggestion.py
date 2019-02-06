@@ -22,10 +22,10 @@ from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 
 def test_auto_complete_suggestion_all_fields():
     suggestion = AutoCompleteSuggestion.from_dict(
-        {"description": "desc", "insertionIndex": 0, "isPartial": True, "rank": 42,
+        {"description": "desc", "insertionIndex": 16, "isPartial": True, "rank": 42,
          "text": "suggestion"})
     assert suggestion.description == "desc"
-    assert suggestion.insertion_index == 0
+    assert suggestion.insertion_index == 16
     assert suggestion.is_partial
     assert suggestion.rank == 42
     assert suggestion.text == "suggestion"
@@ -33,8 +33,18 @@ def test_auto_complete_suggestion_all_fields():
 
 def test_auto_complete_suggestion_no_description():
     suggestion = AutoCompleteSuggestion.from_dict(
-        {"insertionIndex": 0, "isPartial": True, "rank": 42, "text": "suggestion"})
+        {"insertionIndex": 10, "isPartial": True, "rank": 42, "text": "suggestion"})
     assert suggestion.description is None
+    assert suggestion.insertion_index == 10
+    assert suggestion.is_partial
+    assert suggestion.rank == 42
+    assert suggestion.text == "suggestion"
+
+
+def test_auto_complete_suggestion_no_insertion_index():
+    suggestion = AutoCompleteSuggestion.from_dict(
+        {"description": "desc", "isPartial": True, "rank": 42, "text": "suggestion"})
+    assert suggestion.description == "desc"
     assert suggestion.insertion_index == 0
     assert suggestion.is_partial
     assert suggestion.rank == 42

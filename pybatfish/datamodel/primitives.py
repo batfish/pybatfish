@@ -162,7 +162,7 @@ class AutoCompleteSuggestion(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> AutoCompleteSuggestion
         return AutoCompleteSuggestion(json_dict.get("description", None),
-                                      json_dict["insertionIndex"],
+                                      json_dict.get("insertionIndex", 0),
                                       json_dict["isPartial"],
                                       json_dict["rank"], json_dict["text"])
 
