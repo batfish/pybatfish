@@ -83,7 +83,7 @@ cat <<EOF
   - label: "Python ${version} integration tests"
     command:
       - "apt -qq update && apt -qq install -y openjdk-8-jre-headless"
-      - "tar -C workspace -xzf questions.tgz"
+      - "tar -xzf workspace/questions.tgz -C workspace"
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs workspace/questions periodassignworkms=5' &"
       - "pip install -e .[dev]"
       - "pytest tests/integration"
