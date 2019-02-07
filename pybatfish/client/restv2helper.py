@@ -183,24 +183,24 @@ def get_network_object(session, key):
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
-def get_snapshot_input_object(session, key):
-    # type: (Session, str) -> Any
+def get_snapshot_input_object(session, key, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Any
     """Gets input object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_INPUT)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
-def get_snapshot_object(session, key):
-    # type: (Session, str) -> Any
+def get_snapshot_object(session, key, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Any
     """Gets extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_OBJECTS)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
@@ -253,69 +253,69 @@ def get_reference_library(session):
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_roles(session):
-    # type: (Session) -> Dict
+def get_snapshot_inferred_node_roles(session, snapshot=None):
+    # type: (Session, Optional[str]) -> Dict
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_INFERRED_NODE_ROLES)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_role_dimension(session, dimension):
-    # type: (Session, str) -> Dict
+def get_snapshot_inferred_node_role_dimension(session, dimension, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Dict
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                            session.network,
                                            CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.baseSnapshot,
+                                           session.get_snapshot(snapshot),
                                            CoordConstsV2.RSC_INFERRED_NODE_ROLES,
                                            dimension)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_node_roles(session):
-    # type: (Session) -> Dict
+def get_snapshot_node_roles(session, snapshot=None):
+    # type: (Session, Optional[str]) -> Dict
     """Gets the definitions and assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_NODE_ROLES)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_node_role_dimension(session, dimension):
-    # type: (Session, str) -> Dict
+def get_snapshot_node_role_dimension(session, dimension, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Dict
     """Gets the definition and assignments of node roles for the given dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                            session.network,
                                            CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.baseSnapshot,
+                                           session.get_snapshot(snapshot),
                                            CoordConstsV2.RSC_NODE_ROLES,
                                            dimension)
     return _get_dict(session, url_tail)
 
 
 def get_work_log(session, snapshot, work_id):
-    # type: (Session, str, str) -> Text
+    # type: (Session, Optional[str], str) -> Text
     """Retrieve the log for a work item with a given ID."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
 
     url_tail = "/{}/{}/{}/{}/{}/{}".format(
         CoordConstsV2.RSC_NETWORKS, session.network,
-        CoordConstsV2.RSC_SNAPSHOTS, snapshot,
+        CoordConstsV2.RSC_SNAPSHOTS, session.get_snapshot(snapshot),
         CoordConstsV2.RSC_WORK_LOG, work_id)
 
     return six.u(_get(session, url_tail, dict()).text)
@@ -363,13 +363,13 @@ def put_reference_book(session, book):
     _put_json(session, url_tail, book)
 
 
-def put_snapshot_object(session, key, data):
-    # type: (Session, str, Any) -> None
+def put_snapshot_object(session, key, data, snapshot=None):
+    # type: (Session, str, Any, Optional[str]) -> None
     """Put data as extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_OBJECTS)
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
