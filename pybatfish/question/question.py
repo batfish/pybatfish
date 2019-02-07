@@ -34,6 +34,7 @@ from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
 from pybatfish.datamodel import Assertion, AssertionType, \
     VariableType  # noqa: F401
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
@@ -141,7 +142,8 @@ class QuestionBase(object):
         self._dict = deepcopy(dictionary)
 
     def answer(self, snapshot=None, reference_snapshot=None,
-               include_one_table_keys=None, background=False):
+               include_one_table_keys=None, background=False, extra_args=None):
+        # type: (Optional[str], Optional[str], Optional[bool], bool, Optional[Dict[str, Any]]) -> Union[str, Answer]
         """
         Ask and return the answer for this question.
 
@@ -156,13 +158,15 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
+        :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+        :type extra_args: dict
         :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
             :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
         from pybatfish.client.commands import bf_session
-        snapshot = bf_session.get_snapshot(snapshot)
+        real_snapshot = bf_session.get_snapshot(snapshot)
         if reference_snapshot is None and self.get_differential():
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
@@ -173,8 +177,9 @@ class QuestionBase(object):
                               parameters_str="{}",
                               question_name=self.get_name(),
                               background=background,
-                              snapshot=snapshot,
-                              reference_snapshot=reference_snapshot)
+                              snapshot=real_snapshot,
+                              reference_snapshot=reference_snapshot,
+                              extra_args=extra_args)
 
     def dict(self):
         """Return the dictionary representing this question."""

@@ -15,12 +15,13 @@
 """Contains internal functions for interacting with the Batfish service."""
 
 import json
-from typing import Dict, Optional, Union  # noqa: F401
+from typing import Any, Dict, Optional, Union  # noqa: F401
 
 import six
 
 from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel import answer
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import (get_uuid)
 from . import resthelper, workhelper
 from .options import Options
@@ -28,8 +29,8 @@ from .workhelper import _get_data_get_question_templates
 
 
 def _bf_answer_obj(question_str, parameters_str, question_name,
-                   background, snapshot, reference_snapshot):
-    # type: (str, str, str, bool, str, Optional[str]) -> Union[str, Dict]
+                   background, snapshot, reference_snapshot, extra_args):
+    # type: (str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
     from pybatfish.client.commands import bf_session
 
     json.loads(parameters_str)  # a syntactic check for parametersStr
@@ -46,7 +47,7 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
     # Answer the question
     work_item = workhelper.get_workitem_answer(bf_session, question_name,
                                                snapshot, reference_snapshot)
-    workhelper.execute(work_item, bf_session, background)
+    workhelper.execute(work_item, bf_session, background, extra_args)
 
     if background:
         return work_item.id
@@ -69,7 +70,6 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
 def _bf_get_question_templates():
     from pybatfish.client.commands import bf_session
     jsonData = _get_data_get_question_templates(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES,
-                                                jsonData)
+    jsonResponse = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES, jsonData)
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
