@@ -430,7 +430,7 @@ def _delete(session, url_tail, params=None):
 
 
 def _get(session, url_tail, params, stream=False):
-    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Any
+    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Response
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
