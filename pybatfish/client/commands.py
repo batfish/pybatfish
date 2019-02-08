@@ -143,9 +143,9 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
         >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
         >>> name = bf_set_network()
         >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b")
-        [AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='bgp'),
-            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ebgp'),
-            AutoCompleteSuggestion(description=None, is_partial=False, rank=2147483647, text='ibgp')]
+        [AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='bgp'),
+            AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ebgp'),
+            AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ibgp')]
 
     :param completion_type: The type of parameter to suggest autocompletions for
     :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
