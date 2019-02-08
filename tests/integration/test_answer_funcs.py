@@ -20,6 +20,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
                                        bf_init_analysis, bf_init_snapshot,
                                        bf_session, bf_set_network)
 from pybatfish.datamodel.flow import HeaderConstraints
+from pybatfish.exception import BatfishException
 from pybatfish.question import bfq
 from pybatfish.question.question import load_questions
 
@@ -67,6 +68,13 @@ def test_answer_background(network):
 def test_answer_foreground(network):
     """Expect an answer that is valid JSON when run in foreground."""
     bfq.ipOwners().answer()
+
+
+def test_answer_fail(network):
+    """Expect a BatfishException with searchFilters specifying a non-existant filter."""
+    with pytest.raises(BatfishException) as err:
+        bfq.searchFilters(filters="undefined").answer().frame()
+    assert "Work terminated abnormally" in str(err.value)
 
 
 def test_init_analysis(network):
