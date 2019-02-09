@@ -45,6 +45,13 @@ def example_snapshot(network):
     bf_delete_snapshot(name)
 
 
+def test_questions(network, example_snapshot):
+    """Run diagnostic questions on example snapshot."""
+    for q in _INIT_INFO_QUESTIONS:
+        # Goal here is to run question successfully, i.e. not crash
+        q.answer()
+
+
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
