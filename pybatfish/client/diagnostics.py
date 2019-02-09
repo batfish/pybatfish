@@ -65,6 +65,9 @@ _PARSE_WARNINGS_QUESTION = QuestionBase({
     }
 })
 
+# TODO(https://github.com/batfish/pybatfish/issues/275)
+# Remove redundant questions (parse warnings, conversion warnings)
+#
 # Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
     _INIT_INFO_QUESTION,
