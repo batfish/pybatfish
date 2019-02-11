@@ -383,7 +383,8 @@ def _load_question_dict(question):
 
     # Validate question variables
     ivars = instance_data.get('variables')
-    variables = _process_variables(question_name, ivars)
+    ordered_variable_names = instance_data.get('orderedVariableNames')
+    variables = _process_variables(question_name, ivars, ordered_variable_names)
 
     # Compute docstring
     docstring = _compute_docstring(question_description, variables, ivars)
@@ -399,17 +400,20 @@ def _load_question_dict(question):
     return question_name, question_class
 
 
-def _process_variables(question_name, variables):
-    # type: (str, Optional[Dict[str, Dict[str, Any]]]) -> List[str]
+def _process_variables(question_name, variables, ordered_variable_names):
+    # type: (str, Optional[Dict[str, Dict[str, Any]]], Optional[List[str]]) -> List[str]
     """Perform validation on question variables.
 
-    :returns a sorted list of variable names
+    :returns an ordered list of variable names
     """
     if variables is None:
         return []
     for var_name, var_data in variables.items():
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
+
+    if _has_valid_ordered_variable_names(ordered_variable_names, variables):
+        return ordered_variable_names
 
     def __var_key(name):
         """Orders required [!optional] vars first, then by name."""
@@ -454,6 +458,17 @@ def _validate_variable_name(question_name, var_name):
                 question_name, var_name))
     return True
 
+
+def _has_valid_ordered_variable_names(variables, ordered_variable_names):
+    # type: (Dict[str, Dict[str, Any]], Optional[List[str]]) -> bool
+    """Check if orderedVariableNames is present and that it includes all instance variables."""
+    if not ordered_variable_names:
+        return False
+    set_of_ordered_variable_names = frozenset(ordered_variable_names)
+    set_of_variable_names = frozenset(variables.keys())
+    has_unique_ordered_variable_names = len(set_of_ordered_variable_names) == len(ordered_variable_names)
+    has_all_variable_names = set_of_ordered_variable_names == set_of_variable_names
+    return has_unique_ordered_variable_names and has_all_variable_names
 
 def _compute_docstring(base_docstring, var_names, variables):
     # type: (str, List[str], Dict[str, Any]) -> str
