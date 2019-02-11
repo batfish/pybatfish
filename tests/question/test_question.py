@@ -232,7 +232,7 @@ def test_compute_var_help_with_old_allowed_values():
 
 
 def test_process_variables():
-    assert _process_variables("foo", None) == []
+    assert _process_variables("foo", None, None) == []
 
 
 def test_load_dir_questions(tmpdir):
