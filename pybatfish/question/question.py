@@ -412,7 +412,7 @@ def _process_variables(question_name, variables, ordered_variable_names):
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
 
-    if _has_valid_ordered_variable_names(ordered_variable_names, variables):
+    if _has_valid_ordered_variable_names(variables, ordered_variable_names):
         return ordered_variable_names
 
     def __var_key(name):
@@ -469,6 +469,7 @@ def _has_valid_ordered_variable_names(variables, ordered_variable_names):
     has_unique_ordered_variable_names = len(set_of_ordered_variable_names) == len(ordered_variable_names)
     has_all_variable_names = set_of_ordered_variable_names == set_of_variable_names
     return has_unique_ordered_variable_names and has_all_variable_names
+
 
 def _compute_docstring(base_docstring, var_names, variables):
     # type: (str, List[str], Dict[str, Any]) -> str
