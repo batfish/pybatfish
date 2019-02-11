@@ -118,7 +118,7 @@ class QuestionMeta(type):
             from inspect import Signature, Parameter
             # Merge constructor params with question variables
             params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-                      for param in sorted(dct.get("variables", [])) +
+                      for param in dct.get("variables", []) +
                       [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
             setattr(constructor, '__signature__', Signature(parameters=params))
