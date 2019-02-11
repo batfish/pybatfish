@@ -50,6 +50,13 @@ _INIT_INFO_QUESTION = QuestionBase({
         "instanceName": "__initInfo"
     },
 })
+_INIT_ISSUES_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.InitIssuesQuestion",
+    "differential": False,
+    "instance": {
+        "instanceName": "__initIssues"
+    },
+})
 _PARSE_WARNINGS_QUESTION = QuestionBase({
     "class": "org.batfish.question.initialization.ParseWarningQuestion",
     "differential": False,
@@ -58,9 +65,13 @@ _PARSE_WARNINGS_QUESTION = QuestionBase({
     }
 })
 
+# TODO(https://github.com/batfish/pybatfish/issues/275)
+# Remove redundant questions (parse warnings, conversion warnings)
+#
 # Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
     _INIT_INFO_QUESTION,
+    _INIT_ISSUES_QUESTION,
     _PARSE_WARNINGS_QUESTION,
     _FILE_PARSE_STATUS_QUESTION,
     _CONVERSION_WARNINGS_QUESTION,

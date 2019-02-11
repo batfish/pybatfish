@@ -17,7 +17,6 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
 
 import requests
-import six
 from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
@@ -318,7 +317,7 @@ def get_work_log(session, snapshot, work_id):
         CoordConstsV2.RSC_SNAPSHOTS, session.get_snapshot(snapshot),
         CoordConstsV2.RSC_WORK_LOG, work_id)
 
-    return six.u(_get(session, url_tail, dict()).text)
+    return _get(session, url_tail, dict()).text
 
 
 def put_network_object(session, key, data):
@@ -431,7 +430,7 @@ def _delete(session, url_tail, params=None):
 
 
 def _get(session, url_tail, params, stream=False):
-    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Any
+    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Response
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
