@@ -39,10 +39,10 @@ The [Batfish YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60
   
 ## How do I get started?
 
-Install Batfish
+### Install Batfish
 Follow the instructions listed in the [batfish github repository](https://github.com/batfish/batfish/blob/master/README.md) 
 
-Install Pybatfish
+### Install Pybatfish
 We highly recommend that you install Pybatfish in a Python 3 virtual environment. Details on how to set one up can be found [here](https://docs.python.org/3/library/venv.html). Once your virtual environment is setup and activated, upgrade pip and then install pybatfish.
 
 ```
