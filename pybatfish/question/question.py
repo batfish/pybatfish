@@ -382,8 +382,8 @@ def _load_question_dict(question):
     _tags.update(tags)
 
     # Validate question variables
-    ivars = instance_data.get('variables')
-    ordered_variable_names = instance_data.get('orderedVariableNames')
+    ivars = instance_data.get('variables', {})
+    ordered_variable_names = instance_data.get('orderedVariableNames', [])
     variables = _process_variables(question_name, ivars, ordered_variable_names)
 
     # Compute docstring
@@ -401,7 +401,7 @@ def _load_question_dict(question):
 
 
 def _process_variables(question_name, variables, ordered_variable_names):
-    # type: (str, Optional[Dict[str, Dict[str, Any]]], Optional[List[str]]) -> List[str]
+    # type: (str, Dict[str, Dict[str, Any]], List[str]) -> List[str]
     """Perform validation on question variables.
 
     :returns an ordered list of variable names
