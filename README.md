@@ -39,8 +39,24 @@ The [Batfish YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60
   
 ## How do I get started?
 
-Follow the instructions listed in the [batfish github repository](https://github.com/batfish/batfish/blob/master/README.md)
+If you haven't already installed Batfish, follow the instructions listed in the [batfish github repository](https://github.com/batfish/batfish/blob/master/README.md) to do so.
 
+### Install Pybatfish
+We highly recommend that you install Pybatfish in a Python 3 virtual environment. Details on how to set one up can be found [here](https://docs.python.org/3/library/venv.html). Once your virtual environment is setup and activated, upgrade pip and then install pybatfish.
+
+```
+python3 -m pip install --upgrade pip
+python3 -m pip install --upgrade git+https://github.com/batfish/pybatfish.git
+```
+
+Now, you are ready to evaluate your own network with Batfish. We encourage you to use Jupyter notebooks as your starting point, but you can use other methods that you are a comfortable with, e.g., an IDE like PyCharm or an interactive Python shell. If you choose to use Jupyter notebooks as your starting point, you need to install Jupyter in your virtual environment. Jupyter documentation can be found [here](http://jupyter.org/install) - but the commands below will get you going.
+
+```
+python3 -m pip install jupyter
+jupyter notebook
+```
+
+Our notebooks provide a quick start guide for different use cases. Beyond that, the complete documentation is available on [readthedocs](https://pybatfish.readthedocs.io/en/latest/quickstart.html).
 
 ### Pybatfish documentation
 
