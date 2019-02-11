@@ -406,7 +406,7 @@ def _process_variables(question_name, variables, ordered_variable_names):
 
     :returns an ordered list of variable names
     """
-    if variables is None:
+    if not variables:
         return []
     for var_name, var_data in variables.items():
         _validate_variable_name(question_name, var_name)
