@@ -17,11 +17,15 @@ import pytest
 
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question.question import (_compute_docstring, _compute_var_help,
+from pybatfish.question.question import (_compute_docstring,
+                                         _compute_var_help,
                                          _load_question_dict,
                                          _load_questions_from_dir,
-                                         _process_variables, _validate,
-                                         list_questions, load_questions)
+                                         _process_variables,
+                                         _has_valid_ordered_variable_names,
+                                         _validate,
+                                         list_questions,
+                                         load_questions)
 
 TEST_QUESTION_NAME = 'testQuestionName'
 TEST_QUESTION_DICT = {
@@ -235,6 +239,37 @@ def test_process_variables():
     assert _process_variables("foo", None, None) == []
 
 
+def test_has_valid_ordered_variable_names():
+    """Test if question has valid orderedVariableNames"""
+    variables = {
+        "a": {},
+        "b": {},
+        "c": {},
+    }
+
+    # empty ordered_variable_names returns False
+    ordered_variable_names = []
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # incomplete ordered_variable_names returns False
+    ordered_variable_names = ["a"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    ordered_variable_names = ["a", "c"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # complete ordered_variable_names but with duplicate returns False
+    ordered_variable_names = ["a", "c", "b", "b"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # ordered_variable_names with extraneous variable returns False
+    ordered_variable_names = ["a", "c", "b", "d"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # complete ordered_variable_names return True
+    ordered_variable_names = ["a", "c", "b"]
+    assert _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+
 def test_load_dir_questions(tmpdir):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
@@ -261,7 +296,6 @@ def test_make_check():
     qdict = q().make_check().dict()
     assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
                                                0).dict()
-
 
 def test_question_name():
     """Test user-set and default question names."""
