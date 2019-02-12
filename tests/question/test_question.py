@@ -19,10 +19,11 @@ from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (_compute_docstring,
                                          _compute_var_help,
+                                         _has_valid_ordered_variable_names,
                                          _load_question_dict,
                                          _load_questions_from_dir,
                                          _process_variables,
-                                         _has_valid_ordered_variable_names,
+
                                          _validate,
                                          list_questions,
                                          load_questions)
