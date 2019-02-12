@@ -412,7 +412,7 @@ def _process_variables(question_name, variables, ordered_variable_names):
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
 
-    if _has_valid_ordered_variable_names(variables, ordered_variable_names):
+    if _has_valid_ordered_variable_names(ordered_variable_names, variables):
         return ordered_variable_names
 
     def __var_key(name):
@@ -459,8 +459,8 @@ def _validate_variable_name(question_name, var_name):
     return True
 
 
-def _has_valid_ordered_variable_names(variables, ordered_variable_names):
-    # type: (Dict[str, Dict[str, Any]], Optional[List[str]]) -> bool
+def _has_valid_ordered_variable_names(ordered_variable_names, variables):
+    # type: (List[str], Dict[str, Dict[str, Any]]) -> bool
     """Check if orderedVariableNames is present and that it includes all instance variables."""
     if not ordered_variable_names:
         return False
