@@ -237,7 +237,7 @@ def test_compute_var_help_with_old_allowed_values():
 
 
 def test_process_variables():
-    """Test if variable names are returned in the correct order"""
+    """Test if variable names are returned in the correct order."""
     assert _process_variables("foo", None, None) == []
 
     variables = {
@@ -285,7 +285,7 @@ def test_process_variables():
 
 
 def test_has_valid_ordered_variable_names():
-    """Test if question has valid orderedVariableNames"""
+    """Test if question has valid orderedVariableNames."""
     variables = {
         "a": {},
         "b": {},
@@ -341,6 +341,7 @@ def test_make_check():
     qdict = q().make_check().dict()
     assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
                                                0).dict()
+
 
 def test_question_name():
     """Test user-set and default question names."""
