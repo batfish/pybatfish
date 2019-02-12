@@ -236,7 +236,51 @@ def test_compute_var_help_with_old_allowed_values():
 
 
 def test_process_variables():
+    """Test if variable names are returned in the correct order"""
     assert _process_variables("foo", None, None) == []
+
+    variables = {
+        "c": {
+            "description": "c description",
+            "optional": True,
+            "type": "boolean",
+            "displayName": "c display name"
+        },
+        "d": {
+            "description": "d description",
+            "optional": False,
+            "type": "boolean",
+            "displayName": "d display name"
+        },
+        "a": {
+            "description": "a description",
+            "optional": True,
+            "type": "boolean",
+            "displayName": "a display name"
+        },
+        "b": {
+            "description": "b description",
+            "optional": False,
+            "type": "boolean",
+            "displayName": "b display name"
+        },
+    }
+
+    # default order: non-optional variables listed alphabetically
+    # then optional variables listed alphabetically
+    default_variables = ["b", "d", "a", "c"]
+
+    # no ordered_variable_names returns variables in default order
+    ordered_variable_names = []
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+
+    # invalid ordered_variable_names returns variables in default order
+    ordered_variable_names = ["d", "c", "b"]
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+
+    # valid ordered_variable_names returns ordered_variable_names
+    ordered_variable_names = ["d", "c", "b", "a"]
+    assert _process_variables("foo", variables, ordered_variable_names) == ordered_variable_names
 
 
 def test_has_valid_ordered_variable_names():
