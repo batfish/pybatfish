@@ -90,8 +90,6 @@ class Assertion(DataModelElement):
 class VariableType(str, Enum):
     """Auto completion type."""
 
-    ADDRESS_BOOK = "addressBook"  #: names of address books
-    ADDRESS_GROUP = "addressGroup"  #: names of address groups
     ANSWER_ELEMENT = "answerElement"  #: answer elements
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
