@@ -661,8 +661,6 @@ def _validateType(value, expectedType):
     elif expectedType == VariableType.DOUBLE:
         return isinstance(value, float), None
     elif expectedType in [
-        VariableType.ADDRESS_BOOK,
-        VariableType.ADDRESS_GROUP,
         VariableType.BGP_PEER_PROPERTY_SPEC,
         VariableType.BGP_PROCESS_PROPERTY_SPEC,
         VariableType.BGP_SESSION_STATUS,
