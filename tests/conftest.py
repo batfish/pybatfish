@@ -1,6 +1,7 @@
 from pybatfish.datamodel.primitives import VariableType
 
 COMPLETION_TYPES = [
+    VariableType.ADDRESS_GROUP_AND_BOOK,
     VariableType.BGP_PEER_PROPERTY_SPEC,
     VariableType.BGP_PROCESS_PROPERTY_SPEC,
     VariableType.BGP_SESSION_STATUS,
@@ -11,6 +12,7 @@ COMPLETION_TYPES = [
     VariableType.INTERFACE,
     VariableType.INTERFACE_PROPERTY_SPEC,
     VariableType.IP,
+    VariableType.IP_SPACE_SPEC
     VariableType.IPSEC_SESSION_STATUS,
     VariableType.NAMED_STRUCTURE_SPEC,
     VariableType.NODE_PROPERTY_SPEC,
