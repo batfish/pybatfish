@@ -464,11 +464,8 @@ def _has_valid_ordered_variable_names(ordered_variable_names, variables):
     """Check if ordered_variable_names is present and that it includes all instance variables."""
     if not ordered_variable_names:
         return False
-    set_of_ordered_variable_names = frozenset(ordered_variable_names)
-    set_of_variable_names = frozenset(variables.keys())
-    has_unique_ordered_variable_names = len(set_of_ordered_variable_names) == len(ordered_variable_names)
-    has_all_variable_names = set_of_ordered_variable_names == set_of_variable_names
-    return has_unique_ordered_variable_names and has_all_variable_names
+    return (len(ordered_variable_names) == len(variables)
+            and set(ordered_variable_names) == set(variables.keys()))
 
 
 def _compute_docstring(base_docstring, var_names, variables):
