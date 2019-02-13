@@ -461,7 +461,7 @@ def _validate_variable_name(question_name, var_name):
 
 def _has_valid_ordered_variable_names(ordered_variable_names, variables):
     # type: (List[str], Dict[str, Dict[str, Any]]) -> bool
-    """Check if orderedVariableNames is present and that it includes all instance variables."""
+    """Check if ordered_variable_names is present and that it includes all instance variables."""
     if not ordered_variable_names:
         return False
     set_of_ordered_variable_names = frozenset(ordered_variable_names)
