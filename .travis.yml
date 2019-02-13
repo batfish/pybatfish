@@ -4,6 +4,10 @@ python:
 - 3.5
 - 3.6
 
+branches:
+  only:
+    - master
+
 os: linux
 dist: xenial
 jdk:
