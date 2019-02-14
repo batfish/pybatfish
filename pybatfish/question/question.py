@@ -118,7 +118,7 @@ class QuestionMeta(type):
             from inspect import Signature, Parameter
             # Merge constructor params with question variables
             params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-                      for param in sorted(dct.get("variables", [])) +
+                      for param in dct.get("variables", []) +
                       [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
             setattr(constructor, '__signature__', Signature(parameters=params))
@@ -382,8 +382,9 @@ def _load_question_dict(question):
     _tags.update(tags)
 
     # Validate question variables
-    ivars = instance_data.get('variables')
-    variables = _process_variables(question_name, ivars)
+    ivars = instance_data.get('variables', {})
+    ordered_variable_names = instance_data.get('orderedVariableNames', [])
+    variables = _process_variables(question_name, ivars, ordered_variable_names)
 
     # Compute docstring
     docstring = _compute_docstring(question_description, variables, ivars)
@@ -399,17 +400,20 @@ def _load_question_dict(question):
     return question_name, question_class
 
 
-def _process_variables(question_name, variables):
-    # type: (str, Optional[Dict[str, Dict[str, Any]]]) -> List[str]
+def _process_variables(question_name, variables, ordered_variable_names):
+    # type: (str, Dict[str, Dict[str, Any]], List[str]) -> List[str]
     """Perform validation on question variables.
 
-    :returns a sorted list of variable names
+    :returns an ordered list of variable names
     """
-    if variables is None:
+    if not variables:
         return []
     for var_name, var_data in variables.items():
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
+
+    if _has_valid_ordered_variable_names(ordered_variable_names, variables):
+        return ordered_variable_names
 
     def __var_key(name):
         """Orders required [!optional] vars first, then by name."""
@@ -453,6 +457,15 @@ def _validate_variable_name(question_name, var_name):
             "Question {} has invalid variable name: {}. Only alphanumeric characters are allowed".format(
                 question_name, var_name))
     return True
+
+
+def _has_valid_ordered_variable_names(ordered_variable_names, variables):
+    # type: (List[str], Dict[str, Dict[str, Any]]) -> bool
+    """Check if ordered_variable_names is present and that it includes all instance variables."""
+    if not ordered_variable_names:
+        return False
+    return (len(ordered_variable_names) == len(variables)
+            and set(ordered_variable_names) == set(variables.keys()))
 
 
 def _compute_docstring(base_docstring, var_names, variables):
