@@ -90,6 +90,7 @@ class Assertion(DataModelElement):
 class VariableType(str, Enum):
     """Auto completion type."""
 
+    ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
     ANSWER_ELEMENT = "answerElement"  #: answer elements
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
@@ -110,6 +111,7 @@ class VariableType(str, Enum):
     INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
     IP = "ip"  #: ips
     IP_PROTOCOL = "ipProtocol"  #: ip protocols
+    IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
     IP_WILDCARD = "ipWildcard"  #: ip protocols
     IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
     JAVA_REGEX = "javaRegex"  #: java regex
