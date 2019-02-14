@@ -12,7 +12,7 @@ COMPLETION_TYPES = [
     VariableType.INTERFACE,
     VariableType.INTERFACE_PROPERTY_SPEC,
     VariableType.IP,
-    VariableType.IP_SPACE_SPEC
+    VariableType.IP_SPACE_SPEC,
     VariableType.IPSEC_SESSION_STATUS,
     VariableType.NAMED_STRUCTURE_SPEC,
     VariableType.NODE_PROPERTY_SPEC,
