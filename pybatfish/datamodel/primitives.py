@@ -111,7 +111,7 @@ class VariableType(str, Enum):
     INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
     IP = "ip"  #: ips
     IP_PROTOCOL = "ipProtocol"  #: ip protocols
-    IP_SPACE_SPEC = "IP_SPACE_SPEC"  #: ip space specifier
+    IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
     IP_WILDCARD = "ipWildcard"  #: ip protocols
     IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
     JAVA_REGEX = "javaRegex"  #: java regex
