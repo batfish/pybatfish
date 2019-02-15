@@ -15,8 +15,6 @@ from pybatfish.util import get_html
 
 bf_logger.setLevel(logging.WARN)
 
-load_questions()
-
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', None)
 # Prevent rendering text between '$' as MathJax expressions
