@@ -58,6 +58,35 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: bgpSessionType
 
+.. py:class:: bidirectionalTraceroute(*, headers, startLocation, ignoreFilters, maxTraces, question_name)
+
+   Trace the path(s) for the specified flow, along with path(s) for reverse flows.
+   
+   This question performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
+   If the trace succeeds, a traceroute is performed in the reverse direction.
+   
+   
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
+   :type startLocation: string
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
+.. py:class:: compareFilters(*, nodes, filters, question_name)
+
+   Find lines of two versions of a filter that treat the same flow(s) differently.
+   
+   This question searches for pairs of lines for which two versions of a filter (access control list) treat the same flow(s) differently.
+   
+   
+   :param nodes: Only evaluate filters present on nodes matching this specifier.
+   :type nodes: nodeSpec
+   :param filters: Only evaluate filters that match this regex.
+   :type filters: filter
+
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
    Lists the structures defined in the network.
@@ -110,7 +139,7 @@
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
 
-.. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name)
+.. py:class:: edges(*, nodes, remoteNodes, edgeType, question_name)
 
    Lists different types of edges in a snapshot.
    
@@ -160,7 +189,7 @@
    :param nodes: Examine filters on nodes matching this specifier.
    :type nodes: nodeSpec
 
-.. py:class:: filterTable(*, columns, filter, innerQuestion, question_name)
+.. py:class:: filterTable(*, innerQuestion, columns, filter, question_name)
 
    Return subset of answer for a question.
    
@@ -174,7 +203,11 @@
    :param filter: The filter to use.
    :type filter: string
 
-.. py:class:: interfaceMtu(*, comparator, interfaces, mtuBytes, nodes, question_name)
+.. py:class:: initIssues(*, question_name)
+
+   Return issues that occurred when parsing input files and converting to vendor independent model.
+
+.. py:class:: interfaceMtu(*, interfaces, mtuBytes, nodes, comparator, question_name)
 
    Find interfaces where the configured MTU matches the specified comparator and mtuBytes.
    
@@ -284,7 +317,7 @@
    :param structureTypes: Include structures of this type.
    :type structureTypes: namedStructureSpec
 
-.. py:class:: neighbors(*, neighborTypes, nodes, remoteNodes, roleDimension, style, question_name)
+.. py:class:: neighbors(*, nodes, remoteNodes, style, neighborTypes, roleDimension, question_name)
 
    Lists neighbor relationships in the snapshot.
    
@@ -333,7 +366,7 @@
    :param properties: Include properties matching this regex.
    :type properties: nodePropertySpec
 
-.. py:class:: nodes(*, nodeTypes, nodes, summary, question_name)
+.. py:class:: nodes(*, nodes, summary, nodeTypes, question_name)
 
    Lists configuration attributes of nodes in the network.
    
@@ -379,25 +412,25 @@
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
 
-.. py:class:: reachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name)
+.. py:class:: reachability(*, pathConstraints, headers, actions, maxTraces, invertSearch, ignoreFilters, question_name)
 
    Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
    
    
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
    :param actions: Only return flows for which the disposition is from this set.
    
        Default value: ``success``
    :type actions: dispositionSpec
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
-   :param ignoreFilters: Do not apply filters/ACLs during analysis.
-   :type ignoreFilters: boolean
-   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
-   :type invertSearch: boolean
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   :type ignoreFilters: boolean
 
 .. py:class:: referencedStructures(*, names, nodes, types, question_name)
 
@@ -449,6 +482,14 @@
        Default value: ``0.0.0.0/0``
    :type ips: string
 
+.. py:class:: resolveIpSpecifier2(*, ips, question_name)
+
+   Show the resolved values for IP space specifier.
+   
+   
+   :param ips: Input to the IP space specifier.
+   :type ips: ipSpaceSpec
+
 .. py:class:: resolveIpsOfLocationSpecifier(*, locations, question_name)
 
    Show IPs that are auto-assigned to locations.
@@ -473,7 +514,7 @@
    :param nodes: Input to the NodeSpecifier.
    :type nodes: nodeSpec
 
-.. py:class:: routes(*, network, nodes, protocols, rib, vrfs, question_name)
+.. py:class:: routes(*, nodes, vrfs, network, protocols, rib, question_name)
 
    Show routing tables.
    
@@ -566,7 +607,7 @@
    :param startLocation: Location to start tracing from.
    :type startLocation: string
 
-.. py:class:: traceroute(*, headers, ignoreFilters, maxTraces, startLocation, question_name)
+.. py:class:: traceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
 
    Trace the path(s) for the specified flow.
    
@@ -574,14 +615,14 @@
    Unlike a real traceroute, this traceroute is directional. That is, for it to succeed, the reverse connectivity is not needed. This feature can help debug connectivity issues by decoupling the two directions.
    
    
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
    :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
    :type startLocation: string
-   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
-   :type ignoreFilters: boolean
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
 
 .. py:class:: undefinedReferences(*, nodes, question_name)
 
