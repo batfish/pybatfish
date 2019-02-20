@@ -58,6 +58,35 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: bgpSessionType
 
+.. py:class:: bidirectionalTraceroute(*, headers, ignoreFilters, maxTraces, startLocation, question_name)
+
+   Trace the path(s) for the specified flow, along with path(s) for reverse flows.
+   
+   This question performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
+   If the trace succeeds, a traceroute is performed in the reverse direction.
+   
+   
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
+   :type startLocation: string
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
+.. py:class:: compareFilters(*, filters, nodes, question_name)
+
+   Compares filters with the same name in the current and reference snapshots. Returns pairs of lines, one from each filter, that match the same flow(s) but treat them differently (i.e. one permits and the other denies the flow).
+   
+   This question can be used to summarize how a filter has changed over time. In particular, it highlights differences that cause flows to be denied when they used to be permitted, or vice versa. The output is a table that includes pairs of lines, one from each version of the filter, that both match at least one common flow, and have different action (permit or deny).
+   
+   
+   :param filters: Only evaluate filters that match this regex.
+   :type filters: filter
+   :param nodes: Only evaluate filters present on nodes matching this specifier.
+   :type nodes: nodeSpec
+
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
    Lists the structures defined in the network.
@@ -173,6 +202,10 @@
    :type columns: string
    :param filter: The filter to use.
    :type filter: string
+
+.. py:class:: initIssues(*, question_name)
+
+   Return issues that occurred when parsing input files and converting to vendor independent model.
 
 .. py:class:: interfaceMtu(*, comparator, interfaces, mtuBytes, nodes, question_name)
 
@@ -448,6 +481,14 @@
    
        Default value: ``0.0.0.0/0``
    :type ips: string
+
+.. py:class:: resolveIpSpecifier2(*, ips, question_name)
+
+   Show the resolved values for IP space specifier.
+   
+   
+   :param ips: Input to the IP space specifier.
+   :type ips: ipSpaceSpec
 
 .. py:class:: resolveIpsOfLocationSpecifier(*, locations, question_name)
 
