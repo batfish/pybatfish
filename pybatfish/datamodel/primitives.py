@@ -123,6 +123,7 @@ class VariableType(str, Enum):
     JAVA_REGEX = "javaRegex"  #: java regex
     JSON_PATH = "jsonPath"  #: json path
     JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
+    LOCATION_SPEC = "locationSpec"  #: location specifier
     LONG = "long"  #: long values
     NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
     NODE_NAME = "nodeName"  #: name of nodes
