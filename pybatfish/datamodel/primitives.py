@@ -88,10 +88,9 @@ class Assertion(DataModelElement):
 
 
 class VariableType(str, Enum):
-    """Auto completion type.
+    """Auto completion type."""
 
-    Should be in sync with org.batfish.datamodel.questions.Variable.Type
-    """
+    # Should be in sync with org.batfish.datamodel.questions.Variable.Type
 
     ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
     ANSWER_ELEMENT = "answerElement"  #: answer elements
