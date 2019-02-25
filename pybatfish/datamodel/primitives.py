@@ -88,7 +88,10 @@ class Assertion(DataModelElement):
 
 
 class VariableType(str, Enum):
-    """Auto completion type."""
+    """Auto completion type.
+
+    Should be in sync with org.batfish.datamodel.questions.Variable.Type
+    """
 
     ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
     ANSWER_ELEMENT = "answerElement"  #: answer elements
@@ -100,17 +103,21 @@ class VariableType(str, Enum):
     COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
     DOUBLE = "double"  #: double values
     DISPOSITION_SPEC = "dispositionSpec"  #: dispositions
-    FILTER = "filter"  #: names of filters
+    FILTER = "filter"  #: names or regex of filters
+    FILTER_NAME = "filter"  #: name of filters
     FLOAT = "float"  #: float values
     FLOW_STATE = "flowState"  #: flow states
     HEADER_CONSTRAINT = "headerConstraint"  #: packet header constraints
     INTEGER = "integer"  #: integer values
     INTEGER_SPACE = "integerSpace"  #: integer spaces
     INTERFACE = "interface"  #: names of interfaces
+    INTERFACE_GROUP_AND_BOOK = "interfaceGroupAndBook"  #: interface group, book
+    INTERFACE_NAME = "interfaceName"  #: name of interfaces
     INTERFACE_PROPERTY_SPEC = "interfacePropertySpec"  #: interface properties
     INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
     IP = "ip"  #: ips
     IP_PROTOCOL = "ipProtocol"  #: ip protocols
+    IP_PROTOCOL_SPEC = "ipProtocolSpec"  #: ip protocol specifier
     IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
     IP_WILDCARD = "ipWildcard"  #: ip protocols
     IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
@@ -119,9 +126,11 @@ class VariableType(str, Enum):
     JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
     LONG = "long"  #: long values
     NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
+    NODE_NAME = "nodeName"  #: name of nodes
     NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties
+    NODE_ROLE_AND_DIMENSION = "nodeRoleAndDimension"  #: node role,dimension
     NODE_ROLE_DIMENSION = "nodeRoleDimension"  #: names of node role dimensions
-    NODE_SPEC = "nodeSpec"  #: names of nodes
+    NODE_SPEC = "nodeSpec"  #: node specifier
     OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
     PREFIX = "prefix"  #: prefixes
