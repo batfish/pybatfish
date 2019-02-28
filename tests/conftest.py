@@ -8,6 +8,7 @@ COMPLETION_TYPES = [
     VariableType.BGP_SESSION_TYPE,
     VariableType.DISPOSITION_SPEC,
     VariableType.FILTER,
+    VariableType.FILTER_SPEC,
     VariableType.FLOW_STATE,
     VariableType.INTERFACE,
     VariableType.INTERFACE_GROUP_AND_BOOK,
