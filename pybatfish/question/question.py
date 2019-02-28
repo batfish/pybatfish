@@ -681,6 +681,7 @@ def _validateType(value, expectedType):
         VariableType.BGP_SESSION_TYPE,
         VariableType.DISPOSITION_SPEC,
         VariableType.FILTER,
+        VariableType.FILTER_SPEC,
         VariableType.FLOW_STATE,
         VariableType.INTEGER_SPACE,
         VariableType.INTERFACE,

@@ -104,6 +104,7 @@ class VariableType(str, Enum):
     DISPOSITION_SPEC = "dispositionSpec"  #: dispositions
     FILTER = "filter"  #: names or regex of filters
     FILTER_NAME = "filter"  #: name of filters
+    FILTER_SPEC = "filterSpec"  #: filter specifier
     FLOAT = "float"  #: float values
     FLOW_STATE = "flowState"  #: flow states
     HEADER_CONSTRAINT = "headerConstraint"  #: packet header constraints
