@@ -22,7 +22,8 @@ from pybatfish.client import resthelper, workhelper
 from pybatfish.client.consts import CoordConsts
 from .commands import (bf_session, restv2helper)
 
-__all__ = ['bf_get_network_object_stream',
+__all__ = ['bf_delete_network_object',
+           'bf_get_network_object_stream',
            'bf_get_network_object_text',
            'bf_get_snapshot_input_object_stream',
            'bf_get_snapshot_input_object_text',
@@ -30,6 +31,12 @@ __all__ = ['bf_get_network_object_stream',
            'bf_get_snapshot_object_text',
            'bf_put_network_object',
            'bf_put_snapshot_object']
+
+
+def bf_delete_network_object(key):
+    # type: (str) -> Any
+    """Deletes the network object with specified key."""
+    return restv2helper.delete_network_object(bf_session, key)
 
 
 def bf_get_network_object_stream(key):
