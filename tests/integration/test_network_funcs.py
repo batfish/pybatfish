@@ -55,7 +55,7 @@ def test_delete_network_object(network):
     bf_delete_network_object('new_object')
     # the object should be non-existent now
     with raises(HTTPError, match='404'):
-        bf_get_network_object_text('missing_object')
+        bf_get_network_object_text('new_object')
 
 
 def test_set_network():
