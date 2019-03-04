@@ -122,6 +122,14 @@ def fork_snapshot(session, obj):
     return _post(session, url_tail, obj)
 
 
+def delete_network_object(session, key):
+    # type: (Session, str) -> None
+    """Deletes extended object with given key for the current network."""
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
+    return _delete(session, url_tail, {CoordConstsV2.QP_KEY: key})
+
+
 def delete_node_role_dimension(session, dimension):
     # type: (Session, str) -> None
     """Deletes the definition of the given node role dimension for the active network."""

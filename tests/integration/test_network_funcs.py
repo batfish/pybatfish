@@ -31,7 +31,8 @@ from pybatfish.client.commands import (bf_add_node_role_dimension,
                                        bf_put_node_roles,
                                        bf_put_reference_book,
                                        bf_set_network)
-from pybatfish.client.extended import (bf_get_network_object_text,
+from pybatfish.client.extended import (bf_delete_network_object,
+                                       bf_get_network_object_text,
                                        bf_put_network_object)
 from pybatfish.client.options import Options
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
@@ -47,6 +48,14 @@ def network():
     yield name
     # cleanup
     bf_delete_network(name)
+
+
+def test_delete_network_object(network):
+    bf_put_network_object('new_object', 'goodbye')
+    bf_delete_network_object('new_object')
+    # the object should be non-existent now
+    with raises(HTTPError, match='404'):
+        bf_get_network_object_text('new_object')
 
 
 def test_set_network():
