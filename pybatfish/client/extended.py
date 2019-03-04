@@ -34,7 +34,7 @@ __all__ = ['bf_delete_network_object',
 
 
 def bf_delete_network_object(key):
-    # type: (str) -> Any
+    # type: (str) -> None
     """Deletes the network object with specified key."""
     return restv2helper.delete_network_object(bf_session, key)
 
