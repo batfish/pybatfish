@@ -29,13 +29,6 @@ from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
-_CONVERSION_WARNINGS_QUESTION = QuestionBase({
-    "class": "org.batfish.question.initialization.ConversionWarningQuestion",
-    "differential": False,
-    "instance": {
-        "instanceName": "__viConversionWarning",
-    }
-})
 _FILE_PARSE_STATUS_QUESTION = QuestionBase({
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",
     "differential": False,
@@ -57,24 +50,12 @@ _INIT_ISSUES_QUESTION = QuestionBase({
         "instanceName": "__initIssues"
     },
 })
-_PARSE_WARNINGS_QUESTION = QuestionBase({
-    "class": "org.batfish.question.initialization.ParseWarningQuestion",
-    "differential": False,
-    "instance": {
-        "instanceName": "__parseWarning",
-    }
-})
 
-# TODO(https://github.com/batfish/pybatfish/issues/275)
-# Remove redundant questions (parse warnings, conversion warnings)
-#
 # Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
     _INIT_INFO_QUESTION,
     _INIT_ISSUES_QUESTION,
-    _PARSE_WARNINGS_QUESTION,
     _FILE_PARSE_STATUS_QUESTION,
-    _CONVERSION_WARNINGS_QUESTION,
 )
 
 _S3_BUCKET = 'batfish-diagnostics'
