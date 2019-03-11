@@ -62,28 +62,28 @@ class Flow(DataModelElement):
 
     dscp = attr.ib(type=int, converter=int)
     dstIp = attr.ib(type=str, converter=str)
-    dstPort = attr.ib(type=int, converter=int)
+    dstPort = attr.ib(type=Optional[int], converter=int)
     ecn = attr.ib(type=int, converter=int)
     fragmentOffset = attr.ib(type=int, converter=int)
-    icmpCode = attr.ib(type=int, converter=int)
-    icmpVar = attr.ib(type=int, converter=int)
+    icmpCode = attr.ib(type=Optional[int], converter=int)
+    icmpVar = attr.ib(type=Optional[int], converter=int)
     ingressInterface = attr.ib(type=Optional[str])
     ingressNode = attr.ib(type=Optional[str])
     ingressVrf = attr.ib(type=Optional[str])
     ipProtocol = attr.ib(type=str)
     packetLength = attr.ib(type=str)
     srcIp = attr.ib(type=str, converter=str)
-    srcPort = attr.ib(type=int, converter=int)
+    srcPort = attr.ib(type=Optional[int], converter=int)
     state = attr.ib(type=str, converter=str)
     tag = attr.ib(type=str, converter=str)
-    tcpFlagsAck = attr.ib(type=int, converter=int)
-    tcpFlagsCwr = attr.ib(type=int, converter=int)
-    tcpFlagsEce = attr.ib(type=int, converter=int)
-    tcpFlagsFin = attr.ib(type=int, converter=int)
-    tcpFlagsPsh = attr.ib(type=int, converter=int)
-    tcpFlagsRst = attr.ib(type=int, converter=int)
-    tcpFlagsSyn = attr.ib(type=int, converter=int)
-    tcpFlagsUrg = attr.ib(type=int, converter=int)
+    tcpFlagsAck = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsCwr = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsEce = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsFin = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsPsh = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsRst = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsSyn = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsUrg = attr.ib(type=Optional[int], converter=int)
 
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
@@ -93,28 +93,28 @@ class Flow(DataModelElement):
         return Flow(
             json_dict["dscp"],
             json_dict["dstIp"],
-            json_dict["dstPort"],
+            json_dict.get("dstPort"),
             json_dict["ecn"],
             json_dict["fragmentOffset"],
-            json_dict["icmpCode"],
-            json_dict["icmpVar"],
+            json_dict.get("icmpCode"),
+            json_dict.get("icmpVar"),
             json_dict.get("ingressInterface"),
             json_dict.get("ingressNode"),
             json_dict.get("ingressVrf"),
             json_dict["ipProtocol"],
             json_dict["packetLength"],
             json_dict["srcIp"],
-            json_dict["srcPort"],
+            json_dict.get("srcPort"),
             json_dict["state"],
             json_dict["tag"],
-            json_dict["tcpFlagsAck"],
-            json_dict["tcpFlagsCwr"],
-            json_dict["tcpFlagsEce"],
-            json_dict["tcpFlagsFin"],
-            json_dict["tcpFlagsPsh"],
-            json_dict["tcpFlagsRst"],
-            json_dict["tcpFlagsSyn"],
-            json_dict["tcpFlagsUrg"])
+            json_dict.get("tcpFlagsAck"),
+            json_dict.get("tcpFlagsCwr"),
+            json_dict.get("tcpFlagsEce"),
+            json_dict.get("tcpFlagsFin"),
+            json_dict.get("tcpFlagsPsh"),
+            json_dict.get("tcpFlagsRst"),
+            json_dict.get("tcpFlagsSyn"),
+            json_dict.get("tcpFlagsUrg"))
 
     def __str__(self):
         # type: () -> str
