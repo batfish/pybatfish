@@ -198,8 +198,9 @@ class Flow(DataModelElement):
         return lines
 
     def _ip_port(self, ip, port):
-        # type: (str, int) -> str
+        # type: (str, Optional[int]) -> str
         if self._has_ports():
+            assert port is not None
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
             return ip
