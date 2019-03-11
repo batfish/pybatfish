@@ -173,7 +173,9 @@ class Flow(DataModelElement):
 
     def _has_ports(self):
         # type: () -> bool
-        return self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
+        return (self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
+                and self.srcPort is not None
+                and self.dstPort is not None)
 
     def _repr_html_(self):
         # type: () -> str
