@@ -71,6 +71,8 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+          environment:
+            - "BATFISH_GITHUB_BATFISH_REF=${BATFISH_GITHUB_BATFISH_REF}"
 EOF
 done
 
