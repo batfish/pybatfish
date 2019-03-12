@@ -58,6 +58,7 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
           always-pull: true
+          propagate-environment: true
 EOF
 
 for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
