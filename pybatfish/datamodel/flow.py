@@ -784,12 +784,14 @@ def _get_color_for_disposition(disposition):
         return "#7c020e"
 
 
-def _normalize_phc_strings(value):
+def _normalize_phc_intspace(value):
     # type: (Any) -> Optional[Text]
     if value is None or isinstance(value, six.string_types):
         return value
+    if isinstance(value, int):
+        return str(value)
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: Text
+        result = ",".join(str(v) for v in value)
         return result
     raise ValueError("Invalid value {}".format(value))
 
@@ -805,6 +807,16 @@ def _normalize_phc_list(value):
             # reject empty list values
             raise ValueError("Invalid value {}".format(value))
         return alist
+    raise ValueError("Invalid value {}".format(value))
+
+
+def _normalize_phc_strings(value):
+    # type: (Any) -> Optional[Text]
+    if value is None or isinstance(value, six.string_types):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: Text
+        return result
     raise ValueError("Invalid value {}".format(value))
 
 
@@ -857,27 +869,27 @@ class HeaderConstraints(DataModelElement):
     srcIps = attr.ib(default=None, type=Optional[str])
     dstIps = attr.ib(default=None, type=Optional[str])
     srcPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_strings)
+                       converter=_normalize_phc_intspace)
     dstPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_strings)
+                       converter=_normalize_phc_intspace)
     ipProtocols = attr.ib(default=None, type=Optional[List[str]],
                           converter=_normalize_phc_list)
     applications = attr.ib(default=None, type=Optional[List[str]],
                            converter=_normalize_phc_list)
     icmpCodes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_strings)
+                        converter=_normalize_phc_intspace)
     icmpTypes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_strings)
+                        converter=_normalize_phc_intspace)
     firewallClassifications = attr.ib(default=None, type=Optional[List[str]],
                                       converter=_normalize_phc_list)
     ecns = attr.ib(default=None, type=Optional[str],
-                   converter=_normalize_phc_strings)
+                   converter=_normalize_phc_intspace)
     dscps = attr.ib(default=None, type=Optional[str],
-                    converter=_normalize_phc_strings)
+                    converter=_normalize_phc_intspace)
     packetLengths = attr.ib(default=None, type=Optional[str],
-                            converter=_normalize_phc_strings)
+                            converter=_normalize_phc_intspace)
     fragmentOffsets = attr.ib(default=None, type=Optional[str],
-                              converter=_normalize_phc_strings)
+                              converter=_normalize_phc_intspace)
     tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
 
     @classmethod
