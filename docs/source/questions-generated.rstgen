@@ -297,6 +297,24 @@
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
 
+.. py:class:: lpmRoutes(*, ip, nodes, vrfs, question_name)
+
+   Show routes which are longest prefix match for a given IP address.
+   
+   Return longest prefix match routes for a given IP in the RIBs of specified node/VRF.
+   
+   
+   :param ip: *Required.* IP address to run LPM on.
+   :type ip: ip
+   :param nodes: *Required.* Examine routes on nodes matching this specifier.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param vrfs: *Required.* Examine routes on VRFs matching this name or regex.
+   
+       Default value: ``.*``
+   :type vrfs: vrf
+
 .. py:class:: mlagProperties(*, idRegex, nodes, question_name)
 
    Returns configuration properties of MLAGs.
