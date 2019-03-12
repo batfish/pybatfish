@@ -791,7 +791,7 @@ def _normalize_phc_intspace(value):
     if isinstance(value, int):
         return str(value)
     if isinstance(value, Iterable):
-        result = ",".join(v for v in value)
+        result = ",".join(v for v in value)  # type: Text
         return result
     raise ValueError("Invalid value {}".format(value))
 
