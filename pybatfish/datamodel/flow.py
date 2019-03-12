@@ -43,6 +43,13 @@ __all__ = [
 ]
 
 
+def _optional_int(x):
+    # type: (Any) -> Optional[int]
+    if x is None:
+        return None
+    return int(x)
+
+
 @attr.s(frozen=True)
 class Flow(DataModelElement):
     """A concrete IPv4 flow.
@@ -62,28 +69,28 @@ class Flow(DataModelElement):
 
     dscp = attr.ib(type=int, converter=int)
     dstIp = attr.ib(type=str, converter=str)
-    dstPort = attr.ib(type=Optional[int], converter=int)
+    dstPort = attr.ib(type=Optional[int], converter=_optional_int)
     ecn = attr.ib(type=int, converter=int)
     fragmentOffset = attr.ib(type=int, converter=int)
-    icmpCode = attr.ib(type=Optional[int], converter=int)
-    icmpVar = attr.ib(type=Optional[int], converter=int)
+    icmpCode = attr.ib(type=Optional[int], converter=_optional_int)
+    icmpVar = attr.ib(type=Optional[int], converter=_optional_int)
     ingressInterface = attr.ib(type=Optional[str])
     ingressNode = attr.ib(type=Optional[str])
     ingressVrf = attr.ib(type=Optional[str])
     ipProtocol = attr.ib(type=str)
     packetLength = attr.ib(type=str)
     srcIp = attr.ib(type=str, converter=str)
-    srcPort = attr.ib(type=Optional[int], converter=int)
+    srcPort = attr.ib(type=Optional[int], converter=_optional_int)
     state = attr.ib(type=str, converter=str)
     tag = attr.ib(type=str, converter=str)
-    tcpFlagsAck = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsCwr = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsEce = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsFin = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsPsh = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsRst = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsSyn = attr.ib(type=Optional[int], converter=int)
-    tcpFlagsUrg = attr.ib(type=Optional[int], converter=int)
+    tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsFin = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsPsh = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsRst = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsSyn = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsUrg = attr.ib(type=Optional[int], converter=_optional_int)
 
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
@@ -190,9 +197,11 @@ class Flow(DataModelElement):
             vrf=self._vrf_str()))
         lines.append('Src IP: %s' % self.srcIp)
         if self._has_ports():
+            assert self.srcPort is not None
             lines.append('Src Port: %d' % self.srcPort)
         lines.append('Dst IP: %s' % self.dstIp)
         if self._has_ports():
+            assert self.dstPort is not None
             lines.append('Dst Port: %d' % self.dstPort)
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
         if self.state != "NEW":
