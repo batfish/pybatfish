@@ -42,6 +42,7 @@ _requests_session = requests.Session()
 _requests_session.mount("http", HTTPAdapter(
     max_retries=Retry(
         connect=Options.max_tries_to_connect_to_coordinator,
+        read=Options.max_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor)))
 
 _encoder = BfJsonEncoder()
