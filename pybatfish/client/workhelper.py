@@ -114,9 +114,11 @@ def execute(work_item, session, background=False, extra_args=None):
         status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
         task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
 
+        cur_sleep = 0.1  # seconds
         while not WorkStatusCode.is_terminated(status):
             print_work_status(session, status, task_details)
-            time.sleep(1)
+            time.sleep(cur_sleep)
+            cur_sleep = min(1.0, cur_sleep * 1.5)
             answer = get_work_status(work_item.id, session)
             status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
             task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
