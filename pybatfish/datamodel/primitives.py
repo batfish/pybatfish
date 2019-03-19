@@ -94,6 +94,7 @@ class VariableType(str, Enum):
 
     ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
     ANSWER_ELEMENT = "answerElement"  #: answer elements
+    APPLICATION_SPEC = "applicationSpec"  #: application specifier
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
