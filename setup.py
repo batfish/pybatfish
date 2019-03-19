@@ -101,7 +101,7 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['attrs>=18.1.0',
-                      'deepdiff',
+                      'deepdiff<=3.3.0',
                       'deprecated',
                       'netconan>=0.9.2',
                       'pandas>=0.24.1,<0.25.0',
