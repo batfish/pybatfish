@@ -15,6 +15,7 @@
 from typing import Dict, List
 
 import attr
+
 from pybatfish.datamodel.primitives import DataModelElement
 
 __all__ = [
@@ -136,4 +137,3 @@ class BgpRouteDiffs(DataModelElement):
     def _repr_html_(self):
         # type: () -> str
         return "<BR>".join(diff._repr_html_() for diff in self.diffs)
-
