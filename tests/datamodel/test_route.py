@@ -1,4 +1,4 @@
-from pybatfish.datamodel.route import BgpRouteDiff, BgpRoute
+from pybatfish.datamodel.route import BgpRoute, BgpRouteDiff
 
 
 def testBgpRouteDeserialization():
@@ -34,7 +34,7 @@ def testBgpRouteStr():
         "Communities: [1, 2, 3]",
         "Local Preference: 4",
         "Metric: 5"
-        ]
+    ]
 
 
 def testBgpRouteDiffDeserialization():
