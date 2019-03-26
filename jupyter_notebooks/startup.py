@@ -10,7 +10,7 @@ from pybatfish.client.commands import *
 # noinspection PyUnresolvedReferences
 from pybatfish.datamodel import Interface, Edge
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints
-from pybatfish.question import bfq, load_questions  # noqa: F401
+from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
 bf_logger.setLevel(logging.WARN)
