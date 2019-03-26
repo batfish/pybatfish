@@ -60,7 +60,9 @@ class BgpRoute(DataModelElement):
                         json_dict.get("metric", 0))
 
     def dict(self):
+        # type: () -> Dict
         return {
+            # needed for batfish jackson deserialization
             'class': 'org.batfish.datamodel.BgpRoute',
             'network': self.network,
             'asPath': self.asPath,
@@ -132,7 +134,7 @@ class BgpRouteDiffs(DataModelElement):
         # type: (Dict) -> BgpRouteDiffs
         return BgpRouteDiffs(
             [BgpRouteDiff.from_dict(route_dict)
-                for route_dict in json_dict['diffs']])
+             for route_dict in json_dict.get('diffs', [])])
 
     def _repr_html_(self):
         # type: () -> str

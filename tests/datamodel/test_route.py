@@ -17,8 +17,8 @@ def testBgpRouteDeserialization():
         'communities': communities,
         'localPreference': localPreference,
         'metric': metric,
-        'originType': originType,
         'originatorIp': originatorIp,
+        'originType': originType,
         'protocol': protocol
     }
     bgpRoute = BgpRoute.from_dict(dct)
@@ -29,6 +29,34 @@ def testBgpRouteDeserialization():
     assert bgpRoute.originType == originType
     assert bgpRoute.originatorIp == originatorIp
     assert bgpRoute.protocol == protocol
+
+
+def testBgpRouteSerialization():
+    network = '0.0.0.0/0'
+    asPath = [1, 2, 3]
+    communities = [4, 5, 6]
+    localPreference = 1
+    metric = 2
+    originType = 'egp'
+    originatorIp = '1.1.1.1'
+    protocol = 'bgp'
+
+    bgpRoute = BgpRoute(network=network, asPath=asPath, communities=communities,
+                        localPreference=localPreference, metric=metric,
+                        originatorIp=originatorIp, originType=originType,
+                        protocol=protocol)
+
+    dct = bgpRoute.dict()
+
+    assert dct['class'] == 'org.batfish.datamodel.BgpRoute'
+    assert dct['network'] == network
+    assert dct['asPath'] == asPath
+    assert dct['communities'] == communities
+    assert dct['localPreference'] == localPreference
+    assert dct['metric'] == metric
+    assert dct['originatorIp'] == originatorIp
+    assert dct['originType'] == originType
+    assert dct['protocol'] == protocol
 
 
 def testBgpRouteStr():
