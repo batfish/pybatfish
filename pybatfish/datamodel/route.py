@@ -131,8 +131,8 @@ class BgpRouteDiffs(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> BgpRouteDiffs
         return BgpRouteDiffs(
-            set(BgpRouteDiff.from_dict(route_dict)
-                for route_dict in json_dict['diffs']))
+            [BgpRouteDiff.from_dict(route_dict)
+                for route_dict in json_dict['diffs']])
 
     def _repr_html_(self):
         # type: () -> str
