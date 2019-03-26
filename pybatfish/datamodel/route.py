@@ -138,4 +138,4 @@ class BgpRouteDiffs(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "<BR>".join(diff._repr_html_() for diff in self.diffs)
+        return "<br>".join(diff._repr_html_() for diff in self.diffs)
