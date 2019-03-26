@@ -125,7 +125,7 @@ class BgpRouteDiffs(DataModelElement):
     :ivar diffs: The set of BgpRouteDiff objects.
     """
 
-    diffs = attr.ib(type=list)
+    diffs = attr.ib(type=List[BgpRouteDiff])
 
     @classmethod
     def from_dict(cls, json_dict):
