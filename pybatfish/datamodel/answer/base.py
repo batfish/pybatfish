@@ -21,6 +21,7 @@ from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace, Trace
 from pybatfish.datamodel.primitives import (FileLines, Interface, Issue,
                                             ListWrapper)
+from pybatfish.datamodel.route import BgpRoute, BgpRouteDiffs
 
 __all__ = ['Answer']
 
@@ -93,6 +94,10 @@ def _parse_json_with_schema(schema, json_object):
         return Issue.from_dict(json_object)
     if schema == "Node":
         return json_object["name"]
+    if schema == "BgpRoute":
+        return BgpRoute.from_dict(json_object)
+    if schema == "BgpRouteDiffs":
+        return BgpRouteDiffs.from_dict(json_object)
     if schema == "Prefix":
         return str(json_object)
     if schema == "SelfDescribing":
