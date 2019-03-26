@@ -28,6 +28,12 @@ Reference Library
     :members:
 
 
+Routes
+------
+.. automodule:: pybatfish.datamodel.route
+    :members:
+
+
 Answers
 -------
 
