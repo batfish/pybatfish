@@ -19,7 +19,7 @@ def testBgpRouteDeserialization():
         'metric': metric,
         'originType': originType,
         'originatorIp': originatorIp,
-        'protocol' : protocol
+        'protocol': protocol
     }
     bgpRoute = BgpRoute.from_dict(dct)
     assert bgpRoute.network == network
