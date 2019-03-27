@@ -17,21 +17,24 @@
 from __future__ import absolute_import, print_function
 
 import json
+import logging
 import os
 import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
-from typing import (Any, Dict, Iterable, List, Optional, Set, Tuple, Union)  # noqa: F401
+from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
+                    Tuple, Union)
 
 import attr
 import six
 from six import PY3, integer_types, string_types
 
-from pybatfish.client.commands import (_bf_answer_obj,
-                                       _bf_get_question_templates, bf_logger,
-                                       bf_session)
-from pybatfish.datamodel import Assertion, AssertionType  # noqa: F401
+from pybatfish.client.internal import (_bf_answer_obj,
+                                       _bf_get_question_templates)
+from pybatfish.datamodel import Assertion, AssertionType, \
+    VariableType  # noqa: F401
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
@@ -46,6 +49,8 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
+
+bf_logger = logging.getLogger("pybatfish.client")
 
 
 @attr.s(frozen=True)
@@ -72,18 +77,23 @@ class QuestionMeta(type):
     def __new__(cls, name, base, dct):
         """Creates a new class for a specific question."""
         new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
+        additional_kwargs = {'question_name'}
 
-        def constructor(self, question_name=None,
-                        exclusions=None, **kwargs):
+        def constructor(self, *args, **kwargs):
             """Create a new question."""
+            # Reject positional args; this way is PY2-compliant
+            if args:
+                raise TypeError("Please use keyword arguments")
+
             # Call super (i.e., QuestionBase)
             super(new_cls, self).__init__(new_cls.template)
 
             # Update well-known params, if passed in
-            if exclusions is not None:
-                self._dict['exclusions'] = exclusions
-            if question_name:
-                self._dict['instance']['instanceName'] = question_name
+            if "exclusions" in kwargs:
+                self._dict['exclusions'] = kwargs.get("exclusions")
+            if "question_name" in kwargs:
+                self._dict['instance']['instanceName'] = kwargs.get(
+                    "question_name")
             else:
                 self._dict['instance']['instanceName'] = (
                     "__{}_{}".format(
@@ -91,22 +101,25 @@ class QuestionMeta(type):
 
             # Validate that we are not accepting invalid kwargs/variables
             instance_vars = self._dict['instance'].get('variables', {})
-            var_difference = set(kwargs.keys()).difference(instance_vars)
+            allowed_kwargs = set(instance_vars)
+            allowed_kwargs.update(additional_kwargs)
+            var_difference = set(kwargs.keys()).difference(allowed_kwargs)
             if var_difference:
                 raise QuestionValidationException(
                     "Received unsupported parameters/variables: {}".format(
                         var_difference))
             # Set question-specific parameters
             for var_name, var_value in kwargs.items():
-                instance_vars[var_name]['value'] = var_value
+                if var_name not in additional_kwargs:
+                    instance_vars[var_name]['value'] = var_value
 
         # Define signature. Helps with tab completion. Python3 centric
         if PY3:
-            from inspect import Signature, Parameter, signature
+            from inspect import Signature, Parameter
             # Merge constructor params with question variables
             params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-                      for param in sorted(dct.get("variables", [])) +
-                      [p for p in signature(constructor).parameters if
+                      for param in dct.get("variables", []) +
+                      [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
             setattr(constructor, '__signature__', Signature(parameters=params))
         setattr(new_cls, '__init__', constructor)
@@ -129,7 +142,8 @@ class QuestionBase(object):
         self._dict = deepcopy(dictionary)
 
     def answer(self, snapshot=None, reference_snapshot=None,
-               include_one_table_keys=None, background=False):
+               include_one_table_keys=None, background=False, extra_args=None):
+        # type: (Optional[str], Optional[str], Optional[bool], bool, Optional[Dict[str, Any]]) -> Union[str, Answer]
         """
         Ask and return the answer for this question.
 
@@ -144,12 +158,15 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
+        :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+        :type extra_args: dict
         :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
             :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
-        snapshot = bf_session.get_snapshot(snapshot)
+        from pybatfish.client.commands import bf_session
+        real_snapshot = bf_session.get_snapshot(snapshot)
         if reference_snapshot is None and self.get_differential():
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
@@ -160,8 +177,9 @@ class QuestionBase(object):
                               parameters_str="{}",
                               question_name=self.get_name(),
                               background=background,
-                              snapshot=snapshot,
-                              reference_snapshot=reference_snapshot)
+                              snapshot=real_snapshot,
+                              reference_snapshot=reference_snapshot,
+                              extra_args=extra_args)
 
     def dict(self):
         """Return the dictionary representing this question."""
@@ -364,8 +382,9 @@ def _load_question_dict(question):
     _tags.update(tags)
 
     # Validate question variables
-    ivars = instance_data.get('variables')
-    variables = _process_variables(question_name, ivars)
+    ivars = instance_data.get('variables', {})
+    ordered_variable_names = instance_data.get('orderedVariableNames', [])
+    variables = _process_variables(question_name, ivars, ordered_variable_names)
 
     # Compute docstring
     docstring = _compute_docstring(question_description, variables, ivars)
@@ -381,17 +400,20 @@ def _load_question_dict(question):
     return question_name, question_class
 
 
-def _process_variables(question_name, variables):
-    # type: (str, Optional[Dict[str, Dict[str, Any]]]) -> List[str]
+def _process_variables(question_name, variables, ordered_variable_names):
+    # type: (str, Dict[str, Dict[str, Any]], List[str]) -> List[str]
     """Perform validation on question variables.
 
-    :returns a sorted list of variable names
+    :returns an ordered list of variable names
     """
-    if variables is None:
+    if not variables:
         return []
     for var_name, var_data in variables.items():
         _validate_variable_name(question_name, var_name)
         _validate_variable_data(question_name, var_name, var_data)
+
+    if _has_valid_ordered_variable_names(ordered_variable_names, variables):
+        return ordered_variable_names
 
     def __var_key(name):
         """Orders required [!optional] vars first, then by name."""
@@ -435,6 +457,15 @@ def _validate_variable_name(question_name, var_name):
             "Question {} has invalid variable name: {}. Only alphanumeric characters are allowed".format(
                 question_name, var_name))
     return True
+
+
+def _has_valid_ordered_variable_names(ordered_variable_names, variables):
+    # type: (List[str], Dict[str, Dict[str, Any]]) -> bool
+    """Check if ordered_variable_names is present and that it includes all instance variables."""
+    if not ordered_variable_names:
+        return False
+    return (len(ordered_variable_names) == len(variables)
+            and set(ordered_variable_names) == set(variables.keys()))
 
 
 def _compute_docstring(base_docstring, var_names, variables):
@@ -623,78 +654,100 @@ def _validateType(value, expectedType):
 
     :raises QuestionValidationException
     """
-    if expectedType == 'boolean':
+    if expectedType == VariableType.BOOLEAN:
         return isinstance(value, bool), None
-    elif expectedType == 'comparator':
+    elif expectedType == VariableType.COMPARATOR:
         validComparators = ['<', '<=', '==', '>=', '>', '!=']
         if value not in validComparators:
             return False, "'{}' is not a known comparator. Valid options are: '{}'".format(
                 value,
                 ", ".join(validComparators))
         return True, None
-    elif expectedType == 'integer':
+    elif expectedType == VariableType.INTEGER:
         INT32_MIN = -2 ** 32
         INT32_MAX = 2 ** 32 - 1
         valid = (isinstance(value, integer_types) and
                  INT32_MIN <= value <= INT32_MAX)
         return valid, None
-    elif expectedType == 'float':
+    elif expectedType == VariableType.FLOAT:
         return isinstance(value, float), None
-    elif expectedType == 'double':
+    elif expectedType == VariableType.DOUBLE:
         return isinstance(value, float), None
     elif expectedType in [
-        'bgpPeerPropertySpec',
-        'bgpProcessPropertySpec',
-        'interfacePropertySpec',
-        'interfaceSpec',
-        'javaRegex',
-        'jsonPathRegex',
-        'namedStructureSpec',
-        'nodePropertySpec',
-        'nodeSpec',
-        'ospfPropertySpec',
+        VariableType.ADDRESS_GROUP_AND_BOOK,
+        VariableType.APPLICATION_SPEC,
+        VariableType.BGP_PEER_PROPERTY_SPEC,
+        VariableType.BGP_PROCESS_PROPERTY_SPEC,
+        VariableType.BGP_SESSION_STATUS,
+        VariableType.BGP_SESSION_TYPE,
+        VariableType.DISPOSITION_SPEC,
+        VariableType.FILTER,
+        VariableType.FILTER_SPEC,
+        VariableType.FLOW_STATE,
+        VariableType.INTEGER_SPACE,
+        VariableType.INTERFACE,
+        VariableType.INTERFACE_GROUP_AND_BOOK,
+        VariableType.INTERFACE_PROPERTY_SPEC,
+        VariableType.INTERFACES_SPEC,
+        VariableType.IP_PROTOCOL_SPEC,
+        VariableType.IP_SPACE_SPEC,
+        VariableType.IPSEC_SESSION_STATUS,
+        VariableType.JAVA_REGEX,
+        VariableType.JSON_PATH_REGEX,
+        VariableType.LOCATION_SPEC,
+        VariableType.NAMED_STRUCTURE_SPEC,
+        VariableType.NODE_PROPERTY_SPEC,
+        VariableType.NODE_ROLE_AND_DIMENSION,
+        VariableType.NODE_ROLE_DIMENSION,
+        VariableType.NODE_SPEC,
+        VariableType.OSPF_PROPERTY_SPEC,
+        VariableType.ROUTING_PROTOCOL_SPEC,
+        VariableType.STRUCTURE_NAME,
+        VariableType.VRF,
+        VariableType.VXLAN_VNI_PROPERTY_SPEC,
+        VariableType.ZONE,
     ]:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         return True, None
-    elif expectedType == 'ip':
+    elif expectedType == VariableType.IP:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isIp(value)
-    elif expectedType == 'ipWildcard':
+    elif expectedType == VariableType.IP_WILDCARD:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isIpWildcard(value)
-    elif expectedType == 'jsonPath':
+    elif expectedType == VariableType.JSON_PATH:
         return _isJsonPath(value)
-    elif expectedType == 'long':
+    elif expectedType == VariableType.LONG:
         INT64_MIN = -2 ** 64
         INT64_MAX = 2 ** 64 - 1
         valid = (isinstance(value, integer_types) and
                  INT64_MIN <= value <= INT64_MAX)
         return valid, None
-    elif expectedType == 'prefix':
+    elif expectedType == VariableType.PREFIX:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isPrefix(value)
-    elif expectedType == 'prefixRange':
+    elif expectedType == VariableType.PREFIX_RANGE:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
         else:
             return _isPrefixRange(value)
-    elif expectedType == 'question':
+    elif expectedType == VariableType.QUESTION:
         return isinstance(value, QuestionBase), None
-    elif expectedType == 'string':
+    elif expectedType == VariableType.STRING:
         return isinstance(value, string_types), None
-    elif expectedType == 'subrange':
+    elif expectedType == VariableType.SUBRANGE:
         if isinstance(value, int):
             return True, None
         elif isinstance(value, string_types):
@@ -702,7 +755,7 @@ def _validateType(value, expectedType):
         else:
             return False, "A Batfish {} must either be a string or an integer".format(
                 expectedType)
-    elif expectedType == 'protocol':
+    elif expectedType == VariableType.PROTOCOL:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
@@ -713,7 +766,7 @@ def _validateType(value, expectedType):
                     value,
                     ", ".join(validProtocols))
             return True, None
-    elif expectedType == 'ipProtocol':
+    elif expectedType == VariableType.IP_PROTOCOL:
         if not isinstance(value, string_types):
             return False, "A Batfish {} must be a string".format(
                 expectedType)
@@ -728,10 +781,9 @@ def _validateType(value, expectedType):
                 # TODO: Should be validated at server side
                 return True, None
     elif expectedType in [
-        'answerElement',
-        'dispositionSpec',
-        'headerConstraint',
-        'pathConstraint',
+        VariableType.ANSWER_ELEMENT,
+        VariableType.HEADER_CONSTRAINT,
+        VariableType.PATH_CONSTRAINT,
     ]:
         return True, None
     else:

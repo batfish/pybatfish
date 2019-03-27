@@ -17,8 +17,9 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 from requests import HTTPError
 
-from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
-                                       bf_fork_snapshot, bf_generate_dataplane,
+from pybatfish.client.commands import (bf_delete_network,
+                                       bf_delete_snapshot, bf_fork_snapshot,
+                                       bf_generate_dataplane,
                                        bf_get_snapshot_inferred_node_role_dimension,
                                        bf_get_snapshot_inferred_node_roles,
                                        bf_get_snapshot_node_role_dimension,
@@ -28,6 +29,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_delete_snapshot,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
 from pybatfish.client.consts import BfConsts
+from pybatfish.client.diagnostics import (_get_snapshot_parse_status)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
@@ -70,6 +72,16 @@ def example_snapshot(network):
 
 
 @pytest.fixture()
+def file_status_snapshot(network):
+    bf_set_network(network)
+    name = uuid.uuid4().hex
+    bf_init_snapshot(join(_this_dir, 'snapshot_file_status'), name)
+    yield name
+    # cleanup
+    bf_delete_snapshot(name)
+
+
+@pytest.fixture()
 def roles_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
@@ -77,6 +89,15 @@ def roles_snapshot(network):
     yield name
     # cleanup
     bf_delete_snapshot(name)
+
+
+def test_get_snapshot_file_status(network, file_status_snapshot):
+    """Confirm we get correct init info statuses for example snapshot."""
+    statuses = _get_snapshot_parse_status()
+    assert (statuses == {
+        'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
+        'configs/recognized.cfg': 'PASSED',
+    })
 
 
 def test_fork_snapshot(network, example_snapshot):

@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""Utility assert functions for writing batfish tests.
+"""Utility assert functions for writing network tests (or policies).
 
 All `assert_*` methods will raise an
 :py:class:`~pybatfish.util.exception.BatfishAssertException` if the assertion
@@ -21,28 +21,33 @@ fails.
 
 import operator
 import warnings
-from typing import Any, Dict, Iterable  # noqa: F401
+from typing import Any, Dict, Iterable, Union  # noqa: F401
 
 from deepdiff import DeepDiff
+from pandas import DataFrame
 
-from pybatfish.datamodel.answer import Answer  # noqa: F401
+from pybatfish.datamodel import HeaderConstraints  # noqa: F401
+from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning)
+from pybatfish.question import bfq
 
-__all__ = ['assert_dict_match',
-           'assert_has_no_route',
-           'assert_has_route',
-           'assert_num_results',
-           'assert_zero_results',
-           ]
+__all__ = [
+    'assert_dict_match',
+    'assert_filter_denies',
+    'assert_filter_permits',
+    'assert_has_no_route',
+    'assert_has_route',
+    'assert_num_results',
+    'assert_zero_results',
+]
 
 
 def assert_zero_results(answer, soft=False):
-    # type: (Answer, bool) -> bool
+    # type: (Union[Answer, TableAnswer, DataFrame], bool) -> bool
     """Assert no results were returned.
 
-    :param answer: Batfish answer
-    :type answer: :py:class:`~pybatfish.datamodel.answer.Answer`
+    :param answer: Batfish answer or DataFrame
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :type soft: bool
@@ -51,11 +56,10 @@ def assert_zero_results(answer, soft=False):
 
 
 def assert_num_results(answer, num, soft=False):
-    # type: (Answer, int, bool) -> bool
+    # type: (Union[Answer, TableAnswer, DataFrame], int, bool) -> bool
     """Assert an exact number of results were returned.
 
-    :param answer: Batfish answer
-    :type answer: :py:class:`~pybatfish.datamodel.answer.Answer`
+    :param answer: Batfish answer or DataFrame
     :param num: expected number of results
     :type num: int
     :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -64,7 +68,14 @@ def assert_num_results(answer, num, soft=False):
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
-    actual = answer['summary']['numResults']
+    if isinstance(answer, DataFrame):
+        actual = len(answer)
+    elif isinstance(answer, TableAnswer):
+        actual = len(answer.frame())
+    elif isinstance(answer, Answer):
+        actual = answer['summary']['numResults']
+    else:
+        raise TypeError("Unrecognized answer type")
     if not actual == num:
         err_text = "Expected {} results, found: {}\nFull answer:\n{}".format(
             num, actual, answer)
@@ -89,6 +100,8 @@ def _is_dict_match(actual, expected):
 def _raise_common(err_text, soft=False):
     # type: (str, bool) -> bool
     """Utility function for soft/hard exception raising."""
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
     if soft:
         warnings.warn(err_text, category=BatfishAssertWarning)
         return False
@@ -153,7 +166,7 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     """Assert that a particular route is **NOT** present.
 
     .. note:: If a node or VRF is missing in the route answer the assertion
-    will NOT fail, but a warning will be generated.
+        will NOT fail, but a warning will be generated.
 
     :param routes: All routes returned by the Batfish routes question.
     :param expected_route: A dictionary describing route to match.
@@ -185,4 +198,57 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
         "when none were expected:\n{}".format(
             all_matches)
         return _raise_common(err_text, soft)
+    return True
+
+
+def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
+    # type: (str, HeaderConstraints, str, bool) -> bool
+    """
+    Check if a named ACL permits a specified set of flows.
+
+    :param filter_name: the name of ACL to check
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+    :param startLocation: LocationSpec indicating where a flow starts
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(filters=filter_name, headers=headers, action="deny")
+    if startLocation is not None:
+        kwargs.update(startLocation=startLocation)
+    df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found a flow that was denied, when expected to be permitted\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
+    # type: (str, HeaderConstraints, str, bool) -> bool
+    """
+    Check if a named ACL denies a specified set of flows.
+
+    :param filter_name: the name of ACL to check
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+    :param startLocation: LocationSpec indicating where a flow starts
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(filters=filter_name, headers=headers, action="permit")
+    if startLocation is not None:
+        kwargs.update(startLocation=startLocation)
+
+    df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found a flow that was permitted, when expected to be denied\n{}".format(
+                df.to_string()), soft)
     return True

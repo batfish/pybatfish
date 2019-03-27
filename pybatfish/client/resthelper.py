@@ -25,7 +25,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import BfConsts, CoordConsts
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from .options import Options
@@ -39,6 +39,7 @@ _requests_session = requests.Session()
 _requests_session.mount("http", HTTPAdapter(
     max_retries=Retry(
         connect=Options.max_tries_to_connect_to_coordinator,
+        read=Options.max_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor)))
 
 
@@ -52,7 +53,6 @@ def get_answer(session, snapshot, question_name, reference_snapshot=None):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
-                 CoordConsts.SVC_KEY_ENV_NAME: BfConsts.RELPATH_DEFAULT_ENVIRONMENT_NAME,
                  CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
                  }
     if reference_snapshot is not None:

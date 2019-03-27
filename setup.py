@@ -101,39 +101,42 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['attrs>=18.1.0',
-                      'deepdiff',
+                      'deepdiff<=3.3.0',
                       'deprecated',
-                      'pandas>=0.23.0',
+                      'netconan>=0.9.2',
+                      'pandas>=0.24.1,<0.25.0',
                       'python-dateutil',
                       'requests',
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (['enum34', 'typing'] if PY2 else []),
+                      ] + (['enum34', 'mock', 'typing'] if PY2 else []),
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
-    # $ pip install -e .[dev,test]
+    # $ pip install -e .[dev]
     extras_require={
         'dev': ['check-manifest',
+                'coverage',
                 'flake8',
                 'flake8-docstrings',
                 'flake8-import-order',
                 'jupyter',
                 'nbformat',
                 'nbconvert',
+                'pytest>=4.2.0,<5.0.0',
                 'pytz',
-                'sphinx',
+                'requests_mock',
+                'responses',
+                'sphinx>=1.8.0',
                 'sphinx_rtd_theme',
                 ] + \
                (['mypy'] if not PY2 else []),
-        'test': ['coverage', 'pytz'],
     },
 
     # List pytest requirements for running unit tests
     setup_requires=['pytest-runner'],
-    tests_require=['pytest', 'requests_mock'],
 
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these

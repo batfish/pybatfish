@@ -6,9 +6,11 @@ the questions outlined below should be available to you.
 
 A note on types
 ---------------
-1. You will see types such as ``javaRegex`` and ``nodeSpec``.
-These are aliases for ``string``. Beware that Java regexes differ a bit from
-standard Python regexes. See here pattern_ page for details.
+1. You will see types such as ``nodeSpec`` and ``interfacesSpec``. 
+From a Python perspective, they are ``string``. 
+But they have a rich grammar underneath that enables flexible 
+specification of a multiple nodes, interfaces etc. 
+The grammar is outlined here grammar_.
 
 2. ``headerConstraint`` is a special type that allows you to place constraints
 on IPv4 packet header for questions that require it
@@ -22,4 +24,4 @@ List of questions
 .. include:: questions-generated.rstgen
 
 
-.. _pattern: https://docs.oracle.com/javase/8/docs/api/java/util/regex/Pattern.html
+.. _grammar: https://github.com/batfish/batfish/blob/master/questions/Parameters.md

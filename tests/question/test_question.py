@@ -17,11 +17,16 @@ import pytest
 
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question.question import (_compute_docstring, _compute_var_help,
+from pybatfish.question.question import (_compute_docstring,
+                                         _compute_var_help,
+                                         _has_valid_ordered_variable_names,
                                          _load_question_dict,
                                          _load_questions_from_dir,
-                                         _process_variables, _validate,
-                                         list_questions, load_questions)
+                                         _process_variables,
+
+                                         _validate,
+                                         list_questions,
+                                         load_questions)
 
 TEST_QUESTION_NAME = 'testQuestionName'
 TEST_QUESTION_DICT = {
@@ -232,7 +237,82 @@ def test_compute_var_help_with_old_allowed_values():
 
 
 def test_process_variables():
-    assert _process_variables("foo", None) == []
+    """Test if variable names are returned in the correct order."""
+    assert _process_variables("foo", None, None) == []
+
+    variables = {
+        "c": {
+            "description": "c description",
+            "optional": True,
+            "type": "boolean",
+            "displayName": "c display name"
+        },
+        "d": {
+            "description": "d description",
+            "optional": False,
+            "type": "boolean",
+            "displayName": "d display name"
+        },
+        "a": {
+            "description": "a description",
+            "optional": True,
+            "type": "boolean",
+            "displayName": "a display name"
+        },
+        "b": {
+            "description": "b description",
+            "optional": False,
+            "type": "boolean",
+            "displayName": "b display name"
+        },
+    }
+
+    # default order: non-optional variables listed alphabetically
+    # then optional variables listed alphabetically
+    default_variables = ["b", "d", "a", "c"]
+
+    # no ordered_variable_names returns variables in default order
+    ordered_variable_names = []
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+
+    # invalid ordered_variable_names returns variables in default order
+    ordered_variable_names = ["d", "c", "b"]
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+
+    # valid ordered_variable_names returns ordered_variable_names
+    ordered_variable_names = ["d", "c", "b", "a"]
+    assert _process_variables("foo", variables, ordered_variable_names) == ordered_variable_names
+
+
+def test_has_valid_ordered_variable_names():
+    """Test if question has valid orderedVariableNames."""
+    variables = {
+        "a": {},
+        "b": {},
+        "c": {},
+    }
+
+    # empty ordered_variable_names returns False
+    ordered_variable_names = []
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # incomplete ordered_variable_names returns False
+    ordered_variable_names = ["a"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    ordered_variable_names = ["a", "c"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # complete ordered_variable_names but with duplicate returns False
+    ordered_variable_names = ["a", "c", "b", "b"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # ordered_variable_names with extraneous variable returns False
+    ordered_variable_names = ["a", "c", "b", "d"]
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+
+    # complete ordered_variable_names return True
+    ordered_variable_names = ["a", "c", "b"]
+    assert _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
 
 def test_load_dir_questions(tmpdir):
@@ -273,3 +353,14 @@ def test_question_name():
     inferred_name = qclass()
     assert inferred_name.get_name().startswith(
         '__{}_'.format(TEST_QUESTION_NAME))
+
+
+def test_question_positional_args():
+    """Test that a question constructor rejects positional arguments."""
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
+    with pytest.raises(TypeError):
+        qclass("positional")
+
+
+if __name__ == "__main__":
+    pytest.main()

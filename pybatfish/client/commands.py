@@ -24,12 +24,16 @@ import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 import six
+from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.datamodel import answer
+from pybatfish.client.diagnostics import (_upload_diagnostics,
+                                          _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
-    Edge, Interface)
+    AutoCompleteSuggestion,
+    Edge, Interface,
+    VariableType)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
                                                   ReferenceLibrary)
@@ -39,7 +43,7 @@ from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
-from .workhelper import (_get_data_get_question_templates, get_work_status,
+from .workhelper import (get_work_status,
                          kill_work)
 
 # TODO: normally libraries don't configure logging in code
@@ -89,12 +93,15 @@ __all__ = ['bf_add_analysis',
            'bf_list_questions',
            'bf_list_snapshots',
            'bf_logger',
+           'bf_put_node_role_dimension',
            'bf_put_node_roles',
            'bf_read_question_settings',
+           'bf_put_reference_book',
            'bf_run_analysis',
            'bf_session',
            'bf_set_network',
            'bf_set_snapshot',
+           'bf_upload_diagnostics',
            'bf_write_question_settings']
 
 
@@ -113,83 +120,52 @@ def bf_add_issue_config(issue_config):
     restv2helper.add_issue_config(bf_session, issue_config)
 
 
+@deprecated(reason="Use bf_put_node_role_dimension")
 def bf_add_node_role_dimension(dimension):
-    # type: (NodeRoleDimension) -> None
-    """
-    Adds another role dimension to the active network.
-
-    Individual roles within the dimension must have a valid (java) regex.
-    The node list within those roles, if present, is ignored by the server.
-
-    :param dimension: The NodeRoleDimension object for the dimension to add
-    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
-    """
-    if dimension.type == "AUTO":
-        raise ValueError("Cannot add a dimension of type AUTO")
-    restv2helper.add_node_role_dimension(bf_session, dimension)
+    bf_put_node_role_dimension(dimension)
 
 
+@deprecated(reason="Use bf_put_reference_book")
 def bf_add_reference_book(book):
-    # type: (ReferenceBook) -> None
+    bf_put_reference_book(book)
+
+
+def bf_auto_complete(completion_type, query, max_suggestions=None):
+    # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
     """
-    Adds another reference book to the active network.
+    Get a list of autocomplete suggestions that match the provided query based on the variable type.
 
-    :param book: The ReferenceBook object to add
-    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
+    If completion is not supported for the provied variable type a BatfishException will be raised.
+
+    Usage Example::
+
+        >>> from pybatfish.client.commands import bf_auto_complete, bf_set_network
+        >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
+        >>> name = bf_set_network()
+        >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b")
+        [AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='bgp'),
+            AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ebgp'),
+            AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ibgp')]
+
+    :param completion_type: The type of parameter to suggest autocompletions for
+    :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
+    :param query: The partial string to match suggestions on
+    :type query: str
+    :param max_suggestions: Optional max number of suggestions to be returned
+    :type max_suggestions: int
     """
-    restv2helper.add_reference_book(bf_session, book)
-
-
-def _bf_answer_obj(question_str, parameters_str, question_name,
-                   background, snapshot, reference_snapshot):
-    # type: (str, str, str, bool, str, Optional[str]) -> Union[str, Dict]
-
-    json.loads(parameters_str)  # a syntactic check for parametersStr
-    if not question_name:
-        question_name = Options.default_question_prefix + "_" + get_uuid()
-
-    # Upload the question
-    json_data = workhelper.get_data_upload_question(bf_session, question_name,
-                                                    question_str,
-                                                    parameters_str)
-    resthelper.get_json_response(bf_session,
-                                 CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data)
-
-    # Answer the question
-    work_item = workhelper.get_workitem_answer(bf_session, question_name,
-                                               snapshot, reference_snapshot)
-    workhelper.execute(work_item, bf_session, background)
-
-    if background:
-        return work_item.id
-
-    # get the answer
-    answer_bytes = resthelper.get_answer(bf_session, snapshot, question_name,
-                                         reference_snapshot)
-
-    # In Python 3.x, answer needs to be decoded before it can be used
-    # for things like json.loads (<= 3.6).
-    if six.PY3:
-        answer_string = answer_bytes.decode(encoding="utf-8")
-    else:
-        answer_string = answer_bytes
-    answer_obj = json.loads(answer_string)
-
-    return answer.from_string(answer_obj[1]['answer'])
-
-
-def bf_auto_complete(completionType, query, maxSuggestions=None):
-    """Auto complete the partial query based on its type."""
-    jsonData = workhelper.get_data_auto_complete(bf_session, completionType,
-                                                 query, maxSuggestions)
+    jsonData = workhelper.get_data_auto_complete(bf_session, completion_type,
+                                                 query, max_suggestions)
     response = resthelper.get_json_response(bf_session,
                                             CoordConsts.SVC_RSC_AUTO_COMPLETE,
                                             jsonData)
     if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-        return response[CoordConsts.SVC_KEY_SUGGESTIONS]
-    else:
-        bf_logger.error("Unexpected response: " + str(response))
-        return None
+        suggestions = [AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                       for suggestion in
+                       response[CoordConsts.SVC_KEY_SUGGESTIONS]]
+        return suggestions
+
+    raise BatfishException("Unexpected response: {}.".format(response))
 
 
 def bf_delete_analysis(analysisName):
@@ -262,8 +238,8 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
                      deactivate_links=None, deactivate_nodes=None,
                      restore_interfaces=None, restore_links=None,
-                     restore_nodes=None, add_files=None):
-    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str]) -> Union[str, Dict, None]
+                     restore_nodes=None, add_files=None, extra_args=None):
+    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
     :param base_name: name of the snapshot to copy
@@ -289,6 +265,8 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :type extra_args: dict
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
     :rtype: Union[str, Dict, None]
@@ -334,34 +312,16 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     restv2helper.fork_snapshot(bf_session,
                                json_data)
 
-    work_item = workhelper.get_workitem_parse(bf_session, name)
-    answer_dict = workhelper.execute(work_item, bf_session,
-                                     background=background)
-    if background:
-        bf_session.baseSnapshot = name
-        return answer_dict
-
-    status = WorkStatusCode(answer_dict['status'])
-    if status != WorkStatusCode.TERMINATEDNORMALLY:
-        raise BatfishException(
-            'Forking snapshot {ss} from {base} failed with status {status}'.format(
-                ss=name,
-                base=base_name,
-                status=status))
-    else:
-        bf_session.baseSnapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.baseSnapshot)
-        return bf_session.baseSnapshot
+    return _parse_snapshot(name, background, extra_args)
 
 
-def bf_generate_dataplane(snapshot=None):
-    # type: (Optional[str]) -> str
+def bf_generate_dataplane(snapshot=None, extra_args=None):
+    # type: (Optional[str], Optional[Dict[str, Any]]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
     snapshot = bf_session.get_snapshot(snapshot)
 
     work_item = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session)
+    answer_dict = workhelper.execute(work_item, bf_session, extra_args=extra_args)
     return str(answer_dict["status"].value)
 
 
@@ -492,8 +452,8 @@ def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
 
 
-def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
-    # type: (str, Optional[str], bool, bool) -> Union[str, Dict[str, str]]
+def bf_init_snapshot(upload, name=None, overwrite=False, background=False, extra_args=None):
+    # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
     """Initialize a new snapshot.
 
     :param upload: snapshot to upload
@@ -505,6 +465,8 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
     """
@@ -535,14 +497,32 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
                                  CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
                                  json_data)
 
+    return _parse_snapshot(name, background, extra_args)
+
+
+def _parse_snapshot(name, background, extra_args):
+    # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+    """Parse specified snapshot.
+
+    :param name: name of the snapshot to initialize
+    :type name: str
+    :param background: whether or not to run the task in the background
+    :type background: bool
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :type extra_args: dict
+    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+    :rtype: Union[str, Dict]
+    """
     work_item = workhelper.get_workitem_parse(bf_session, name)
     answer_dict = workhelper.execute(work_item, bf_session,
-                                     background=background)
+                                     background=background,
+                                     extra_args=extra_args)
     if background:
         bf_session.baseSnapshot = name
         return answer_dict
 
     status = WorkStatusCode(answer_dict["status"])
+
     if status != WorkStatusCode.TERMINATEDNORMALLY:
         init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
         raise BatfishException(
@@ -552,6 +532,9 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False):
         bf_session.baseSnapshot = name
         bf_logger.info("Default snapshot is now set to %s",
                        bf_session.baseSnapshot)
+        if bf_session.enable_diagnostics:
+            _warn_on_snapshot_failure()
+
         return bf_session.baseSnapshot
 
 
@@ -615,12 +598,35 @@ def bf_list_snapshots(verbose=False):
     return restv2helper.list_snapshots(bf_session, verbose)
 
 
-def _bf_get_question_templates():
-    jsonData = _get_data_get_question_templates(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES,
-                                                jsonData)
-    return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
+def bf_put_reference_book(book):
+    # type: (ReferenceBook) -> None
+    """
+    Put a reference book in the active network.
+
+    If a book with the same name exists, it is overwritten.
+
+    :param book: The ReferenceBook object to add
+    :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
+    """
+    restv2helper.put_reference_book(bf_session, book)
+
+
+def bf_put_node_role_dimension(dimension):
+    # type: (NodeRoleDimension) -> None
+    """
+    Put a role dimension in the active network.
+
+    Overwrites the old dimension if one of the same name already exists.
+
+    Individual roles within the dimension must have a valid (java) regex.
+    The node list within those roles, if present, is ignored by the server.
+
+    :param dimension: The NodeRoleDimension object for the dimension to add
+    :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+    """
+    if dimension.type == "AUTO":
+        raise ValueError("Cannot put a dimension of type AUTO")
+    restv2helper.put_node_role_dimension(bf_session, dimension)
 
 
 def bf_put_node_roles(node_roles_data):
@@ -645,11 +651,11 @@ def bf_read_question_settings(question_class, json_path=None):
                                                json_path)
 
 
-def bf_run_analysis(name, snapshot, reference_snapshot=None):
-    # type: (str, str, Optional[str]) -> Any
+def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
+    # type: (str, str, Optional[str], Optional[Dict[str, Any]]) -> Any
     work_item = workhelper.get_workitem_run_analysis(
         bf_session, name, snapshot, reference_snapshot)
-    work_answer = workhelper.execute(work_item, bf_session)
+    work_answer = workhelper.execute(work_item, bf_session, extra_args=extra_args)
     if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException("Failed to run analysis")
 
@@ -734,6 +740,34 @@ def bf_set_snapshot(name=None, index=None):
 
     bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
     return bf_session.baseSnapshot
+
+
+def bf_upload_diagnostics(dry_run=True, netconan_config=None):
+    # type: (bool, str) -> str
+    """
+    Fetch, anonymize, and optionally upload snapshot diagnostics information.
+
+    This runs a series of diagnostic questions on the current snapshot
+    (including collecting parsing and conversion information).
+
+    The information collected is anonymized with
+    `Netconan <https://github.com/intentionet/netconan>`_ which either
+    anonymizes passwords and IP addresses (default) or uses the settings in
+    the provided `netconan_config`.
+
+    The anonymous information is then either saved locally (if `dry_run` is
+    True) or uploaded to Batfish developers (if `dry_run` is False).  The
+    uploaded information will be accessible only to Batfish developers and will
+    be used to help diagnose any issues you encounter.
+
+    :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
+    :type dry_run: bool
+    :param netconan_config: path to Netconan configuration file
+    :type netconan_config: string
+    :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
+    :rtype: string
+    """
+    return _upload_diagnostics(dry_run=dry_run, netconan_config=netconan_config)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):

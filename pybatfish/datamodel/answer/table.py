@@ -90,6 +90,10 @@ class TableAnswer(Answer):
     def __str__(self):
         return str(self.table_data)
 
+    def __len__(self):
+        # type: () -> int
+        return len(self.table_data)
+
 
 class Row(dict):
     """Represents a table row."""
@@ -116,7 +120,18 @@ class TableMetadata:
 
 def _rows_to_frame(table_metadata, rows):
     # type: (TableMetadata, List[Row]) -> pandas.DataFrame
-    return pandas.DataFrame.from_records(
-        [[_parse_json_with_schema(cm.schema, row.get(cm.name)) for
-          cm in table_metadata.column_metadata]
-         for row in rows], columns=table_metadata.get_column_names())
+    row_based = [[_parse_json_with_schema(cm.schema, row.get(cm.name))
+                  for cm in table_metadata.column_metadata]
+                 for row in rows]
+    column_names = table_metadata.get_column_names()
+    # convert data to column format and force dtype=object on Series
+    # This gets us consistent `None` values across columns -- no columns
+    # are treated as numeric.
+    col_based = {column_names[i]: pandas.Series(column, dtype='object')
+                 for i, column in enumerate(zip(*row_based))}
+    df = pandas.DataFrame.from_dict(col_based, orient='columns',
+                                    dtype='object')
+    # Re-index to:
+    # 1. Force ordering of columns
+    # 2. Set columns even if the dataframe is empty
+    return df.reindex(labels=column_names, axis='columns')

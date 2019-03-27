@@ -11,11 +11,13 @@ The current list of notebooks are:
    - Shows how to use analyze ACLs and firewalls rules using Batfish. 
 - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb) [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)]
    - Shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
-- [Introduction to Forwarding Analysis](Introduction%20to%20Forwarding%20Analysis.ipynb)
+- [Introduction to Forwarding Analysis](Introduction%20to%20Forwarding%20Analysis.ipynb) [[video](https://youtu.be/yaJBH3ZZ5Dw)]
    - Shows how forwarding paths can be analyzed using traceroute and reachability queries.
-- [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb)
+- [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb) [[video](https://youtu.be/Yje70Q8R79w)]
    - Shows a workflow to ensure that changes to the network do not impact packet forwarding.
-   
+- [Analyzing the Impact of Failures (and letting loose a Chaos Monkey)](Analyzing%20the%20Impact%20of%20Failures%20(and%20letting%20loose%20a%20Chaos%20Monkey).ipynb) [[video](https://youtu.be/1adAT6FK-UI)]
+   - Shows how to analyze the impact of failures on the network and conduct Chaos Monkey style testing.
+  
 We will continue adding notebooks that demonstrating additional use cases of Batfish. 
 
 ------

@@ -17,7 +17,6 @@ from __future__ import absolute_import, print_function
 from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
 
 import requests
-import six
 from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
@@ -43,14 +42,13 @@ _requests_session = requests.Session()
 _requests_session.mount("http", HTTPAdapter(
     max_retries=Retry(
         connect=Options.max_tries_to_connect_to_coordinator,
+        read=Options.max_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor)))
 
 _encoder = BfJsonEncoder()
 
 __all__ = [
     'add_issue_config',
-    'add_node_role_dimension',
-    'add_reference_book',
     'delete_issue_config',
     'delete_node_role_dimension',
     'delete_reference_book',
@@ -65,6 +63,8 @@ __all__ = [
     'get_snapshot_input_object',
     'get_snapshot_object',
     'put_network_object',
+    'put_node_role_dimension',
+    'put_reference_book',
     'put_snapshot_object',
     'read_question_settings',
     'write_question_settings'
@@ -81,26 +81,6 @@ def add_issue_config(session, issue_config):
                                      CoordConstsV2.RSC_SETTINGS,
                                      CoordConstsV2.RSC_ISSUES)
     _post(session, url_tail, issue_config)
-
-
-def add_node_role_dimension(session, dimension):
-    # type: (Session, NodeRoleDimension) -> None
-    """Adds a new node role dimension to the active network."""
-    if not session.network:
-        raise ValueError("Network must be set to add node role dimension")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_NODE_ROLES)
-    _post(session, url_tail, dimension)
-
-
-def add_reference_book(session, book):
-    # type: (Session, ReferenceBook) -> None
-    """Adds a new reference book to the active network."""
-    if not session.network:
-        raise ValueError("Network must be set to add reference book")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_REFERENCE_LIBRARY)
-    _post(session, url_tail, book)
 
 
 def delete_issue_config(session, major, minor):
@@ -141,6 +121,14 @@ def fork_snapshot(session, obj):
                                      CoordConstsV2.RSC_SNAPSHOTS,
                                      CoordConstsV2.RSC_FORK)
     return _post(session, url_tail, obj)
+
+
+def delete_network_object(session, key):
+    # type: (Session, str) -> None
+    """Deletes extended object with given key for the current network."""
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
+    return _delete(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
 def delete_node_role_dimension(session, dimension):
@@ -198,28 +186,29 @@ def get_network(session, network):
 def get_network_object(session, key):
     # type: (Session, str) -> Any
     """Gets extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
-def get_snapshot_input_object(session, key):
-    # type: (Session, str) -> Any
+def get_snapshot_input_object(session, key, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Any
     """Gets input object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_INPUT)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
-def get_snapshot_object(session, key):
-    # type: (Session, str) -> Any
+def get_snapshot_object(session, key, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Any
     """Gets extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_OBJECTS)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
@@ -272,79 +261,92 @@ def get_reference_library(session):
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_roles(session):
-    # type: (Session) -> Dict
+def get_snapshot_inferred_node_roles(session, snapshot=None):
+    # type: (Session, Optional[str]) -> Dict
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_INFERRED_NODE_ROLES)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_role_dimension(session, dimension):
-    # type: (Session, str) -> Dict
+def get_snapshot_inferred_node_role_dimension(session, dimension, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Dict
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                            session.network,
                                            CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.baseSnapshot,
+                                           session.get_snapshot(snapshot),
                                            CoordConstsV2.RSC_INFERRED_NODE_ROLES,
                                            dimension)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_node_roles(session):
-    # type: (Session) -> Dict
+def get_snapshot_node_roles(session, snapshot=None):
+    # type: (Session, Optional[str]) -> Dict
     """Gets the definitions and assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_NODE_ROLES)
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_node_role_dimension(session, dimension):
-    # type: (Session, str) -> Dict
+def get_snapshot_node_role_dimension(session, dimension, snapshot=None):
+    # type: (Session, str, Optional[str]) -> Dict
     """Gets the definition and assignments of node roles for the given dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                            session.network,
                                            CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.baseSnapshot,
+                                           session.get_snapshot(snapshot),
                                            CoordConstsV2.RSC_NODE_ROLES,
                                            dimension)
     return _get_dict(session, url_tail)
 
 
 def get_work_log(session, snapshot, work_id):
-    # type: (Session, str, str) -> Text
+    # type: (Session, Optional[str], str) -> Text
     """Retrieve the log for a work item with a given ID."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
 
     url_tail = "/{}/{}/{}/{}/{}/{}".format(
         CoordConstsV2.RSC_NETWORKS, session.network,
-        CoordConstsV2.RSC_SNAPSHOTS, snapshot,
+        CoordConstsV2.RSC_SNAPSHOTS, session.get_snapshot(snapshot),
         CoordConstsV2.RSC_WORK_LOG, work_id)
 
-    return six.u(_get(session, url_tail, dict()).text)
+    return _get(session, url_tail, dict()).text
 
 
 def put_network_object(session, key, data):
     # type: (Session, str, Any) -> None
     """Put data as extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
+                                  CoordConstsV2.RSC_OBJECTS)
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
+
+
+def put_node_role_dimension(session, dimension):
+    # type: (Session, NodeRoleDimension) -> None
+    """Adds a new node role dimension to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add node role dimension")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_NODE_ROLES,
+                                     dimension.name)
+    _put_json(session, url_tail, dimension)
 
 
 def put_node_roles(session, node_roles_data):
@@ -357,13 +359,25 @@ def put_node_roles(session, node_roles_data):
     return _put_json(session, url_tail, node_roles_data)
 
 
-def put_snapshot_object(session, key, data):
-    # type: (Session, str, Any) -> None
+def put_reference_book(session, book):
+    # type: (Session, ReferenceBook) -> None
+    """Put a reference book to the active network."""
+    if not session.network:
+        raise ValueError("Network must be set to add reference book")
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                     session.network,
+                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
+                                     book.name)
+    _put_json(session, url_tail, book)
+
+
+def put_snapshot_object(session, key, data, snapshot=None):
+    # type: (Session, str, Any, Optional[str]) -> None
     """Put data as extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.baseSnapshot,
+                                        session.get_snapshot(snapshot),
                                         CoordConstsV2.RSC_OBJECTS)
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
@@ -407,7 +421,7 @@ def _check_response_status(response):
         raise HTTPError("{}. {}".format(e, response.text), response=response)
 
 
-def _delete(session, url_tail, params={}):
+def _delete(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> None
     """Make an HTTP(s) DELETE request to Batfish coordinator.
 
@@ -425,7 +439,7 @@ def _delete(session, url_tail, params={}):
 
 
 def _get(session, url_tail, params, stream=False):
-    # type: (Session, str, Dict[str, Any], bool) -> Any
+    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Response
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -443,8 +457,8 @@ def _get(session, url_tail, params, stream=False):
     return response
 
 
-def _get_dict(session, url_tail, params={}):
-    # type: (Session, str, Dict[str, Any]) -> Dict[str, Any]
+def _get_dict(session, url_tail, params=None):
+    # type: (Session, str, Optional[Dict[str, Any]]) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
 
     :raises SSLError if SSL connection failed
@@ -454,7 +468,7 @@ def _get_dict(session, url_tail, params={}):
     return dict(response.json())
 
 
-def _get_list(session, url_tail, params={}):
+def _get_list(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> List
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON list.
 
@@ -465,7 +479,7 @@ def _get_list(session, url_tail, params={}):
     return list(response.json())
 
 
-def _get_stream(session, url_tail, params={}):
+def _get_stream(session, url_tail, params=None):
     # type: (Session, str, Dict[str, Any]) -> Any
     """Make an HTTP(s) GET request to Batfish coordinator that should return a raw stream.
 
@@ -477,7 +491,7 @@ def _get_stream(session, url_tail, params={}):
     return response.raw
 
 
-def _post(session, url_tail, obj, params={}):
+def _post(session, url_tail, obj, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) POST request to Batfish coordinator.
 
@@ -496,8 +510,8 @@ def _post(session, url_tail, obj, params={}):
     return None
 
 
-def _put(session, url_tail, obj, params={}, json=None, stream=None):
-    # type: (Session, str, Any, Dict[str, Any], Any, Any) -> None
+def _put(session, url_tail, params=None, json=None, stream=None):
+    # type: (Session, str, Optional[Dict[str, Any]], Optional[Any], Optional[Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
@@ -518,21 +532,21 @@ def _put(session, url_tail, obj, params={}, json=None, stream=None):
     return None
 
 
-def _put_json(session, url_tail, obj, params={}):
+def _put_json(session, url_tail, obj, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    _put(session, url_tail, obj, params=params, json=_encoder.default(obj))
+    _put(session, url_tail, params=params, json=_encoder.default(obj))
 
 
-def _put_stream(session, url_tail, stream, params={}):
+def _put_stream(session, url_tail, stream, params=None):
     # type: (Session, str, Any, Dict[str, Any]) -> None
     """Make an HTTP(s) PUT request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    _put(session, url_tail, stream, params=params, stream=stream)
+    _put(session, url_tail, params=params, stream=stream)
