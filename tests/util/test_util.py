@@ -20,8 +20,9 @@ import pytest
 
 from pybatfish.datamodel import Interface
 from pybatfish.exception import QuestionValidationException
-from pybatfish.util import (BfJsonEncoder, conditional_str, escape_html,
-                            validate_name, validate_question_name, zip_dir)
+from pybatfish.util import (BfJsonEncoder, conditional_str, escape_name,
+                            escape_html, validate_name, validate_question_name,
+                            zip_dir)
 
 
 def test_conditional_str():
@@ -100,6 +101,16 @@ def test_escape_html():
     assert escape_html('"a"') == '&quot;a&quot;'
     assert escape_html('a&b') == 'a&amp;b'
     assert escape_html('a & b') == 'a &amp; b'
+
+
+def test_escape_name():
+    assert escape_name('') == ''
+    assert escape_name('a') == 'a'
+    assert escape_name('abc') == 'abc'
+    assert escape_name('"a') == '""a"'
+    assert escape_name('/a') == '"/a"'
+    assert escape_name('0a') == '"0a"'
+    assert escape_name('a#') == '"a#"'
 
 
 def _make_config(directory, filename, file_contents):

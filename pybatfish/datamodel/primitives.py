@@ -18,7 +18,7 @@ from typing import Any, Dict, List  # noqa: F401
 import attr
 from pandas.core.indexes.frozen import FrozenList
 
-from pybatfish.util import escape_html, get_html
+from pybatfish.util import escape_html, escape_name, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
@@ -146,12 +146,12 @@ class Interface(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{}:{}".format(self.hostname, self.interface)
+        return "{}[{}]".format(escape_name(self.hostname),
+                               escape_name(self.interface))
 
     def _repr_html_(self):
         # type: () -> str
-        return "{}:{}".format(escape_html(self.hostname),
-                              escape_html(self.interface))
+        return "{}".format(escape_html(self.__str__()))
 
 
 def _interface_converter(val):
