@@ -38,10 +38,9 @@ _MAX_FILENAME_LEN = 150
 # See issue https://bugs.python.org/issue34097
 _MIN_ZIP_TIMESTAMP = 315561600.0
 
-# Characters that are considered special in names and must be quoted.
+# Characters that must be escaped in name
 # Should be in sync with SPECIAL_CHARS in CommonParser.java
 _NAME_SPECIAL_CHARS_ = " \t,\\&()[]@" + "!#$%^;?<>={}"
-
 
 __all__ = [
     'BfJsonEncoder',
