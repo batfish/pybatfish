@@ -16,7 +16,7 @@
 from __future__ import absolute_import, print_function
 
 from logging import Logger  # noqa: F401
-from typing import Dict, Optional  # noqa: F401
+from typing import Dict, Optional, Text  # noqa: F401
 
 from deprecated import deprecated
 
@@ -39,9 +39,9 @@ class Session(object):
                  port_v2=Options.coordinator_work_v2_port,
                  ssl=Options.use_ssl,
                  verify_ssl_certs=Options.verify_ssl_certs):
-        # type: (Logger, str, int, int, bool, bool) -> None
+        # type: (Logger, Text, int, int, bool, bool) -> None
         # Coordinator args
-        self.host = host  # type: str
+        self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
         self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
         self.port_v2 = port_v2  # type: int
