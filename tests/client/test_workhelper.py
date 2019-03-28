@@ -61,7 +61,7 @@ def test_execute_request_params(logger):
     witem = __execute_and_return_request_params(work_item, session)
     assert 'TESTARG' not in witem
 
-    session.additionalArgs['TESTARG'] = 'addl'
+    session.additional_args['TESTARG'] = 'addl'
 
     # Work item with additional args
     work_item = WorkItem(session)
