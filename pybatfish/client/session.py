@@ -64,73 +64,83 @@ class Session(object):
         self.enable_diagnostics = True  # type: bool
 
     # Support old property names
-    @property
-    @deprecated(reason="Use additional_args")
+    @property  # type: ignore
+    @deprecated(reason="Use the new additional_args field instead")
     def additionalArgs(self):
         return self.additional_args
 
-    @additionalArgs.setter
-    @deprecated(reason="Use additional_args")
+    @additionalArgs.setter  # type: ignore
+    @deprecated(reason="Use the new additional_args field instead")
     def additionalArgs(self, val):
         self.additional_args = val
 
-    @property
-    @deprecated(reason="Use api_key")
+    @property  # type: ignore
+    @deprecated(reason="Use the new api_key field instead")
     def apiKey(self):
         return self.api_key
 
-    @apiKey.setter
-    @deprecated(reason="Use api_key")
+    @apiKey.setter  # type: ignore
+    @deprecated(reason="Use the new api_key field instead")
     def apiKey(self, val):
         self.api_key = val
 
-    @property
-    @deprecated(reason="Use snapshot")
+    @property  # type: ignore
+    @deprecated(reason="Use the new snapshot field instead")
     def baseSnapshot(self):
         return self.snapshot
 
-    @baseSnapshot.setter
-    @deprecated(reason="Use snapshot")
+    @baseSnapshot.setter  # type: ignore
+    @deprecated(reason="Use the new snapshot field instead")
     def baseSnapshot(self, val):
         self.snapshot = val
 
-    @property
-    @deprecated(reason="Use port_v1")
+    @property  # type: ignore
+    @deprecated(reason="Use the new host field instead")
+    def coordinatorHost(self):
+        return self.host
+
+    @coordinatorHost.setter  # type: ignore
+    @deprecated(reason="Use the new host field instead")
+    def coordinatorHost(self, val):
+        self.host = val
+
+    @property  # type: ignore
+    @deprecated(reason="Use the new port_v1 field instead")
     def coordinatorPort(self):
         return self.port_v1
 
-    @coordinatorPort.setter
-    @deprecated(reason="Use port_v1")
+    @coordinatorPort.setter  # type: ignore
+    @deprecated(reason="Use the new port_v1 field instead")
     def coordinatorPort(self, val):
         self.port_v1 = val
 
-    @property
-    @deprecated(reason="Use port_v2")
+    @property  # type: ignore
+    @deprecated(reason="Use the new port_v2 field instead")
     def coordinatorPort2(self):
         return self.port_v2
 
-    @coordinatorPort2.setter
-    @deprecated(reason="Use port_v2")
+    @coordinatorPort2.setter  # type: ignore
+    @deprecated(reason="Use the new port_v2 field instead")
     def coordinatorPort2(self, val):
         self.port_v2 = val
 
-    @property
-    @deprecated(reason="Use ssl")
+    @property  # type: ignore
+    @deprecated(reason="Use the new ssl field instead")
     def useSsl(self):
         return self.ssl
 
-    @useSsl.setter
-    @deprecated(reason="Use ssl")
+    @useSsl.setter  # type: ignore
+    @deprecated(reason="Use the new ssl field instead")
     def useSsl(self, val):
         self.ssl = val
 
-    @property
-    @deprecated(reason="Use verify_ssl_certs")
+    @property  # type: ignore
+    @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self):
         return self.verify_ssl_certs
 
-    @verifySslCerts.setter
-    @deprecated(reason="Use verify_ssl_certs")
+    @verifySslCerts.setter  # type: ignore
+    @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self, val):
         self.verify_ssl_certs = val
 
