@@ -84,7 +84,7 @@ def _parse_json_with_schema(schema, json_object):
         return Flow.from_dict(json_object)
     if schema == "FlowTrace":
         return FlowTrace.from_dict(json_object)
-    if schema == "Integer":
+    if schema == "Integer" or schema == "Long":
         return int(json_object)
     if schema == "Interface":
         return Interface.from_dict(json_object)
