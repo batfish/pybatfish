@@ -197,4 +197,4 @@ def get_html(element):
     try:
         return element._repr_html_()
     except AttributeError:
-        return escape_html(repr(element))
+        return escape_html(str(element))
