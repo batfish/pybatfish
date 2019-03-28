@@ -158,7 +158,7 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
-        :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+        :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
         :type extra_args: dict
         :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
             :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`

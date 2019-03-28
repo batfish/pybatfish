@@ -265,7 +265,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
     :type extra_args: dict
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
@@ -321,7 +321,8 @@ def bf_generate_dataplane(snapshot=None, extra_args=None):
     snapshot = bf_session.get_snapshot(snapshot)
 
     work_item = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session, extra_args=extra_args)
+    answer_dict = workhelper.execute(work_item, bf_session,
+                                     extra_args=extra_args)
     return str(answer_dict["status"].value)
 
 
@@ -452,7 +453,8 @@ def bf_init_analysis(analysisName, questionDirectory):
     return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
 
 
-def bf_init_snapshot(upload, name=None, overwrite=False, background=False, extra_args=None):
+def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
+                     extra_args=None):
     # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
     """Initialize a new snapshot.
 
@@ -465,7 +467,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False, extra
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
@@ -508,7 +510,7 @@ def _parse_snapshot(name, background, extra_args):
     :type name: str
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additionalArgs.
+    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
@@ -518,7 +520,7 @@ def _parse_snapshot(name, background, extra_args):
                                      background=background,
                                      extra_args=extra_args)
     if background:
-        bf_session.baseSnapshot = name
+        bf_session.snapshot = name
         return answer_dict
 
     status = WorkStatusCode(answer_dict["status"])
@@ -529,13 +531,13 @@ def _parse_snapshot(name, background, extra_args):
             'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
                 ss=name, status=status, log=init_log))
     else:
-        bf_session.baseSnapshot = name
+        bf_session.snapshot = name
         bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.baseSnapshot)
+                       bf_session.snapshot)
         if bf_session.enable_diagnostics:
             _warn_on_snapshot_failure()
 
-        return bf_session.baseSnapshot
+        return bf_session.snapshot
 
 
 def bf_kill_work(wItemId):
@@ -655,7 +657,8 @@ def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
     # type: (str, str, Optional[str], Optional[Dict[str, Any]]) -> Any
     work_item = workhelper.get_workitem_run_analysis(
         bf_session, name, snapshot, reference_snapshot)
-    work_answer = workhelper.execute(work_item, bf_session, extra_args=extra_args)
+    work_answer = workhelper.execute(work_item, bf_session,
+                                     extra_args=extra_args)
     if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException("Failed to run analysis")
 
@@ -727,7 +730,7 @@ def bf_set_snapshot(name=None, index=None):
             raise IndexError(
                 "Server has only {} snapshots: {}".format(
                     len(snapshots), snapshots))
-        bf_session.baseSnapshot = str(snapshots[index])
+        bf_session.snapshot = str(snapshots[index])
 
     # Name specified, make sure it exists.
     else:
@@ -736,10 +739,10 @@ def bf_set_snapshot(name=None, index=None):
             raise ValueError(
                 'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
                     name, bf_session.network, snapshots))
-        bf_session.baseSnapshot = name
+        bf_session.snapshot = name
 
-    bf_logger.info("Default snapshot is now set to %s", bf_session.baseSnapshot)
-    return bf_session.baseSnapshot
+    bf_logger.info("Default snapshot is now set to %s", bf_session.snapshot)
+    return bf_session.snapshot
 
 
 def bf_upload_diagnostics(dry_run=True, netconan_config=None):

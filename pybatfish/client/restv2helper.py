@@ -274,7 +274,8 @@ def get_snapshot_inferred_node_roles(session, snapshot=None):
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_role_dimension(session, dimension, snapshot=None):
+def get_snapshot_inferred_node_role_dimension(session, dimension,
+                                              snapshot=None):
     # type: (Session, str, Optional[str]) -> Dict
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     if not session.network:
@@ -428,13 +429,13 @@ def _delete(session, url_tail, params=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
     response = requests.delete(url,
                                headers=headers,
                                params=params,
-                               verify=session.verifySslCerts)
+                               verify=session.verify_ssl_certs)
     _check_response_status(response)
 
 
@@ -445,14 +446,14 @@ def _get(session, url_tail, params, stream=False):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
     response = requests.get(url,
                             headers=headers,
                             params=params,
                             stream=stream,
-                            verify=session.verifySslCerts)
+                            verify=session.verify_ssl_certs)
     _check_response_status(response)
     return response
 
@@ -498,14 +499,14 @@ def _post(session, url_tail, obj, params=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     url = session.get_base_url2() + url_tail
     response = requests.post(url,
                              json=_encoder.default(obj),
                              headers=headers,
                              params=params,
-                             verify=session.verifySslCerts)
+                             verify=session.verify_ssl_certs)
     _check_response_status(response)
     return None
 
@@ -517,7 +518,7 @@ def _put(session, url_tail, params=None, json=None, stream=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.apiKey,
+    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
                CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
     if stream:
         headers['Content-Type'] = 'application/octet-stream'
@@ -526,7 +527,7 @@ def _put(session, url_tail, params=None, json=None, stream=None):
                             json=json,
                             data=stream,
                             headers=headers,
-                            verify=session.verifySslCerts,
+                            verify=session.verify_ssl_certs,
                             params=params)
     _check_response_status(response)
     return None

@@ -50,7 +50,7 @@ _requests_session.mount("http", HTTPAdapter(
 
 def get_answer(session, snapshot, question_name, reference_snapshot=None):
     # type: (Session, str, str, Optional[str]) -> bytes
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
                  CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
@@ -107,7 +107,7 @@ def _make_request(session, resource, json_data=None, stream=False,
     url = session.get_url(resource)
     if use_http_get:
         response = _requests_session.get(
-            url, verify=session.verifySslCerts, stream=stream)
+            url, verify=session.verify_ssl_certs, stream=stream)
     else:
         if json_data is None:
             json_data = {}
@@ -115,7 +115,7 @@ def _make_request(session, resource, json_data=None, stream=False,
         multipart_data = MultipartEncoder(json_data)
         headers = {'Content-Type': multipart_data.content_type}
         response = _requests_session.post(
-            url, data=multipart_data, verify=session.verifySslCerts,
+            url, data=multipart_data, verify=session.verify_ssl_certs,
             stream=stream, headers=headers)
     response.raise_for_status()
     return response
