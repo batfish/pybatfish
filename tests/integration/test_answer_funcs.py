@@ -83,7 +83,7 @@ def test_init_analysis(network):
 
 
 def test_answer_traceroute(traceroute_network):
-    bf_session.additionalArgs = {'debugflags': 'traceroute'}
+    bf_session.additional_args = {'debugflags': 'traceroute'}
     answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(
         dstIps="1.0.0.2")).answer().frame()
     list_traces = answer.iloc[0]['Traces']
