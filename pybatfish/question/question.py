@@ -535,7 +535,7 @@ def load_questions(question_dir=None, from_server=False,
     :param module_name: the name of the module where questions should be loaded.
         Default is :py:mod:`pybatfish.question.bfq`
     :param session: Batfish session to load questions from
-    :type session:class:`pybatfish.client.session.Session:
+    :type session: :class:`pybatfish.client.session.Session`
     """
     if not session:
         from pybatfish.client.commands import bf_session
