@@ -206,9 +206,8 @@ def escape_name(s):
     contains a special character (_NAME_SPECIAL_CHARS_).
     """
     return "\"{}\"".format(s) if s is not None and len(s) != 0 and (
-                s.startswith("\"") or s.startswith("/") or s[
-            0].isdigit() or any(
-            s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)) else s
+        s.startswith("\"") or s.startswith("/") or s[0].isdigit() or
+        any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)) else s
 
 
 def get_html(element):

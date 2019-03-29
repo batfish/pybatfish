@@ -20,8 +20,8 @@ import pytest
 
 from pybatfish.datamodel import Interface
 from pybatfish.exception import QuestionValidationException
-from pybatfish.util import (BfJsonEncoder, conditional_str, escape_name,
-                            escape_html, validate_name, validate_question_name,
+from pybatfish.util import (BfJsonEncoder, conditional_str, escape_html,
+                            escape_name, validate_name, validate_question_name,
                             zip_dir)
 
 
