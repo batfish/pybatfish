@@ -33,7 +33,7 @@ class WorkItem(object):
         # type: (Session) -> None
         self.id = batfishutils.get_uuid()  # type: str
         self.network = session.network  # type: Optional[str]
-        self.requestParams = dict(session.additionalArgs)  # type: Dict
+        self.requestParams = dict(session.additional_args)  # type: Dict
 
     def to_json(self):
         # type: () -> str

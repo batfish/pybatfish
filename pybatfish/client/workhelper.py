@@ -80,7 +80,7 @@ def execute(work_item, session, background=False, extra_args=None):
     :param background: Whether to background the job. If `True`,
         this function only returns the result of submitting the job.
     :type background: bool
-    :param extra_args: extra arguments to be passed to Batfish. See bf_session.additionalArgs.
+    :param extra_args: extra arguments to be passed to Batfish. See bf_session.additional_args.
     :type extra_args: dict
 
     :return: If `background=True`, a dict containing a single key 'result' with
@@ -97,7 +97,7 @@ def execute(work_item, session, background=False, extra_args=None):
 
     json_data = {
         CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
-        CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+        CoordConsts.SVC_KEY_API_KEY: session.api_key,
     }
 
     # Submit the work item
@@ -180,7 +180,7 @@ def get_data_upload_question(session, question_name, question_json,
                              parameters_json):
     # type: (Session, str, str, str) -> Dict
     """Create the form parameters needed to upload the given question."""
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
                  CoordConsts.SVC_KEY_FILE: ('question', question_json),
@@ -189,9 +189,9 @@ def get_data_upload_question(session, question_name, question_json,
 
 
 def get_data_auto_complete(session, completion_type, query, max_suggestions):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-                 CoordConsts.SVC_KEY_SNAPSHOT_NAME: session.baseSnapshot,
+                 CoordConsts.SVC_KEY_SNAPSHOT_NAME: session.snapshot,
                  CoordConsts.SVC_KEY_COMPLETION_TYPE: completion_type,
                  CoordConsts.SVC_KEY_QUERY: query}
     if max_suggestions:
@@ -201,7 +201,7 @@ def get_data_auto_complete(session, completion_type, query, max_suggestions):
 
 def get_data_configure_analysis(session, new_analysis, analysis_name,
                                 add_questions_filename, del_questions_str):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     if new_analysis:
         json_data[CoordConsts.SVC_KEY_NEW_ANALYSIS] = "new"
@@ -218,7 +218,7 @@ def get_data_configure_analysis(session, new_analysis, analysis_name,
 
 def get_data_configure_question_template(session, in_question, exceptions,
                                          assertion):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_QUESTION: in_question}
     if exceptions:
         json_data[CoordConsts.SVC_KEY_EXCEPTIONS] = json.dumps(exceptions)
@@ -229,20 +229,20 @@ def get_data_configure_question_template(session, in_question, exceptions,
 
 
 def get_data_delete_analysis(session, analysis_name):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_ANALYSIS_NAME: analysis_name}
     return json_data
 
 
 def get_data_delete_network(session, name):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: name}
     return json_data
 
 
 def get_data_delete_snapshot(session, name):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: name}
     return json_data
@@ -252,7 +252,7 @@ def get_data_get_analysis_answers(session, analysis_name, snapshot,
                                   reference_snapshot=None):
     # type: (Session, str, str, Optional[str]) -> Dict
     json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+        CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
         CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
     }
@@ -264,7 +264,7 @@ def get_data_get_analysis_answers(session, analysis_name, snapshot,
 
 
 def _get_data_get_question_templates(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey}
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     return json_data
 
 
@@ -272,7 +272,7 @@ def get_data_get_answer(session, question_name, snapshot,
                         reference_snapshot=None):
     # type: (Session, str, str, Optional[str]) -> Dict
     json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+        CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
         CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
         CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
@@ -284,56 +284,56 @@ def get_data_get_answer(session, question_name, snapshot,
 
 
 def get_data_init_network(session, network_name):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: network_name}
     return json_data
 
 
 def get_data_kill_work(session, workId):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_WORKID: workId}
     return json_data
 
 
 def get_data_list_analyses(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
 def get_data_list_networks(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey}
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     return json_data
 
 
 def get_data_list_incomplete_work(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
 def get_data_list_questions(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
     return json_data
 
 
 def get_data_list_snapshots(session, network):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey}
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     if network is not None:
         json_data[CoordConsts.SVC_KEY_NETWORK_NAME] = network
     return json_data
 
 
 def get_data_list_testrigs(session, network):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey}
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     if network is not None:
         json_data[CoordConsts.SVC_KEY_NETWORK_NAME] = network
     return json_data
 
 
 def get_data_sync_snapshots_sync_now(session, plugin_id, force):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_PLUGIN_ID: plugin_id,
                  CoordConsts.SVC_KEY_FORCE: str(force)}
@@ -341,7 +341,7 @@ def get_data_sync_snapshots_sync_now(session, plugin_id, force):
 
 
 def get_data_sync_snapshots_update_settings(session, plugin_id, settings_dict):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_PLUGIN_ID: plugin_id,
                  CoordConsts.SVC_KEY_SETTINGS: json.dumps(settings_dict)}
@@ -350,7 +350,7 @@ def get_data_sync_snapshots_update_settings(session, plugin_id, settings_dict):
 
 def get_data_upload_snapshot(session, snapshot, file_to_send):
     # type: (Session, str, str) -> Dict
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
                  CoordConsts.SVC_KEY_ZIPFILE: (
@@ -412,7 +412,7 @@ def get_workitem_run_analysis(session, analysis_name, snapshot,
 
 
 def get_work_status(w_item_id, session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.apiKey,
+    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_WORKID: w_item_id}
 
     answer = resthelper.get_json_response(session,
