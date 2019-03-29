@@ -34,8 +34,8 @@ TEST_NETWORK = 'ref_network'
 
 @pytest.fixture(scope='module')
 def network():
-    load_questions(_stable_question_dir, bf_session)
-    load_questions(_experimental_question_dir, bf_session)
+    load_questions(_stable_question_dir)
+    load_questions(_experimental_question_dir)
     try:
         bf_delete_network(TEST_NETWORK)
     except Exception:
@@ -47,8 +47,8 @@ def network():
 
 @pytest.fixture(scope='module')
 def traceroute_network():
-    load_questions(_stable_question_dir, bf_session)
-    load_questions(_experimental_question_dir, bf_session)
+    load_questions(_stable_question_dir)
+    load_questions(_experimental_question_dir)
     try:
         bf_delete_network(TEST_NETWORK)
     except Exception:
