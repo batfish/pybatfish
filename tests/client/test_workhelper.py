@@ -17,13 +17,17 @@ import json
 import logging
 
 import pytest
+import six
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 from pytz import UTC
 
+from pybatfish.client import resthelper
+from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
 from pybatfish.client.workhelper import _format_elapsed_time, _parse_timestamp, \
-    _print_timestamp, _print_work_status
+    _print_timestamp, _print_work_status, execute
+from pybatfish.client.workitem import WorkItem
 
 
 @pytest.fixture
@@ -31,6 +35,49 @@ def logger(caplog):
     logger = logging.getLogger(__name__)
     logger.setLevel(logging.DEBUG)
     return logger
+
+
+if six.PY3:
+    from unittest.mock import patch
+else:
+    from mock import patch
+
+
+def __execute_and_return_request_params(work_item, session, extra_args=None):
+    work_item.requestParams[BfConsts.ARG_TESTRIG] = 'snapshot'
+    with patch.object(resthelper,
+                      'get_json_response') as mock_get_json_response:
+        execute(work_item, session, True, extra_args)
+    args, kwargs = mock_get_json_response.call_args
+    witem = json.loads(args[2]['workitem'])
+    return witem['requestParams']
+
+
+def test_execute_request_params(logger):
+    session = Session(logger)
+
+    # Unmodified work item
+    work_item = WorkItem(session)
+    witem = __execute_and_return_request_params(work_item, session)
+    assert 'TESTARG' not in witem
+
+    session.additional_args['TESTARG'] = 'addl'
+
+    # Work item with additional args
+    work_item = WorkItem(session)
+    witem = __execute_and_return_request_params(work_item, session)
+    assert witem.get('TESTARG') == 'addl'
+
+    # Work item with additional args and extra args
+    work_item = WorkItem(session)
+    witem = __execute_and_return_request_params(
+        work_item, session, extra_args={'TESTARG': 'extra'})
+    assert witem.get('TESTARG') == 'extra'
+
+    # Confirm additional args not messed up
+    work_item = WorkItem(session)
+    witem = __execute_and_return_request_params(work_item, session)
+    assert witem.get('TESTARG') == 'addl'
 
 
 def test_format_elapsed_time():

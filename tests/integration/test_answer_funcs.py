@@ -20,6 +20,7 @@ from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
                                        bf_init_analysis, bf_init_snapshot,
                                        bf_session, bf_set_network)
 from pybatfish.datamodel.flow import HeaderConstraints
+from pybatfish.exception import BatfishException
 from pybatfish.question import bfq
 from pybatfish.question.question import load_questions
 
@@ -69,13 +70,20 @@ def test_answer_foreground(network):
     bfq.ipOwners().answer()
 
 
+def test_answer_fail(network):
+    """Expect a BatfishException with searchFilters specifying a non-existant filter."""
+    with pytest.raises(BatfishException) as err:
+        bfq.searchFilters(filters="undefined").answer().frame()
+    assert "Work terminated abnormally" in str(err.value)
+
+
 def test_init_analysis(network):
     """Ensure bf_init_analysis does not crash."""
     bf_init_analysis("test_analysis", _stable_question_dir)
 
 
 def test_answer_traceroute(traceroute_network):
-    bf_session.additionalArgs = {'debugflags': 'traceroute'}
+    bf_session.additional_args = {'debugflags': 'traceroute'}
     answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(
         dstIps="1.0.0.2")).answer().frame()
     list_traces = answer.iloc[0]['Traces']

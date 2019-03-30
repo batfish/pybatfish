@@ -22,16 +22,32 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
+    'EnterInputIfaceStepDetail',
+    'ExitOutputIfaceStepDetail',
+    'FilterStepDetail',
     'Flow',
     'FlowTrace',
     'FlowTraceHop',
     'HeaderConstraints',
     'Hop',
+    'InboundStepDetail',
+    'MatchSessionStepDetail',
     'MatchTcpFlags',
+    'OriginateStepDetail',
+    'RoutingStepDetail',
+    'SetupSessionStepDetail',
     'PathConstraints',
     'TcpFlags',
-    'Trace'
+    'Trace',
+    'TransformationStepDetail'
 ]
+
+
+def _optional_int(x):
+    # type: (Any) -> Optional[int]
+    if x is None:
+        return None
+    return int(x)
 
 
 @attr.s(frozen=True)
@@ -43,7 +59,7 @@ class Flow(DataModelElement):
     :ivar srcIP: Source IP of the flow
     :ivar dstIP: Destination IP of the flow
     :ivar srcPort: Source port of the flow
-    :ivar dstPort: Destionation port of the flow
+    :ivar dstPort: Destination port of the flow
     :ivar ipProtocol: the IP protocol of the flow
         (as integer, e.g., 1=ICMP, 6=TCP, 17=UDP)
     :ivar ingressNode: the node where the flow started (or entered the network)
@@ -53,28 +69,28 @@ class Flow(DataModelElement):
 
     dscp = attr.ib(type=int, converter=int)
     dstIp = attr.ib(type=str, converter=str)
-    dstPort = attr.ib(type=int, converter=int)
+    dstPort = attr.ib(type=Optional[int], converter=_optional_int)
     ecn = attr.ib(type=int, converter=int)
     fragmentOffset = attr.ib(type=int, converter=int)
-    icmpCode = attr.ib(type=int, converter=int)
-    icmpVar = attr.ib(type=int, converter=int)
+    icmpCode = attr.ib(type=Optional[int], converter=_optional_int)
+    icmpVar = attr.ib(type=Optional[int], converter=_optional_int)
     ingressInterface = attr.ib(type=Optional[str])
     ingressNode = attr.ib(type=Optional[str])
     ingressVrf = attr.ib(type=Optional[str])
     ipProtocol = attr.ib(type=str)
     packetLength = attr.ib(type=str)
     srcIp = attr.ib(type=str, converter=str)
-    srcPort = attr.ib(type=int, converter=int)
+    srcPort = attr.ib(type=Optional[int], converter=_optional_int)
     state = attr.ib(type=str, converter=str)
     tag = attr.ib(type=str, converter=str)
-    tcpFlagsAck = attr.ib(type=int, converter=int)
-    tcpFlagsCwr = attr.ib(type=int, converter=int)
-    tcpFlagsEce = attr.ib(type=int, converter=int)
-    tcpFlagsFin = attr.ib(type=int, converter=int)
-    tcpFlagsPsh = attr.ib(type=int, converter=int)
-    tcpFlagsRst = attr.ib(type=int, converter=int)
-    tcpFlagsSyn = attr.ib(type=int, converter=int)
-    tcpFlagsUrg = attr.ib(type=int, converter=int)
+    tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsFin = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsPsh = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsRst = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsSyn = attr.ib(type=Optional[int], converter=_optional_int)
+    tcpFlagsUrg = attr.ib(type=Optional[int], converter=_optional_int)
 
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
@@ -84,28 +100,28 @@ class Flow(DataModelElement):
         return Flow(
             json_dict["dscp"],
             json_dict["dstIp"],
-            json_dict["dstPort"],
+            json_dict.get("dstPort"),
             json_dict["ecn"],
             json_dict["fragmentOffset"],
-            json_dict["icmpCode"],
-            json_dict["icmpVar"],
+            json_dict.get("icmpCode"),
+            json_dict.get("icmpVar"),
             json_dict.get("ingressInterface"),
             json_dict.get("ingressNode"),
             json_dict.get("ingressVrf"),
             json_dict["ipProtocol"],
             json_dict["packetLength"],
             json_dict["srcIp"],
-            json_dict["srcPort"],
+            json_dict.get("srcPort"),
             json_dict["state"],
             json_dict["tag"],
-            json_dict["tcpFlagsAck"],
-            json_dict["tcpFlagsCwr"],
-            json_dict["tcpFlagsEce"],
-            json_dict["tcpFlagsFin"],
-            json_dict["tcpFlagsPsh"],
-            json_dict["tcpFlagsRst"],
-            json_dict["tcpFlagsSyn"],
-            json_dict["tcpFlagsUrg"])
+            json_dict.get("tcpFlagsAck"),
+            json_dict.get("tcpFlagsCwr"),
+            json_dict.get("tcpFlagsEce"),
+            json_dict.get("tcpFlagsFin"),
+            json_dict.get("tcpFlagsPsh"),
+            json_dict.get("tcpFlagsRst"),
+            json_dict.get("tcpFlagsSyn"),
+            json_dict.get("tcpFlagsUrg"))
 
     def __str__(self):
         # type: () -> str
@@ -164,7 +180,9 @@ class Flow(DataModelElement):
 
     def _has_ports(self):
         # type: () -> bool
-        return self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
+        return (self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
+                and self.srcPort is not None
+                and self.dstPort is not None)
 
     def _repr_html_(self):
         # type: () -> str
@@ -179,9 +197,11 @@ class Flow(DataModelElement):
             vrf=self._vrf_str()))
         lines.append('Src IP: %s' % self.srcIp)
         if self._has_ports():
+            assert self.srcPort is not None
             lines.append('Src Port: %d' % self.srcPort)
         lines.append('Dst IP: %s' % self.dstIp)
         if self._has_ports():
+            assert self.dstPort is not None
             lines.append('Dst Port: %d' % self.dstPort)
         lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
         if self.state != "NEW":
@@ -189,8 +209,9 @@ class Flow(DataModelElement):
         return lines
 
     def _ip_port(self, ip, port):
-        # type: (str, int) -> str
+        # type: (str, Optional[int]) -> str
         if self._has_ports():
+            assert port is not None
             return "{ip}:{port}".format(ip=ip, port=port)
         else:
             return ip
@@ -381,6 +402,20 @@ class InboundStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class MatchSessionStepDetail(DataModelElement):
+    """Details of a step for when a flow matches a firewall session."""
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> MatchSessionStepDetail
+        return MatchSessionStepDetail()
+
+    def __str__(self):
+        # type: () -> str
+        return ""
+
+
+@attr.s(frozen=True)
 class OriginateStepDetail(DataModelElement):
     """Details of a step representing the originating of a flow in a Hop.
 
@@ -428,6 +463,20 @@ class RoutingStepDetail(DataModelElement):
                     network=route.get("network"),
                     next_hop_ip=route.get("nextHopIp")))
         return "Routes: " + ",".join(routes_str)
+
+
+@attr.s(frozen=True)
+class SetupSessionStepDetail(DataModelElement):
+    """Details of a step for when a firewall session is created."""
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> SetupSessionStepDetail
+        return SetupSessionStepDetail()
+
+    def __str__(self):
+        # type: () -> str
+        return ""
 
 
 @attr.s(frozen=True)
@@ -497,8 +546,10 @@ class Step(DataModelElement):
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
+            "MatchSession": MatchSessionStepDetail.from_dict,
             "Originate": OriginateStepDetail.from_dict,
             "Routing": RoutingStepDetail.from_dict,
+            "SetupSession": SetupSessionStepDetail.from_dict,
             "Transformation": TransformationStepDetail.from_dict,
             "Filter": FilterStepDetail.from_dict
         }
@@ -733,12 +784,14 @@ def _get_color_for_disposition(disposition):
         return "#7c020e"
 
 
-def _normalize_phc_strings(value):
+def _normalize_phc_intspace(value):
     # type: (Any) -> Optional[Text]
     if value is None or isinstance(value, six.string_types):
         return value
+    if isinstance(value, int):
+        return str(value)
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: Text
+        result = ",".join(str(v) for v in value)
         return result
     raise ValueError("Invalid value {}".format(value))
 
@@ -754,6 +807,16 @@ def _normalize_phc_list(value):
             # reject empty list values
             raise ValueError("Invalid value {}".format(value))
         return alist
+    raise ValueError("Invalid value {}".format(value))
+
+
+def _normalize_phc_strings(value):
+    # type: (Any) -> Optional[Text]
+    if value is None or isinstance(value, six.string_types):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: Text
+        return result
     raise ValueError("Invalid value {}".format(value))
 
 
@@ -806,27 +869,27 @@ class HeaderConstraints(DataModelElement):
     srcIps = attr.ib(default=None, type=Optional[str])
     dstIps = attr.ib(default=None, type=Optional[str])
     srcPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_strings)
+                       converter=_normalize_phc_intspace)
     dstPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_strings)
+                       converter=_normalize_phc_intspace)
     ipProtocols = attr.ib(default=None, type=Optional[List[str]],
                           converter=_normalize_phc_list)
     applications = attr.ib(default=None, type=Optional[List[str]],
                            converter=_normalize_phc_list)
     icmpCodes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_strings)
+                        converter=_normalize_phc_intspace)
     icmpTypes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_strings)
+                        converter=_normalize_phc_intspace)
     firewallClassifications = attr.ib(default=None, type=Optional[List[str]],
                                       converter=_normalize_phc_list)
     ecns = attr.ib(default=None, type=Optional[str],
-                   converter=_normalize_phc_strings)
+                   converter=_normalize_phc_intspace)
     dscps = attr.ib(default=None, type=Optional[str],
-                    converter=_normalize_phc_strings)
+                    converter=_normalize_phc_intspace)
     packetLengths = attr.ib(default=None, type=Optional[str],
-                            converter=_normalize_phc_strings)
+                            converter=_normalize_phc_intspace)
     fragmentOffsets = attr.ib(default=None, type=Optional[str],
-                              converter=_normalize_phc_strings)
+                              converter=_normalize_phc_intspace)
     tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
 
     @classmethod

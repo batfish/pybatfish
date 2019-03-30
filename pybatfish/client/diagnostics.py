@@ -25,16 +25,10 @@ import requests
 from netconan import netconan
 from requests import HTTPError
 
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
-_CONVERSION_WARNINGS_QUESTION = QuestionBase({
-    "class": "org.batfish.question.initialization.ConversionWarningQuestion",
-    "differential": False,
-    "instance": {
-        "instanceName": "__viConversionWarning",
-    }
-})
 _FILE_PARSE_STATUS_QUESTION = QuestionBase({
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",
     "differential": False,
@@ -49,20 +43,19 @@ _INIT_INFO_QUESTION = QuestionBase({
         "instanceName": "__initInfo"
     },
 })
-_PARSE_WARNINGS_QUESTION = QuestionBase({
-    "class": "org.batfish.question.initialization.ParseWarningQuestion",
+_INIT_ISSUES_QUESTION = QuestionBase({
+    "class": "org.batfish.question.initialization.InitIssuesQuestion",
     "differential": False,
     "instance": {
-        "instanceName": "__parseWarning",
-    }
+        "instanceName": "__initIssues"
+    },
 })
 
 # Note: this is a Tuple to enforce immutability.
 _INIT_INFO_QUESTIONS = (
     _INIT_INFO_QUESTION,
-    _PARSE_WARNINGS_QUESTION,
+    _INIT_ISSUES_QUESTION,
     _FILE_PARSE_STATUS_QUESTION,
-    _CONVERSION_WARNINGS_QUESTION,
 )
 
 _S3_BUCKET = 'batfish-diagnostics'
@@ -98,8 +91,12 @@ def _upload_diagnostics(bucket=_S3_BUCKET, region=_S3_REGION, dry_run=True,
         for q in questions:
             instance_name = q.get_name()
             try:
-                content = json.dumps(q.answer().dict(), indent=4,
-                                     sort_keys=True)
+                ans = q.answer()
+                if not isinstance(ans, Answer):
+                    raise BatfishException(
+                        "question.answer() did not return an Answer: {}".format(
+                            ans))
+                content = json.dumps(ans.dict(), indent=4, sort_keys=True)
             except BatfishException as e:
                 content = "Failed to answer {}: {}".format(instance_name, e)
                 bf_logger.warning(content)
@@ -179,6 +176,11 @@ def _get_snapshot_parse_status():
     parse_status = {}  # type: Dict[str, str]
     try:
         answer = _INIT_INFO_QUESTION.answer()
+        if not isinstance(answer, Answer):
+            raise BatfishException(
+                "question.answer() did not return an Answer: {}".format(
+                    answer))
+
         if 'answerElements' not in answer:
             raise BatfishException('Invalid answer format for init info')
         answer_elements = answer['answerElements']
@@ -247,7 +249,7 @@ def _warn_on_snapshot_failure():
     statuses = _get_snapshot_parse_status()
     if _check_if_any_failed(statuses):
         bf_logger.warning("""\
-Batfish failed to understand one or more input files, so some analyses will be incorrect. Please consider sharing error logs with the Batfish developers by running:
+Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
 
@@ -256,7 +258,7 @@ to share private, anonymized information. For more information, see the document
     help(bf_upload_diagnostics)""")
     elif not _check_if_all_passed(statuses):
         bf_logger.warning("""\
-One or more input files were not fully recognized by Batfish. Some unrecognized configuration snippets are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
 

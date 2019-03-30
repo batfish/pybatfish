@@ -16,13 +16,14 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any  # noqa: F401
+from typing import Any, Optional  # noqa: F401
 
 from pybatfish.client import resthelper, workhelper
 from pybatfish.client.consts import CoordConsts
 from .commands import (bf_session, restv2helper)
 
-__all__ = ['bf_get_network_object_stream',
+__all__ = ['bf_delete_network_object',
+           'bf_get_network_object_stream',
            'bf_get_network_object_text',
            'bf_get_snapshot_input_object_stream',
            'bf_get_snapshot_input_object_text',
@@ -30,6 +31,12 @@ __all__ = ['bf_get_network_object_stream',
            'bf_get_snapshot_object_text',
            'bf_put_network_object',
            'bf_put_snapshot_object']
+
+
+def bf_delete_network_object(key):
+    # type: (str) -> None
+    """Deletes the network object with specified key."""
+    return restv2helper.delete_network_object(bf_session, key)
 
 
 def bf_get_network_object_stream(key):
@@ -46,30 +53,30 @@ def bf_get_network_object_text(key, encoding='utf-8'):
     return str(text)
 
 
-def bf_get_snapshot_input_object_stream(key):
-    # type: (str) -> Any
+def bf_get_snapshot_input_object_stream(key, snapshot=None):
+    # type: (str, Optional[str]) -> Any
     """Returns a binary stream of the content of the snapshot input object with specified key."""
-    return restv2helper.get_snapshot_input_object(bf_session, key)
+    return restv2helper.get_snapshot_input_object(bf_session, key, snapshot)
 
 
-def bf_get_snapshot_input_object_text(key, encoding='utf-8'):
-    # type: (str, str) -> str
+def bf_get_snapshot_input_object_text(key, encoding='utf-8', snapshot=None):
+    # type: (str, str, Optional[str]) -> str
     """Returns the text content of the snapshot input object with specified key."""
-    with bf_get_snapshot_input_object_stream(key) as stream:
+    with bf_get_snapshot_input_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
     return str(text)
 
 
-def bf_get_snapshot_object_stream(key):
-    # type: (str) -> Any
+def bf_get_snapshot_object_stream(key, snapshot=None):
+    # type: (str, Optional[str]) -> Any
     """Returns a binary stream of the content of the snapshot object with specified key."""
-    return restv2helper.get_snapshot_object(bf_session, key)
+    return restv2helper.get_snapshot_object(bf_session, key, snapshot)
 
 
-def bf_get_snapshot_object_text(key, encoding='utf-8'):
-    # type: (str, str) -> str
+def bf_get_snapshot_object_text(key, encoding='utf-8', snapshot=None):
+    # type: (str, str, Optional[str]) -> str
     """Returns the text content of the snapshot object with specified key."""
-    with bf_get_snapshot_object_stream(key) as stream:
+    with bf_get_snapshot_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
     return str(text)
 
@@ -80,10 +87,10 @@ def bf_put_network_object(key, data):
     restv2helper.put_network_object(bf_session, key, data)
 
 
-def bf_put_snapshot_object(key, data):
-    # type: (str, Any) -> None
+def bf_put_snapshot_object(key, data, snapshot=None):
+    # type: (str, Any, Optional[str]) -> None
     """Puts data as the snapshot object with specified key."""
-    restv2helper.put_snapshot_object(bf_session, key, data)
+    restv2helper.put_snapshot_object(bf_session, key, data, snapshot)
 
 
 def bf_sync_snapshots_sync_now(plugin, force=False):
@@ -97,11 +104,10 @@ def bf_sync_snapshots_sync_now(plugin, force=False):
     :return: json response containing result of snapshot sync from Batfish service
     :rtype: dict
     """
-    json_data = workhelper.get_data_sync_snapshots_sync_now(bf_session, plugin,
-                                                            force)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_SYNC_NOW,
-                                                 json_data)
+    json_data = workhelper.get_data_sync_snapshots_sync_now(
+        bf_session, plugin, force)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_SYNC_NOW, json_data)
     return json_response
 
 
@@ -116,10 +122,9 @@ def bf_sync_snapshots_update_settings(plugin, settings):
     :return: json response containing result of settings update from Batfish service
     :rtype: dict
     """
-    json_data = workhelper.get_data_sync_snapshots_update_settings(bf_session,
-                                                                   plugin,
-                                                                   settings)
-    json_response = resthelper.get_json_response(bf_session,
-                                                 CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_UPDATE_SETTINGS,
-                                                 json_data)
+    json_data = workhelper.get_data_sync_snapshots_update_settings(
+        bf_session, plugin, settings)
+    json_response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_SYNC_SNAPSHOTS_UPDATE_SETTINGS,
+        json_data)
     return json_response

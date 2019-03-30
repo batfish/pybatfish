@@ -23,36 +23,37 @@ from pybatfish.datamodel.flow import (EnterInputIfaceStepDetail,
                                       ExitOutputIfaceStepDetail,
                                       FilterStepDetail, Flow, FlowDiff,
                                       FlowTraceHop, HeaderConstraints, Hop,
-                                      MatchTcpFlags, RoutingStepDetail, Step,
-                                      TcpFlags, TransformationStepDetail)
+                                      MatchSessionStepDetail, MatchTcpFlags,
+                                      RoutingStepDetail, SetupSessionStepDetail,
+                                      Step, TcpFlags, TransformationStepDetail)
 
 
-def testExitOutputIfaceStepDetail_str():
+def test_exit_output_iface_step_detail_str():
     detail = ExitOutputIfaceStepDetail("iface", None)
 
     step = Step(detail, "ACTION")
     assert str(step) == "ACTION(iface)"
 
 
-def testTransformationStepDetail_str():
-    noDiffs = TransformationStepDetail("type", [])
-    oneDiff = TransformationStepDetail("type", [FlowDiff("field", "old", "new")])
-    twoDiffs = TransformationStepDetail("type",
-                                        [FlowDiff("field1", "old1", "new1"),
-                                         FlowDiff("field2", "old2", "new2")])
+def test_transformation_step_detail_str():
+    no_diffs = TransformationStepDetail("type", [])
+    one_diff = TransformationStepDetail("type", [FlowDiff("field", "old", "new")])
+    two_diffs = TransformationStepDetail("type",
+                                         [FlowDiff("field1", "old1", "new1"),
+                                          FlowDiff("field2", "old2", "new2")])
 
-    step = Step(noDiffs, "ACTION")
+    step = Step(no_diffs, "ACTION")
     assert str(step) == "ACTION(type)"
 
-    step = Step(oneDiff, "ACTION")
+    step = Step(one_diff, "ACTION")
     assert str(step) == "ACTION(type field: old -> new)"
 
-    step = Step(twoDiffs, "ACTION")
+    step = Step(two_diffs, "ACTION")
     assert str(step) == "ACTION(type field1: old1 -> new1, field2: old2 -> new2)"
 
 
-def testFlowDeserialization():
-    hopDict = {
+def test_flow_deserialization():
+    hop_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -80,21 +81,21 @@ def testFlowDeserialization():
     }
 
     # check deserialization
-    flow = Flow.from_dict(hopDict)
+    flow = Flow.from_dict(hop_dict)
     assert flow.srcIp == "5.5.1.1"
     assert flow.ingressInterface == "intface"
     assert flow.ingressVrf == "vrfAbc"
 
     # check the string representation has the essential elements (without forcing a strict format)
-    flowStr = str(flow)
-    assert "5.5.1.1" in flowStr
-    assert "intface" in flowStr
-    assert "vrfAbc" in flowStr
+    flow_str = str(flow)
+    assert "5.5.1.1" in flow_str
+    assert "intface" in flow_str
+    assert "vrfAbc" in flow_str
 
 
 # test if a flow is deserialized properly when the optional fields are missing
-def testFlowDeserializationOptionalMissing():
-    hopDict = {
+def test_flow_deserialization_optional_missing():
+    hop_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -119,7 +120,7 @@ def testFlowDeserializationOptionalMissing():
         "tcpFlagsUrg": 0
     }
     # check deserialization
-    flow = Flow.from_dict(hopDict)
+    flow = Flow.from_dict(hop_dict)
     assert flow.srcIp == "5.5.1.1"
 
     # should convert to string without problems
@@ -143,7 +144,7 @@ def test_flow_trace_hop_no_transformed_flow():
 
 
 def test_get_ip_protocol_str():
-    flowDict = {
+    flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -167,10 +168,10 @@ def test_get_ip_protocol_str():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    assert Flow.from_dict(flowDict).get_ip_protocol_str() == "ipProtocol=243"
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "ipProtocol=243"
 
-    flowDict["ipProtocol"] = "TCP"
-    assert Flow.from_dict(flowDict).get_ip_protocol_str() == "TCP"
+    flow_dict["ipProtocol"] = "TCP"
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP"
 
 
 def test_header_constraints_serialization():
@@ -189,6 +190,10 @@ def test_header_constraints_serialization():
 
     hc = HeaderConstraints(dstPorts="10-20,33")
     assert hc.dict()["dstPorts"] == "10-20,33"
+
+    for dp in [10, "10", [10], ["10"]]:
+        hc = HeaderConstraints(dstPorts=dp)
+        assert hc.dict()["dstPorts"] == "10"
 
     hc = HeaderConstraints(applications="dns,ssh")
     assert hc.dict()["applications"] == ['dns', 'ssh']
@@ -243,7 +248,7 @@ def test_match_tcp_generators():
 
 def test_flow_repr_html_ports():
     # ICMP flows do not have ports
-    flowDict = {
+    flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -267,16 +272,16 @@ def test_flow_repr_html_ports():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    assert ("Port" not in Flow.from_dict(flowDict)._repr_html_())
+    assert ("Port" not in Flow.from_dict(flow_dict)._repr_html_())
 
     # UDP
-    flowDict['ipProtocol'] = "UDP"
-    assert ("Port" in Flow.from_dict(flowDict)._repr_html_())
+    flow_dict['ipProtocol'] = "UDP"
+    assert ("Port" in Flow.from_dict(flow_dict)._repr_html_())
 
 
 def test_flow_repr_html_start_location():
     # ICMP flows do not have ports
-    flowDict = {
+    flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -303,22 +308,22 @@ def test_flow_repr_html_start_location():
     }
 
     assert ("Start Location: ingressNode" in Flow.from_dict(
-        flowDict)._repr_html_lines())
+        flow_dict)._repr_html_lines())
 
-    flowDict['ingressVrf'] = "ingressVrf"
+    flow_dict['ingressVrf'] = "ingressVrf"
     assert ("Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(
-        flowDict)._repr_html_lines())
+        flow_dict)._repr_html_lines())
 
-    del flowDict['ingressVrf']
-    flowDict['ingressInterface'] = "ingressIface"
+    del flow_dict['ingressVrf']
+    flow_dict['ingressInterface'] = "ingressIface"
 
-    flow = Flow.from_dict(flowDict)
+    flow = Flow.from_dict(flow_dict)
     assert ("Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines())
 
 
 def test_flow_repr_html_state():
     # ICMP flows do not have ports
-    flowDict = {
+    flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 0,
@@ -343,17 +348,17 @@ def test_flow_repr_html_state():
         "tcpFlagsUrg": 0
     }
     assert ("Firewall Classification" not in Flow.from_dict(
-        flowDict)._repr_html_())
+        flow_dict)._repr_html_())
 
     # ESTABLISHED
-    flowDict['state'] = "ESTABLISHED"
+    flow_dict['state'] = "ESTABLISHED"
     assert ("Firewall Classification: ESTABLISHED" in Flow.from_dict(
-        flowDict)._repr_html_())
+        flow_dict)._repr_html_())
 
 
 def test_flow_str_ports():
     # ICMP flows do not have ports
-    flowDict = {
+    flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
         "dstPort": 1234,
@@ -377,15 +382,33 @@ def test_flow_str_ports():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0
     }
-    str = repr(Flow.from_dict(flowDict))
-    assert ("2.1.1.1:1234" not in str)
-    assert ("5.5.1.1:2345" not in str)
+    s = repr(Flow.from_dict(flow_dict))
+    assert ("2.1.1.1:1234" not in s)
+    assert ("5.5.1.1:2345" not in s)
 
     # UDP
-    flowDict['ipProtocol'] = "UDP"
-    str = repr(Flow.from_dict(flowDict))
-    assert ("2.1.1.1:1234" not in str)
-    assert ("5.5.1.1:2345" not in str)
+    flow_dict['ipProtocol'] = "UDP"
+    s = repr(Flow.from_dict(flow_dict))
+    assert ("2.1.1.1:1234" not in s)
+    assert ("5.5.1.1:2345" not in s)
+
+
+def test_SetupSessionStepDetail_from_dict():
+    d = {'type': 'SetupSession', 'action': 'SETUP_SESSION'}
+    assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail()
+
+
+def test_SetupSessionStepDetail_str():
+    assert str(SetupSessionStepDetail()) == ""
+
+
+def test_MatchSessionStepDetail_from_dict():
+    d = {'type': 'MatchSession', 'action': 'MATCHED_SESSION'}
+    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail()
+
+
+def test_MatchSessionStepDetail_str():
+    assert str(MatchSessionStepDetail()) == ""
 
 
 if __name__ == "__main__":

@@ -22,6 +22,8 @@ from pybatfish.util import escape_html, escape_name, get_html
 
 __all__ = ['Assertion',
            'AssertionType',
+           'VariableType',
+           'AutoCompleteSuggestion',
            'Edge',
            'FileLines',
            'Interface',
@@ -85,16 +87,65 @@ class Assertion(DataModelElement):
         return dict(type=self.type.value, expect=self.expect)
 
 
-class AutoCompletionType(str, Enum):
+class VariableType(str, Enum):
     """Auto completion type."""
 
-    BGP_PEER_PROPERTY = "bgp_peer_property"  #: bgp peer properties
-    BGP_PROCESS_PROPERTY = "bgp_process_property"  #: bgp process properties
-    INTERFACE_PROPERTY = "interface_property"  #: interface properties
-    NAMED_STRUCTURE = "named_structure"  #: named structure type
-    NODE = "node"  #: names of nodes
-    NODE_PROPERTY = "node_property"  #: node properties
-    OSPF_PROPERTY = "ospf_property"  #: ospf property
+    # Should be in sync with org.batfish.datamodel.questions.Variable.Type
+
+    ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
+    ANSWER_ELEMENT = "answerElement"  #: answer elements
+    APPLICATION_SPEC = "applicationSpec"  #: application specifier
+    BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
+    BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
+    BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
+    BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
+    BOOLEAN = "boolean"  #: boolean values
+    COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
+    DOUBLE = "double"  #: double values
+    DISPOSITION_SPEC = "dispositionSpec"  #: dispositions
+    FILTER = "filter"  #: names or regex of filters
+    FILTER_NAME = "filter"  #: name of filters
+    FILTER_SPEC = "filterSpec"  #: filter specifier
+    FLOAT = "float"  #: float values
+    FLOW_STATE = "flowState"  #: flow states
+    HEADER_CONSTRAINT = "headerConstraint"  #: packet header constraints
+    INTEGER = "integer"  #: integer values
+    INTEGER_SPACE = "integerSpace"  #: integer spaces
+    INTERFACE = "interface"  #: names of interfaces
+    INTERFACE_GROUP_AND_BOOK = "interfaceGroupAndBook"  #: interface group, book
+    INTERFACE_NAME = "interfaceName"  #: name of interfaces
+    INTERFACE_PROPERTY_SPEC = "interfacePropertySpec"  #: interface properties
+    INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
+    IP = "ip"  #: ips
+    IP_PROTOCOL = "ipProtocol"  #: ip protocols
+    IP_PROTOCOL_SPEC = "ipProtocolSpec"  #: ip protocol specifier
+    IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
+    IP_WILDCARD = "ipWildcard"  #: ip protocols
+    IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
+    JAVA_REGEX = "javaRegex"  #: java regex
+    JSON_PATH = "jsonPath"  #: json path
+    JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
+    LOCATION_SPEC = "locationSpec"  #: location specifier
+    LONG = "long"  #: long values
+    NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
+    NODE_NAME = "nodeName"  #: name of nodes
+    NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties
+    NODE_ROLE_AND_DIMENSION = "nodeRoleAndDimension"  #: node role,dimension
+    NODE_ROLE_DIMENSION = "nodeRoleDimension"  #: names of node role dimensions
+    NODE_SPEC = "nodeSpec"  #: node specifier
+    OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
+    PATH_CONSTRAINT = "pathConstraint"  #: path constraints
+    PREFIX = "prefix"  #: prefixes
+    PREFIX_RANGE = "prefixRange"  #: prefix ranges
+    PROTOCOL = "protocol"  #: application-level protocols
+    QUESTION = "question"  #: questions
+    ROUTING_PROTOCOL_SPEC = "routingProtocolSpec"  #: routing protocols
+    STRING = "string"  #: string values
+    STRUCTURE_NAME = "structureName"  #: names of structures
+    SUBRANGE = "subrange"  #: subranges
+    VRF = "vrf"  #: names of vrfs
+    VXLAN_VNI_PROPERTY_SPEC = "vxlanVniPropertySpec"  #: vxlan vni properties
+    ZONE = "zone"  #: names of zones
 
 
 @attr.s(frozen=True)
@@ -104,12 +155,14 @@ class AutoCompleteSuggestion(DataModelElement):
     Auto complete suggestions are returned by Batfish for auto complete queries.
 
     :ivar description: A description of the suggestion (optional)
+    :ivar insertion_index: Index in original input string where suggested text should be inserted
     :ivar is_partial: Whether this suggestion represents partial or full text
     :ivar rank: Batfish may assign a rank to the suggestion
     :ivar text: The actual suggested text
     """
 
     description = attr.ib(type=str)
+    insertion_index = attr.ib(type=int)
     is_partial = attr.ib(type=bool)
     rank = attr.ib(type=int)
     text = attr.ib(type=str)
@@ -120,11 +173,12 @@ class AutoCompleteSuggestion(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> AutoCompleteSuggestion
         return AutoCompleteSuggestion(json_dict.get("description", None),
+                                      json_dict.get("insertionIndex", 0),
                                       json_dict["isPartial"],
                                       json_dict["rank"], json_dict["text"])
 
     def dict(self):
-        return dict(description=self.description, is_partial=self.is_partial,
+        return dict(description=self.description, insertion_index=self.insertion_index, is_partial=self.is_partial,
                     rank=self.rank, text=self.text)
 
 
