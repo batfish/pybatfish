@@ -17,6 +17,7 @@ from typing import Any, Dict, List  # noqa: F401
 
 import attr
 from pandas.core.indexes.frozen import FrozenList
+
 from pybatfish.util import escape_html, get_html
 
 __all__ = ['Assertion',
