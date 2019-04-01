@@ -266,8 +266,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
-    :param extra_args: extra arguments to be passed to the parse command. See
-        `~pybatfish.client.session.Session.additional_args`.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
@@ -471,8 +470,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See
-        `~pybatfish.client.session.Session.additional_args`.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
@@ -515,8 +513,7 @@ def _parse_snapshot(name, background, extra_args):
     :type name: str
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See
-        `~pybatfish.client.session.Session.additional_args`.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]

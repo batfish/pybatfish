@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print(_root_dir)
     # Make some assumptions about where questions live
     question_dir = join(_root_dir, 'questions')
-    session = Session(logging.getLogger('pybatfish.client'))
+    session = Session(logging.getLogger(__name__))
     try:
         load_dir_questions(question_dir, session)
     except FileNotFoundError:

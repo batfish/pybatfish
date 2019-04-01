@@ -74,7 +74,7 @@ def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
     :param session: Batfish session to use for running diagnostics questions
-    :type session: :class:`pybatfish.client.session.Session`
+    :type session: :class:`~pybatfish.client.session.Session`
     :param bucket: name of the AWS S3 bucket to upload to
     :type bucket: string
     :param region: name of the region containing the bucket
@@ -176,7 +176,7 @@ def _get_snapshot_parse_status(session):
     Get parsing and conversion status for files and nodes in the current snapshot.
 
     :param session: Batfish session to use for getting snapshot parse status
-    :type session: :class:`pybatfish.client.session.Session`
+    :type session: :class:`~pybatfish.client.session.Session`
     :return: dictionary of files and nodes to parse/convert status
     :rtype: dict
     """
@@ -256,7 +256,7 @@ def _warn_on_snapshot_failure(session):
     Check if snapshot passed and warn about any parsing or conversion issues.
 
     :param session: Batfish session to check for snapshot failure
-    :type session: :class:`pybatfish.client.session.Session`
+    :type session: :class:`~pybatfish.client.session.Session`
     """
     statuses = _get_snapshot_parse_status(session)
     if _check_if_any_failed(statuses):

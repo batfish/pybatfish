@@ -161,8 +161,7 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
-        :param extra_args: extra arguments to be passed to the parse command. See
-            `~pybatfish.client.session.Session.additional_args`.
+        :param extra_args: extra arguments to be passed with the question.
         :type extra_args: dict
         :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
             :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
@@ -535,7 +534,7 @@ def load_questions(question_dir=None, from_server=False,
     :param module_name: the name of the module where questions should be loaded.
         Default is :py:mod:`pybatfish.question.bfq`
     :param session: Batfish session to load questions from
-    :type session: :class:`pybatfish.client.session.Session`
+    :type session: :class:`~pybatfish.client.session.Session`
     """
     if not session:
         from pybatfish.client.commands import bf_session

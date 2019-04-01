@@ -42,7 +42,7 @@ TEST_QUESTION_DICT = {
 @pytest.fixture()
 def session():
     """Session associated with questions created in tests."""
-    yield Session(logging.getLogger('pybatfish.client'))
+    yield Session(logging.getLogger(__name__))
 
 
 def test_min_length():
