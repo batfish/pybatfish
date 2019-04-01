@@ -97,6 +97,7 @@ class VariableType(str, Enum):
     APPLICATION_SPEC = "applicationSpec"  #: application specifier
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
+    BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
     BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
@@ -178,7 +179,9 @@ class AutoCompleteSuggestion(DataModelElement):
                                       json_dict["rank"], json_dict["text"])
 
     def dict(self):
-        return dict(description=self.description, insertion_index=self.insertion_index, is_partial=self.is_partial,
+        return dict(description=self.description,
+                    insertion_index=self.insertion_index,
+                    is_partial=self.is_partial,
                     rank=self.rank, text=self.text)
 
 
