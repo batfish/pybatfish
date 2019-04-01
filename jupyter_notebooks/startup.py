@@ -1,6 +1,6 @@
 # Importing required libraries, setting up logging, and loading questions
 import logging
-import random
+import random  # noqa: F401
 
 import pandas as pd
 from IPython.display import display
@@ -8,8 +8,10 @@ from pandas.io.formats.style import Styler
 
 from pybatfish.client.commands import *
 # noinspection PyUnresolvedReferences
-from pybatfish.datamodel import Interface, Edge
-from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints
+from pybatfish.datamodel import Edge, Interface
+from pybatfish.datamodel.answer import TableAnswer
+from pybatfish.datamodel.flow import (HeaderConstraints,
+                                      PathConstraints)  # noqa: F401
 from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
@@ -39,12 +41,12 @@ def show(df):
     Replaces newlines and double-spaces in the input with HTML markup, and
     left-aligns the text.
     """
+    if isinstance(df, TableAnswer):
+        df = df.frame()
 
     # workaround for Pandas bug in Python 2.7 for empty frames
     if not isinstance(df, pd.DataFrame) or df.size == 0:
         display(df)
         return
-    df = df.replace('\n', '<br>', regex=True).replace('  ', '&nbsp;&nbsp;',
-                                                      regex=True)
     display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
             .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))

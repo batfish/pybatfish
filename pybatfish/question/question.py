@@ -33,7 +33,7 @@ from six import PY3, integer_types, string_types
 from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
 from pybatfish.client.session import Session  # noqa: F401
-from pybatfish.datamodel import Assertion, AssertionType, \
+from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, \
     VariableType  # noqa: F401
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
@@ -759,6 +759,12 @@ def _validateType(value, expectedType):
             return _isPrefixRange(value)
     elif expectedType == VariableType.QUESTION:
         return isinstance(value, QuestionBase), None
+    elif expectedType == VariableType.BGP_ROUTES:
+        if not isinstance(value, list) or not all(
+                isinstance(r, BgpRoute) for r in value):
+            return False, "A Batfish {} must be a list of BgpRoute".format(
+                expectedType)
+        return True, None
     elif expectedType == VariableType.STRING:
         return isinstance(value, string_types), None
     elif expectedType == VariableType.SUBRANGE:
