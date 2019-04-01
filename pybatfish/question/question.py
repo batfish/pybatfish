@@ -28,6 +28,8 @@ from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
 
 import attr
 import six
+from six import PY3, integer_types, string_types
+
 from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
 from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, \
@@ -36,7 +38,6 @@ from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
-from six import PY3, integer_types, string_types
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
