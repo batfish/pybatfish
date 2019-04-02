@@ -15,7 +15,8 @@ from pybatfish.datamodel.flow import (HeaderConstraints,
 from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
-bf_logger.setLevel(logging.WARN)
+# Configure all pybatfish loggers to use WARN level
+logging.getLogger('pybatfish').setLevel(logging.WARN)
 
 pd.set_option('display.max_colwidth', -1)
 pd.set_option('display.max_columns', None)
