@@ -103,13 +103,11 @@ def delete_issue_config(session, major, minor):
 def list_snapshots(session, verbose):
     # type: (Session, bool) -> Union[List[str], List[Dict[str,str]]]
     if not session.network:
-        raise ValueError("Network must be set to fork a snapshot")
+        raise ValueError("Network must be set to list snapshots")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                   session.network,
                                   CoordConstsV2.RSC_SNAPSHOTS)
-    params = {}
-    params[CoordConstsV2.QP_VERBOSE] = verbose
-    return _get_list(session, url_tail, params)
+    return _get_list(session, url_tail, {CoordConstsV2.QP_VERBOSE: verbose})
 
 
 def fork_snapshot(session, obj):
