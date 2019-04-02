@@ -46,16 +46,7 @@ from .session import Session
 from .workhelper import (get_work_status,
                          kill_work)
 
-# TODO: normally libraries don't configure logging in code
-_bfDebug = True
-bf_logger = logging.getLogger("pybatfish.client")
-bf_session = Session(bf_logger)
-
-if _bfDebug:
-    bf_logger.setLevel(logging.INFO)
-    bf_logger.addHandler(logging.StreamHandler())
-else:
-    bf_logger.addHandler(logging.NullHandler())
+bf_session = Session()
 
 __all__ = ['bf_add_analysis',
            'bf_add_issue_config',
@@ -92,7 +83,6 @@ __all__ = ['bf_add_analysis',
            'bf_list_incomplete_works',
            'bf_list_questions',
            'bf_list_snapshots',
-           'bf_logger',
            'bf_put_node_role_dimension',
            'bf_put_node_roles',
            'bf_read_question_settings',
@@ -535,8 +525,8 @@ def _parse_snapshot(name, background, extra_args):
                 ss=name, status=status, log=init_log))
     else:
         bf_session.snapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.snapshot)
+        logging.getLogger(__name__).info("Default snapshot is now set to %s",
+                                         bf_session.snapshot)
         if bf_session.enable_diagnostics:
             _warn_on_snapshot_failure(bf_session)
 
@@ -744,7 +734,8 @@ def bf_set_snapshot(name=None, index=None):
                     name, bf_session.network, snapshots))
         bf_session.snapshot = name
 
-    bf_logger.info("Default snapshot is now set to %s", bf_session.snapshot)
+    logging.getLogger(__name__).info("Default snapshot is now set to %s",
+                                     bf_session.snapshot)
     return bf_session.snapshot
 
 

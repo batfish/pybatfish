@@ -441,13 +441,14 @@ def print_work_status(session, work_status, task_details):
 
 
 def _print_work_status(session, work_status, task_details, now_function):
-    if session.logger.getEffectiveLevel() == logging.INFO \
-            or session.logger.getEffectiveLevel() == logging.DEBUG:
-        session.logger.info("status: {}".format(work_status))
+    logger = logging.getLogger(__name__)
+    if logger.getEffectiveLevel() == logging.INFO \
+            or logger.getEffectiveLevel() == logging.DEBUG:
+        logger.info("status: {}".format(work_status))
 
         json_task = json.loads(task_details)
         if not json_task:
-            session.logger.info(".... no task information")
+            logger.info(".... no task information")
             return
         obtained_time = _parse_timestamp(json_task["obtained"])
         now = now_function(obtained_time.tzinfo)
@@ -463,10 +464,10 @@ def _print_work_status(session, work_status, task_details, now_function):
             batch_elapsed_seconds = (now - batch_started_time).total_seconds()
             print_batch_elapsed = batch_elapsed_seconds > session.elapsed_delay
             for batch in batches[:-1]:
-                session.logger.debug(".... {obtained_time} {batch}".format(
+                logger.debug(".... {obtained_time} {batch}".format(
                     obtained_time=obtained_str,
                     batch=_batch_to_string(batch, None)))
-            session.logger.info(
+            logger.info(
                 ".... {obtained_time} {batch}".format(
                     obtained_time=obtained_str,
                     batch=_batch_to_string(

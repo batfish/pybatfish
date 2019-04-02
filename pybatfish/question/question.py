@@ -51,8 +51,6 @@ __all__ = [
     'load_questions',
 ]
 
-bf_logger = logging.getLogger("pybatfish.client")
-
 
 @attr.s(frozen=True)
 class AllowedValue(object):
@@ -293,13 +291,14 @@ def _install_questions_in_module(questions, module_name):
 
 def _load_questions_from_dir(question_dir, session):
     # type: (str, Session) -> Dict[str, QuestionMeta]
+    logger = logging.getLogger(__name__)
     question_files = []
     for dirpath, dirnames, filenames in os.walk(question_dir):
         for filename in filenames:
             if filename.endswith(".json"):
                 question_files.append(os.path.join(dirpath, filename))
     if len(question_files) == 0:
-        bf_logger.warn(
+        logger.warning(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
                 questionDir=question_dir))
         return {}
@@ -310,11 +309,11 @@ def _load_questions_from_dir(question_dir, session):
             (qname, qclass) = _load_question_disk(questionFile, session)
             questions[qname] = qclass
         except Exception as err:
-            bf_logger.error(
+            logger.error(
                 "Could not load question from {questionFile}:{err}".format(
                     questionFile=questionFile,
                     err=err))
-    bf_logger.info(
+    logger.info(
         "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
             numQuestions=len(questions), numQuestionFiles=len(question_files)))
     return questions
@@ -552,13 +551,14 @@ def load_questions(question_dir=None, from_server=False,
                                              moduleName=module_name)
         over_written_questions = len(set(local_questions) & new_names)
         if over_written_questions > 0:
-            bf_logger.info(
+            logging.getLogger(__name__).info(
                 "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
                     over_written_questions=over_written_questions))
 
 
 def _load_remote_questions_templates(session):
     # type: (Session) -> Set[Tuple[str, QuestionMeta]]
+    logger = logging.getLogger(__name__)
     num_questions = 0
     remote_questions = set()
     questions_dict = _bf_get_question_templates(session)
@@ -568,10 +568,10 @@ def _load_remote_questions_templates(session):
                 _load_question_dict(json.loads(value), session))
             num_questions += 1
         except Exception as err:
-            bf_logger.error(
+            logger.error(
                 "Could not load question {name} : {err}".format(name=key,
                                                                 err=err))
-    bf_logger.info(
+    logger.info(
         "Successfully loaded {numQuestions} questions from remote".format(
             numQuestions=num_questions))
     return remote_questions
@@ -807,7 +807,7 @@ def _validateType(value, expectedType):
     ]:
         return True, None
     else:
-        bf_logger.warn(
+        logging.getLogger(__name__).warning(
             "WARNING: skipping validation for unknown argument type {}".format(
                 expectedType))
         return True, None

@@ -34,7 +34,7 @@ class Session(object):
     :ivar api_key: Your API key
     """
 
-    def __init__(self, logger, host=Options.coordinator_host,
+    def __init__(self, host=Options.coordinator_host,
                  port_v1=Options.coordinator_work_port,
                  port_v2=Options.coordinator_work_v2_port,
                  ssl=Options.use_ssl,
@@ -56,8 +56,6 @@ class Session(object):
 
         # Additional worker args
         self.additional_args = {}  # type: Dict
-
-        self.logger = logger  # type: Logger
 
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int

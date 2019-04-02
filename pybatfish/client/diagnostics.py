@@ -62,8 +62,6 @@ _INIT_INFO_QUESTIONS = (
 _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
 
-bf_logger = logging.getLogger("pybatfish.client")
-
 
 def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
                         dry_run=True,
@@ -90,6 +88,7 @@ def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
+    logger = logging.getLogger(__name__)
     tmp_dir = tempfile.mkdtemp()
     try:
         for template in questions:
@@ -104,7 +103,7 @@ def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
                 content = json.dumps(ans.dict(), indent=4, sort_keys=True)
             except BatfishException as e:
                 content = "Failed to answer {}: {}".format(instance_name, e)
-                bf_logger.warning(content)
+                logger.warning(content)
 
             with open(os.path.join(tmp_dir, instance_name), 'w') as f:
                 f.write(content)
@@ -115,7 +114,7 @@ def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
         shutil.rmtree(tmp_dir)
 
     if dry_run:
-        bf_logger.info(
+        logger.info(
             'See anonymized files produced by dry-run here: {}'.format(
                 tmp_dir_anon))
         return tmp_dir_anon
@@ -133,7 +132,7 @@ def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
 
         _upload_dir_to_url(upload_dest, tmp_dir_anon,
                            headers={'x-amz-acl': 'bucket-owner-full-control'})
-        bf_logger.debug('Uploaded files to: {}'.format(upload_dest))
+        logger.debug('Uploaded files to: {}'.format(upload_dest))
     finally:
         shutil.rmtree(tmp_dir_anon)
 
@@ -196,7 +195,8 @@ def _get_snapshot_parse_status(session):
         # These statuses contain parse and conversion status
         parse_status = answer_elements[0].get('parseStatus', {})
     except BatfishException as e:
-        bf_logger.warning("Failed to check snapshot init info: %s", e)
+        logging.getLogger(__name__).warning(
+            "Failed to check snapshot init info: %s", e)
 
     return parse_status
 
@@ -258,9 +258,10 @@ def _warn_on_snapshot_failure(session):
     :param session: Batfish session to check for snapshot failure
     :type session: :class:`~pybatfish.client.session.Session`
     """
+    logger = logging.getLogger(__name__)
     statuses = _get_snapshot_parse_status(session)
     if _check_if_any_failed(statuses):
-        bf_logger.warning("""\
+        logger.warning("""\
 Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
@@ -269,7 +270,7 @@ to share private, anonymized information. For more information, see the document
 
     help(bf_upload_diagnostics)""")
     elif not _check_if_all_passed(statuses):
-        bf_logger.warning("""\
+        logger.warning("""\
 Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False)
