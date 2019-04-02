@@ -80,7 +80,7 @@ def execute(work_item, session, background=False, extra_args=None):
     :param background: Whether to background the job. If `True`,
         this function only returns the result of submitting the job.
     :type background: bool
-    :param extra_args: extra arguments to be passed to Batfish. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to Batfish.
     :type extra_args: dict
 
     :return: If `background=True`, a dict containing a single key 'result' with

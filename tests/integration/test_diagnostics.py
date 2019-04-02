@@ -19,9 +19,10 @@ import requests
 
 from pybatfish.client.commands import (bf_delete_network,
                                        bf_delete_snapshot, bf_init_snapshot,
-                                       bf_set_network)
+                                       bf_session, bf_set_network)
 from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
                                           _S3_REGION, _upload_diagnostics)
+from pybatfish.question.question import QuestionBase
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -47,19 +48,21 @@ def example_snapshot(network):
 
 def test_questions(network, example_snapshot):
     """Run diagnostic questions on example snapshot."""
-    for q in _INIT_INFO_QUESTIONS:
+    for template in _INIT_INFO_QUESTIONS:
         # Goal here is to run question successfully, i.e. not crash
-        q.answer()
+        QuestionBase(template, bf_session).answer()
 
 
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
-    resource = _upload_diagnostics(dry_run=False, resource_prefix='test/')
+    resource = _upload_diagnostics(session=bf_session, dry_run=False,
+                                   resource_prefix='test/')
     base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
         bucket=_S3_BUCKET, region=_S3_REGION)
 
     # Confirm none of the uploaded questions are accessible
-    for q in _INIT_INFO_QUESTIONS:
+    for template in _INIT_INFO_QUESTIONS:
+        q = QuestionBase(template, bf_session)
         r = requests.get('{}/{}/{}'.format(base_url, resource, q.get_name()))
         assert (r.status_code == 403)

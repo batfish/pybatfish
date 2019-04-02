@@ -20,6 +20,7 @@ from typing import Any, Dict, Optional, Union  # noqa: F401
 import six
 
 from pybatfish.client.consts import CoordConsts
+from pybatfish.client.session import Session
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import (get_uuid)
@@ -28,32 +29,30 @@ from .options import Options
 from .workhelper import _get_data_get_question_templates
 
 
-def _bf_answer_obj(question_str, parameters_str, question_name,
+def _bf_answer_obj(session, question_str, parameters_str, question_name,
                    background, snapshot, reference_snapshot, extra_args):
-    # type: (str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
-    from pybatfish.client.commands import bf_session
-
+    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
     json.loads(parameters_str)  # a syntactic check for parametersStr
     if not question_name:
         question_name = Options.default_question_prefix + "_" + get_uuid()
 
     # Upload the question
-    json_data = workhelper.get_data_upload_question(bf_session, question_name,
+    json_data = workhelper.get_data_upload_question(session, question_name,
                                                     question_str,
                                                     parameters_str)
-    resthelper.get_json_response(bf_session,
+    resthelper.get_json_response(session,
                                  CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data)
 
     # Answer the question
-    work_item = workhelper.get_workitem_answer(bf_session, question_name,
+    work_item = workhelper.get_workitem_answer(session, question_name,
                                                snapshot, reference_snapshot)
-    workhelper.execute(work_item, bf_session, background, extra_args)
+    workhelper.execute(work_item, session, background, extra_args)
 
     if background:
         return work_item.id
 
     # get the answer
-    answer_bytes = resthelper.get_answer(bf_session, snapshot, question_name,
+    answer_bytes = resthelper.get_answer(session, snapshot, question_name,
                                          reference_snapshot)
 
     # In Python 3.x, answer needs to be decoded before it can be used
@@ -67,9 +66,8 @@ def _bf_answer_obj(question_str, parameters_str, question_name,
     return answer.from_string(answer_obj[1]['answer'])
 
 
-def _bf_get_question_templates():
-    from pybatfish.client.commands import bf_session
-    jsonData = _get_data_get_question_templates(bf_session)
+def _bf_get_question_templates(session):
+    jsonData = _get_data_get_question_templates(session)
     jsonResponse = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES, jsonData)
+        session, CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES, jsonData)
     return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
