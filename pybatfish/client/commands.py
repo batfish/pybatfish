@@ -46,6 +46,10 @@ from .session import Session
 from .workhelper import (get_work_status,
                          kill_work)
 
+# TODO: normally libraries don't configure logging in code
+logger = logging.getLogger('pybatfish')
+logger.setLevel(logging.INFO)
+logger.addHandler(logging.StreamHandler())
 bf_session = Session()
 
 __all__ = ['bf_add_analysis',
