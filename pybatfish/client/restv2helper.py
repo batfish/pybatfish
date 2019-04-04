@@ -14,8 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional, Text, TYPE_CHECKING, \
-    Union  # noqa: F401
+from typing import (Any, Dict, List, Optional, Text,  # noqa: F401
+                    TYPE_CHECKING, Union)
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
