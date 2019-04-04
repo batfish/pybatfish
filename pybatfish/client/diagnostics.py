@@ -19,16 +19,18 @@ import os
 import shutil
 import tempfile
 import uuid
-from typing import Dict, Iterable, Optional  # noqa: F401
+from typing import Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
 
 import requests
 from netconan import netconan
 from requests import HTTPError
 
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 _FILE_PARSE_STATUS_QUESTION = {
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",

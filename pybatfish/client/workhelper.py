@@ -20,17 +20,19 @@ import json
 import logging
 import tempfile
 import time
-from typing import Any, Dict, Optional  # noqa: F401
+from typing import Any, Dict, Optional, TYPE_CHECKING  # noqa: F401
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
 MAX_LOG_LENGTH = 64 * 1024
