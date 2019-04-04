@@ -24,7 +24,7 @@ import sys
 from copy import deepcopy
 from inspect import getmembers
 from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
-                    Tuple, Union)
+                    Tuple, TYPE_CHECKING, Union)
 
 import attr
 import six
@@ -32,13 +32,15 @@ from six import PY3, integer_types, string_types
 
 from pybatfish.client.internal import (_bf_answer_obj,
                                        _bf_get_question_templates)
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, \
     VariableType  # noqa: F401
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
@@ -287,13 +289,6 @@ def _install_questions_in_module(questions, module_name):
     for (name, question_class) in questions:
         setattr(question_class, '__module__', module_name)
         setattr(module, name, question_class)
-
-
-def _install_questions_in_object(questions, obj):
-    # type: (Iterable[Tuple[str, QuestionMeta]], str) -> None
-    """Install the given questions in the specified object."""
-    for (name, question_class) in questions:
-        setattr(obj, name, question_class)
 
 
 def _load_questions_from_dir(question_dir, session):

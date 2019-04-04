@@ -15,18 +15,20 @@
 """Contains internal functions for interacting with the Batfish service."""
 
 import json
-from typing import Any, Dict, Optional, Union  # noqa: F401
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
 import six
 
 from pybatfish.client.consts import CoordConsts
-from pybatfish.client.session import Session
 from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import (get_uuid)
 from . import resthelper, workhelper
 from .options import Options
 from .workhelper import _get_data_get_question_templates
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session
 
 
 def _bf_answer_obj(session, question_str, parameters_str, question_name,
