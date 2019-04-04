@@ -16,7 +16,6 @@ frequently.
 """
 
 import inspect
-import logging
 import sys
 from inspect import getmembers
 from os.path import abspath, dirname, realpath, join, pardir
@@ -41,7 +40,7 @@ if __name__ == "__main__":
     print(_root_dir)
     # Make some assumptions about where questions live
     question_dir = join(_root_dir, 'questions')
-    session = Session(logging.getLogger(__name__))
+    session = Session()
     try:
         load_dir_questions(question_dir, session)
     except FileNotFoundError:
