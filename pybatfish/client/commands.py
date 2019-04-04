@@ -46,16 +46,16 @@ from .session import Session
 from .workhelper import (get_work_status,
                          kill_work)
 
-# TODO: normally libraries don't configure logging in code
-_bfDebug = True
-bf_logger = logging.getLogger("pybatfish.client")
-bf_session = Session(bf_logger)
 
-if _bfDebug:
-    bf_logger.setLevel(logging.INFO)
-    bf_logger.addHandler(logging.StreamHandler())
-else:
-    bf_logger.addHandler(logging.NullHandler())
+def _configure_default_logging():
+    logger = logging.getLogger('pybatfish')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+
+
+# TODO: normally libraries don't configure logging in code
+_configure_default_logging()
+bf_session = Session()
 
 __all__ = ['bf_add_analysis',
            'bf_add_issue_config',
@@ -92,7 +92,6 @@ __all__ = ['bf_add_analysis',
            'bf_list_incomplete_works',
            'bf_list_questions',
            'bf_list_snapshots',
-           'bf_logger',
            'bf_put_node_role_dimension',
            'bf_put_node_roles',
            'bf_read_question_settings',
@@ -106,7 +105,8 @@ __all__ = ['bf_add_analysis',
 
 
 def bf_add_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(analysisName, questionDirectory, False)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
+                                    False)
 
 
 def bf_add_issue_config(issue_config):
@@ -265,7 +265,7 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
@@ -430,10 +430,11 @@ def bf_get_work_status(wItemId):
     return get_work_status(wItemId, bf_session)
 
 
-def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
+def _bf_init_or_add_analysis(session, analysisName, questionDirectory,
+                             newAnalysis):
     from pybatfish.question.question import _load_questions_from_dir
     _check_network()
-    questions = _load_questions_from_dir(questionDirectory)
+    questions = _load_questions_from_dir(questionDirectory, session)
     analysis = {
         question_name: question_class(question_name=question_name)
         for question_name, question_class in six.iteritems(questions)
@@ -450,7 +451,8 @@ def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
 
 
 def bf_init_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
+                                    True)
 
 
 def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
@@ -467,7 +469,7 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
@@ -510,7 +512,7 @@ def _parse_snapshot(name, background, extra_args):
     :type name: str
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
@@ -532,10 +534,10 @@ def _parse_snapshot(name, background, extra_args):
                 ss=name, status=status, log=init_log))
     else:
         bf_session.snapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.snapshot)
+        logging.getLogger(__name__).info("Default snapshot is now set to %s",
+                                         bf_session.snapshot)
         if bf_session.enable_diagnostics:
-            _warn_on_snapshot_failure()
+            _warn_on_snapshot_failure(bf_session)
 
         return bf_session.snapshot
 
@@ -741,7 +743,8 @@ def bf_set_snapshot(name=None, index=None):
                     name, bf_session.network, snapshots))
         bf_session.snapshot = name
 
-    bf_logger.info("Default snapshot is now set to %s", bf_session.snapshot)
+    logging.getLogger(__name__).info("Default snapshot is now set to %s",
+                                     bf_session.snapshot)
     return bf_session.snapshot
 
 
@@ -770,7 +773,8 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-    return _upload_diagnostics(dry_run=dry_run, netconan_config=netconan_config)
+    return _upload_diagnostics(bf_session, dry_run=dry_run,
+                               netconan_config=netconan_config)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):

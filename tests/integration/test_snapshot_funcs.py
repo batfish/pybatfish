@@ -93,7 +93,7 @@ def roles_snapshot(network):
 
 def test_get_snapshot_file_status(network, file_status_snapshot):
     """Confirm we get correct init info statuses for example snapshot."""
-    statuses = _get_snapshot_parse_status()
+    statuses = _get_snapshot_parse_status(bf_session)
     assert (statuses == {
         'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
         'configs/recognized.cfg': 'PASSED',

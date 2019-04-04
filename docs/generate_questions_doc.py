@@ -22,6 +22,7 @@ from os.path import abspath, dirname, realpath, join, pardir
 from warnings import warn
 
 import pybatfish
+from pybatfish.client.session import Session
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir))
@@ -39,8 +40,9 @@ if __name__ == "__main__":
     print(_root_dir)
     # Make some assumptions about where questions live
     question_dir = join(_root_dir, 'questions')
+    session = Session()
     try:
-        load_dir_questions(question_dir)
+        load_dir_questions(question_dir, session)
     except FileNotFoundError:
         warn("Could not load question templates from {} ".format(question_dir) +
              "Documentation will not be generated for questions.")

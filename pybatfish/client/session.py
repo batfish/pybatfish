@@ -15,7 +15,6 @@
 
 from __future__ import absolute_import, print_function
 
-from logging import Logger  # noqa: F401
 from typing import Dict, Optional, Text  # noqa: F401
 
 from deprecated import deprecated
@@ -34,12 +33,12 @@ class Session(object):
     :ivar api_key: Your API key
     """
 
-    def __init__(self, logger, host=Options.coordinator_host,
+    def __init__(self, host=Options.coordinator_host,
                  port_v1=Options.coordinator_work_port,
                  port_v2=Options.coordinator_work_v2_port,
                  ssl=Options.use_ssl,
                  verify_ssl_certs=Options.verify_ssl_certs):
-        # type: (Logger, Text, int, int, bool, bool) -> None
+        # type: (Text, int, int, bool, bool) -> None
         # Coordinator args
         self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
@@ -56,8 +55,6 @@ class Session(object):
 
         # Additional worker args
         self.additional_args = {}  # type: Dict
-
-        self.logger = logger  # type: Logger
 
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int

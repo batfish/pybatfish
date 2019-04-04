@@ -24,7 +24,7 @@ import sys
 from copy import deepcopy
 from inspect import getmembers
 from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
-                    Tuple, Union)
+                    TYPE_CHECKING, Tuple, Union)
 
 import attr
 import six
@@ -39,6 +39,9 @@ from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
 
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
+
 # A set of tags across all questions
 _tags = set()  # type: Set[str]
 _VALID_VARIABLE_NAME_REGEX = re.compile(r'^\w+$')
@@ -49,8 +52,6 @@ __all__ = [
     'load_dir_questions',
     'load_questions',
 ]
-
-bf_logger = logging.getLogger("pybatfish.client")
 
 
 @attr.s(frozen=True)
@@ -86,7 +87,7 @@ class QuestionMeta(type):
                 raise TypeError("Please use keyword arguments")
 
             # Call super (i.e., QuestionBase)
-            super(new_cls, self).__init__(new_cls.template)
+            super(new_cls, self).__init__(new_cls.template, new_cls.session)
 
             # Update well-known params, if passed in
             if "exclusions" in kwargs:
@@ -127,6 +128,7 @@ class QuestionMeta(type):
         new_cls.description = dct.get("description", "")
         new_cls.tags = dct.get("tags", [])
         new_cls.template = dct.get('template', {})
+        new_cls.session = dct.get('session')
 
         return new_cls
 
@@ -138,8 +140,9 @@ class QuestionMeta(type):
 class QuestionBase(object):
     """All questions inherit functionality from this class."""
 
-    def __init__(self, dictionary):
+    def __init__(self, dictionary, session):
         self._dict = deepcopy(dictionary)
+        self._session = session
 
     def answer(self, snapshot=None, reference_snapshot=None,
                include_one_table_keys=None, background=False, extra_args=None):
@@ -158,22 +161,23 @@ class QuestionBase(object):
         :type include_one_table_keys: bool
         :param background: run this question in background, return immediately
         :type background: bool
-        :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+        :param extra_args: extra arguments to be passed with the question.
         :type extra_args: dict
         :rtype: :py:class:`~pybatfish.datamodel.answer.base.Answer` or
             :py:class:`~pybatfish.datamodel.answer.table.TableAnswer`
 
         :raises QuestionValidationException: if the question is malformed
         """
-        from pybatfish.client.commands import bf_session
-        real_snapshot = bf_session.get_snapshot(snapshot)
+        session = self._session
+        real_snapshot = session.get_snapshot(snapshot)
         if reference_snapshot is None and self.get_differential():
             raise ValueError(
                 "reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
         if include_one_table_keys is not None:
             self._set_include_one_table_keys(include_one_table_keys)
-        return _bf_answer_obj(self.json(),
+        return _bf_answer_obj(session=session,
+                              question_str=self.json(),
                               parameters_str="{}",
                               question_name=self.get_name(),
                               background=background,
@@ -287,15 +291,16 @@ def _install_questions_in_module(questions, module_name):
         setattr(module, name, question_class)
 
 
-def _load_questions_from_dir(question_dir):
-    # type: (str) -> Dict[str, QuestionMeta]
+def _load_questions_from_dir(question_dir, session):
+    # type: (str, Session) -> Dict[str, QuestionMeta]
+    logger = logging.getLogger(__name__)
     question_files = []
     for dirpath, dirnames, filenames in os.walk(question_dir):
         for filename in filenames:
             if filename.endswith(".json"):
                 question_files.append(os.path.join(dirpath, filename))
     if len(question_files) == 0:
-        bf_logger.warn(
+        logger.warning(
             "WARNING: no .json files found in supplied question directory: {questionDir}".format(
                 questionDir=question_dir))
         return {}
@@ -303,42 +308,42 @@ def _load_questions_from_dir(question_dir):
     questions = {}
     for questionFile in question_files:
         try:
-            (qname, qclass) = _load_question_disk(questionFile)
+            (qname, qclass) = _load_question_disk(questionFile, session)
             questions[qname] = qclass
         except Exception as err:
-            bf_logger.error(
+            logger.error(
                 "Could not load question from {questionFile}:{err}".format(
                     questionFile=questionFile,
                     err=err))
-    bf_logger.info(
+    logger.info(
         "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
             numQuestions=len(questions), numQuestionFiles=len(question_files)))
     return questions
 
 
-def load_dir_questions(questionDir, moduleName=bfq.__name__):
-    # type: (str, str) -> Iterable[str]
+def load_dir_questions(questionDir, session, moduleName=bfq.__name__):
+    # type: (str, Session, str) -> Iterable[str]
     """Load question templates from a directory on disk and install them in the given module."""
     # Find all files with questions in them.
-    questions = _load_questions_from_dir(questionDir)
+    questions = _load_questions_from_dir(questionDir, session)
     _install_questions_in_module(six.iteritems(questions), moduleName)
     return questions.keys()
 
 
-def _load_question_disk(question_path):
-    # type: (str) -> Tuple[str, QuestionMeta]
+def _load_question_disk(question_path, session):
+    # type: (str, Session) -> Tuple[str, QuestionMeta]
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path, 'r') as question_file:
         question_dict = json.load(question_file)
     try:
-        return _load_question_dict(question_dict)
+        return _load_question_dict(question_dict, session)
     except QuestionValidationException as e:
         raise QuestionValidationException(
             "Error loading question from {}".format(question_path), e)
 
 
-def _load_question_dict(question):
-    # type: (Dict[str, Any]) -> Tuple[str, QuestionMeta]
+def _load_question_dict(question, session):
+    # type: (Dict[str, Any], Session) -> Tuple[str, QuestionMeta]
     """Create a question from a dictionary which contains a template.
 
     :return the name of the question
@@ -393,6 +398,7 @@ def _load_question_dict(question):
     question_class = QuestionMeta(question_name, (QuestionBase,), {
         'docstring': docstring,
         'description': question_description,
+        'session': session,
         'tags': tags,
         'template': deepcopy(question),
         'variables': variables,
@@ -516,8 +522,8 @@ def _build_allowed_values(var_data):
 
 
 def load_questions(question_dir=None, from_server=False,
-                   module_name=bfq.__name__):
-    # type: (Optional[str], bool, str) -> None
+                   module_name=bfq.__name__, session=None):
+    # type: (Optional[str], bool, str, Optional[Session]) -> None
     """Load questions from directory or batfish service.
 
     :param question_dir: Load questions from this local directory instead of
@@ -528,36 +534,46 @@ def load_questions(question_dir=None, from_server=False,
     :type from_server: bool
     :param module_name: the name of the module where questions should be loaded.
         Default is :py:mod:`pybatfish.question.bfq`
+    :param session: Batfish session to load questions from
+    :type session: :class:`~pybatfish.client.session.Session`
     """
+    if not session:
+        from pybatfish.client.commands import bf_session
+        s = bf_session
+    else:
+        s = session
     new_names = set()  # type: Set[str]
     if not question_dir or from_server:
-        remote_questions = _load_remote_questions_templates()
+        remote_questions = _load_remote_questions_templates(s)
         _install_questions_in_module(remote_questions, module_name)
         new_names |= set(name for name, q in remote_questions)
     if question_dir:
         local_questions = load_dir_questions(question_dir,
+                                             session=s,
                                              moduleName=module_name)
         over_written_questions = len(set(local_questions) & new_names)
         if over_written_questions > 0:
-            bf_logger.info(
+            logging.getLogger(__name__).info(
                 "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
                     over_written_questions=over_written_questions))
 
 
-def _load_remote_questions_templates():
-    # type: () -> Set[Tuple[str, QuestionMeta]]
+def _load_remote_questions_templates(session):
+    # type: (Session) -> Set[Tuple[str, QuestionMeta]]
+    logger = logging.getLogger(__name__)
     num_questions = 0
     remote_questions = set()
-    questions_dict = _bf_get_question_templates()
+    questions_dict = _bf_get_question_templates(session)
     for (key, value) in questions_dict.items():
         try:
-            remote_questions.add(_load_question_dict(json.loads(value)))
+            remote_questions.add(
+                _load_question_dict(json.loads(value), session))
             num_questions += 1
         except Exception as err:
-            bf_logger.error(
+            logger.error(
                 "Could not load question {name} : {err}".format(name=key,
                                                                 err=err))
-    bf_logger.info(
+    logger.info(
         "Successfully loaded {numQuestions} questions from remote".format(
             numQuestions=num_questions))
     return remote_questions
@@ -793,7 +809,7 @@ def _validateType(value, expectedType):
     ]:
         return True, None
     else:
-        bf_logger.warn(
+        logging.getLogger(__name__).warning(
             "WARNING: skipping validation for unknown argument type {}".format(
                 expectedType))
         return True, None

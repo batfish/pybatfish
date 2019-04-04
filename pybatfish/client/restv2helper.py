@@ -14,7 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
+from typing import (Any, Dict, List, Optional, TYPE_CHECKING,  # noqa: F401
+                    Text, Union)
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -24,7 +25,6 @@ from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
 from pybatfish.client.consts import CoordConstsV2
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     NodeRolesData,
@@ -32,6 +32,9 @@ from pybatfish.datamodel.referencelibrary import (  # noqa: F401
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
 from .options import Options
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
@@ -103,13 +106,11 @@ def delete_issue_config(session, major, minor):
 def list_snapshots(session, verbose):
     # type: (Session, bool) -> Union[List[str], List[Dict[str,str]]]
     if not session.network:
-        raise ValueError("Network must be set to fork a snapshot")
+        raise ValueError("Network must be set to list snapshots")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                   session.network,
                                   CoordConstsV2.RSC_SNAPSHOTS)
-    params = {}
-    params[CoordConstsV2.QP_VERBOSE] = verbose
-    return _get_list(session, url_tail, params)
+    return _get_list(session, url_tail, {CoordConstsV2.QP_VERBOSE: verbose})
 
 
 def fork_snapshot(session, obj):
