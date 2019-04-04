@@ -289,6 +289,13 @@ def _install_questions_in_module(questions, module_name):
         setattr(module, name, question_class)
 
 
+def _install_questions_in_object(questions, obj):
+    # type: (Iterable[Tuple[str, QuestionMeta]], str) -> None
+    """Install the given questions in the specified object."""
+    for (name, question_class) in questions:
+        setattr(obj, name, question_class)
+
+
 def _load_questions_from_dir(question_dir, session):
     # type: (str, Session) -> Dict[str, QuestionMeta]
     logger = logging.getLogger(__name__)
