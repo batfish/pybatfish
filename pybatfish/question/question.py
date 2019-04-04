@@ -24,7 +24,7 @@ import sys
 from copy import deepcopy
 from inspect import getmembers
 from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
-                    Tuple, TYPE_CHECKING, Union)
+                    TYPE_CHECKING, Tuple, Union)
 
 import attr
 import six
