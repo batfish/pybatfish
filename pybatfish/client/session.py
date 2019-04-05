@@ -710,12 +710,13 @@ class Session(object):
     def _check_network(self):
         """Check if current network is set."""
         if self.network is None:
-            raise BatfishException("Network is not set")
+            raise ValueError("Network is not set")
 
     def _check_snapshot(self):
         """Check if current snapshot (and network) is set."""
-        if self.network is None:
-            raise BatfishException("Network is not set")
+        self._check_network()
+        if self.snapshot is None:
+            raise ValueError("Snapshot is not set")
 
     def _parse_snapshot(self, name, background, extra_args):
         # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
