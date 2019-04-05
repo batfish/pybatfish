@@ -20,23 +20,23 @@ import json
 import logging
 import os
 import tempfile
-from typing import Dict, Optional, Text, List, Union, Any  # noqa: F401
+from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
 
 from deprecated import deprecated
 from requests import HTTPError
 
-from pybatfish.client import workhelper, resthelper, restv2helper
+from pybatfish.client import resthelper, restv2helper, workhelper
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_get_snapshot_parse_status,
+from pybatfish.client.diagnostics import (_check_if_all_passed,
                                           _check_if_any_failed,
-                                          _check_if_all_passed,
+                                          _get_snapshot_parse_status,
                                           _upload_diagnostics)
 from pybatfish.client.workhelper import get_work_status
-from pybatfish.datamodel import (Interface, Edge, NodeRolesData,
-                                 NodeRoleDimension, ReferenceBook,
+from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
+                                 NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
-from pybatfish.util import validate_name, get_uuid, zip_dir
+from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
 
 
@@ -214,7 +214,7 @@ class Session(object):
                       deactivate_nodes=None, restore_interfaces=None,
                       restore_links=None, restore_nodes=None, add_files=None,
                       extra_args=None):
-        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, None]
+        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Optional[str]
         """
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
@@ -242,17 +242,22 @@ class Session(object):
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
         :return: name of initialized snapshot or None if the call fails
-        :rtype: Union[str, None]
+        :rtype: Optional[str]
         """
-        return self._fork_snapshot(base_name, name=name, overwrite=overwrite,
-                                   deactivate_interfaces=deactivate_interfaces,
-                                   deactivate_links=deactivate_links,
-                                   deactivate_nodes=deactivate_nodes,
-                                   restore_interfaces=restore_interfaces,
-                                   restore_links=restore_links,
-                                   restore_nodes=restore_nodes,
-                                   add_files=add_files,
-                                   extra_args=extra_args)
+        result = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
+                                     deactivate_interfaces=deactivate_interfaces,
+                                     deactivate_links=deactivate_links,
+                                     deactivate_nodes=deactivate_nodes,
+                                     restore_interfaces=restore_interfaces,
+                                     restore_links=restore_links,
+                                     restore_nodes=restore_nodes,
+                                     add_files=add_files,
+                                     extra_args=extra_args)
+        # Get around mypy thinking this could also be Dict
+        # We know the result here will be str or None because background = False
+        if isinstance(result, str):
+            return result
+        return None
 
     def _fork_snapshot(self, base_name, name=None, overwrite=False,
                        background=False, deactivate_interfaces=None,
@@ -363,7 +368,7 @@ class Session(object):
         return resthelper.get_json_response(self, '', useHttpGet=True)
 
     def get_node_role_dimension(self, dimension, inferred=False):
-        # type: (str) -> NodeRoleDimension
+        # type: (str, bool) -> NodeRoleDimension
         """
         Returns the definition of the given node role dimension for the active network or inferred definition for the active snapshot.
 
@@ -385,7 +390,7 @@ class Session(object):
             restv2helper.get_node_role_dimension(self, dimension))
 
     def get_node_roles(self, inferred=False):
-        # type: () -> NodeRolesData
+        # type: (bool) -> NodeRolesData
         """
         Returns the definitions of node roles for the active network or inferred roles for the active snapshot.
 
@@ -454,8 +459,15 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        return self._init_snapshot(upload, name=name, overwrite=overwrite,
-                                   extra_args=extra_args)
+        result = self._init_snapshot(upload, name=name,
+                                     overwrite=overwrite,
+                                     extra_args=extra_args)
+        # Get around mypy thinking this could also be Dict
+        # We know the result here will be str because background = False
+        if isinstance(result, str):
+            return result
+        # Should never get here
+        raise BatfishException('Unable to initialize snapshot')
 
     def _init_snapshot(self, upload, name=None, overwrite=False,
                        background=False,
@@ -519,7 +531,7 @@ class Session(object):
         return response
 
     def list_asked_questions(self):
-        # type: () -> Dict[str, Any]
+        # type: () -> Any
         """
         Get questions asked about this network.
 
@@ -757,18 +769,18 @@ class Session(object):
         if _check_if_any_failed(statuses):
             logger.warning("""\
     Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
-    
+
         bf_upload_diagnostics(dry_run=False)
-    
+
     to share private, anonymized information. For more information, see the documentation with:
-    
+
         help(bf_upload_diagnostics)""")
         elif not _check_if_all_passed(statuses):
             logger.warning("""\
     Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
-    
+
         bf_upload_diagnostics(dry_run=False)
-    
+
     to share private, anonymized information. For more information, see the documentation with:
-    
+
         help(bf_upload_diagnostics)""")
