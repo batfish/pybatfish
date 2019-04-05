@@ -214,7 +214,7 @@ class Session(object):
                       deactivate_nodes=None, restore_interfaces=None,
                       restore_links=None, restore_nodes=None, add_files=None,
                       extra_args=None):
-        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, None]
         """
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
@@ -241,9 +241,8 @@ class Session(object):
         :type add_files: str
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
-        :return: name of initialized snapshot, JSON dictionary of task status if
-            background=True, or None if the call fails
-        :rtype: Union[str, Dict, None]
+        :return: name of initialized snapshot or None if the call fails
+        :rtype: Union[str, None]
         """
         return self._fork_snapshot(base_name, name=name, overwrite=overwrite,
                                    deactivate_interfaces=deactivate_interfaces,
@@ -439,7 +438,7 @@ class Session(object):
 
     def init_snapshot(self, upload, name=None, overwrite=False,
                       extra_args=None):
-        # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
         Initialize a new snapshot.
 
@@ -452,8 +451,8 @@ class Session(object):
         :type overwrite: bool
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
-        :return: name of initialized snapshot, or JSON dictionary of task status if background=True
-        :rtype: Union[str, Dict]
+        :return: name of initialized snapshot
+        :rtype: str
         """
         return self._init_snapshot(upload, name=name, overwrite=overwrite,
                                    extra_args=extra_args)
