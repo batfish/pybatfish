@@ -177,7 +177,6 @@ def bf_delete_issue_config(major, minor):
     restv2helper.delete_issue_config(bf_session, major, minor)
 
 
-@deprecated(reason="Use the new delete_network method in Session instead")
 def bf_delete_network(name):
     # type: (str) -> None
     """
@@ -189,23 +188,18 @@ def bf_delete_network(name):
     bf_session.delete_network(name)
 
 
-@deprecated(
-    reason="Use the new delete_node_role_dimension method in Session instead")
 def bf_delete_node_role_dimension(dimension):
     # type: (str) -> None
     """Deletes the definition of the given role dimension for the active network."""
     bf_session.delete_node_role_dimension(dimension)
 
 
-@deprecated(
-    reason="Use the new delete_reference_book method in Session instead")
 def bf_delete_reference_book(book_name):
     # type: (str) -> None
     """Deletes the reference book with the specified name for the active network."""
     bf_session.delete_reference_book(book_name)
 
 
-@deprecated(reason="Use the new delete_snapshot method in Session instead")
 def bf_delete_snapshot(name):
     # type: (str) -> None
     """
@@ -226,7 +220,6 @@ def bf_extract_answer_summary(answer_dict):
     return answer_dict["summary"]
 
 
-@deprecated(reason="Use the new fork_snapshot method in Session instead")
 def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
                      deactivate_links=None, deactivate_nodes=None,
@@ -276,7 +269,6 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
                                      extra_args=extra_args)
 
 
-@deprecated(reason="Use the new generate_datalpane method in Session instead")
 def bf_generate_dataplane(snapshot=None, extra_args=None):
     # type: (Optional[str], Optional[Dict[str, Any]]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
@@ -297,7 +289,6 @@ def bf_get_analysis_answers(name, snapshot=None,
     return answers_dict
 
 
-@deprecated(reason="Use the new get_answer method in Session instead")
 def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """
@@ -312,7 +303,6 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
                                  reference_snapshot=reference_snapshot)
 
 
-@deprecated(reason="Use the new get_info method in Session instead")
 def bf_get_info():
     bf_session.get_info()
 
@@ -324,45 +314,36 @@ def bf_get_issue_config(major, minor):
         restv2helper.get_issue_config(bf_session, major, minor))
 
 
-@deprecated(
-    reason="Use the new get_node_role_dimension method in Session instead")
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the definition of the given node role dimension for the active network."""
     return bf_session.get_node_role_dimension(dimension=dimension)
 
 
-@deprecated(reason="Use the new get_node_roles method in Session instead")
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the definitions of node roles for the active network."""
     return bf_session.get_node_roles()
 
 
-@deprecated(reason="Use the new get_reference_book method in Session instead")
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
     """Returns the reference book with the specified for the active network."""
     return bf_session.get_reference_book(name=book_name)
 
 
-@deprecated(
-    reason="Use the new get_reference_library method in Session instead")
 def bf_get_reference_library():
     # type: () -> ReferenceLibrary
     """Returns the reference library for the active network."""
     return bf_session.get_reference_library()
 
 
-@deprecated(reason="Use the new get_node_roles method in Session instead")
 def bf_get_snapshot_inferred_node_roles():
     # type: () -> NodeRolesData
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
     return bf_session.get_node_roles(inferred=True)
 
 
-@deprecated(
-    reason="Use the new get_node_role_dimension method in Session instead")
 def bf_get_snapshot_inferred_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
@@ -385,7 +366,6 @@ def bf_get_snapshot_node_role_dimension(dimension):
         restv2helper.get_snapshot_node_role_dimension(bf_session, dimension))
 
 
-@deprecated(reason="Use the new get_work_status method in Session instead")
 def bf_get_work_status(wItemId):
     return bf_session.get_work_status(work_item=wItemId)
 
@@ -415,7 +395,6 @@ def bf_init_analysis(analysisName, questionDirectory):
                                     True)
 
 
-@deprecated(reason="Use the new init_snapshot method in Session instead")
 def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
                      extra_args=None):
     # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
@@ -492,7 +471,6 @@ def bf_list_analyses():
     return answer
 
 
-@deprecated(reason="Use the new list_networks method in Session instead")
 def bf_list_networks():
     # type: () -> List[str]
     """
@@ -503,20 +481,14 @@ def bf_list_networks():
     return bf_session.list_networks()
 
 
-@deprecated(
-    reason="Use the new list_incomplete_works method in Session instead")
 def bf_list_incomplete_works():
     return bf_session.list_incomplete_works()
 
 
-@deprecated(
-    reason="Use the new list_asked_questions method in Session instead")
 def bf_list_questions():
     return bf_session.list_asked_questions()
 
 
-@deprecated(
-    reason="Use the new list_snapshots method in Session instead")
 def bf_list_snapshots(verbose=False):
     # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
     """
@@ -531,8 +503,6 @@ def bf_list_snapshots(verbose=False):
     return bf_session.list_snapshots(verbose=verbose)
 
 
-@deprecated(
-    reason="Use the new put_reference_book method in Session instead")
 def bf_put_reference_book(book):
     # type: (ReferenceBook) -> None
     """
@@ -546,8 +516,6 @@ def bf_put_reference_book(book):
     bf_session.put_reference_book(book)
 
 
-@deprecated(
-    reason="Use the new put_node_role_dimension method in Session instead")
 def bf_put_node_role_dimension(dimension):
     # type: (NodeRoleDimension) -> None
     """
@@ -564,7 +532,6 @@ def bf_put_node_role_dimension(dimension):
     bf_session.put_node_role_dimension(dimension=dimension)
 
 
-@deprecated(reason="Use the new put_node_roles method in Session instead")
 def bf_put_node_roles(node_roles_data):
     # type: (NodeRolesData) -> None
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
@@ -599,7 +566,6 @@ def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
     return bf_get_analysis_answers(name, snapshot, reference_snapshot)
 
 
-@deprecated(reason="Use the new set_network method in Session instead")
 def bf_set_network(name=None, prefix=Options.default_network_prefix):
     # type: (str, str) -> str
     """
@@ -617,7 +583,6 @@ def bf_set_network(name=None, prefix=Options.default_network_prefix):
     return bf_session.set_network(name=name, prefix=prefix)
 
 
-@deprecated(reason="Use the new set_snapshot method in Session instead")
 def bf_set_snapshot(name=None, index=None):
     # type: (Optional[str], Optional[int]) -> str
     """
@@ -633,7 +598,6 @@ def bf_set_snapshot(name=None, index=None):
     return bf_session.set_snapshot(name=name, index=index)
 
 
-@deprecated(reason="Use the new upload_diagnostics method in Session instead")
 def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     # type: (bool, str) -> str
     """
