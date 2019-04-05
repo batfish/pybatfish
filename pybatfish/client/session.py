@@ -27,10 +27,8 @@ from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_check_if_all_passed,
-                                          _check_if_any_failed,
-                                          _get_snapshot_parse_status,
-                                          _upload_diagnostics)
+from pybatfish.client.diagnostics import (_upload_diagnostics,
+                                          _warn_on_snapshot_failure)
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
@@ -753,35 +751,6 @@ class Session(object):
                 "Default snapshot is now set to %s",
                 self.snapshot)
             if self.enable_diagnostics:
-                self._warn_on_snapshot_failure()
+                _warn_on_snapshot_failure(self)
 
             return self.snapshot
-
-    def _warn_on_snapshot_failure(self):
-        # type: (Session) -> None
-        """
-        Check if snapshot passed and warn about any parsing or conversion issues.
-
-        :param session: Batfish session to check for snapshot failure
-        :type session: :class:`~pybatfish.client.session.Session`
-        """
-        logger = logging.getLogger(__name__)
-        statuses = _get_snapshot_parse_status(self)
-        if _check_if_any_failed(statuses):
-            logger.warning("""\
-    Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
-
-        bf_upload_diagnostics(dry_run=False)
-
-    to share private, anonymized information. For more information, see the documentation with:
-
-        help(bf_upload_diagnostics)""")
-        elif not _check_if_all_passed(statuses):
-            logger.warning("""\
-    Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
-
-        bf_upload_diagnostics(dry_run=False)
-
-    to share private, anonymized information. For more information, see the documentation with:
-
-        help(bf_upload_diagnostics)""")

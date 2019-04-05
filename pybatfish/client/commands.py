@@ -25,7 +25,6 @@ import six
 from deprecated import deprecated
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     Edge, Interface,
@@ -415,44 +414,6 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
     return bf_session._init_snapshot(upload, name=name, overwrite=overwrite,
                                      background=background,
                                      extra_args=extra_args)
-
-
-def _parse_snapshot(name, background, extra_args):
-    # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
-    """Parse specified snapshot.
-
-    :param name: name of the snapshot to initialize
-    :type name: str
-    :param background: whether or not to run the task in the background
-    :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command.
-    :type extra_args: dict
-    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
-    :rtype: Union[str, Dict]
-    """
-    work_item = workhelper.get_workitem_parse(bf_session, name)
-    answer_dict = workhelper.execute(work_item, bf_session,
-                                     background=background,
-                                     extra_args=extra_args)
-    if background:
-        bf_session.snapshot = name
-        return answer_dict
-
-    status = WorkStatusCode(answer_dict["status"])
-
-    if status != WorkStatusCode.TERMINATEDNORMALLY:
-        init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
-        raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
-                ss=name, status=status, log=init_log))
-    else:
-        bf_session.snapshot = name
-        logging.getLogger(__name__).info("Default snapshot is now set to %s",
-                                         bf_session.snapshot)
-        if bf_session.enable_diagnostics:
-            _warn_on_snapshot_failure(bf_session)
-
-        return bf_session.snapshot
 
 
 def bf_kill_work(wItemId):

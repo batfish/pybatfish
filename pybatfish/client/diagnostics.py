@@ -260,4 +260,23 @@ def _warn_on_snapshot_failure(session):
     :param session: Batfish session to check for snapshot failure
     :type session: :class:`~pybatfish.client.session.Session`
     """
-    session._warn_on_snapshot_failure()
+    logger = logging.getLogger(__name__)
+    statuses = _get_snapshot_parse_status(session)
+    if _check_if_any_failed(statuses):
+        logger.warning("""\
+Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")
+    elif not _check_if_all_passed(statuses):
+        logger.warning("""\
+Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+
+    bf_upload_diagnostics(dry_run=False)
+
+to share private, anonymized information. For more information, see the documentation with:
+
+    help(bf_upload_diagnostics)""")
