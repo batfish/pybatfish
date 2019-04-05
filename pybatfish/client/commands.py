@@ -347,9 +347,7 @@ def bf_get_snapshot_inferred_node_roles():
 def bf_get_snapshot_inferred_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session,
-                                                               dimension))
+    return bf_session.get_node_role_dimension(dimension, inferred=True)
 
 
 def bf_get_snapshot_node_roles():
