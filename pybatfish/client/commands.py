@@ -84,7 +84,6 @@ __all__ = ['bf_add_analysis',
            'bf_list_analyses',
            'bf_list_networks',
            'bf_list_incomplete_works',
-           'bf_list_questions',
            'bf_list_snapshots',
            'bf_put_node_role_dimension',
            'bf_put_node_roles',
@@ -442,10 +441,6 @@ def bf_list_networks():
 
 def bf_list_incomplete_works():
     return bf_session.list_incomplete_works()
-
-
-def bf_list_questions():
-    return bf_session.list_asked_questions()
 
 
 def bf_list_snapshots(verbose=False):

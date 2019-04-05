@@ -528,21 +528,6 @@ class Session(object):
                                                 json_data)
         return response
 
-    def list_asked_questions(self):
-        # type: () -> Any
-        """
-        Get questions asked about this network.
-
-        :return: JSON dictionary of question name to question object
-        :rtype: dict
-        """
-        self._check_network()
-        json_data = workhelper.get_data_list_questions(self)
-        response = resthelper.get_json_response(self,
-                                                CoordConsts.SVC_RSC_LIST_QUESTIONS,
-                                                json_data)
-        return response['questionlist']
-
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
         """
