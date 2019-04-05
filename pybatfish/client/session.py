@@ -429,7 +429,8 @@ class Session(object):
             return self.snapshot
         else:
             raise ValueError(
-                "snapshot must be either provided or set using bf_set_snapshot")
+                "snapshot must be either provided or set using "
+                "set_snapshot (e.g. bf_session.set_snapshot('NAME')")
 
     def get_url(self, resource):
         # type: (str) -> str
