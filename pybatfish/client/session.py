@@ -393,7 +393,6 @@ class Session(object):
         :return: the definitions of node roles for the active network, or inferred definitions for the active snapshot if inferred=True.
         :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
         """
-        # TODO finish/format docstring
         if inferred:
             self._check_snapshot()
             return NodeRolesData.from_dict(
@@ -402,7 +401,12 @@ class Session(object):
 
     def get_reference_book(self, name):
         # type: (str) -> ReferenceBook
-        """Returns the specified reference book for the active network."""
+        """
+        Returns the specified reference book for the active network.
+
+        :param name: name of the reference book to fetch
+        :type name: str
+        """
         return ReferenceBook.from_dict(
             restv2helper.get_reference_book(self, name))
 
@@ -490,6 +494,7 @@ class Session(object):
         List networks the session's API key can access.
 
         :return: a list of network names
+        :rtype: list
         """
         json_data = workhelper.get_data_list_networks(self)
         json_response = resthelper.get_json_response(
@@ -499,7 +504,12 @@ class Session(object):
 
     def list_incomplete_works(self):
         # type: () -> Dict[str, Any]
-        """Get pending work that is incomplete."""
+        """
+        Get pending work that is incomplete.
+
+        :return: JSON dictionary of question name to question object
+        :rtype: dict
+        """
         json_data = workhelper.get_data_list_incomplete_work(self)
         response = resthelper.get_json_response(self,
                                                 CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK,
@@ -508,7 +518,12 @@ class Session(object):
 
     def list_asked_questions(self):
         # type: () -> Dict[str, Any]
-        """Get questions asked about this network."""
+        """
+        Get questions asked about this network.
+
+        :return: JSON dictionary of question name to question object
+        :rtype: dict
+        """
         self._check_network()
         json_data = workhelper.get_data_list_questions(self)
         response = resthelper.get_json_response(self,
@@ -523,9 +538,11 @@ class Session(object):
 
         :param verbose: If true, return the full output of Batfish, including
             snapshot metadata.
+        :type verbose: bool
 
         :return: a list of snapshot names or the full json response containing
             snapshots and metadata (if `verbose=True`)
+        :rtype: list
         """
         return restv2helper.list_snapshots(self, verbose)
 
@@ -560,7 +577,12 @@ class Session(object):
 
     def put_node_roles(self, node_roles_data):
         # type: (NodeRolesData) -> None
-        """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
+        """
+        Writes the definitions of node roles for the active network. Completely replaces any existing definitions.
+
+        :param node_roles_data: node roles definitions to add to the active network
+        :type node_roles_data: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
+        """
         restv2helper.put_node_roles(self, node_roles_data)
 
     def set_network(self, name=None, prefix=Options.default_network_prefix):
