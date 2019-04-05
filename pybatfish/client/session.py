@@ -15,11 +15,25 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Dict, Optional, Text  # noqa: F401
+import base64
+import json
+import logging
+import os
+import tempfile
+from typing import Dict, Optional, Text, List, Union, Any  # noqa: F401
 
 from deprecated import deprecated
+from requests import HTTPError
 
-from pybatfish.client.consts import CoordConsts
+from pybatfish.client import workhelper, resthelper, restv2helper
+from pybatfish.client.consts import CoordConsts, WorkStatusCode
+from pybatfish.client.diagnostics import _get_snapshot_parse_status, \
+    _check_if_any_failed, _check_if_all_passed, _upload_diagnostics
+from pybatfish.client.workhelper import get_work_status
+from pybatfish.datamodel import Interface, Edge, NodeRolesData, \
+    NodeRoleDimension, ReferenceBook, ReferenceLibrary
+from pybatfish.exception import BatfishException
+from pybatfish.util import validate_name, get_uuid, zip_dir
 from .options import Options
 
 
@@ -141,6 +155,190 @@ class Session(object):
     def verifySslCerts(self, val):
         self.verify_ssl_certs = val
 
+    def delete_network(self, name):
+        # type: (str) -> None
+        """
+        Delete network by name.
+
+        :param name: name of the network to delete
+        :type name: str
+        """
+        if name is None:
+            raise ValueError('Network to be deleted must be supplied')
+        json_data = workhelper.get_data_delete_network(self, name)
+        resthelper.get_json_response(self,
+                                     CoordConsts.SVC_RSC_DEL_NETWORK,
+                                     json_data)
+
+    def delete_node_role_dimension(self, dimension):
+        # type: (str) -> None
+        """
+        Deletes the definition of the given role dimension for the active network.
+
+        :param dimension: name of the dimension to delete from the active network
+        :type dimension: str
+        """
+        restv2helper.delete_node_role_dimension(self, dimension)
+
+    def delete_reference_book(self, name):
+        # type: (str) -> None
+        """
+        Deletes the reference book with the specified name for the active network.
+
+        :param name: name of the reference book to delete
+        :type name: str
+        """
+        restv2helper.delete_reference_book(self, name)
+
+    def delete_snapshot(self, name):
+        # type: (str) -> None
+        """
+        Delete specified snapshot from current network.
+
+        :param name: name of the snapshot to delete
+        :type name: str
+        """
+        self._check_network()
+        if name is None:
+            raise ValueError('Snapshot to be deleted must be supplied')
+        json_data = workhelper.get_data_delete_snapshot(self, name)
+        resthelper.get_json_response(self,
+                                     CoordConsts.SVC_RSC_DEL_SNAPSHOT,
+                                     json_data)
+
+    def fork_snapshot(self, base_name, name=None, overwrite=False,
+                      deactivate_interfaces=None, deactivate_links=None,
+                      deactivate_nodes=None, restore_interfaces=None,
+                      restore_links=None, restore_nodes=None, add_files=None,
+                      extra_args=None):
+        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        """
+        Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
+
+        :param base_name: name of the snapshot to copy
+        :type base_name: string
+        :param name: name of the snapshot to initialize
+        :type name: string
+        :param overwrite: whether or not to overwrite an existing snapshot with the
+            same name
+        :type overwrite: bool
+        :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
+        :type deactivate_interfaces: list[Interface]
+        :param deactivate_links: list of links to deactivate in new snapshot
+        :type deactivate_links: list[Edge]
+        :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
+        :type deactivate_nodes: list[str]
+        :param restore_interfaces: list of interfaces to reactivate
+        :type restore_interfaces: list[Interface]
+        :param restore_links: list of links to reactivate
+        :type restore_links: list[Edge]
+        :param restore_nodes: list of names of nodes to reactivate
+        :type restore_nodes: list[str]
+        :param add_files: path to zip file or directory containing files to add
+        :type add_files: str
+        :param extra_args: extra arguments to be passed to the parse command.
+        :type extra_args: dict
+        :return: name of initialized snapshot, JSON dictionary of task status if
+            background=True, or None if the call fails
+        :rtype: Union[str, Dict, None]
+        """
+        return self._fork_snapshot(base_name, name=name, overwrite=overwrite,
+                                   deactivate_interfaces=deactivate_interfaces,
+                                   deactivate_links=deactivate_links,
+                                   deactivate_nodes=deactivate_nodes,
+                                   restore_interfaces=restore_interfaces,
+                                   restore_links=restore_links,
+                                   restore_nodes=restore_nodes,
+                                   add_files=add_files,
+                                   extra_args=extra_args)
+
+    def _fork_snapshot(self, base_name, name=None, overwrite=False,
+                       background=False, deactivate_interfaces=None,
+                       deactivate_links=None, deactivate_nodes=None,
+                       restore_interfaces=None, restore_links=None,
+                       restore_nodes=None, add_files=None,
+                       extra_args=None):
+        # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        self._check_network()
+
+        if name is None:
+            name = Options.default_snapshot_prefix + get_uuid()
+        validate_name(name)
+
+        if name in self.list_snapshots():
+            if overwrite:
+                self.delete_snapshot(name)
+            else:
+                raise ValueError(
+                    'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                        name, self.network))
+
+        encoded_file = None
+        if add_files is not None:
+            file_to_send = add_files
+            if os.path.isdir(add_files):
+                temp_zip_file = tempfile.NamedTemporaryFile()
+                zip_dir(add_files, temp_zip_file)
+                file_to_send = temp_zip_file.name
+
+            if os.path.isfile(file_to_send):
+                with open(file_to_send, "rb") as f:
+                    encoded_file = base64.b64encode(f.read()).decode(
+                        'ascii')
+
+        json_data = {
+            "snapshotBase": base_name,
+            "snapshotNew": name,
+            "deactivateInterfaces": deactivate_interfaces,
+            "deactivateLinks": deactivate_links,
+            "deactivateNodes": deactivate_nodes,
+            "restoreInterfaces": restore_interfaces,
+            "restoreLinks": restore_links,
+            "restoreNodes": restore_nodes,
+            "zipFile": encoded_file
+        }
+        restv2helper.fork_snapshot(self, json_data)
+
+        return self._parse_snapshot(name, background, extra_args)
+
+    def generate_dataplane(self, snapshot=None, extra_args=None):
+        # type: (Optional[str], Optional[Dict[str, Any]]) -> str
+        """
+        Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized.
+
+        :param snapshot: name of the snapshot to generate dataplane for
+        :type snapshot: Text
+        :param extra_args: extra arguments to be passed to the parse command
+        :type extra_args: dict
+        """
+        snapshot = self.get_snapshot(snapshot)
+
+        work_item = workhelper.get_workitem_generate_dataplane(self,
+                                                               snapshot)
+        answer_dict = workhelper.execute(work_item, self,
+                                         extra_args=extra_args)
+        return str(answer_dict["status"].value)
+
+    def get_answer(self, question, snapshot, reference_snapshot=None):
+        # type: (str, str, Optional[str]) -> Any
+        """
+        Get the answer for a previously asked question.
+
+        :param question: the unique identifier of the previously asked question
+        :type question: str
+        :param snapshot: name of the snapshot the question was run on
+        :type snapshot: str
+        :param reference_snapshot: if present, the snapshot against which the answer
+            was computed differentially
+        :type reference_snapshot: str
+        """
+        json_data = workhelper.get_data_get_answer(self, question,
+                                                   snapshot, reference_snapshot)
+        response = resthelper.get_json_response(self,
+                                                CoordConsts.SVC_RSC_GET_ANSWER,
+                                                json_data)
+        return json.loads(response["answer"])
+
     def get_base_url(self):
         # type: () -> str
         """Generate the base URL for connecting to batfish coordinator."""
@@ -157,9 +355,62 @@ class Session(object):
                                          self.port_v2,
                                          self._base_uri_v2)
 
-    def get_url(self, resource):
-        # type: (str) -> str
-        return '{0}/{1}'.format(self.get_base_url(), resource)
+    def get_info(self):
+        # type: () -> Dict[str, Any]
+        """Get basic info about the Batfish service (including name, version, ...)."""
+        return resthelper.get_json_response(self, '', useHttpGet=True)
+
+    def get_node_role_dimension(self, dimension, inferred=False):
+        # type: (str) -> NodeRoleDimension
+        """
+        Returns the definition of the given node role dimension for the active network or inferred definition for the active snapshot.
+
+        :param dimension: name of the node role dimension to fetch
+        :type dimension: str
+        :param inferred: whether or not to fetch active snapshot's inferred node role dimension
+        :type inferred: bool
+
+        :return: the definition of the given node role dimension for the active network, or inferred definition for the active snapshot if inferred=True.
+        :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+        """
+        if inferred:
+            self._check_snapshot()
+            return NodeRoleDimension.from_dict(
+                restv2helper.get_snapshot_inferred_node_role_dimension(
+                    self,
+                    dimension))
+        return NodeRoleDimension.from_dict(
+            restv2helper.get_node_role_dimension(self, dimension))
+
+    def get_node_roles(self, inferred=False):
+        # type: () -> NodeRolesData
+        """
+        Returns the definitions of node roles for the active network or inferred roles for the active snapshot.
+
+        :param inferred: whether or not to fetch the active snapshot's inferred node roles
+        :type inferred: bool
+
+        :return: the definitions of node roles for the active network, or inferred definitions for the active snapshot if inferred=True.
+        :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
+        """
+        # TODO finish/format docstring
+        if inferred:
+            self._check_snapshot()
+            return NodeRolesData.from_dict(
+                restv2helper.get_snapshot_inferred_node_roles(self))
+        return NodeRolesData.from_dict(restv2helper.get_node_roles(self))
+
+    def get_reference_book(self, name):
+        # type: (str) -> ReferenceBook
+        """Returns the specified reference book for the active network."""
+        return ReferenceBook.from_dict(
+            restv2helper.get_reference_book(self, name))
+
+    def get_reference_library(self):
+        # type: () -> ReferenceLibrary
+        """Returns the reference library for the active network."""
+        return ReferenceLibrary.from_dict(
+            restv2helper.get_reference_library(self))
 
     def get_snapshot(self, snapshot=None):
         # type: (Optional[str]) -> str
@@ -170,3 +421,330 @@ class Session(object):
         else:
             raise ValueError(
                 "snapshot must be either provided or set using bf_set_snapshot")
+
+    def get_url(self, resource):
+        # type: (str) -> str
+        return '{0}/{1}'.format(self.get_base_url(), resource)
+
+    def get_work_status(self, work_item):
+        """Get the status for the specified work item."""
+        return get_work_status(work_item, self)
+
+    def init_snapshot(self, upload, name=None, overwrite=False,
+                      extra_args=None):
+        # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        """
+        Initialize a new snapshot.
+
+        :param upload: snapshot to upload
+        :type upload: zip file or directory
+        :param name: name of the snapshot to initialize
+        :type name: string
+        :param overwrite: whether or not to overwrite an existing snapshot with the
+           same name
+        :type overwrite: bool
+        :param extra_args: extra arguments to be passed to the parse command.
+        :type extra_args: dict
+        :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+        :rtype: Union[str, Dict]
+        """
+        return self._init_snapshot(upload, name=name, overwrite=overwrite,
+                                   extra_args=extra_args)
+
+    def _init_snapshot(self, upload, name=None, overwrite=False,
+                       background=False,
+                       extra_args=None):
+        # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        if self.network is None:
+            self.set_network()
+
+        if name is None:
+            name = Options.default_snapshot_prefix + get_uuid()
+        validate_name(name)
+
+        if name in self.list_snapshots():
+            if overwrite:
+                self.delete_snapshot(name)
+            else:
+                raise ValueError(
+                    'A snapshot named ''{}'' already exists in network ''{}'''.format(
+                        name, self.network))
+
+        file_to_send = upload
+        if os.path.isdir(upload):
+            temp_zip_file = tempfile.NamedTemporaryFile()
+            zip_dir(upload, temp_zip_file)
+            file_to_send = temp_zip_file.name
+
+        json_data = workhelper.get_data_upload_snapshot(self, name,
+                                                        file_to_send)
+        resthelper.get_json_response(self,
+                                     CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
+                                     json_data)
+
+        return self._parse_snapshot(name, background, extra_args)
+
+    def list_networks(self):
+        # type: () -> List[str]
+        """
+        List networks the session's API key can access.
+
+        :return: a list of network names
+        """
+        json_data = workhelper.get_data_list_networks(self)
+        json_response = resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
+
+        return list(map(str, json_response['networklist']))
+
+    def list_incomplete_works(self):
+        # type: () -> Dict[str, Any]
+        """Get pending work that is incomplete."""
+        json_data = workhelper.get_data_list_incomplete_work(self)
+        response = resthelper.get_json_response(self,
+                                                CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK,
+                                                json_data)
+        return response
+
+    def list_asked_questions(self):
+        # type: () -> Dict[str, Any]
+        """Get questions asked about this network."""
+        self._check_network()
+        json_data = workhelper.get_data_list_questions(self)
+        response = resthelper.get_json_response(self,
+                                                CoordConsts.SVC_RSC_LIST_QUESTIONS,
+                                                json_data)
+        return response['questionlist']
+
+    def list_snapshots(self, verbose=False):
+        # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
+        """
+        List snapshots for the current network.
+
+        :param verbose: If true, return the full output of Batfish, including
+            snapshot metadata.
+
+        :return: a list of snapshot names or the full json response containing
+            snapshots and metadata (if `verbose=True`)
+        """
+        return restv2helper.list_snapshots(self, verbose)
+
+    def put_reference_book(self, book):
+        # type: (ReferenceBook) -> None
+        """
+        Put a reference book in the active network.
+
+        If a book with the same name exists, it is overwritten.
+
+        :param book: The ReferenceBook object to add
+        :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
+        """
+        restv2helper.put_reference_book(self, book)
+
+    def put_node_role_dimension(self, dimension):
+        # type: (NodeRoleDimension) -> None
+        """
+        Put a role dimension in the active network.
+
+        Overwrites the old dimension if one of the same name already exists.
+
+        Individual roles within the dimension must have a valid (java) regex.
+        The node list within those roles, if present, is ignored by the server.
+
+        :param dimension: The NodeRoleDimension object for the dimension to add
+        :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+        """
+        if dimension.type == "AUTO":
+            raise ValueError("Cannot put a dimension of type AUTO")
+        restv2helper.put_node_role_dimension(self, dimension)
+
+    def put_node_roles(self, node_roles_data):
+        # type: (NodeRolesData) -> None
+        """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
+        restv2helper.put_node_roles(self, node_roles_data)
+
+    def set_network(self, name=None, prefix=Options.default_network_prefix):
+        # type: (str, str) -> str
+        """
+        Configure the network used for analysis.
+
+        :param name: name of the network to set. If `None`, a name will be generated using prefix.
+        :type name: string
+        :param prefix: prefix to prepend to auto-generated network names if name is empty
+        :type name: string
+
+        :return: The name of the configured network, if configured successfully.
+        :rtype: string
+        :raises BatfishException: if configuration fails
+        """
+        if name is None:
+            name = prefix + get_uuid()
+        validate_name(name, "network")
+
+        try:
+            net = restv2helper.get_network(self, name)
+            self.network = str(net['name'])
+            return self.network
+        except HTTPError as e:
+            if e.response.status_code != 404:
+                raise BatfishException('Unknown error accessing network', e)
+
+        json_data = workhelper.get_data_init_network(self, name)
+        json_response = resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
+
+        network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+        if network_name is None:
+            raise BatfishException(
+                "Network initialization failed. Server response: {}".format(
+                    json_response))
+
+        self.network = str(network_name)
+        return self.network
+
+    def set_snapshot(self, name=None, index=None):
+        # type: (Optional[str], Optional[int]) -> str
+        """
+        Set the current snapshot by name or index.
+
+        :param name: name of the snapshot to set as the current snapshot
+        :type name: string
+        :param index: set the current snapshot to the ``index``-th most recent snapshot
+        :type index: int
+        :return: the name of the successfully set snapshot
+        :rtype: str
+        """
+        if name is None and index is None:
+            raise ValueError('One of name and index must be set')
+        if name is not None and index is not None:
+            raise ValueError('Only one of name and index can be set')
+
+        snapshots = self.list_snapshots()
+
+        # Index specified, simply give the ith snapshot
+        if index is not None:
+            if not (-len(snapshots) <= index < len(snapshots)):
+                raise IndexError(
+                    "Server has only {} snapshots: {}".format(
+                        len(snapshots), snapshots))
+            self.snapshot = str(snapshots[index])
+
+        # Name specified, make sure it exists.
+        else:
+            assert name is not None  # type-hint to Python
+            if name not in snapshots:
+                raise ValueError(
+                    'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
+                        name, self.network, snapshots))
+            self.snapshot = name
+
+        logging.getLogger(__name__).info(
+            "Default snapshot is now set to %s",
+            self.snapshot)
+        return self.snapshot
+
+    def upload_diagnostics(self, dry_run=True, netconan_config=None):
+        # type: (bool, str) -> str
+        """
+        Fetch, anonymize, and optionally upload snapshot diagnostics information.
+
+        This runs a series of diagnostic questions on the current snapshot
+        (including collecting parsing and conversion information).
+
+        The information collected is anonymized with
+        `Netconan <https://github.com/intentionet/netconan>`_ which either
+        anonymizes passwords and IP addresses (default) or uses the settings in
+        the provided `netconan_config`.
+
+        The anonymous information is then either saved locally (if `dry_run` is
+        True) or uploaded to Batfish developers (if `dry_run` is False).  The
+        uploaded information will be accessible only to Batfish developers and will
+        be used to help diagnose any issues you encounter.
+
+        :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
+        :type dry_run: bool
+        :param netconan_config: path to Netconan configuration file
+        :type netconan_config: string
+        :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
+        :rtype: string
+        """
+        return _upload_diagnostics(self, dry_run=dry_run,
+                                   netconan_config=netconan_config)
+
+    def _check_network(self):
+        """Check if current network is set."""
+        if self.network is None:
+            raise BatfishException("Network is not set")
+
+    def _check_snapshot(self):
+        """Check if current snapshot (and network) is set."""
+        if self.network is None:
+            raise BatfishException("Network is not set")
+
+    def _parse_snapshot(self, name, background, extra_args):
+        # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        """
+        Parse specified snapshot.
+
+        :param name: name of the snapshot to initialize
+        :type name: str
+        :param background: whether or not to run the task in the background
+        :type background: bool
+        :param extra_args: extra arguments to be passed to the parse command.
+        :type extra_args: dict
+        :return: name of initialized snapshot, or JSON dictionary of task status if background=True
+        :rtype: Union[str, Dict]
+        """
+        work_item = workhelper.get_workitem_parse(self, name)
+        answer_dict = workhelper.execute(work_item, self,
+                                         background=background,
+                                         extra_args=extra_args)
+        if background:
+            self.snapshot = name
+            return answer_dict
+
+        status = WorkStatusCode(answer_dict["status"])
+
+        if status != WorkStatusCode.TERMINATEDNORMALLY:
+            init_log = restv2helper.get_work_log(self, name, work_item.id)
+            raise BatfishException(
+                'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
+                    ss=name, status=status, log=init_log))
+        else:
+            self.snapshot = name
+            logging.getLogger(__name__).info(
+                "Default snapshot is now set to %s",
+                self.snapshot)
+            if self.enable_diagnostics:
+                self._warn_on_snapshot_failure()
+
+            return self.snapshot
+
+    def _warn_on_snapshot_failure(self):
+        # type: (Session) -> None
+        """
+        Check if snapshot passed and warn about any parsing or conversion issues.
+
+        :param session: Batfish session to check for snapshot failure
+        :type session: :class:`~pybatfish.client.session.Session`
+        """
+        logger = logging.getLogger(__name__)
+        statuses = _get_snapshot_parse_status(self)
+        if _check_if_any_failed(statuses):
+            logger.warning("""\
+    Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
+    
+        bf_upload_diagnostics(dry_run=False)
+    
+    to share private, anonymized information. For more information, see the documentation with:
+    
+        help(bf_upload_diagnostics)""")
+        elif not _check_if_all_passed(statuses):
+            logger.warning("""\
+    Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
+    
+        bf_upload_diagnostics(dry_run=False)
+    
+    to share private, anonymized information. For more information, see the documentation with:
+    
+        help(bf_upload_diagnostics)""")
