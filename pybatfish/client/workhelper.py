@@ -314,12 +314,6 @@ def get_data_list_incomplete_work(session):
     return json_data
 
 
-def get_data_list_questions(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
-    return json_data
-
-
 def get_data_list_snapshots(session, network):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     if network is not None:
