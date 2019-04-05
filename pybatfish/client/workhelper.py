@@ -314,9 +314,12 @@ def get_data_list_incomplete_work(session):
     return json_data
 
 
-def get_data_list_questions(session):
+def get_data_list_questions(session, verbose=True):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
+                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
+                 # Pybatfish questions (leading `__`) are ignored by default
+                 # Use verbose flag to include these
+                 CoordConsts.SVC_KEY_VERBOSE: str(verbose)}
     return json_data
 
 

@@ -18,7 +18,8 @@ import pytest
 
 from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
                                        bf_init_analysis, bf_init_snapshot,
-                                       bf_session, bf_set_network)
+                                       bf_list_questions, bf_session,
+                                       bf_set_network)
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.exception import BatfishException
 from pybatfish.question import bfq
@@ -80,6 +81,13 @@ def test_answer_fail(network):
 def test_init_analysis(network):
     """Ensure bf_init_analysis does not crash."""
     bf_init_analysis("test_analysis", _stable_question_dir)
+
+
+def test_list_questions(network):
+    """Make sure answered question shows up in list_questions."""
+    question = bfq.ipOwners()
+    question.answer()
+    assert question.get_name() in bf_list_questions()
 
 
 def test_answer_traceroute(traceroute_network):
