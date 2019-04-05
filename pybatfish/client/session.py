@@ -27,11 +27,14 @@ from requests import HTTPError
 
 from pybatfish.client import workhelper, resthelper, restv2helper
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import _get_snapshot_parse_status, \
-    _check_if_any_failed, _check_if_all_passed, _upload_diagnostics
+from pybatfish.client.diagnostics import (_get_snapshot_parse_status,
+                                          _check_if_any_failed,
+                                          _check_if_all_passed,
+                                          _upload_diagnostics)
 from pybatfish.client.workhelper import get_work_status
-from pybatfish.datamodel import Interface, Edge, NodeRolesData, \
-    NodeRoleDimension, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel import (Interface, Edge, NodeRolesData,
+                                 NodeRoleDimension, ReferenceBook,
+                                 ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.util import validate_name, get_uuid, zip_dir
 from .options import Options

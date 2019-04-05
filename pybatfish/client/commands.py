@@ -304,7 +304,7 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
 
 
 def bf_get_info():
-    bf_session.get_info()
+    return bf_session.get_info()
 
 
 def bf_get_issue_config(major, minor):
