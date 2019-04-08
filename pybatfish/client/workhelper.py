@@ -20,17 +20,19 @@ import json
 import logging
 import tempfile
 import time
-from typing import Any, Dict, Optional  # noqa: F401
+from typing import Any, Dict, Optional, TYPE_CHECKING  # noqa: F401
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.exception import BatfishException
 from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
 MAX_LOG_LENGTH = 64 * 1024
@@ -80,7 +82,7 @@ def execute(work_item, session, background=False, extra_args=None):
     :param background: Whether to background the job. If `True`,
         this function only returns the result of submitting the job.
     :type background: bool
-    :param extra_args: extra arguments to be passed to Batfish. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to Batfish.
     :type extra_args: dict
 
     :return: If `background=True`, a dict containing a single key 'result' with
@@ -312,12 +314,6 @@ def get_data_list_incomplete_work(session):
     return json_data
 
 
-def get_data_list_questions(session):
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network}
-    return json_data
-
-
 def get_data_list_snapshots(session, network):
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key}
     if network is not None:
@@ -441,13 +437,14 @@ def print_work_status(session, work_status, task_details):
 
 
 def _print_work_status(session, work_status, task_details, now_function):
-    if session.logger.getEffectiveLevel() == logging.INFO \
-            or session.logger.getEffectiveLevel() == logging.DEBUG:
-        session.logger.info("status: {}".format(work_status))
+    logger = logging.getLogger(__name__)
+    if logger.getEffectiveLevel() == logging.INFO \
+            or logger.getEffectiveLevel() == logging.DEBUG:
+        logger.info("status: {}".format(work_status))
 
         json_task = json.loads(task_details)
         if not json_task:
-            session.logger.info(".... no task information")
+            logger.info(".... no task information")
             return
         obtained_time = _parse_timestamp(json_task["obtained"])
         now = now_function(obtained_time.tzinfo)
@@ -463,10 +460,10 @@ def _print_work_status(session, work_status, task_details, now_function):
             batch_elapsed_seconds = (now - batch_started_time).total_seconds()
             print_batch_elapsed = batch_elapsed_seconds > session.elapsed_delay
             for batch in batches[:-1]:
-                session.logger.debug(".... {obtained_time} {batch}".format(
+                logger.debug(".... {obtained_time} {batch}".format(
                     obtained_time=obtained_str,
                     batch=_batch_to_string(batch, None)))
-            session.logger.info(
+            logger.info(
                 ".... {obtained_time} {batch}".format(
                     obtained_time=obtained_str,
                     batch=_batch_to_string(

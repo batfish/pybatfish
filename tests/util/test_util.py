@@ -18,11 +18,11 @@ import zipfile
 
 import pytest
 
-from pybatfish.datamodel import Interface
+from pybatfish.datamodel import AclTrace, Interface
 from pybatfish.exception import QuestionValidationException
 from pybatfish.util import (BfJsonEncoder, conditional_str, escape_html,
-                            escape_name, validate_name, validate_question_name,
-                            zip_dir)
+                            escape_name, get_html, validate_name,
+                            validate_question_name, zip_dir)
 
 
 def test_conditional_str():
@@ -111,6 +111,14 @@ def test_escape_name():
     assert escape_name('/a') == '"/a"'
     assert escape_name('0a') == '"0a"'
     assert escape_name('a#') == '"a#"'
+
+
+def test_get_html():
+    assert get_html('astring') == 'astring'
+    assert get_html(1.2) == '1.2'
+    assert get_html(100) == '100'
+    # Complex object without __str__ implementation, expect repr-like
+    assert get_html(AclTrace()) == 'AclTrace(events=[])'
 
 
 def _make_config(directory, filename, file_contents):

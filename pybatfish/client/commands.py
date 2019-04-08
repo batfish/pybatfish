@@ -16,20 +16,15 @@
 
 from __future__ import absolute_import, print_function
 
-import base64
 import json
 import logging
-import os
 import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 import six
 from deprecated import deprecated
-from requests import HTTPError
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_upload_diagnostics,
-                                          _warn_on_snapshot_failure)
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     Edge, Interface,
@@ -39,23 +34,22 @@ from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   ReferenceLibrary)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from pybatfish.util import (BfJsonEncoder, get_uuid, validate_name, zip_dir)
+from pybatfish.util import (BfJsonEncoder)
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
-from .workhelper import (get_work_status,
-                         kill_work)
+from .workhelper import (kill_work)
+
+
+def _configure_default_logging():
+    logger = logging.getLogger('pybatfish')
+    logger.setLevel(logging.INFO)
+    logger.addHandler(logging.StreamHandler())
+
 
 # TODO: normally libraries don't configure logging in code
-_bfDebug = True
-bf_logger = logging.getLogger("pybatfish.client")
-bf_session = Session(bf_logger)
-
-if _bfDebug:
-    bf_logger.setLevel(logging.INFO)
-    bf_logger.addHandler(logging.StreamHandler())
-else:
-    bf_logger.addHandler(logging.NullHandler())
+_configure_default_logging()
+bf_session = Session()
 
 __all__ = ['bf_add_analysis',
            'bf_add_issue_config',
@@ -90,9 +84,7 @@ __all__ = ['bf_add_analysis',
            'bf_list_analyses',
            'bf_list_networks',
            'bf_list_incomplete_works',
-           'bf_list_questions',
            'bf_list_snapshots',
-           'bf_logger',
            'bf_put_node_role_dimension',
            'bf_put_node_roles',
            'bf_read_question_settings',
@@ -106,7 +98,8 @@ __all__ = ['bf_add_analysis',
 
 
 def bf_add_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(analysisName, questionDirectory, False)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
+                                    False)
 
 
 def bf_add_issue_config(issue_config):
@@ -190,23 +183,19 @@ def bf_delete_network(name):
     :param name: name of the network to delete
     :type name: string
     """
-    if name is None:
-        raise ValueError('Network to be deleted must be supplied')
-    jsonData = workhelper.get_data_delete_network(bf_session, name)
-    resthelper.get_json_response(bf_session, CoordConsts.SVC_RSC_DEL_NETWORK,
-                                 jsonData)
+    bf_session.delete_network(name)
 
 
 def bf_delete_node_role_dimension(dimension):
     # type: (str) -> None
     """Deletes the definition of the given role dimension for the active network."""
-    restv2helper.delete_node_role_dimension(bf_session, dimension)
+    bf_session.delete_node_role_dimension(dimension)
 
 
 def bf_delete_reference_book(book_name):
     # type: (str) -> None
     """Deletes the reference book with the specified name for the active network."""
-    restv2helper.delete_reference_book(bf_session, book_name)
+    bf_session.delete_reference_book(book_name)
 
 
 def bf_delete_snapshot(name):
@@ -217,12 +206,7 @@ def bf_delete_snapshot(name):
     :param name: name of the snapshot to delete
     :type name: string
     """
-    _check_network()
-    if name is None:
-        raise ValueError('Snapshot to be deleted must be supplied')
-    json_data = workhelper.get_data_delete_snapshot(bf_session, name)
-    resthelper.get_json_response(bf_session, CoordConsts.SVC_RSC_DEL_SNAPSHOT,
-                                 json_data)
+    bf_session.delete_snapshot(name)
 
 
 def bf_extract_answer_summary(answer_dict):
@@ -265,65 +249,29 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
     :type add_files: str
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, JSON dictionary of task status if
         background=True, or None if the call fails
     :rtype: Union[str, Dict, None]
     """
-    if bf_session.network is None:
-        raise ValueError('Network must be set to fork a snapshot.')
-
-    if name is None:
-        name = Options.default_snapshot_prefix + get_uuid()
-    validate_name(name)
-
-    if name in bf_list_snapshots():
-        if overwrite:
-            bf_delete_snapshot(name)
-        else:
-            raise ValueError(
-                'A snapshot named ''{}'' already exists in network ''{}'''.format(
-                    name, bf_session.network))
-
-    encoded_file = None
-    if add_files is not None:
-        file_to_send = add_files
-        if os.path.isdir(add_files):
-            temp_zip_file = tempfile.NamedTemporaryFile()
-            zip_dir(add_files, temp_zip_file)
-            file_to_send = temp_zip_file.name
-
-        if os.path.isfile(file_to_send):
-            with open(file_to_send, "rb") as f:
-                encoded_file = base64.b64encode(f.read()).decode('ascii')
-
-    json_data = {
-        "snapshotBase": base_name,
-        "snapshotNew": name,
-        "deactivateInterfaces": deactivate_interfaces,
-        "deactivateLinks": deactivate_links,
-        "deactivateNodes": deactivate_nodes,
-        "restoreInterfaces": restore_interfaces,
-        "restoreLinks": restore_links,
-        "restoreNodes": restore_nodes,
-        "zipFile": encoded_file
-    }
-    restv2helper.fork_snapshot(bf_session,
-                               json_data)
-
-    return _parse_snapshot(name, background, extra_args)
+    return bf_session._fork_snapshot(base_name, name=name, overwrite=overwrite,
+                                     background=background,
+                                     deactivate_interfaces=deactivate_interfaces,
+                                     deactivate_links=deactivate_links,
+                                     deactivate_nodes=deactivate_nodes,
+                                     restore_interfaces=restore_interfaces,
+                                     restore_links=restore_links,
+                                     restore_nodes=restore_nodes,
+                                     add_files=add_files,
+                                     extra_args=extra_args)
 
 
 def bf_generate_dataplane(snapshot=None, extra_args=None):
     # type: (Optional[str], Optional[Dict[str, Any]]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
-    snapshot = bf_session.get_snapshot(snapshot)
-
-    work_item = workhelper.get_workitem_generate_dataplane(bf_session, snapshot)
-    answer_dict = workhelper.execute(work_item, bf_session,
-                                     extra_args=extra_args)
-    return str(answer_dict["status"].value)
+    return bf_session.generate_dataplane(snapshot=snapshot,
+                                         extra_args=extra_args)
 
 
 def bf_get_analysis_answers(name, snapshot=None,
@@ -349,18 +297,12 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     :param reference_snapshot: if present, the snapshot against which the answer
         was computed differentially.
     """
-    jsonData = workhelper.get_data_get_answer(bf_session, questionName,
-                                              snapshot, reference_snapshot)
-    response = resthelper.get_json_response(bf_session,
-                                            CoordConsts.SVC_RSC_GET_ANSWER,
-                                            jsonData)
-    answerJson = json.loads(response["answer"])
-    return answerJson
+    return bf_session.get_answer(question=questionName, snapshot=snapshot,
+                                 reference_snapshot=reference_snapshot)
 
 
 def bf_get_info():
-    jsonResponse = resthelper.get_json_response(bf_session, '', useHttpGet=True)
-    return jsonResponse
+    return bf_session.get_info()
 
 
 def bf_get_issue_config(major, minor):
@@ -373,43 +315,37 @@ def bf_get_issue_config(major, minor):
 def bf_get_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the definition of the given node role dimension for the active network."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_node_role_dimension(bf_session, dimension))
+    return bf_session.get_node_role_dimension(dimension=dimension)
 
 
 def bf_get_node_roles():
     # type: () -> NodeRolesData
     """Returns the definitions of node roles for the active network."""
-    return NodeRolesData.from_dict(restv2helper.get_node_roles(bf_session))
+    return bf_session.get_node_roles()
 
 
 def bf_get_reference_book(book_name):
     # type: (str) -> ReferenceBook
     """Returns the reference book with the specified for the active network."""
-    return ReferenceBook.from_dict(
-        restv2helper.get_reference_book(bf_session, book_name))
+    return bf_session.get_reference_book(name=book_name)
 
 
 def bf_get_reference_library():
     # type: () -> ReferenceLibrary
     """Returns the reference library for the active network."""
-    return ReferenceLibrary.from_dict(
-        restv2helper.get_reference_library(bf_session))
+    return bf_session.get_reference_library()
 
 
 def bf_get_snapshot_inferred_node_roles():
     # type: () -> NodeRolesData
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
-    return NodeRolesData.from_dict(
-        restv2helper.get_snapshot_inferred_node_roles(bf_session))
+    return bf_session.get_node_roles(inferred=True)
 
 
 def bf_get_snapshot_inferred_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
-    return NodeRoleDimension.from_dict(
-        restv2helper.get_snapshot_inferred_node_role_dimension(bf_session,
-                                                               dimension))
+    return bf_session.get_node_role_dimension(dimension, inferred=True)
 
 
 def bf_get_snapshot_node_roles():
@@ -427,13 +363,14 @@ def bf_get_snapshot_node_role_dimension(dimension):
 
 
 def bf_get_work_status(wItemId):
-    return get_work_status(wItemId, bf_session)
+    return bf_session.get_work_status(work_item=wItemId)
 
 
-def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
+def _bf_init_or_add_analysis(session, analysisName, questionDirectory,
+                             newAnalysis):
     from pybatfish.question.question import _load_questions_from_dir
     _check_network()
-    questions = _load_questions_from_dir(questionDirectory)
+    questions = _load_questions_from_dir(questionDirectory, session)
     analysis = {
         question_name: question_class(question_name=question_name)
         for question_name, question_class in six.iteritems(questions)
@@ -450,7 +387,8 @@ def _bf_init_or_add_analysis(analysisName, questionDirectory, newAnalysis):
 
 
 def bf_init_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(analysisName, questionDirectory, True)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
+                                    True)
 
 
 def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
@@ -467,77 +405,14 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
     :type overwrite: bool
     :param background: whether or not to run the task in the background
     :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
+    :param extra_args: extra arguments to be passed to the parse command.
     :type extra_args: dict
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
     """
-    if bf_session.network is None:
-        bf_set_network()
-
-    if name is None:
-        name = Options.default_snapshot_prefix + get_uuid()
-    validate_name(name)
-
-    if name in bf_list_snapshots():
-        if overwrite:
-            bf_delete_snapshot(name)
-        else:
-            raise ValueError(
-                'A snapshot named ''{}'' already exists in network ''{}'''.format(
-                    name, bf_session.network))
-
-    file_to_send = upload
-    if os.path.isdir(upload):
-        temp_zip_file = tempfile.NamedTemporaryFile()
-        zip_dir(upload, temp_zip_file)
-        file_to_send = temp_zip_file.name
-
-    json_data = workhelper.get_data_upload_snapshot(bf_session, name,
-                                                    file_to_send)
-    resthelper.get_json_response(bf_session,
-                                 CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
-                                 json_data)
-
-    return _parse_snapshot(name, background, extra_args)
-
-
-def _parse_snapshot(name, background, extra_args):
-    # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
-    """Parse specified snapshot.
-
-    :param name: name of the snapshot to initialize
-    :type name: str
-    :param background: whether or not to run the task in the background
-    :type background: bool
-    :param extra_args: extra arguments to be passed to the parse command. See bf_session.additional_args.
-    :type extra_args: dict
-    :return: name of initialized snapshot, or JSON dictionary of task status if background=True
-    :rtype: Union[str, Dict]
-    """
-    work_item = workhelper.get_workitem_parse(bf_session, name)
-    answer_dict = workhelper.execute(work_item, bf_session,
+    return bf_session._init_snapshot(upload, name=name, overwrite=overwrite,
                                      background=background,
                                      extra_args=extra_args)
-    if background:
-        bf_session.snapshot = name
-        return answer_dict
-
-    status = WorkStatusCode(answer_dict["status"])
-
-    if status != WorkStatusCode.TERMINATEDNORMALLY:
-        init_log = restv2helper.get_work_log(bf_session, name, work_item.id)
-        raise BatfishException(
-            'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
-                ss=name, status=status, log=init_log))
-    else:
-        bf_session.snapshot = name
-        bf_logger.info("Default snapshot is now set to %s",
-                       bf_session.snapshot)
-        if bf_session.enable_diagnostics:
-            _warn_on_snapshot_failure()
-
-        return bf_session.snapshot
 
 
 def bf_kill_work(wItemId):
@@ -561,29 +436,11 @@ def bf_list_networks():
 
     :return: a list of network names
     """
-    json_data = workhelper.get_data_list_networks(bf_session)
-    json_response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
-
-    return list(map(str, json_response['networklist']))
+    return bf_session.list_networks()
 
 
 def bf_list_incomplete_works():
-    jsonData = workhelper.get_data_list_incomplete_work(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK,
-                                                jsonData)
-    return jsonResponse
-
-
-def bf_list_questions():
-    _check_network()
-    jsonData = workhelper.get_data_list_questions(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_LIST_QUESTIONS,
-                                                jsonData)
-    answer = jsonResponse['questionlist']
-    return answer
+    return bf_session.list_incomplete_works()
 
 
 def bf_list_snapshots(verbose=False):
@@ -597,7 +454,7 @@ def bf_list_snapshots(verbose=False):
     :return: a list of snapshot names or the full json response containing
         snapshots and metadata (if `verbose=True`)
     """
-    return restv2helper.list_snapshots(bf_session, verbose)
+    return bf_session.list_snapshots(verbose=verbose)
 
 
 def bf_put_reference_book(book):
@@ -610,7 +467,7 @@ def bf_put_reference_book(book):
     :param book: The ReferenceBook object to add
     :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
     """
-    restv2helper.put_reference_book(bf_session, book)
+    bf_session.put_reference_book(book)
 
 
 def bf_put_node_role_dimension(dimension):
@@ -626,15 +483,13 @@ def bf_put_node_role_dimension(dimension):
     :param dimension: The NodeRoleDimension object for the dimension to add
     :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
     """
-    if dimension.type == "AUTO":
-        raise ValueError("Cannot put a dimension of type AUTO")
-    restv2helper.put_node_role_dimension(bf_session, dimension)
+    bf_session.put_node_role_dimension(dimension=dimension)
 
 
 def bf_put_node_roles(node_roles_data):
     # type: (NodeRolesData) -> None
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
-    restv2helper.put_node_roles(bf_session, node_roles_data)
+    bf_session.put_node_roles(node_roles_data=node_roles_data)
 
 
 def bf_read_question_settings(question_class, json_path=None):
@@ -679,30 +534,7 @@ def bf_set_network(name=None, prefix=Options.default_network_prefix):
     :rtype: string
     :raises BatfishException: if configuration fails
     """
-    if name is None:
-        name = prefix + get_uuid()
-    validate_name(name, "network")
-
-    try:
-        net = restv2helper.get_network(bf_session, name)
-        bf_session.network = str(net['name'])
-        return bf_session.network
-    except HTTPError as e:
-        if e.response.status_code != 404:
-            raise BatfishException('Unknown error accessing network', e)
-
-    json_data = workhelper.get_data_init_network(bf_session, name)
-    json_response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
-
-    network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
-    if network_name is None:
-        raise BatfishException(
-            "Network initialization failed. Server response: {}".format(
-                json_response))
-
-    bf_session.network = str(network_name)
-    return bf_session.network
+    return bf_session.set_network(name=name, prefix=prefix)
 
 
 def bf_set_snapshot(name=None, index=None):
@@ -717,32 +549,7 @@ def bf_set_snapshot(name=None, index=None):
     :return: the name of the successfully set snapshot
     :rtype: str
     """
-    if name is None and index is None:
-        raise ValueError('One of name and index must be set')
-    if name is not None and index is not None:
-        raise ValueError('Only one of name and index can be set')
-
-    snapshots = bf_list_snapshots()
-
-    # Index specified, simply give the ith snapshot
-    if index is not None:
-        if not (-len(snapshots) <= index < len(snapshots)):
-            raise IndexError(
-                "Server has only {} snapshots: {}".format(
-                    len(snapshots), snapshots))
-        bf_session.snapshot = str(snapshots[index])
-
-    # Name specified, make sure it exists.
-    else:
-        assert name is not None  # type-hint to Python
-        if name not in snapshots:
-            raise ValueError(
-                'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
-                    name, bf_session.network, snapshots))
-        bf_session.snapshot = name
-
-    bf_logger.info("Default snapshot is now set to %s", bf_session.snapshot)
-    return bf_session.snapshot
+    return bf_session.set_snapshot(name=name, index=index)
 
 
 def bf_upload_diagnostics(dry_run=True, netconan_config=None):
@@ -770,7 +577,8 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-    return _upload_diagnostics(dry_run=dry_run, netconan_config=netconan_config)
+    return bf_session.upload_diagnostics(dry_run=dry_run,
+                                         netconan_config=netconan_config)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):

@@ -12,9 +12,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import json
+import logging
 
 import pytest
 
+from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (_compute_docstring,
@@ -35,6 +37,12 @@ TEST_QUESTION_DICT = {
         'description': 'a test question',
     }
 }
+
+
+@pytest.fixture()
+def session():
+    """Session associated with questions created in tests."""
+    yield Session(logging.getLogger(__name__))
 
 
 def test_min_length():
@@ -273,15 +281,18 @@ def test_process_variables():
 
     # no ordered_variable_names returns variables in default order
     ordered_variable_names = []
-    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+    assert _process_variables("foo", variables,
+                              ordered_variable_names) == default_variables
 
     # invalid ordered_variable_names returns variables in default order
     ordered_variable_names = ["d", "c", "b"]
-    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
+    assert _process_variables("foo", variables,
+                              ordered_variable_names) == default_variables
 
     # valid ordered_variable_names returns ordered_variable_names
     ordered_variable_names = ["d", "c", "b", "a"]
-    assert _process_variables("foo", variables, ordered_variable_names) == ordered_variable_names
+    assert _process_variables("foo", variables,
+                              ordered_variable_names) == ordered_variable_names
 
 
 def test_has_valid_ordered_variable_names():
@@ -294,58 +305,65 @@ def test_has_valid_ordered_variable_names():
 
     # empty ordered_variable_names returns False
     ordered_variable_names = []
-    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names,
+                                                 variables)
 
     # incomplete ordered_variable_names returns False
     ordered_variable_names = ["a"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names,
+                                                 variables)
     ordered_variable_names = ["a", "c"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names,
+                                                 variables)
 
     # complete ordered_variable_names but with duplicate returns False
     ordered_variable_names = ["a", "c", "b", "b"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names,
+                                                 variables)
 
     # ordered_variable_names with extraneous variable returns False
     ordered_variable_names = ["a", "c", "b", "d"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names,
+                                                 variables)
 
     # complete ordered_variable_names return True
     ordered_variable_names = ["a", "c", "b"]
     assert _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
 
-def test_load_dir_questions(tmpdir):
+def test_load_dir_questions(tmpdir, session):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    loaded = _load_questions_from_dir(question_dir=dir.strpath,
+                                      session=session)
     assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
     # test fault tolerance to bad questions
     dir.join("badq.json").write('{')
-    loaded = _load_questions_from_dir(question_dir=dir.strpath)
+    loaded = _load_questions_from_dir(question_dir=dir.strpath,
+                                      session=session)
     assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
 
-def test_list_questions(tmpdir):
+def test_list_questions(tmpdir, session):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    load_questions(question_dir=dir.strpath)
+    load_questions(question_dir=dir.strpath, session=session)
     names = [q['name'] for q in list_questions()]
     assert names == [TEST_QUESTION_NAME]
 
 
-def test_make_check():
+def test_make_check(session):
     """Make a check out of the first available question."""
-    name, q = _load_question_dict(TEST_QUESTION_DICT)
+    name, q = _load_question_dict(TEST_QUESTION_DICT, session)
     qdict = q().make_check().dict()
     assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
                                                0).dict()
 
 
-def test_question_name():
+def test_question_name(session):
     """Test user-set and default question names."""
-    qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
 
     has_name = qclass(question_name="manually set")
     assert has_name.get_name() == "manually set"
@@ -355,9 +373,9 @@ def test_question_name():
         '__{}_'.format(TEST_QUESTION_NAME))
 
 
-def test_question_positional_args():
+def test_question_positional_args(session):
     """Test that a question constructor rejects positional arguments."""
-    qname, qclass = _load_question_dict(TEST_QUESTION_DICT)
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
     with pytest.raises(TypeError):
         qclass("positional")
 
