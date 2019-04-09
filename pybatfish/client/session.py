@@ -26,9 +26,9 @@ from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
+from pybatfish.client._diagnostics import (upload_diagnostics,
+                                           warn_on_snapshot_failure)
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.diagnostics import (_upload_diagnostics,
-                                          _warn_on_snapshot_failure)
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
@@ -688,8 +688,8 @@ class Session(object):
         :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
         :rtype: string
         """
-        return _upload_diagnostics(self, dry_run=dry_run,
-                                   netconan_config=netconan_config)
+        return upload_diagnostics(self, dry_run=dry_run,
+                                  netconan_config=netconan_config)
 
     def _check_network(self):
         """Check if current network is set."""
@@ -737,6 +737,6 @@ class Session(object):
                 "Default snapshot is now set to %s",
                 self.snapshot)
             if self.enable_diagnostics:
-                _warn_on_snapshot_failure(self)
+                warn_on_snapshot_failure(self)
 
             return self.snapshot

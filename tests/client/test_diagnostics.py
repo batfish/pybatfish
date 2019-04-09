@@ -20,9 +20,9 @@ import uuid
 import pytest
 import responses
 
-from pybatfish.client.diagnostics import (_anonymize_dir, _check_if_all_passed,
-                                          _check_if_any_failed,
-                                          _upload_dir_to_url)
+from pybatfish.client._diagnostics import (_anonymize_dir, _check_if_all_passed,
+                                           _check_if_any_failed,
+                                           _upload_dir_to_url)
 
 # Config file constants for anonymization and upload
 _CONFIG_IP_ADDR = "1.2.3.4"
