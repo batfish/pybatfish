@@ -22,6 +22,7 @@ from pybatfish.question.question import (QuestionBase, QuestionMeta,
 
 
 def create_question(name, session, description, tags):
+    """Create question to manually install into Session.q."""
     return (name, QuestionMeta(name, (QuestionBase,), {
         'docstring': 'docstring',
         'description': description,
@@ -30,12 +31,6 @@ def create_question(name, session, description, tags):
         'template': {},
         'variables': [],
     }))
-
-
-@pytest.fixture(scope='function')
-def session():
-    s = Session()
-    yield s
 
 
 @pytest.fixture(scope='module')
@@ -52,6 +47,12 @@ def questions():
         'tags': ['tags2'],
     }
     yield [q1, q2]
+
+
+@pytest.fixture(scope='function')
+def session():
+    s = Session()
+    yield s
 
 
 def test_list_question_tags(session):
