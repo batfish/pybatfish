@@ -38,10 +38,15 @@ _MAX_FILENAME_LEN = 150
 # See issue https://bugs.python.org/issue34097
 _MIN_ZIP_TIMESTAMP = 315561600.0
 
+# Characters that must be escaped in name
+# Should be in sync with SPECIAL_CHARS in CommonParser.java
+_NAME_SPECIAL_CHARS_ = " \t,\\&()[]@" + "!#$%^;?<>={}"
+
 __all__ = [
     'BfJsonEncoder',
     'conditional_str',
     'escape_html',
+    'escape_name',
     'get_html',
     'get_uuid',
     'validate_name',
@@ -190,6 +195,19 @@ def escape_html(s):
     else:
         from html import escape
         return escape(s)
+
+
+def escape_name(s):
+    # type: (str) -> str
+    """
+    Escapes the given name string with double quotes if needed.
+
+    A name should be quoted if it begins with '"', '/', or digit, or if it
+    contains a special character (_NAME_SPECIAL_CHARS_).
+    """
+    return "\"{}\"".format(s) if s is not None and len(s) != 0 and (
+        s.startswith("\"") or s.startswith("/") or s[0].isdigit() or
+        any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)) else s
 
 
 def get_html(element):
