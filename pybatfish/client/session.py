@@ -70,8 +70,7 @@ class Session(object):
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
 
-        # Object to hold questions
-        # self.q = type('q', (object,), {})  # type: object
+        # Object to hold and manage questions
         self.q = Questions(self)
 
         # Additional worker args
