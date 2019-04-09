@@ -55,10 +55,10 @@ def session():
     yield s
 
 
-def test_list_question_tags(session):
+def test_list_tags(session):
     """Test that question tags are listed as expected."""
     # Should have no tags to start with
-    assert len(session.list_question_tags()) == 0
+    assert len(session.q.list_tags()) == 0
 
     q1_tags = ['tag1', 'tag2']
     q3_tags = ['tag2']
@@ -72,20 +72,20 @@ def test_list_question_tags(session):
     _install_questions([q1, q2, q3], session.q)
 
     # Make sure all tags show up when listing tags
-    assert all_tags == session.list_question_tags()
+    assert all_tags == session.q.list_tags()
 
 
 def test_list_questions(session, questions):
     """Test that questions are listed as expected."""
     # Should have no questions to start with
-    assert len(session.list_questions()) == 0
+    assert len(session.q.list()) == 0
 
     qs = [create_question(q.get('name'), session, q.get('description'),
                           q.get('tags')) for q in questions]
     _install_questions(qs, session.q)
 
     # Make sure all questions show up when listing questions
-    listed_questions = session.list_questions()
+    listed_questions = session.q.list()
     for q in questions:
         assert q in listed_questions
 
@@ -93,11 +93,11 @@ def test_list_questions(session, questions):
 def test_load_questions_local(session, tmpdir, questions):
     """Test that questions loaded from a directory show up as expected."""
     # Should have no questions to start with
-    assert len(session.list_questions()) == 0
+    assert len(session.q.list()) == 0
 
     # Should still have no questions after loading an empty dir
     dir_path = str(tmpdir.mkdir('questions'))
-    session.load_questions(dir_path)
+    session.q.load(dir_path)
 
     for q in questions:
         filename = '{}.json'.format(q['name'])
@@ -111,9 +111,9 @@ def test_load_questions_local(session, tmpdir, questions):
                 }
             }))
             f.flush()
-    session.load_questions(dir_path)
+    session.q.load(dir_path)
 
     # Make sure all questions from specified directory show up when listing questions
-    listed_questions = session.list_questions()
+    listed_questions = session.q.list()
     for q in questions:
         assert q in listed_questions
