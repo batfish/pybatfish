@@ -252,12 +252,17 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
     :returns: a list of questions, where each question is represented as a dict
         containing "name", "description", and "tags".
     """
-    module = sys.modules[question_module]
+    return _list_questions(tags, sys.modules[question_module])
+
+
+def _list_questions(tags, obj):
+    # type: (Optional[Iterable[str]], object) -> List[Dict[str, Union[str, Set]]]
+    """List questions in the specified object, optionally filtering on supplied tags."""
     # Members of the module are (name,value) pairs so
     # x[1] in the lambda represents the value part.
     # Want members with value of type QuestionMeta
     predicate = lambda x: isinstance(x[1], QuestionMeta)
-    question_functions = filter(predicate, getmembers(module))
+    question_functions = filter(predicate, getmembers(obj))
 
     matching_questions = []
     desired_tags = set(
@@ -289,6 +294,13 @@ def _install_questions_in_module(questions, module_name):
     for (name, question_class) in questions:
         setattr(question_class, '__module__', module_name)
         setattr(module, name, question_class)
+
+
+def _install_questions(questions, obj):
+    # type: (Iterable[Tuple[str, QuestionMeta]], object) -> None
+    """Install the given questions in the specified object."""
+    for (name, question_class) in questions:
+        setattr(obj, name, question_class)
 
 
 def _load_questions_from_dir(question_dir, session):

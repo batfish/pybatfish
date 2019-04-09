@@ -20,8 +20,10 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
+from typing import (Any, Dict, Iterable, List, Optional, Set,  # noqa: F401
+                    Text, Union)
 
+import six
 from deprecated import deprecated
 from requests import HTTPError
 
@@ -34,6 +36,10 @@ from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
+from pybatfish.question.question import (_install_questions,
+                                         _list_questions,
+                                         _load_questions_from_dir,
+                                         _load_remote_questions_templates)
 from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
 
@@ -67,6 +73,9 @@ class Session(object):
         self.api_key = CoordConsts.DEFAULT_API_KEY  # type: str
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
+
+        # Object to hold questions
+        self.q = type('q', (object,), {})  # type: object
 
         # Additional worker args
         self.additional_args = {}  # type: Dict
@@ -529,6 +538,28 @@ class Session(object):
                                                 json_data)
         return response
 
+    def list_question_tags(self):
+        # type: () -> Set[str]
+        """
+        Get the tags for available questions.
+
+        :return: tags for available questions
+        :rtype: set
+        """
+        return {t for q in self.list_questions() for t in q.get('tags', [])}
+
+    def list_questions(self, tags=None):
+        # type: (Optional[Iterable[str]]) -> List[Dict[str, Union[str, Set]]]
+        """
+        List questions available in this session.
+
+        :param tags: if not `None`, only list questions with specified tags
+            See :py:func:`list_question_tags` for a list of tags for available questions.
+        :type tags: Iterable[str]
+        :return: list of question dict, containing "name", "description", and "tags"
+        """
+        return _list_questions(tags, self.q)
+
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
         """
@@ -543,6 +574,20 @@ class Session(object):
         :rtype: list
         """
         return restv2helper.list_snapshots(self, verbose)
+
+    def load_questions(self, directory=None):
+        # type: (Optional[str]) -> None
+        """
+        Load questions from Batfish service or local directory into this session.
+
+        :param directory: optional directory to load questions from, if none is specified, questions are loaded from the Batfish service instead
+        :type directory: str
+        """
+        if directory:
+            questions = six.iteritems(_load_questions_from_dir(directory, self))
+            _install_questions(questions, self.q)
+        else:
+            _install_questions(_load_remote_questions_templates(self), self.q)
 
     def put_reference_book(self, book):
         # type: (ReferenceBook) -> None
