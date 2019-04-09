@@ -259,10 +259,10 @@ class Questions(object):
     def list(self, tags=None):
         # type: (Optional[Iterable[str]]) -> List[Dict[str, Union[str, Set]]]
         """
-        List questions available in this session.
+        List available questions.
 
         :param tags: if not `None`, only list questions with specified tags
-            See :py:func:`list_question_tags` for a list of tags for available questions.
+            See :py:func:`list_tags` for a list of tags for available questions.
         :type tags: Iterable[str]
         :return: list of question dict, containing "name", "description", and "tags"
         """
