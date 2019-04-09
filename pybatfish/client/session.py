@@ -57,16 +57,16 @@ class Session(object):
         # Coordinator args
         self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
-        self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
+        self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: Text
         self.port_v2 = port_v2  # type: int
-        self._base_uri_v2 = CoordConsts.SVC_CFG_WORK_MGR2  # type: str
+        self._base_uri_v2 = CoordConsts.SVC_CFG_WORK_MGR2  # type: Text
         self.ssl = ssl  # type: bool
         self.verify_ssl_certs = verify_ssl_certs  # type: bool
 
         # Session args
-        self.api_key = CoordConsts.DEFAULT_API_KEY  # type: str
-        self.network = None  # type: Optional[str]
-        self.snapshot = None  # type: Optional[str]
+        self.api_key = CoordConsts.DEFAULT_API_KEY  # type: Text
+        self.network = None  # type: Optional[Text]
+        self.snapshot = None  # type: Optional[Text]
 
         # Additional worker args
         self.additional_args = {}  # type: Dict
