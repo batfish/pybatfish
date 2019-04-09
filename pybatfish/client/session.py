@@ -239,6 +239,7 @@ class Session(object):
         :type add_files: str
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
+
         :return: name of initialized snapshot or None if the call fails
         :rtype: Optional[str]
         """
@@ -648,6 +649,7 @@ class Session(object):
         :type name: str
         :param index: set the current snapshot to the ``index``-th most recent snapshot
         :type index: int
+
         :return: the name of the successfully set snapshot
         :rtype: str
         """
