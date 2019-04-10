@@ -20,7 +20,8 @@ import json
 import logging
 import os
 import tempfile
-from typing import Any, Dict, List, Optional, Text, Union  # noqa: F401
+from typing import (Any, Dict, List, Optional,  # noqa: F401
+                    Text, Union)
 
 from deprecated import deprecated
 from requests import HTTPError
@@ -34,6 +35,7 @@ from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
 from pybatfish.exception import BatfishException
+from pybatfish.question.question import (Questions)
 from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
 
@@ -67,6 +69,9 @@ class Session(object):
         self.api_key = CoordConsts.DEFAULT_API_KEY  # type: str
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
+
+        # Object to hold and manage questions
+        self.q = Questions(self)
 
         # Additional worker args
         self.additional_args = {}  # type: Dict

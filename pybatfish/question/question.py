@@ -240,6 +240,52 @@ class QuestionBase(object):
         return self
 
 
+class Questions(object):
+    """Class to hold and manage (e.g. load, list) Batfish questions."""
+
+    def __init__(self, session):
+        self._session = session
+
+    def list_tags(self):
+        # type: () -> Set[str]
+        """
+        Get the tags for available questions.
+
+        :return: tags for available questions
+        :rtype: set
+        """
+        return {t for q in self.list() for t in q.get('tags', [])}
+
+    def list(self, tags=None):
+        # type: (Optional[Iterable[str]]) -> List[Dict[str, Union[str, Set]]]
+        """
+        List available questions.
+
+        :param tags: if not `None`, only list questions with specified tags
+            See :py:func:`list_tags` for a list of tags for available questions.
+        :type tags: Iterable[str]
+        :return: list of question dict, containing "name", "description", and "tags"
+        """
+        return _list_questions(tags, self)
+
+    def load(self, directory=None):
+        # type: (Optional[str]) -> None
+        """
+        Load questions from Batfish service or local directory.
+
+        :param directory: optional directory to load questions from, if none is specified, questions are loaded from the Batfish service instead
+        :type directory: str
+        """
+        if directory:
+            _install_questions(
+                six.iteritems(
+                    _load_questions_from_dir(directory, self._session)),
+                self)
+        else:
+            _install_questions(_load_remote_questions_templates(self._session),
+                               self)
+
+
 def list_questions(tags=None, question_module='pybatfish.question.bfq'):
     # type: (Optional[Iterable[str]], str) -> List[Dict[str, Union[str, Set]]]
     """List available questions.
@@ -252,12 +298,17 @@ def list_questions(tags=None, question_module='pybatfish.question.bfq'):
     :returns: a list of questions, where each question is represented as a dict
         containing "name", "description", and "tags".
     """
-    module = sys.modules[question_module]
+    return _list_questions(tags, sys.modules[question_module])
+
+
+def _list_questions(tags, obj):
+    # type: (Optional[Iterable[str]], object) -> List[Dict[str, Union[str, Set]]]
+    """List questions in the specified object, optionally filtering on supplied tags."""
     # Members of the module are (name,value) pairs so
     # x[1] in the lambda represents the value part.
     # Want members with value of type QuestionMeta
     predicate = lambda x: isinstance(x[1], QuestionMeta)
-    question_functions = filter(predicate, getmembers(module))
+    question_functions = filter(predicate, getmembers(obj))
 
     matching_questions = []
     desired_tags = set(
@@ -289,6 +340,13 @@ def _install_questions_in_module(questions, module_name):
     for (name, question_class) in questions:
         setattr(question_class, '__module__', module_name)
         setattr(module, name, question_class)
+
+
+def _install_questions(questions, obj):
+    # type: (Iterable[Tuple[str, QuestionMeta]], object) -> None
+    """Install the given questions in the specified object."""
+    for (name, question_class) in questions:
+        setattr(obj, name, question_class)
 
 
 def _load_questions_from_dir(question_dir, session):
