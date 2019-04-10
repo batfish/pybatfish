@@ -81,6 +81,10 @@ class Session(object):
         self.stale_timeout = 5  # type: int
         self.enable_diagnostics = True  # type: bool
 
+        # Auto-load question templates
+        if load_questions:
+            self.q.load()
+
     # Support old property names
     @property  # type: ignore
     @deprecated(reason="Use the new additional_args field instead")

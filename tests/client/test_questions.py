@@ -51,7 +51,7 @@ def questions():
 
 @pytest.fixture(scope='function')
 def session():
-    s = Session()
+    s = Session(load_questions=False)
     yield s
 
 
