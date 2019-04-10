@@ -15,7 +15,9 @@ import json
 import os
 
 import pytest
+import responses
 
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session
 from pybatfish.question.question import (QuestionBase, QuestionMeta,
                                          _install_questions)
@@ -116,5 +118,41 @@ def test_load_questions_local(session, tmpdir, questions):
 
     # Make sure all questions from specified directory show up when listing questions
     listed_questions = session.q.list()
+    for q in questions:
+        assert q in listed_questions
+
+
+@responses.activate
+def test_load_questions_remote(session, questions):
+    """Test that questions are successfully loaded from a Batfish service."""
+    # Should have no questions to start with
+    assert len(session.q.list()) == 0
+
+    # Build correctly formatted getquestiontemplates response
+    qs = {CoordConsts.SVC_KEY_QUESTION_LIST: {}}
+    for q in questions:
+        qs[CoordConsts.SVC_KEY_QUESTION_LIST][q['name']] = json.dumps({
+            'class': 'class',
+            'instance': {
+                'description': q['description'],
+                'instanceName': q['name'],
+                'tags': q['tags'],
+            }
+        })
+    question_response_json = json.dumps([CoordConsts.SVC_KEY_SUCCESS, qs])
+
+    def callback(request):
+        return 200, {}, question_response_json
+
+    # Intercept the POST request destined for the Batfish service, and just return get-question json
+    responses.add_callback(
+        responses.POST,
+        session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
+        callback=callback,
+    )
+
+    session.q.load()
+    listed_questions = session.q.list()
+    # Make sure all questions were loaded from the service
     for q in questions:
         assert q in listed_questions
