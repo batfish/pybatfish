@@ -103,8 +103,7 @@ def test_filter_permits_no_session():
     with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
-        from pybatfish.client.commands import bf_session
-        assert_filter_permits('filter', headers, session=bf_session)
+        assert_filter_permits('filter', headers)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='deny')
