@@ -21,7 +21,8 @@ fails.
 
 import operator
 import warnings
-from typing import Any, Dict, Iterable, Union  # noqa: F401
+from typing import (Any, Dict, Iterable, Optional, TYPE_CHECKING,  # noqa: F401
+                    Union)
 
 from deepdiff import DeepDiff
 from pandas import DataFrame
@@ -31,6 +32,9 @@ from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning)
 from pybatfish.question import bfq
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session
 
 __all__ = [
     'assert_dict_match',
@@ -201,8 +205,9 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     return True
 
 
-def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
-    # type: (str, HeaderConstraints, str, bool) -> bool
+def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
+                          session=None):
+    # type: (str, HeaderConstraints, str, bool, Optional[Session]) -> bool
     """
     Check if a named ACL permits a specified set of flows.
 
@@ -211,6 +216,7 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
+    :param session: Batfish session to use for the assertion
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -219,7 +225,13 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
     kwargs = dict(filters=filter_name, headers=headers, action="deny")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
-    df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
+
+    # If no session was specified, use bfq for reverse compatibility
+    if session:
+        q = session.q
+    else:
+        q = bfq
+    df = q.searchFilters(**kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
@@ -227,8 +239,9 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False):
     return True
 
 
-def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
-    # type: (str, HeaderConstraints, str, bool) -> bool
+def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
+                         session=None):
+    # type: (str, HeaderConstraints, str, bool, Optional[Session]) -> bool
     """
     Check if a named ACL denies a specified set of flows.
 
@@ -237,6 +250,7 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
+    :param session: Batfish session to use for the assertion
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -246,7 +260,12 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False):
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
-    df = bfq.searchFilters(**kwargs).answer().frame()  # type: ignore
+    # If no session was specified, use bfq for reverse compatibility
+    if session:
+        q = session.q
+    else:
+        q = bfq
+    df = q.searchFilters(**kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
