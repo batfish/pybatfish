@@ -98,6 +98,7 @@ def test_load_questions_local(session, tmpdir, questions):
     # Should still have no questions after loading an empty dir
     dir_path = str(tmpdir.mkdir('questions'))
     session.q.load(dir_path)
+    assert len(session.q.list()) == 0
 
     for q in questions:
         filename = '{}.json'.format(q['name'])
