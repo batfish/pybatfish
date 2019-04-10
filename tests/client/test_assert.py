@@ -196,5 +196,6 @@ def test_get_question_object():
     # Cannot find the question we're searching for
     with patch.object(bf.q, 'otherName', create=True):
         with patch.object(bfq, 'otherOtherName', create=True):
-            with pytest.raises(BatfishException):
+            with pytest.raises(BatfishException) as err:
                 _get_question_object(bf, 'qName')
+            assert 'qName question was not found' in str(err.value)
