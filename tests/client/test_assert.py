@@ -64,7 +64,7 @@ class MockQuestion(QuestionBase):
 
 
 def test_filter_permits():
-    """Confirm filter permits assert passes and fails as expected when specifying a session."""
+    """Confirm filter-permits assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps='1.1.1.1')
     bf = Session()
     with patch.object(bf.q, 'searchFilters',
@@ -92,7 +92,7 @@ def test_filter_permits():
 
 def test_filter_permits_no_session():
     """
-    Confirm filter permit assert passes and fails as expected when not specifying a session.
+    Confirm filter-permits assert passes and fails as expected when not specifying a session.
 
     For reverse compatibility.
     """
@@ -121,7 +121,7 @@ def test_filter_permits_no_session():
 
 
 def test_filter_denies():
-    """Confirm filter denies assert passes and fails as expected when specifying a session."""
+    """Confirm filter-denies assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps='1.1.1.1')
     bf = Session()
     with patch.object(bf.q, 'searchFilters',
@@ -149,7 +149,7 @@ def test_filter_denies():
 
 def test_filter_denies_no_session():
     """
-    Confirm filter denies assert passes and fails as expected when not specifying a session.
+    Confirm filter-denies assert passes and fails as expected when not specifying a session.
 
     For reverse compatibility.
     """
