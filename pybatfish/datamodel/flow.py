@@ -810,6 +810,15 @@ def _normalize_phc_list(value):
     raise ValueError("Invalid value {}".format(value))
 
 
+def _normalize_phc_tcpflags(value):
+    # type: (Any) -> Optional[List[MatchTcpFlags]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, MatchTcpFlags):
+        return [value]
+    raise ValueError("Invalid value {}".format(value))
+
+
 def _normalize_phc_strings(value):
     # type: (Any) -> Optional[Text]
     if value is None or isinstance(value, six.string_types):
@@ -890,7 +899,8 @@ class HeaderConstraints(DataModelElement):
                             converter=_normalize_phc_intspace)
     fragmentOffsets = attr.ib(default=None, type=Optional[str],
                               converter=_normalize_phc_intspace)
-    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
+    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags],
+                       converter=_normalize_phc_tcpflags)
 
     @classmethod
     def from_dict(cls, json_dict):

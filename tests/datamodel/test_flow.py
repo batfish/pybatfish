@@ -207,6 +207,11 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(ipProtocols=['tcp', 'udp'])
     assert hc.dict()["ipProtocols"] == ['tcp', 'udp']
 
+    match_syn = MatchTcpFlags(tcpFlags=TcpFlags(syn=True), useSyn=True)
+    hc1 = HeaderConstraints(tcpFlags=match_syn)
+    hc2 = HeaderConstraints(tcpFlags=[match_syn])
+    assert hc1.dict() == hc2.dict()
+
     with pytest.raises(ValueError):
         HeaderConstraints(applications="")
 
