@@ -124,7 +124,7 @@ def test_load_questions_local(session, tmpdir, questions):
 
 @responses.activate
 def test_load_questions_remote(session, questions):
-    """Test that questions are successfully loaded from a Batfish service."""
+    """Test that questions are successfully loaded from a mock Batfish service."""
     # Should have no questions to start with
     assert len(session.q.list()) == 0
 
@@ -139,17 +139,12 @@ def test_load_questions_remote(session, questions):
                 'tags': q['tags'],
             }
         })
-    question_response_json = json.dumps([CoordConsts.SVC_KEY_SUCCESS, qs])
-
-    def callback(request):
-        return 200, {}, question_response_json
 
     # Intercept the POST request destined for the Batfish service, and just return json response
-    responses.add_callback(
-        responses.POST,
-        session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
-        callback=callback,
-    )
+    # (Success + question templates)
+    responses.add(responses.POST,
+                  session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
+                  json=[CoordConsts.SVC_KEY_SUCCESS, qs], status=200)
 
     session.q.load()
     listed_questions = session.q.list()
