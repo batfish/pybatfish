@@ -207,6 +207,11 @@ def test_header_constraints_serialization():
     hc = HeaderConstraints(ipProtocols=['tcp', 'udp'])
     assert hc.dict()["ipProtocols"] == ['tcp', 'udp']
 
+    match_syn = MatchTcpFlags(tcpFlags=TcpFlags(syn=True), useSyn=True)
+    hc1 = HeaderConstraints(tcpFlags=match_syn)
+    hc2 = HeaderConstraints(tcpFlags=[match_syn])
+    assert hc1.dict() == hc2.dict()
+
     with pytest.raises(ValueError):
         HeaderConstraints(applications="")
 
@@ -241,6 +246,10 @@ def test_match_tcp_generators():
         TcpFlags(ack=True), useAck=True)
     assert MatchTcpFlags.match_rst() == MatchTcpFlags(
         TcpFlags(rst=True), useRst=True)
+    assert MatchTcpFlags.match_syn() == MatchTcpFlags(
+        TcpFlags(syn=True), useSyn=True)
+    assert MatchTcpFlags.match_synack() == MatchTcpFlags(
+        TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
     assert len(MatchTcpFlags.match_established()) == 2
     assert MatchTcpFlags.match_established() == [MatchTcpFlags.match_ack(),
                                                  MatchTcpFlags.match_rst()]

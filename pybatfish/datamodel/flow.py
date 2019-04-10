@@ -759,19 +759,47 @@ class MatchTcpFlags(DataModelElement):
     @staticmethod
     def match_ack():
         # type: () -> MatchTcpFlags
-        """Return match conditions checking that ACK bit is set."""
+        """Return match conditions checking that ACK bit is set.
+
+        Other bits may take any value.
+        """
         return MatchTcpFlags(TcpFlags(ack=True), useAck=True)
 
     @staticmethod
     def match_rst():
         # type: () -> MatchTcpFlags
-        """Return match conditions checking that RST bit is set."""
+        """Return match conditions checking that RST bit is set.
+
+        Other bits may take any value.
+        """
         return MatchTcpFlags(TcpFlags(rst=True), useRst=True)
+
+    @staticmethod
+    def match_syn():
+        # type: () -> MatchTcpFlags
+        """Return match conditions checking that the SYN bit is set.
+
+        Other bits may take any value.
+        """
+        return MatchTcpFlags(TcpFlags(syn=True), useSyn=True)
+
+    @staticmethod
+    def match_synack():
+        # type: () -> MatchTcpFlags
+        """Return match conditions checking that both the SYN and ACK bits are set.
+
+        Other bits may take any value.
+        """
+        return MatchTcpFlags(
+            TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
 
     @staticmethod
     def match_established():
         # type: () -> List[MatchTcpFlags]
-        """Return a list of match conditions matching an established flow (ACK or RST bit set)."""
+        """Return a list of match conditions matching an established flow (ACK or RST bit set).
+
+        Other bits may take any value.
+        """
         return [MatchTcpFlags.match_ack(), MatchTcpFlags.match_rst()]
 
 
@@ -807,6 +835,15 @@ def _normalize_phc_list(value):
             # reject empty list values
             raise ValueError("Invalid value {}".format(value))
         return alist
+    raise ValueError("Invalid value {}".format(value))
+
+
+def _normalize_phc_tcpflags(value):
+    # type: (Any) -> Optional[List[MatchTcpFlags]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, MatchTcpFlags):
+        return [value]
     raise ValueError("Invalid value {}".format(value))
 
 
@@ -890,7 +927,8 @@ class HeaderConstraints(DataModelElement):
                             converter=_normalize_phc_intspace)
     fragmentOffsets = attr.ib(default=None, type=Optional[str],
                               converter=_normalize_phc_intspace)
-    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags])
+    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags],
+                       converter=_normalize_phc_tcpflags)
 
     @classmethod
     def from_dict(cls, json_dict):
