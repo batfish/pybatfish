@@ -267,9 +267,10 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
 
 def _get_question_object(session, name):
     """
-    Get the question object for the specified session, containing the specified question name.
+    Get the question object corresponding to the specified question name.
 
-    Falls back to bfq if it contains the question and specified session does not.
+    First searches the specified session, but falls back to bfq if it contains
+    the question and specified session does not.
     """
     # If no session was specified or it doesn't have the specified question
     # (e.g. questions were loaded with load_questions()), use bfq for reverse
