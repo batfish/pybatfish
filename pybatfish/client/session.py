@@ -176,7 +176,7 @@ class Session(object):
         """
         Deletes the definition of the given role dimension for the active network.
 
-        :param dimension: name of the dimension to delete from the active network
+        :param dimension: name of the dimension to delete
         :type dimension: str
         """
         restv2helper.delete_node_role_dimension(self, dimension)
@@ -217,9 +217,9 @@ class Session(object):
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
         :param base_name: name of the snapshot to copy
-        :type base_name: string
+        :type base_name: str
         :param name: name of the snapshot to initialize
-        :type name: string
+        :type name: str
         :param overwrite: whether or not to overwrite an existing snapshot with the
             same name
         :type overwrite: bool
@@ -239,6 +239,7 @@ class Session(object):
         :type add_files: str
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
+
         :return: name of initialized snapshot or None if the call fails
         :rtype: Optional[str]
         """
@@ -309,11 +310,11 @@ class Session(object):
     def generate_dataplane(self, snapshot=None, extra_args=None):
         # type: (Optional[str], Optional[Dict[str, Any]]) -> str
         """
-        Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized.
+        Generates the data plane for the supplied snapshot. If no snapshot is specified, uses the last snapshot initialized.
 
         :param snapshot: name of the snapshot to generate dataplane for
-        :type snapshot: Text
-        :param extra_args: extra arguments to be passed to the parse command
+        :type snapshot: str
+        :param extra_args: extra arguments to be passed to Batfish
         :type extra_args: dict
         """
         snapshot = self.get_snapshot(snapshot)
@@ -333,8 +334,7 @@ class Session(object):
         :type question: str
         :param snapshot: name of the snapshot the question was run on
         :type snapshot: str
-        :param reference_snapshot: if present, the snapshot against which the answer
-            was computed differentially
+        :param reference_snapshot: if present, gets the answer for a differential question asked against the specified reference snapshot
         :type reference_snapshot: str
         """
         json_data = workhelper.get_data_get_answer(self, question,
@@ -346,7 +346,7 @@ class Session(object):
 
     def get_base_url(self):
         # type: () -> str
-        """Generate the base URL for connecting to batfish coordinator."""
+        """Generate the base URL for connecting to Batfish coordinator."""
         protocol = "https" if self.ssl else "http"
         return '{0}://{1}:{2}{3}'.format(protocol, self.host,
                                          self.port_v1,
@@ -423,6 +423,17 @@ class Session(object):
 
     def get_snapshot(self, snapshot=None):
         # type: (Optional[str]) -> str
+        """
+        Get the specified or active snapshot name.
+
+        :param snapshot: if specified, this name is returned instead of active snapshot
+        :type snapshot: str
+
+        :return: name of the active snapshot, or the specified snapshot if applicable
+        :rtype: str
+
+        :raises ValueError: if there is no active snapshot and no snapshot was specified
+        """
         if snapshot is not None:
             return snapshot
         elif self.snapshot is not None:
@@ -434,6 +445,12 @@ class Session(object):
 
     def get_url(self, resource):
         # type: (str) -> str
+        """
+        Get URL for the specified resource.
+
+        :param resource: URI of the requested resource
+        :type resource: str
+        """
         return '{0}/{1}'.format(self.get_base_url(), resource)
 
     def get_work_status(self, work_item):
@@ -446,15 +463,16 @@ class Session(object):
         """
         Initialize a new snapshot.
 
-        :param upload: snapshot to upload
-        :type upload: zip file or directory
+        :param upload: path to the snapshot zip or directory
+        :type upload: str
         :param name: name of the snapshot to initialize
-        :type name: string
+        :type name: str
         :param overwrite: whether or not to overwrite an existing snapshot with the
            same name
         :type overwrite: bool
-        :param extra_args: extra arguments to be passed to the parse command.
+        :param extra_args: extra arguments to be passed to the parse command
         :type extra_args: dict
+
         :return: name of initialized snapshot
         :rtype: str
         """
@@ -506,7 +524,7 @@ class Session(object):
         """
         List networks the session's API key can access.
 
-        :return: a list of network names
+        :return: network names
         :rtype: list
         """
         json_data = workhelper.get_data_list_networks(self)
@@ -538,8 +556,8 @@ class Session(object):
             snapshot metadata.
         :type verbose: bool
 
-        :return: a list of snapshot names or the full json response containing
-            snapshots and metadata (if `verbose=True`)
+        :return: snapshot names or the full JSON response containing snapshots
+            and metadata (if `verbose=True`)
         :rtype: list
         """
         return restv2helper.list_snapshots(self, verbose)
@@ -552,7 +570,7 @@ class Session(object):
         If a book with the same name exists, it is overwritten.
 
         :param book: The ReferenceBook object to add
-        :type book: :class:`pybatfish.datamodel.referencelibrary.ReferenceBook`
+        :type book: :class:`~pybatfish.datamodel.referencelibrary.ReferenceBook`
         """
         restv2helper.put_reference_book(self, book)
 
@@ -567,7 +585,7 @@ class Session(object):
         The node list within those roles, if present, is ignored by the server.
 
         :param dimension: The NodeRoleDimension object for the dimension to add
-        :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`
+        :type dimension: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
         """
         if dimension.type == "AUTO":
             raise ValueError("Cannot put a dimension of type AUTO")
@@ -588,13 +606,13 @@ class Session(object):
         """
         Configure the network used for analysis.
 
-        :param name: name of the network to set. If `None`, a name will be generated using prefix.
-        :type name: string
+        :param name: name of the network to set. If `None`, a name will be generated
+        :type name: str
         :param prefix: prefix to prepend to auto-generated network names if name is empty
-        :type name: string
+        :type name: str
 
-        :return: The name of the configured network, if configured successfully.
-        :rtype: string
+        :return: name of the configured network
+        :rtype: str
         :raises BatfishException: if configuration fails
         """
         if name is None:
@@ -628,9 +646,10 @@ class Session(object):
         Set the current snapshot by name or index.
 
         :param name: name of the snapshot to set as the current snapshot
-        :type name: string
+        :type name: str
         :param index: set the current snapshot to the ``index``-th most recent snapshot
         :type index: int
+
         :return: the name of the successfully set snapshot
         :rtype: str
         """
@@ -684,9 +703,10 @@ class Session(object):
         :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
         :type dry_run: bool
         :param netconan_config: path to Netconan configuration file
-        :type netconan_config: string
+        :type netconan_config: str
+
         :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
-        :rtype: string
+        :rtype: str
         """
         return upload_diagnostics(self, dry_run=dry_run,
                                   netconan_config=netconan_config)
@@ -713,6 +733,7 @@ class Session(object):
         :type background: bool
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
+
         :return: name of initialized snapshot, or JSON dictionary of task status if background=True
         :rtype: Union[str, Dict]
         """
