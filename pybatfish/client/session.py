@@ -463,7 +463,7 @@ class Session(object):
         """
         Initialize a new snapshot.
 
-        :param upload: path of snapshot zip or directory to upload
+        :param upload: path to the snapshot zip or directory
         :type upload: str
         :param name: name of the snapshot to initialize
         :type name: str
