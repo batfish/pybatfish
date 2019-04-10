@@ -16,12 +16,13 @@ import six
 from pandas import DataFrame
 
 from pybatfish.client.asserts import (_raise_common, assert_filter_denies,
-                                      assert_filter_permits)
+                                      assert_filter_permits,
+                                      _get_question_object)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.exception import (BatfishAssertException,
-                                 BatfishAssertWarning)
+                                 BatfishAssertWarning, BatfishException)
 from pybatfish.question import bfq
 from pybatfish.question.question import QuestionBase
 
@@ -102,7 +103,8 @@ def test_filter_permits_no_session():
     with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
-        assert_filter_permits('filter', headers)
+        from pybatfish.client.commands import bf_session
+        assert_filter_permits('filter', headers, session=bf_session)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='deny')
@@ -173,3 +175,26 @@ def test_filter_denies_no_session():
                                                headers=headers,
                                                startLocation='Ethernet1',
                                                action='permit')
+
+
+def test_get_question_object():
+    """Confirm _get_question_object identifies the correct question object based on the specified session and the questions it contains."""
+
+    # Session contains the question we're searching for
+    bf = Session()
+    with patch.object(bf.q, 'qName', create=True):
+        assert bf.q == _get_question_object(bf, 'qName')
+
+    # Session does not contain the question we're searching for, but bfq does
+    with patch.object(bfq, 'qName', create=True):
+        assert bfq == _get_question_object(bf, 'qName')
+
+    # No Session specified, but bfq contains the question we're searching for
+    with patch.object(bfq, 'qName', create=True):
+        assert bfq == _get_question_object(None, 'qName')
+
+    # Cannot find the question we're searching for
+    with patch.object(bf.q, 'otherName', create=True):
+        with patch.object(bfq, 'otherOtherName', create=True):
+            with pytest.raises(BatfishException):
+                _get_question_object(bf, 'qName')

@@ -30,7 +30,7 @@ from pandas import DataFrame
 from pybatfish.datamodel import HeaderConstraints  # noqa: F401
 from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (BatfishAssertException,
-                                 BatfishAssertWarning)
+                                 BatfishAssertWarning, BatfishException)
 from pybatfish.question import bfq
 
 if TYPE_CHECKING:
@@ -226,12 +226,8 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
-    # If no session was specified, use bfq for reverse compatibility
-    if session:
-        q = session.q
-    else:
-        q = bfq
-    df = q.searchFilters(**kwargs).answer().frame()  # type: ignore
+    df = _get_question_object(session, 'searchFilters').searchFilters(
+        **kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
@@ -260,14 +256,27 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
-    # If no session was specified, use bfq for reverse compatibility
-    if session:
-        q = session.q
-    else:
-        q = bfq
-    df = q.searchFilters(**kwargs).answer().frame()  # type: ignore
+    df = _get_question_object(session, 'searchFilters').searchFilters(
+        **kwargs).answer().frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
                 df.to_string()), soft)
     return True
+
+
+def _get_question_object(session, name):
+    """
+    Get the question object for the specified session, containing the specified question name.
+
+    Falls back to bfq contains the question and session does not.
+    """
+    # If no session was specified or it doesn't have the specified question
+    # (e.g. questions were loaded with load_questions()), use bfq for reverse
+    # compatibility
+    if session and hasattr(session.q, name):
+        return session.q
+    elif hasattr(bfq, name):
+        return bfq
+    else:
+        raise BatfishException('{} question was not found'.format(name))
