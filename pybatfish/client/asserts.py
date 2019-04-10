@@ -269,7 +269,7 @@ def _get_question_object(session, name):
     """
     Get the question object for the specified session, containing the specified question name.
 
-    Falls back to bfq contains the question and session does not.
+    Falls back to bfq if it contains the question and specified session does not.
     """
     # If no session was specified or it doesn't have the specified question
     # (e.g. questions were loaded with load_questions()), use bfq for reverse
