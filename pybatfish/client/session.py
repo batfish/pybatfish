@@ -54,8 +54,9 @@ class Session(object):
                  port_v1=Options.coordinator_work_port,
                  port_v2=Options.coordinator_work_v2_port,
                  ssl=Options.use_ssl,
-                 verify_ssl_certs=Options.verify_ssl_certs):
-        # type: (Text, int, int, bool, bool) -> None
+                 verify_ssl_certs=Options.verify_ssl_certs,
+                 load_questions=True):
+        # type: (Text, int, int, bool, bool, bool) -> None
         # Coordinator args
         self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
