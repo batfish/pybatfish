@@ -15,9 +15,9 @@ import pytest
 import six
 from pandas import DataFrame
 
-from pybatfish.client.asserts import (_raise_common, assert_filter_denies,
-                                      assert_filter_permits,
-                                      _get_question_object)
+from pybatfish.client.asserts import (_get_question_object, _raise_common,
+                                      assert_filter_denies,
+                                      assert_filter_permits)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.datamodel.answer import TableAnswer
@@ -179,7 +179,6 @@ def test_filter_denies_no_session():
 
 def test_get_question_object():
     """Confirm _get_question_object identifies the correct question object based on the specified session and the questions it contains."""
-
     # Session contains the question we're searching for
     bf = Session()
     with patch.object(bf.q, 'qName', create=True):

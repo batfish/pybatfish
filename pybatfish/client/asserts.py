@@ -266,6 +266,7 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
 
 
 def _get_question_object(session, name):
+    # type: (Optional[Session], str) -> Any
     """
     Get the question object corresponding to the specified question name.
 
