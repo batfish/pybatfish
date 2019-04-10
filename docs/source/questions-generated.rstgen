@@ -686,6 +686,30 @@
    :param startLocation: Location to start tracing from.
    :type startLocation: string
 
+.. py:class:: testRoutePolicies(*, nodes, policies, inputRoute, direction, question_name)
+
+   Evaluate the processing of a route by a given policy.
+   
+   Find how the specified route is processed through the specified policies.
+   
+   
+   :param nodes: *Required.* Only examine filters on nodes matching this specifier.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param policies: *Required.* Only consider policies that match this specifier.
+   
+       Default value: ``.*``
+   :type policies: string
+   :param inputRoute: *Required.* The BGP route announcement to test the policy on.
+   :type inputRoute: bgpRouteSpec
+   :param direction: *Required.* The direction of the route, with respect to the device (IN/OUT).
+       Allowed values:
+   
+       * in: The route is inbound to the device
+       * out: The route is outbound from the device
+   :type direction: string
+
 .. py:class:: traceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
 
    Trace the path(s) for the specified flow.
