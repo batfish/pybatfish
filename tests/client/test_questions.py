@@ -144,7 +144,7 @@ def test_load_questions_remote(session, questions):
     def callback(request):
         return 200, {}, question_response_json
 
-    # Intercept the POST request destined for the Batfish service, and just return get-question json
+    # Intercept the POST request destined for the Batfish service, and just return json response
     responses.add_callback(
         responses.POST,
         session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
