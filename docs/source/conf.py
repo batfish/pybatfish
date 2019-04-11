@@ -173,3 +173,7 @@ texinfo_documents = [
      author, 'pybatfish', 'One line description of project.',
      'Miscellaneous'),
 ]
+
+# Add both class and constructor docstrings
+autoclass_content = 'both'
+

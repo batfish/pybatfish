@@ -41,12 +41,13 @@ from .options import Options
 
 
 class Session(object):
-    """Keeps session configuration needed to connect to a Batfish server.
+    """
+    Session configuration info for connecting to a Batfish server.
 
-    :ivar host: The host of the batfish service
-    :ivar port_v1: The port batfish service is running on (9997 by default)
-    :ivar port_v2: The additional port of batfish service (9996 by default)
-    :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
+    :ivar host: The host of the Batfish service
+    :ivar port_v1: The port Batfish service is running on
+    :ivar port_v2: The additional port of Batfish service
+    :ivar ssl: Whether to use SSL when connecting to Batfish
     :ivar api_key: Your API key
     """
 
@@ -57,6 +58,22 @@ class Session(object):
                  verify_ssl_certs=Options.verify_ssl_certs,
                  load_questions=True):
         # type: (Text, int, int, bool, bool, bool) -> None
+        """
+        Constructs a new session using the supplied parameters.
+
+        :param host: The host of the Batfish service
+        :type host: Text
+        :param port_v1: port for Batfish service version 1
+        :type port_v1: int
+        :param port_v2: port for Batfish service version 2
+        :type port_v2: int
+        :param ssl: whether to use SSL when connecting to Batfish
+        :type ssl: bool
+        :param verify_ssl_certs: whether to verify Batfish SSL certificates when connecting with SSL
+        :type verify_ssl_certs: bool
+        :param load_questions: whether to autoload questions on session creation
+        :type load_questions: bool
+        """
         # Coordinator args
         self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
