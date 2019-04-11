@@ -67,7 +67,7 @@ class MockQuestion(QuestionBase):
 def test_filter_permits():
     """Confirm filter-permits assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps='1.1.1.1')
-    bf = Session()
+    bf = Session(load_questions=False)
     with patch.object(bf.q, 'searchFilters',
                       create=True) as mock_search_filters:
         # Test success
@@ -124,7 +124,7 @@ def test_filter_permits_no_session():
 def test_filter_denies():
     """Confirm filter-denies assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps='1.1.1.1')
-    bf = Session()
+    bf = Session(load_questions=False)
     with patch.object(bf.q, 'searchFilters',
                       create=True) as mock_search_filters:
         # Test success
@@ -179,7 +179,7 @@ def test_filter_denies_no_session():
 def test_get_question_object():
     """Confirm _get_question_object identifies the correct question object based on the specified session and the questions it contains."""
     # Session contains the question we're searching for
-    bf = Session()
+    bf = Session(load_questions=False)
     with patch.object(bf.q, 'qName', create=True):
         assert bf.q == _get_question_object(bf, 'qName')
 
