@@ -72,7 +72,7 @@
    :param returnFlowType: Specifies whether to search for return flows that are successful (SUCCESS), that fail (FAILURE), or that can either succeed or fail depending on the path taken (MULTIPATH_INCONSISTENT). The default is SUCCESS.
    :type returnFlowType: string
 
-.. py:class:: bidirectionalTraceroute(*, headers, startLocation, ignoreFilters, maxTraces, question_name)
+.. py:class:: bidirectionalTraceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
 
    Trace the path(s) for the specified flow, along with path(s) for reverse flows.
    
@@ -80,16 +80,16 @@
    If the trace succeeds, a traceroute is performed in the reverse direction.
    
    
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
    :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
    :type startLocation: locationSpec
-   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
-   :type ignoreFilters: boolean
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
 
-.. py:class:: compareFilters(*, nodes, filters, question_name)
+.. py:class:: compareFilters(*, nodes, filters, ignoreComposites, question_name)
 
    Compares filters with the same name in the current and reference snapshots. Returns pairs of lines, one from each filter, that match the same flow(s) but treat them differently (i.e. one permits and the other denies the flow).
    
@@ -100,6 +100,8 @@
    :type nodes: nodeSpec
    :param filters: Only evaluate filters that match this regex.
    :type filters: filter
+   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   :type ignoreComposites: boolean
 
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
@@ -686,7 +688,7 @@
    :param startLocation: Location to start tracing from.
    :type startLocation: string
 
-.. py:class:: testRoutePolicies(*, nodes, policies, inputRoute, direction, question_name)
+.. py:class:: testRoutePolicies(*, nodes, policies, inputRoutes, direction, question_name)
 
    Evaluate the processing of a route by a given policy.
    
@@ -701,8 +703,8 @@
    
        Default value: ``.*``
    :type policies: string
-   :param inputRoute: *Required.* The BGP route announcement to test the policy on.
-   :type inputRoute: bgpRouteSpec
+   :param inputRoutes: *Required.* The BGP route announcements to test the policy on.
+   :type inputRoutes: bgpRoutes
    :param direction: *Required.* The direction of the route, with respect to the device (IN/OUT).
        Allowed values:
    
