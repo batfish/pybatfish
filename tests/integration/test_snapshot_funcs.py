@@ -17,6 +17,7 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 from requests import HTTPError
 
+from pybatfish.client._diagnostics import (_get_snapshot_parse_status)
 from pybatfish.client.commands import (bf_delete_network,
                                        bf_delete_snapshot, bf_fork_snapshot,
                                        bf_generate_dataplane,
@@ -29,7 +30,6 @@ from pybatfish.client.commands import (bf_delete_network,
                                        bf_session, bf_set_network,
                                        bf_set_snapshot)
 from pybatfish.client.consts import BfConsts
-from pybatfish.client.diagnostics import (_get_snapshot_parse_status)
 from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)

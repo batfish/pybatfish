@@ -54,7 +54,7 @@ def __execute_and_return_request_params(work_item, session, extra_args=None):
 
 
 def test_execute_request_params(logger):
-    session = Session(logger)
+    session = Session()
 
     # Unmodified work item
     work_item = WorkItem(session)
@@ -126,7 +126,7 @@ def test_print_timestamp():
 
 
 def test_print_workstatus_fresh_task(logger, caplog):
-    session = Session(logger)
+    session = Session()
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
                                                    tzinfo=tzinfo)
@@ -149,7 +149,7 @@ def test_print_workstatus_fresh_task(logger, caplog):
 
 
 def test_print_workstatus_fresh_task_subtasks(logger, caplog):
-    session = Session(logger)
+    session = Session()
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
                                                    tzinfo=tzinfo)
@@ -172,7 +172,7 @@ def test_print_workstatus_fresh_task_subtasks(logger, caplog):
 
 
 def test_print_workstatus_old_task(logger, caplog):
-    session = Session(logger)
+    session = Session()
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
                                                    tzinfo=tzinfo)
@@ -195,7 +195,7 @@ def test_print_workstatus_old_task(logger, caplog):
 
 
 def test_print_workstatus_old_task_subtasks(logger, caplog):
-    session = Session(logger)
+    session = Session()
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
                                                    tzinfo=tzinfo)

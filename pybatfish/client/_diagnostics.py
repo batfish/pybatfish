@@ -65,10 +65,10 @@ _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
 
 
-def _upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
-                        dry_run=True,
-                        netconan_config=None, questions=_INIT_INFO_QUESTIONS,
-                        resource_prefix=''):
+def upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
+                       dry_run=True,
+                       netconan_config=None, questions=_INIT_INFO_QUESTIONS,
+                       resource_prefix=''):
     # type: (Session, str, str, bool, Optional[str], Iterable[Dict[str, object]], str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
@@ -252,7 +252,7 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
                             resource, r.status_code))
 
 
-def _warn_on_snapshot_failure(session):
+def warn_on_snapshot_failure(session):
     # type: (Session) -> None
     """
     Check if snapshot passed and warn about any parsing or conversion issues.

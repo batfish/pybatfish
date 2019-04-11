@@ -17,11 +17,11 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 import requests
 
+from pybatfish.client._diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
+                                           _S3_REGION, upload_diagnostics)
 from pybatfish.client.commands import (bf_delete_network,
                                        bf_delete_snapshot, bf_init_snapshot,
                                        bf_session, bf_set_network)
-from pybatfish.client.diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
-                                          _S3_REGION, _upload_diagnostics)
 from pybatfish.question.question import QuestionBase
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -56,8 +56,8 @@ def test_questions(network, example_snapshot):
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
-    resource = _upload_diagnostics(session=bf_session, dry_run=False,
-                                   resource_prefix='test/')
+    resource = upload_diagnostics(session=bf_session, dry_run=False,
+                                  resource_prefix='test/')
     base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
         bucket=_S3_BUCKET, region=_S3_REGION)
 

@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import json
-import logging
 
 import pytest
 
@@ -42,7 +41,7 @@ TEST_QUESTION_DICT = {
 @pytest.fixture()
 def session():
     """Session associated with questions created in tests."""
-    yield Session(logging.getLogger(__name__))
+    yield Session()
 
 
 def test_min_length():
