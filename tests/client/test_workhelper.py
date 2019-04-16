@@ -26,7 +26,7 @@ from pybatfish.client import resthelper
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
 from pybatfish.client.workhelper import _format_elapsed_time, _parse_timestamp, \
-    _print_timestamp, _print_work_status, execute
+    _print_timestamp, _print_work_status_helper, execute
 from pybatfish.client.workitem import WorkItem
 
 
@@ -140,7 +140,7 @@ def test_print_workstatus_fresh_task(logger, caplog):
             "startDate": "2017-12-20 00:00:00 UTC"
         }]
     })
-    _print_work_status(session, workStatus, taskDetails, nowFunction)
+    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert ".... {obtained} Fooing the bar".format(
         obtained=_print_timestamp(
@@ -163,7 +163,7 @@ def test_print_workstatus_fresh_task_subtasks(logger, caplog):
             "startDate": "2017-12-20 00:00:00 UTC"
         }]
     })
-    _print_work_status(session, workStatus, taskDetails, nowFunction)
+    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert ".... {obtained} Fooing the bar 1 / 2".format(
         obtained=_print_timestamp(
@@ -186,7 +186,7 @@ def test_print_workstatus_old_task(logger, caplog):
             "startDate": "2016-11-22 10:43:21 UTC"
         }]
     })
-    _print_work_status(session, workStatus, taskDetails, nowFunction)
+    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert ".... {obtained} Fooing the bar Elapsed 1y27d13:16:39".format(
         obtained=_print_timestamp(
@@ -209,7 +209,7 @@ def test_print_workstatus_old_task_subtasks(logger, caplog):
             "startDate": "2016-11-22 10:43:21 UTC"
         }]
     })
-    _print_work_status(session, workStatus, taskDetails, nowFunction)
+    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert ".... {obtained} Fooing the bar 1 / 2 Elapsed 1y27d13:16:39".format(
         obtained=_print_timestamp(
