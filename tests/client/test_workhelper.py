@@ -165,7 +165,7 @@ def test_print_workstatus_fresh_task_subtasks(logger, caplog):
     })
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar 1 / 2".format(
+    assert ".... {obtained} Fooing the bar 1 / 2.".format(
         obtained=_print_timestamp(
             _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
            in caplog.text
@@ -178,17 +178,17 @@ def test_print_workstatus_old_task(logger, caplog):
                                                    tzinfo=tzinfo)
     workStatus = "TEST"
     taskDetails = json.dumps({
-        "obtained": "2017-12-20 00:00:00 UTC",
+        "obtained": "2016-11-22 10:43:21 UTC",
         "batches": [{
             "completed": 0,
             "description": "Fooing the bar",
             "size": 0,
-            "startDate": "2016-11-22 10:43:21 UTC"
+            "startDate": "2016-11-22 10:43:22 UTC"
         }]
     })
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar Elapsed 1y27d13:16:39".format(
+    assert ".... {obtained} Fooing the bar. (1y27d13:16:39 elapsed)".format(
         obtained=_print_timestamp(
             _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
            in caplog.text
@@ -201,17 +201,17 @@ def test_print_workstatus_old_task_subtasks(logger, caplog):
                                                    tzinfo=tzinfo)
     workStatus = "TEST"
     taskDetails = json.dumps({
-        "obtained": "2017-12-20 00:00:00 UTC",
+        "obtained": "2016-11-22 10:43:21 UTC",
         "batches": [{
             "completed": 1,
             "description": "Fooing the bar",
             "size": 2,
-            "startDate": "2016-11-22 10:43:21 UTC"
+            "startDate": "2016-11-22 10:43:22 UTC"
         }]
     })
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar 1 / 2 Elapsed 1y27d13:16:39".format(
+    assert ".... {obtained} Fooing the bar 1 / 2. (1y27d13:16:39 elapsed)".format(
         obtained=_print_timestamp(
             _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
            in caplog.text

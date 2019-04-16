@@ -38,18 +38,17 @@ if TYPE_CHECKING:
 MAX_LOG_LENGTH = 64 * 1024
 
 
-def _batch_to_string(json_batch, elapsed):
-    # type: (Dict, Optional[relativedelta]) -> str
-    """Get status of the Batfish job batch."""
-    description = json_batch["description"]
-    elapsed_str = " Elapsed %s" % _format_elapsed_time(elapsed) \
-        if elapsed is not None else ""
-    if json_batch["size"] == 0:
-        return "{desc}{elapsed}".format(desc=description, elapsed=elapsed_str)
-    else:
-        return "{desc} {completed} / {size}{elapsed}" \
+def _batch_desc(json_batch):
+    # type: (Dict) -> str
+    """Get a string representation of the Batfish job batch."""
+    description = json_batch.get("description", "").strip()
+    if json_batch["size"] > 0:
+        description = "{desc} {completed} / {size}" \
             .format(desc=description, completed=json_batch['completed'],
-                    size=json_batch['size'], elapsed=elapsed_str)
+                    size=json_batch['size'])
+    if not description.endswith((',', '.', '?', '!')):
+        description += '.'
+    return description
 
 
 def _parse_timestamp(timestamp_str):
@@ -446,26 +445,37 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
         if not json_task:
             logger.info(".... no task information")
             return
-        obtained_time = _parse_timestamp(json_task["obtained"])
-        now = now_function(obtained_time.tzinfo)
-        obtained_str = _print_timestamp(obtained_time)
-        batches = json_task["batches"] if "batches" in json_task else []
 
-        if batches:
-            # when log level is INFO, we only print the last batch
-            # else print all
-            lastbatch = batches[-1]
-            batch_started_time = _parse_timestamp(lastbatch["startDate"])
-            batch_elapsed = relativedelta(now, batch_started_time)
-            batch_elapsed_seconds = (now - batch_started_time).total_seconds()
-            print_batch_elapsed = batch_elapsed_seconds > session.elapsed_delay
+        batches = json_task["batches"] if "batches" in json_task else []
+        if not batches:
+            return
+
+        # Compute when the task started.
+        task_start_time = _parse_timestamp(json_task["obtained"])
+        task_start_time_str = _print_timestamp(task_start_time)
+
+        # Compute how much time has elapsed in this task.
+        now = now_function(task_start_time.tzinfo)
+
+        # If true, print the elapsed time since the task started.
+        print_elapsed = (
+                (now - task_start_time).total_seconds() > session.elapsed_delay)
+
+        # Only print info about finished batches in debug mode
+        if logger.isEnabledFor(logging.DEBUG):
             for batch in batches[:-1]:
-                logger.debug(".... {obtained_time} {batch}".format(
-                    obtained_time=obtained_str,
-                    batch=_batch_to_string(batch, None)))
-            logger.info(
-                ".... {obtained_time} {batch}".format(
-                    obtained_time=obtained_str,
-                    batch=_batch_to_string(
-                        lastbatch,
-                        batch_elapsed if print_batch_elapsed else None)))
+                logger.debug(".... {start} {batch}".format(
+                    start=task_start_time_str,
+                    batch=_batch_desc(batch)))
+
+        lastbatch = batches[-1]
+        total_time_str = ""
+        if print_elapsed:
+            total_time = relativedelta(now, task_start_time)
+            total_time_str = " ({total} elapsed)".format(
+                total=_format_elapsed_time(total_time))
+
+        logger.info(".... {start} {batch}{total}".format(
+            start=task_start_time_str,
+            batch=_batch_desc(lastbatch),
+            total=total_time_str))
