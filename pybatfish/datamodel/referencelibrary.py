@@ -31,15 +31,20 @@ class AddressGroup(DataModelElement):
     :ivar addresses: a list of 'addresses' where each element is a string
         that represents an IP address (e.g., "1.1.1.1") or an address:mask
         (e.g., "1.1.1.1:0.0.0.8").
+    :ivar childGroupNames: a list of names of address groups contained within
+        this address group. The child groups must be within the same reference
+        book. Circular references are allowed.
     """
 
     name = attr.ib(type=str)
     addresses = attr.ib(type=List[str], factory=list)
+    childGroupNames = attr.ib(type=List[str], factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> AddressGroup
-        return AddressGroup(json_dict["name"], json_dict.get("addresses", []))
+        return AddressGroup(json_dict["name"], json_dict.get("addresses", []),
+                            json_dict.get("childGroupNames", []))
 
 
 @attr.s(frozen=True)

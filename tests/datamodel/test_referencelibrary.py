@@ -18,7 +18,72 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.referencelibrary import NodeRolesData, ReferenceLibrary
+from pybatfish.datamodel.referencelibrary import NodeRolesData, \
+    ReferenceLibrary, AddressGroup
+
+
+def test_addressgroup_both_subfields():
+    """Test deserialization for a reference library with address groups."""
+    dict = {
+        "name": "ag1",
+        "addresses": [
+            "1.1.1.1/24",
+            "2.2.2.2"
+        ],
+        "childGroupNames": [
+            "child1",
+            "child2"
+        ]
+    }
+
+    address_group = AddressGroup.from_dict(dict)
+
+    assert len(address_group.addresses) == 2
+    assert len(address_group.childGroupNames) == 2
+
+
+def test_addressgroup_none_subfields():
+    """Test deserialization for a reference library with address groups."""
+    dict = {
+        "name": "ag1"
+    }
+
+    address_group = AddressGroup.from_dict(dict)
+
+    assert len(address_group.addresses) == 0
+    assert len(address_group.childGroupNames) == 0
+
+
+def test_addressgroup_only_addresses():
+    """Test deserialization for a reference library with address groups."""
+    dict = {
+        "name": "ag1",
+        "addresses": [
+            "1.1.1.1/24",
+            "2.2.2.2"
+        ]
+    }
+
+    address_group = AddressGroup.from_dict(dict)
+
+    assert len(address_group.addresses) == 2
+    assert len(address_group.childGroupNames) == 0
+
+
+def test_addressgroup_only_child_groups():
+    """Test deserialization for a reference library with address groups."""
+    dict = {
+        "name": "ag1",
+        "childGroupNames": [
+            "child1",
+            "child2"
+        ]
+    }
+
+    address_group = AddressGroup.from_dict(dict)
+
+    assert len(address_group.addresses) == 0
+    assert len(address_group.childGroupNames) == 2
 
 
 def test_empty_referencelibrary():
