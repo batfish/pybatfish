@@ -118,14 +118,14 @@ def execute(work_item, session, background=False, extra_args=None):
 
         cur_sleep = 0.1  # seconds
         while not WorkStatusCode.is_terminated(status):
-            print_work_status(session, status, task_details)
+            _print_work_status(session, status, task_details)
             time.sleep(cur_sleep)
             cur_sleep = min(1.0, cur_sleep * 1.5)
             answer = get_work_status(work_item.id, session)
             status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
             task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
 
-        print_work_status(session, status, task_details)
+        _print_work_status(session, status, task_details)
 
         # Handle fail conditions not producing logs
         if status in [WorkStatusCode.ASSIGNMENTERROR,
@@ -430,13 +430,13 @@ def kill_work(session, w_item_id):
                                         json_data)
 
 
-def print_work_status(session, work_status, task_details):
+def _print_work_status(session, work_status, task_details):
     # type: (Session, WorkStatusCode, str) -> Any
-    return _print_work_status(session, work_status, task_details,
-                              datetime.datetime.now)
+    return _print_work_status_helper(session, work_status, task_details,
+                                     datetime.datetime.now)
 
 
-def _print_work_status(session, work_status, task_details, now_function):
+def _print_work_status_helper(session, work_status, task_details, now_function):
     logger = logging.getLogger(__name__)
     if logger.getEffectiveLevel() == logging.INFO \
             or logger.getEffectiveLevel() == logging.DEBUG:
