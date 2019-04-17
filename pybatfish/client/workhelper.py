@@ -47,7 +47,7 @@ def _batch_desc(json_batch):
         description = "{desc} {completed} / {size}" \
             .format(desc=description, completed=json_batch['completed'],
                     size=json_batch['size'])
-    if not description.endswith(string.punctuation):
+    if not description.endswith(tuple(string.punctuation)):
         description += '.'
     return description
 
