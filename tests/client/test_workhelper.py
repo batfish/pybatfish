@@ -181,7 +181,7 @@ def test_print_workstatus_old_task(logger, caplog):
         "obtained": "2016-11-22 10:43:21 UTC",
         "batches": [{
             "completed": 0,
-            "description": "Fooing the bar",
+            "description": "Fooing the bar.",
             "size": 0,
             "startDate": "2016-11-22 10:43:22 UTC"
         }]

@@ -18,6 +18,7 @@ from __future__ import absolute_import, print_function
 import datetime
 import json
 import logging
+import string
 import tempfile
 import time
 from typing import Any, Dict, Optional, TYPE_CHECKING  # noqa: F401
@@ -46,7 +47,7 @@ def _batch_desc(json_batch):
         description = "{desc} {completed} / {size}" \
             .format(desc=description, completed=json_batch['completed'],
                     size=json_batch['size'])
-    if not description.endswith((',', '.', '?', '!')):
+    if not description.endswith(string.punctuation):
         description += '.'
     return description
 
