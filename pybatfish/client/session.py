@@ -16,7 +16,6 @@
 from __future__ import absolute_import, print_function
 
 import base64
-import json
 import logging
 import os
 import tempfile
@@ -336,7 +335,7 @@ class Session(object):
         return str(answer_dict["status"].value)
 
     def get_answer(self, question, snapshot, reference_snapshot=None):
-        # type: (str, str, Optional[str]) -> Any
+        # type: (str, str, Optional[str]) -> Dict[str, Any]
         """
         Get the answer for a previously asked question.
 
@@ -346,13 +345,14 @@ class Session(object):
         :type snapshot: str
         :param reference_snapshot: if present, gets the answer for a differential question asked against the specified reference snapshot
         :type reference_snapshot: str
+        :return: answer to the specified question
+        :rtype: dict
         """
-        json_data = workhelper.get_data_get_answer(self, question,
-                                                   snapshot, reference_snapshot)
-        response = resthelper.get_json_response(self,
-                                                CoordConsts.SVC_RSC_GET_ANSWER,
-                                                json_data)
-        return json.loads(response["answer"])
+        params = {
+            'snapshot': snapshot,
+            'referenceSnapshot': reference_snapshot,
+        }
+        return restv2helper.get_answer(self, question, params)
 
     def get_base_url(self):
         # type: () -> str

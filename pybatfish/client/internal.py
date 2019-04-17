@@ -17,11 +17,9 @@
 import json
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
-import six
-
 from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel import answer
-from pybatfish.datamodel.answer import Answer  # noqa: F401
+from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.util import (get_uuid)
 from . import resthelper, workhelper
 from .options import Options
@@ -33,7 +31,7 @@ if TYPE_CHECKING:
 
 def _bf_answer_obj(session, question_str, parameters_str, question_name,
                    background, snapshot, reference_snapshot, extra_args):
-    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
+    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, TableAnswer, str]
     json.loads(parameters_str)  # a syntactic check for parametersStr
     if not question_name:
         question_name = Options.default_question_prefix + "_" + get_uuid()
@@ -54,18 +52,8 @@ def _bf_answer_obj(session, question_str, parameters_str, question_name,
         return work_item.id
 
     # get the answer
-    answer_bytes = resthelper.get_answer(session, snapshot, question_name,
-                                         reference_snapshot)
-
-    # In Python 3.x, answer needs to be decoded before it can be used
-    # for things like json.loads (<= 3.6).
-    if six.PY3:
-        answer_string = answer_bytes.decode(encoding="utf-8")
-    else:
-        answer_string = answer_bytes
-    answer_obj = json.loads(answer_string)
-
-    return answer.from_string(answer_obj[1]['answer'])
+    return answer.from_dict(session.get_answer(question_name, snapshot,
+                                               reference_snapshot))
 
 
 def _bf_get_question_templates(session):
