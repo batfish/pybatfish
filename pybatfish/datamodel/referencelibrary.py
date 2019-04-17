@@ -29,11 +29,13 @@ class AddressGroup(DataModelElement):
 
     :ivar name: The name of the group
     :ivar addresses: a list of 'addresses' where each element is a string
-        that represents an IP address (e.g., "1.1.1.1") or an address:mask
-        (e.g., "1.1.1.1:0.0.0.8").
-    :ivar childGroupNames: a list of names of address groups contained within
-        this address group. The child groups must be within the same reference
-        book. Circular references are allowed.
+        that represents an IP address (e.g., "1.1.1.1"), prefix
+        (e.g., 1.1.1.0/24), or an address:mask (e.g., "1.1.1.1:0.0.0.8").
+    :ivar childGroupNames: a list of names of child groups in this address
+        group. The child groups must exist in the same reference book. Circular
+        descendant relationships between address groups are allowed. The
+        address group is considered to contain all addresses that are directly
+        in it or in any of its descendants.
     """
 
     name = attr.ib(type=str)
