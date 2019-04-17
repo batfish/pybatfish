@@ -41,7 +41,7 @@ MAX_LOG_LENGTH = 64 * 1024
 def _batch_desc(json_batch):
     # type: (Dict) -> str
     """Get a string representation of the Batfish job batch."""
-    description = json_batch.get("description", "").strip()
+    description = json_batch.get("description", "").strip()  # type: str
     if json_batch["size"] > 0:
         description = "{desc} {completed} / {size}" \
             .format(desc=description, completed=json_batch['completed'],
@@ -459,7 +459,7 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
 
         # If true, print the elapsed time since the task started.
         print_elapsed = (
-                (now - task_start_time).total_seconds() > session.elapsed_delay)
+            (now - task_start_time).total_seconds() > session.elapsed_delay)
 
         # Only print info about finished batches in debug mode
         if logger.isEnabledFor(logging.DEBUG):
