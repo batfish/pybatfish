@@ -18,8 +18,8 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.referencelibrary import NodeRolesData, \
-    ReferenceLibrary, AddressGroup
+from pybatfish.datamodel.referencelibrary import AddressGroup, NodeRolesData, \
+    ReferenceLibrary
 
 
 def test_addressgroup_both_subfields():
