@@ -297,8 +297,8 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     :param reference_snapshot: if present, the snapshot against which the answer
         was computed differentially.
     """
-    return bf_session.get_answer(question=questionName, snapshot=snapshot,
-                                 reference_snapshot=reference_snapshot)
+    return dict(bf_session.get_answer(question=questionName, snapshot=snapshot,
+                                      reference_snapshot=reference_snapshot))
 
 
 def bf_get_info():
