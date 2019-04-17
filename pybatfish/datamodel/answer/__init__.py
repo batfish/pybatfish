@@ -26,7 +26,7 @@ def from_dict(dict):
     """Take a dict representing a Batfish answer, return answer object.
 
     :returns either an old :py:class:`Answer`
-        or new :py:class:`TableAnswer` class.
+        or new :py:class:`TableAnswer` object.
     """
     if "answerElements" in dict and "metadata" in dict["answerElements"][0]:
         return TableAnswer(dict)

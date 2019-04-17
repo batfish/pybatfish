@@ -18,7 +18,6 @@ import json
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts
-from pybatfish.datamodel import answer
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.util import (get_uuid)
 from . import resthelper, workhelper
@@ -52,8 +51,7 @@ def _bf_answer_obj(session, question_str, parameters_str, question_name,
         return work_item.id
 
     # get the answer
-    return answer.from_dict(session.get_answer(question_name, snapshot,
-                                               reference_snapshot))
+    return session.get_answer(question_name, snapshot, reference_snapshot)
 
 
 def _bf_get_question_templates(session):

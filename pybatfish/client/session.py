@@ -32,7 +32,8 @@ from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
-                                 ReferenceLibrary)
+                                 ReferenceLibrary, answer)
+from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import (Questions)
 from pybatfish.util import get_uuid, validate_name, zip_dir
@@ -335,7 +336,7 @@ class Session(object):
         return str(answer_dict["status"].value)
 
     def get_answer(self, question, snapshot, reference_snapshot=None):
-        # type: (str, str, Optional[str]) -> Dict[str, Any]
+        # type: (str, str, Optional[str]) -> Union[Answer, TableAnswer]
         """
         Get the answer for a previously asked question.
 
@@ -346,13 +347,13 @@ class Session(object):
         :param reference_snapshot: if present, gets the answer for a differential question asked against the specified reference snapshot
         :type reference_snapshot: str
         :return: answer to the specified question
-        :rtype: dict
+        :rtype: :py:class:`Answer` or :py:class:`TableAnswer`
         """
         params = {
             'snapshot': snapshot,
             'referenceSnapshot': reference_snapshot,
         }
-        return restv2helper.get_answer(self, question, params)
+        return answer.from_dict(restv2helper.get_answer(self, question, params))
 
     def get_base_url(self):
         # type: () -> str
