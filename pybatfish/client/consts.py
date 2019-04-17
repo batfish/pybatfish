@@ -283,8 +283,6 @@ class CoordConstsV2(object):
     RSC_ANALYSES = "analyses"
     RSC_ANSWER = "answer"
     RSC_COMPLETED_WORK = "completed_work"
-    RSC_CONTAINER = "container"
-    RSC_CONTAINERS = "containers"
     RSC_FORK = "fork"
     RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
     RSC_INPUT = "input"
