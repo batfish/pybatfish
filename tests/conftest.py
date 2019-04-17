@@ -1,7 +1,7 @@
 from pybatfish.datamodel.primitives import VariableType
 
 COMPLETION_TYPES = [
-    VariableType.ADDRESS_GROUP_AND_BOOK,
+    VariableType.ADDRESS_GROUP_NAME,
     VariableType.APPLICATION_SPEC,
     VariableType.BGP_PEER_PROPERTY_SPEC,
     VariableType.BGP_PROCESS_PROPERTY_SPEC,
@@ -12,7 +12,7 @@ COMPLETION_TYPES = [
     VariableType.FILTER_SPEC,
     VariableType.FLOW_STATE,
     VariableType.INTERFACE,
-    VariableType.INTERFACE_GROUP_AND_BOOK,
+    VariableType.INTERFACE_GROUP_NAME,
     VariableType.INTERFACE_PROPERTY_SPEC,
     VariableType.IP,
     VariableType.IP_PROTOCOL_SPEC,
@@ -21,12 +21,13 @@ COMPLETION_TYPES = [
     VariableType.LOCATION_SPEC,
     VariableType.NAMED_STRUCTURE_SPEC,
     VariableType.NODE_PROPERTY_SPEC,
-    VariableType.NODE_ROLE_AND_DIMENSION,
-    VariableType.NODE_ROLE_DIMENSION,
+    VariableType.NODE_ROLE_DIMENSION_NAME,
+    VariableType.NODE_ROLE_NAME,
     VariableType.NODE_SPEC,
     VariableType.OSPF_PROPERTY_SPEC,
     VariableType.PREFIX,
     VariableType.PROTOCOL,
+    VariableType.REFERENCE_BOOK_NAME,
     VariableType.ROUTING_PROTOCOL_SPEC,
     VariableType.STRUCTURE_NAME,
     VariableType.VRF,
