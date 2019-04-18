@@ -18,7 +18,7 @@ import json
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
 from pybatfish.client.consts import CoordConsts
-from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
+from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import (get_uuid)
 from . import resthelper, workhelper
 from .options import Options
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 def _bf_answer_obj(session, question_str, parameters_str, question_name,
                    background, snapshot, reference_snapshot, extra_args):
-    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, TableAnswer, str]
+    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
     json.loads(parameters_str)  # a syntactic check for parametersStr
     if not question_name:
         question_name = Options.default_question_prefix + "_" + get_uuid()

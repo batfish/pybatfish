@@ -13,22 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Any, Dict, Union  # noqa: F401
-
 from pybatfish.datamodel.answer.base import Answer
 from pybatfish.datamodel.answer.table import TableAnswer
 
-__all__ = ['from_dict', 'Answer', 'TableAnswer']
-
-
-def from_dict(dict):
-    # type: (Dict[str, Any]) -> Union[Answer, TableAnswer]
-    """Take a dict representing a Batfish answer, return answer object.
-
-    :returns either an old :py:class:`Answer`
-        or new :py:class:`TableAnswer` object.
-    """
-    if "answerElements" in dict and "metadata" in dict["answerElements"][0]:
-        return TableAnswer(dict)
-    else:
-        return Answer(dict)
+__all__ = ['Answer', 'TableAnswer']
