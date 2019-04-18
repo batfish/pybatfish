@@ -56,6 +56,7 @@ __all__ = [
     'delete_node_role_dimension',
     'delete_reference_book',
     'fork_snapshot',
+    'get_answer',
     'get_issue_config',
     'get_network',
     'get_network_object',
@@ -158,6 +159,17 @@ def delete_reference_book(session, book_name):
                                      CoordConstsV2.RSC_REFERENCE_LIBRARY,
                                      book_name)
     return _delete(session, url_tail)
+
+
+def get_answer(session, question, params):
+    # type: (Session, str, Dict[str, Optional[str]]) -> Dict[str, Any]
+    """Get answer for the specified question."""
+    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
+                                        session.network,
+                                        CoordConstsV2.RSC_QUESTIONS,
+                                        question,
+                                        CoordConstsV2.RSC_ANSWER)
+    return _get_dict(session, url_tail, params)
 
 
 def get_issue_config(session, major, minor):

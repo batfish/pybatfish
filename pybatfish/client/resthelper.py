@@ -50,20 +50,6 @@ _requests_session.mount("http", HTTPAdapter(
 #                              'https': 'http://127.0.0.1:8888'}
 
 
-def get_answer(session, snapshot, question_name, reference_snapshot=None):
-    # type: (Session, str, str, Optional[str]) -> bytes
-    json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
-                 CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-                 CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
-                 CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
-                 }
-    if reference_snapshot is not None:
-        json_data[
-            CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
-    return _post_data(session, CoordConsts.SVC_RSC_GET_ANSWER, json_data,
-                      stream=False).content
-
-
 def get_json_response(session, resource, jsonData=None, useHttpGet=False):
     # type: (Session, str, Optional[Dict], bool) -> Dict[str, Any]
     """Send a request (POST or GET) to Batfish.
