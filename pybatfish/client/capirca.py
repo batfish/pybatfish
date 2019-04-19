@@ -17,6 +17,7 @@
 from __future__ import absolute_import, print_function
 
 import logging
+from typing import Union  # noqa: F401
 
 import ipaddr
 import six
@@ -90,17 +91,18 @@ def _entry_to_group(name, items, definitions):
         childGroupNames=converted_group)
 
 
-def create_reference_book(definitions_dir, book_name='capirca'):
-    # type: (str, str) -> ReferenceBook
+def create_reference_book(definitions, book_name='capirca'):
+    # type: (Union[str, naming.Naming], str) -> ReferenceBook
     """
     Create a ReferenceBook containing the given Capirca network definitions.
 
-    :param definitions_dir: path to the Capirca definitions folder.
-    :type definitions_dir: str
+    :param definitions: a Capirca Naming definitions object, or the path to the Capirca definitions folder.
+    :type definitions: capirca.lib.naming.Naming or str
     :param book_name: the name of the created ReferenceBook. Defaults to 'capirca'.
-    :type book_name: str
+    :type book_name: str, optional
     """
-    definitions = _load_definitions(definitions_dir)
+    if not isinstance(definitions, naming.Naming):
+        definitions = _load_definitions(definitions)
 
     groups = [_entry_to_group(network.name, network.items, definitions)
               for network in definitions.networks.values()]
