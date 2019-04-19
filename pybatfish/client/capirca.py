@@ -102,27 +102,7 @@ def create_reference_book(definitions_dir, book_name='capirca'):
     """
     definitions = _load_definitions(definitions_dir)
 
-    groups = []
-    for network in definitions.networks.values():
-        try:
-            converted = [_item_to_python_repr(i, definitions) for i in
-                         network.items]
-        except ValueError:
-            LOGGER.exception('error converting %s', network.name)
-            continue
-
-        if any(isinstance(c, (ipaddr.IPv6Address, ipaddr.IPv6Network))
-               for c in converted):
-            LOGGER.warning('Skipping IPv6 addresses in %s', network.name)
-
-        converted_v4 = [str(c) for c in converted if
-                        isinstance(c, (ipaddr.IPv4Address, ipaddr.IPv4Network))]
-        converted_group = [c for c in converted if
-                           isinstance(c, six.string_types)]
-
-        groups.append(
-            AddressGroup('{name}'.format(name=network.name),
-                         addresses=converted_v4,
-                         childGroupNames=converted_group))
+    groups = [_entry_to_group(network.name, network.items, definitions)
+              for network in definitions.networks.values()]
 
     return ReferenceBook(name=book_name, addressGroups=groups)
