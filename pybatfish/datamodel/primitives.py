@@ -92,7 +92,7 @@ class VariableType(str, Enum):
 
     # Should be in sync with org.batfish.datamodel.questions.Variable.Type
 
-    ADDRESS_GROUP_AND_BOOK = "addressGroupAndBook"  #: address group and book pair
+    ADDRESS_GROUP_NAME = "addressGroupName"  #: address group name
     ANSWER_ELEMENT = "answerElement"  #: answer elements
     APPLICATION_SPEC = "applicationSpec"  #: application specifier
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
@@ -113,7 +113,7 @@ class VariableType(str, Enum):
     INTEGER = "integer"  #: integer values
     INTEGER_SPACE = "integerSpace"  #: integer spaces
     INTERFACE = "interface"  #: names of interfaces
-    INTERFACE_GROUP_AND_BOOK = "interfaceGroupAndBook"  #: interface group, book
+    INTERFACE_GROUP_NAME = "interfaceGroupName"  #: interface group name
     INTERFACE_NAME = "interfaceName"  #: name of interfaces
     INTERFACE_PROPERTY_SPEC = "interfacePropertySpec"  #: interface properties
     INTERFACES_SPEC = "interfacesSpec"  #: interfaces specifier
@@ -131,14 +131,15 @@ class VariableType(str, Enum):
     NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
     NODE_NAME = "nodeName"  #: name of nodes
     NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties
-    NODE_ROLE_AND_DIMENSION = "nodeRoleAndDimension"  #: node role,dimension
-    NODE_ROLE_DIMENSION = "nodeRoleDimension"  #: names of node role dimensions
+    NODE_ROLE_DIMENSION_NAME = "nodeRoleDimensionName"  #: names of node role dimension
+    NODE_ROLE_NAME = "nodeRoleName"  #: node role name
     NODE_SPEC = "nodeSpec"  #: node specifier
     OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
     PREFIX = "prefix"  #: prefixes
     PREFIX_RANGE = "prefixRange"  #: prefix ranges
     PROTOCOL = "protocol"  #: application-level protocols
+    REFERENCE_BOOK_NAME = "referenceBookName"  #: reference book name
     QUESTION = "question"  #: questions
     ROUTING_PROTOCOL_SPEC = "routingProtocolSpec"  #: routing protocols
     STRING = "string"  #: string values
