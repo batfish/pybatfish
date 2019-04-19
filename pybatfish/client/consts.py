@@ -280,7 +280,6 @@ class CoordConstsV2(object):
     QP_KEY = "key"
     QP_VERBOSE = "verbose"
 
-    RSC_ANSWER = "answer"
     RSC_FORK = "fork"
     RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
     RSC_INPUT = "input"
