@@ -24,7 +24,7 @@ from capirca.lib import naming
 
 from pybatfish.datamodel import AddressGroup, ReferenceBook
 
-__all__ = []
+__all__ = ["create_reference_book"]
 
 LOGGER = logging.getLogger(__name__)
 
