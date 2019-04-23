@@ -102,3 +102,30 @@ def test_entry_to_group_error_undefined(caplog):
     assert not g.childGroupNames
 
     assert 'error converting DENY-EXTERNAL-SRC, creating empty group' in caplog.text
+
+
+def test_create_reference_book():
+    simple_database = """
+        RFC1918_10 = 10.0.0.0/8      # non-public
+
+        RFC1918_172 = 172.16.0.0/12  # non-public
+
+        RFC1918_192 = 192.168.0.0/16  # non-public
+
+        RFC1918 = RFC1918_10
+                  RFC1918_172
+                  RFC1918_192
+    """
+    defs = _load_test_definitions(simple_database)
+
+    book = capirca.create_reference_book(defs)
+    assert book.name == 'capirca'
+    assert len(book.addressGroups) == 4
+    assert set(g.name for g in book.addressGroups) == {
+        'RFC1918', 'RFC1918_10', 'RFC1918_172', 'RFC1918_192'}
+    assert not book.interfaceGroups
+
+    book_custom = capirca.create_reference_book(defs, 'testbook')
+    assert book_custom.name == 'testbook'
+    assert book_custom.addressGroups == book.addressGroups
+    assert book_custom.interfaceGroups == book.interfaceGroups
