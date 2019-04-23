@@ -117,6 +117,7 @@ setup(
     # for example:
     # $ pip install -e .[dev]
     extras_require={
+        'capirca': ['capirca'],
         'dev': ['capirca',
                 'check-manifest',
                 'coverage',
