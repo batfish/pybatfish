@@ -13,23 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-import json
-
 from pybatfish.datamodel.answer.base import Answer
 from pybatfish.datamodel.answer.table import TableAnswer
 
-__all__ = ['from_string', 'Answer', 'TableAnswer']
-
-
-def from_string(json_string):
-    # type: (str) -> Answer
-    """Take a string representing a Batfish answer, return answer object.
-
-    :returns either an old :py:class:`Answer`
-        or new :py:class:`TableAnswer` class.
-    """
-    o = json.loads(json_string)
-    if "answerElements" in o and "metadata" in o["answerElements"][0]:
-        return TableAnswer(o)
-    else:
-        return Answer(o)
+__all__ = ['Answer', 'TableAnswer']
