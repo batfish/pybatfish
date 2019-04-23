@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""Contains Batfish extended client commands for devs and power users that query the Batfish service."""
+"""Contains Batfish commands that integrate with the Google Capirca library (https://github.com/google/capirca)."""
 
 from __future__ import absolute_import, print_function
 
@@ -26,8 +26,6 @@ from capirca.lib import naming
 from pybatfish.datamodel import AddressGroup, ReferenceBook
 
 __all__ = ["create_reference_book"]
-
-LOGGER = logging.getLogger(__name__)
 
 
 def _load_definitions(definition_dir):
@@ -69,16 +67,17 @@ def _item_to_python_repr(item, definitions):
 
 def _entry_to_group(name, items, definitions):
     """Converts one network definition into a Batfish AddressGroup."""
+    logger = logging.getLogger(__name__)
     try:
         converted = [_item_to_python_repr(i, definitions) for i in
                      items]
     except ValueError:
-        LOGGER.exception('error converting %s, creating empty group', name)
+        logger.exception('error converting %s, creating empty group', name)
         return AddressGroup(name)
 
     if any(isinstance(c, (ipaddr.IPv6Address, ipaddr.IPv6Network))
            for c in converted):
-        LOGGER.warning('Skipping IPv6 addresses in %s', name)
+        logger.warning('Skipping IPv6 addresses in %s', name)
 
     converted_v4 = [str(c) for c in converted if
                     isinstance(c, (ipaddr.IPv4Address, ipaddr.IPv4Network))]
@@ -94,7 +93,7 @@ def _entry_to_group(name, items, definitions):
 def create_reference_book(definitions, book_name='capirca'):
     # type: (Union[str, naming.Naming], str) -> ReferenceBook
     """
-    Create a ReferenceBook containing the given Capirca network definitions.
+    Create a :py:class:~pybatfish.datamodel.referencelibrary.ReferenceBook containing the given Capirca network definitions.
 
     :param definitions: a Capirca Naming definitions object, or the path to the Capirca definitions folder.
     :type definitions: capirca.lib.naming.Naming or str
