@@ -13,14 +13,16 @@
 #   limitations under the License.
 
 from io import StringIO
+from typing import Text
 
+import six
 from capirca.lib import naming
 
 from pybatfish.client import capirca
 
 
 def _load_test_definitions(defstr):
-    # type: (str) -> naming.Naming
+    # type: (Text) -> naming.Naming
     """Converts the given string into a Capirca naming object."""
     def_file = StringIO(defstr)
     defs = naming.Naming()
@@ -28,7 +30,7 @@ def _load_test_definitions(defstr):
     return defs
 
 
-TEST_DATABASE = """
+TEST_DATABASE = six.u("""
     RFC1918_10 = 10.0.0.0/8      # non-public
 
     RFC1918_172 = 172.16.0.0/12  # non-public
@@ -58,7 +60,7 @@ TEST_DATABASE = """
         MULTICAST
         CLASS-E
         UNDEFINED
-"""
+""")
 DEFINITIONS = _load_test_definitions(TEST_DATABASE)
 
 
@@ -105,7 +107,7 @@ def test_entry_to_group_error_undefined(caplog):
 
 
 def test_create_reference_book():
-    simple_database = """
+    simple_database = six.u("""
         RFC1918_10 = 10.0.0.0/8      # non-public
 
         RFC1918_172 = 172.16.0.0/12  # non-public
@@ -115,7 +117,7 @@ def test_create_reference_book():
         RFC1918 = RFC1918_10
                   RFC1918_172
                   RFC1918_192
-    """
+    """)
     defs = _load_test_definitions(simple_database)
 
     book = capirca.create_reference_book(defs)
