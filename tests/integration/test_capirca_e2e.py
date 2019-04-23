@@ -38,4 +38,9 @@ def test_create_reference_book(network):
     bf_put_reference_book(book)
 
     getbook = bf_get_reference_book('capirca')
-    assert getbook.addressGroups == book.addressGroups
+    # TODO: can this just be book equality? Right now, books are implemented
+    #  with contents that are lists, and converting to set broke a bunch of
+    #  tests that expect those lists to be indexable.
+    assert getbook.name == book.name
+    assert (set(g.name for g in getbook.addressGroups) ==
+            set(g.name for g in book.addressGroups))
