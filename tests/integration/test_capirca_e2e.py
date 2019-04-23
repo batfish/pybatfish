@@ -17,7 +17,7 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
-from pybatfish.client.capirca import _load_definitions, create_reference_book
+from pybatfish.client.capirca import create_reference_book
 from pybatfish.client.commands import (bf_delete_network, bf_get_reference_book,
                                        bf_put_reference_book, bf_set_network)
 
@@ -33,8 +33,7 @@ def network():
 
 
 def test_create_reference_book(network):
-    defs = _load_definitions(os.path.join(_this_dir, 'capirca'))
-    book = create_reference_book(defs)
+    book = create_reference_book(os.path.join(_this_dir, 'capirca'))
     bf_put_reference_book(book)
 
     getbook = bf_get_reference_book('capirca')

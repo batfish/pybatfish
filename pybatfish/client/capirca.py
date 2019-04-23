@@ -101,7 +101,7 @@ def create_reference_book(definitions, book_name='capirca'):
     :type book_name: str, optional
     """
     if not isinstance(definitions, naming.Naming):
-        definitions = _load_definitions(definitions)
+        definitions = naming.Naming(naming_dir=definitions)
 
     groups = [_entry_to_group(network.name, network.items, definitions)
               for network in definitions.networks.values()]
