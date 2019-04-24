@@ -117,7 +117,9 @@ setup(
     # for example:
     # $ pip install -e .[dev]
     extras_require={
-        'dev': ['check-manifest',
+        'capirca': ['capirca'],
+        'dev': ['capirca',
+                'check-manifest',
                 'coverage',
                 'flake8',
                 'flake8-docstrings',
