@@ -23,7 +23,7 @@ import ipaddr
 import six
 try:
     from capirca.lib import naming
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     logging.exception(
         'Capirca must be installed to use the Pybatfish Capirca extensions')
     raise
