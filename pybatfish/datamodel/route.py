@@ -36,6 +36,7 @@ class BgpRoute(DataModelElement):
     :ivar metric: The metric of the route.
     :ivar originatorIp: The IP address of the originator of the route.
     :ivar originType: The origin type of the route.
+    :ivar sourceProtocol: The source protocol of the route.
     """
 
     network = attr.ib(type=str)
@@ -46,6 +47,7 @@ class BgpRoute(DataModelElement):
     communities = attr.ib(type=list, default=[])
     localPreference = attr.ib(type=int, default=0)
     metric = attr.ib(type=int, default=0)
+    sourceProtocol = attr.ib(type=str, default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -57,7 +59,8 @@ class BgpRoute(DataModelElement):
                         json_dict.get("asPath", []),
                         json_dict.get("communities", []),
                         json_dict.get("localPreference", 0),
-                        json_dict.get("metric", 0))
+                        json_dict.get("metric", 0),
+                        json_dict.get("srcProtocol", None))
 
     def dict(self):
         # type: () -> Dict
@@ -71,7 +74,8 @@ class BgpRoute(DataModelElement):
             'metric': self.metric,
             'originatorIp': self.originatorIp,
             'originType': self.originType,
-            'protocol': self.protocol
+            'protocol': self.protocol,
+            'srcProtocol': self.sourceProtocol
         }
 
     def _repr_html_(self):
@@ -89,6 +93,7 @@ class BgpRoute(DataModelElement):
         lines.append('Originator IP: %s' % self.originatorIp)
         lines.append('Origin Type: %s' % self.originType)
         lines.append('Protocol: %s' % self.protocol)
+        lines.append('Source Protocol: %s' % self.sourceProtocol)
         return lines
 
 
