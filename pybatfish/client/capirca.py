@@ -21,7 +21,12 @@ from typing import Union  # noqa: F401
 
 import ipaddr
 import six
-from capirca.lib import naming
+try:
+    from capirca.lib import naming
+except (ImportError, ModuleNotFoundError) as exc:
+    logging.exception(
+        'Capirca must be installed to use the Pybatfish Capirca extensions')
+    raise
 
 from pybatfish.datamodel import AddressGroup, ReferenceBook
 
