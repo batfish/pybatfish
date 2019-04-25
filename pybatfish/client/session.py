@@ -712,6 +712,11 @@ class Session(object):
         uploaded information will be accessible only to Batfish developers and will
         be used to help diagnose any issues you encounter.
 
+        If `contact_info` is supplied (e.g. username for Batfish.org or
+        NetworkToCode Slack workspace, or email address), Batfish developers may
+        contact you if they have follow-up questions or to update you when the
+        issues you encountered are resolved.
+
         :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
         :type dry_run: bool
         :param netconan_config: path to Netconan configuration file
