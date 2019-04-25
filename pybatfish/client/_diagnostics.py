@@ -32,7 +32,7 @@ from pybatfish.question.question import QuestionBase
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
 
-METADATA_FILENAME = 'metadata.json'
+METADATA_FILENAME = 'metadata'
 
 _FILE_PARSE_STATUS_QUESTION = {
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",
