@@ -571,8 +571,7 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None,
     uploaded information will be accessible only to Batfish developers and will
     be used to help diagnose any issues you encounter.
 
-    If `contact_info` is supplied (e.g. username for Batfish.org or
-    NetworkToCode Slack workspace, or email address), Batfish developers may
+    If `contact_info` is supplied (e.g. email address), Batfish developers may
     contact you if they have follow-up questions or to update you when the
     issues you encountered are resolved.
 
