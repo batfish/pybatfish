@@ -20,9 +20,12 @@ import uuid
 import pytest
 import responses
 
-from pybatfish.client._diagnostics import (_anonymize_dir, _check_if_all_passed,
+from pybatfish.client._diagnostics import (METADATA_FILENAME, _anonymize_dir,
+                                           _check_if_all_passed,
                                            _check_if_any_failed,
-                                           _upload_dir_to_url)
+                                           _upload_dir_to_url,
+                                           upload_diagnostics)
+from pybatfish.client.session import Session
 
 # Config file constants for anonymization and upload
 _CONFIG_IP_ADDR = "1.2.3.4"
@@ -84,6 +87,21 @@ def test_check_if_snapshot_failed():
     assert not _check_if_any_failed({'a': 'PASSED', 'b': 'EMPTY'})
     assert _check_if_any_failed({'a': 'PASSED', 'b': 'FAILED'})
     assert _check_if_any_failed({'a': 'FAILED', 'b': 'FAILED'})
+
+
+def test_upload_diagnostics_metadata():
+    """Confirm metadata file is generated with correct content."""
+    metadata = {
+        'test_key1': 'test_value',
+        'test_key2': 1234,
+    }
+    out_dir = upload_diagnostics(Session(), metadata, dry_run=True,
+                                 questions=[])
+
+    with open(os.path.join(out_dir, METADATA_FILENAME)) as f:
+        contents = json.loads(f.read())
+
+    assert contents == metadata
 
 
 @responses.activate
