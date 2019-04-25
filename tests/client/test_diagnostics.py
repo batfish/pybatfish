@@ -95,7 +95,8 @@ def test_upload_diagnostics_metadata():
         'test_key1': 'test_value',
         'test_key2': 1234,
     }
-    out_dir = upload_diagnostics(Session(), metadata, dry_run=True,
+    out_dir = upload_diagnostics(Session(load_questions=False), metadata,
+                                 dry_run=True,
                                  questions=[])
 
     with open(os.path.join(out_dir, METADATA_FILENAME)) as f:
