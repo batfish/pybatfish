@@ -274,7 +274,7 @@ def warn_on_snapshot_failure(session):
         logger.warning("""\
 Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
-    bf_upload_diagnostics(dry_run=False, contact_info='<optional contact info>')
+    bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
@@ -283,7 +283,7 @@ to share private, anonymized information. For more information, see the document
         logger.warning("""\
 Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
-    bf_upload_diagnostics(dry_run=False, contact_info='<optional contact info>')
+    bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
