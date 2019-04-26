@@ -35,10 +35,11 @@ def _files(dir):
 def test_create_single_file_zip_basic(tmp_path):
     """Creates the expected directory structure in default config."""
     text = "abcdefgh\n"
-    _create_single_file_zip(tmp_path, text, 'config', None)
+    path = str(tmp_path)
+    _create_single_file_zip(path, text, 'config', None)
 
-    filename = os.path.join(tmp_path, 'configs', 'config')
-    assert _files(tmp_path) == [filename]
+    filename = os.path.join(path, 'configs', 'config')
+    assert _files(path) == [filename]
     with open(filename, 'r') as infile:
         assert infile.read() == text
 
@@ -46,10 +47,11 @@ def test_create_single_file_zip_basic(tmp_path):
 def test_create_single_file_zip_platform(tmp_path):
     """Creates the expected file text with provided platform."""
     text = "abcdefgh\n"
+    path = str(tmp_path)
+    _create_single_file_zip(path, text, 'config', 'arista')
 
-    _create_single_file_zip(tmp_path, text, 'config', 'arista')
-    filename = os.path.join(tmp_path, 'configs', 'config')
-    assert _files(tmp_path) == [filename]
+    filename = os.path.join(path, 'configs', 'config')
+    assert _files(path) == [filename]
     with open(filename, 'r') as infile:
         assert infile.read() == '!RANCID-CONTENT-TYPE: arista\n' + text
 
@@ -57,10 +59,11 @@ def test_create_single_file_zip_platform(tmp_path):
 def test_create_single_file_zip_custom_platform(tmp_path):
     """Creates the expected file text with provided poorly typed platform."""
     text = "abcdefgh\n"
-    _create_single_file_zip(tmp_path, text, 'config', ' aRiStA \t')
-    filename = os.path.join(tmp_path, 'configs', 'config')
+    path = str(tmp_path)
+    _create_single_file_zip(path, text, 'config', ' aRiStA \t')
 
-    assert _files(tmp_path) == [filename]
+    filename = os.path.join(path, 'configs', 'config')
+    assert _files(path) == [filename]
     with open(filename, 'r') as infile:
         assert infile.read() == '!RANCID-CONTENT-TYPE: arista\n' + text
 
@@ -68,10 +71,11 @@ def test_create_single_file_zip_custom_platform(tmp_path):
 def test_create_single_file_zip_custom_filename(tmp_path):
     """Creates the expected file text in the expected filename."""
     text = "abcdefgh\n"
-    _create_single_file_zip(tmp_path, text, 'somefile', None)
+    path = str(tmp_path)
+    _create_single_file_zip(path, text, 'somefile', None)
 
-    filename = os.path.join(tmp_path, 'configs', 'somefile')
-    assert _files(tmp_path) == [filename]
+    filename = os.path.join(path, 'configs', 'somefile')
+    assert _files(path) == [filename]
     with open(filename, 'r') as infile:
         assert infile.read() == text
 
