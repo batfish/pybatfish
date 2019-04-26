@@ -348,7 +348,8 @@ class Session(object):
         :type reference_snapshot: str
         """
         json_data = workhelper.get_data_get_answer(self, question,
-                                                   snapshot, reference_snapshot)
+                                                   snapshot,
+                                                   reference_snapshot)
         response = resthelper.get_json_response(self,
                                                 CoordConsts.SVC_RSC_GET_ANSWER,
                                                 json_data)
@@ -692,8 +693,9 @@ class Session(object):
             self.snapshot)
         return self.snapshot
 
-    def upload_diagnostics(self, dry_run=True, netconan_config=None):
-        # type: (bool, str) -> str
+    def upload_diagnostics(self, dry_run=True, netconan_config=None,
+                           contact_info=None):
+        # type: (bool, str, Optional[str]) -> str
         """
         Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
@@ -710,15 +712,23 @@ class Session(object):
         uploaded information will be accessible only to Batfish developers and will
         be used to help diagnose any issues you encounter.
 
+        If `contact_info` is supplied (e.g. email address), Batfish developers may
+        contact you if they have follow-up questions or to update you when the
+        issues you encountered are resolved.
+
         :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
         :type dry_run: bool
         :param netconan_config: path to Netconan configuration file
         :type netconan_config: str
-
+        :param contact_info: optional contact info associated with this upload
+        :type contact_info: str
         :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
         :rtype: str
         """
-        return upload_diagnostics(self, dry_run=dry_run,
+        metadata = {}
+        if contact_info:
+            metadata['contact_info'] = contact_info
+        return upload_diagnostics(self, metadata=metadata, dry_run=dry_run,
                                   netconan_config=netconan_config)
 
     def _check_network(self):

@@ -19,7 +19,7 @@ import os
 import shutil
 import tempfile
 import uuid
-from typing import Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
+from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
 
 import requests
 from netconan import netconan
@@ -31,6 +31,8 @@ from pybatfish.question.question import QuestionBase
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
+
+METADATA_FILENAME = 'metadata'
 
 _FILE_PARSE_STATUS_QUESTION = {
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",
@@ -65,16 +67,18 @@ _S3_BUCKET = 'batfish-diagnostics'
 _S3_REGION = 'us-west-2'
 
 
-def upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
+def upload_diagnostics(session, metadata, bucket=_S3_BUCKET, region=_S3_REGION,
                        dry_run=True,
                        netconan_config=None, questions=_INIT_INFO_QUESTIONS,
                        resource_prefix=''):
-    # type: (Session, str, str, bool, Optional[str], Iterable[Dict[str, object]], str) -> str
+    # type: (Session, Dict[str, Any], str, str, bool, Optional[str], Iterable[Dict[str, object]], str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
     :param session: Batfish session to use for running diagnostics questions
     :type session: :class:`~pybatfish.client.session.Session`
+    :param metadata: additional metadata to upload with the diagnostics
+    :type metadata: dict[str, Any]
     :param bucket: name of the AWS S3 bucket to upload to
     :type bucket: string
     :param region: name of the region containing the bucket
@@ -111,9 +115,13 @@ def upload_diagnostics(session, bucket=_S3_BUCKET, region=_S3_REGION,
                 f.write(content)
 
         tmp_dir_anon = tempfile.mkdtemp()
-        _anonymize_dir(tmp_dir, tmp_dir_anon, netconan_config)
+        if questions:
+            _anonymize_dir(tmp_dir, tmp_dir_anon, netconan_config)
     finally:
         shutil.rmtree(tmp_dir)
+
+    with open(os.path.join(tmp_dir_anon, METADATA_FILENAME), 'w') as f:
+        f.write(json.dumps(metadata))
 
     if dry_run:
         logger.info(
@@ -266,7 +274,7 @@ def warn_on_snapshot_failure(session):
         logger.warning("""\
 Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
-    bf_upload_diagnostics(dry_run=False)
+    bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
@@ -275,7 +283,7 @@ to share private, anonymized information. For more information, see the document
         logger.warning("""\
 Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
-    bf_upload_diagnostics(dry_run=False)
+    bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
