@@ -498,8 +498,7 @@ class Session(object):
             overwrite=False, extra_args=None):
         # type: (str, str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
-        Initialize a new snapshot consisting of a single configuration file with
-        the given text.
+        Initialize a snapshot of a single configuration file with given text.
 
         When platform=None the file contains the given text, unmodified. This
         means that the file text must indicate the platform of the vendor to
@@ -538,26 +537,16 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        import os
         import tempfile
 
         d = tempfile.TemporaryDirectory(prefix='_batfish_temp.')
         try:
-            configs = os.path.join(d.name, 'configs')
-            config_file = os.path.join(configs, filename)
-            os.makedirs(configs)
-            with open(config_file, 'w') as outfile:
-                if platform is not None:
-                    p = platform.strip().lower()
-                    outfile.write('!RANCID-CONTENT-TYPE: {}\n'.format(p))
-                outfile.write(text)
-
+            _create_single_file_zip(d.name, text, filename, platform)
             ss_name = self._init_snapshot(d.name, name=snapshot_name,
                                           overwrite=overwrite,
                                           extra_args=extra_args)
             assert isinstance(ss_name, str)  # Guaranteed since background=False
             return ss_name
-
         finally:
             d.cleanup()
 
@@ -845,3 +834,16 @@ class Session(object):
                 warn_on_snapshot_failure(self)
 
             return self.snapshot
+
+
+def _create_single_file_zip(dirname, text, filename, platform):
+    # type: (str, str, str, Optional[str]) -> None
+    """Utility function for Session.init_snapshot_from_text."""
+    configs = os.path.join(dirname, 'configs')
+    config_file = os.path.join(configs, filename)
+    os.makedirs(configs)
+    with open(config_file, 'w') as outfile:
+        if platform is not None:
+            p = platform.strip().lower()
+            outfile.write('!RANCID-CONTENT-TYPE: {}\n'.format(p))
+        outfile.write(text)
