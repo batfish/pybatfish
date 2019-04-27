@@ -500,17 +500,17 @@ class Session(object):
         """
         Initialize a snapshot of a single configuration file with given text.
 
-        When platform=None the file contains the given text, unmodified. This
+        When `platform=None` the file contains the given text, unmodified. This
         means that the file text must indicate the platform of the vendor to
         Batfish, which is usually learned from headers that devices add in
-        "show run", such as
+        "show run"::
 
             boot nxos bootflash:nxos.7.0.3.I4.7.bin   (Cisco NX-OS)
             ! boot system flash:/vEOS-lab.swi         (Arista EOS)
             #TMSH-VERSION: 1.0                        (F5 Big-IP)
             !! IOS XR Configuration 5.2.4             (Cisco IOS XR)
 
-        Alternately, you may supply the name of the platform in the platform
+        Alternately, you may supply the name of the platform in the `platform`
         argument.
 
         As usual, the hostname of the node will be parsed from the configuration
@@ -520,13 +520,13 @@ class Session(object):
         :param text: the contents of the file.
         :type text: str
         :param filename: name of the configuration file created, 'config' by
-        default.
+            default.
         :type filename: str
         :param snapshot_name: name of the snapshot to initialize
         :type snapshot_name: str
         :param platform: the RANCID router.db name for the device platform,
-        i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for the above examples.
-        See https://www.shrubbery.net/rancid/man/router.db.5.html .
+            i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for the above examples.
+            See https://www.shrubbery.net/rancid/man/router.db.5.html .
         :type snapshot_name: str
         :param overwrite: whether or not to overwrite an existing snapshot with the
            same name
