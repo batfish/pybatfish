@@ -23,6 +23,7 @@ import tempfile
 from typing import (Any, Dict, List, Optional,  # noqa: F401
                     Text, Union)
 
+import six
 from deprecated import deprecated
 from requests import HTTPError
 
@@ -253,20 +254,18 @@ class Session(object):
         :return: name of initialized snapshot or None if the call fails
         :rtype: Optional[str]
         """
-        result = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
-                                     deactivate_interfaces=deactivate_interfaces,
-                                     deactivate_links=deactivate_links,
-                                     deactivate_nodes=deactivate_nodes,
-                                     restore_interfaces=restore_interfaces,
-                                     restore_links=restore_links,
-                                     restore_nodes=restore_nodes,
-                                     add_files=add_files,
-                                     extra_args=extra_args)
-        # Get around mypy thinking this could also be Dict
-        # We know the result here will be str or None because background = False
-        if isinstance(result, str):
-            return result
-        return None
+        ss_name = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
+                                      deactivate_interfaces=deactivate_interfaces,
+                                      deactivate_links=deactivate_links,
+                                      deactivate_nodes=deactivate_nodes,
+                                      restore_interfaces=restore_interfaces,
+                                      restore_links=restore_links,
+                                      restore_nodes=restore_nodes,
+                                      add_files=add_files,
+                                      extra_args=extra_args)
+        assert isinstance(
+            ss_name, six.string_types)  # Guaranteed since background=False
+        return ss_name
 
     def _fork_snapshot(self, base_name, name=None, overwrite=False,
                        background=False, deactivate_interfaces=None,
@@ -487,15 +486,70 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        result = self._init_snapshot(upload, name=name,
-                                     overwrite=overwrite,
-                                     extra_args=extra_args)
-        # Get around mypy thinking this could also be Dict
-        # We know the result here will be str because background = False
-        if isinstance(result, str):
-            return result
-        # Should never get here
-        raise BatfishException('Unable to initialize snapshot')
+        ss_name = self._init_snapshot(upload, name=name,
+                                      overwrite=overwrite,
+                                      extra_args=extra_args)
+        assert isinstance(
+            ss_name, six.string_types)  # Guaranteed since background=False
+        return ss_name
+
+    def init_snapshot_from_text(
+            self, text, filename='config', snapshot_name=None, platform=None,
+            overwrite=False, extra_args=None):
+        # type: (str, str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
+        """
+        Initialize a snapshot of a single configuration file with given text.
+
+        When `platform=None` the file contains the given text, unmodified. This
+        means that the file text must indicate the platform of the vendor to
+        Batfish, which is usually learned from headers that devices add in
+        "show run"::
+
+            boot nxos bootflash:nxos.7.0.3.I4.7.bin   (Cisco NX-OS)
+            ! boot system flash:/vEOS-lab.swi         (Arista EOS)
+            #TMSH-VERSION: 1.0                        (F5 Big-IP)
+            !! IOS XR Configuration 5.2.4             (Cisco IOS XR)
+
+        Alternately, you may supply the name of the platform in the `platform`
+        argument.
+
+        As usual, the hostname of the node will be parsed from the configuration
+        text itself, and if not present Batfish will default to the provided
+        filename.
+
+        :param text: the contents of the file.
+        :type text: str
+        :param filename: name of the configuration file created, 'config' by
+            default.
+        :type filename: str
+        :param snapshot_name: name of the snapshot to initialize
+        :type snapshot_name: str
+        :param platform: the RANCID router.db name for the device platform,
+            i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for above examples.
+            See https://www.shrubbery.net/rancid/man/router.db.5.html
+        :type platform: str
+        :param overwrite: whether or not to overwrite an existing snapshot with
+           the same name.
+        :type overwrite: bool
+        :param extra_args: extra arguments to be passed to the parse command
+        :type extra_args: dict
+
+        :return: name of initialized snapshot
+        :rtype: str
+        """
+        import tempfile
+
+        d = tempfile.TemporaryDirectory(prefix='_batfish_temp.')
+        try:
+            _create_single_file_zip(d.name, text, filename, platform)
+            ss_name = self._init_snapshot(d.name, name=snapshot_name,
+                                          overwrite=overwrite,
+                                          extra_args=extra_args)
+            assert isinstance(
+                ss_name, six.string_types)  # Guaranteed since background=False
+            return ss_name
+        finally:
+            d.cleanup()
 
     def _init_snapshot(self, upload, name=None, overwrite=False,
                        background=False,
@@ -781,3 +835,16 @@ class Session(object):
                 warn_on_snapshot_failure(self)
 
             return self.snapshot
+
+
+def _create_single_file_zip(dirname, text, filename, platform):
+    # type: (str, str, str, Optional[str]) -> None
+    """Utility function for Session.init_snapshot_from_text."""
+    configs = os.path.join(dirname, 'configs')
+    config_file = os.path.join(configs, filename)
+    os.makedirs(configs)
+    with open(config_file, 'w') as outfile:
+        if platform is not None:
+            p = platform.strip().lower()
+            outfile.write('!RANCID-CONTENT-TYPE: {}\n'.format(p))
+        outfile.write(text)
