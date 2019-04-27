@@ -525,11 +525,11 @@ class Session(object):
         :param snapshot_name: name of the snapshot to initialize
         :type snapshot_name: str
         :param platform: the RANCID router.db name for the device platform,
-            i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for the above examples.
-            See https://www.shrubbery.net/rancid/man/router.db.5.html .
-        :type snapshot_name: str
-        :param overwrite: whether or not to overwrite an existing snapshot with the
-           same name
+            i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for above examples.
+            See https://www.shrubbery.net/rancid/man/router.db.5.html
+        :type platform: str
+        :param overwrite: whether or not to overwrite an existing snapshot with
+           the same name.
         :type overwrite: bool
         :param extra_args: extra arguments to be passed to the parse command
         :type extra_args: dict
