@@ -23,6 +23,7 @@ import tempfile
 from typing import (Any, Dict, List, Optional,  # noqa: F401
                     Text, Union)
 
+import six
 from deprecated import deprecated
 from requests import HTTPError
 
@@ -253,20 +254,18 @@ class Session(object):
         :return: name of initialized snapshot or None if the call fails
         :rtype: Optional[str]
         """
-        result = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
-                                     deactivate_interfaces=deactivate_interfaces,
-                                     deactivate_links=deactivate_links,
-                                     deactivate_nodes=deactivate_nodes,
-                                     restore_interfaces=restore_interfaces,
-                                     restore_links=restore_links,
-                                     restore_nodes=restore_nodes,
-                                     add_files=add_files,
-                                     extra_args=extra_args)
-        # Get around mypy thinking this could also be Dict
-        # We know the result here will be str or None because background = False
-        if isinstance(result, str):
-            return result
-        return None
+        ss_name = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
+                                      deactivate_interfaces=deactivate_interfaces,
+                                      deactivate_links=deactivate_links,
+                                      deactivate_nodes=deactivate_nodes,
+                                      restore_interfaces=restore_interfaces,
+                                      restore_links=restore_links,
+                                      restore_nodes=restore_nodes,
+                                      add_files=add_files,
+                                      extra_args=extra_args)
+        assert isinstance(
+            ss_name, six.string_types)  # Guaranteed since background=False
+        return ss_name
 
     def _fork_snapshot(self, base_name, name=None, overwrite=False,
                        background=False, deactivate_interfaces=None,
@@ -490,7 +489,8 @@ class Session(object):
         ss_name = self._init_snapshot(upload, name=name,
                                       overwrite=overwrite,
                                       extra_args=extra_args)
-        assert isinstance(ss_name, str)  # Guaranteed since background=False
+        assert isinstance(
+            ss_name, six.string_types)  # Guaranteed since background=False
         return ss_name
 
     def init_snapshot_from_text(
@@ -545,7 +545,8 @@ class Session(object):
             ss_name = self._init_snapshot(d.name, name=snapshot_name,
                                           overwrite=overwrite,
                                           extra_args=extra_args)
-            assert isinstance(ss_name, str)  # Guaranteed since background=False
+            assert isinstance(
+                ss_name, six.string_types)  # Guaranteed since background=False
             return ss_name
         finally:
             d.cleanup()
