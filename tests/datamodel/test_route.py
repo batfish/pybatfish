@@ -48,6 +48,7 @@ def testBgpRouteSerialization():
 
     dct = bgpRoute.dict()
 
+    assert dct['class'] == 'org.batfish.datamodel.BgpRoute'
     assert dct['network'] == network
     assert dct['asPath'] == asPath
     assert dct['communities'] == communities

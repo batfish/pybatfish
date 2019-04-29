@@ -65,6 +65,8 @@ class BgpRoute(DataModelElement):
     def dict(self):
         # type: () -> Dict
         return {
+            # needed for batfish jackson deserialization
+            'class': 'org.batfish.datamodel.BgpRoute',
             'network': self.network,
             'asPath': self.asPath,
             'communities': self.communities,
