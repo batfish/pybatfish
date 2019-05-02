@@ -1,0 +1,3 @@
+SSH = 22/tcp
+TELNET = 23/tcp
+SMTP = 25/tcp

@@ -59,8 +59,8 @@ def testBgpRouteSerialization():
     assert dct['protocol'] == protocol
 
 
-def testBgpRouteStr():
-    bgpRoute = BgpRoute(
+def test_bgp_route_str():
+    bgp_route = BgpRoute(
         network="A",
         asPath=[1, 2],
         communities=[1, 2, 3],
@@ -68,18 +68,21 @@ def testBgpRouteStr():
         metric=5,
         originatorIp='1.1.1.1',
         originType='egp',
-        protocol='bgp'
+        protocol='bgp',
+        sourceProtocol='connected'
     )
-    lines = bgpRoute._repr_html_lines()
-    assert len(lines) == 8
-    assert lines[0] == "Network: A"
-    assert lines[1] == "AS Path: [1, 2]"
-    assert lines[2] == "Communities: [1, 2, 3]"
-    assert lines[3] == "Local Preference: 4"
-    assert lines[4] == "Metric: 5"
-    assert lines[5] == "Originator IP: 1.1.1.1"
-    assert lines[6] == "Origin Type: egp"
-    assert lines[7] == "Protocol: bgp"
+    lines = bgp_route._repr_html_lines()
+    assert lines == [
+        "Network: A",
+        "AS Path: [1, 2]",
+        "Communities: [1, 2, 3]",
+        "Local Preference: 4",
+        "Metric: 5",
+        "Originator IP: 1.1.1.1",
+        "Origin Type: egp",
+        "Protocol: bgp",
+        "Source Protocol: connected",
+    ]
 
 
 def testBgpRouteDiffDeserialization():
