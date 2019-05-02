@@ -56,8 +56,8 @@ def test_questions(network, example_snapshot):
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
-    resource = upload_diagnostics(session=bf_session, dry_run=False,
-                                  resource_prefix='test/')
+    resource = upload_diagnostics(session=bf_session, metadata={},
+                                  dry_run=False, resource_prefix='test/')
     base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
         bucket=_S3_BUCKET, region=_S3_REGION)
 

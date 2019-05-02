@@ -552,8 +552,9 @@ def bf_set_snapshot(name=None, index=None):
     return bf_session.set_snapshot(name=name, index=index)
 
 
-def bf_upload_diagnostics(dry_run=True, netconan_config=None):
-    # type: (bool, str) -> str
+def bf_upload_diagnostics(dry_run=True, netconan_config=None,
+                          contact_info=None):
+    # type: (bool, str, Optional[str]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
@@ -570,15 +571,22 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None):
     uploaded information will be accessible only to Batfish developers and will
     be used to help diagnose any issues you encounter.
 
+    If `contact_info` is supplied (e.g. email address), Batfish developers may
+    contact you if they have follow-up questions or to update you when the
+    issues you encountered are resolved.
+
     :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
     :type dry_run: bool
     :param netconan_config: path to Netconan configuration file
     :type netconan_config: string
+    :param contact_info: optional contact info associated with this upload
+    :type contact_info: str
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
     return bf_session.upload_diagnostics(dry_run=dry_run,
-                                         netconan_config=netconan_config)
+                                         netconan_config=netconan_config,
+                                         contact_info=contact_info)
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):
