@@ -16,7 +16,6 @@
 from __future__ import absolute_import, print_function
 
 import base64
-import json
 import logging
 import os
 import tempfile
@@ -35,6 +34,7 @@ from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
+from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import (Questions)
 from pybatfish.util import get_uuid, validate_name, zip_dir
@@ -335,7 +335,7 @@ class Session(object):
         return str(answer_dict["status"].value)
 
     def get_answer(self, question, snapshot, reference_snapshot=None):
-        # type: (str, str, Optional[str]) -> Any
+        # type: (str, str, Optional[str]) -> Answer
         """
         Get the answer for a previously asked question.
 
@@ -345,14 +345,18 @@ class Session(object):
         :type snapshot: str
         :param reference_snapshot: if present, gets the answer for a differential question asked against the specified reference snapshot
         :type reference_snapshot: str
+        :return: answer to the specified question
+        :rtype: :py:class:`Answer`
         """
-        json_data = workhelper.get_data_get_answer(self, question,
-                                                   snapshot,
-                                                   reference_snapshot)
-        response = resthelper.get_json_response(self,
-                                                CoordConsts.SVC_RSC_GET_ANSWER,
-                                                json_data)
-        return json.loads(response["answer"])
+        params = {
+            'snapshot': snapshot,
+            'referenceSnapshot': reference_snapshot,
+        }
+        ans = restv2helper.get_answer(self, question, params)
+        if "answerElements" in ans and "metadata" in ans["answerElements"][0]:
+            return TableAnswer(ans)
+        else:
+            return Answer(ans)
 
     def get_base_url(self):
         # type: () -> str
