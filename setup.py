@@ -110,7 +110,8 @@ setup(
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (['enum34', 'mock', 'typing'] if PY2 else []),
+                      ] + (['enum34', 'ipaddress', 'mock',
+                            'typing'] if PY2 else []),
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
