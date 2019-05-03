@@ -16,11 +16,12 @@
 
 from __future__ import absolute_import, print_function
 
+import ipaddress
 import logging
 from typing import Union  # noqa: F401
 
-import ipaddr
 import six
+
 try:
     from capirca.lib import naming
 except ImportError:
@@ -49,21 +50,21 @@ def _item_to_python_repr(item, definitions):
 
     # IPv4 address / network
     try:
-        return ipaddr.IPv4Address(s)
+        return ipaddress.IPv4Address(s)
     except ValueError:
         pass
     try:
-        return ipaddr.IPv4Network(s)
+        return ipaddress.IPv4Network(s)
     except ValueError:
         pass
 
     # IPv6 address / network
     try:
-        return ipaddr.IPv6Address(s)
+        return ipaddress.IPv6Address(s)
     except ValueError:
         pass
     try:
-        return ipaddr.IPv6Network(s)
+        return ipaddress.IPv6Network(s)
     except ValueError:
         pass
 
@@ -80,12 +81,13 @@ def _entry_to_group(name, items, definitions):
         logger.exception('error converting %s, creating empty group', name)
         return AddressGroup(name)
 
-    if any(isinstance(c, (ipaddr.IPv6Address, ipaddr.IPv6Network))
+    if any(isinstance(c, (ipaddress.IPv6Address, ipaddress.IPv6Network))
            for c in converted):
         logger.warning('Skipping IPv6 addresses in %s', name)
 
     converted_v4 = [str(c) for c in converted if
-                    isinstance(c, (ipaddr.IPv4Address, ipaddr.IPv4Network))]
+                    isinstance(c,
+                               (ipaddress.IPv4Address, ipaddress.IPv4Network))]
 
     converted_group = [c for c in converted if
                        isinstance(c, six.string_types)]
