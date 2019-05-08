@@ -18,3 +18,8 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# Rule to generate base questions doc (source/questions-generated.rstgen)
+# The outfile helps us view which questions failed column generation
+questions_doc:
+	python generate_questions_doc.py > generate_questions_doc.out
