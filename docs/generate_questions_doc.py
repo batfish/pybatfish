@@ -17,6 +17,8 @@ need to be re-generated frequently.
 Run the script using "make questions_doc" which will generate an .out file for
 questions for which column detail generation failed. Some failures are expected
 (3 questions at the time of this writing).
+
+The script should have access to a running Batfish service on localhost.
 """
 import importlib
 import inspect
