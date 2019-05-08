@@ -96,10 +96,11 @@ if __name__ == "__main__":
     session = None
     try:
         session = Session()
-    except ConnectionError:
-        warn("Could not load question templates from {}.".format(
-            Options.coordinator_host) +
+    except ConnectionError as e:
+        warn("Could not load question templates from {}: {}\n".format(
+            Options.coordinator_host, e) +
              "Documentation will not be generated for questions.")
+        sys.exit(1)
 
     session.set_network("generate_questions")
     snapshot = session.init_snapshot(_example_snapshot_dir,
@@ -115,7 +116,7 @@ if __name__ == "__main__":
             question_name = member[0]
             question_class = member[1]
 
-            if question_name is "__class__":
+            if question_name == "__class__":
                 continue
 
             doc_orig = inspect.getdoc(question_class).split("\n")
