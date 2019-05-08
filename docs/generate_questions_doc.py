@@ -13,6 +13,10 @@ full documentation without needing to clone batfish/load questions first.
 This script hardcodes which example snapshot to use and what values to use for
 mandatory parameters. It also bets on the fact that question templates won't
 need to be re-generated frequently.
+
+Run the script using "make questions_doc" which will generate an .out file for
+questions for which column detail generation failed. Some failures are expected
+(3 questions at the time of this writing).
 """
 import importlib
 import inspect
