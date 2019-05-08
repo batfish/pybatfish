@@ -1,8 +1,0 @@
-Exception while asking filterTable: 
-   Missing value for mandatory parameter: 'innerQuestion'
-
-Exception while asking testRoutePolicies: 
-   Missing value for mandatory parameter: 'direction'
-   Missing value for mandatory parameter: 'inputRoutes'
-
-Exception while asking viModel: TableMetadata not found in dictionary

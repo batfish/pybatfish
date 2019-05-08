@@ -14,13 +14,8 @@ This script hardcodes which example snapshot to use and what values to use for
 mandatory parameters. It also bets on the fact that question templates won't
 need to be re-generated frequently.
 
-Run the script using "make questions_doc" which will generate an .out file for
-questions for which column detail generation failed. Some failures are expected
-(3 questions at the time of this writing).
-
 The script should have access to a running Batfish service on localhost.
 """
-import importlib
 import inspect
 import sys
 from inspect import getmembers
@@ -29,18 +24,22 @@ from requests import ConnectionError
 from warnings import warn
 
 import pybatfish
-from pybatfish.client.commands import bf_set_network, bf_set_snapshot, \
-    bf_init_snapshot
+from pybatfish.client.options import Options
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.datamodel.answer import TableAnswer
-from pybatfish.exception import QuestionValidationException
 from pybatfish.question import load_questions  # noqa: 402
 from pybatfish.question import bfq  # noqa: 402
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir))
 sys.path.insert(0, _root_dir)
+
+_questions_to_ignore = [
+    "filterTable",  # takes a question as input; no fixed schema
+    "testRoutePolicies",  # likely to evolve; need work to support its types
+    "viModel"  # not a table answer
+]
 
 _example_snapshot_dir = join(_root_dir, 'jupyter_notebooks/networks/example')
 
@@ -79,23 +78,32 @@ def _get_parameter_values(parameters):
     return parameter_values
 
 
+def _is_trivial_description(col_name, col_description):
+    """
+    Heuristics to determine if the column has a trivial description (which we
+    do not document).
+    """
+    return col_description == col_name or \
+        col_description == "Property " + col_name or \
+        col_description == col_name.replace("_", " ")
+
+
 def _process(line):
     return "   " + line
 
 
 if __name__ == "__main__":
-    session = Session(load_questions=False)
+    session = None
     try:
-        load_questions(session=session)
+        session = Session()
     except ConnectionError:
-        warn("Could not load question templates from {}.".format(session.host) +
+        warn("Could not load question templates from {}.".format(
+            Options.coordinator_host) +
              "Documentation will not be generated for questions.")
 
     session.set_network("generate_questions")
     snapshot = session.init_snapshot(_example_snapshot_dir,
                                      name="generate_questions", overwrite=True)
-
-    bfq_module = importlib.import_module("pybatfish.question.bfq")
 
     # use extension different from *.rst
     with open(join("source", "questions-generated.rstgen"), 'w') as f:
@@ -103,38 +111,41 @@ if __name__ == "__main__":
         f.write(".. py:module:: pybatfish.question.bfq\n\n")
 
         # For each class in bfq, extract and format the constructor's docstring
-        for member in getmembers(pybatfish.question.bfq, inspect.isclass):
-            doc_orig = inspect.getdoc(member[1]).split("\n")
+        for member in getmembers(session.q, inspect.isclass):
+            question_name = member[0]
+            question_class = member[1]
+
+            if question_name is "__class__":
+                continue
+
+            doc_orig = inspect.getdoc(question_class).split("\n")
             doc_updated = "\n".join(_process(line) for line in doc_orig)
             f.write(
                 ".. py:class:: {}{}\n\n{}\n\n".format(
-                    member[0],
-                    inspect.signature(member[1].__init__),
+                    question_name,
+                    inspect.signature(question_class.__init__),
                     doc_updated))
 
-            try:
-                # Compute the parameter values we are going to use
-                template_dict = member[1].template
-                mandatory_params = _get_mandatory_parameters(template_dict)
-                mandatory_param_values = _get_parameter_values(mandatory_params)
+            if question_name in _questions_to_ignore:
+                continue
 
-                # Get the class of the question and instantiate it
-                class_ = getattr(bfq_module, member[0])
-                instance = class_(**mandatory_param_values)
+            # Compute the parameter values we are going to use
+            template_dict = question_class.template
+            mandatory_params = _get_mandatory_parameters(template_dict)
+            mandatory_param_values = _get_parameter_values(mandatory_params)
 
-                # Ask the question
-                answer = instance.answer() if \
-                    not template_dict.get("differential", False) else \
-                    instance.answer(reference_snapshot=snapshot)
-                table_answer = TableAnswer(answer)
+            # Ask the question
+            question_instance = question_class(**mandatory_param_values)
+            answer = question_instance.answer() if \
+                not template_dict.get("differential", False) else \
+                question_instance.answer(reference_snapshot=snapshot)
+            table_answer = TableAnswer(answer)
 
-                # Output column details as a note
-                f.write(_process(".. note::\n"))
-                f.write(_process(
-                    _process("The output table has the following columns\n\n")))
-                for col in table_answer.metadata.column_metadata:
-                    f.write(_process(_process(
-                        "#. **{}** (*{}*) {}\n\n".format(col.name, col.schema,
-                                                         col.description))))
-            except (QuestionValidationException, ValueError) as e:
-                print("Exception while asking {}: {}".format(member[0], e))
+            # Output column details as a note
+            f.write(_process("Return table columns:\n\n"))
+            for col in table_answer.metadata.column_metadata:
+                f.write(_process("#. **{}**{}\n\n".format(col.name,
+                                                          "" if _is_trivial_description(
+                                                              col.name,
+                                                              col.description) else " -- {}".format(
+                                                              col.description))))
