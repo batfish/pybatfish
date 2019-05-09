@@ -33,7 +33,7 @@ def network():
 
 
 def test_create_reference_book(network):
-    book = create_reference_book(os.path.join(_this_dir, 'capirca'))
+    book = create_reference_book(os.path.join(_this_dir, 'capirca', 'defs'))
     bf_put_reference_book(book)
 
     getbook = bf_get_reference_book('capirca')
