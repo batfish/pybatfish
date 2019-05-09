@@ -18,17 +18,19 @@ from __future__ import absolute_import, print_function
 
 import ipaddress
 import logging
-from typing import Union  # noqa: F401
+import os
+from typing import Any, Dict, Optional, Union  # noqa: F401
 
 import six
 
 try:
-    from capirca.lib import naming
+    from capirca.lib import naming, policy
 except ImportError:
     logging.exception(
         'Capirca must be installed to use the Pybatfish Capirca extensions')
     raise
 
+from pybatfish.client.session import Session
 from pybatfish.datamodel import AddressGroup, ReferenceBook
 
 __all__ = ["create_reference_book"]
@@ -95,6 +97,87 @@ def _entry_to_group(name, items, definitions):
     return AddressGroup(
         '{name}'.format(name=name), addresses=converted_v4,
         childGroupNames=converted_group)
+
+
+def create_snapshot_from_acl(session, pol, definitions, platform, filename=None,
+                             snapshot_name=None, overwrite=False,
+                             extra_args=None):
+    # type: (Session, Union[str, policy.Policy], Union[str, naming.Naming], str, Optional[str], Optional[str], Optional[bool], Optional[Dict[str, Any]]) -> str
+    """
+    Initialize a snapshot containing a single host with the given ACL.
+
+    :param session: the Pybatfish session in which the snapshot is created.
+    :type session: a :py:class:~pybatfish.client.session.Session object
+    :param pol: a Capirca Policy object, or the path to the Capirca policy file.
+    :type pol: capirca.lib.policy.Policy or str
+    :param definitions: a Capirca Naming definitions object, or the path to the Capirca definitions folder.
+    :type definitions: capirca.lib.naming.Naming or str
+    :param platform: the RANCID router.db name for the device platform,
+       i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for above examples.
+       See https://www.shrubbery.net/rancid/man/router.db.5.html
+    :type platform: str
+    :param filename: name of the configuration file created, 'config' by
+       default. This is used as the default hostname in Batfish for the created
+       device.
+    :type filename: str
+    :param filename: name of the configuration file created, 'config' by
+       default.
+    :type filename: str
+    :param snapshot_name: name of the snapshot to initialize
+    :type snapshot_name: str
+    :param overwrite: whether or not to overwrite an existing snapshot with
+       the same name.
+    :type overwrite: bool
+    :param extra_args: extra arguments to be passed to the parse command
+    :type extra_args: dict
+    """
+    if not isinstance(definitions, naming.Naming):
+        definitions = naming.Naming(naming_dir=definitions)
+
+    if not isinstance(pol, policy.Policy):
+        with open(pol, 'r') as pol_file:
+            pol_text = pol_file.read()
+        pol_dir = os.path.dirname(pol)
+        pol = policy.ParsePolicy(
+            pol_text, definitions, base_dir=pol_dir, optimize=False)
+
+    # Capirca policy terms can have expiration dates, and Capirca warns if any
+    # of the terms expire before this future date. Just set to a large number to
+    # prevent warning - Capirca already warns itself if terms are expired.
+    exp_info_weeks = 52 * 100  # ~100 years
+
+    if platform == 'arista':
+        from capirca.lib import arista
+        file_text = str(arista.Arista(pol, exp_info_weeks))
+    elif platform == 'cisco' or platform == 'cisco-nx':
+        from capirca.lib import cisco
+        file_text = str(cisco.Cisco(pol, exp_info_weeks))
+    elif platform == 'cisco-xr':
+        from capirca.lib import ciscoxr
+        file_text = str(ciscoxr.CiscoXR(pol, exp_info_weeks))
+    elif platform == 'ciscoasa':
+        from capirca.lib import ciscoasa
+        file_text = str(ciscoasa.CiscoASA(pol, exp_info_weeks))
+    elif platform == 'juniper':
+        from capirca.lib import juniper
+        file_text = str(juniper.Juniper(pol, exp_info_weeks))
+    elif platform == 'juniper-srx':
+        # TODO: make batfish recognize juniper-srx
+        platform = 'juniper'
+        from capirca.lib import junipersrx
+        file_text = str(junipersrx.JuniperSRX(pol, exp_info_weeks))
+    elif platform == 'paloalto':
+        # from capirca.lib import paloaltofw
+        # file_text = str(paloaltofw.PaloAltoFW(pol, exp_info_weeks))
+        raise ValueError(
+            'Capirca generates PaloAlto in XML form, which Batfish does not yet parse')
+    else:
+        raise ValueError(
+            'Either Capirca or Pybatfish does not handle converting to ACLs in platform: ' + platform)
+
+    return session.init_snapshot_from_text(
+        file_text, filename=filename, platform=platform,
+        snapshot_name=snapshot_name, overwrite=overwrite, extra_args=extra_args)
 
 
 def create_reference_book(definitions, book_name='capirca'):
