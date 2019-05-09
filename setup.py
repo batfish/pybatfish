@@ -117,7 +117,7 @@ setup(
     # for example:
     # $ pip install -e .[dev]
     extras_require={
-        'capirca': ['capirca'] + ['ipaddress'] if PY2 else [],
+        'capirca': ['capirca'] + (['ipaddress'] if PY2 else []),
         'dev': ['capirca',
                 'check-manifest',
                 'coverage',
