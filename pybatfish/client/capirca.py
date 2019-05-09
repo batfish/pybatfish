@@ -99,9 +99,9 @@ def _entry_to_group(name, items, definitions):
         childGroupNames=converted_group)
 
 
-def create_snapshot_from_acl(session, pol, definitions, platform, filename=None,
-                             snapshot_name=None, overwrite=False,
-                             extra_args=None):
+def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
+                           snapshot_name=None, overwrite=False,
+                           extra_args=None):
     # type: (Session, Union[str, policy.Policy], Union[str, naming.Naming], str, Optional[str], Optional[str], Optional[bool], Optional[Dict[str, Any]]) -> str
     """
     Initialize a snapshot containing a single host with the given ACL.
