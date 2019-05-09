@@ -110,15 +110,14 @@ setup(
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (['enum34', 'ipaddress', 'mock',
-                            'typing'] if PY2 else []),
+                      ] + (['enum34', 'typing'] if PY2 else []),
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
     # for example:
     # $ pip install -e .[dev]
     extras_require={
-        'capirca': ['capirca'],
+        'capirca': ['capirca'] + ['ipaddress'] if PY2 else [],
         'dev': ['capirca',
                 'check-manifest',
                 'coverage',
@@ -135,7 +134,7 @@ setup(
                 'sphinx>=1.8.0',
                 'sphinx_rtd_theme',
                 ] + \
-               (['mypy'] if not PY2 else []),
+               (['ipaddress', 'mock'] if PY2 else ['mypy']),
     },
 
     # List pytest requirements for running unit tests
