@@ -2,7 +2,7 @@
 
 .. py:class:: aaaAuthenticationLogin(*, nodes, question_name)
 
-   Return nodes that do not require authentication on all lines.
+   Return nodes that do not require authentication on all virtual terminal lines.
    
    
    :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
@@ -14,7 +14,7 @@
 
    #. **Node**
 
-   #. **Line_Names** -- Line names
+   #. **Line_Names** -- Names of virtual terminal lines
 
 .. py:class:: bgpPeerConfiguration(*, nodes, properties, question_name)
 
@@ -116,6 +116,8 @@
 
    #. **Remote_Node** -- Remote node for this session
 
+   #. **Remote_Interface** -- Remote interface for this session
+
    #. **Remote_IP** -- Remote IP or prefix for this session
 
    #. **Session_Type** -- The type of this session
@@ -151,6 +153,8 @@
    #. **Remote_AS** -- The remote AS or list of ASes of the session
 
    #. **Remote_Node** -- Remote node for this session
+
+   #. **Remote_Interface** -- Remote interface for this session
 
    #. **Remote_IP** -- Remote IP or prefix for this session
 
@@ -415,15 +419,15 @@
 
    #. **Sources** -- Filter sources
 
-   #. **Unreachable_Line** -- Unreachable line
+   #. **Unreachable_Line** -- Filter line that cannot be matched (i.e., unreachable)
 
-   #. **Unreachable_Line_Action** -- Unreachable line action
+   #. **Unreachable_Line_Action** -- Action performed by the unreachable line (e.g., PERMIT or DENY)
 
-   #. **Blocking_Lines** -- Blocking lines
+   #. **Blocking_Lines** -- Lines that, when combined, cover the unreachable line
 
-   #. **Different_Action** -- Different action
+   #. **Different_Action** -- Whether unreachable line has an action different from the blocking line(s)
 
-   #. **Reason** -- Reason unreachable
+   #. **Reason** -- The reason a line is unreachable
 
    #. **Additional_Info** -- Additional information
 
@@ -607,9 +611,9 @@
 
    #. **IP** -- IP address
 
-   #. **Mask** -- IP address
+   #. **Mask** -- Network mask length
 
-   #. **Active** -- Whether the interface with given IP is active
+   #. **Active** -- Whether the interface is active
 
 .. py:class:: ipsecSessionStatus(*, nodes, remoteNodes, status, question_name)
 
@@ -679,15 +683,15 @@
 
    Return table columns:
 
-   #. **Node**
+   #. **Node** -- Node where the route is present
 
-   #. **VRF** -- Node
+   #. **VRF** -- VRF where the route is present
 
-   #. **Ip** -- Node
+   #. **Ip** -- IP that was being matched on
 
-   #. **Network** -- Node
+   #. **Network** -- The longest-prefix network that matched
 
-   #. **Num_Routes** -- Node
+   #. **Num_Routes** -- Number of routes that matched (in case of ECMP)
 
 .. py:class:: mlagProperties(*, idRegex, nodes, question_name)
 
@@ -703,7 +707,7 @@
 
    #. **Node** -- Node name
 
-   #. **MLAG_ID**
+   #. **MLAG_ID** -- MLAG domain ID
 
    #. **Peer_Address** -- Peer's IP address
 
@@ -1223,7 +1227,7 @@
 
    #. **Network** -- Network for this route
 
-   #. **Next_Hop** -- Route's Next Hop's Hostname
+   #. **Next_Hop** -- Inferred hostname of the next hop
 
    #. **Next_Hop_IP** -- Route's Next Hop IP
 
