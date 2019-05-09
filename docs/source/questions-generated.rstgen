@@ -2,13 +2,19 @@
 
 .. py:class:: aaaAuthenticationLogin(*, nodes, question_name)
 
-   Return nodes that do not require authentication on all lines.
+   Return nodes that do not require authentication on all virtual terminal lines.
    
    
    :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
    
        Default value: ``.*``
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Line_Names** -- Names of virtual terminal lines
 
 .. py:class:: bgpPeerConfiguration(*, nodes, properties, question_name)
 
@@ -20,6 +26,36 @@
    :param properties: Include properties matching this regex.
    :type properties: bgpPeerPropertySpec
 
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF**
+
+   #. **Local_AS**
+
+   #. **Local_IP**
+
+   #. **Local_Interface**
+
+   #. **Remote_AS**
+
+   #. **Remote_IP**
+
+   #. **Route_Reflector_Client**
+
+   #. **Cluster_ID**
+
+   #. **Peer_Group**
+
+   #. **Import_Policy**
+
+   #. **Export_Policy**
+
+   #. **Send_Community**
+
+   #. **Is_Passive**
+
 .. py:class:: bgpProcessConfiguration(*, nodes, properties, question_name)
 
    Return BGP process configuration properties.
@@ -29,6 +65,26 @@
    :type nodes: nodeSpec
    :param properties: Include properties matching this regex.
    :type properties: bgpProcessPropertySpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF**
+
+   #. **Router_ID**
+
+   #. **Route_Reflector**
+
+   #. **Multipath_Match_Mode**
+
+   #. **Multipath_EBGP**
+
+   #. **Multipath_IBGP**
+
+   #. **Neighbors**
+
+   #. **Tie_Breaker**
 
 .. py:class:: bgpSessionCompatibility(*, nodes, remoteNodes, status, type, question_name)
 
@@ -44,6 +100,30 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: bgpSessionType
 
+   Return table columns:
+
+   #. **Node** -- The node where this session is configured
+
+   #. **VRF** -- The VRF in which this session is configured
+
+   #. **Local_AS** -- The local AS of the session
+
+   #. **Local_Interface** -- Local interface of the session
+
+   #. **Local_IP** -- The local IP of the session
+
+   #. **Remote_AS** -- The remote AS or list of ASes of the session
+
+   #. **Remote_Node** -- Remote node for this session
+
+   #. **Remote_Interface** -- Remote interface for this session
+
+   #. **Remote_IP** -- Remote IP or prefix for this session
+
+   #. **Session_Type** -- The type of this session
+
+   #. **Configured_Status** -- Configured status
+
 .. py:class:: bgpSessionStatus(*, nodes, remoteNodes, status, type, question_name)
 
    Return the status of configured BGP sessions.
@@ -58,6 +138,30 @@
    :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
    :type type: bgpSessionType
 
+   Return table columns:
+
+   #. **Node** -- The node where this session is configured
+
+   #. **VRF** -- The VRF in which this session is configured
+
+   #. **Local_AS** -- The local AS of the session
+
+   #. **Local_Interface** -- Local interface of the session
+
+   #. **Local_IP** -- The local IP of the session
+
+   #. **Remote_AS** -- The remote AS or list of ASes of the session
+
+   #. **Remote_Node** -- Remote node for this session
+
+   #. **Remote_Interface** -- Remote interface for this session
+
+   #. **Remote_IP** -- Remote IP or prefix for this session
+
+   #. **Session_Type** -- The type of this session
+
+   #. **Established_Status** -- Established status
+
 .. py:class:: bidirectionalReachability(*, headers, pathConstraints, returnFlowType, question_name)
 
    Search for successfully delivered flows that can successfully receive a response.
@@ -71,6 +175,18 @@
    :type pathConstraints: pathConstraint
    :param returnFlowType: Specifies whether to search for return flows that are successful (SUCCESS), that fail (FAILURE), or that can either succeed or fail depending on the path taken (MULTIPATH_INCONSISTENT). The default is SUCCESS.
    :type returnFlowType: string
+
+   Return table columns:
+
+   #. **Forward_Flow** -- The forward flow.
+
+   #. **Forward_Traces** -- The forward traces.
+
+   #. **New_Sessions** -- Sessions initialized by the forward trace.
+
+   #. **Reverse_Flow** -- The reverse flow.
+
+   #. **Reverse_Traces** -- The reverse traces.
 
 .. py:class:: bidirectionalTraceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
 
@@ -89,6 +205,18 @@
    :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
    :type ignoreFilters: boolean
 
+   Return table columns:
+
+   #. **Forward_Flow** -- The forward flow.
+
+   #. **Forward_Traces** -- The forward traces.
+
+   #. **New_Sessions** -- Sessions initialized by the forward trace.
+
+   #. **Reverse_Flow** -- The reverse flow.
+
+   #. **Reverse_Traces** -- The reverse traces.
+
 .. py:class:: compareFilters(*, nodes, filters, ignoreComposites, question_name)
 
    Compares filters with the same name in the current and reference snapshots. Returns pairs of lines, one from each filter, that match the same flow(s) but treat them differently (i.e. one permits and the other denies the flow).
@@ -102,6 +230,22 @@
    :type filters: filter
    :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
    :type ignoreComposites: boolean
+
+   Return table columns:
+
+   #. **Node** -- Hostname.
+
+   #. **Filter_Name** -- The filter name.
+
+   #. **Line_Index** -- The index of the line in the current filter.
+
+   #. **Line_Content** -- The current filter line content.
+
+   #. **Line_Action** -- The current filter line action.
+
+   #. **Reference_Line_Index** -- The index of the line in the reference filter.
+
+   #. **Reference_Line_Content** -- The reference filter line content.
 
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
@@ -123,6 +267,14 @@
        Default value: ``.*``
    :type types: namedStructureSpec
 
+   Return table columns:
+
+   #. **Structure_Type** -- Vendor-specific type of the structure
+
+   #. **Structure_Name** -- Name of the structure
+
+   #. **Source_Lines** -- File and line numbers where the structure is defined
+
 .. py:class:: detectLoops(*, maxTraces, question_name)
 
    Detect forwarding loops.
@@ -132,6 +284,14 @@
    
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
 
 .. py:class:: differentialReachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name)
 
@@ -154,6 +314,18 @@
    :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
+
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Snapshot_Traces** -- The traces in the BASE snapshot
+
+   #. **Snapshot_TraceCount** -- The total number traces in the BASE snapshot
+
+   #. **Reference_Traces** -- The traces in the DELTA snapshot
+
+   #. **Reference_TraceCount** -- The total number traces in the DELTA snapshot
 
 .. py:class:: edges(*, nodes, remoteNodes, edgeType, question_name)
 
@@ -185,6 +357,16 @@
        * vxlan
    :type edgeType: string
 
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates
+
+   #. **IPs**
+
+   #. **Remote_Interface** -- Interface at which the edge terminates
+
+   #. **Remote_IPs**
+
 .. py:class:: f5BigipVipConfiguration(*, nodes, question_name)
 
    Report VIP mappings of F5 BIG-IP configurations.
@@ -193,11 +375,31 @@
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
 
+   Return table columns:
+
+   #. **Node**
+
+   #. **VIP_Name** -- Virtual Service Name
+
+   #. **VIP_Endpoint** -- Virtual Service Endpoint
+
+   #. **Servers**
+
+   #. **Description**
+
 .. py:class:: fileParseStatus(*, question_name)
 
    Display file parse status.
    
    For each file in a snapshot, returns the host(s) that were produced by the file and the parse status: pass, fail, partially parsed.
+
+   Return table columns:
+
+   #. **File_Name** -- The file that was parsed
+
+   #. **Status** -- The status of the parsing operation
+
+   #. **Nodes** -- Names of nodes produced from this file
 
 .. py:class:: filterLineReachability(*, filters, ignoreComposites, nodes, question_name)
 
@@ -212,6 +414,22 @@
    :type ignoreComposites: boolean
    :param nodes: Examine filters on nodes matching this specifier.
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Sources** -- Filter sources
+
+   #. **Unreachable_Line** -- Filter line that cannot be matched (i.e., unreachable)
+
+   #. **Unreachable_Line_Action** -- Action performed by the unreachable line (e.g., PERMIT or DENY)
+
+   #. **Blocking_Lines** -- Lines that, when combined, cover the unreachable line
+
+   #. **Different_Action** -- Whether unreachable line has an action different from the blocking line(s)
+
+   #. **Reason** -- The reason a line is unreachable
+
+   #. **Additional_Info** -- Additional information
 
 .. py:class:: filterTable(*, innerQuestion, columns, filter, question_name)
 
@@ -230,6 +448,20 @@
 .. py:class:: initIssues(*, question_name)
 
    Return issues that occurred when parsing input files and converting to vendor independent model.
+
+   Return table columns:
+
+   #. **Nodes** -- The nodes that were converted (if applicable)
+
+   #. **Source_Lines** -- The files and lines that caused the issues (if applicable)
+
+   #. **Type** -- The type of issues identified
+
+   #. **Details** -- Details about the issues identified
+
+   #. **Line_Text** -- The text of the input files that caused the issues (if applicable)
+
+   #. **Parser_Context** -- Batfish parser state when issues were encountered (if applicable)
 
 .. py:class:: interfaceMtu(*, interfaces, mtuBytes, nodes, comparator, question_name)
 
@@ -255,6 +487,12 @@
        Default value: ``<``
    :type comparator: comparator
 
+   Return table columns:
+
+   #. **Interface**
+
+   #. **MTU**
+
 .. py:class:: interfaceProperties(*, excludeShutInterfaces, interfaces, nodes, properties, question_name)
 
    Returns configuration properties of interfaces.
@@ -269,6 +507,92 @@
    :param properties: Include properties matching this specifier.
    :type properties: interfacePropertySpec
 
+   Return table columns:
+
+   #. **Interface**
+
+   #. **Access_VLAN**
+
+   #. **Active**
+
+   #. **Allowed_VLANs**
+
+   #. **All_Prefixes**
+
+   #. **Auto_State_VLAN**
+
+   #. **Bandwidth**
+
+   #. **Blacklisted**
+
+   #. **Channel_Group**
+
+   #. **Channel_Group_Members**
+
+   #. **Declared_Names**
+
+   #. **Description**
+
+   #. **DHCP_Relay_Addresses**
+
+   #. **Encapsulation_VLAN**
+
+   #. **HSRP_Groups**
+
+   #. **HSRP_Version**
+
+   #. **Incoming_Filter_Name**
+
+   #. **Interface_Type**
+
+   #. **MLAG_ID**
+
+   #. **MTU**
+
+   #. **Native_VLAN**
+
+   #. **OSPF_Area_Name**
+
+   #. **OSPF_Cost**
+
+   #. **OSPF_Enabled**
+
+   #. **OSPF_Hello_Multiplier**
+
+   #. **OSPF_Passive**
+
+   #. **OSPF_Point_To_Point**
+
+   #. **Outgoing_Filter_Name**
+
+   #. **Primary_Address**
+
+   #. **Primary_Network**
+
+   #. **Proxy_ARP**
+
+   #. **Rip_Enabled**
+
+   #. **Rip_Passive**
+
+   #. **Routing_Policy_Name**
+
+   #. **Spanning_Tree_Portfast**
+
+   #. **Speed**
+
+   #. **Switchport**
+
+   #. **Switchport_Mode**
+
+   #. **Switchport_Trunk_Encapsulation**
+
+   #. **VRF**
+
+   #. **VRRP_Groups**
+
+   #. **Zone_Name**
+
 .. py:class:: ipOwners(*, duplicatesOnly, question_name)
 
    Returns the mapping of IP address, interface, node and VRF for all devices in the snapshot.
@@ -276,6 +600,20 @@
    
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
    :type duplicatesOnly: boolean
+
+   Return table columns:
+
+   #. **Node** -- Node hostname
+
+   #. **VRF** -- VRF name
+
+   #. **Interface** -- Interface name
+
+   #. **IP** -- IP address
+
+   #. **Mask** -- Network mask length
+
+   #. **Active** -- Whether the interface is active
 
 .. py:class:: ipsecSessionStatus(*, nodes, remoteNodes, status, question_name)
 
@@ -289,6 +627,24 @@
    :param status: Only include IPSec sessions for which status matches this regex.
    :type status: ipsecSessionStatus
 
+   Return table columns:
+
+   #. **Node** -- IPSec initiator
+
+   #. **Node_Interface** -- Initiator Interface
+
+   #. **Node_IP** -- Initiator IP
+
+   #. **Remote_Node** -- IPSec responder
+
+   #. **Remote_Node_Interface** -- Responder Interface
+
+   #. **Remote_Node_IP** -- Responder IP
+
+   #. **Tunnel_Interfaces** -- Tunnel interfaces pair used in peering session
+
+   #. **Status** -- IPSec session status
+
 .. py:class:: loopbackMultipathConsistency(*, maxTraces, question_name)
 
    Validate multipath consistency between all pairs of loopbacks.
@@ -298,6 +654,14 @@
    
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
 
 .. py:class:: lpmRoutes(*, ip, nodes, vrfs, question_name)
 
@@ -317,6 +681,18 @@
        Default value: ``.*``
    :type vrfs: vrf
 
+   Return table columns:
+
+   #. **Node** -- Node where the route is present
+
+   #. **VRF** -- VRF where the route is present
+
+   #. **Ip** -- IP that was being matched on
+
+   #. **Network** -- The longest-prefix network that matched
+
+   #. **Num_Routes** -- Number of routes that matched (in case of ECMP)
+
 .. py:class:: mlagProperties(*, idRegex, nodes, question_name)
 
    Returns configuration properties of MLAGs.
@@ -326,6 +702,18 @@
    :type idRegex: javaRegex
    :param nodes: Include nodes matching this specifier.
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node** -- Node name
+
+   #. **MLAG_ID** -- MLAG domain ID
+
+   #. **Peer_Address** -- Peer's IP address
+
+   #. **Local_Interface** -- Local interface used for MLAG peering
+
+   #. **Source_Interface** -- Local interface used as source-interface for MLAG peering
 
 .. py:class:: multipathConsistency(*, headers, maxTraces, pathConstraints, question_name)
 
@@ -340,6 +728,14 @@
    :type maxTraces: integer
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
+
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
 
 .. py:class:: namedStructures(*, ignoreGenerated, indicatePresence, nodes, structureNames, structureTypes, question_name)
 
@@ -359,44 +755,15 @@
    :param structureTypes: Include structures of this type.
    :type structureTypes: namedStructureSpec
 
-.. py:class:: neighbors(*, nodes, remoteNodes, style, neighborTypes, roleDimension, question_name)
+   Return table columns:
 
-   Lists neighbor relationships in the snapshot.
-   
-   Lists neighbor relationships of the specified type (layer3, eBGP, iBGP, ospf, etc.).
-   
-   
-   :param nodes: *Required.* Include neighbors whose first node matches this specifier.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param remoteNodes: *Required.* Include neighbors whose second node matches this specifier.
-   
-       Default value: ``.*``
-   :type remoteNodes: nodeSpec
-   :param style: *Required.* String indicating the style of information requested about each neighbor.
-       Allowed values:
-   
-       * role
-       * summary
-       * verbose
-   
-       Default value: ``summary``
-   :type style: string
-   :param neighborTypes: Types of neighbor relationships to include.
-       Allowed values:
-   
-       * ebgp
-       * eigrp
-       * ibgp
-       * layer1
-       * layer2
-       * layer3
-       * ospf
-       * rip
-   :type neighborTypes: string
-   :param roleDimension: Role dimension to run the question on.
-   :type roleDimension: nodeRoleDimension
+   #. **Node**
+
+   #. **Structure_Type** -- Structure type
+
+   #. **Structure_Name** -- Structure name
+
+   #. **Structure_Definition** -- Structure definition
 
 .. py:class:: nodeProperties(*, nodes, properties, question_name)
 
@@ -408,23 +775,81 @@
    :param properties: Include properties matching this regex.
    :type properties: nodePropertySpec
 
-.. py:class:: nodes(*, nodes, summary, nodeTypes, question_name)
+   Return table columns:
 
-   Lists configuration attributes of nodes in the network.
-   
-   Returns a JSON dictionary with all (or summary) of the configuration parameters that are stored in the vendor independent data-model.
-   
-   
-   :param nodes: *Required.* Include nodes matching this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param summary: *Required.* Whether to provide only summary information about each node rather than the full data model.
-   
-       Default value: ``True``
-   :type summary: boolean
-   :param nodeTypes: Include nodes of the specified types.
-   :type nodeTypes: string
+   #. **Node**
+
+   #. **AS_Path_Access_Lists**
+
+   #. **Authentication_Key_Chains**
+
+   #. **Canonical_IP**
+
+   #. **Community_Lists**
+
+   #. **Configuration_Format**
+
+   #. **Default_Cross_Zone_Action**
+
+   #. **Default_Inbound_Action**
+
+   #. **Device_Type**
+
+   #. **DNS_Servers**
+
+   #. **DNS_Source_Interface**
+
+   #. **Domain_Name**
+
+   #. **Hostname**
+
+   #. **IKE_Phase1_Keys**
+
+   #. **IKE_Phase1_Policies**
+
+   #. **IKE_Phase1_Proposals**
+
+   #. **Interfaces**
+
+   #. **IP_Access_Lists**
+
+   #. **IP_Spaces**
+
+   #. **IP6_Access_Lists**
+
+   #. **IPsec_Peer_Configs**
+
+   #. **IPsec_Phase2_Policies**
+
+   #. **IPsec_Phase2_Proposals**
+
+   #. **Logging_Servers**
+
+   #. **Logging_Source_Interface**
+
+   #. **NTP_Servers**
+
+   #. **NTP_Source_Interface**
+
+   #. **Route_Filter_Lists**
+
+   #. **Route6_Filter_Lists**
+
+   #. **Routing_Policies**
+
+   #. **SNMP_Source_Interface**
+
+   #. **SNMP_Trap_Servers**
+
+   #. **TACACS_Servers**
+
+   #. **TACACS_Source_Interface**
+
+   #. **Vendor_Family**
+
+   #. **VRFs**
+
+   #. **Zones**
 
 .. py:class:: ospfAreaConfiguration(*, nodes, question_name)
 
@@ -433,6 +858,22 @@
    
    :param nodes: Include nodes matching this name or regex.
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF**
+
+   #. **Process_ID**
+
+   #. **Area** -- Area Number
+
+   #. **Area_Type**
+
+   #. **Active_Interfaces**
+
+   #. **Passive_Interfaces**
 
 .. py:class:: ospfInterfaceConfiguration(*, nodes, properties, question_name)
 
@@ -444,6 +885,24 @@
    :param properties: Include properties matching this regex.
    :type properties: ospfPropertySpec
 
+   Return table columns:
+
+   #. **Interface**
+
+   #. **VRF**
+
+   #. **Process_ID**
+
+   #. **OSPF_Area_Name**
+
+   #. **OSPF_Passive**
+
+   #. **OSPF_Cost**
+
+   #. **OSPF_Point_To_Point**
+
+   #. **OSPF_Hello_Multiplier**
+
 .. py:class:: ospfProcessConfiguration(*, nodes, properties, question_name)
 
    Return configuration parameters for OSPF routing processes.
@@ -453,6 +912,24 @@
    :type nodes: nodeSpec
    :param properties: Include properties matching this regex.
    :type properties: ospfPropertySpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF**
+
+   #. **Process_ID**
+
+   #. **Areas**
+
+   #. **Reference_Bandwidth**
+
+   #. **Router_ID**
+
+   #. **Export_Policy_Sources**
+
+   #. **Area_Border_Router**
 
 .. py:class:: ospfProperties(*, nodes, properties, question_name)
 
@@ -464,6 +941,38 @@
    :param properties: Include properties matching this regex.
    :type properties: ospfPropertySpec
 
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF**
+
+   #. **Process_ID**
+
+   #. **Area_Border_Router**
+
+   #. **Areas**
+
+   #. **Export_Policy**
+
+   #. **Export_Policy_Sources**
+
+   #. **Generated_Routes**
+
+   #. **Max_Metric_External_Networks**
+
+   #. **Max_Metric_Stub_Networks**
+
+   #. **Max_Metric_Summary_Networks**
+
+   #. **Max_Metric_Transit_Links**
+
+   #. **Reference_Bandwidth**
+
+   #. **RFC1583_Compatible**
+
+   #. **Router_ID**
+
 .. py:class:: ospfSessionCompatibility(*, nodes, remoteNodes, question_name)
 
    Returns compatible OSPF sessions.
@@ -474,6 +983,24 @@
    :param remoteNodes: Include remote nodes matching this name or regex.
    :type remoteNodes: nodeSpec
 
+   Return table columns:
+
+   #. **Interface**
+
+   #. **VRF**
+
+   #. **IP** -- Ip
+
+   #. **Area**
+
+   #. **Remote_Interface**
+
+   #. **Remote_VRF**
+
+   #. **Remote_IP**
+
+   #. **Remote_Area**
+
 .. py:class:: parseWarning(*, aggregateDuplicates, question_name)
 
    Return a table of the Batfish warnings that occurred parsing this snapshot.
@@ -481,6 +1008,18 @@
    
    :param aggregateDuplicates: Whether to aggregate duplicate results.
    :type aggregateDuplicates: boolean
+
+   Return table columns:
+
+   #. **Filename** -- The file that was parsed
+
+   #. **Text** -- The text of the input that caused the warning
+
+   #. **Line** -- The line number in the input file that caused the warning
+
+   #. **Parser_Context** -- The context of the Batfish parser when the warning occurred
+
+   #. **Comment** -- An optional comment explaining more information about the warning
 
 .. py:class:: prefixTracer(*, nodes, prefix, question_name)
 
@@ -491,6 +1030,18 @@
    :type nodes: nodeSpec
    :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
    :type prefix: prefix
+
+   Return table columns:
+
+   #. **Node** -- The node where action takes place
+
+   #. **VRF** -- The VRF where action takes place
+
+   #. **Peer** -- The node's neighbor to which the action applies
+
+   #. **Action** -- The action that takes place
+
+   #. **Prefix** -- The prefix in question
 
 .. py:class:: reachability(*, pathConstraints, headers, actions, maxTraces, invertSearch, ignoreFilters, question_name)
 
@@ -512,6 +1063,14 @@
    :param ignoreFilters: Do not apply filters/ACLs during analysis.
    :type ignoreFilters: boolean
 
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
+
 .. py:class:: referencedStructures(*, names, nodes, types, question_name)
 
    Lists the references in configuration files to vendor-specific structures.
@@ -532,6 +1091,16 @@
        Default value: ``.*``
    :type types: namedStructureSpec
 
+   Return table columns:
+
+   #. **Structure_Type** -- Type of structure referenced
+
+   #. **Structure_Name** -- The referenced structure
+
+   #. **Context** -- Configuration context in which the reference appears
+
+   #. **Source_Lines** -- Lines where reference appears
+
 .. py:class:: resolveFilterSpecifier(*, filters, grammarVersion, nodes, question_name)
 
    Show the resolved values for filter specifier.
@@ -543,6 +1112,12 @@
    :type grammarVersion: string
    :param nodes: Input to the NodeSpecifier.
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Filter_Name** -- Filter name
 
 .. py:class:: resolveInterfaceSpecifier(*, grammarVersion, interfaces, nodes, question_name)
 
@@ -556,6 +1131,10 @@
    :param nodes: Input to the NodeSpecifier.
    :type nodes: nodeSpec
 
+   Return table columns:
+
+   #. **Interface**
+
 .. py:class:: resolveIpSpecifier(*, grammarVersion, ips, question_name)
 
    Show the resolved values for IP space specifier.
@@ -565,6 +1144,10 @@
    :type grammarVersion: string
    :param ips: Input to the IP space specifier.
    :type ips: ipSpaceSpec
+
+   Return table columns:
+
+   #. **IP_Space** -- IP space
 
 .. py:class:: resolveIpsOfLocationSpecifier(*, grammarVersion, locations, question_name)
 
@@ -576,6 +1159,12 @@
    :param locations: Input to the LocationSpecifier.
    :type locations: locationSpec
 
+   Return table columns:
+
+   #. **Locations** -- Resolution
+
+   #. **IP_Space** -- IP space
+
 .. py:class:: resolveLocationSpecifier(*, grammarVersion, locations, question_name)
 
    Show the resolved values for location specifier.
@@ -586,6 +1175,10 @@
    :param locations: Input to the LocationSpecifier.
    :type locations: locationSpec
 
+   Return table columns:
+
+   #. **Location**
+
 .. py:class:: resolveNodeSpecifier(*, grammarVersion, nodes, question_name)
 
    Show the resolved values for node specifier.
@@ -595,6 +1188,10 @@
    :type grammarVersion: string
    :param nodes: Input to the NodeSpecifier.
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
 
 .. py:class:: routes(*, nodes, vrfs, network, protocols, rib, question_name)
 
@@ -622,6 +1219,28 @@
        * bgp
    :type rib: string
 
+   Return table columns:
+
+   #. **Node**
+
+   #. **VRF** -- VRF name
+
+   #. **Network** -- Network for this route
+
+   #. **Next_Hop** -- Inferred hostname of the next hop
+
+   #. **Next_Hop_IP** -- Route's Next Hop IP
+
+   #. **Next_Hop_Interface** -- Route's Next Hop Interface
+
+   #. **Protocol** -- Route's Protocol
+
+   #. **Metric** -- Route's Metric
+
+   #. **Admin_Distance** -- Route's Admin distance
+
+   #. **Tag** -- Tag for this route
+
 .. py:class:: searchFilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name)
 
    Find flows for which a filter takes a particular behavior.
@@ -644,6 +1263,20 @@
    :param startLocation: Only consider specified locations as possible sources.
    :type startLocation: locationSpec
 
+   Return table columns:
+
+   #. **Node**
+
+   #. **Filter_Name** -- Filter name
+
+   #. **Flow** -- Evaluated flow
+
+   #. **Action** -- Outcome
+
+   #. **Line_Content** -- Line content
+
+   #. **Trace** -- ACL trace
+
 .. py:class:: subnetMultipathConsistency(*, maxTraces, question_name)
 
    Validate multipath consistency between all pairs of subnets.
@@ -653,6 +1286,14 @@
    
    :param maxTraces: Limit the number of traces returned.
    :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
 
 .. py:class:: switchedVlanProperties(*, excludeShutInterfaces, interfaces, nodes, vlans, question_name)
 
@@ -667,6 +1308,16 @@
    :type nodes: nodeSpec
    :param vlans: Include VLANs in this space.
    :type vlans: integerSpace
+
+   Return table columns:
+
+   #. **Node** -- VLAN_ID
+
+   #. **VLAN_ID**
+
+   #. **Interfaces** -- Switched interfaces carrying traffic for this VLAN
+
+   #. **VXLAN_VNI** -- VXLAN VNI with which this VLAN is associated
 
 .. py:class:: testFilters(*, filters, headers, nodes, startLocation, question_name)
 
@@ -687,6 +1338,20 @@
    :type nodes: nodeSpec
    :param startLocation: Location to start tracing from.
    :type startLocation: string
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Filter_Name** -- Filter name
+
+   #. **Flow** -- Evaluated flow
+
+   #. **Action** -- Outcome
+
+   #. **Line_Content** -- Line content
+
+   #. **Trace** -- ACL trace
 
 .. py:class:: testRoutePolicies(*, nodes, policies, inputRoutes, direction, question_name)
 
@@ -729,6 +1394,14 @@
    :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
    :type ignoreFilters: boolean
 
+   Return table columns:
+
+   #. **Flow** -- The flow
+
+   #. **Traces** -- The traces for this flow
+
+   #. **TraceCount** -- The total number traces for this flow
+
 .. py:class:: undefinedReferences(*, nodes, question_name)
 
    Identify undefined references in configuration.
@@ -740,6 +1413,18 @@
    
        Default value: ``.*``
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **File_Name** -- File containing reference
+
+   #. **Struct_Type** -- Type of struct reference is supposed to be
+
+   #. **Ref_Name** -- The undefined reference
+
+   #. **Context** -- Context of undefined reference
+
+   #. **Lines** -- Lines where reference appears
 
 .. py:class:: unusedStructures(*, nodes, question_name)
 
@@ -753,15 +1438,37 @@
        Default value: ``.*``
    :type nodes: nodeSpec
 
+   Return table columns:
+
+   #. **Structure_Type** -- Vendor-specific type of the structure
+
+   #. **Structure_Name** -- Name of the structure
+
+   #. **Source_Lines** -- File and line numbers where the structure is defined
+
 .. py:class:: viConversionStatus(*, question_name)
 
    Display vendor independent conversion status.
    
    For each node in a snapshot, returns the vendor independent conversion status: pass, fail, converted with warnings.
 
+   Return table columns:
+
+   #. **Node** -- The node that was converted
+
+   #. **Status** -- The status of the conversion operation
+
 .. py:class:: viConversionWarning(*, question_name)
 
    Return Batfish warnings that occurred when converting to vendor independent model.
+
+   Return table columns:
+
+   #. **Node** -- The node that caused the warning
+
+   #. **Type** -- The type of the warning
+
+   #. **Comment** -- The description of the warning
 
 .. py:class:: viModel(*, question_name)
 
@@ -778,4 +1485,20 @@
    :type nodes: nodeSpec
    :param properties: Include properties matching this specifier.
    :type properties: vxlanVniPropertySpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **VNI** -- VXLAN Segment ID
+
+   #. **Local_VTEP_IP**
+
+   #. **Multicast_Group**
+
+   #. **VLAN**
+
+   #. **VTEP_Flood_List**
+
+   #. **VXLAN_Port**
 
