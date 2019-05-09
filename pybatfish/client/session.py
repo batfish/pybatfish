@@ -500,7 +500,7 @@ class Session(object):
     def init_snapshot_from_text(
             self, text, filename=None, snapshot_name=None, platform=None,
             overwrite=False, extra_args=None):
-        # type: (str, str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
+        # type: (str, Optional[str], Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
         Initialize a snapshot of a single configuration file with given text.
 
