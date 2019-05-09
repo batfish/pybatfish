@@ -498,7 +498,7 @@ class Session(object):
         return ss_name
 
     def init_snapshot_from_text(
-            self, text, filename='config', snapshot_name=None, platform=None,
+            self, text, filename=None, snapshot_name=None, platform=None,
             overwrite=False, extra_args=None):
         # type: (str, str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
@@ -542,6 +542,9 @@ class Session(object):
         :rtype: str
         """
         import tempfile
+
+        if filename is None:
+            filename = 'config'
 
         d = tempfile.TemporaryDirectory(prefix='_batfish_temp.')
         try:
