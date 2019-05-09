@@ -12,21 +12,22 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+import re
 from io import StringIO
 from typing import Text
 
 import six
-from capirca.lib import naming
+from capirca.lib import naming, policy
 
 from pybatfish.client import capirca
 
 
-def _load_test_definitions(defstr):
-    # type: (Text) -> naming.Naming
+def _load_test_definitions(netstr, svcstr=''):
+    # type: (Text, Text) -> naming.Naming
     """Converts the given string into a Capirca naming object."""
-    def_file = StringIO(defstr)
     defs = naming.Naming()
-    defs._ParseFile(def_file, 'networks')
+    defs._ParseFile(StringIO(netstr), 'networks')
+    defs._ParseFile(StringIO(svcstr), 'services')
     return defs
 
 
@@ -131,3 +132,64 @@ def test_create_reference_book():
     assert book_custom.name == 'testbook'
     assert book_custom.addressGroups == book.addressGroups
     assert book_custom.interfaceGroups == book.interfaceGroups
+
+
+TEST_SVCS = six.u("""
+SSH = 22/tcp
+DNS = 53/udp
+""")
+
+TEST_POLICY = six.u("""
+header {
+  target:: arista some_acl
+  target:: cisco some_acl
+  target:: juniper some_acl
+  target:: paloalto some_acl
+}
+
+term permit_ssh {
+  protocol:: tcp
+  destination-port:: SSH
+  action:: accept
+}
+
+term permit_dns {
+  protocol:: udp
+  destination-port:: DNS
+  action:: accept
+}
+
+term deny_all {
+  action:: reject
+}
+""")
+
+
+def test_get_acl_text():
+    defs = _load_test_definitions(TEST_DATABASE, TEST_SVCS)
+    pol = policy.ParsePolicy(TEST_POLICY, defs)
+
+    cisco = capirca._get_acl_text(pol, 'cisco')
+    assert 'permit tcp any any eq 22' in cisco
+    assert 'permit udp any any eq 53' in cisco
+    assert 'deny ip any any' in cisco
+
+    juniper = capirca._get_acl_text(pol, 'juniper')
+    assert re.search(
+        r'from {\s*protocol tcp;\s*destination-port 22;\s*}', juniper)
+    assert re.search(
+        r'from {\s*protocol udp;\s*destination-port 53;\s*}', juniper)
+    assert re.search(
+        r'term deny_all {\s*then {\s*reject;\s*}\s*}', juniper)
+
+    arista = capirca._get_acl_text(pol, 'arista')
+    assert 'permit tcp any any eq ssh' in arista
+    assert 'permit udp any any eq domain' in arista
+    assert 'deny ip any any' in arista
+
+    # palo alto currently unsupported
+    try:
+        capirca._get_acl_text(pol, 'paloalto')
+        assert False
+    except ValueError as e:
+        assert 'Batfish' in str(e)
