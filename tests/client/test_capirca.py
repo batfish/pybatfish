@@ -34,6 +34,8 @@ def _load_test_definitions(netstr, svcstr=None):
 
 
 TEST_DATABASE = six.u("""
+    HOST_BITS = 1.2.3.4/8        # some prefix with host bits present
+
     RFC1918_10 = 10.0.0.0/8      # non-public
 
     RFC1918_172 = 172.16.0.0/12  # non-public
@@ -84,6 +86,11 @@ def test_entry_to_group_naive():
     g = _get_group('RFC1918_192')
     assert set(g.addresses) == {'192.168.0.0/16'}
     assert not g.childGroupNames
+
+
+def test_entry_to_group_host_bits():
+    g = _get_group('HOST_BITS')
+    assert set(g.addresses) == {'1.0.0.0/8'}
 
 
 def test_entry_to_group_recursive():
