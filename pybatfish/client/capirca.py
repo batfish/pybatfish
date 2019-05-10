@@ -67,7 +67,7 @@ def _item_to_python_repr(item, definitions):
     except ValueError:
         pass
     try:
-        return ipaddress.IPv4Network(s)
+        return ipaddress.IPv4Network(s, strict=False)
     except ValueError:
         pass
 
@@ -77,7 +77,7 @@ def _item_to_python_repr(item, definitions):
     except ValueError:
         pass
     try:
-        return ipaddress.IPv6Network(s)
+        return ipaddress.IPv6Network(s, strict=False)
     except ValueError:
         pass
 
