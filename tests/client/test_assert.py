@@ -60,7 +60,7 @@ class MockQuestion(QuestionBase):
     def __init__(self, answer=None):
         self._answer = answer if answer is not None else MockTableAnswer()
 
-    def answer(self, **kwargs):
+    def answer(self, *args, **kwargs):
         return self._answer
 
 

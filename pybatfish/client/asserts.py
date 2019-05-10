@@ -206,8 +206,8 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
 
 
 def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
-                          session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[Session]) -> bool
+                          snapshot=None, session=None):
+    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL permits a specified set of flows.
 
@@ -216,6 +216,7 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
+    :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
     :return: True if the assertion passes
     """
@@ -227,7 +228,7 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
         kwargs.update(startLocation=startLocation)
 
     df = _get_question_object(session, 'searchFilters').searchFilters(
-        **kwargs).answer().frame()  # type: ignore
+        **kwargs).answer(snapshot).frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
@@ -236,8 +237,8 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
 
 
 def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
-                         session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[Session]) -> bool
+                         snapshot=None, session=None):
+    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL denies a specified set of flows.
 
@@ -246,6 +247,7 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
+    :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
     :return: True if the assertion passes
     """
@@ -257,7 +259,7 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
         kwargs.update(startLocation=startLocation)
 
     df = _get_question_object(session, 'searchFilters').searchFilters(
-        **kwargs).answer().frame()  # type: ignore
+        **kwargs).answer(snapshot).frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(

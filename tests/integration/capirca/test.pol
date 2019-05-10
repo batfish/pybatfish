@@ -1,0 +1,22 @@
+header {
+  target:: arista some_acl
+  target:: cisco some_acl
+  target:: juniper some_acl
+  target:: paloalto some_acl
+}
+
+term permit_ssh {
+  protocol:: tcp
+  destination-port:: SSH
+  action:: accept
+}
+
+term permit_dns {
+  protocol:: udp
+  destination-port:: DNS
+  action:: accept
+}
+
+term deny_all {
+  action:: reject
+}

@@ -1,3 +1,4 @@
 SSH = 22/tcp
 TELNET = 23/tcp
 SMTP = 25/tcp
+DNS = 53/udp
