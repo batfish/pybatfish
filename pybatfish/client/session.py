@@ -549,17 +549,14 @@ class Session(object):
         if filename is None:
             filename = 'config'
 
-        d = TemporaryDirectory(prefix='_batfish_temp.')
-        try:
-            _create_single_file_zip(d.name, text, filename, platform)
-            ss_name = self._init_snapshot(d.name, name=snapshot_name,
+        with TemporaryDirectory(prefix='_batfish_temp.') as dirname:
+            _create_single_file_zip(dirname, text, filename, platform)
+            ss_name = self._init_snapshot(dirname, name=snapshot_name,
                                           overwrite=overwrite,
                                           extra_args=extra_args)
             assert isinstance(
                 ss_name, six.string_types)  # Guaranteed since background=False
             return ss_name
-        finally:
-            d.cleanup()
 
     def _init_snapshot(self, upload, name=None, overwrite=False,
                        background=False,

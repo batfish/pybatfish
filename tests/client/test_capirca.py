@@ -24,7 +24,7 @@ from pybatfish.client import capirca
 
 def _load_test_definitions(netstr, svcstr=None):
     # type: (Text, Text) -> naming.Naming
-    """Converts the given string into a Capirca naming object."""
+    """Parses a Capirca Naming from the given network and services strings."""
     defs = naming.Naming()
     if netstr:
         defs._ParseFile(StringIO(netstr), 'networks')

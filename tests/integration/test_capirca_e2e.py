@@ -33,8 +33,7 @@ _this_dir = abspath(dirname(realpath(__file__)))
 @fixture(scope="module")
 def session():
     s = Session()
-    s.q.load()
-    yield s
+    return s
 
 
 @fixture(scope="module")

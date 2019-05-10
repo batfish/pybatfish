@@ -117,6 +117,8 @@ def _get_acl_text(pol, platform):
     # prevent warning - Capirca already warns itself if terms are expired.
     exp_info_weeks = 52 * 100  # ~100 years
 
+    platform = platform.strip().lower()
+
     if platform == 'arista':
         from capirca.lib import arista
         return str(arista.Arista(pol, exp_info_weeks))
@@ -192,8 +194,14 @@ def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
         with open(pol, 'r') as pol_file:
             pol_text = pol_file.read()
         pol_dir = os.path.dirname(pol)
+
+        # Capirca can optimize ACL outputs, but this is not well-documented.
+        # Since we will likely be using Batfish to analyze the "raw" Capirca
+        # config, disable optimization.
+        optimize = False
+
         pol = policy.ParsePolicy(
-            pol_text, definitions, base_dir=pol_dir, optimize=False)
+            pol_text, definitions, base_dir=pol_dir, optimize=optimize)
 
     file_text = _get_acl_text(pol, platform)
 
