@@ -197,10 +197,6 @@ def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
 
     file_text = _get_acl_text(pol, platform)
 
-    # TODO: make batfish recognize "juniper-srx"
-    if platform == 'juniper-srx':
-        platform = 'juniper'
-
     return session.init_snapshot_from_text(
         file_text, filename=filename, platform=platform,
         snapshot_name=snapshot_name, overwrite=overwrite, extra_args=extra_args)
