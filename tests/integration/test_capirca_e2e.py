@@ -17,13 +17,13 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
+from pybatfish.client.asserts import (
+    assert_filter_denies, assert_filter_permits)
 from pybatfish.client.capirca import (
     create_reference_book, init_snapshot_from_acl)
 from pybatfish.client.commands import (
-    bf_delete_network, bf_set_network,
-    bf_get_reference_book, bf_put_reference_book)
-from pybatfish.client.asserts import (
-    assert_filter_denies, assert_filter_permits)
+    bf_delete_network, bf_get_reference_book,
+    bf_put_reference_book, bf_set_network)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 
