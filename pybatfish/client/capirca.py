@@ -42,6 +42,9 @@ try:
     # warning; ignore and continue if something goes wrong.
     import absl.logging
 
+    # https://github.com/abseil/abseil-py/issues/99
+    logging.root.removeHandler(absl.logging._absl_handler)
+    # https://github.com/abseil/abseil-py/issues/102
     absl.logging._warn_preinit_stderr = False
 except Exception:
     pass
