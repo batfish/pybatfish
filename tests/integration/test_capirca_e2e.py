@@ -30,14 +30,14 @@ from pybatfish.datamodel import HeaderConstraints
 _this_dir = abspath(dirname(realpath(__file__)))
 
 
-@fixture()
+@fixture(scope="module")
 def session():
     s = Session()
     s.q.load()
     yield s
 
 
-@fixture()
+@fixture(scope="module")
 def network(session):
     name = bf_set_network()
     yield name
