@@ -541,12 +541,15 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        import tempfile
+        if six.PY2:
+            from backports.tempfile import TemporaryDirectory
+        else:
+            from tempfile import TemporaryDirectory
 
         if filename is None:
             filename = 'config'
 
-        d = tempfile.TemporaryDirectory(prefix='_batfish_temp.')
+        d = TemporaryDirectory(prefix='_batfish_temp.')
         try:
             _create_single_file_zip(d.name, text, filename, platform)
             ss_name = self._init_snapshot(d.name, name=snapshot_name,
