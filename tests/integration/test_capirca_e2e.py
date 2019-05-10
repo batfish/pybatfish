@@ -17,22 +17,35 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
-from pybatfish.client.capirca import create_reference_book
-from pybatfish.client.commands import (bf_delete_network, bf_get_reference_book,
-                                       bf_put_reference_book, bf_set_network)
+from pybatfish.client.capirca import (
+    create_reference_book, init_snapshot_from_acl)
+from pybatfish.client.commands import (
+    bf_delete_network, bf_set_network,
+    bf_get_reference_book, bf_put_reference_book)
+from pybatfish.client.asserts import (
+    assert_filter_denies, assert_filter_permits)
+from pybatfish.client.session import Session
+from pybatfish.datamodel import HeaderConstraints
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
 
 @fixture()
-def network():
+def session():
+    s = Session()
+    s.q.load()
+    yield s
+
+
+@fixture()
+def network(session):
     name = bf_set_network()
     yield name
     # cleanup
     bf_delete_network(name)
 
 
-def test_create_reference_book(network):
+def test_create_reference_book(session, network):
     book = create_reference_book(os.path.join(_this_dir, 'capirca', 'defs'))
     bf_put_reference_book(book)
 
@@ -43,3 +56,18 @@ def test_create_reference_book(network):
     assert getbook.name == book.name
     assert (set(g.name for g in getbook.addressGroups) ==
             set(g.name for g in book.addressGroups))
+
+
+def test_init_snapshot_from_acl(session, network):
+    defs = os.path.join(_this_dir, 'capirca', 'defs')
+    pol = os.path.join(_this_dir, 'capirca', 'test.pol')
+    ss = init_snapshot_from_acl(
+        session, pol, defs, platform='cisco', filename='some_cfg')
+
+    ssh = HeaderConstraints(applications='ssh')
+    dns = HeaderConstraints(applications='dns')
+    http = HeaderConstraints(applications='http')
+
+    assert_filter_permits('some_acl', ssh, snapshot=ss, session=session)
+    assert_filter_permits('some_acl', dns, snapshot=ss, session=session)
+    assert_filter_denies('some_acl', http, snapshot=ss, session=session)
