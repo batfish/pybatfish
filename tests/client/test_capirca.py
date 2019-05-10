@@ -22,12 +22,14 @@ from capirca.lib import naming, policy
 from pybatfish.client import capirca
 
 
-def _load_test_definitions(netstr, svcstr=''):
+def _load_test_definitions(netstr, svcstr=None):
     # type: (Text, Text) -> naming.Naming
     """Converts the given string into a Capirca naming object."""
     defs = naming.Naming()
-    defs._ParseFile(StringIO(netstr), 'networks')
-    defs._ParseFile(StringIO(svcstr), 'services')
+    if netstr:
+        defs._ParseFile(StringIO(netstr), 'networks')
+    if svcstr:
+        defs._ParseFile(StringIO(svcstr), 'services')
     return defs
 
 
