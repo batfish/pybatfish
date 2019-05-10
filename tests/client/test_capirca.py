@@ -176,6 +176,9 @@ def test_get_acl_text():
     assert 'permit udp any any eq 53' in cisco
     assert 'deny ip any any' in cisco
 
+    cisco_wrong = capirca._get_acl_text(pol, ' CISCO ')
+    assert cisco_wrong == cisco
+
     juniper = capirca._get_acl_text(pol, 'juniper')
     assert re.search(
         r'from {\s*protocol tcp;\s*destination-port 22;\s*}', juniper)
