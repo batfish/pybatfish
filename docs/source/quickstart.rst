@@ -24,7 +24,7 @@ name of initialized snapshot (prefixed by ``ss_``):
 >>> bf_init_snapshot('jupyter_notebooks/networks/example') # doctest: +ELLIPSIS
 'ss_...'
 
-Here, the example network is being uploaded, but this location could also be a folder or a zip containing a custom network snapshot.
+Here, an example network that is part of the `Pybatfish GitHub repo <https://github.com/batfish/pybatfish>`_ is being uploaded. In general, this location is a folder or a zip containing a network snapshot. See `instructions for packaging snapshots <https://github.com/batfish/batfish/wiki/Packaging-snapshots-for-analysis>`_.
 
 5. Ask a question about the snapshot, using one of the loaded templates (``bfq`` holds the questions currently loaded in Pybatfish).
 For example here, the question ``IPOwners`` fetches the mapping between IP address, interface, node and VRF for all devices in the network. :
