@@ -5,7 +5,7 @@ Once you have the ``Batfish`` service running, you can use the questions below t
 
 Notes on types
 --------------
-1. Types such as ``nodeSpec`` and ``ipSpec`` are strings in Python but have
+1. Parameter types such as ``nodeSpec`` and ``ipSpec`` below are strings in Python but have
 rich grammars (`specified here <https://github.com/batfish/batfish/blob/master/questions/Parameters.md>`_)
 that enable flexible expression of sets of nodes, interfaces etc.
 The grammars generally accept the simplest form of each type, such as node name
