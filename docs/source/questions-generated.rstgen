@@ -1,8 +1,30 @@
+ - `Configuration data questions <#configuration>`_
+ - `Configuration hygiene questions <#hygiene>`_
+ - `Configuration compatibility questions <#status>`_
+ - `Network adjacency questions <#topology>`_
+ - `Flow path questions <#traceroute>`_
+ - `Flow search questions <#reachability>`_
+ - `ACL and firewall analysis questions <#acl>`_
+ - `Routing analysis questions <#routing>`_
+ - `Specifier resolvers <#specifiers>`_
+ - `Initialization information questions <#initialization>`_
+ - `Other questions <#other>`_
+
 .. py:module:: pybatfish.question.bfq
+
+
+.. _configuration:
+
+Configuration data questions
+----------------------------
+
+Questions that return the contents of configuration in a structured format.
 
 .. py:class:: aaaAuthenticationLogin(*, nodes, question_name)
 
-   Return nodes that do not require authentication on all virtual terminal lines.
+   Returns nodes that do not require authentication on all virtual terminal lines.
+   
+   Lists all nodes in the network for which there is a virtual terminal line that does not require authentication.
    
    
    :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
@@ -14,11 +36,13 @@
 
    #. **Node**
 
-   #. **Line_Names** -- Names of virtual terminal lines
+   #. **Line_Names** -- Names of virtual terminal lines.
 
 .. py:class:: bgpPeerConfiguration(*, nodes, properties, question_name)
 
-   Return BGP peer configuration properties.
+   Returns configuration settings for BGP peerings.
+   
+   Reports configuration settings for each configured BGP peering on each node in the network. This question reports peer-specific settings. Settings that are process-wide are reported by the bgpProcessConfiguration question.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -58,7 +82,9 @@
 
 .. py:class:: bgpProcessConfiguration(*, nodes, properties, question_name)
 
-   Return BGP process configuration properties.
+   Returns configuration settings of BGP processes.
+   
+   Reports configuration settings for each BGP process on each node and VRF in the network. This question reports only process-wide settings. Peer-specific settings are reported by the bgpPeerConfiguration question.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -86,167 +112,6 @@
 
    #. **Tie_Breaker**
 
-.. py:class:: bgpSessionCompatibility(*, nodes, remoteNodes, status, type, question_name)
-
-   Return the status of configured BGP sessions, independent of remote peer configurations.
-   
-   
-   :param nodes: Include sessions whose first node matches this specifier.
-   :type nodes: nodeSpec
-   :param remoteNodes: Include sessions whose second node matches this specifier.
-   :type remoteNodes: nodeSpec
-   :param status: Only include sessions for which status matches this regex.
-   :type status: bgpSessionStatus
-   :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
-   :type type: bgpSessionType
-
-   Return table columns:
-
-   #. **Node** -- The node where this session is configured
-
-   #. **VRF** -- The VRF in which this session is configured
-
-   #. **Local_AS** -- The local AS of the session
-
-   #. **Local_Interface** -- Local interface of the session
-
-   #. **Local_IP** -- The local IP of the session
-
-   #. **Remote_AS** -- The remote AS or list of ASes of the session
-
-   #. **Remote_Node** -- Remote node for this session
-
-   #. **Remote_Interface** -- Remote interface for this session
-
-   #. **Remote_IP** -- Remote IP or prefix for this session
-
-   #. **Session_Type** -- The type of this session
-
-   #. **Configured_Status** -- Configured status
-
-.. py:class:: bgpSessionStatus(*, nodes, remoteNodes, status, type, question_name)
-
-   Return the status of configured BGP sessions.
-   
-   
-   :param nodes: Include sessions whose first node matches this specifier.
-   :type nodes: nodeSpec
-   :param remoteNodes: Include sessions whose second node matches this specifier.
-   :type remoteNodes: nodeSpec
-   :param status: Only include sessions for which status matches this regex.
-   :type status: bgpSessionStatus
-   :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
-   :type type: bgpSessionType
-
-   Return table columns:
-
-   #. **Node** -- The node where this session is configured
-
-   #. **VRF** -- The VRF in which this session is configured
-
-   #. **Local_AS** -- The local AS of the session
-
-   #. **Local_Interface** -- Local interface of the session
-
-   #. **Local_IP** -- The local IP of the session
-
-   #. **Remote_AS** -- The remote AS or list of ASes of the session
-
-   #. **Remote_Node** -- Remote node for this session
-
-   #. **Remote_Interface** -- Remote interface for this session
-
-   #. **Remote_IP** -- Remote IP or prefix for this session
-
-   #. **Session_Type** -- The type of this session
-
-   #. **Established_Status** -- Established status
-
-.. py:class:: bidirectionalReachability(*, headers, pathConstraints, returnFlowType, question_name)
-
-   Search for successfully delivered flows that can successfully receive a response.
-   
-   Performs two reachability analyses, first originating from specified sources, then returning back to those sources. After the first (forward) pass, sets up sessions in the network and creates returning flows for each successfully delivered forward flow. The second pass searches for return flows that can be successfully delivered in the presence of the setup sessions.
-   
-   
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
-   :param returnFlowType: Specifies whether to search for return flows that are successful (SUCCESS), that fail (FAILURE), or that can either succeed or fail depending on the path taken (MULTIPATH_INCONSISTENT). The default is SUCCESS.
-   :type returnFlowType: string
-
-   Return table columns:
-
-   #. **Forward_Flow** -- The forward flow.
-
-   #. **Forward_Traces** -- The forward traces.
-
-   #. **New_Sessions** -- Sessions initialized by the forward trace.
-
-   #. **Reverse_Flow** -- The reverse flow.
-
-   #. **Reverse_Traces** -- The reverse traces.
-
-.. py:class:: bidirectionalTraceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
-
-   Trace the path(s) for the specified flow, along with path(s) for reverse flows.
-   
-   This question performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
-   If the trace succeeds, a traceroute is performed in the reverse direction.
-   
-   
-   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
-   :type startLocation: locationSpec
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
-   :type ignoreFilters: boolean
-
-   Return table columns:
-
-   #. **Forward_Flow** -- The forward flow.
-
-   #. **Forward_Traces** -- The forward traces.
-
-   #. **New_Sessions** -- Sessions initialized by the forward trace.
-
-   #. **Reverse_Flow** -- The reverse flow.
-
-   #. **Reverse_Traces** -- The reverse traces.
-
-.. py:class:: compareFilters(*, nodes, filters, ignoreComposites, question_name)
-
-   Compares filters with the same name in the current and reference snapshots. Returns pairs of lines, one from each filter, that match the same flow(s) but treat them differently (i.e. one permits and the other denies the flow).
-   
-   This question can be used to summarize how a filter has changed over time. In particular, it highlights differences that cause flows to be denied when they used to be permitted, or vice versa. The output is a table that includes pairs of lines, one from each version of the filter, that both match at least one common flow, and have different action (permit or deny).
-   
-   
-   :param nodes: Only evaluate filters present on nodes matching this specifier.
-   :type nodes: nodeSpec
-   :param filters: Only evaluate filters that match this regex.
-   :type filters: filter
-   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
-   :type ignoreComposites: boolean
-
-   Return table columns:
-
-   #. **Node** -- Hostname.
-
-   #. **Filter_Name** -- The filter name.
-
-   #. **Line_Index** -- The index of the line in the current filter.
-
-   #. **Line_Content** -- The current filter line content.
-
-   #. **Line_Action** -- The current filter line action.
-
-   #. **Reference_Line_Index** -- The index of the line in the reference filter.
-
-   #. **Reference_Line_Content** -- The reference filter line content.
-
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
    Lists the structures defined in the network.
@@ -269,107 +134,17 @@
 
    Return table columns:
 
-   #. **Structure_Type** -- Vendor-specific type of the structure
+   #. **Structure_Type** -- Vendor-specific type of the structure.
 
-   #. **Structure_Name** -- Name of the structure
+   #. **Structure_Name** -- Name of the structure.
 
-   #. **Source_Lines** -- File and line numbers where the structure is defined
-
-.. py:class:: detectLoops(*, maxTraces, question_name)
-
-   Detect forwarding loops.
-   
-   Finds forwarding loops.
-   
-   
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
-
-.. py:class:: differentialReachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name)
-
-   Detect differential reachability.
-   
-   Finds flows that are accepted in one snapshot but dropped in another.
-   
-   
-   :param actions: Only return flows for which the disposition is from this set.
-   
-       Default value: ``success``
-   :type actions: dispositionSpec
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
-   :param ignoreFilters: Do not apply filters/ACLs during analysis.
-   :type ignoreFilters: boolean
-   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
-   :type invertSearch: boolean
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Snapshot_Traces** -- The traces in the BASE snapshot
-
-   #. **Snapshot_TraceCount** -- The total number traces in the BASE snapshot
-
-   #. **Reference_Traces** -- The traces in the DELTA snapshot
-
-   #. **Reference_TraceCount** -- The total number traces in the DELTA snapshot
-
-.. py:class:: edges(*, nodes, remoteNodes, edgeType, question_name)
-
-   Lists different types of edges in a snapshot.
-   
-   Lists neighbor relationships of the specified type (layer3, BGP, ospf, etc. in the form of edges).
-   
-   
-   :param nodes: *Required.* Include edges whose first node matches this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
-   
-       Default value: ``.*``
-   :type remoteNodes: nodeSpec
-   :param edgeType: Types of edges to include.
-       Allowed values:
-   
-       * bgp
-       * eigrp
-       * ipsec
-       * isis
-       * layer1
-       * layer2
-       * layer3
-       * ospf
-       * rip
-       * vxlan
-   :type edgeType: string
-
-   Return table columns:
-
-   #. **Interface** -- Interface from which the edge originates
-
-   #. **IPs**
-
-   #. **Remote_Interface** -- Interface at which the edge terminates
-
-   #. **Remote_IPs**
+   #. **Source_Lines** -- File and line numbers where the structure is defined.
 
 .. py:class:: f5BigipVipConfiguration(*, nodes, question_name)
 
-   Report VIP mappings of F5 BIG-IP configurations.
+   Returns VIP configuration of F5 BIG-IP devices.
+   
+   Lists all the VIP to server IP mappings contained in F5 BIP-IP configurations.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -379,123 +154,19 @@
 
    #. **Node**
 
-   #. **VIP_Name** -- Virtual Service Name
+   #. **VIP_Name** -- Virtual Service Name.
 
-   #. **VIP_Endpoint** -- Virtual Service Endpoint
+   #. **VIP_Endpoint** -- Virtual Service Endpoint.
 
    #. **Servers**
 
    #. **Description**
 
-.. py:class:: fileParseStatus(*, question_name)
-
-   Display file parse status.
-   
-   For each file in a snapshot, returns the host(s) that were produced by the file and the parse status: pass, fail, partially parsed.
-
-   Return table columns:
-
-   #. **File_Name** -- The file that was parsed
-
-   #. **Status** -- The status of the parsing operation
-
-   #. **Nodes** -- Names of nodes produced from this file
-
-.. py:class:: filterLineReachability(*, filters, ignoreComposites, nodes, question_name)
-
-   Identify ACLs/filters with unreachable lines.
-   
-   This question finds all unreachable lines in the specified ACLs/filters.
-   
-   
-   :param filters: Specifier for filters to test.
-   :type filters: filterSpec
-   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
-   :type ignoreComposites: boolean
-   :param nodes: Examine filters on nodes matching this specifier.
-   :type nodes: nodeSpec
-
-   Return table columns:
-
-   #. **Sources** -- Filter sources
-
-   #. **Unreachable_Line** -- Filter line that cannot be matched (i.e., unreachable)
-
-   #. **Unreachable_Line_Action** -- Action performed by the unreachable line (e.g., PERMIT or DENY)
-
-   #. **Blocking_Lines** -- Lines that, when combined, cover the unreachable line
-
-   #. **Different_Action** -- Whether unreachable line has an action different from the blocking line(s)
-
-   #. **Reason** -- The reason a line is unreachable
-
-   #. **Additional_Info** -- Additional information
-
-.. py:class:: filterTable(*, innerQuestion, columns, filter, question_name)
-
-   Return subset of answer for a question.
-   
-   Return a subset of the answer generated by the inner question. The results are trimmed first by row and then by column. Rows where any value matches the filter are returned. The columns returned for each row is restricted by the column specifier.
-   
-   
-   :param innerQuestion: *Required.* The inner question whose answer should be filtered.
-   :type innerQuestion: question
-   :param columns: The set of columns to fetch.
-   :type columns: string
-   :param filter: The filter to use.
-   :type filter: string
-
-.. py:class:: initIssues(*, question_name)
-
-   Return issues that occurred when parsing input files and converting to vendor independent model.
-
-   Return table columns:
-
-   #. **Nodes** -- The nodes that were converted (if applicable)
-
-   #. **Source_Lines** -- The files and lines that caused the issues (if applicable)
-
-   #. **Type** -- The type of issues identified
-
-   #. **Details** -- Details about the issues identified
-
-   #. **Line_Text** -- The text of the input files that caused the issues (if applicable)
-
-   #. **Parser_Context** -- Batfish parser state when issues were encountered (if applicable)
-
-.. py:class:: interfaceMtu(*, interfaces, mtuBytes, nodes, comparator, question_name)
-
-   Find interfaces where the configured MTU matches the specified comparator and mtuBytes.
-   
-   For example, if comparator is '<' and mtuBytes is 1500, then only interfaces where the configured MTU is less than 1500 bytes will be returned.
-   
-   
-   :param interfaces: *Required.* Evaluate interfaces matching this specifier.
-   
-       Default value: ``.*``
-   :type interfaces: interfacesSpec
-   :param mtuBytes: *Required.* The reference MTU in bytes against which to check the configured MTU.
-   
-       Default value: ``1500``
-   :type mtuBytes: integer
-   :param nodes: *Required.* Include nodes matching this specifier.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param comparator: Returned devices will satisfy <comparator> <mtuBytes>. Use '<' to find devices that do not have MTU smaller than the specified <mtuBytes> MTU.
-   
-       Default value: ``<``
-   :type comparator: comparator
-
-   Return table columns:
-
-   #. **Interface**
-
-   #. **MTU**
-
 .. py:class:: interfaceProperties(*, excludeShutInterfaces, interfaces, nodes, properties, question_name)
 
-   Returns configuration properties of interfaces.
+   Returns configuration settings of interfaces.
+   
+   Lists interface-level settings of interfaces. Settings for routing protocols, VRFs, and zones etc. that are attached to interfaces are available via other questions.
    
    
    :param excludeShutInterfaces: Exclude interfaces that are shutdown.
@@ -595,7 +266,9 @@
 
 .. py:class:: ipOwners(*, duplicatesOnly, question_name)
 
-   Returns the mapping of IP address, interface, node and VRF for all devices in the snapshot.
+   Returns where IP addresses are attached in the network.
+   
+   For each device, lists the mapping from IPs to corresponding interface(s) and VRF(s).
    
    
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
@@ -603,99 +276,23 @@
 
    Return table columns:
 
-   #. **Node** -- Node hostname
+   #. **Node** -- Node hostname.
 
-   #. **VRF** -- VRF name
+   #. **VRF** -- VRF name.
 
-   #. **Interface** -- Interface name
+   #. **Interface** -- Interface name.
 
-   #. **IP** -- IP address
+   #. **IP** -- IP address.
 
-   #. **Mask** -- Network mask length
+   #. **Mask** -- Network mask length.
 
-   #. **Active** -- Whether the interface is active
-
-.. py:class:: ipsecSessionStatus(*, nodes, remoteNodes, status, question_name)
-
-   Returns the status of configured IPSec sessions.
-   
-   
-   :param nodes: Include sessions whose first node matches this specifier.
-   :type nodes: nodeSpec
-   :param remoteNodes: Include sessions whose second node matches this specifier.
-   :type remoteNodes: nodeSpec
-   :param status: Only include IPSec sessions for which status matches this regex.
-   :type status: ipsecSessionStatus
-
-   Return table columns:
-
-   #. **Node** -- IPSec initiator
-
-   #. **Node_Interface** -- Initiator Interface
-
-   #. **Node_IP** -- Initiator IP
-
-   #. **Remote_Node** -- IPSec responder
-
-   #. **Remote_Node_Interface** -- Responder Interface
-
-   #. **Remote_Node_IP** -- Responder IP
-
-   #. **Tunnel_Interfaces** -- Tunnel interfaces pair used in peering session
-
-   #. **Status** -- IPSec session status
-
-.. py:class:: loopbackMultipathConsistency(*, maxTraces, question_name)
-
-   Validate multipath consistency between all pairs of loopbacks.
-   
-   Finds flows between loopbacks that are treated differently by different paths in the presence of multipath routing.
-   
-   
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
-
-.. py:class:: lpmRoutes(*, ip, nodes, vrfs, question_name)
-
-   Show routes which are longest prefix match for a given IP address.
-   
-   Return longest prefix match routes for a given IP in the RIBs of specified node/VRF.
-   
-   
-   :param ip: *Required.* IP address to run LPM on.
-   :type ip: ip
-   :param nodes: *Required.* Examine routes on nodes matching this specifier.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param vrfs: *Required.* Examine routes on VRFs matching this name or regex.
-   
-       Default value: ``.*``
-   :type vrfs: vrf
-
-   Return table columns:
-
-   #. **Node** -- Node where the route is present
-
-   #. **VRF** -- VRF where the route is present
-
-   #. **Ip** -- IP that was being matched on
-
-   #. **Network** -- The longest-prefix network that matched
-
-   #. **Num_Routes** -- Number of routes that matched (in case of ECMP)
+   #. **Active** -- Whether the interface is active.
 
 .. py:class:: mlagProperties(*, idRegex, nodes, question_name)
 
-   Returns configuration properties of MLAGs.
+   Returns MLAG configuration.
+   
+   Lists the configuration settings for each MLAG domain in the network.
    
    
    :param idRegex: Include MLAG IDs matching this java Regex.
@@ -705,41 +302,21 @@
 
    Return table columns:
 
-   #. **Node** -- Node name
+   #. **Node** -- Node name.
 
-   #. **MLAG_ID** -- MLAG domain ID
+   #. **MLAG_ID** -- MLAG domain ID.
 
-   #. **Peer_Address** -- Peer's IP address
+   #. **Peer_Address** -- Peer's IP address.
 
-   #. **Local_Interface** -- Local interface used for MLAG peering
+   #. **Local_Interface** -- Local interface used for MLAG peering.
 
-   #. **Source_Interface** -- Local interface used as source-interface for MLAG peering
-
-.. py:class:: multipathConsistency(*, headers, maxTraces, pathConstraints, question_name)
-
-   Validate multipath consistency.
-   
-   Finds flows that are treated differently by different paths in the presence of multipath routing.
-   
-   
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
+   #. **Source_Interface** -- Local interface used as source-interface for MLAG peering.
 
 .. py:class:: namedStructures(*, ignoreGenerated, indicatePresence, nodes, structureNames, structureTypes, question_name)
 
-   Return named structure definitions.
+   Returns named structure definitions.
+   
+   Return structures defined in the configurations, represented in a vendor-independent JSON format.
    
    
    :param ignoreGenerated: Whether to ignore auto-generated structures.
@@ -759,15 +336,17 @@
 
    #. **Node**
 
-   #. **Structure_Type** -- Structure type
+   #. **Structure_Type** -- Structure type.
 
-   #. **Structure_Name** -- Structure name
+   #. **Structure_Name** -- Structure name.
 
-   #. **Structure_Definition** -- Structure definition
+   #. **Structure_Definition** -- Structure definition.
 
 .. py:class:: nodeProperties(*, nodes, properties, question_name)
 
-   Return configuration properties of nodes.
+   Returns configuration settings of nodes.
+   
+   Lists global settings of devices in the network. Settings that are specific to interfaces, routing protocols, etc. are available via other questions.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -853,7 +432,9 @@
 
 .. py:class:: ospfAreaConfiguration(*, nodes, question_name)
 
-   Return configuration parameters of OSPF areas.
+   Returns configuration parameters of OSPF areas.
+   
+   Returns information about all OSPF areas defined across the network.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -867,7 +448,7 @@
 
    #. **Process_ID**
 
-   #. **Area** -- Area Number
+   #. **Area** -- Area Number.
 
    #. **Area_Type**
 
@@ -878,6 +459,8 @@
 .. py:class:: ospfInterfaceConfiguration(*, nodes, properties, question_name)
 
    Returns OSPF configuration of interfaces.
+   
+   Returns the interface level OSPF configuration details for the interfaces in the network which run OSPF.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -905,7 +488,9 @@
 
 .. py:class:: ospfProcessConfiguration(*, nodes, properties, question_name)
 
-   Return configuration parameters for OSPF routing processes.
+   Returns configuration parameters for OSPF routing processes.
+   
+   Returns the values of important properties for all OSPF processes running across the network.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -933,7 +518,9 @@
 
 .. py:class:: ospfProperties(*, nodes, properties, question_name)
 
-   Return configuration parameters for OSPF routing processes.
+   Returns configuration parameters for OSPF routing processes.
+   
+   Returns all properties of all OSPF processes present in the network. ospfProcessConfiguration question should be used instead as this question is deprecated and will be removed in the future.
    
    
    :param nodes: Include nodes matching this name or regex.
@@ -973,104 +560,6 @@
 
    #. **Router_ID**
 
-.. py:class:: ospfSessionCompatibility(*, nodes, remoteNodes, question_name)
-
-   Returns compatible OSPF sessions.
-   
-   
-   :param nodes: Include nodes matching this name or regex.
-   :type nodes: nodeSpec
-   :param remoteNodes: Include remote nodes matching this name or regex.
-   :type remoteNodes: nodeSpec
-
-   Return table columns:
-
-   #. **Interface**
-
-   #. **VRF**
-
-   #. **IP** -- Ip
-
-   #. **Area**
-
-   #. **Remote_Interface**
-
-   #. **Remote_VRF**
-
-   #. **Remote_IP**
-
-   #. **Remote_Area**
-
-.. py:class:: parseWarning(*, aggregateDuplicates, question_name)
-
-   Return a table of the Batfish warnings that occurred parsing this snapshot.
-   
-   
-   :param aggregateDuplicates: Whether to aggregate duplicate results.
-   :type aggregateDuplicates: boolean
-
-   Return table columns:
-
-   #. **Filename** -- The file that was parsed
-
-   #. **Text** -- The text of the input that caused the warning
-
-   #. **Line** -- The line number in the input file that caused the warning
-
-   #. **Parser_Context** -- The context of the Batfish parser when the warning occurred
-
-   #. **Comment** -- An optional comment explaining more information about the warning
-
-.. py:class:: prefixTracer(*, nodes, prefix, question_name)
-
-   Trace prefix propagation through the network.
-   
-   
-   :param nodes: Include prefix tracing information for nodes matching this name or regex.
-   :type nodes: nodeSpec
-   :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
-   :type prefix: prefix
-
-   Return table columns:
-
-   #. **Node** -- The node where action takes place
-
-   #. **VRF** -- The VRF where action takes place
-
-   #. **Peer** -- The node's neighbor to which the action applies
-
-   #. **Action** -- The action that takes place
-
-   #. **Prefix** -- The prefix in question
-
-.. py:class:: reachability(*, pathConstraints, headers, actions, maxTraces, invertSearch, ignoreFilters, question_name)
-
-   Find flows that match the ingress and egress location, src and dest ip address and disposition constraints, as described by the input specifiers.
-   
-   
-   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
-   :type pathConstraints: pathConstraint
-   :param headers: Packet header constraints.
-   :type headers: headerConstraint
-   :param actions: Only return flows for which the disposition is from this set.
-   
-       Default value: ``success``
-   :type actions: dispositionSpec
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
-   :type invertSearch: boolean
-   :param ignoreFilters: Do not apply filters/ACLs during analysis.
-   :type ignoreFilters: boolean
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
-
 .. py:class:: referencedStructures(*, names, nodes, types, question_name)
 
    Lists the references in configuration files to vendor-specific structures.
@@ -1093,111 +582,788 @@
 
    Return table columns:
 
-   #. **Structure_Type** -- Type of structure referenced
+   #. **Structure_Type** -- Type of structure referenced.
 
-   #. **Structure_Name** -- The referenced structure
+   #. **Structure_Name** -- The referenced structure.
 
-   #. **Context** -- Configuration context in which the reference appears
+   #. **Context** -- Configuration context in which the reference appears.
 
-   #. **Source_Lines** -- Lines where reference appears
+   #. **Source_Lines** -- Lines where reference appears.
 
-.. py:class:: resolveFilterSpecifier(*, filters, grammarVersion, nodes, question_name)
+.. py:class:: switchedVlanProperties(*, excludeShutInterfaces, interfaces, nodes, vlans, question_name)
 
-   Show the resolved values for filter specifier.
+   Returns configuration settings of switched VLANs.
+   
+   Lists information about implicitly and explicitly configured switched VLANs.
    
    
-   :param filters: Input to the FilterSpecifier.
-   :type filters: filterSpec
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param nodes: Input to the NodeSpecifier.
+   :param excludeShutInterfaces: Exclude interfaces that are shutdown.
+   :type excludeShutInterfaces: boolean
+   :param interfaces: Include interfaces matching this specifier.
+   :type interfaces: interfacesSpec
+   :param nodes: Include nodes matching this specifier.
    :type nodes: nodeSpec
+   :param vlans: Include VLANs in this space.
+   :type vlans: integerSpace
+
+   Return table columns:
+
+   #. **Node** -- VLAN_ID.
+
+   #. **VLAN_ID**
+
+   #. **Interfaces** -- Switched interfaces carrying traffic for this VLAN.
+
+   #. **VXLAN_VNI** -- VXLAN VNI with which this VLAN is associated.
+
+.. py:class:: viModel(*, question_name)
+
+   Lists configuration attributes of nodes and edges in the network.
+   
+   Returns a JSON dictionary with all of the configuration parameters and neighbor relations stored in the vendor independent data-model.
+
+.. py:class:: vxlanVniProperties(*, nodes, properties, question_name)
+
+   Returns configuration settings of VXLANs.
+   
+   Lists VNI-level network segment settings configured for VXLANs.
+   
+   
+   :param nodes: Include nodes matching this specifier.
+   :type nodes: nodeSpec
+   :param properties: Include properties matching this specifier.
+   :type properties: vxlanVniPropertySpec
 
    Return table columns:
 
    #. **Node**
 
-   #. **Filter_Name** -- Filter name
+   #. **VNI** -- VXLAN Segment ID.
 
-.. py:class:: resolveInterfaceSpecifier(*, grammarVersion, interfaces, nodes, question_name)
+   #. **Local_VTEP_IP**
 
-   Show the resolved values for interface specifier.
+   #. **Multicast_Group**
+
+   #. **VLAN**
+
+   #. **VTEP_Flood_List**
+
+   #. **VXLAN_Port**
+
+.. _hygiene:
+
+Configuration hygiene questions
+-------------------------------
+
+Questions that flag unused and undefined structures in configurations.
+
+.. py:class:: interfaceMtu(*, interfaces, mtuBytes, nodes, comparator, question_name)
+
+   Finds interfaces where the configured MTU matches the specified comparator and mtuBytes.
+   
+   For example, if comparator is '<' and mtuBytes is 1500, then only interfaces where the configured MTU is less than 1500 bytes will be returned.
    
    
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param interfaces: Input to the interfaceSpecifier.
+   :param interfaces: *Required.* Evaluate interfaces matching this specifier.
+   
+       Default value: ``.*``
    :type interfaces: interfacesSpec
-   :param nodes: Input to the NodeSpecifier.
+   :param mtuBytes: *Required.* The reference MTU in bytes against which to check the configured MTU.
+   
+       Default value: ``1500``
+   :type mtuBytes: integer
+   :param nodes: *Required.* Include nodes matching this specifier.
+   
+       Default value: ``.*``
    :type nodes: nodeSpec
+   :param comparator: Returned devices will satisfy <comparator> <mtuBytes>. Use '<' to find devices that do not have MTU smaller than the specified <mtuBytes> MTU.
+   
+       Default value: ``<``
+   :type comparator: comparator
 
    Return table columns:
 
    #. **Interface**
 
-.. py:class:: resolveIpSpecifier(*, grammarVersion, ips, question_name)
+   #. **MTU**
 
-   Show the resolved values for IP space specifier.
+.. py:class:: undefinedReferences(*, nodes, question_name)
+
+   Identifies undefined references in configuration.
+   
+   Finds configurations that have references to named structures (e.g., ACLs) that are not defined. Such occurrences indicate errors and can have serious consequences in some cases.
    
    
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param ips: Input to the IP space specifier.
-   :type ips: ipSpaceSpec
-
-   Return table columns:
-
-   #. **IP_Space** -- IP space
-
-.. py:class:: resolveIpsOfLocationSpecifier(*, grammarVersion, locations, question_name)
-
-   Show IPs that are auto-assigned to locations.
+   :param nodes: *Required.* Look for undefined references on nodes matching this name or regex.
    
-   
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param locations: Input to the LocationSpecifier.
-   :type locations: locationSpec
-
-   Return table columns:
-
-   #. **Locations** -- Resolution
-
-   #. **IP_Space** -- IP space
-
-.. py:class:: resolveLocationSpecifier(*, grammarVersion, locations, question_name)
-
-   Show the resolved values for location specifier.
-   
-   
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param locations: Input to the LocationSpecifier.
-   :type locations: locationSpec
-
-   Return table columns:
-
-   #. **Location**
-
-.. py:class:: resolveNodeSpecifier(*, grammarVersion, nodes, question_name)
-
-   Show the resolved values for node specifier.
-   
-   
-   :param grammarVersion: Version of grammar to use for resolution.
-   :type grammarVersion: string
-   :param nodes: Input to the NodeSpecifier.
+       Default value: ``.*``
    :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **File_Name** -- File containing reference.
+
+   #. **Struct_Type** -- Type of struct reference is supposed to be.
+
+   #. **Ref_Name** -- The undefined reference.
+
+   #. **Context** -- Context of undefined reference.
+
+   #. **Lines** -- Lines where reference appears.
+
+.. py:class:: unusedStructures(*, nodes, question_name)
+
+   Returns nodes with structures such as ACLs, routemaps, etc. that are defined but not used.
+   
+   Return nodes with structures such as ACLs, routes, etc. that are defined but not used. This may represent a bug in the configuration, which may have occurred because a final step in a template or MOP was not completed. Or it could be harmless extra configuration generated from a master template that is not meant to be used on those nodes.
+   
+   
+   :param nodes: *Required.* Look for unused structures on nodes matching this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Structure_Type** -- Vendor-specific type of the structure.
+
+   #. **Structure_Name** -- Name of the structure.
+
+   #. **Source_Lines** -- File and line numbers where the structure is defined.
+
+.. _status:
+
+Configuration compatibility questions
+-------------------------------------
+
+Questions that show if configuration settings are compatible across devices.
+
+.. py:class:: bgpSessionCompatibility(*, nodes, remoteNodes, status, type, question_name)
+
+   Returns the compatibility of configured BGP sessions.
+   
+   Checks the settings of each configured BGP peering and reports any issue with those settings locally or incompatiblity with its remote counterparts. Each row represents one configured BGP peering on a node and contains information about the session it is meant to establish. For dynamic peers, there is one row per compatible remote peer. Statuses that indicate an independently misconfigured peerings include NO_LOCAL_AS, NO_REMOTE_AS, NO_LOCAL_IP (for eBGP single-hop peerings), LOCAL_IP_UNKNOWN_STATICALLY (for iBGP or eBGP multi-hop peerings), NO_REMOTE_IP (for point-to-point peerings), and NO_REMOTE_PREFIX (for dynamic peerings). INVALID_LOCAL_IP indicates that the peering's configured local IP does not belong to any active interface on the node; UNKNOWN_REMOTE indicates that the configured remote IP is not present in the network. A locally valid point-to-point peering is deemed HALF_OPEN if it has no compatible remote peers, UNIQUE_MATCH if it has exactly one compatible remote peer, or MULTIPLE_REMOTES if it has multiple compatible remote peers. A locally valid dynamic peering is deemed NO_MATCH_FOUND if it has no compatible remote peers, or DYNAMIC_MATCH if it has at least one compatible remote peer.
+   
+   
+   :param nodes: Include sessions whose first node matches this specifier.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include sessions whose second node matches this specifier.
+   :type remoteNodes: nodeSpec
+   :param status: Only include sessions for which status matches this regex.
+   :type status: bgpSessionStatus
+   :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
+   :type type: bgpSessionType
+
+   Return table columns:
+
+   #. **Node** -- The node where this session is configured.
+
+   #. **VRF** -- The VRF in which this session is configured.
+
+   #. **Local_AS** -- The local AS of the session.
+
+   #. **Local_Interface** -- Local interface of the session.
+
+   #. **Local_IP** -- The local IP of the session.
+
+   #. **Remote_AS** -- The remote AS or list of ASes of the session.
+
+   #. **Remote_Node** -- Remote node for this session.
+
+   #. **Remote_Interface** -- Remote interface for this session.
+
+   #. **Remote_IP** -- Remote IP or prefix for this session.
+
+   #. **Session_Type** -- The type of this session.
+
+   #. **Configured_Status** -- Configured status.
+
+.. py:class:: bgpSessionStatus(*, nodes, remoteNodes, status, type, question_name)
+
+   Returns the dynamic status of configured BGP sessions.
+   
+   Checks whether configured BGP peerings can be established. Each row represents one configured BGP peering and contains information about the session it is configured to establish. For dynamic peerings, one row is shown per compatible remote peer. Possible statuses for each session are NOT_COMPATIBLE, ESTABLISHED, and NOT_ESTABLISHED. NOT_COMPATIBLE sessions are those where one or both peers are misconfigured; the BgpSessionCompatibility question provides further insight into the nature of the configuration error. NOT_ESTABLISHED sessions are those that are configured compatibly but will not come up because peers cannot reach each other (e.g., due to being blocked by an ACL). ESTABLISHED sessions are those that are compatible and are expected to come up.
+   
+   
+   :param nodes: Include sessions whose first node matches this specifier.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include sessions whose second node matches this specifier.
+   :type remoteNodes: nodeSpec
+   :param status: Only include sessions for which status matches this regex.
+   :type status: bgpSessionStatus
+   :param type: Only include sessions for which type (ibgp, ebgp_singlehop, ebgp_multihop) matches this regex.
+   :type type: bgpSessionType
+
+   Return table columns:
+
+   #. **Node** -- The node where this session is configured.
+
+   #. **VRF** -- The VRF in which this session is configured.
+
+   #. **Local_AS** -- The local AS of the session.
+
+   #. **Local_Interface** -- Local interface of the session.
+
+   #. **Local_IP** -- The local IP of the session.
+
+   #. **Remote_AS** -- The remote AS or list of ASes of the session.
+
+   #. **Remote_Node** -- Remote node for this session.
+
+   #. **Remote_Interface** -- Remote interface for this session.
+
+   #. **Remote_IP** -- Remote IP or prefix for this session.
+
+   #. **Session_Type** -- The type of this session.
+
+   #. **Established_Status** -- Established status.
+
+.. py:class:: ipsecSessionStatus(*, nodes, remoteNodes, status, question_name)
+
+   Returns the status of configured IPSec sessions.
+   
+   Shows configuration settings and status for each configured IPSec tunnel in the network. The status is IPSEC_SESSION_ESTABLISHED for tunnels that are expected to be established; it is IKE_PHASE1_FAILED if IKE parameters negotiation failed; it is IKE_PHASE1_KEY_MISMATCH if IKE negotiation was successful but IKE keys do not match; it is IPSEC_PHASE2_FAILED if negotiation of IPsec parameters failed; and it is MISSING_END_POINT if the remote endpoint for a configured IPsec tunnel could not be found in the network.
+   
+   
+   :param nodes: Include sessions whose first node matches this specifier.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include sessions whose second node matches this specifier.
+   :type remoteNodes: nodeSpec
+   :param status: Only include IPSec sessions for which status matches this regex.
+   :type status: ipsecSessionStatus
+
+   Return table columns:
+
+   #. **Node** -- IPSec initiator.
+
+   #. **Node_Interface** -- Initiator Interface.
+
+   #. **Node_IP** -- Initiator IP.
+
+   #. **Remote_Node** -- IPSec responder.
+
+   #. **Remote_Node_Interface** -- Responder Interface.
+
+   #. **Remote_Node_IP** -- Responder IP.
+
+   #. **Tunnel_Interfaces** -- Tunnel interfaces pair used in peering session.
+
+   #. **Status** -- IPSec session status.
+
+.. py:class:: ospfSessionCompatibility(*, nodes, remoteNodes, question_name)
+
+   Returns compatible OSPF sessions.
+   
+   Returns compatible OSPF sessions in the network. A session is compatible if the interfaces involved are not shutdown and do run OSPF, are not OSPF passive and are associated with the same OSPF area.
+   
+   
+   :param nodes: Include nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param remoteNodes: Include remote nodes matching this name or regex.
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface**
+
+   #. **VRF**
+
+   #. **IP** -- Ip.
+
+   #. **Area**
+
+   #. **Remote_Interface**
+
+   #. **Remote_VRF**
+
+   #. **Remote_IP**
+
+   #. **Remote_Area**
+
+.. _topology:
+
+Network adjacency questions
+---------------------------
+
+Questions that show different types of network adjacencies.
+
+.. py:class:: edges(*, nodes, remoteNodes, edgeType, question_name)
+
+   Returns different types of network adjacencies in a snapshot.
+   
+   Lists network adjacencies of different types (e.g., Layer 3, BGP, OSPF) in the form of edges.
+   
+   
+   :param nodes: *Required.* Include edges whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+   :param edgeType: Types of edges to include.
+       Allowed values:
+   
+       * bgp
+       * eigrp
+       * ipsec
+       * isis
+       * layer1
+       * layer2
+       * layer3
+       * ospf
+       * rip
+       * vxlan
+   :type edgeType: string
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **IPs**
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+   #. **Remote_IPs**
+
+.. _traceroute:
+
+Flow path questions
+-------------------
+
+Questions that show paths of specified flows in the network.
+
+.. py:class:: bidirectionalTraceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
+
+   Traces the path(s) for the specified flow, along with path(s) for reverse flows.
+   
+   This question performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
+   If the trace succeeds, a traceroute is performed in the reverse direction.
+   
+   
+   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
+   :type startLocation: locationSpec
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
+
+   Return table columns:
+
+   #. **Forward_Flow** -- The forward flow.
+
+   #. **Forward_Traces** -- The forward traces.
+
+   #. **New_Sessions** -- Sessions initialized by the forward trace.
+
+   #. **Reverse_Flow** -- The reverse flow.
+
+   #. **Reverse_Traces** -- The reverse traces.
+
+.. py:class:: traceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
+
+   Traces the path(s) for the specified flow.
+   
+   Performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
+   Unlike a real traceroute, this traceroute is directional. That is, for it to succeed, the reverse connectivity is not needed. This feature can help debug connectivity issues by decoupling the two directions.
+   
+   
+   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
+   :type startLocation: locationSpec
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
+   :type ignoreFilters: boolean
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. _reachability:
+
+Flow search questions
+---------------------
+
+Questions that exhaustively search for flows that meet specified constraints.
+
+.. py:class:: bidirectionalReachability(*, headers, pathConstraints, returnFlowType, question_name)
+
+   Searches for successfully delivered flows that can successfully receive a response.
+   
+   Performs two reachability analyses, first originating from specified sources, then returning back to those sources. After the first (forward) pass, sets up sessions in the network and creates returning flows for each successfully delivered forward flow. The second pass searches for return flows that can be successfully delivered in the presence of the setup sessions.
+   
+   
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+   :param returnFlowType: Specifies whether to search for return flows that are successful (SUCCESS), that fail (FAILURE), or that can either succeed or fail depending on the path taken (MULTIPATH_INCONSISTENT). The default is SUCCESS.
+   :type returnFlowType: string
+
+   Return table columns:
+
+   #. **Forward_Flow** -- The forward flow.
+
+   #. **Forward_Traces** -- The forward traces.
+
+   #. **New_Sessions** -- Sessions initialized by the forward trace.
+
+   #. **Reverse_Flow** -- The reverse flow.
+
+   #. **Reverse_Traces** -- The reverse traces.
+
+.. py:class:: detectLoops(*, maxTraces, question_name)
+
+   Detects forwarding loops.
+   
+   Searches across all possible flows in the network and returns example flows that will experience forwarding loops.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. py:class:: differentialReachability(*, actions, headers, ignoreFilters, invertSearch, maxTraces, pathConstraints, question_name)
+
+   Returns flows that are successful in one snapshot but not in another.
+   
+   Searches across all possible flows in the network, with the specified header and path constraints, and returns example flows that are successful in one snapshot and not the other. This is a differential question and the reference snapshot to compare against must be provided in the call to answer().
+   
+   
+   :param actions: Only return flows for which the disposition is from this set.
+   
+       Default value: ``success``
+   :type actions: dispositionSpec
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   :type ignoreFilters: boolean
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Snapshot_Traces** -- The traces in the BASE snapshot.
+
+   #. **Snapshot_TraceCount** -- The total number traces in the BASE snapshot.
+
+   #. **Reference_Traces** -- The traces in the DELTA snapshot.
+
+   #. **Reference_TraceCount** -- The total number traces in the DELTA snapshot.
+
+.. py:class:: loopbackMultipathConsistency(*, maxTraces, question_name)
+
+   Validates multipath consistency between all pairs of loopbacks.
+   
+   Finds flows between loopbacks that are treated differently (i.e., dropped versus forwarded) by different paths in the presence of multipath routing.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. py:class:: multipathConsistency(*, headers, maxTraces, pathConstraints, question_name)
+
+   Validates multipath consistency.
+   
+   Searches across all flows in the network and returns example flows that are treated differently (i.e., dropped versus forwarded) by different paths in the presence of multipath routing.
+   
+   
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. py:class:: reachability(*, pathConstraints, headers, actions, maxTraces, invertSearch, ignoreFilters, question_name)
+
+   Finds flows that match the specified path and header space conditions.
+   
+   Searches across all flows that match the specified conditions and returns examples of such flows. This question can be used to ensure that certain services are globally accessible and parts of the network are perfectly isolated from each other.
+   
+   
+   :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
+   :type pathConstraints: pathConstraint
+   :param headers: Packet header constraints.
+   :type headers: headerConstraint
+   :param actions: Only return flows for which the disposition is from this set.
+   
+       Default value: ``success``
+   :type actions: dispositionSpec
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   :type ignoreFilters: boolean
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. py:class:: subnetMultipathConsistency(*, maxTraces, question_name)
+
+   Validates multipath consistency between all pairs of subnets.
+   
+   Searches across all flows between subnets that are treated differently (i.e., dropped versus forwarded) by different paths in the network and returns example flows.
+   
+   
+   :param maxTraces: Limit the number of traces returned.
+   :type maxTraces: integer
+
+   Return table columns:
+
+   #. **Flow** -- The flow.
+
+   #. **Traces** -- The traces for this flow.
+
+   #. **TraceCount** -- The total number traces for this flow.
+
+.. _acl:
+
+ACL and firewall analysis questions
+-----------------------------------
+
+Questions that analyze ACLs and firewall rules.
+
+.. py:class:: compareFilters(*, nodes, filters, ignoreComposites, question_name)
+
+   Compares filters with the same name in the current and reference snapshots. Returns pairs of lines, one from each filter, that match the same flow(s) but treat them differently (i.e. one permits and the other denies the flow).
+   
+   This question can be used to summarize how a filter has changed over time. In particular, it highlights differences that cause flows to be denied when they used to be permitted, or vice versa. The output is a table that includes pairs of lines, one from each version of the filter, that both match at least one common flow, and have different action (permit or deny). This is a differential question and the reference snapshot to compare against must be provided in the call to answer().
+   
+   
+   :param nodes: Only evaluate filters present on nodes matching this specifier.
+   :type nodes: nodeSpec
+   :param filters: Only evaluate filters that match this regex.
+   :type filters: filter
+   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   :type ignoreComposites: boolean
+
+   Return table columns:
+
+   #. **Node** -- Hostname.
+
+   #. **Filter_Name** -- The filter name.
+
+   #. **Line_Index** -- The index of the line in the current filter.
+
+   #. **Line_Content** -- The current filter line content.
+
+   #. **Line_Action** -- The current filter line action.
+
+   #. **Reference_Line_Index** -- The index of the line in the reference filter.
+
+   #. **Reference_Line_Content** -- The reference filter line content.
+
+.. py:class:: filterLineReachability(*, filters, ignoreComposites, nodes, question_name)
+
+   Returns unreachable lines in filters (ACLs and firewall rules).
+   
+   Finds all lines in the specified filters that will not match any packet, either because of being shadowed by prior lines or because of its match condition being empty.
+   
+   
+   :param filters: Specifier for filters to test.
+   :type filters: filterSpec
+   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   :type ignoreComposites: boolean
+   :param nodes: Examine filters on nodes matching this specifier.
+   :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Sources** -- Filter sources.
+
+   #. **Unreachable_Line** -- Filter line that cannot be matched (i.e., unreachable).
+
+   #. **Unreachable_Line_Action** -- Action performed by the unreachable line (e.g., PERMIT or DENY).
+
+   #. **Blocking_Lines** -- Lines that, when combined, cover the unreachable line.
+
+   #. **Different_Action** -- Whether unreachable line has an action different from the blocking line(s).
+
+   #. **Reason** -- The reason a line is unreachable.
+
+   #. **Additional_Info** -- Additional information.
+
+.. py:class:: searchFilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name)
+
+   Finds flows for which a filter takes a particular behavior.
+   
+   This question searches for flows for which a filter (access control list) has a particular behavior. The behaviors can be: that the filter permits the flow (permit), that it denies the flow (deny), or that the flow is matched by a particular line (matchLine <lineNumber>). Filters are selected using node and filter specifiers, which might match multiple filters. In this case, a (possibly different) flow will be found for each filter.
+   
+   
+   :param action: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
+   :type action: string
+   :param explain: Include a description of the flow space matching the query.
+   :type explain: boolean
+   :param filters: Only evaluate filters that match this specifier.
+   :type filters: filterSpec
+   :param headers: Packet header constraints on the flows being searched.
+   :type headers: headerConstraint
+   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
+   :type invertSearch: boolean
+   :param nodes: Only evaluate filters present on nodes matching this specifier.
+   :type nodes: nodeSpec
+   :param startLocation: Only consider specified locations as possible sources.
+   :type startLocation: locationSpec
 
    Return table columns:
 
    #. **Node**
 
+   #. **Filter_Name** -- Filter name.
+
+   #. **Flow** -- Evaluated flow.
+
+   #. **Action** -- Outcome.
+
+   #. **Line_Content** -- Line content.
+
+   #. **Trace** -- ACL trace.
+
+.. py:class:: testFilters(*, filters, headers, nodes, startLocation, question_name)
+
+   Returns how a flow is processed by a filter (ACLs, firewall rules).
+   
+   Shows how the specified flow is processed through the specified filters, returning its permit/deny status as well as the line(s) it matched.
+   
+   
+   :param filters: *Required.* Only consider filters that match this specifier.
+   
+       Default value: ``.*``
+   :type filters: filterSpec
+   :param headers: *Required.* Packet header constraints.
+   :type headers: headerConstraint
+   :param nodes: *Required.* Only examine filters on nodes matching this specifier.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param startLocation: Location to start tracing from.
+   :type startLocation: string
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Filter_Name** -- Filter name.
+
+   #. **Flow** -- Evaluated flow.
+
+   #. **Action** -- Outcome.
+
+   #. **Line_Content** -- Line content.
+
+   #. **Trace** -- ACL trace.
+
+.. _routing:
+
+Routing analysis questions
+--------------------------
+
+Questions that analyze routing
+
+.. py:class:: lpmRoutes(*, ip, nodes, vrfs, question_name)
+
+   Returns routes that are longest prefix match for a given IP address.
+   
+   Return longest prefix match routes for a given IP in the RIBs of specified nodes and VRFs.
+   
+   
+   :param ip: *Required.* IP address to run LPM on.
+   :type ip: ip
+   :param nodes: *Required.* Examine routes on nodes matching this specifier.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param vrfs: *Required.* Examine routes on VRFs matching this name or regex.
+   
+       Default value: ``.*``
+   :type vrfs: vrf
+
+   Return table columns:
+
+   #. **Node** -- Node where the route is present.
+
+   #. **VRF** -- VRF where the route is present.
+
+   #. **Ip** -- IP that was being matched on.
+
+   #. **Network** -- The longest-prefix network that matched.
+
+   #. **Num_Routes** -- Number of routes that matched (in case of ECMP).
+
+.. py:class:: prefixTracer(*, nodes, prefix, question_name)
+
+   Traces prefix propagation through the network.
+   
+   Shows how prefixes are treated by devices in the network during routing.
+   
+   
+   :param nodes: Include prefix tracing information for nodes matching this name or regex.
+   :type nodes: nodeSpec
+   :param prefix: The prefix to trace. Expected format is A.B.C.D/Y.
+   :type prefix: prefix
+
+   Return table columns:
+
+   #. **Node** -- The node where action takes place.
+
+   #. **VRF** -- The VRF where action takes place.
+
+   #. **Peer** -- The node's neighbor to which the action applies.
+
+   #. **Action** -- The action that takes place.
+
+   #. **Prefix** -- The prefix in question.
+
 .. py:class:: routes(*, nodes, vrfs, network, protocols, rib, question_name)
 
-   Show routing tables.
+   Returns routing tables.
    
-   Return routes for the specified RIB for specified VRF for specified node(s).
+   Shows routes for specified RIB, VRF, and node(s).
    
    
    :param nodes: *Required.* Examine routes on nodes matching this specifier.
@@ -1223,141 +1389,29 @@
 
    #. **Node**
 
-   #. **VRF** -- VRF name
+   #. **VRF** -- VRF name.
 
-   #. **Network** -- Network for this route
+   #. **Network** -- Network for this route.
 
-   #. **Next_Hop** -- Inferred hostname of the next hop
+   #. **Next_Hop** -- Inferred hostname of the next hop.
 
-   #. **Next_Hop_IP** -- Route's Next Hop IP
+   #. **Next_Hop_IP** -- Route's Next Hop IP.
 
-   #. **Next_Hop_Interface** -- Route's Next Hop Interface
+   #. **Next_Hop_Interface** -- Route's Next Hop Interface.
 
-   #. **Protocol** -- Route's Protocol
+   #. **Protocol** -- Route's Protocol.
 
-   #. **Metric** -- Route's Metric
+   #. **Metric** -- Route's Metric.
 
-   #. **Admin_Distance** -- Route's Admin distance
+   #. **Admin_Distance** -- Route's Admin distance.
 
-   #. **Tag** -- Tag for this route
-
-.. py:class:: searchFilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name)
-
-   Find flows for which a filter takes a particular behavior.
-   
-   This question searches for flows for which a filter (access control list) has a particular behavior. The behaviors can be: that the filter permits the flow (permit), that it denies the flow (deny), or that the flow is matched by a particular line (matchLine <lineNumber>). Filters are selected using node and filter specifiers, which might match multiple filters. In this case, a (possibly different) flow will be found for each filter.
-   
-   
-   :param action: The behavior that you want evaluated. Options are: permit|deny|matchLine <line number>. Only one option should be selected.
-   :type action: string
-   :param explain: Include a description of the flow space matching the query.
-   :type explain: boolean
-   :param filters: Only evaluate filters that match this specifier.
-   :type filters: filterSpec
-   :param headers: Packet header constraints on the flows being searched.
-   :type headers: headerConstraint
-   :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
-   :type invertSearch: boolean
-   :param nodes: Only evaluate filters present on nodes matching this specifier.
-   :type nodes: nodeSpec
-   :param startLocation: Only consider specified locations as possible sources.
-   :type startLocation: locationSpec
-
-   Return table columns:
-
-   #. **Node**
-
-   #. **Filter_Name** -- Filter name
-
-   #. **Flow** -- Evaluated flow
-
-   #. **Action** -- Outcome
-
-   #. **Line_Content** -- Line content
-
-   #. **Trace** -- ACL trace
-
-.. py:class:: subnetMultipathConsistency(*, maxTraces, question_name)
-
-   Validate multipath consistency between all pairs of subnets.
-   
-   Finds flows between subnets that are treated differently by different paths in the presence of multipath routing.
-   
-   
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
-
-.. py:class:: switchedVlanProperties(*, excludeShutInterfaces, interfaces, nodes, vlans, question_name)
-
-   Returns configuration properties of switched VLANs.
-   
-   
-   :param excludeShutInterfaces: Exclude interfaces that are shutdown.
-   :type excludeShutInterfaces: boolean
-   :param interfaces: Include interfaces matching this specifier.
-   :type interfaces: interfacesSpec
-   :param nodes: Include nodes matching this specifier.
-   :type nodes: nodeSpec
-   :param vlans: Include VLANs in this space.
-   :type vlans: integerSpace
-
-   Return table columns:
-
-   #. **Node** -- VLAN_ID
-
-   #. **VLAN_ID**
-
-   #. **Interfaces** -- Switched interfaces carrying traffic for this VLAN
-
-   #. **VXLAN_VNI** -- VXLAN VNI with which this VLAN is associated
-
-.. py:class:: testFilters(*, filters, headers, nodes, startLocation, question_name)
-
-   Evaluate the processing of a flow by a given filter/ACL.
-   
-   Find how the specified flow is processed through the specified filters/ACLs.
-   
-   
-   :param filters: *Required.* Only consider filters that match this specifier.
-   
-       Default value: ``.*``
-   :type filters: filterSpec
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
-   :param nodes: *Required.* Only examine filters on nodes matching this specifier.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-   :param startLocation: Location to start tracing from.
-   :type startLocation: string
-
-   Return table columns:
-
-   #. **Node**
-
-   #. **Filter_Name** -- Filter name
-
-   #. **Flow** -- Evaluated flow
-
-   #. **Action** -- Outcome
-
-   #. **Line_Content** -- Line content
-
-   #. **Trace** -- ACL trace
+   #. **Tag** -- Tag for this route.
 
 .. py:class:: testRoutePolicies(*, nodes, policies, inputRoutes, direction, question_name)
 
-   Evaluate the processing of a route by a given policy.
+   Evaluates the processing of a route by a given policy.
    
-   Find how the specified route is processed through the specified policies.
+   Find how the specified route is processed through the specified routing policies.
    
    
    :param nodes: *Required.* Only examine filters on nodes matching this specifier.
@@ -1377,128 +1431,224 @@
        * out: The route is outbound from the device
    :type direction: string
 
-.. py:class:: traceroute(*, startLocation, headers, maxTraces, ignoreFilters, question_name)
+.. _specifiers:
 
-   Trace the path(s) for the specified flow.
+Specifier resolvers
+-------------------
+
+Questions that resolve specifier expressions.
+
+.. py:class:: resolveFilterSpecifier(*, filters, grammarVersion, nodes, question_name)
+
+   Returns the set of filters corresponding to a filterSpec value.
    
-   This question performs a virtual traceroute in the network from a starting node. A destination IP and ingress (source) node must be specified. Other IP headers are given default values if unspecified.
-   Unlike a real traceroute, this traceroute is directional. That is, for it to succeed, the reverse connectivity is not needed. This feature can help debug connectivity issues by decoupling the two directions.
-   
-   
-   :param startLocation: *Required.* Location (node and interface combination) to start tracing from.
-   :type startLocation: locationSpec
-   :param headers: *Required.* Packet header constraints.
-   :type headers: headerConstraint
-   :param maxTraces: Limit the number of traces returned.
-   :type maxTraces: integer
-   :param ignoreFilters: If set, filters/ACLs encountered along the path are ignored.
-   :type ignoreFilters: boolean
-
-   Return table columns:
-
-   #. **Flow** -- The flow
-
-   #. **Traces** -- The traces for this flow
-
-   #. **TraceCount** -- The total number traces for this flow
-
-.. py:class:: undefinedReferences(*, nodes, question_name)
-
-   Identify undefined references in configuration.
-   
-   This question finds configurations that have references to named structures (e.g., ACLs) that are not defined. Such occurrences indicate errors and can have serious consequences in some cases.
+   Helper question that shows how specified filterSpec values resolve to the filters in the network.
    
    
-   :param nodes: *Required.* Look for undefined references on nodes matching this name or regex.
-   
-       Default value: ``.*``
+   :param filters: Input to the FilterSpecifier.
+   :type filters: filterSpec
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param nodes: Input to the NodeSpecifier.
    :type nodes: nodeSpec
-
-   Return table columns:
-
-   #. **File_Name** -- File containing reference
-
-   #. **Struct_Type** -- Type of struct reference is supposed to be
-
-   #. **Ref_Name** -- The undefined reference
-
-   #. **Context** -- Context of undefined reference
-
-   #. **Lines** -- Lines where reference appears
-
-.. py:class:: unusedStructures(*, nodes, question_name)
-
-   Return nodes with structures such as ACLs, routemaps, etc. that are defined but not used.
-   
-   Return nodes with structures such as ACLs, routes, etc. that are defined but not used. This may represent a bug in the configuration, which may have occurred because a final step in a template or MOP was not completed. Or it could be harmless extra configuration generated from a master template that is not meant to be used on those nodes.
-   
-   
-   :param nodes: *Required.* Look for unused structures on nodes matching this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-
-   Return table columns:
-
-   #. **Structure_Type** -- Vendor-specific type of the structure
-
-   #. **Structure_Name** -- Name of the structure
-
-   #. **Source_Lines** -- File and line numbers where the structure is defined
-
-.. py:class:: viConversionStatus(*, question_name)
-
-   Display vendor independent conversion status.
-   
-   For each node in a snapshot, returns the vendor independent conversion status: pass, fail, converted with warnings.
-
-   Return table columns:
-
-   #. **Node** -- The node that was converted
-
-   #. **Status** -- The status of the conversion operation
-
-.. py:class:: viConversionWarning(*, question_name)
-
-   Return Batfish warnings that occurred when converting to vendor independent model.
-
-   Return table columns:
-
-   #. **Node** -- The node that caused the warning
-
-   #. **Type** -- The type of the warning
-
-   #. **Comment** -- The description of the warning
-
-.. py:class:: viModel(*, question_name)
-
-   Lists configuration attributes of nodes and edges in the network.
-   
-   Returns a JSON dictionary with all of the configuration parameters and neighbor relations stored in the vendor independent data-model.
-
-.. py:class:: vxlanVniProperties(*, nodes, properties, question_name)
-
-   Returns configuration properties of VXLANs.
-   
-   
-   :param nodes: Include nodes matching this specifier.
-   :type nodes: nodeSpec
-   :param properties: Include properties matching this specifier.
-   :type properties: vxlanVniPropertySpec
 
    Return table columns:
 
    #. **Node**
 
-   #. **VNI** -- VXLAN Segment ID
+   #. **Filter_Name** -- Filter name.
 
-   #. **Local_VTEP_IP**
+.. py:class:: resolveInterfaceSpecifier(*, grammarVersion, interfaces, nodes, question_name)
 
-   #. **Multicast_Group**
+   Returns the set of interfaces corresponding to an interfaceSpec value.
+   
+   Helper question that shows how specified interfaceSpec values resolve to the interfaces in the network.
+   
+   
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param interfaces: Input to the interfaceSpecifier.
+   :type interfaces: interfacesSpec
+   :param nodes: Input to the NodeSpecifier.
+   :type nodes: nodeSpec
 
-   #. **VLAN**
+   Return table columns:
 
-   #. **VTEP_Flood_List**
+   #. **Interface**
 
-   #. **VXLAN_Port**
+.. py:class:: resolveIpSpecifier(*, grammarVersion, ips, question_name)
+
+   Returns the IP address space corresponding to an ipSpec value.
+   
+   Helper question that shows how specified ipSpec values resolve to IPs.
+   
+   
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param ips: Input to the IP space specifier.
+   :type ips: ipSpaceSpec
+
+   Return table columns:
+
+   #. **IP_Space** -- IP space.
+
+.. py:class:: resolveIpsOfLocationSpecifier(*, grammarVersion, locations, question_name)
+
+   Returns IPs that are auto-assigned to locations.
+   
+   Helper question that shows IPs that will be assigned to specified locationSpec values by questions are automatically pick IPs based on locations.
+   
+   
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param locations: Input to the LocationSpecifier.
+   :type locations: locationSpec
+
+   Return table columns:
+
+   #. **Locations** -- Resolution.
+
+   #. **IP_Space** -- IP space.
+
+.. py:class:: resolveLocationSpecifier(*, grammarVersion, locations, question_name)
+
+   Returns the set of locations corresponding to a locationSpec value.
+   
+   Helper question that shows how specified locationSpec values resolve to the locations in the network.
+   
+   
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param locations: Input to the LocationSpecifier.
+   :type locations: locationSpec
+
+   Return table columns:
+
+   #. **Location**
+
+.. py:class:: resolveNodeSpecifier(*, grammarVersion, nodes, question_name)
+
+   Returns the set of nodes corresponding to a nodeSpec value.
+   
+   Helper question that shows how specified nodeSpec values resolve to the nodes in the network.
+   
+   
+   :param grammarVersion: Version of grammar to use for resolution.
+   :type grammarVersion: string
+   :param nodes: Input to the NodeSpecifier.
+   :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
+
+.. _initialization:
+
+Initialization information questions
+------------------------------------
+
+Question that reveal how well Batfish understood input data.
+
+.. py:class:: fileParseStatus(*, question_name)
+
+   Displays file parse status.
+   
+   For each file in a snapshot, returns the host(s) that were produced by the file and the parse status: pass, fail, partially parsed.
+
+   Return table columns:
+
+   #. **File_Name** -- The file that was parsed.
+
+   #. **Status** -- The status of the parsing operation.
+
+   #. **Nodes** -- Names of nodes produced from this file.
+
+.. py:class:: initIssues(*, question_name)
+
+   Returns issues encountered when processing the snapshot.
+   
+   Reports issues encountered by Batfish, including failure to recognize certain lines in the configuration, lack of support for certain features, and errors when converting to vendor-independent models.
+
+   Return table columns:
+
+   #. **Nodes** -- The nodes that were converted (if applicable).
+
+   #. **Source_Lines** -- The files and lines that caused the issues (if applicable).
+
+   #. **Type** -- The type of issues identified.
+
+   #. **Details** -- Details about the issues identified.
+
+   #. **Line_Text** -- The text of the input files that caused the issues (if applicable).
+
+   #. **Parser_Context** -- Batfish parser state when issues were encountered (if applicable).
+
+.. py:class:: parseWarning(*, aggregateDuplicates, question_name)
+
+   Returns warnings that occurred when parsing the snapshot.
+   
+   Return warnings such as failure to recognize certain lines and lack of support for certain features.
+   
+   
+   :param aggregateDuplicates: Whether to aggregate duplicate results.
+   :type aggregateDuplicates: boolean
+
+   Return table columns:
+
+   #. **Filename** -- The file that was parsed.
+
+   #. **Text** -- The text of the input that caused the warning.
+
+   #. **Line** -- The line number in the input file that caused the warning.
+
+   #. **Parser_Context** -- The context of the Batfish parser when the warning occurred.
+
+   #. **Comment** -- An optional comment explaining more information about the warning.
+
+.. py:class:: viConversionStatus(*, question_name)
+
+   Displays vendor independent conversion status.
+   
+   For each node in a snapshot, returns the vendor independent conversion status: pass, fail, converted with warnings.
+
+   Return table columns:
+
+   #. **Node** -- The node that was converted.
+
+   #. **Status** -- The status of the conversion operation.
+
+.. py:class:: viConversionWarning(*, question_name)
+
+   Returns Batfish warnings that occurred when converting to vendor independent model.
+   
+   When converting configurations to a vendor independent model Batfish may generate warnings for unsupported features and for unexpected configurations (e.g., missing definitions). This question lists those warnings.
+
+   Return table columns:
+
+   #. **Node** -- The node that caused the warning.
+
+   #. **Type** -- The type of the warning.
+
+   #. **Comment** -- The description of the warning.
+
+.. _other:
+
+Other questions
+---------------
+
+Questions that do not belong to any other category
+
+.. py:class:: filterTable(*, innerQuestion, columns, filter, question_name)
+
+   Returns subset of answer for a question.
+   
+   Return a subset of the answer generated by the inner question. The results are trimmed first by row and then by column. Rows where any value matches the filter are returned. The columns returned for each row is restricted by the column specifier.
+   
+   
+   :param innerQuestion: *Required.* The inner question whose answer should be filtered.
+   :type innerQuestion: question
+   :param columns: The set of columns to fetch.
+   :type columns: string
+   :param filter: The filter to use.
+   :type filter: string
 

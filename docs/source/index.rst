@@ -3,9 +3,9 @@ Pybatfish
 
 `pybatfish` is a library of Python bindings for Batfish_.
 Using Python to analyze configurations requires access to a running Batfish
-service (which could be localhost).
-See `here <https://github.com/batfish/batfish/wiki/Building-and-running-Batfish-service>`_
-for building and running Batfish service.
+service.
+See `here <https://github.com/batfish/batfish#1-run-the-batfish-service>`_
+for instruction on that.
 
 .. _Batfish: https://github.com/batfish/batfish
 
