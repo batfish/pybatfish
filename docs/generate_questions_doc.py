@@ -18,18 +18,18 @@ The script should have access to a running Batfish service on localhost.
 """
 import inspect
 import sys
+from collections import defaultdict
 from inspect import getmembers
 from os.path import abspath, dirname, realpath, join, pardir
+from typing import List, Dict, TextIO, Any
+
 from requests import ConnectionError
 from warnings import warn
 
-import pybatfish
 from pybatfish.client.options import Options
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.datamodel.answer import TableAnswer
-from pybatfish.question import load_questions  # noqa: 402
-from pybatfish.question import bfq  # noqa: 402
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir))
@@ -52,6 +52,7 @@ _values_by_type = {
 }
 
 # mapping from question category tags to category name and description
+# the master list of categories being checked and enforced is here: https://github.com/batfish/batfish/blob/master/tests/questions/test_questions.py
 _question_categories = [
     ["configuration",
      "Configuration data questions",
@@ -92,39 +93,51 @@ _question_categories = [
 _category_details_map = {c[0]: [c[1], c[2]] for c in _question_categories}
 
 # the category we use when the tags do not let us infer a category
-_default_question_category_name = "other"
+_default_question_category_tag = "other"
+
+
+def _add_leading_whitespace(line):
+    # type: (str) -> str
+    return "   " + line
 
 
 def _categorize_question(question_name, tags):
+    # type: (str, List[str]) -> str
+    """
+    Return the category tag from the list of specified tags
+
+    :param question_name: The name of question, used for the error messages only
+    :param tags: The list of tags
+    """
     for category in _question_categories:
         if category[0] in tags:
             return category[0]
-    print("Could not find a category for {}. Using {}".format(question_name,
-                                                              _default_question_category_name),
-          sys.stderr)
-    return _default_question_category_name
+    # given that we are testing in Batfish for the presence of exactly one
+    # category tag in each template, this should happen only if categories in
+    # this script are out of date with those in Batfish (as enforced in https://github.com/batfish/batfish/blob/master/tests/questions/test_questions.py)
+    warn("Could not find a category for {}. Using {}".format(question_name,
+                                                             _default_question_category_tag))
+    return _default_question_category_tag
 
 
 def _categorize_questions(questions):
+    # type: (Dict) -> Dict[str, List[str]]
     """
     Returns a map from category tag to list of question names.
 
     :param questions: a map from question name to class
     """
-    questions_by_category_tag = {}
+    questions_by_category_tag = defaultdict(list)  # type: Dict[str, List[str]]
     for question_name, question_class in questions.items():
-        if question_name == "__class__":
-            continue
         template_dict = question_class.template
         tags = template_dict.get("instance").get("tags")
-        question_category_name = _categorize_question(question_name, tags)
-        if question_category_name not in questions_by_category_tag:
-            questions_by_category_tag[question_category_name] = []
-        questions_by_category_tag[question_category_name].append(question_name)
+        category_tag = _categorize_question(question_name, tags)
+        questions_by_category_tag[category_tag].append(question_name)
     return questions_by_category_tag
 
 
 def _get_mandatory_parameters(template_dict):
+    # type: (Dict) -> Dict[str, str]
     """
     Returns parameter name to type map for parameters are neither optional nor
     have a default value in the template.
@@ -138,6 +151,7 @@ def _get_mandatory_parameters(template_dict):
 
 
 def _get_parameter_values(parameters):
+    # type: (Dict[str, str]) -> Dict[str, Any]
     """
     Returns a parameter name to value map, given a parameter name to type map.
 
@@ -151,6 +165,7 @@ def _get_parameter_values(parameters):
 
 
 def _is_trivial_description(col_name, col_description):
+    # type: (str, str) -> bool
     """
     Heuristics to determine if the column has a trivial description (which we
     do not document).
@@ -160,11 +175,8 @@ def _is_trivial_description(col_name, col_description):
            col_description == col_name.replace("_", " ")
 
 
-def _process(line):
-    return "   " + line
-
-
 def _write_question_category(category_tag, tag_questions, all_questions, f):
+    # type: (str, List[str], Dict[str, Any], TextIO) -> None
     """
     Writes the section corresponding to the specified category
 
@@ -191,7 +203,7 @@ def _write_question_category(category_tag, tag_questions, all_questions, f):
         question_class = all_questions[question_name]
 
         doc_orig = inspect.getdoc(question_class).split("\n")
-        doc_updated = "\n".join(_process(line) for line in doc_orig)
+        doc_updated = "\n".join(_add_leading_whitespace(line) for line in doc_orig)
         f.write(
             ".. py:class:: {}{}\n\n{}\n\n".format(
                 question_name,
@@ -214,9 +226,9 @@ def _write_question_category(category_tag, tag_questions, all_questions, f):
         table_answer = TableAnswer(answer)
 
         # Output column details as a note
-        f.write(_process("Return table columns:\n\n"))
+        f.write(_add_leading_whitespace("Return table columns:\n\n"))
         for col in table_answer.metadata.column_metadata:
-            f.write(_process("#. **{}**{}\n\n".format(col.name,
+            f.write(_add_leading_whitespace("#. **{}**{}\n\n".format(col.name,
                                                       "" if _is_trivial_description(
                                                           col.name,
                                                           col.description) else " -- {}".format(
@@ -253,6 +265,7 @@ if __name__ == "__main__":
         # get a map from question name to class
         all_questions = {q[0]: q[1] for q in
                          getmembers(session.q, inspect.isclass)}
+        all_questions.pop("__class__")  # don't need this member
 
         questions_by_category_tag = _categorize_questions(all_questions)
 
