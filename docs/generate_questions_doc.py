@@ -18,7 +18,7 @@ The script should have access to a running Batfish service on localhost.
 """
 import inspect
 import sys
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 from inspect import getmembers
 from os.path import abspath, dirname, realpath, join, pardir
 from typing import List, Dict, TextIO, Any
@@ -53,44 +53,41 @@ _values_by_type = {
 
 # mapping from question category tags to category name and description
 # the master list of categories being checked and enforced is here: https://github.com/batfish/batfish/blob/master/tests/questions/test_questions.py
-_question_categories = [
-    ["configuration",
-     "Configuration data questions",
-     "Questions that return the contents of configuration in a structured format."],
-    ["hygiene",
-     "Configuration hygiene questions",
-     "Questions that flag unused and undefined structures in configurations."],
-    ["status",
-     "Configuration compatibility questions",
-     "Questions that show if configuration settings are compatible across devices."],
-    ["topology",
-     "Network adjacency questions",
-     "Questions that show different types of network adjacencies."],
-    ["traceroute",
-     "Flow path questions",
-     "Questions that show paths of specified flows in the network."],
-    ["reachability",
-     "Flow search questions",
-     "Questions that exhaustively search for flows that meet specified constraints."],
-    ["acl",
-     "ACL and firewall analysis questions",
-     "Questions that analyze ACLs and firewall rules."],
-    ["routing",
-     "Routing analysis questions",
-     "Questions that analyze routing"],
-    ["specifiers",
-     "Specifier resolvers",
-     "Questions that resolve specifier expressions."],
-    ["initialization",
-     "Initialization information questions",
-     "Question that reveal how well Batfish understood input data."],
-    ["other",
-     "Other questions",
-     "Questions that do not belong to any other category"],
-]
-
-# turn the structure above into a map from tag to [name, description] tuple
-_category_details_map = {c[0]: [c[1], c[2]] for c in _question_categories}
+_question_categories = OrderedDict(
+    [("configuration",
+      ["Configuration data questions",
+       "Questions that return the contents of configuration in a structured format."]),
+     ("hygiene",
+      ["Configuration hygiene questions",
+       "Questions that flag unused and undefined structures in configurations."]),
+     ("status",
+      ["Configuration compatibility questions",
+       "Questions that show if configuration settings are compatible across devices."]),
+     ("topology",
+      ["Network adjacency questions",
+       "Questions that show different types of network adjacencies."]),
+     ("traceroute",
+      ["Flow path questions",
+       "Questions that show paths of specified flows in the network."]),
+     ("reachability",
+      ["Flow search questions",
+       "Questions that exhaustively search for flows that meet specified constraints."]),
+     ("acl",
+      ["ACL and firewall analysis questions",
+       "Questions that analyze ACLs and firewall rules."]),
+     ("routing",
+      ["Routing analysis questions",
+       "Questions that analyze routing"]),
+     ("specifiers",
+      ["Specifier resolvers",
+       "Questions that resolve specifier expressions."]),
+     ("initialization",
+      ["Initialization information questions",
+       "Question that reveal how well Batfish understood input data."]),
+     ("other",
+      ["Other questions",
+       "Questions that do not belong to any other category"])
+     ])
 
 # the category we use when the tags do not let us infer a category
 _default_question_category_tag = "other"
@@ -109,14 +106,14 @@ def _categorize_question(question_name, tags):
     :param question_name: The name of question, used for the error messages only
     :param tags: The list of tags
     """
-    for category in _question_categories:
-        if category[0] in tags:
-            return category[0]
-    # given that we are testing in Batfish for the presence of exactly one
-    # category tag in each template, this should happen only if categories in
-    # this script are out of date with those in Batfish (as enforced in https://github.com/batfish/batfish/blob/master/tests/questions/test_questions.py)
-    warn("Could not find a category for {}. Using {}".format(question_name,
-                                                             _default_question_category_tag))
+    for category_tag in _question_categories.keys():
+        if category_tag in tags:
+            return category_tag
+    # since we are testing in Batfish for the presence of exactly one category
+    # tag in each template, this should happen only if categories in this script
+    # are out of sync with Batfish (https://github.com/batfish/batfish/blob/master/tests/questions/test_questions.py)
+    warn("Could not find a category for {}. Using '{}'".format(question_name,
+                                                               _default_question_category_tag))
     return _default_question_category_tag
 
 
@@ -195,15 +192,16 @@ def _write_question_category(category_tag, tag_questions, all_questions, f):
     # category description
     #
     f.write(".. _{}:\n\n".format(category_tag))
-    f.write(_category_details_map[category_tag][0] + "\n")
-    f.write("-" * len(_category_details_map[category_tag][0]) + "\n\n")
-    f.write(_category_details_map[category_tag][1] + "\n\n")
+    f.write(_question_categories[category_tag][0] + "\n")
+    f.write("-" * len(_question_categories[category_tag][0]) + "\n\n")
+    f.write(_question_categories[category_tag][1] + "\n\n")
 
     for question_name in tag_questions:
         question_class = all_questions[question_name]
 
         doc_orig = inspect.getdoc(question_class).split("\n")
-        doc_updated = "\n".join(_add_leading_whitespace(line) for line in doc_orig)
+        doc_updated = "\n".join(
+            _add_leading_whitespace(line) for line in doc_orig)
         f.write(
             ".. py:class:: {}{}\n\n{}\n\n".format(
                 question_name,
@@ -229,13 +227,13 @@ def _write_question_category(category_tag, tag_questions, all_questions, f):
         f.write(_add_leading_whitespace("Return table columns:\n\n"))
         for col in table_answer.metadata.column_metadata:
             f.write(_add_leading_whitespace("#. **{}**{}\n\n".format(col.name,
-                                                      "" if _is_trivial_description(
-                                                          col.name,
-                                                          col.description) else " -- {}".format(
-                                                          col.description + (
-                                                              # add period if missing
-                                                              "" if col.description.endswith(
-                                                                  ".") else ".")))))
+                                                                     "" if _is_trivial_description(
+                                                                         col.name,
+                                                                         col.description) else " -- {}".format(
+                                                                         col.description + (
+                                                                             # add period if missing
+                                                                             "" if col.description.endswith(
+                                                                                 ".") else ".")))))
 
 
 if __name__ == "__main__":
@@ -255,8 +253,8 @@ if __name__ == "__main__":
     # use extension different from *.rst
     with open(join("source", "questions-generated.rstgen"), 'w') as f:
         # write question category list
-        for category in _question_categories:
-            f.write(" - `{} <#{}>`_\n".format(category[1], category[0]))
+        for tag, details in _question_categories.items():
+            f.write(" - `{} <#{}>`_\n".format(details[0], tag))
 
         # Setup module header
         f.write("\n")
@@ -270,9 +268,8 @@ if __name__ == "__main__":
         questions_by_category_tag = _categorize_questions(all_questions)
 
         # For each class in bfq, extract and format the constructor's docstring
-        for category in _question_categories:
-            category_tag = category[0]
-            _write_question_category(category[0],
+        for category_tag in _question_categories.keys():
+            _write_question_category(category_tag,
                                      questions_by_category_tag.get(category_tag,
                                                                    []),
                                      all_questions, f)
