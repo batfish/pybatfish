@@ -110,7 +110,7 @@ setup(
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      'yaml'
+                      'pyyaml'
                       ] + (
                          ['backports.tempfile', 'enum34',
                           'typing'] if PY2 else []),

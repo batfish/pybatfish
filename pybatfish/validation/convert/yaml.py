@@ -14,13 +14,13 @@
 #   limitations under the License.
 """Convert YAML file into validation tasks."""
 import logging
-from typing import Dict, List, Text, Union
+from typing import Dict, List, Text
 
 import six
 import yaml
 
 from pybatfish.validation.commands import (
-    InitSnapshot, SetNetwork, ShowFacts
+    Command, InitSnapshot, SetNetwork, ShowFacts,
 )
 
 _BF_COMMANDS = 'bf_commands'
@@ -31,14 +31,13 @@ _CMD_SHOW_FACTS = 'show_facts'
 
 
 def convert_yaml(filename):
-    # type: (Text) -> List[Union[InitSnapshot, SetNetwork, ShowFacts]]
+    # type: (Text) -> List[Command]
     """Convert specified file into validation commands."""
     logger = logging.getLogger(__name__)
 
     logger.info('Parsing YAML file: {}'.format(filename))
     with open(filename, 'r') as f:
         yaml_dict = yaml.load(f, Loader=yaml.SafeLoader)
-    logger.debug('Extracted YAML: {}'.format(yaml_dict))
 
     cmds_in = yaml_dict.get(_BF_COMMANDS)
     if not cmds_in:
@@ -46,7 +45,7 @@ def convert_yaml(filename):
             'Commands must be specified under top-level key {}'.format(
                 _BF_COMMANDS))
 
-    cmds_out = []  # type: List[Union[InitSnapshot, SetNetwork, ShowFacts]]
+    cmds_out = []  # type: List[Command]
     for cmd_dict in cmds_in:
         logger.debug('Command: {}'.format(cmd_dict))
         if len(cmd_dict) != 1:

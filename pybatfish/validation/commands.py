@@ -24,7 +24,7 @@ class Command(object):
     """Command abstract class."""
 
 
-class InitSnapshot(object):
+class InitSnapshot(Command):
     """Command to initialize a new snapshot."""
 
     def __init__(self, name, upload, overwrite):
@@ -34,7 +34,7 @@ class InitSnapshot(object):
         self.overwrite = overwrite
 
 
-class SetNetwork(object):
+class SetNetwork(Command):
     """Command to set current network."""
 
     def __init__(self, name):
@@ -42,7 +42,7 @@ class SetNetwork(object):
         self.name = name
 
 
-class ShowFacts(object):
+class ShowFacts(Command):
     """Command to show facts about a network."""
 
     def __init__(self, nodes=None):
