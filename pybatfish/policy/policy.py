@@ -13,12 +13,16 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """Internal representation for user specified policies."""
+from typing import List
+
+from pybatfish.policy.commands import Command
 
 
 class Policy(object):
     """Policy representation."""
 
     def __init__(self, name, cmds):
+        # type: (str, List[Command]) -> None
         """Build policy outline from collection of commands."""
         self.name = name
         self.cmds = cmds

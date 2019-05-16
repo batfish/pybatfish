@@ -14,11 +14,14 @@
 #   limitations under the License.
 """Convert YAML file into validation tasks."""
 import logging
+from typing import Dict, List, Text
 
 import six
 import yaml
 
-from pybatfish.policy.commands import InitSnapshot, SetNetwork, ShowFacts
+from pybatfish.policy.commands import (
+    Command, InitSnapshot, SetNetwork, ShowFacts
+)
 
 _BF_COMMANDS = 'bf_commands'
 # Supported bf_commands
@@ -28,6 +31,7 @@ _CMD_SHOW_FACTS = 'show_facts'
 
 
 def convert_yaml(filename):
+    # type: (Text) -> List[Command]
     """Convert specified file into validation commands."""
     logger = logging.getLogger(__name__)
 
@@ -67,6 +71,7 @@ def convert_yaml(filename):
 
 
 def _extract_network(name):
+    # type: (str) -> SetNetwork
     """Create set network command."""
     if not isinstance(name, six.string_types):
         raise TypeError('{} value must be a string'.format(_CMD_SET_NETWORK))
@@ -74,6 +79,7 @@ def _extract_network(name):
 
 
 def _extract_show_facts(dict_):
+    # type: (Dict) -> ShowFacts
     """Extract fact-extractions from input dict."""
     if not type(dict_) is dict:
         raise TypeError(
@@ -83,6 +89,7 @@ def _extract_show_facts(dict_):
 
 
 def _extract_snapshot(dict_):
+    # type: (Dict) -> InitSnapshot
     """Extract snapshot init from input dict."""
     if not type(dict_) is dict:
         raise TypeError(
