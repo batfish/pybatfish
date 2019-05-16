@@ -14,13 +14,13 @@
 #   limitations under the License.
 """Convert YAML file into validation tasks."""
 import logging
-from typing import Dict, List, Text
+from typing import Dict, List, Text, Union
 
 import six
 import yaml
 
 from pybatfish.policy.commands import (
-    Command, InitSnapshot, SetNetwork, ShowFacts
+    InitSnapshot, SetNetwork, ShowFacts
 )
 
 _BF_COMMANDS = 'bf_commands'
@@ -31,7 +31,7 @@ _CMD_SHOW_FACTS = 'show_facts'
 
 
 def convert_yaml(filename):
-    # type: (Text) -> List[Command]
+    # type: (Text) -> List[Union[InitSnapshot, SetNetwork, ShowFacts]]
     """Convert specified file into validation commands."""
     logger = logging.getLogger(__name__)
 
@@ -46,7 +46,7 @@ def convert_yaml(filename):
             'Commands must be specified under top-level key {}'.format(
                 _BF_COMMANDS))
 
-    cmds_out = []
+    cmds_out = []  # type: List[Union[InitSnapshot, SetNetwork, ShowFacts]]
     for cmd_dict in cmds_in:
         logger.debug('Command: {}'.format(cmd_dict))
         if len(cmd_dict) != 1:
@@ -58,14 +58,13 @@ def convert_yaml(filename):
         cmd_params = cmd_dict[cmd]
 
         if cmd == _CMD_SET_NETWORK:
-            new_cmd = _extract_network(cmd_params)
+            cmds_out.append(_extract_network(cmd_params))
         elif cmd == _CMD_INIT_SNAPSHOT:
-            new_cmd = _extract_snapshot(cmd_params)
+            cmds_out.append(_extract_snapshot(cmd_params))
         elif cmd == _CMD_SHOW_FACTS:
-            new_cmd = _extract_show_facts(cmd_params)
+            cmds_out.append(_extract_show_facts(cmd_params))
         else:
             raise ValueError('Got unexpected command: {}'.format(cmd))
-        cmds_out.append(new_cmd)
 
     return cmds_out
 

@@ -18,7 +18,7 @@ import pytest
 
 from pybatfish.policy.commands import InitSnapshot, SetNetwork, ShowFacts
 from pybatfish.policy.convert.yaml import (
-    convert_yaml, _extract_network, _extract_show_facts, _extract_snapshot
+    _extract_network, _extract_show_facts, _extract_snapshot, convert_yaml
 )
 
 YAML_CONTENTS = """
@@ -53,7 +53,7 @@ def test_convert_yaml(tmpdir):
     # Confirm the command param extractions are correct
     assert net.name == 'my net name'
     assert snapshot.name is None
-    assert snapshot.overwrite == True
+    assert snapshot.overwrite
     assert snapshot.upload == '/my/path'
     assert facts.nodes == 'mynodes'
 
@@ -113,13 +113,13 @@ def test_extract_snapshot():
 
     # Defaults should be populated for keys not specified
     assert basic_dict.upload == 'mypath'
-    assert basic_dict.overwrite == False
+    assert not basic_dict.overwrite
     assert basic_dict.name is None
 
     # All specified values should make it into resulting command object
     assert full_dict.upload == 'mypath'
-    assert full_dict.overwrite == True
-    assert full_dict.name is 'myname'
+    assert full_dict.overwrite
+    assert full_dict.name == 'myname'
 
 
 def test_extract_snapshot_invalid_type():
