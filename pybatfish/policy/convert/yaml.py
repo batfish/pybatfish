@@ -33,7 +33,7 @@ def convert_yml(filename):
 
     logger.info('Parsing YAML file: {}'.format(filename))
     with open(filename, 'r') as f:
-        yaml_dict = yaml.load(f)
+        yaml_dict = yaml.load(f, Loader=yaml.SafeLoader)
     logger.debug('Extracted YAML: {}'.format(yaml_dict))
 
     cmds_in = yaml_dict.get(_BF_COMMANDS)
