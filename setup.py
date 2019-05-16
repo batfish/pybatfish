@@ -110,7 +110,10 @@ setup(
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (['backports.tempfile', 'enum34', 'typing'] if PY2 else []),
+                      'yaml'
+                      ] + (
+                         ['backports.tempfile', 'enum34',
+                          'typing'] if PY2 else []),
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
