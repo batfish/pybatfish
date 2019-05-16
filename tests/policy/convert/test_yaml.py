@@ -18,10 +18,10 @@ import pytest
 
 from pybatfish.policy.commands import InitSnapshot, SetNetwork, ShowFacts
 from pybatfish.policy.convert.yaml import (
-    convert_yml, _extract_network, _extract_show_facts, _extract_snapshot
+    convert_yaml, _extract_network, _extract_show_facts, _extract_snapshot
 )
 
-YML_CONTENTS = """
+YAML_CONTENTS = """
 bf_commands:
     - set_network: my net name
     - init_snapshot:
@@ -32,13 +32,13 @@ bf_commands:
 """
 
 
-def test_convert_yml(tmpdir):
+def test_convert_yaml(tmpdir):
     """Test converting YML into commands."""
     filename = 'filename'
     ref_file = tmpdir.join(filename)
-    ref_file.write(YML_CONTENTS)
+    ref_file.write(YAML_CONTENTS)
 
-    cmds = convert_yml(ref_file)
+    cmds = convert_yaml(ref_file)
     assert len(cmds) == 3
 
     # Confirm YML is converted into the correct command types,

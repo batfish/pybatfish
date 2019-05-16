@@ -27,7 +27,7 @@ _CMD_INIT_SNAPSHOT = 'init_snapshot'
 _CMD_SHOW_FACTS = 'show_facts'
 
 
-def convert_yml(filename):
+def convert_yaml(filename):
     """Convert specified file into validation commands."""
     logger = logging.getLogger(__name__)
 
