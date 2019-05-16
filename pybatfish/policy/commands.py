@@ -25,7 +25,7 @@ class SetNetwork(object):
 class InitSnapshot(object):
     """Command to initialize a new snapshot."""
 
-    def __init__(self, name, upload=None, overwrite=False):
+    def __init__(self, name, upload, overwrite):
         self.name = name
         self.upload = upload
         self.overwrite = overwrite

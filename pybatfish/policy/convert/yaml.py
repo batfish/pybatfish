@@ -15,6 +15,7 @@
 """Convert YAML file into validation tasks."""
 import logging
 
+import six
 import yaml
 
 from pybatfish.policy.commands import SetNetwork, InitSnapshot, ShowFacts
@@ -65,22 +66,31 @@ def convert_yml(filename):
     return cmds_out
 
 
+def _extract_network(name):
+    """Create set network command."""
+    if not isinstance(name, six.string_types):
+        raise TypeError('{} value must be a string'.format(_CMD_SET_NETWORK))
+    return SetNetwork(name)
+
+
 def _extract_show_facts(dict_):
     """Extract fact-extractions from input dict."""
+    if not type(dict_) is dict:
+        raise TypeError(
+            '{} value must be key-value pairs'.format(_CMD_SHOW_FACTS))
     nodes = dict_.get('nodes', None)
     return ShowFacts(nodes)
 
 
-def _extract_network(name):
-    """Create init network command."""
-    return SetNetwork(name)
-
-
 def _extract_snapshot(dict_):
     """Extract snapshot init from input dict."""
-    path = dict_.get('path', None)
+    if not type(dict_) is dict:
+        raise TypeError(
+            '{} value must be key-value pairs'.format(_CMD_INIT_SNAPSHOT))
+
+    if 'path' not in dict_:
+        raise ValueError('Snapshot path must be set via \'path\'')
+    path = dict_.get('path')
     overwrite = dict_.get('overwrite', False)
     name = dict_.get('name', None)
-    if not path:
-        raise ValueError('Snapshot path must be set via \'path\'')
     return InitSnapshot(name, path, overwrite)
