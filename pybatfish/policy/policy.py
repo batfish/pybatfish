@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-"""Handle user specified policies."""
+"""Internal representation for user specified policies."""
 
 
 class Policy(object):
