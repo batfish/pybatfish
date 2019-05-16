@@ -18,7 +18,7 @@ import logging
 import six
 import yaml
 
-from pybatfish.policy.commands import SetNetwork, InitSnapshot, ShowFacts
+from pybatfish.policy.commands import InitSnapshot, SetNetwork, ShowFacts
 
 _BF_COMMANDS = 'bf_commands'
 # Supported bf_commands

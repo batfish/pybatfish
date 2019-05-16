@@ -15,13 +15,6 @@
 """Internal representation for validation commands."""
 
 
-class SetNetwork(object):
-    """Command to set current network."""
-
-    def __init__(self, name):
-        self.name = name
-
-
 class InitSnapshot(object):
     """Command to initialize a new snapshot."""
 
@@ -29,6 +22,13 @@ class InitSnapshot(object):
         self.name = name
         self.upload = upload
         self.overwrite = overwrite
+
+
+class SetNetwork(object):
+    """Command to set current network."""
+
+    def __init__(self, name):
+        self.name = name
 
 
 class ShowFacts(object):
