@@ -19,7 +19,7 @@ from typing import Dict, List, Text, Union
 import six
 import yaml
 
-from pybatfish.policy.commands import (
+from pybatfish.validation.commands import (
     InitSnapshot, SetNetwork, ShowFacts
 )
 

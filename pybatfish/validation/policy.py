@@ -15,7 +15,7 @@
 """Internal representation for user specified policies."""
 from typing import List
 
-from pybatfish.policy.commands import Command
+from pybatfish.validation.commands import Command
 
 
 class Policy(object):

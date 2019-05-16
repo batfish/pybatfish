@@ -16,8 +16,8 @@
 
 import pytest
 
-from pybatfish.policy.commands import InitSnapshot, SetNetwork, ShowFacts
-from pybatfish.policy.convert.yaml import (
+from pybatfish.validation.commands import InitSnapshot, SetNetwork, ShowFacts
+from pybatfish.validation.convert.yaml import (
     _extract_network, _extract_show_facts, _extract_snapshot, convert_yaml
 )
 
