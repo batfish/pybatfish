@@ -17,7 +17,7 @@ import logging
 from typing import Dict, List, Text
 
 import six
-import yaml
+from yaml import safe_load
 
 from pybatfish.validation.commands import (
     Command, InitSnapshot, SetNetwork, ShowFacts,
@@ -37,7 +37,7 @@ def convert_yaml(filename):
 
     logger.info('Parsing YAML file: {}'.format(filename))
     with open(filename, 'r') as f:
-        yaml_dict = yaml.load(f, Loader=yaml.SafeLoader)
+        yaml_dict = safe_load(f)
 
     cmds_in = yaml_dict.get(_BF_COMMANDS)
     if not cmds_in:

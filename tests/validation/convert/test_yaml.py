@@ -17,7 +17,7 @@
 import pytest
 
 from pybatfish.validation.commands import InitSnapshot, SetNetwork, ShowFacts
-from pybatfish.validation.convert.yaml import (
+from pybatfish.validation.convert.yaml_c import (
     _extract_network, _extract_show_facts, _extract_snapshot, convert_yaml
 )
 
@@ -38,7 +38,7 @@ def test_convert_yaml(tmpdir):
     ref_file = tmpdir.join(filename)
     ref_file.write(YAML_CONTENTS)
 
-    cmds = convert_yaml(ref_file)
+    cmds = convert_yaml(str(ref_file))
     assert len(cmds) == 3
 
     # Confirm YML is converted into the correct command types,
