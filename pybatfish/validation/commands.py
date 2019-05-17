@@ -14,7 +14,7 @@
 #   limitations under the License.
 """Internal representation for validation commands."""
 from abc import ABCMeta
-from typing import Optional
+from typing import List, Optional
 
 from six import add_metaclass
 
@@ -48,3 +48,12 @@ class ShowFacts(Command):
     def __init__(self, nodes=None):
         # type: (str) -> None
         self.nodes = nodes
+
+
+class CommandList(object):
+    """Internal representation of a collection of commands."""
+
+    def __init__(self, name, cmds):
+        # type: (str, List[Command]) -> None
+        self.name = name
+        self.cmds = cmds
