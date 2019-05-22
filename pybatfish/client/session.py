@@ -579,15 +579,22 @@ class Session(object):
 
         file_to_send = upload
         if os.path.isdir(upload):
-            temp_zip_file = tempfile.NamedTemporaryFile()
-            zip_dir(upload, temp_zip_file)
-            file_to_send = temp_zip_file.name
+            # delete=False because we re-open for reading
+            with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
+                zip_dir(upload, temp_zip_file)
+                file_to_send = temp_zip_file.name
 
-        json_data = workhelper.get_data_upload_snapshot(self, name,
-                                                        file_to_send)
-        resthelper.get_json_response(self,
-                                     CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
-                                     json_data)
+        with open(file_to_send, 'rb') as fd:
+            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+
+            resthelper.get_json_response(self,
+                                         CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
+                                         json_data)
+        # Cleanup tmp file
+        try:
+            os.remove(file_to_send)
+        except (OSError, IOError):
+            pass
 
         return self._parse_snapshot(name, background, extra_args)
 

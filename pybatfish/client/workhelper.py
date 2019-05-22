@@ -21,7 +21,7 @@ import logging
 import string
 import tempfile
 import time
-from typing import Any, Dict, Optional, TYPE_CHECKING  # noqa: F401
+from typing import Any, Dict, IO, Optional, TYPE_CHECKING  # noqa: F401
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -344,14 +344,13 @@ def get_data_sync_snapshots_update_settings(session, plugin_id, settings_dict):
     return json_data
 
 
-def get_data_upload_snapshot(session, snapshot, file_to_send):
-    # type: (Session, str, str) -> Dict
+def get_data_upload_snapshot(session, snapshot, fd):
+    # type: (Session, str, IO) -> Dict
     json_data = {CoordConsts.SVC_KEY_API_KEY: session.api_key,
                  CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
                  CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
-                 CoordConsts.SVC_KEY_ZIPFILE: (
-                     'filename', open(file_to_send, 'rb'),
-                     'application/octet-stream')}
+                 CoordConsts.SVC_KEY_ZIPFILE: ('filename', fd,
+                                               'application/octet-stream')}
     return json_data
 
 
@@ -460,7 +459,7 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
 
         # If true, print the elapsed time since the task started.
         print_elapsed = (
-            (now - task_start_time).total_seconds() > session.elapsed_delay)
+                (now - task_start_time).total_seconds() > session.elapsed_delay)
 
         # Only print info about finished batches in debug mode
         if logger.isEnabledFor(logging.DEBUG):
