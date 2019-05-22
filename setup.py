@@ -125,6 +125,7 @@ setup(
                 'flake8-docstrings',
                 'flake8-import-order',
                 'jupyter',
+                'matplotlib<3.1.0', # brought in by jupyter; needs to work with py3.5
                 'nbformat',
                 'nbconvert',
                 'pytest>=4.2.0,<5.0.0',

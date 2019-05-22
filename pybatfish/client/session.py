@@ -578,16 +578,27 @@ class Session(object):
                         name, self.network))
 
         file_to_send = upload
+        tmp_file_name = None  # type: Optional[Text]
         if os.path.isdir(upload):
-            temp_zip_file = tempfile.NamedTemporaryFile()
-            zip_dir(upload, temp_zip_file)
-            file_to_send = temp_zip_file.name
+            # delete=False because we re-open for reading
+            with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
+                zip_dir(upload, temp_zip_file)
+                tmp_file_name = file_to_send = temp_zip_file.name
 
-        json_data = workhelper.get_data_upload_snapshot(self, name,
-                                                        file_to_send)
-        resthelper.get_json_response(self,
-                                     CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
-                                     json_data)
+        with open(file_to_send, 'rb') as fd:
+            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+
+            resthelper.get_json_response(self,
+                                         CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
+                                         json_data)
+        # Cleanup tmp file if we made one
+        if tmp_file_name is not None:
+            try:
+                os.remove(tmp_file_name)
+            except (OSError, IOError):
+                # If we can't delete the file for some reason, let it be,
+                # no need to crash initialization
+                pass
 
         return self._parse_snapshot(name, background, extra_args)
 
