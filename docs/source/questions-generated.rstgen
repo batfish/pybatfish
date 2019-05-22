@@ -20,24 +20,6 @@ Configuration data questions
 
 Questions that return the contents of configuration in a structured format.
 
-.. py:class:: aaaAuthenticationLogin(*, nodes, question_name)
-
-   Returns nodes that do not require authentication on all virtual terminal lines.
-   
-   Lists all nodes in the network for which there is a virtual terminal line that does not require authentication.
-   
-   
-   :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
-   
-       Default value: ``.*``
-   :type nodes: nodeSpec
-
-   Return table columns:
-
-   #. **Node**
-
-   #. **Line_Names** -- Names of virtual terminal lines.
-
 .. py:class:: bgpPeerConfiguration(*, nodes, properties, question_name)
 
    Returns configuration settings for BGP peerings.
@@ -657,6 +639,24 @@ Configuration hygiene questions
 
 Questions that flag unused and undefined structures in configurations.
 
+.. py:class:: aaaAuthenticationLogin(*, nodes, question_name)
+
+   Returns nodes that do not require authentication on all virtual terminal lines.
+   
+   Lists all nodes in the network for which there is a virtual terminal line that does not require authentication.
+   
+   
+   :param nodes: *Required.* Examine AAA Authentication on nodes matching this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Line_Names** -- Names of virtual terminal lines.
+
 .. py:class:: interfaceMtu(*, interfaces, mtuBytes, nodes, comparator, question_name)
 
    Finds interfaces where the configured MTU matches the specified comparator and mtuBytes.
@@ -887,13 +887,61 @@ Network adjacency questions
 
 Questions that show different types of network adjacencies.
 
-.. py:class:: edges(*, nodes, remoteNodes, edgeType, question_name)
+.. py:class:: bgpEdges(*, nodes, remoteNodes, question_name)
+
+   Returns BGP adjacencies.
+   
+   Lists all BGP adjacencies in the network.
+   
+   
+   :param nodes: *Required.* Include adjacencies whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include adjacencies whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Node** -- Node from which the edge originates.
+
+   #. **IP** -- IP at the side of originator.
+
+   #. **Interface** -- Interface at which the edge originates.
+
+   #. **AS_Number** -- AS Number at the side of originator.
+
+   #. **Remote_Node** -- Node at which the edge terminates.
+
+   #. **Remote_IP** -- IP at the side of the responder.
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+   #. **Remote_AS_Number** -- AS Number at the side of responder.
+
+.. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name)
 
    Returns different types of network adjacencies in a snapshot.
    
-   Lists network adjacencies of different types (e.g., Layer 3, BGP, OSPF) in the form of edges.
+   Lists network adjacencies of different types (e.g., Layer 3, BGP, OSPF) in the form of edges. This question is deprecated in favor of specific edges question such as bgpEdges and layer3Edges.
    
    
+   :param edgeType: *Required.* Types of edges to include. Default is layer3.
+       Allowed values:
+   
+       * bgp
+       * eigrp
+       * ipsec
+       * isis
+       * layer1
+       * layer3
+       * ospf
+       * vxlan
+   
+       Default value: ``layer3``
+   :type edgeType: string
    :param nodes: *Required.* Include edges whose first node matches this name or regex.
    
        Default value: ``.*``
@@ -902,20 +950,6 @@ Questions that show different types of network adjacencies.
    
        Default value: ``.*``
    :type remoteNodes: nodeSpec
-   :param edgeType: Types of edges to include.
-       Allowed values:
-   
-       * bgp
-       * eigrp
-       * ipsec
-       * isis
-       * layer1
-       * layer2
-       * layer3
-       * ospf
-       * rip
-       * vxlan
-   :type edgeType: string
 
    Return table columns:
 
@@ -926,6 +960,182 @@ Questions that show different types of network adjacencies.
    #. **Remote_Interface** -- Interface at which the edge terminates.
 
    #. **Remote_IPs**
+
+.. py:class:: eigrpEdges(*, nodes, remoteNodes, question_name)
+
+   Returns EIGRP adjacencies.
+   
+   Lists all EIGRP adjacencies in the network.
+   
+   
+   :param nodes: *Required.* Include adjacencies whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include adjacencies whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+.. py:class:: ipsecEdges(*, nodes, remoteNodes, question_name)
+
+   Returns IPSec tunnels.
+   
+   Lists all IPSec tunnels in the network.
+   
+   
+   :param nodes: *Required.* Include tunnels whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include tunnels whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Source_Interface** -- Source interface used in the IPsec session.
+
+   #. **Tunnel_Interface** -- Tunnel interface (if any) used in the IPsec session.
+
+   #. **Remote_Source_Interface** -- Remote source interface used in the IPsec session.
+
+   #. **Remote_Tunnel_Interface** -- Remote tunnel interface (if any) used in the IPsec session.
+
+.. py:class:: isisEdges(*, nodes, remoteNodes, question_name)
+
+   Returns ISIS adjacencies.
+   
+   Lists all ISIS adjacencies in the network.
+   
+   
+   :param nodes: *Required.* Include adjacencies whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include adjacencies whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+.. py:class:: layer1Edges(*, nodes, remoteNodes, question_name)
+
+   Returns Layer 1 links.
+   
+   Lists all Layer 1 links in the network.
+   
+   
+   :param nodes: *Required.* Include links whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include links whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+.. py:class:: layer3Edges(*, nodes, remoteNodes, question_name)
+
+   Returns Layer 3 links.
+   
+   Lists all Layer 3 edges in the network.
+   
+   
+   :param nodes: *Required.* Include edges whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **IPs**
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+   #. **Remote_IPs**
+
+.. py:class:: ospfEdges(*, nodes, remoteNodes, question_name)
+
+   Returns OSPF adjacencies.
+   
+   Lists all OSPF adjacencies in the network.
+   
+   
+   :param nodes: *Required.* Include adjacencies whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **Interface** -- Interface from which the edge originates.
+
+   #. **Remote_Interface** -- Interface at which the edge terminates.
+
+.. py:class:: vxlanEdges(*, nodes, remoteNodes, question_name)
+
+   Returns VXLAN edges.
+   
+   Lists all VXLAN edges in the network.
+   
+   
+   :param nodes: *Required.* Include edges whose first node matches this name or regex.
+   
+       Default value: ``.*``
+   :type nodes: nodeSpec
+   :param remoteNodes: *Required.* Include edges whose second node matches this name or regex.
+   
+       Default value: ``.*``
+   :type remoteNodes: nodeSpec
+
+   Return table columns:
+
+   #. **VNI** -- VNI of the VXLAN tunnel edge.
+
+   #. **Node** -- Node from which the edge originates.
+
+   #. **Remote_Node** -- Node at which the edge terminates.
+
+   #. **VTEP_Address** -- VTEP IP of node from which the edge originates.
+
+   #. **Remote_VTEP_Address** -- VTEP IP of node at which the edge terminates.
+
+   #. **VLAN** -- VLAN associated with VNI on node from which the edge originates.
+
+   #. **Remote_VLAN** -- VLAN associated with VNI on node at which the edge terminates.
+
+   #. **UDP_Port** -- UDP port of the VXLAN tunnel transport.
+
+   #. **Multicast_Group** -- Multicast group of the VXLAN tunnel transport.
 
 .. _traceroute:
 
