@@ -458,8 +458,7 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
         now = now_function(task_start_time.tzinfo)
 
         # If true, print the elapsed time since the task started.
-        print_elapsed = (
-                (now - task_start_time).total_seconds() > session.elapsed_delay)
+        print_elapsed = ((now - task_start_time).total_seconds() > session.elapsed_delay)
 
         # Only print info about finished batches in debug mode
         if logger.isEnabledFor(logging.DEBUG):
