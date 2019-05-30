@@ -83,7 +83,7 @@ def upload_diagnostics(session, metadata, bucket=_S3_BUCKET, region=_S3_REGION,
     :type bucket: string
     :param region: name of the region containing the bucket
     :type region: string
-    :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to the specified S3 bucket
+    :param dry_run: if True, upload is skipped and the anonymized files will be stored locally for review. If False, anonymized files will be uploaded to the specified S3 bucket
     :type dry_run: bool
     :param netconan_config: path to Netconan configuration file
     :type netconan_config: string
