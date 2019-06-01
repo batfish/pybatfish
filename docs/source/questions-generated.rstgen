@@ -490,38 +490,6 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Area_Border_Router** -- Whether this process is at the area border (with at least one interface in Area 0 and one in another area).
 
-.. py:class:: ospfProperties(*, nodes, properties, question_name)
-
-   Returns configuration parameters for OSPF routing processes.
-   
-   Returns all properties of all OSPF processes present in the network. ospfProcessConfiguration question should be used instead as this question is deprecated and will be removed in the future.
-   
-   
-   :param nodes: Include nodes matching this name or regex.
-   :type nodes: nodeSpec
-   :param properties: Include properties matching this regex.
-   :type properties: ospfPropertySpec
-
-   Return table columns:
-
-   #. **Node**
-
-   #. **VRF**
-
-   #. **Process_ID**
-
-   #. **Area_Border_Router**
-
-   #. **Areas**
-
-   #. **Export_Policy_Sources**
-
-   #. **Reference_Bandwidth**
-
-   #. **RFC1583_Compatible**
-
-   #. **Router_ID**
-
 .. py:class:: referencedStructures(*, names, nodes, types, question_name)
 
    Lists the references in configuration files to vendor-specific structures.
