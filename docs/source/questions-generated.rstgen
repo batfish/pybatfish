@@ -38,29 +38,29 @@ Questions that return the contents of configuration in a structured format.
 
    #. **VRF**
 
-   #. **Local_AS**
+   #. **Local_AS** -- Local AS number.
 
-   #. **Local_IP**
+   #. **Local_IP** -- Local IPv4 address (null for BGP unnumbered peers).
 
    #. **Local_Interface**
 
-   #. **Remote_AS**
+   #. **Remote_AS** -- Remote AS numbers with which this peer may establish a session.
 
    #. **Remote_IP**
 
-   #. **Route_Reflector_Client**
+   #. **Route_Reflector_Client** -- Whether this peer is a route reflector client.
 
-   #. **Cluster_ID**
+   #. **Cluster_ID** -- Cluster ID of this peer (null for peers that are not route reflector clients).
 
-   #. **Peer_Group**
+   #. **Peer_Group** -- Name of the BGP peer group to which this peer belongs.
 
-   #. **Import_Policy**
+   #. **Import_Policy** -- Names of import policies to be applied to routes received by this peer.
 
-   #. **Export_Policy**
+   #. **Export_Policy** -- Names of export policies to be applied to routes exported by this peer.
 
-   #. **Send_Community**
+   #. **Send_Community** -- Whether this peer propagates communities.
 
-   #. **Is_Passive**
+   #. **Is_Passive** -- Whether this peer is passive.
 
 .. py:class:: bgpProcessConfiguration(*, nodes, properties, question_name)
 
@@ -82,17 +82,17 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Router_ID**
 
-   #. **Route_Reflector**
+   #. **Route_Reflector** -- Whether any BGP peer in this process is configured as a route reflector client.
 
-   #. **Multipath_Match_Mode**
+   #. **Multipath_Match_Mode** -- Which AS paths are considered equivalent (EXACT_PATH, FIRST_AS, PATH_LENGTH) when multipath BGP is enabled.
 
-   #. **Multipath_EBGP**
+   #. **Multipath_EBGP** -- Whether multipath routing is enabled for EBGP.
 
-   #. **Multipath_IBGP**
+   #. **Multipath_IBGP** -- Whether multipath routing is enabled for IBGP.
 
-   #. **Neighbors**
+   #. **Neighbors** -- All peers configured on this process, identified by peer address (for active and dynamic peers) or peer interface (for BGP unnumbered peers).
 
-   #. **Tie_Breaker**
+   #. **Tie_Breaker** -- Tie breaking mode (ARRIVAL_ORDER, CLUSTER_LIST_LENGTH, ROUTER_ID).
 
 .. py:class:: definedStructures(*, names, nodes, types, question_name)
 
@@ -164,87 +164,83 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Interface**
 
-   #. **Access_VLAN**
+   #. **Access_VLAN** -- VLAN number when the switchport mode is access (null otherwise).
 
-   #. **Active**
+   #. **Active** -- Whether the interface is active.
 
-   #. **Allowed_VLANs**
+   #. **Allowed_VLANs** -- Allowed VLAN numbers when the switchport mode is trunk.
 
-   #. **All_Prefixes**
+   #. **All_Prefixes** -- All IPv4 addresses assigned to the interface.
 
-   #. **Auto_State_VLAN**
+   #. **Auto_State_VLAN** -- For VLAN interfaces, whether the operational status depends on member switchports.
 
-   #. **Bandwidth**
+   #. **Bandwidth** -- Nominal bandwidth in bits/sec, used for protocol cost calculations.
 
-   #. **Blacklisted**
+   #. **Blacklisted** -- Whether the interface is considered down for maintenance.
 
-   #. **Channel_Group**
+   #. **Channel_Group** -- Name of the aggregated interface (e.g., a port channel) to which this interface belongs.
 
-   #. **Channel_Group_Members**
+   #. **Channel_Group_Members** -- For aggregated interfaces (e.g., a port channel), names of constituent interfaces.
 
-   #. **Declared_Names**
+   #. **Declared_Names** -- Any aliases explicitly defined for this interface.
 
-   #. **Description**
+   #. **Description** -- Configured interface description.
 
-   #. **DHCP_Relay_Addresses**
+   #. **DHCP_Relay_Addresses** -- IPv4 addresses to which incoming DHCP requests are relayed.
 
-   #. **Encapsulation_VLAN**
+   #. **Encapsulation_VLAN** -- Number for VLAN encapsulation.
 
-   #. **HSRP_Groups**
+   #. **HSRP_Groups** -- HSRP group identifiers.
 
-   #. **HSRP_Version**
+   #. **HSRP_Version** -- HSRP version that will be used.
 
-   #. **Incoming_Filter_Name**
+   #. **Incoming_Filter_Name** -- Name of the input IPv4 filter.
 
-   #. **Interface_Type**
+   #. **MLAG_ID** -- MLAG identifier of the interface.
 
-   #. **MLAG_ID**
+   #. **MTU** -- Layer3 MTU of the interface.
 
-   #. **MTU**
+   #. **Native_VLAN** -- Native VLAN when switchport mode is trunk.
 
-   #. **Native_VLAN**
+   #. **OSPF_Area_Name** -- OSPF area to which the interface belongs.
 
-   #. **OSPF_Area_Name**
+   #. **OSPF_Cost** -- OSPF cost if explicitly configured.
 
-   #. **OSPF_Cost**
+   #. **OSPF_Enabled** -- Whether OSPF is enabled.
 
-   #. **OSPF_Enabled**
+   #. **OSPF_Passive** -- Whether interface is in OSPF passive mode.
 
-   #. **OSPF_Hello_Multiplier**
+   #. **OSPF_Point_To_Point** -- Whether OSPF should operate as if its on a point-to-point link.
 
-   #. **OSPF_Passive**
+   #. **Outgoing_Filter_Name** -- Name of the output IPv4 filter.
 
-   #. **OSPF_Point_To_Point**
+   #. **Primary_Address** -- Primary IPv4 address along with the prefix length.
 
-   #. **Outgoing_Filter_Name**
+   #. **Primary_Network** -- Primary IPv4 subnet, in canonical form.
 
-   #. **Primary_Address**
+   #. **Proxy_ARP** -- Whether proxy ARP is enabled.
 
-   #. **Primary_Network**
+   #. **Rip_Enabled** -- Whether RIP is enabled.
 
-   #. **Proxy_ARP**
+   #. **Rip_Passive** -- Whether interface is in RIP passive mode.
 
-   #. **Rip_Enabled**
+   #. **PBR_Policy_Name** -- Name of policy-based routing (PBR) policy.
 
-   #. **Rip_Passive**
+   #. **Spanning_Tree_Portfast** -- Whether spanning-tree portfast feature is enabled.
 
-   #. **Routing_Policy_Name**
+   #. **Speed** -- Link speed in bits/sec.
 
-   #. **Spanning_Tree_Portfast**
+   #. **Switchport** -- Whether the interface is configured as switchport.
 
-   #. **Speed**
+   #. **Switchport_Mode** -- Switchport mode (ACCESS, DOT1Q_TUNNEL, DYNAMIC_AUTO, DYNAMIC_DESIRABLE, FEX_FABRIC, NONE, TAP, TOOL, TRUNK) for switchport interfaces.
 
-   #. **Switchport**
+   #. **Switchport_Trunk_Encapsulation** -- Encapsulation type (DOT1Q, ISL, NEGOTIATE) for switchport trunk interfaces.
 
-   #. **Switchport_Mode**
+   #. **VRF** -- Name of the VRF to which the interface belongs.
 
-   #. **Switchport_Trunk_Encapsulation**
+   #. **VRRP_Groups** -- All VRRP groups to which the interface belongs.
 
-   #. **VRF**
-
-   #. **VRRP_Groups**
-
-   #. **Zone_Name**
+   #. **Zone_Name** -- Name of the firewall zone to which the interface belongs.
 
 .. py:class:: ipOwners(*, duplicatesOnly, question_name)
 
@@ -340,77 +336,75 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Node**
 
-   #. **AS_Path_Access_Lists**
+   #. **AS_Path_Access_Lists** -- Names of AS path access lists.
 
-   #. **Authentication_Key_Chains**
+   #. **Authentication_Key_Chains** -- Names of authentication keychains.
 
-   #. **Canonical_IP**
+   #. **Community_Lists** -- Names of community lists.
 
-   #. **Community_Lists**
+   #. **Configuration_Format** -- Configuration format of the node.
 
-   #. **Configuration_Format**
+   #. **Default_Cross_Zone_Action** -- Default action (PERMIT, DENY) for traffic that traverses firewall zones (null for non-firewall nodes).
 
-   #. **Default_Cross_Zone_Action**
+   #. **Default_Inbound_Action** -- Default action (PERMIT, DENY) for traffic destined for this node.
 
-   #. **Default_Inbound_Action**
+   #. **Device_Type** -- Device type of this node (HOST, INTERNET, ISP, ROUTER, SWITCH).
 
-   #. **Device_Type**
+   #. **DNS_Servers** -- Configured DNS servers.
 
-   #. **DNS_Servers**
+   #. **DNS_Source_Interface** -- Source interface to use for communicating with DNS servers.
 
-   #. **DNS_Source_Interface**
+   #. **Domain_Name** -- Domain name of the node.
 
-   #. **Domain_Name**
+   #. **Hostname** -- Hostname of the node.
 
-   #. **Hostname**
+   #. **IKE_Phase1_Keys** -- Names of IKE Phase 1 keys.
 
-   #. **IKE_Phase1_Keys**
+   #. **IKE_Phase1_Policies** -- Names of IKE Phase 1 policies.
 
-   #. **IKE_Phase1_Policies**
+   #. **IKE_Phase1_Proposals** -- Names of IKE Phase 1 proposals.
 
-   #. **IKE_Phase1_Proposals**
+   #. **Interfaces** -- Names of interfaces.
 
-   #. **Interfaces**
+   #. **IP_Access_Lists** -- Names of IPv4 filters (ACLs, firewall rule sets).
 
-   #. **IP_Access_Lists**
+   #. **IP6_Access_Lists** -- Names of IPv6 filters (ACLs, firewall rule sets).
 
-   #. **IP_Spaces**
+   #. **IPsec_Peer_Configs** -- Names of IPSec peers.
 
-   #. **IP6_Access_Lists**
+   #. **IPsec_Phase2_Policies** -- Names of IPSec Phase 2 policies.
 
-   #. **IPsec_Peer_Configs**
+   #. **IPsec_Phase2_Proposals** -- Names of IPSec Phase 2 proposals.
 
-   #. **IPsec_Phase2_Policies**
+   #. **Logging_Servers** -- Configured logging servers.
 
-   #. **IPsec_Phase2_Proposals**
+   #. **Logging_Source_Interface** -- Source interface for communicating with logging servers.
 
-   #. **Logging_Servers**
+   #. **NTP_Servers** -- Configured NTP servers.
 
-   #. **Logging_Source_Interface**
+   #. **NTP_Source_Interface** -- Source interface for communicating with NTP servers.
 
-   #. **NTP_Servers**
+   #. **PBR_Policies** -- Names of policy-based routing (PBR) policies.
 
-   #. **NTP_Source_Interface**
+   #. **Route_Filter_Lists** -- Names of structures that filter IPv4 routes (e.g., prefix lists).
 
-   #. **Route_Filter_Lists**
+   #. **Route6_Filter_Lists** -- Names of structures that filter IPv6 routes (e.g., prefix lists).
 
-   #. **Route6_Filter_Lists**
+   #. **Routing_Policies** -- Names of policies that manipulate routes (e.g., route maps).
 
-   #. **Routing_Policies**
+   #. **SNMP_Source_Interface** -- Source interface to use for communicating with SNMP servers.
 
-   #. **SNMP_Source_Interface**
+   #. **SNMP_Trap_Servers** -- Configured SNMP trap servers.
 
-   #. **SNMP_Trap_Servers**
+   #. **TACACS_Servers** -- Configured TACACS servers.
 
-   #. **TACACS_Servers**
+   #. **TACACS_Source_Interface** -- Source interface to use for communicating with TACACS servers.
 
-   #. **TACACS_Source_Interface**
+   #. **Vendor_Family** -- Vendor family (AWS, CISCO, CUMULUS, F5_BIGIP, JUNIPER, UNKNOWN).
 
-   #. **Vendor_Family**
+   #. **VRFs** -- Names of VRFs present on the node.
 
-   #. **VRFs**
-
-   #. **Zones**
+   #. **Zones** -- Names of firewall zones on the node.
 
 .. py:class:: ospfAreaConfiguration(*, nodes, question_name)
 
@@ -430,13 +424,13 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Process_ID**
 
-   #. **Area** -- Area Number.
+   #. **Area** -- Area number.
 
-   #. **Area_Type**
+   #. **Area_Type** -- Area type.
 
-   #. **Active_Interfaces**
+   #. **Active_Interfaces** -- Names of active interfaces.
 
-   #. **Passive_Interfaces**
+   #. **Passive_Interfaces** -- Names of passive interfaces.
 
 .. py:class:: ospfInterfaceConfiguration(*, nodes, properties, question_name)
 
@@ -454,19 +448,17 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Interface**
 
-   #. **VRF**
+   #. **VRF** -- VRF name.
 
    #. **Process_ID**
 
-   #. **OSPF_Area_Name**
+   #. **OSPF_Area_Name** -- OSPF area to which the interface belongs.
 
-   #. **OSPF_Passive**
+   #. **OSPF_Passive** -- Whether interface is in OSPF passive mode.
 
-   #. **OSPF_Cost**
+   #. **OSPF_Cost** -- OSPF cost if explicitly configured.
 
-   #. **OSPF_Point_To_Point**
-
-   #. **OSPF_Hello_Multiplier**
+   #. **OSPF_Point_To_Point** -- Whether OSPF should operate as if its on a point-to-point link.
 
 .. py:class:: ospfProcessConfiguration(*, nodes, properties, question_name)
 
@@ -484,63 +476,19 @@ Questions that return the contents of configuration in a structured format.
 
    #. **Node**
 
-   #. **VRF**
+   #. **VRF** -- VRF name.
 
    #. **Process_ID**
 
-   #. **Areas**
+   #. **Areas** -- All OSPF areas for this process.
 
-   #. **Reference_Bandwidth**
+   #. **Reference_Bandwidth** -- Reference bandwidth in bits/sec used to calculate interface OSPF cost.
 
-   #. **Router_ID**
+   #. **Router_ID** -- Router ID of the process.
 
-   #. **Export_Policy_Sources**
+   #. **Export_Policy_Sources** -- Names of policies that determine which routes are exported into OSPF.
 
-   #. **Area_Border_Router**
-
-.. py:class:: ospfProperties(*, nodes, properties, question_name)
-
-   Returns configuration parameters for OSPF routing processes.
-   
-   Returns all properties of all OSPF processes present in the network. ospfProcessConfiguration question should be used instead as this question is deprecated and will be removed in the future.
-   
-   
-   :param nodes: Include nodes matching this name or regex.
-   :type nodes: nodeSpec
-   :param properties: Include properties matching this regex.
-   :type properties: ospfPropertySpec
-
-   Return table columns:
-
-   #. **Node**
-
-   #. **VRF**
-
-   #. **Process_ID**
-
-   #. **Area_Border_Router**
-
-   #. **Areas**
-
-   #. **Export_Policy**
-
-   #. **Export_Policy_Sources**
-
-   #. **Generated_Routes**
-
-   #. **Max_Metric_External_Networks**
-
-   #. **Max_Metric_Stub_Networks**
-
-   #. **Max_Metric_Summary_Networks**
-
-   #. **Max_Metric_Transit_Links**
-
-   #. **Reference_Bandwidth**
-
-   #. **RFC1583_Compatible**
-
-   #. **Router_ID**
+   #. **Area_Border_Router** -- Whether this process is at the area border (with at least one interface in Area 0 and one in another area).
 
 .. py:class:: referencedStructures(*, names, nodes, types, question_name)
 
@@ -590,7 +538,7 @@ Questions that return the contents of configuration in a structured format.
 
    Return table columns:
 
-   #. **Node** -- VLAN_ID.
+   #. **Node**
 
    #. **VLAN_ID**
 
@@ -622,15 +570,15 @@ Questions that return the contents of configuration in a structured format.
 
    #. **VNI** -- VXLAN Segment ID.
 
-   #. **Local_VTEP_IP**
+   #. **Local_VTEP_IP** -- IPv4 address of the local VTEP.
 
-   #. **Multicast_Group**
+   #. **Multicast_Group** -- IPv4 address of the multicast group.
 
-   #. **VLAN**
+   #. **VLAN** -- VLAN number for the VNI.
 
-   #. **VTEP_Flood_List**
+   #. **VTEP_Flood_List** -- All IPv4 addresses in the VTEP flood list.
 
-   #. **VXLAN_Port**
+   #. **VXLAN_Port** -- Destination port number for the VXLAN tunnel.
 
 .. _hygiene:
 
@@ -685,7 +633,7 @@ Questions that flag unused and undefined structures in configurations.
 
    #. **Interface**
 
-   #. **MTU**
+   #. **MTU** -- Layer3 MTU of the interface.
 
 .. py:class:: undefinedReferences(*, nodes, question_name)
 
@@ -1437,6 +1385,40 @@ Questions that analyze ACLs and firewall rules.
    #. **Reason** -- The reason a line is unreachable.
 
    #. **Additional_Info** -- Additional information.
+
+.. py:class:: findMatchingFilterLines(*, nodes, filters, headers, action, ignoreComposites, question_name)
+
+   Returns lines in filters (ACLs and firewall rules) that match any packet within the specified header constraints.
+   
+   Finds all lines in the specified filters that match any packet within the specified header constraints.
+   
+   
+   :param nodes: Examine filters on nodes matching this specifier.
+   :type nodes: nodeSpec
+   :param filters: Specifier for filters to check.
+   :type filters: filterSpec
+   :param headers: Packet header constraints for which to find matching filter lines.
+   :type headers: headerConstraint
+   :param action: Show filter lines with this action. By default returns lines with either action.
+       Allowed values:
+   
+       * permit: Return only lines that permit packets
+       * deny: Return only lines that deny packets
+   :type action: string
+   :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   :type ignoreComposites: boolean
+
+   Return table columns:
+
+   #. **Node**
+
+   #. **Filter** -- Filter name.
+
+   #. **Line** -- Line text.
+
+   #. **Line_Index** -- Index of line.
+
+   #. **Action** -- Action performed by the line (e.g., PERMIT or DENY).
 
 .. py:class:: searchFilters(*, action, explain, filters, headers, invertSearch, nodes, startLocation, question_name)
 
