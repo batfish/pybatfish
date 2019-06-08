@@ -27,7 +27,7 @@ from typing import (Any, Dict, Iterable, Optional, TYPE_CHECKING,  # noqa: F401
 from deepdiff import DeepDiff
 from pandas import DataFrame
 
-from pybatfish.datamodel import HeaderConstraints  # noqa: F401
+from pybatfish.datamodel import HeaderConstraints, PathConstraints  # noqa: F401
 from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning, BatfishException)
@@ -40,6 +40,8 @@ __all__ = [
     'assert_dict_match',
     'assert_filter_denies',
     'assert_filter_permits',
+    'assert_flows_fail',
+    'assert_flows_succeed',
     'assert_has_no_route',
     'assert_has_route',
     'assert_num_results',
@@ -263,6 +265,66 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_flows_fail(startLocation, headers, soft=False, snapshot=None,
+                      session=None):
+    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
+    """
+    Check if the specified set of flows, denoted by starting locations and headers, fail.
+
+    :param startLocation: LocationSpec indicating where the flow starts
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param snapshot: the snapshot on which to check the assertion
+    :param session: Batfish session to use for the assertion
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(pathConstraints=PathConstraints(startLocation=startLocation),
+                  headers=headers,
+                  actions="success")
+
+    df = _get_question_object(session, 'reachability').reachability(
+        **kwargs).answer(snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found a flow that succeed, when expected to fail\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
+                         session=None):
+    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
+    """
+    Check if the specified set of flows, denoted by starting locations and headers, succeed.
+
+    :param startLocation: LocationSpec indicating where the flow starts
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param snapshot: the snapshot on which to check the assertion
+    :param session: Batfish session to use for the assertion
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(pathConstraints=PathConstraints(startLocation=startLocation),
+                  headers=headers,
+                  actions="failure")
+
+    df = _get_question_object(session, 'reachability').reachability(
+        **kwargs).answer(snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found a flow that failed, when expected to succeed\n{}".format(
                 df.to_string()), soft)
     return True
 
