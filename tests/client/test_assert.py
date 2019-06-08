@@ -17,9 +17,10 @@ from pandas import DataFrame
 
 from pybatfish.client.asserts import (_get_question_object, _raise_common,
                                       assert_filter_denies,
-                                      assert_filter_permits)
+                                      assert_filter_permits,
+                                      assert_flows_succeed, assert_flows_fail)
 from pybatfish.client.session import Session
-from pybatfish.datamodel import HeaderConstraints
+from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.exception import (BatfishAssertException,
                                  BatfishAssertWarning, BatfishException)
@@ -176,6 +177,120 @@ def test_filter_denies_no_session():
                                                action='permit')
 
 
+def test_flows_fail():
+    """Confirm flows-fail assert passes and fails as expected when specifying a session."""
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        assert_flows_fail(startLocation, headers, session=bf)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_flows_fail(startLocation, headers, session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+
+
+def test_flows_fail_no_session():
+    """
+    Confirm flows-fail assert passes and fails as expected when not specifying a session.
+
+    For reverse compatibility.
+    """
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    with patch.object(bfq, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        assert_flows_fail(startLocation, headers)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_flows_fail(startLocation, headers)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+
+
+def test_flows_succeed():
+    """Confirm flows-succeed assert passes and fails as expected when specifying a session."""
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        assert_flows_succeed(startLocation, headers, session=bf)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_flows_succeed(startLocation, headers, session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+
+
+def test_flows_succeed_no_session():
+    """
+    Confirm filter-permits assert passes and fails as expected when not specifying a session.
+
+    For reverse compatibility.
+    """
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    with patch.object(bfq, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        assert_flows_succeed(startLocation, headers)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_flows_succeed(startLocation, headers)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+
+
 def test_get_question_object():
     """Confirm _get_question_object identifies the correct question object based on the specified session and the questions it contains."""
     # Session contains the question we're searching for
@@ -197,3 +312,7 @@ def test_get_question_object():
             with pytest.raises(BatfishException) as err:
                 _get_question_object(bf, 'qName')
             assert 'qName question was not found' in str(err.value)
+
+
+if __name__ == "__main__":
+    pytest.main()
