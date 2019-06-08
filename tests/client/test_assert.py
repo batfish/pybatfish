@@ -263,7 +263,7 @@ def test_flows_succeed():
 
 def test_flows_succeed_no_session():
     """
-    Confirm filter-permits assert passes and fails as expected when not specifying a session.
+    Confirm flows-succeed assert passes and fails as expected when not specifying a session.
 
     For reverse compatibility.
     """
