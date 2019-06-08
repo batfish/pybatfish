@@ -273,8 +273,7 @@ def assert_flows_fail(startLocation, headers, soft=False, snapshot=None,
                       session=None):
     # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
     """
-    Check if the specified set of flows, denoted by starting locations and
-    headers, fail.
+    Check if the specified set of flows, denoted by starting locations and headers, fail.
 
     :param startLocation: LocationSpec indicating where the flow starts
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
@@ -304,8 +303,7 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
                          session=None):
     # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
     """
-    Check if the specified set of flows, denoted by starting locations and
-    headers, succeed.
+    Check if the specified set of flows, denoted by starting locations and headers, succeed.
 
     :param startLocation: LocationSpec indicating where the flow starts
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`

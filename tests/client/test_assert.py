@@ -15,10 +15,12 @@ import pytest
 import six
 from pandas import DataFrame
 
-from pybatfish.client.asserts import (_get_question_object, _raise_common,
+from pybatfish.client.asserts import (_get_question_object,
+                                      _raise_common,
                                       assert_filter_denies,
                                       assert_filter_permits,
-                                      assert_flows_succeed, assert_flows_fail)
+                                      assert_flows_fail,
+                                      assert_flows_succeed)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
