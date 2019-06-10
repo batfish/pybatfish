@@ -21,7 +21,7 @@ from operator import attrgetter
 import pytest
 
 from pybatfish.datamodel import ListWrapper
-from pybatfish.datamodel.answer.table import TableAnswer
+from pybatfish.datamodel.answer.table import TableAnswer, is_table_ans
 
 
 def test_table_answer_no_answer_elements():
@@ -195,6 +195,27 @@ def test_table_answer_dtype_object():
     assert df['col2'].dtype == 'object'
     assert df['col2'][1] is None
     assert str(df['col2'][1]) == 'None'
+
+
+def test_is_table_answer():
+    answer = {
+        "answerElements": [{
+            "metadata": {
+                "columnMetadata": [{
+                    "name": "col1",
+                    "schema": "List<String>"
+                }]
+            },
+            "rows": [{
+                "col1": ['e1', 'e2', 'e3']
+            }]
+        }]
+    }
+    assert not is_table_ans(answer)
+    # Fix up metadata
+    answer["answerElements"][0][
+        "class"] = "org.batfish.datamodel.table.TableAnswerElement"
+    assert is_table_ans(answer)
 
 
 if __name__ == "__main__":
