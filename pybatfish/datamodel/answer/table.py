@@ -135,3 +135,11 @@ def _rows_to_frame(table_metadata, rows):
     # 1. Force ordering of columns
     # 2. Set columns even if the dataframe is empty
     return df.reindex(labels=column_names, axis='columns')
+
+
+def is_table_ans(d):
+    # type: (Dict) -> bool
+    """Check if a given dictionary represents a table answer."""
+    return ("answerElements" in d and
+            d["answerElements"][0].get("class") ==
+            "org.batfish.datamodel.table.TableAnswerElement")

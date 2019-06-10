@@ -35,6 +35,7 @@ from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
+from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import (Questions)
 from pybatfish.util import get_uuid, validate_name, zip_dir
@@ -353,7 +354,7 @@ class Session(object):
             'referenceSnapshot': reference_snapshot,
         }
         ans = restv2helper.get_answer(self, question, params)
-        if "answerElements" in ans and "metadata" in ans["answerElements"][0]:
+        if is_table_ans(ans):
             return TableAnswer(ans)
         else:
             return Answer(ans)
