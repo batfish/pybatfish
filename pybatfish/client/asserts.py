@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from pybatfish.client.session import Session
 
 __all__ = [
-    'assert_dict_match',
     'assert_filter_denies',
     'assert_filter_permits',
     'assert_flows_fail',
