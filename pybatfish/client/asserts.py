@@ -37,7 +37,6 @@ if TYPE_CHECKING:
     from pybatfish.client.session import Session
 
 __all__ = [
-    'assert_dict_match',
     'assert_filter_denies',
     'assert_filter_permits',
     'assert_flows_fail',
@@ -113,25 +112,6 @@ def _raise_common(err_text, soft=False):
         return False
     else:
         raise BatfishAssertException(err_text)
-
-
-def assert_dict_match(actual, expected, soft=False):
-    # type: (Dict, Dict, bool) -> bool
-    """Assert that two dictionaries are equal. `expected` can be a subset of `actual`.
-
-    :param actual: the value tested.
-    :param expected: the expected value of a dictionary
-    :param soft: whether this assertion is soft (i.e., generates a warning but
-        not a failure)
-    """
-    __tracebackhide__ = operator.methodcaller("errisinstance",
-                                              BatfishAssertException)
-    diff = DeepDiff(_subdict(actual, expected.keys()), expected,
-                    ignore_order=True, verbose_level=0, view='text')
-    if diff:
-        err_text = "Unexpected differences found:\n{}".format(diff)
-        return _raise_common(err_text, soft)
-    return True
 
 
 # TODO: converge on representation of routes. (Blocked on backend batfish).
