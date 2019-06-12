@@ -18,8 +18,6 @@ dist
 .idea/misc.xml
 .idea/workspace.xml
 .idea/tasks.xml
-.idea/inspectionProfiles/Project_Default.xml
-.idea/*
 *.iml
 
 # Virtual environment, for python and python3, if desired.
