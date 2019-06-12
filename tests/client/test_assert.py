@@ -79,18 +79,19 @@ def test_filter_permits():
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='deny')
-        # Test failure; also test that startLocation is passed through
+        # Test failure; also test that optional params are passed through
         mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_permits('filter', headers, startLocation='Ethernet1',
-                                  session=bf)
+                                  nodes='.*', session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
+                                               nodes='.*',
                                                action='deny')
 
 
@@ -110,17 +111,19 @@ def test_filter_permits_no_session():
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='deny')
-        # Test failure; also test that startLocation is passed through
+        # Test failure; also test that optional params are passed through
         mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_permits('filter', headers, startLocation='Ethernet1')
+            assert_filter_permits('filter', headers, startLocation='Ethernet1',
+                                  nodes='.*')
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
+                                               nodes='.*',
                                                action='deny')
 
 
@@ -136,18 +139,19 @@ def test_filter_denies():
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='permit')
-        # Test failure; also test that startLocation is passed through
+        # Test failure; also test that optional params are passed through
         mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_denies('filter', headers, startLocation='Ethernet1',
-                                 session=bf)
+                                 nodes='.*', session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
+                                               nodes='.*',
                                                action='permit')
 
 
@@ -165,17 +169,19 @@ def test_filter_denies_no_session():
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                action='permit')
-        # Test failure; also test that startLocation is passed through
+        # Test failure; also test that optional params are passed through
         mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
         mock_search_filters.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_denies('filter', headers, startLocation='Ethernet1')
+            assert_filter_denies('filter', headers, startLocation='Ethernet1',
+                                 nodes='.*')
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
                                                headers=headers,
                                                startLocation='Ethernet1',
+                                               nodes='.*',
                                                action='permit')
 
 

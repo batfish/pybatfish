@@ -187,15 +187,16 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     return True
 
 
-def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
-                          snapshot=None, session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
+def assert_filter_permits(filter_name, headers, startLocation=None, nodes=None,
+                          soft=False, snapshot=None, session=None):
+    # type: (str, HeaderConstraints, str, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL permits a specified set of flows.
 
     :param filter_name: the name of ACL to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
+    :param nodes: if specified, only check filters on nodes matching the NodeSpec, otherwise check all nodes
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
@@ -208,6 +209,8 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     kwargs = dict(filters=filter_name, headers=headers, action="deny")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
+    if nodes is not None:
+        kwargs.update(nodes=nodes)
 
     df = _get_question_object(session, 'searchFilters').searchFilters(
         **kwargs).answer(snapshot).frame()  # type: ignore
@@ -218,15 +221,16 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     return True
 
 
-def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
-                         snapshot=None, session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
+def assert_filter_denies(filter_name, headers, startLocation=None, nodes=None,
+                         soft=False, snapshot=None, session=None):
+    # type: (str, HeaderConstraints, str, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL denies a specified set of flows.
 
     :param filter_name: the name of ACL to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
+    :param nodes: if specified, only check filters on nodes matching the NodeSpec, otherwise check all nodes
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
@@ -239,6 +243,8 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
     kwargs = dict(filters=filter_name, headers=headers, action="permit")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
+    if nodes is not None:
+        kwargs.update(nodes=nodes)
 
     df = _get_question_object(session, 'searchFilters').searchFilters(
         **kwargs).answer(snapshot).frame()  # type: ignore
