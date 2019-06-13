@@ -49,6 +49,8 @@ __all__ = [
     'assert_zero_results',
 ]
 
+_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*'
+
 
 def assert_zero_results(answer, soft=False):
     # type: (Union[Answer, TableAnswer, DataFrame], bool) -> bool
@@ -311,11 +313,16 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
     return True
 
 
-def assert_no_incompatible_bgp_sessions(snapshot=None, soft=False,
-                                        session=None):
-    # type: (Optional[str], bool, Optional[Session]) -> bool
+def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
+                                        status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
+                                        snapshot=None,
+                                        soft=False, session=None):
+    # type: (Optional[str], Optional[str], str, Optional[str], bool, Optional[Session]) -> bool
     """Assert that there are no incompatible BGP sessions present in the snapshot.
 
+    :param nodes: search sessions with specified nodes on one side of the sessions.
+    :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
+    :param status: select sessions matching the specified session status.
     :param snapshot: the snapshot on which to check the assertion
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
@@ -324,8 +331,16 @@ def assert_no_incompatible_bgp_sessions(snapshot=None, soft=False,
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
+    kwargs = dict()
+    if nodes is not None:
+        kwargs.update(nodes=nodes)
+    if remote_nodes is not None:
+        kwargs.update(remote_nodes=remote_nodes)
+    kwargs.update(status=status)
+
     df = _get_question_object(session,
-                              'bgpSessionCompatibility').bgpSessionCompatibility().answer(
+                              'bgpSessionCompatibility').bgpSessionCompatibility(
+        **kwargs).answer(
         snapshot).frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(

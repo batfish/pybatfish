@@ -302,15 +302,27 @@ def test_no_incompatible_bgp_sessions():
                       create=True) as bgpSessionCompatibility:
         # Test success
         bgpSessionCompatibility.return_value = MockQuestion()
-        assert_no_incompatible_bgp_sessions(session=bf)
+        assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                            remote_nodes='remote_nodes',
+                                            status='.*',
+                                            session=bf)
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
         # Test failure
         mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
         bgpSessionCompatibility.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_no_incompatible_bgp_sessions(session=bf)
+            assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                                remote_nodes='remote_nodes',
+                                                status='.*',
+                                                session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
 
 
 def test_no_incompatible_bgp_sessions_no_session():
@@ -319,15 +331,25 @@ def test_no_incompatible_bgp_sessions_no_session():
                       create=True) as bgpSessionCompatibility:
         # Test success
         bgpSessionCompatibility.return_value = MockQuestion()
-        assert_no_incompatible_bgp_sessions()
+        assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                            remote_nodes='remote_nodes',
+                                            status='.*')
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
         # Test failure
         mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
         bgpSessionCompatibility.return_value = MockQuestion(
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_no_incompatible_bgp_sessions()
+            assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                                remote_nodes='remote_nodes',
+                                                status='.*')
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
 
 
 def test_no_undefined_references():
