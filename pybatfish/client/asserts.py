@@ -343,7 +343,7 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
         snapshot).frame()  # type: ignore
     if len(df) > 0:
         return _raise_common(
-            "Found matching BGP session(s), when none were expected\n{}".format(
+            "Found incompatible BGP session(s), when none were expected\n{}".format(
                 df.to_string()), soft)
     return True
 
