@@ -21,9 +21,9 @@ import pytest
 import responses
 
 from pybatfish.client._diagnostics import (METADATA_FILENAME, _anonymize_dir,
-                                           _check_if_all_passed,
-                                           _check_if_any_failed,
                                            _upload_dir_to_url,
+                                           check_if_all_passed,
+                                           check_if_any_failed,
                                            upload_diagnostics)
 from pybatfish.client.session import Session
 
@@ -74,19 +74,19 @@ def test_anonymize_custom(config_dir, tmpdir):
 def test_check_if_snapshot_passed():
     """Test checking init info statuses for PASSED status."""
     # Confirm result is True iff all values are PASSED
-    assert _check_if_all_passed({'a': 'PASSED', 'b': 'PASSED'})
-    assert not _check_if_all_passed({'a': 'PASSED', 'b': 'FAILED'})
-    assert not _check_if_all_passed({'a': 'PASSED', 'b': 'WARNINGS'})
-    assert not _check_if_all_passed({'a': 'FAILED', 'b': 'FAILED'})
+    assert check_if_all_passed({'a': 'PASSED', 'b': 'PASSED'})
+    assert not check_if_all_passed({'a': 'PASSED', 'b': 'FAILED'})
+    assert not check_if_all_passed({'a': 'PASSED', 'b': 'WARNINGS'})
+    assert not check_if_all_passed({'a': 'FAILED', 'b': 'FAILED'})
 
 
 def test_check_if_snapshot_failed():
     """Test checking init info statuses for FAILED status."""
     # Confirm result is False iff at least one value is FAILED
-    assert not _check_if_any_failed({'a': 'PASSED', 'b': 'PASSED'})
-    assert not _check_if_any_failed({'a': 'PASSED', 'b': 'EMPTY'})
-    assert _check_if_any_failed({'a': 'PASSED', 'b': 'FAILED'})
-    assert _check_if_any_failed({'a': 'FAILED', 'b': 'FAILED'})
+    assert not check_if_any_failed({'a': 'PASSED', 'b': 'PASSED'})
+    assert not check_if_any_failed({'a': 'PASSED', 'b': 'EMPTY'})
+    assert check_if_any_failed({'a': 'PASSED', 'b': 'FAILED'})
+    assert check_if_any_failed({'a': 'FAILED', 'b': 'FAILED'})
 
 
 def test_upload_diagnostics_metadata():
