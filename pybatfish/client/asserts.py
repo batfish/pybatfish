@@ -43,6 +43,8 @@ __all__ = [
     'assert_flows_succeed',
     'assert_has_no_route',
     'assert_has_route',
+    'assert_no_incompatible_bgp_sessions',
+    'assert_no_undefined_references',
     'assert_num_results',
     'assert_zero_results',
 ]
@@ -305,6 +307,52 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that failed, when expected to succeed\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_no_incompatible_bgp_sessions(snapshot=None, soft=False,
+                                        session=None):
+    # type: (Optional[str], bool, Optional[Session]) -> bool
+    """Assert that there are no incompatible BGP sessions present in the snapshot.
+
+    :param snapshot: the snapshot on which to check the assertion
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param session: Batfish session to use for the assertion
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    df = _get_question_object(session,
+                              'bgpSessionCompatibility').bgpSessionCompatibility().answer(
+        snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found incompatible BGP session(s), when none were expected\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_no_undefined_references(snapshot=None, soft=False,
+                                   session=None):
+    # type: (Optional[str], bool, Optional[Session]) -> bool
+    """Assert that there are no undefined references present in the snapshot.
+
+    :param snapshot: the snapshot on which to check the assertion
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param session: Batfish session to use for the assertion
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    df = _get_question_object(session,
+                              'undefinedReferences').undefinedReferences().answer(
+        snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found undefined reference(s), when none were expected\n{}".format(
                 df.to_string()), soft)
     return True
 
