@@ -17,7 +17,7 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 from requests import HTTPError
 
-from pybatfish.client._diagnostics import (_get_snapshot_parse_status)
+from pybatfish.client._diagnostics import (get_snapshot_parse_status)
 from pybatfish.client.commands import (bf_delete_network,
                                        bf_delete_snapshot, bf_fork_snapshot,
                                        bf_generate_dataplane,
@@ -93,7 +93,7 @@ def roles_snapshot(network):
 
 def test_get_snapshot_file_status(network, file_status_snapshot):
     """Confirm we get correct init info statuses for example snapshot."""
-    statuses = _get_snapshot_parse_status(bf_session)
+    statuses = get_snapshot_parse_status(bf_session)
     assert (statuses == {
         'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
         'configs/recognized.cfg': 'PASSED',
