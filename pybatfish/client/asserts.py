@@ -45,6 +45,7 @@ __all__ = [
     'assert_has_route',
     'assert_no_incompatible_bgp_sessions',
     'assert_no_undefined_references',
+    'assert_filter_has_no_unreachable_lines',
     'assert_num_results',
     'assert_zero_results',
 ]
@@ -191,42 +192,11 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     return True
 
 
-def assert_filter_permits(filters, headers, startLocation=None, soft=False,
-                          snapshot=None, session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
-    """
-    Check if a named ACL permits a specified set of flows.
-
-    :param filters: the specification for the filter (filterSpec) to check
-    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
-    :param startLocation: LocationSpec indicating where a flow starts
-    :param soft: whether this assertion is soft (i.e., generates a warning but
-        not a failure)
-    :param snapshot: the snapshot on which to check the assertion
-    :param session: Batfish session to use for the assertion
-    :return: True if the assertion passes
-    """
-    __tracebackhide__ = operator.methodcaller("errisinstance",
-                                              BatfishAssertException)
-
-    kwargs = dict(filters=filters, headers=headers, action="deny")
-    if startLocation is not None:
-        kwargs.update(startLocation=startLocation)
-
-    df = _get_question_object(session, 'searchFilters').searchFilters(
-        **kwargs).answer(snapshot).frame()  # type: ignore
-    if len(df) > 0:
-        return _raise_common(
-            "Found a flow that was denied, when expected to be permitted\n{}".format(
-                df.to_string()), soft)
-    return True
-
-
 def assert_filter_denies(filters, headers, startLocation=None, soft=False,
                          snapshot=None, session=None):
     # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
     """
-    Check if a named ACL denies a specified set of flows.
+    Check if a filter (e.g., ACL) denies a specified set of flows.
 
     :param filters: the specification for the filter (filterSpec) to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
@@ -249,6 +219,65 @@ def assert_filter_denies(filters, headers, startLocation=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
+                                           session=None):
+    # type: (str, bool, bool, Optional[Session]) -> bool
+    """
+    Check that a filter (e.g. an ACL) has no unreachable lines.
+
+    :param filters: the specification for the filter (filterSpec) to check
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param snapshot: the snapshot on which to check the assertion
+    :param session: Batfish session to use for the assertion
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(filters=filters)
+
+    df = _get_question_object(session,
+                              'filterLineReachability').filterLineReachability(
+        **kwargs).answer(snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found unreachable filter line(s), when none were expected\n{}".format(
+                df.to_string()), soft)
+    return True
+
+
+def assert_filter_permits(filters, headers, startLocation=None, soft=False,
+                          snapshot=None, session=None):
+    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
+    """
+    Check if a filter (e.g., ACL) permits a specified set of flows.
+
+    :param filters: the specification for the filter (filterSpec) to check
+    :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+    :param startLocation: LocationSpec indicating where a flow starts
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param snapshot: the snapshot on which to check the assertion
+    :param session: Batfish session to use for the assertion
+    :return: True if the assertion passes
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    kwargs = dict(filters=filters, headers=headers, action="deny")
+    if startLocation is not None:
+        kwargs.update(startLocation=startLocation)
+
+    df = _get_question_object(session, 'searchFilters').searchFilters(
+        **kwargs).answer(snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found a flow that was denied, when expected to be permitted\n{}".format(
                 df.to_string()), soft)
     return True
 
