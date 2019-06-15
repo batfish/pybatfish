@@ -197,7 +197,7 @@ def assert_filter_permits(filters, headers, startLocation=None, soft=False,
     """
     Check if a named ACL permits a specified set of flows.
 
-    :param filters: the specification for the filter to check
+    :param filters: the specification for the filter (filterSpec) to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -228,7 +228,7 @@ def assert_filter_denies(filters, headers, startLocation=None, soft=False,
     """
     Check if a named ACL denies a specified set of flows.
 
-    :param filters: the specification for the filter to check
+    :param filters: the specification for the filter (filterSpec) to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
