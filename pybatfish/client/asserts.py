@@ -37,6 +37,7 @@ if TYPE_CHECKING:
     from pybatfish.client.session import Session
 
 __all__ = [
+    'assert_filter_has_no_unreachable_lines',
     'assert_filter_denies',
     'assert_filter_permits',
     'assert_flows_fail',
@@ -45,7 +46,6 @@ __all__ = [
     'assert_has_route',
     'assert_no_incompatible_bgp_sessions',
     'assert_no_undefined_references',
-    'assert_filter_has_no_unreachable_lines',
     'assert_num_results',
     'assert_zero_results',
 ]
