@@ -191,13 +191,13 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
     return True
 
 
-def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
+def assert_filter_permits(filters, headers, startLocation=None, soft=False,
                           snapshot=None, session=None):
     # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL permits a specified set of flows.
 
-    :param filter_name: the name of ACL to check
+    :param filters: the specification for the filter (filterSpec) to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -209,7 +209,7 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    kwargs = dict(filters=filter_name, headers=headers, action="deny")
+    kwargs = dict(filters=filters, headers=headers, action="deny")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
@@ -222,13 +222,13 @@ def assert_filter_permits(filter_name, headers, startLocation=None, soft=False,
     return True
 
 
-def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
+def assert_filter_denies(filters, headers, startLocation=None, soft=False,
                          snapshot=None, session=None):
     # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
     """
     Check if a named ACL denies a specified set of flows.
 
-    :param filter_name: the name of ACL to check
+    :param filters: the specification for the filter (filterSpec) to check
     :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
     :param startLocation: LocationSpec indicating where a flow starts
     :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -240,7 +240,7 @@ def assert_filter_denies(filter_name, headers, startLocation=None, soft=False,
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    kwargs = dict(filters=filter_name, headers=headers, action="permit")
+    kwargs = dict(filters=filters, headers=headers, action="permit")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
