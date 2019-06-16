@@ -229,6 +229,10 @@ def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
     """
     Check that a filter (e.g. an ACL) has no unreachable lines.
 
+    A filter line is considered unreachable if it will never match a packet,
+    e.g., because its match condition is empty or covered completely by those of
+    prior lines."
+
     :param filters: the specification for the filter (filterSpec) to check
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
