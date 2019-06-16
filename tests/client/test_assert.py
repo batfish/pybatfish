@@ -18,12 +18,12 @@ from pandas import DataFrame
 from pybatfish.client.asserts import (_get_question_object,
                                       _raise_common,
                                       assert_filter_denies,
+                                      assert_filter_has_no_unreachable_lines,
                                       assert_filter_permits,
                                       assert_flows_fail,
                                       assert_flows_succeed,
                                       assert_no_incompatible_bgp_sessions,
-                                      assert_no_undefined_references,
-                                      assert_filter_has_no_unreachable_lines)
+                                      assert_no_undefined_references)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
