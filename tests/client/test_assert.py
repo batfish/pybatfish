@@ -18,6 +18,7 @@ from pandas import DataFrame
 from pybatfish.client.asserts import (_get_question_object,
                                       _raise_common,
                                       assert_filter_denies,
+                                      assert_filter_has_no_unreachable_lines,
                                       assert_filter_permits,
                                       assert_flows_fail,
                                       assert_flows_succeed,
@@ -67,6 +68,100 @@ class MockQuestion(QuestionBase):
 
     def answer(self, *args, **kwargs):
         return self._answer
+
+
+def test_filter_denies():
+    """Confirm filter-denies assert passes and fails as expected when specifying a session."""
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'searchFilters',
+                      create=True) as mock_search_filters:
+        # Test success
+        mock_search_filters.return_value = MockQuestion()
+        assert_filter_denies('filter', headers, session=bf)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               action='permit')
+        # Test failure; also test that startLocation is passed through
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        mock_search_filters.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_filter_denies('filter', headers, startLocation='Ethernet1',
+                                 session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='permit')
+
+
+def test_filter_denies_no_session():
+    """
+    Confirm filter-denies assert passes and fails as expected when not specifying a session.
+
+    For reverse compatibility.
+    """
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
+        # Test success
+        mock_search_filters.return_value = MockQuestion()
+        assert_filter_denies('filter', headers)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               action='permit')
+        # Test failure; also test that startLocation is passed through
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        mock_search_filters.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_filter_denies('filter', headers, startLocation='Ethernet1')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='permit')
+
+
+def test_filter_has_no_unreachable_lines():
+    """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when specifying a session."""
+    filters = "filter1"
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'filterLineReachability',
+                      create=True) as filterLineReachability:
+        # Test success
+        filterLineReachability.return_value = MockQuestion()
+        assert_filter_has_no_unreachable_lines(filters=filters, session=bf)
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'UnreachableLine': 'found', 'More': 'data'}])
+        filterLineReachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_filter_has_no_unreachable_lines(filters=filters, session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_filter_has_no_unreachable_lines_no_session():
+    """Confirm no-unreachable-filter-lines assert passes and fails as expected when no session is specified."""
+    filters = "filter1"
+    with patch.object(bfq, 'filterLineReachability',
+                      create=True) as filterLineReachability:
+        # Test success
+        filterLineReachability.return_value = MockQuestion()
+        assert_filter_has_no_unreachable_lines(filters=filters)
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'UnreachableLine': 'found', 'More': 'data'}])
+        filterLineReachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_filter_has_no_unreachable_lines(filters=filters)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
 
 
 def test_filter_permits():
@@ -124,61 +219,6 @@ def test_filter_permits_no_session():
                                                headers=headers,
                                                startLocation='Ethernet1',
                                                action='deny')
-
-
-def test_filter_denies():
-    """Confirm filter-denies assert passes and fails as expected when specifying a session."""
-    headers = HeaderConstraints(srcIps='1.1.1.1')
-    bf = Session(load_questions=False)
-    with patch.object(bf.q, 'searchFilters',
-                      create=True) as mock_search_filters:
-        # Test success
-        mock_search_filters.return_value = MockQuestion()
-        assert_filter_denies('filter', headers, session=bf)
-        mock_search_filters.assert_called_with(filters='filter',
-                                               headers=headers,
-                                               action='permit')
-        # Test failure; also test that startLocation is passed through
-        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
-        mock_search_filters.return_value = MockQuestion(
-            MockTableAnswer(mock_df))
-        with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_denies('filter', headers, startLocation='Ethernet1',
-                                 session=bf)
-        # Ensure found answer is printed
-        assert mock_df.to_string() in str(excinfo.value)
-        mock_search_filters.assert_called_with(filters='filter',
-                                               headers=headers,
-                                               startLocation='Ethernet1',
-                                               action='permit')
-
-
-def test_filter_denies_no_session():
-    """
-    Confirm filter-denies assert passes and fails as expected when not specifying a session.
-
-    For reverse compatibility.
-    """
-    headers = HeaderConstraints(srcIps='1.1.1.1')
-    with patch.object(bfq, 'searchFilters', create=True) as mock_search_filters:
-        # Test success
-        mock_search_filters.return_value = MockQuestion()
-        assert_filter_denies('filter', headers)
-        mock_search_filters.assert_called_with(filters='filter',
-                                               headers=headers,
-                                               action='permit')
-        # Test failure; also test that startLocation is passed through
-        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
-        mock_search_filters.return_value = MockQuestion(
-            MockTableAnswer(mock_df))
-        with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_denies('filter', headers, startLocation='Ethernet1')
-        # Ensure found answer is printed
-        assert mock_df.to_string() in str(excinfo.value)
-        mock_search_filters.assert_called_with(filters='filter',
-                                               headers=headers,
-                                               startLocation='Ethernet1',
-                                               action='permit')
 
 
 def test_flows_fail():
