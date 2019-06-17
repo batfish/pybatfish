@@ -286,8 +286,9 @@ class Session(object):
                 self.delete_snapshot(name)
             else:
                 raise ValueError(
-                    'A snapshot named ''{}'' already exists in network ''{}'''.format(
-                        name, self.network))
+                    'A snapshot named ''{}'' already exists in network ''{}''. '
+                    'Use overwrite = True if you want to overwrite the '
+                    'existing snapshot'.format(name, self.network))
 
         encoded_file = None
         if add_files is not None:
