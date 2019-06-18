@@ -791,7 +791,7 @@ class Session(object):
         contact you if they have follow-up questions or to update you when the
         issues you encountered are resolved.
 
-        :param dry_run: whether or not to skip upload; if False, anonymized files will be stored locally, otherwise anonymized files will be uploaded to Batfish developers
+        :param dry_run: if True, upload is skipped and the anonymized files will be stored locally for review. If False, anonymized files will be uploaded to the Batfish developers
         :type dry_run: bool
         :param netconan_config: path to Netconan configuration file
         :type netconan_config: str
