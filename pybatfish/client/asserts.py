@@ -120,6 +120,19 @@ def _raise_common(err_text, soft=False):
         raise BatfishAssertException(err_text)
 
 
+def _format_df(df, df_format):
+    # type: (DataFrame, str) -> bool
+    """Utility function for stringifying the dataframe based on desired format."""
+    if df_format == "table":
+        return df.to_string()
+    elif df_format == "records":
+        return df.to_dict(orient="records")
+    else:
+        raise ValueError(
+            "Unknown df_format {}. Should be 'table' or 'records'".format(
+                df_format))
+
+
 # TODO: converge on representation of routes. (Blocked on backend batfish).
 # TODO: allow this to be role-based. (Again, backend support).
 def assert_has_route(routes, expected_route, node, vrf='default', soft=False):
@@ -194,8 +207,8 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
 
 
 def assert_filter_denies(filters, headers, startLocation=None, soft=False,
-                         snapshot=None, session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
+                         snapshot=None, session=None, df_format="table"):
+    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if a filter (e.g., ACL) denies a specified set of flows.
 
@@ -206,6 +219,8 @@ def assert_filter_denies(filters, headers, startLocation=None, soft=False,
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -220,13 +235,13 @@ def assert_filter_denies(filters, headers, startLocation=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
-                                           session=None):
-    # type: (str, bool, bool, Optional[Session]) -> bool
+                                           session=None, df_format="table"):
+    # type: (str, bool, bool, Optional[Session], str) -> bool
     """
     Check that a filter (e.g. an ACL) has no unreachable lines.
 
@@ -239,6 +254,8 @@ def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -252,13 +269,13 @@ def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
     if len(df) > 0:
         return _raise_common(
             "Found unreachable filter line(s), when none were expected\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_filter_permits(filters, headers, startLocation=None, soft=False,
-                          snapshot=None, session=None):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session]) -> bool
+                          snapshot=None, session=None, df_format="table"):
+    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if a filter (e.g., ACL) permits a specified set of flows.
 
@@ -269,6 +286,8 @@ def assert_filter_permits(filters, headers, startLocation=None, soft=False,
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -283,13 +302,13 @@ def assert_filter_permits(filters, headers, startLocation=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_flows_fail(startLocation, headers, soft=False, snapshot=None,
-                      session=None):
-    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
+                      session=None, df_format="table"):
+    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if the specified set of flows, denoted by starting locations and headers, fail.
 
@@ -299,6 +318,8 @@ def assert_flows_fail(startLocation, headers, soft=False, snapshot=None,
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -313,13 +334,13 @@ def assert_flows_fail(startLocation, headers, soft=False, snapshot=None,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that succeed, when expected to fail\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
-                         session=None):
-    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session]) -> bool
+                         session=None, df_format="table"):
+    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if the specified set of flows, denoted by starting locations and headers, succeed.
 
@@ -329,6 +350,8 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
         not a failure)
     :param snapshot: the snapshot on which to check the assertion
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
@@ -343,15 +366,16 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
     if len(df) > 0:
         return _raise_common(
             "Found a flow that failed, when expected to succeed\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
                                         status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
                                         snapshot=None,
-                                        soft=False, session=None):
-    # type: (Optional[str], Optional[str], str, Optional[str], bool, Optional[Session]) -> bool
+                                        soft=False, session=None,
+                                        df_format="table"):
+    # type: (Optional[str], Optional[str], str, Optional[str], bool, Optional[Session], str) -> bool
     """Assert that there are no incompatible BGP sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -361,6 +385,8 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
@@ -378,14 +404,14 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
     if len(df) > 0:
         return _raise_common(
             "Found incompatible BGP session(s), when none were expected\n{}".format(
-                df.to_string()), soft)
+                _format_df(df_format, df_format)), soft)
     return True
 
 
 def assert_no_unestablished_bgp_sessions(nodes=None, remote_nodes=None,
                                          snapshot=None, soft=False,
-                                         session=None):
-    # type: (Optional[str], Optional[str], Optional[str], bool, Optional[Session]) -> bool
+                                         session=None, df_format="table"):
+    # type: (Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
     """Assert that there are no BGP sessions that are compatible but not established.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -394,6 +420,8 @@ def assert_no_unestablished_bgp_sessions(nodes=None, remote_nodes=None,
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
@@ -411,19 +439,21 @@ def assert_no_unestablished_bgp_sessions(nodes=None, remote_nodes=None,
     if len(df) > 0:
         return _raise_common(
             "Found compatible BGP session(s) that were not established, when none were expected\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
 def assert_no_undefined_references(snapshot=None, soft=False,
-                                   session=None):
-    # type: (Optional[str], bool, Optional[Session]) -> bool
+                                   session=None, df_format="table"):
+    # type: (Optional[str], bool, Optional[Session], str) -> bool
     """Assert that there are no undefined references present in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
@@ -434,7 +464,7 @@ def assert_no_undefined_references(snapshot=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found undefined reference(s), when none were expected\n{}".format(
-                df.to_string()), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 
