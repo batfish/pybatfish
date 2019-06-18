@@ -404,7 +404,7 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
     if len(df) > 0:
         return _raise_common(
             "Found incompatible BGP session(s), when none were expected\n{}".format(
-                _format_df(df_format, df_format)), soft)
+                _format_df(df, df_format)), soft)
     return True
 
 

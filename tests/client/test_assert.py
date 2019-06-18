@@ -13,9 +13,10 @@
 #   limitations under the License.
 import pytest
 import six
+import pandas as pd
 from pandas import DataFrame
 
-from pybatfish.client.asserts import (_get_question_object,
+from pybatfish.client.asserts import (_format_df, _get_question_object,
                                       _raise_common,
                                       assert_filter_denies,
                                       assert_filter_has_no_unreachable_lines,
@@ -53,6 +54,23 @@ def test_raise_common_warn():
     with pytest.warns(BatfishAssertWarning):
         result = _raise_common("foobar", True)
     assert not result
+
+
+def test_format_df_illegal_format():
+    with pytest.raises(ValueError):
+        _format_df(None, "nothing")
+
+
+def test_format_df_table():
+    df = pd.DataFrame({'col1': [1, 2],
+                      'col2': [3, 4]})
+    assert _format_df(df, "table") == df.to_string()
+
+
+def test_format_df_records():
+    df = pd.DataFrame({'col1': [1, 2],
+                      'col2': [3, 4]})
+    assert _format_df(df, "records") == df.to_dict(orient="records")
 
 
 class MockTableAnswer(TableAnswer):
