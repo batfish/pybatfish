@@ -124,7 +124,7 @@ def _format_df(df, df_format):
     # type: (DataFrame, str) -> str
     """Utility function for stringifying the dataframe based on desired format."""
     if df_format == "table":
-        return df.to_string()
+        return str(df.to_string())
     elif df_format == "records":
         return str(df.to_dict(orient="records"))
     else:
