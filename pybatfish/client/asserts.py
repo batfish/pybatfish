@@ -121,12 +121,12 @@ def _raise_common(err_text, soft=False):
 
 
 def _format_df(df, df_format):
-    # type: (DataFrame, str) -> bool
+    # type: (DataFrame, str) -> str
     """Utility function for stringifying the dataframe based on desired format."""
     if df_format == "table":
         return df.to_string()
     elif df_format == "records":
-        return df.to_dict(orient="records")
+        return str(df.to_dict(orient="records"))
     else:
         raise ValueError(
             "Unknown df_format {}. Should be 'table' or 'records'".format(

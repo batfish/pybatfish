@@ -70,7 +70,7 @@ def test_format_df_table():
 def test_format_df_records():
     df = pd.DataFrame({'col1': [1, 2],
                       'col2': [3, 4]})
-    assert _format_df(df, "records") == df.to_dict(orient="records")
+    assert _format_df(df, "records") == str(df.to_dict(orient="records"))
 
 
 class MockTableAnswer(TableAnswer):
