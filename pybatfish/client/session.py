@@ -31,7 +31,7 @@ from pybatfish.client._diagnostics import (upload_diagnostics,
                                            warn_on_snapshot_failure)
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
-from pybatfish.datamodel import (Edge, Interface, NodeRoleDimension,
+from pybatfish.datamodel import (Interface, NodeRoleDimension,
                                  NodeRolesData, ReferenceBook,
                                  ReferenceLibrary)
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
@@ -220,11 +220,10 @@ class Session(object):
                                      json_data)
 
     def fork_snapshot(self, base_name, name=None, overwrite=False,
-                      deactivate_interfaces=None, deactivate_links=None,
-                      deactivate_nodes=None, restore_interfaces=None,
-                      restore_links=None, restore_nodes=None, add_files=None,
-                      extra_args=None):
-        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Optional[str]
+                      deactivate_interfaces=None, deactivate_nodes=None,
+                      restore_interfaces=None, restore_nodes=None,
+                      add_files=None, extra_args=None):
+        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Optional[str]
         """
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
@@ -237,14 +236,10 @@ class Session(object):
         :type overwrite: bool
         :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
         :type deactivate_interfaces: list[Interface]
-        :param deactivate_links: list of links to deactivate in new snapshot
-        :type deactivate_links: list[Edge]
         :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
         :type deactivate_nodes: list[str]
         :param restore_interfaces: list of interfaces to reactivate
         :type restore_interfaces: list[Interface]
-        :param restore_links: list of links to reactivate
-        :type restore_links: list[Edge]
         :param restore_nodes: list of names of nodes to reactivate
         :type restore_nodes: list[str]
         :param add_files: path to zip file or directory containing files to add
@@ -257,10 +252,8 @@ class Session(object):
         """
         ss_name = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
                                       deactivate_interfaces=deactivate_interfaces,
-                                      deactivate_links=deactivate_links,
                                       deactivate_nodes=deactivate_nodes,
                                       restore_interfaces=restore_interfaces,
-                                      restore_links=restore_links,
                                       restore_nodes=restore_nodes,
                                       add_files=add_files,
                                       extra_args=extra_args)
@@ -270,11 +263,10 @@ class Session(object):
 
     def _fork_snapshot(self, base_name, name=None, overwrite=False,
                        background=False, deactivate_interfaces=None,
-                       deactivate_links=None, deactivate_nodes=None,
-                       restore_interfaces=None, restore_links=None,
+                       deactivate_nodes=None, restore_interfaces=None,
                        restore_nodes=None, add_files=None,
                        extra_args=None):
-        # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
         self._check_network()
 
         if name is None:
@@ -307,10 +299,8 @@ class Session(object):
             "snapshotBase": base_name,
             "snapshotNew": name,
             "deactivateInterfaces": deactivate_interfaces,
-            "deactivateLinks": deactivate_links,
             "deactivateNodes": deactivate_nodes,
             "restoreInterfaces": restore_interfaces,
-            "restoreLinks": restore_links,
             "restoreNodes": restore_nodes,
             "zipFile": encoded_file
         }

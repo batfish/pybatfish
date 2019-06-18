@@ -27,7 +27,7 @@ from deprecated import deprecated
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
-    Edge, Interface,
+    Interface,
     VariableType)
 from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
                                                   NodeRolesData, ReferenceBook,
@@ -220,10 +220,9 @@ def bf_extract_answer_summary(answer_dict):
 
 def bf_fork_snapshot(base_name, name=None, overwrite=False,
                      background=False, deactivate_interfaces=None,
-                     deactivate_links=None, deactivate_nodes=None,
-                     restore_interfaces=None, restore_links=None,
+                     deactivate_nodes=None, restore_interfaces=None,
                      restore_nodes=None, add_files=None, extra_args=None):
-    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[List[Interface]], Optional[List[Edge]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+    # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
     :param base_name: name of the snapshot to copy
@@ -237,14 +236,10 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     :type background: bool
     :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
     :type deactivate_interfaces: list[Interface]
-    :param deactivate_links: list of links to deactivate in new snapshot
-    :type deactivate_links: list[Edge]
     :param deactivate_nodes: list of names of nodes to deactivate in new snapshot
     :type deactivate_nodes: list[str]
     :param restore_interfaces: list of interfaces to reactivate
     :type restore_interfaces: list[Interface]
-    :param restore_links: list of links to reactivate
-    :type restore_links: list[Edge]
     :param restore_nodes: list of names of nodes to reactivate
     :type restore_nodes: list[str]
     :param add_files: path to zip file or directory containing files to add
@@ -258,10 +253,8 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
     return bf_session._fork_snapshot(base_name, name=name, overwrite=overwrite,
                                      background=background,
                                      deactivate_interfaces=deactivate_interfaces,
-                                     deactivate_links=deactivate_links,
                                      deactivate_nodes=deactivate_nodes,
                                      restore_interfaces=restore_interfaces,
-                                     restore_links=restore_links,
                                      restore_nodes=restore_nodes,
                                      add_files=add_files,
                                      extra_args=extra_args)
