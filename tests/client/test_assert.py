@@ -11,10 +11,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-import pytest
 import pandas as pd
-from pandas import DataFrame
+import pytest
 import six
+from pandas import DataFrame
 
 from pybatfish.client.asserts import (_format_df, _get_question_object,
                                       _raise_common,
