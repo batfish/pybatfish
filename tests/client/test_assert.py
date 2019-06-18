@@ -23,7 +23,8 @@ from pybatfish.client.asserts import (_get_question_object,
                                       assert_flows_fail,
                                       assert_flows_succeed,
                                       assert_no_incompatible_bgp_sessions,
-                                      assert_no_undefined_references)
+                                      assert_no_undefined_references,
+                                      assert_no_unestablished_bgp_sessions)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
@@ -390,6 +391,55 @@ def test_no_incompatible_bgp_sessions_no_session():
         bgpSessionCompatibility.assert_called_with(nodes='nodes',
                                                    remote_nodes='remote_nodes',
                                                    status='.*')
+
+
+def test_no_unestablished_bgp_sessions():
+    """Confirm no-uncompatible-bgp-sessions assert passes and fails as expected when specifying a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'bgpSessionStatus',
+                      create=True) as bgpSessionStatus:
+        # Test success
+        bgpSessionStatus.return_value = MockQuestion()
+        assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                             remote_nodes='remote_nodes',
+                                             session=bf)
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        bgpSessionStatus.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                                 remote_nodes='remote_nodes',
+                                                 session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes')
+
+
+def test_no_unestablished_bgp_sessions_no_session():
+    """Confirm no-unestablished-bgp-sessions assert passes and fails as expected when not specifying a session."""
+    with patch.object(bfq, 'bgpSessionStatus',
+                      create=True) as bgpSessionStatus:
+        # Test success
+        bgpSessionStatus.return_value = MockQuestion()
+        assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                             remote_nodes='remote_nodes')
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        bgpSessionStatus.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                                 remote_nodes='remote_nodes')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes')
 
 
 def test_no_undefined_references():
