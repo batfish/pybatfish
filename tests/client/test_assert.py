@@ -404,7 +404,8 @@ def test_no_unestablished_bgp_sessions():
                                              remote_nodes='remote_nodes',
                                              session=bf)
         bgpSessionStatus.assert_called_with(nodes='nodes',
-                                            remote_nodes='remote_nodes')
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
         # Test failure
         mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
         bgpSessionStatus.return_value = MockQuestion(
@@ -416,7 +417,8 @@ def test_no_unestablished_bgp_sessions():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionStatus.assert_called_with(nodes='nodes',
-                                            remote_nodes='remote_nodes')
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
 
 
 def test_no_unestablished_bgp_sessions_no_session():
@@ -428,7 +430,8 @@ def test_no_unestablished_bgp_sessions_no_session():
         assert_no_unestablished_bgp_sessions(nodes='nodes',
                                              remote_nodes='remote_nodes')
         bgpSessionStatus.assert_called_with(nodes='nodes',
-                                            remote_nodes='remote_nodes')
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
         # Test failure
         mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
         bgpSessionStatus.return_value = MockQuestion(
@@ -439,7 +442,8 @@ def test_no_unestablished_bgp_sessions_no_session():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionStatus.assert_called_with(nodes='nodes',
-                                            remote_nodes='remote_nodes')
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
 
 
 def test_no_undefined_references():
