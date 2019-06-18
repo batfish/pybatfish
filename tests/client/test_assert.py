@@ -12,9 +12,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import pytest
-import six
 import pandas as pd
 from pandas import DataFrame
+import six
 
 from pybatfish.client.asserts import (_format_df, _get_question_object,
                                       _raise_common,
