@@ -145,7 +145,6 @@ def _process_facts(node_props, iface_props, bgp_process_props, bgp_peer_props):
 def _convert_listwrapper(dict_):
     # type: (Mapping[Text, Any]) -> Dict[Text, Any]
     """Convert ListWrapper objects in the specified dict into plain lists."""
-    # TODO handle list wrappers inside of lists?
     out = {}  # type: Dict[Text, Any]
     for k in dict_:
         val = dict_[k]
