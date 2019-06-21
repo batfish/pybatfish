@@ -14,12 +14,8 @@
 #   limitations under the License.
 import os
 
-if six.PY3:
-    from unittest.mock import patch
-else:
-    from mock import patch
-
 import pytest
+import six
 import yaml
 from pandas import DataFrame
 
@@ -30,6 +26,11 @@ from pybatfish.client._facts import (
 from pybatfish.client.session import Session
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.question.question import QuestionBase
+
+if six.PY3:
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 
 class MockTableAnswer(TableAnswer):
