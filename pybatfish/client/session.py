@@ -225,7 +225,7 @@ class Session(object):
     def extract_facts(self, nodes='/.*/', output_directory=None):
         # type: (Text, Text) -> Dict[Text, Any]
         """
-        Extract and returns facts about the specified nodes on the current network snapshot.
+        Extract and return a dictionary of facts about the specified nodes on the current network snapshot.
 
         If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
 
@@ -827,7 +827,7 @@ class Session(object):
     def validate_facts(self, expected_facts, nodes='/.*/'):
         # type: (Text, Text) -> Dict[Text, Any]
         """
-        Return a dictionary of mismatched facts between the expected and actual facts.
+        Return a dictionary of mismatched facts between the loaded expected facts and the actual facts.
 
         :param expected_facts: path to directory to read expected fact YAML files from
         :type expected_facts: Text
