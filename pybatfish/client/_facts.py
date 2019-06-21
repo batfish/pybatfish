@@ -249,11 +249,10 @@ def _reorg_dict(dict, reorg_map):
 
 def _write_yaml_file(dict_, filepath):
     # type: (Dict[Text, Any], Text) -> None
-    # TODO write stream instead of dumping and writing dump
-
-    y = yaml.safe_dump(dict_, default_flow_style=False)
     with open(filepath, 'w') as f:
-        f.write(y)
+        # default_flow_style=False dumps lists as hyphen lists instead of
+        # square bracket lists
+        yaml.safe_dump(dict_, stream=f, default_flow_style=False)
 
 
 def write_facts(output_directory, facts):
