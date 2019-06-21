@@ -104,9 +104,10 @@ def test_load_facts_bad_dir(tmpdir):
 
     f = tmpdir.join('file')
     f.write('foo')
-    # File instead of dir should throw NotADirError
-    with pytest.raises(NotADirectoryError):
+    # File instead of dir should throw an exception about path not being a directory
+    with pytest.raises(Exception) as e:
         load_facts(str(f))
+    assert 'Not a directory' in str(e)
 
 
 def test_load_facts_mismatch_version(tmpdir):
@@ -208,8 +209,9 @@ def test_write_facts(tmpdir):
     write_facts(str(tmpdir), facts)
     for node in nodes:
         filename = node + '.yml'
-        assert os.path.isfile(tmpdir.join(filename))
-        with open(tmpdir.join(filename)) as f:
+        file_path = str(tmpdir.join(filename))
+        assert os.path.isfile(file_path)
+        with open(file_path) as f:
             node_facts_raw = yaml.safe_load(f.read())
             node_facts, node_version = _unencapsulate_facts(node_facts_raw)
             assert version == node_version, 'Each file has the correct version'
