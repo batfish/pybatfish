@@ -30,7 +30,7 @@ from pybatfish.client import resthelper, restv2helper, workhelper
 from pybatfish.client._diagnostics import (upload_diagnostics,
                                            warn_on_snapshot_failure)
 from pybatfish.client._facts import (
-    get_facts, load_facts, write_facts, validate_facts
+    get_facts, load_facts, validate_facts, write_facts
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
@@ -837,8 +837,8 @@ class Session(object):
         :rtype: dict
         """
         actual_facts = get_facts(self, nodes)
-        expected_facts = load_facts(expected_facts)
-        return validate_facts(expected_facts, actual_facts)
+        expected_facts_ = load_facts(expected_facts)
+        return validate_facts(expected_facts_, actual_facts)
 
     def _check_network(self):
         """Check if current network is set."""

@@ -15,7 +15,7 @@
 import os
 from collections import Mapping
 from copy import deepcopy
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, Tuple
+from typing import Any, Dict, Optional, TYPE_CHECKING, Text, Tuple
 
 import yaml
 
@@ -291,29 +291,31 @@ def _unencapsulate_facts(facts):
 
 
 def assert_dict_subset(actual, expected, prefix="", diffs=None):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[List]) -> Dict[Text, Any]
+    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict]) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested
     :param expected: the expected value of a dictionary
     """
     if diffs is None:
-        diffs = {}  # type: Dict[Text, Any]
+        diffs_out = {}  # type: Dict[Text, Any]
+    else:
+        diffs_out = diffs
     for k in expected:
         key_name = '{}{}'.format(prefix, k)
         if k not in actual:
-            diffs[key_name] = {
+            diffs_out[key_name] = {
                 'key_present': False,
                 'expected': expected[k],
             }
         else:
             if isinstance(expected[k], Mapping):
                 assert_dict_subset(actual[k], expected[k], key_name + '.',
-                                   diffs)
+                                   diffs_out)
             else:
                 if expected[k] != actual[k]:
-                    diffs[key_name] = {
+                    diffs_out[key_name] = {
                         'expected': expected[k],
                         'actual': actual[k],
                     }
-    return diffs
+    return diffs_out
