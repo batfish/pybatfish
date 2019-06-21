@@ -106,11 +106,14 @@ setup(
                       'netconan>=0.9.2',
                       'pandas>=0.24.1,<0.25.0',
                       'python-dateutil',
+                      'PyYAML',
                       'requests',
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (['backports.tempfile', 'enum34', 'typing'] if PY2 else []),
+                      ] + (
+                         ['backports.tempfile', 'enum34', 'typing']
+                         if PY2 else []),
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -125,7 +128,8 @@ setup(
                 'flake8-docstrings',
                 'flake8-import-order',
                 'jupyter',
-                'matplotlib<3.1.0', # brought in by jupyter; needs to work with py3.5
+                # brought in by jupyter; needs to work with py3.5
+                'matplotlib<3.1.0',
                 'nbformat',
                 'nbconvert',
                 'pytest>=4.2.0,<5.0.0',
