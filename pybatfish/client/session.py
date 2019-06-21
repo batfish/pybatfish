@@ -229,7 +229,7 @@ class Session(object):
 
         If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
 
-        :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to validate facts for.
+        :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to extract facts for.
         :type nodes: Text
         :param output_directory: path to directory to write facts to
         :type output_directory: Text
