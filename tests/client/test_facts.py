@@ -183,19 +183,16 @@ def test_validate_facts_not_matching_data():
                          _encapsulate_nodes_facts(actual, version))
 
     # Result should identify the mismatched value and the missing key
-    assert res['node1'] == [
-        {
-            'foo': {
-                'expected': 1,
-                'actual': 0,
-            }
+    assert res['node1'] == {
+        'foo': {
+            'expected': 1,
+            'actual': 0,
         },
-        {
-            'baz': {
-                'expected': 1,
-                'key_present': False,
-            }
-        }]
+        'baz': {
+            'expected': 1,
+            'key_present': False,
+        }
+    }
 
 
 def test_write_facts(tmpdir):
@@ -236,7 +233,7 @@ def test_assert_dict_subset_equal():
         'none': None,
     }
     # Equal dicts should result in no differences
-    assert assert_dict_subset(actual, expected) == []
+    assert assert_dict_subset(actual, expected) == {}
 
 
 def test_assert_dict_subset_subset():
@@ -256,7 +253,7 @@ def test_assert_dict_subset_subset():
         },
     }
     # Expected being a subset should result in no differences
-    assert assert_dict_subset(actual, expected) == []
+    assert assert_dict_subset(actual, expected) == {}
 
 
 def test_assert_dict_subset_not_equal():
@@ -283,29 +280,21 @@ def test_assert_dict_subset_not_equal():
 
     }
     # Make sure we identify missing and different values
-    assert assert_dict_subset(actual, expected) == [
-        {
-            'parent_key.missing_nested_key': {
-                'expected': 'missing_value',
-                'key_present': False,
-            }
+    assert assert_dict_subset(actual, expected) == {
+        'parent_key.missing_nested_key': {
+            'expected': 'missing_value',
+            'key_present': False,
         },
-        {
-            'parent_key.different_nested_key': {
-                'expected': 'different_value',
-                'actual': 'not_different_value',
-            }
+        'parent_key.different_nested_key': {
+            'expected': 'different_value',
+            'actual': 'not_different_value',
         },
-        {
-            'missing_key': {
-                'expected': 'missing_value',
-                'key_present': False,
-            }
+        'missing_key': {
+            'expected': 'missing_value',
+            'key_present': False,
         },
-        {
-            'different_key': {
-                'expected': 'different_value',
-                'actual': 'not_different_value',
-            }
-        },
-    ], ''
+        'different_key': {
+            'expected': 'different_value',
+            'actual': 'not_different_value',
+        }
+    }

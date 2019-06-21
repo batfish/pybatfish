@@ -291,35 +291,29 @@ def _unencapsulate_facts(facts):
 
 
 def assert_dict_subset(actual, expected, prefix="", diffs=None):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[List]) -> List
+    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[List]) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested
     :param expected: the expected value of a dictionary
     """
     if diffs is None:
-        diffs = []
+        diffs = {}  # type: Dict[Text, Any]
     for k in expected:
         key_name = '{}{}'.format(prefix, k)
         if k not in actual:
-            diffs.append({
-                key_name: {
-                    'key_present': False,
-                    'expected': expected[k],
-                }
-            })
+            diffs[key_name] = {
+                'key_present': False,
+                'expected': expected[k],
+            }
         else:
             if isinstance(expected[k], Mapping):
                 assert_dict_subset(actual[k], expected[k], key_name + '.',
                                    diffs)
             else:
                 if expected[k] != actual[k]:
-                    # diffs.append('{}: expected: {}, actual: {}'
-                    #             .format(key_name, expected[k], actual[k]))
-                    diffs.append({
-                        key_name: {
-                            'expected': expected[k],
-                            'actual': actual[k],
-                        }
-                    })
+                    diffs[key_name] = {
+                        'expected': expected[k],
+                        'actual': actual[k],
+                    }
     return diffs

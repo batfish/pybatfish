@@ -59,10 +59,10 @@ def test_validate_facts_different(session):
         nodes='basic')
 
     assert validation_results == {
-        'basic': [{
+        'basic': {
             'DNS.DNS_Servers': {
                 'actual': [],
                 'expected': ['1.2.3.4'],
             },
-        }]
+        }
     }, 'Only DNS servers should be different between expected and actual facts'
