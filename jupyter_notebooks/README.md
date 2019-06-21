@@ -14,6 +14,7 @@ The current list of notebooks are:
     - [Analyzing the Impact of Failures (and letting loose a Chaos Monkey)](Analyzing%20the%20Impact%20of%20Failures%20(and%20letting%20loose%20a%20Chaos%20Monkey).ipynb) [[video](https://youtu.be/1adAT6FK-UI)] shows how to analyze the impact of failures on the network and conduct Chaos Monkey style testing.
 - **Routing analysis**
     - [Introduction to Route Analysis](Introduction%20to%20Route%20Analysis.ipynb) [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)] shows how to analyze routing tables computed by Batfish.
+    - [Introduction to BGP Analysis](Introduction%20to%20BGP%20Analysis.ipynb) shows how to analyze BGP session configuration.
 
 We will continue adding notebooks that demonstrating additional use cases of Batfish. 
 
