@@ -29,6 +29,9 @@ from requests import HTTPError
 from pybatfish.client import resthelper, restv2helper, workhelper
 from pybatfish.client._diagnostics import (upload_diagnostics,
                                            warn_on_snapshot_failure)
+from pybatfish.client._facts import (
+    get_facts, load_facts, write_facts, validate_facts
+)
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (Interface, NodeRoleDimension,
@@ -218,6 +221,31 @@ class Session(object):
         resthelper.get_json_response(self,
                                      CoordConsts.SVC_RSC_DEL_SNAPSHOT,
                                      json_data)
+
+    def extract_facts(self, nodes='/.*/', output_directory=None):
+        # type: (Text, Text) -> Dict[Text, Any]
+        """
+        Extract and returns facts about the specified nodes on the current network snapshot.
+
+        If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
+
+        :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to validate facts for.
+        :type nodes: Text
+        :param output_directory: path to directory to write facts to
+        :type output_directory: Text
+        :return: facts about the specified nodes on the current network snapshot
+        :rtype: dict
+        """
+        facts = get_facts(self, nodes)
+        if output_directory:
+            if not os.path.exists(output_directory):
+                os.makedirs(output_directory)
+            if os.path.isfile(output_directory):
+                raise ValueError(
+                    'Cannot write facts to file, must be a directory: {}'.format(
+                        output_directory))
+            write_facts(output_directory, facts)
+        return facts
 
     def fork_snapshot(self, base_name, name=None, overwrite=False,
                       deactivate_interfaces=None, deactivate_nodes=None,
@@ -795,6 +823,22 @@ class Session(object):
             metadata['contact_info'] = contact_info
         return upload_diagnostics(self, metadata=metadata, dry_run=dry_run,
                                   netconan_config=netconan_config)
+
+    def validate_facts(self, expected_facts, nodes='/.*/'):
+        # type: (Text, Text) -> Dict[Text, Any]
+        """
+        Return a dictionary of mismatched facts between the expected and actual facts.
+
+        :param expected_facts: path to directory to read expected fact YAML files from
+        :type expected_facts: Text
+        :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to validate facts for.
+        :type nodes: Text
+        :return: facts about the specified nodes on the current network snapshot
+        :rtype: dict
+        """
+        actual_facts = get_facts(self, nodes)
+        expected_facts = load_facts(expected_facts)
+        return validate_facts(expected_facts, actual_facts)
 
     def _check_network(self):
         """Check if current network is set."""
