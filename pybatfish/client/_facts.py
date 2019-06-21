@@ -123,8 +123,8 @@ def validate_facts(expected, actual):
         }
     for node in actual_facts:
         if node in expected_facts:
-            res = assert_dict_subset(actual_facts[node],
-                                     expected_facts[node])
+            res = _assert_dict_subset(actual_facts[node],
+                                      expected_facts[node])
             if res:
                 failures[node] = res
     return failures
@@ -289,7 +289,7 @@ def _unencapsulate_facts(facts):
     return facts['nodes'], facts.get('version')
 
 
-def assert_dict_subset(actual, expected, prefix="", diffs=None):
+def _assert_dict_subset(actual, expected, prefix="", diffs=None):
     # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict]) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
@@ -309,8 +309,8 @@ def assert_dict_subset(actual, expected, prefix="", diffs=None):
             }
         else:
             if isinstance(expected[k], Mapping):
-                assert_dict_subset(actual[k], expected[k], key_name + '.',
-                                   diffs_out)
+                _assert_dict_subset(actual[k], expected[k], key_name + '.',
+                                    diffs_out)
             else:
                 if expected[k] != actual[k]:
                     diffs_out[key_name] = {

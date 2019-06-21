@@ -20,7 +20,7 @@ import yaml
 from pandas import DataFrame
 
 from pybatfish.client._facts import (
-    _encapsulate_nodes_facts, _unencapsulate_facts, assert_dict_subset,
+    _assert_dict_subset, _encapsulate_nodes_facts, _unencapsulate_facts,
     get_facts, load_facts, validate_facts, write_facts
 )
 from pybatfish.client.session import Session
@@ -233,7 +233,7 @@ def test_assert_dict_subset_equal():
         'none': None,
     }
     # Equal dicts should result in no differences
-    assert assert_dict_subset(actual, expected) == {}
+    assert _assert_dict_subset(actual, expected) == {}
 
 
 def test_assert_dict_subset_subset():
@@ -253,7 +253,7 @@ def test_assert_dict_subset_subset():
         },
     }
     # Expected being a subset should result in no differences
-    assert assert_dict_subset(actual, expected) == {}
+    assert _assert_dict_subset(actual, expected) == {}
 
 
 def test_assert_dict_subset_not_equal():
@@ -280,7 +280,7 @@ def test_assert_dict_subset_not_equal():
 
     }
     # Make sure we identify missing and different values
-    assert assert_dict_subset(actual, expected) == {
+    assert _assert_dict_subset(actual, expected) == {
         'parent_key.missing_nested_key': {
             'expected': 'missing_value',
             'key_present': False,
