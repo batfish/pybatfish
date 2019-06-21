@@ -13,7 +13,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import os
-from unittest.mock import patch
+
+if six.PY3:
+    from unittest.mock import patch
+else:
+    from mock import patch
 
 import pytest
 import yaml
@@ -94,7 +98,7 @@ def test_load_facts_bad_dir(tmpdir):
     """Test load facts when loading from bad directories."""
     # Empty input dir should throw ValueError
     with pytest.raises(ValueError) as e:
-        load_facts(tmpdir)
+        load_facts(str(tmpdir))
     assert 'No files present in specified dir' in str(e)
 
     f = tmpdir.join('file')
@@ -200,7 +204,7 @@ def test_write_facts(tmpdir):
     nodes = {'node1': 'foo', 'node2': 'bar'}
     version = 'version'
     facts = _encapsulate_nodes_facts(nodes, version)
-    write_facts(tmpdir, facts)
+    write_facts(str(tmpdir), facts)
     for node in nodes:
         filename = node + '.yml'
         assert os.path.isfile(tmpdir.join(filename))
