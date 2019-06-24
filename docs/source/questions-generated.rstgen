@@ -109,10 +109,10 @@ Questions that return the contents of configuration in a structured format.
    
        Default value: ``.*``
    :type nodes: nodeSpec
-   :param types: Include structures whose vendor-specific type matches this specifier.
+   :param types: Include structures whose vendor-specific type matches this string or regex.
    
        Default value: ``.*``
-   :type types: namedStructureSpec
+   :type types: javaRegex
 
    Return table columns:
 
@@ -505,10 +505,10 @@ Questions that return the contents of configuration in a structured format.
    
        Default value: ``.*``
    :type nodes: nodeSpec
-   :param types: Include structures whose vendor-specific type matches this specifier.
+   :param types: Include structures whose vendor-specific type matches this string or regex.
    
        Default value: ``.*``
-   :type types: namedStructureSpec
+   :type types: javaRegex
 
    Return table columns:
 
@@ -1164,7 +1164,14 @@ Questions that exhaustively search for flows that meet specified constraints.
    :type headers: headerConstraint
    :param pathConstraints: Constraint the path a flow can take (start/end/transit locations).
    :type pathConstraints: pathConstraint
-   :param returnFlowType: Specifies whether to search for return flows that are successful (SUCCESS), that fail (FAILURE), or that can either succeed or fail depending on the path taken (MULTIPATH_INCONSISTENT). The default is SUCCESS.
+   :param returnFlowType: Specifies the type of return flows to search.
+       Allowed values:
+   
+       * SUCCESS: Flows that are successful
+       * FAILURE: Flows that fail
+       * MULTIPATH_INCONSISTENT: Flows that succeed or fail depending on the path
+   
+       Default value: ``SUCCESS``
    :type returnFlowType: string
 
    Return table columns:
@@ -1333,10 +1340,10 @@ Questions that analyze ACLs and firewall rules.
    This question can be used to summarize how a filter has changed over time. In particular, it highlights differences that cause flows to be denied when they used to be permitted, or vice versa. The output is a table that includes pairs of lines, one from each version of the filter, that both match at least one common flow, and have different action (permit or deny). This is a differential question and the reference snapshot to compare against must be provided in the call to answer().
    
    
-   :param nodes: Only evaluate filters present on nodes matching this specifier.
+   :param nodes: Only evaluate filters present on nodes matching this node specifier.
    :type nodes: nodeSpec
-   :param filters: Only evaluate filters that match this regex.
-   :type filters: filter
+   :param filters: Only evaluate filters that match this filter specifier.
+   :type filters: filterSpec
    :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
    :type ignoreComposites: boolean
 
@@ -1575,6 +1582,7 @@ Questions that analyze routing
    
        * main
        * bgp
+       * evpn
    :type rib: string
 
    Return table columns:
