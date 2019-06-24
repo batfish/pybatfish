@@ -1,0 +1,12 @@
+nodes:
+  basic:
+    Configuration_Format: CISCO_IOS
+    DNS:
+      DNS_Servers: ['1.2.3.4']
+      DNS_Source_Interface: null
+    IP_Access_Lists:
+    - '101'
+    - '102'
+    - '103'
+    Zones: []
+version: batfish_v0
