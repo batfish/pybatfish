@@ -82,7 +82,7 @@ cat <<EOF
   - wait
 EOF
 
-###### Integration tests
+###### Integration tests and doctests
 for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} integration tests"
@@ -92,6 +92,7 @@ cat <<EOF
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > workspace/batfish.log &"
       - "pip install -e .[dev] -q"
       - "pytest tests/integration"
+      - "pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
