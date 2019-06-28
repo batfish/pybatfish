@@ -128,14 +128,14 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
     """
     Get a list of autocomplete suggestions that match the provided query based on the variable type.
 
-    If completion is not supported for the provied variable type a BatfishException will be raised.
+    If completion is not supported for the provided variable type a BatfishException will be raised.
 
     Usage Example::
 
         >>> from pybatfish.client.commands import bf_auto_complete, bf_set_network
         >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
         >>> name = bf_set_network()
-        >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b")
+        >>> bf_auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b") # doctest: +SKIP
         [AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='bgp'),
             AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ebgp'),
             AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ibgp')]

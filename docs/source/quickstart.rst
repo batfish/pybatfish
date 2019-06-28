@@ -19,10 +19,12 @@ In these instructions, we assumed that Batfish is running on the same machine as
 >>> load_questions()
 
 4. Upload a network snapshot (you'll see some log messages followed by the
-name of initialized snapshot (prefixed by ``ss_``):
+name of initialized snapshot):
 
->>> bf_init_snapshot('jupyter_notebooks/networks/example') # doctest: +ELLIPSIS
-'ss_...'
+>>> bf_set_network('ex-net')
+'ex-net'
+>>> bf_init_snapshot('jupyter_notebooks/networks/example', name='ex-net-timestamp')
+'ex-net-timestamp'
 
 Here, an example network that is part of the `Pybatfish GitHub repo <https://github.com/batfish/pybatfish>`_ is being uploaded. In general, this location is a folder or a zip containing a network snapshot. See `instructions for packaging snapshots <https://github.com/batfish/batfish/wiki/Packaging-snapshots-for-analysis>`_.
 
@@ -53,7 +55,7 @@ on the dataframe will print the first 5 rows:
 >>> iface_ans = bfq.interfaceProperties(nodes='as1border1', interfaces='GigabitEthernet0/0', properties='all-prefixes').answer()
 >>> iface_ans
                            Interface
-    0  as1border1:GigabitEthernet0/0
+    0  as1border1[GigabitEthernet0/0]
 
 For additional and more in-depth examples, check out the
 `Jupyter Notebooks <https://github.com/batfish/pybatfish/tree/master/jupyter_notebooks>`_.
