@@ -34,10 +34,10 @@ from pybatfish.client._facts import (
 )
 from pybatfish.client.asserts import (
     assert_filter_denies, assert_filter_has_no_unreachable_lines,
-    assert_filter_permits,
-    assert_flows_fail, assert_no_incompatible_bgp_sessions,
-    assert_no_undefined_references, assert_no_unestablished_bgp_sessions,
-    assert_flows_succeed, _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX
+    assert_filter_permits, assert_flows_fail,
+    assert_no_incompatible_bgp_sessions, assert_no_undefined_references,
+    assert_no_unestablished_bgp_sessions, assert_flows_succeed,
+    _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
@@ -59,8 +59,7 @@ class Asserts(object):
         self.session = session
 
     def assert_filter_denies(self, filters, headers, startLocation=None,
-                             soft=False,
-                             snapshot=None, df_format="table"):
+                             soft=False, snapshot=None, df_format="table"):
         # type: (str, HeaderConstraints, str, bool, Optional[str], str) -> bool
         """
         Check if a filter (e.g., ACL) denies a specified set of flows.
@@ -101,8 +100,7 @@ class Asserts(object):
                                                       self.session, df_format)
 
     def assert_filter_permits(self, filters, headers, startLocation=None,
-                              soft=False,
-                              snapshot=None, df_format="table"):
+                              soft=False, snapshot=None, df_format="table"):
         # type: (str, HeaderConstraints, str, bool, Optional[Session], str) -> bool
         """
         Check if a filter (e.g., ACL) permits a specified set of flows.
@@ -121,8 +119,7 @@ class Asserts(object):
                                      snapshot, self.session, df_format)
 
     def assert_flows_fail(self, startLocation, headers, soft=False,
-                          snapshot=None,
-                          df_format="table"):
+                          snapshot=None, df_format="table"):
         # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
         """
         Check if the specified set of flows, denoted by starting locations and headers, fail.
@@ -141,8 +138,7 @@ class Asserts(object):
                                  df_format)
 
     def assert_flows_succeed(self, startLocation, headers, soft=False,
-                             snapshot=None,
-                             df_format="table"):
+                             snapshot=None, df_format="table"):
         # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
         """
         Check if the specified set of flows, denoted by starting locations and headers, succeed.
@@ -161,8 +157,7 @@ class Asserts(object):
 
     def assert_no_incompatible_bgp_sessions(self, nodes=None, remote_nodes=None,
                                             status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
-                                            snapshot=None,
-                                            soft=False,
+                                            snapshot=None, soft=False,
                                             df_format="table"):
         # type: (Optional[str], Optional[str], str, Optional[str], bool, str) -> bool
         """Assert that there are no incompatible BGP sessions present in the snapshot.
