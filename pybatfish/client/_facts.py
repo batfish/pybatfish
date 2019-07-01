@@ -103,9 +103,12 @@ def load_facts(input_directory):
     return out
 
 
-def validate_facts(expected, actual):
-    # type: (Dict[Text, Any], Dict[Text, Any]) -> Dict[Text, Any]
-    """Return a map of node to non-matching facts based on the difference between the expected and actual facts supplied."""
+def validate_facts(expected, actual, verbose=False):
+    # type: (Dict[Text, Any], Dict[Text, Any], bool) -> Dict[Text, Any]
+    """Return a map of node to non-matching facts based on the difference between the expected and actual facts supplied.
+
+    If the `verbose` flag is set, matching facts are returned in addition-to non-matching facts.
+    """
     failures = {}
     expected_facts = expected['nodes']
     actual_facts = actual['nodes']
@@ -123,7 +126,8 @@ def validate_facts(expected, actual):
     for node in actual_facts:
         if node in expected_facts:
             res = _assert_dict_subset(actual_facts[node],
-                                      expected_facts[node])
+                                      expected_facts[node],
+                                      verbose=verbose)
             if res:
                 failures[node] = res
     return failures
@@ -287,12 +291,13 @@ def _unencapsulate_facts(facts):
     return facts['nodes'], facts.get('version')
 
 
-def _assert_dict_subset(actual, expected, prefix="", diffs=None):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict]) -> Dict[Text, Any]
+def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
+    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict], bool) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested
     :param expected: the expected value of a dictionary
+    :returns: if verbose=`False` returns dictionary of property name to non-matching expected and actual values, if verbose=`True` returns a dictionary of property name to expected and actual values for all checked values
     """
     if diffs is None:
         diffs_out = {}  # type: Dict[Text, Any]
@@ -308,9 +313,9 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None):
         else:
             if isinstance(expected[k], Mapping):
                 _assert_dict_subset(actual[k], expected[k], key_name + '.',
-                                    diffs_out)
+                                    diffs_out, verbose=verbose)
             else:
-                if expected[k] != actual[k]:
+                if expected[k] != actual[k] or verbose:
                     diffs_out[key_name] = {
                         'expected': expected[k],
                         'actual': actual[k],
