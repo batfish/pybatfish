@@ -104,10 +104,11 @@ def load_facts(input_directory):
 
 
 def validate_facts(expected, actual, verbose=False):
-    # type: (Dict[Text, Any], Dict[Text, Any]) -> Dict[Text, Any]
+    # type: (Dict[Text, Any], Dict[Text, Any], bool) -> Dict[Text, Any]
     """Return a map of node to non-matching facts based on the difference between the expected and actual facts supplied.
 
-    If the `verbose` flag is set, matching facts are returned in addition-to non-matching facts."""
+    If the `verbose` flag is set, matching facts are returned in addition-to non-matching facts.
+    """
     failures = {}
     expected_facts = expected['nodes']
     actual_facts = actual['nodes']
@@ -291,7 +292,7 @@ def _unencapsulate_facts(facts):
 
 
 def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict]) -> Dict[Text, Any]
+    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict], bool) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested

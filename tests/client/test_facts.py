@@ -189,8 +189,8 @@ def test_validate_facts_not_matching_data():
                          _encapsulate_nodes_facts(actual, version))
 
     # Result should identify the mismatched value and the missing key
-    assert res == {'node1':
-        {
+    assert res == {
+        'node1': {
             'foo': {
                 'expected': 1,
                 'actual': 0,
