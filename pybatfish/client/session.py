@@ -32,17 +32,181 @@ from pybatfish.client._diagnostics import (upload_diagnostics,
 from pybatfish.client._facts import (
     get_facts, load_facts, validate_facts, write_facts
 )
+from pybatfish.client.asserts import (
+    _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX, assert_filter_denies,
+    assert_filter_has_no_unreachable_lines, assert_filter_permits,
+    assert_flows_fail, assert_flows_succeed,
+    assert_no_incompatible_bgp_sessions, assert_no_undefined_references,
+    assert_no_unestablished_bgp_sessions,
+)
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
-from pybatfish.datamodel import (Interface, NodeRoleDimension,
-                                 NodeRolesData, ReferenceBook,
-                                 ReferenceLibrary)
+from pybatfish.datamodel import (
+    HeaderConstraints, Interface, NodeRoleDimension, NodeRolesData,
+    ReferenceBook, ReferenceLibrary
+)
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import (Questions)
 from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
+
+
+class Asserts(object):
+    """Class containing assertions for a given Session."""
+
+    def __init__(self, session):
+        self.session = session
+
+    def assert_filter_denies(self, filters, headers, startLocation=None,
+                             soft=False, snapshot=None, df_format="table"):
+        # type: (str, HeaderConstraints, str, bool, Optional[str], str) -> bool
+        """
+        Check if a filter (e.g., ACL) denies a specified set of flows.
+
+        :param filters: the specification for the filter (filterSpec) to check
+        :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+        :param startLocation: LocationSpec indicating where a flow starts
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param snapshot: the snapshot on which to check the assertion
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :return: True if the assertion passes
+        """
+        return assert_filter_denies(filters, headers, startLocation, soft,
+                                    snapshot, self.session, df_format)
+
+    def assert_filter_has_no_unreachable_lines(self, filters, soft=False,
+                                               snapshot=None,
+                                               df_format="table"):
+        # type: (str, bool, bool, str) -> bool
+        """
+        Check that a filter (e.g. an ACL) has no unreachable lines.
+
+        A filter line is considered unreachable if it will never match a packet,
+        e.g., because its match condition is empty or covered completely by those of
+        prior lines."
+
+        :param filters: the specification for the filter (filterSpec) to check
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param snapshot: the snapshot on which to check the assertion
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :return: True if the assertion passes
+        """
+        return assert_filter_has_no_unreachable_lines(filters, soft, snapshot,
+                                                      self.session, df_format)
+
+    def assert_filter_permits(self, filters, headers, startLocation=None,
+                              soft=False, snapshot=None, df_format="table"):
+        # type: (str, HeaderConstraints, str, bool, Optional[str], str) -> bool
+        """
+        Check if a filter (e.g., ACL) permits a specified set of flows.
+
+        :param filters: the specification for the filter (filterSpec) to check
+        :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+        :param startLocation: LocationSpec indicating where a flow starts
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param snapshot: the snapshot on which to check the assertion
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :return: True if the assertion passes
+        """
+        return assert_filter_permits(filters, headers, startLocation, soft,
+                                     snapshot, self.session, df_format)
+
+    def assert_flows_fail(self, startLocation, headers, soft=False,
+                          snapshot=None, df_format="table"):
+        # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
+        """
+        Check if the specified set of flows, denoted by starting locations and headers, fail.
+
+        :param startLocation: LocationSpec indicating where the flow starts
+        :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param snapshot: the snapshot on which to check the assertion
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :return: True if the assertion passes
+        """
+        return assert_flows_fail(startLocation, headers, soft, snapshot,
+                                 self.session, df_format)
+
+    def assert_flows_succeed(self, startLocation, headers, soft=False,
+                             snapshot=None, df_format="table"):
+        # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
+        """
+        Check if the specified set of flows, denoted by starting locations and headers, succeed.
+
+        :param startLocation: LocationSpec indicating where the flow starts
+        :param headers: :py:class:`~pybatfish.datamodel.flow.HeaderConstraints`
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param snapshot: the snapshot on which to check the assertion
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :return: True if the assertion passes
+        """
+        return assert_flows_succeed(startLocation, headers, soft, snapshot,
+                                    self.session, df_format)
+
+    def assert_no_incompatible_bgp_sessions(self, nodes=None, remote_nodes=None,
+                                            status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
+                                            snapshot=None, soft=False,
+                                            df_format="table"):
+        # type: (Optional[str], Optional[str], str, Optional[str], bool, str) -> bool
+        """Assert that there are no incompatible BGP sessions present in the snapshot.
+
+        :param nodes: search sessions with specified nodes on one side of the sessions.
+        :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
+        :param status: select sessions matching the specified session status.
+        :param snapshot: the snapshot on which to check the assertion
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_incompatible_bgp_sessions(nodes, remote_nodes, status,
+                                                   snapshot, soft, self.session,
+                                                   df_format)
+
+    def assert_no_unestablished_bgp_sessions(self, nodes=None,
+                                             remote_nodes=None,
+                                             snapshot=None, soft=False,
+                                             df_format="table"):
+        # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        """Assert that there are no BGP sessions that are compatible but not established.
+
+        :param nodes: search sessions with specified nodes on one side of the sessions.
+        :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
+        :param snapshot: the snapshot on which to check the assertion
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_unestablished_bgp_sessions(nodes, remote_nodes,
+                                                    snapshot, soft,
+                                                    self.session, df_format)
+
+    def assert_no_undefined_references(self, snapshot=None, soft=False,
+                                       df_format="table"):
+        # type: (Optional[str], bool, str) -> bool
+        """Assert that there are no undefined references present in the snapshot.
+
+        :param snapshot: the snapshot on which to check the assertion
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_undefined_references(snapshot, soft, self.session,
+                                              df_format)
 
 
 class Session(object):
@@ -76,8 +240,9 @@ class Session(object):
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
 
-        # Object to hold and manage questions
+        # Objects to hold and manage questions and asserts
         self.q = Questions(self)
+        self.asserts = Asserts(self)
 
         # Additional worker args
         self.additional_args = {}  # type: Dict
