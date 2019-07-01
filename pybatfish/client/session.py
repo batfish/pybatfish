@@ -240,7 +240,7 @@ class Session(object):
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
 
-        # Object to hold and manage questions and asserts
+        # Objects to hold and manage questions and asserts
         self.q = Questions(self)
         self.asserts = Asserts(self)
 
