@@ -63,13 +63,13 @@ def test_format_df_illegal_format():
 
 def test_format_df_table():
     df = pd.DataFrame({'col1': [1, 2],
-                      'col2': [3, 4]})
+                       'col2': [3, 4]})
     assert _format_df(df, "table") == df.to_string()
 
 
 def test_format_df_records():
     df = pd.DataFrame({'col1': [1, 2],
-                      'col2': [3, 4]})
+                       'col2': [3, 4]})
     assert _format_df(df, "records") == str(df.to_dict(orient="records"))
 
 
@@ -108,6 +108,33 @@ def test_filter_denies():
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_denies('filter', headers, startLocation='Ethernet1',
                                  session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='permit')
+
+
+def test_filter_denies_from_session():
+    """Confirm filter-denies assert passes and fails as expected when called from a session."""
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'searchFilters',
+                      create=True) as mock_search_filters:
+        # Test success
+        mock_search_filters.return_value = MockQuestion()
+        bf.asserts.assert_filter_denies('filter', headers)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               action='permit')
+        # Test failure; also test that startLocation is passed through
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        mock_search_filters.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_filter_denies('filter', headers,
+                                            startLocation='Ethernet1')
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
@@ -164,6 +191,26 @@ def test_filter_has_no_unreachable_lines():
         assert mock_df.to_string() in str(excinfo.value)
 
 
+def test_filter_has_no_unreachable_lines_from_session():
+    """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when called from a session."""
+    filters = "filter1"
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'filterLineReachability',
+                      create=True) as filterLineReachability:
+        # Test success
+        filterLineReachability.return_value = MockQuestion()
+        bf.asserts.assert_filter_has_no_unreachable_lines(filters=filters)
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'UnreachableLine': 'found', 'More': 'data'}])
+        filterLineReachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_filter_has_no_unreachable_lines(filters=filters)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
 def test_filter_has_no_unreachable_lines_no_session():
     """Confirm no-unreachable-filter-lines assert passes and fails as expected when no session is specified."""
     filters = "filter1"
@@ -202,6 +249,33 @@ def test_filter_permits():
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_filter_permits('filter', headers, startLocation='Ethernet1',
                                   session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               startLocation='Ethernet1',
+                                               action='deny')
+
+
+def test_filter_permits_from_session():
+    """Confirm filter-permits assert passes and fails as expected when called from a session."""
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'searchFilters',
+                      create=True) as mock_search_filters:
+        # Test success
+        mock_search_filters.return_value = MockQuestion()
+        bf.asserts.assert_filter_permits('filter', headers)
+        mock_search_filters.assert_called_with(filters='filter',
+                                               headers=headers,
+                                               action='deny')
+        # Test failure; also test that startLocation is passed through
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        mock_search_filters.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_filter_permits('filter', headers,
+                                             startLocation='Ethernet1')
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(filters='filter',
@@ -267,6 +341,33 @@ def test_flows_fail():
             actions='success')
 
 
+def test_flows_fail_from_session():
+    """Confirm flows-fail assert passes and fails as expected when called from a session."""
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        bf.asserts.assert_flows_fail(startLocation, headers)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_flows_fail(startLocation, headers)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='success')
+
+
 def test_flows_fail_no_session():
     """
     Confirm flows-fail assert passes and fails as expected when not specifying a session.
@@ -316,6 +417,33 @@ def test_flows_succeed():
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_flows_succeed(startLocation, headers, session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+
+
+def test_flows_succeed_from_session():
+    """Confirm flows-succeed assert passes and fails as expected when called from a session."""
+    startLocation = "node1"
+    headers = HeaderConstraints(srcIps='1.1.1.1')
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'reachability', create=True) as reachability:
+        # Test success
+        reachability.return_value = MockQuestion()
+        bf.asserts.assert_flows_succeed(startLocation, headers)
+        reachability.assert_called_with(
+            pathConstraints=PathConstraints(startLocation=startLocation),
+            headers=headers,
+            actions='failure')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Flow': 'found', 'More': 'data'}])
+        reachability.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_flows_succeed(startLocation, headers)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         reachability.assert_called_with(
@@ -384,6 +512,34 @@ def test_no_incompatible_bgp_sessions():
                                                    status='.*')
 
 
+def test_no_incompatible_bgp_sessions_from_session():
+    """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'bgpSessionCompatibility',
+                      create=True) as bgpSessionCompatibility:
+        # Test success
+        bgpSessionCompatibility.return_value = MockQuestion()
+        bf.asserts.assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                                       remote_nodes='remote_nodes',
+                                                       status='.*')
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        bgpSessionCompatibility.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_incompatible_bgp_sessions(nodes='nodes',
+                                                           remote_nodes='remote_nodes',
+                                                           status='.*')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionCompatibility.assert_called_with(nodes='nodes',
+                                                   remote_nodes='remote_nodes',
+                                                   status='.*')
+
+
 def test_no_incompatible_bgp_sessions_no_session():
     """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when not specifying a session."""
     with patch.object(bfq, 'bgpSessionCompatibility',
@@ -439,6 +595,32 @@ def test_no_unestablished_bgp_sessions():
                                             status="NOT_ESTABLISHED")
 
 
+def test_no_unestablished_bgp_sessions_from_session():
+    """Confirm no-uncompatible-bgp-sessions assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'bgpSessionStatus',
+                      create=True) as bgpSessionStatus:
+        # Test success
+        bgpSessionStatus.return_value = MockQuestion()
+        bf.asserts.assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                                        remote_nodes='remote_nodes')
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        bgpSessionStatus.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_unestablished_bgp_sessions(nodes='nodes',
+                                                            remote_nodes='remote_nodes')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        bgpSessionStatus.assert_called_with(nodes='nodes',
+                                            remote_nodes='remote_nodes',
+                                            status="NOT_ESTABLISHED")
+
+
 def test_no_unestablished_bgp_sessions_no_session():
     """Confirm no-unestablished-bgp-sessions assert passes and fails as expected when not specifying a session."""
     with patch.object(bfq, 'bgpSessionStatus',
@@ -479,6 +661,25 @@ def test_no_undefined_references():
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_no_undefined_references(session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_no_undefined_references_from_session():
+    """Confirm no-undefined-references assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'undefinedReferences',
+                      create=True) as undefinedReferences:
+        # Test success
+        undefinedReferences.return_value = MockQuestion()
+        bf.asserts.assert_no_undefined_references()
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'UndefRef': 'found', 'More': 'data'}])
+        undefinedReferences.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_undefined_references()
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
 
