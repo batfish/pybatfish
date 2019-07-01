@@ -54,7 +54,7 @@ from .options import Options
 
 
 class Asserts(object):
-    """Object containing assertions for a given Session."""
+    """Class containing assertions for a given Session."""
 
     def __init__(self, session):
         self.session = session
