@@ -135,8 +135,7 @@ class Asserts(object):
         :return: True if the assertion passes
         """
         return assert_flows_fail(startLocation, headers, soft, snapshot,
-                                 self.session,
-                                 df_format)
+                                 self.session, df_format)
 
     def assert_flows_succeed(self, startLocation, headers, soft=False,
                              snapshot=None, df_format="table"):
@@ -172,10 +171,8 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_incompatible_bgp_sessions(nodes, remote_nodes,
-                                                   status,
-                                                   snapshot,
-                                                   soft, self.session,
+        return assert_no_incompatible_bgp_sessions(nodes, remote_nodes, status,
+                                                   snapshot, soft, self.session,
                                                    df_format)
 
     def assert_no_unestablished_bgp_sessions(self, nodes=None,
