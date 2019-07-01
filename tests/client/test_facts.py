@@ -204,7 +204,7 @@ def test_validate_facts_not_matching_data():
 
 
 def test_validate_facts_verbose():
-    """Test that fact validation returns matching and mismatched facts when running in verbose mode."""
+    """Test that fact validation returns both matching and mismatched facts when running in verbose mode."""
     expected = {
         'node1': {'foo': 1, 'bar': 1, 'baz': 1},
         'node2': {'foo': 2},
