@@ -33,17 +33,18 @@ from pybatfish.client._facts import (
     get_facts, load_facts, validate_facts, write_facts
 )
 from pybatfish.client.asserts import (
-    assert_filter_denies, assert_filter_has_no_unreachable_lines,
-    assert_filter_permits, assert_flows_fail,
+    _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX, assert_filter_denies,
+    assert_filter_has_no_unreachable_lines, assert_filter_permits,
+    assert_flows_fail, assert_flows_succeed,
     assert_no_incompatible_bgp_sessions, assert_no_undefined_references,
-    assert_no_unestablished_bgp_sessions, assert_flows_succeed,
-    _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX
+    assert_no_unestablished_bgp_sessions,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.workhelper import get_work_status
-from pybatfish.datamodel import (Interface, NodeRoleDimension,
-                                 NodeRolesData, ReferenceBook,
-                                 ReferenceLibrary, HeaderConstraints)
+from pybatfish.datamodel import (
+    HeaderConstraints, Interface, NodeRoleDimension, NodeRolesData,
+    ReferenceBook, ReferenceLibrary
+)
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
@@ -101,7 +102,7 @@ class Asserts(object):
 
     def assert_filter_permits(self, filters, headers, startLocation=None,
                               soft=False, snapshot=None, df_format="table"):
-        # type: (str, HeaderConstraints, str, bool, Optional[Session], str) -> bool
+        # type: (str, HeaderConstraints, str, bool, Optional[str], str) -> bool
         """
         Check if a filter (e.g., ACL) permits a specified set of flows.
 
