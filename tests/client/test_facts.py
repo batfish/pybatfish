@@ -189,14 +189,58 @@ def test_validate_facts_not_matching_data():
                          _encapsulate_nodes_facts(actual, version))
 
     # Result should identify the mismatched value and the missing key
-    assert res['node1'] == {
-        'foo': {
-            'expected': 1,
-            'actual': 0,
+    assert res == {'node1':
+        {
+            'foo': {
+                'expected': 1,
+                'actual': 0,
+            },
+            'baz': {
+                'expected': 1,
+                'key_present': False,
+            }
+        }
+    }
+
+
+def test_validate_facts_verbose():
+    """Test that fact validation returns matching and mismatched facts when running in verbose mode."""
+    expected = {
+        'node1': {'foo': 1, 'bar': 1, 'baz': 1},
+        'node2': {'foo': 2},
+    }
+    actual = {
+        'node1': {'foo': 0, 'bar': 1},  # 'foo' doesn't match expected
+        # also missing 'baz': 1
+        'node2': {'foo': 2},
+        'node3': {'foo': 3},
+    }
+    version = 'version'
+    res = validate_facts(_encapsulate_nodes_facts(expected, version),
+                         _encapsulate_nodes_facts(actual, version),
+                         verbose=True)
+
+    # Verbose validation should return both matching and mismatched facts
+    assert res == {
+        'node1': {
+            'foo': {
+                'expected': 1,
+                'actual': 0,
+            },
+            'bar': {
+                'expected': 1,
+                'actual': 1,
+            },
+            'baz': {
+                'expected': 1,
+                'key_present': False,
+            }
         },
-        'baz': {
-            'expected': 1,
-            'key_present': False,
+        'node2': {
+            'foo': {
+                'expected': 2,
+                'actual': 2,
+            },
         }
     }
 
