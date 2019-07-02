@@ -185,6 +185,20 @@ def test_compute_docstring():
     assert _compute_docstring("foo", [], {}) == "foo"
 
 
+def test_compute_var_help_default_value_falsy():
+    var_data = {
+        "optional": True,
+        "description": "Desc",
+        "type": "boolean",
+        "value": False
+    }
+    expected_help = ":param v: Desc\n" \
+                    + "\n" \
+                    + "    Default value: ``False``\n" \
+                    + ":type v: boolean"
+    assert _compute_var_help("v", var_data) == expected_help
+
+
 def test_compute_var_help_with_no_allowed_values():
     var_data = {
         "optional": True,
