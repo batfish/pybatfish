@@ -400,7 +400,7 @@ Questions that return the contents of configuration in a structured format.
 
    #. **TACACS_Source_Interface** -- Source interface to use for communicating with TACACS servers.
 
-   #. **Vendor_Family** -- Vendor family (AWS, CISCO, CUMULUS, F5_BIGIP, JUNIPER, UNKNOWN).
+   #. **Vendor_Family** -- Vendor family (AWS, CISCO, CISCO_NXOS, CUMULUS, F5_BIGIP, JUNIPER, UNKNOWN).
 
    #. **VRFs** -- Names of VRFs present on the node.
 
@@ -869,7 +869,7 @@ Questions that show different types of network adjacencies.
 
    #. **Remote_AS_Number** -- AS Number at the side of responder.
 
-.. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name)
+.. py:class:: edges(*, edgeType, nodes, remoteNodes, initial, question_name)
 
    Returns different types of network adjacencies in a snapshot.
    
@@ -898,6 +898,8 @@ Questions that show different types of network adjacencies.
    
        Default value: ``.*``
    :type remoteNodes: nodeSpec
+   :param initial: *Required.* Use the initial topology (pre-dataplane computation).
+   :type initial: boolean
 
    Return table columns:
 
