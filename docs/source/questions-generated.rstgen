@@ -1700,8 +1700,6 @@ Questions that resolve specifier expressions.
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
    :param ips: Input to the IP space specifier.
-   
-       Default value: ````
    :type ips: ipSpaceSpec
 
    Return table columns:
