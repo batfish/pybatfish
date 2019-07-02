@@ -250,6 +250,8 @@ Questions that return the contents of configuration in a structured format.
    
    
    :param duplicatesOnly: *Required.* Restrict output to only IP addresses that are duplicated (configured on a different node or VRF) in the snapshot.
+   
+       Default value: ``False``
    :type duplicatesOnly: boolean
 
    Return table columns:
@@ -400,7 +402,7 @@ Questions that return the contents of configuration in a structured format.
 
    #. **TACACS_Source_Interface** -- Source interface to use for communicating with TACACS servers.
 
-   #. **Vendor_Family** -- Vendor family (AWS, CISCO, CUMULUS, F5_BIGIP, JUNIPER, UNKNOWN).
+   #. **Vendor_Family** -- Vendor family (AWS, CISCO, CISCO_NXOS, CUMULUS, F5_BIGIP, JUNIPER, UNKNOWN).
 
    #. **VRFs** -- Names of VRFs present on the node.
 
@@ -869,7 +871,7 @@ Questions that show different types of network adjacencies.
 
    #. **Remote_AS_Number** -- AS Number at the side of responder.
 
-.. py:class:: edges(*, edgeType, nodes, remoteNodes, question_name)
+.. py:class:: edges(*, edgeType, nodes, remoteNodes, initial, question_name)
 
    Returns different types of network adjacencies in a snapshot.
    
@@ -898,6 +900,10 @@ Questions that show different types of network adjacencies.
    
        Default value: ``.*``
    :type remoteNodes: nodeSpec
+   :param initial: *Required.* Use the initial topology (pre-dataplane computation).
+   
+       Default value: ``False``
+   :type initial: boolean
 
    Return table columns:
 
@@ -1218,6 +1224,8 @@ Questions that exhaustively search for flows that meet specified constraints.
    :param headers: Packet header constraints.
    :type headers: headerConstraint
    :param ignoreFilters: Do not apply filters/ACLs during analysis.
+   
+       Default value: ``False``
    :type ignoreFilters: boolean
    :param invertSearch: Search for packet headers outside the specified headerspace, rather than inside the space.
    :type invertSearch: boolean
@@ -1345,6 +1353,8 @@ Questions that analyze ACLs and firewall rules.
    :param filters: Only evaluate filters that match this filter specifier.
    :type filters: filterSpec
    :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   
+       Default value: ``False``
    :type ignoreComposites: boolean
 
    Return table columns:
@@ -1373,6 +1383,8 @@ Questions that analyze ACLs and firewall rules.
    :param filters: Specifier for filters to test.
    :type filters: filterSpec
    :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   
+       Default value: ``False``
    :type ignoreComposites: boolean
    :param nodes: Examine filters on nodes matching this specifier.
    :type nodes: nodeSpec
@@ -1413,6 +1425,8 @@ Questions that analyze ACLs and firewall rules.
        * deny: Return only lines that deny packets
    :type action: string
    :param ignoreComposites: Whether to ignore filters that are composed of multiple filters defined in the configs.
+   
+       Default value: ``False``
    :type ignoreComposites: boolean
 
    Return table columns:
@@ -1645,11 +1659,13 @@ Questions that resolve specifier expressions.
    Helper question that shows how specified filterSpec values resolve to the filters in the network.
    
    
-   :param filters: Input to the FilterSpecifier.
+   :param filters: *Required.* Input to the FilterSpecifier.
    :type filters: filterSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param nodes: Input to the NodeSpecifier.
+   :param nodes: Input to the NodeSpecifier that specifies the set of nodes that should be considered.
+   
+       Default value: ``/.*/``
    :type nodes: nodeSpec
 
    Return table columns:
@@ -1658,51 +1674,53 @@ Questions that resolve specifier expressions.
 
    #. **Filter_Name** -- Filter name.
 
-.. py:class:: resolveInterfaceSpecifier(*, grammarVersion, interfaces, nodes, question_name)
+.. py:class:: resolveInterfaceSpecifier(*, interfaces, grammarVersion, nodes, question_name)
 
    Returns the set of interfaces corresponding to an interfaceSpec value.
    
    Helper question that shows how specified interfaceSpec values resolve to the interfaces in the network.
    
    
+   :param interfaces: *Required.* Input to the interfaceSpecifier.
+   :type interfaces: interfacesSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param interfaces: Input to the interfaceSpecifier.
-   :type interfaces: interfacesSpec
-   :param nodes: Input to the NodeSpecifier.
+   :param nodes: Input to the NodeSpecifier that specifies the set of nodes that should be considered.
+   
+       Default value: ``/.*/``
    :type nodes: nodeSpec
 
    Return table columns:
 
    #. **Interface**
 
-.. py:class:: resolveIpSpecifier(*, grammarVersion, ips, question_name)
+.. py:class:: resolveIpSpecifier(*, ips, grammarVersion, question_name)
 
    Returns the IP address space corresponding to an ipSpec value.
    
    Helper question that shows how specified ipSpec values resolve to IPs.
    
    
+   :param ips: *Required.* Input to the IP space specifier.
+   :type ips: ipSpaceSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param ips: Input to the IP space specifier.
-   :type ips: ipSpaceSpec
 
    Return table columns:
 
    #. **IP_Space** -- IP space.
 
-.. py:class:: resolveIpsOfLocationSpecifier(*, grammarVersion, locations, question_name)
+.. py:class:: resolveIpsOfLocationSpecifier(*, locations, grammarVersion, question_name)
 
    Returns IPs that are auto-assigned to locations.
    
    Helper question that shows IPs that will be assigned to specified locationSpec values by questions are automatically pick IPs based on locations.
    
    
+   :param locations: *Required.* Input to the LocationSpecifier.
+   :type locations: locationSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param locations: Input to the LocationSpecifier.
-   :type locations: locationSpec
 
    Return table columns:
 
@@ -1710,33 +1728,33 @@ Questions that resolve specifier expressions.
 
    #. **IP_Space** -- IP space.
 
-.. py:class:: resolveLocationSpecifier(*, grammarVersion, locations, question_name)
+.. py:class:: resolveLocationSpecifier(*, locations, grammarVersion, question_name)
 
    Returns the set of locations corresponding to a locationSpec value.
    
    Helper question that shows how specified locationSpec values resolve to the locations in the network.
    
    
+   :param locations: *Required.* Input to the LocationSpecifier.
+   :type locations: locationSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param locations: Input to the LocationSpecifier.
-   :type locations: locationSpec
 
    Return table columns:
 
    #. **Location**
 
-.. py:class:: resolveNodeSpecifier(*, grammarVersion, nodes, question_name)
+.. py:class:: resolveNodeSpecifier(*, nodes, grammarVersion, question_name)
 
    Returns the set of nodes corresponding to a nodeSpec value.
    
    Helper question that shows how specified nodeSpec values resolve to the nodes in the network.
    
    
+   :param nodes: *Required.* Input to the NodeSpecifier.
+   :type nodes: nodeSpec
    :param grammarVersion: Version of grammar to use for resolution.
    :type grammarVersion: string
-   :param nodes: Input to the NodeSpecifier.
-   :type nodes: nodeSpec
 
    Return table columns:
 
