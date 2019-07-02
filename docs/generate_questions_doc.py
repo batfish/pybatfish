@@ -45,8 +45,11 @@ _example_snapshot_dir = join(_root_dir, 'jupyter_notebooks/networks/example')
 
 # Example values to use for parameters of a given type
 _values_by_type = {
+    'filterSpec': "/.*/",
     'headerConstraint': HeaderConstraints(dstIps="0.0.0.0/0"),
+    'interfacesSpec': "/.*/",
     'ip': "1.1.1.1",
+    'ipSpaceSpec': '1.1.1.1',
     'locationSpec': "/.*/",
     'nodeSpec': "/.*/",
 }
