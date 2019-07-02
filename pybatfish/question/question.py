@@ -559,8 +559,8 @@ def _compute_var_help(var_name, var_data):
         param_line += "    Allowed values:\n\n    * {}\n".format(
             '\n    * '.join([str(v) for v in allowed_values]))
 
-    default_value = var_data.get("value", "")
-    if default_value:
+    default_value = var_data.get("value")
+    if default_value is not None:
         param_line += "\n    Default value: ``{}``\n".format(default_value)
 
     type_line = ":type {name}: {type}".format(
