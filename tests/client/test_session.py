@@ -39,9 +39,10 @@ def test_get_session_types():
     dummy_session_type = 'dummy'
     dummy_session_module = 'dummy_session_module'
 
-    entry_points = [i for i in
-                    pkg_resources.iter_entry_points('batfish_session')] + [
-                       MockEntryPoint(dummy_session_type, dummy_session_module)]
+    entry_points = (
+        [i for i in pkg_resources.iter_entry_points('batfish_session')] +
+        [MockEntryPoint(dummy_session_type, dummy_session_module)]
+    )
     # Add in a dummy entry_point
     with patch.object(pkg_resources, 'iter_entry_points',
                       return_value=entry_points):
