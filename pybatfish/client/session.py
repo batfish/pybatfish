@@ -19,8 +19,9 @@ import base64
 import logging
 import os
 import tempfile
-from typing import (Any, Dict, List, Optional,  # noqa: F401
-                    Text, Union)
+from typing import (
+    Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+)
 
 import pkg_resources
 import six
@@ -339,8 +340,8 @@ class Session(object):
 
     @classmethod
     def get_session_types(cls):
-        # type: () -> Dict[str, Any]
-        """Get a dict of possible session types mapping their names to session modules."""
+        # type: () -> Dict[str, Callable]
+        """Get a dict of possible session types mapping their names to session classes."""
         return {
             entry_point.name: entry_point.load()
             for entry_point in
@@ -357,7 +358,7 @@ class Session(object):
             raise ValueError(
                 "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
                     type_, sessions.keys()))
-        session = getattr(session_module, 'Session')(**params)  # type: Session
+        session = session_module(**params)  # type: Session
         return session
 
     def delete_network(self, name):
