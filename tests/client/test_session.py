@@ -50,7 +50,7 @@ def test_get_session_types():
 
 
 def test_get_session():
-    """Confirm the correct Session object is built for a specified session type."""
+    """Confirm Session object is built for a specified session type."""
     session_host = 'foobar'
     session = Session.get(type_='bf', load_questions=False, host=session_host)
     # Confirm the session is the correct type
@@ -60,7 +60,7 @@ def test_get_session():
 
 
 def test_get_session_default():
-    """Confirm the correct Session object is built when no type is specified."""
+    """Confirm default Session object is built when no type is specified."""
     session_host = 'foobar'
     session = Session.get(load_questions=False, host=session_host)
     # Confirm the session is the correct type
@@ -70,8 +70,8 @@ def test_get_session_default():
 
 
 def test_get_session_bad():
-    """Confirm the exception is thrown with bad session type passed to Session.get."""
-    bogus_type = 'bogus'
+    """Confirm an exception is thrown when a bad session type passed to Session.get."""
+    bogus_type = 'bogus_session_type'
     with pytest.raises(ValueError) as e:
         Session.get(type_=bogus_type)
     e_msg = str(e.value)
