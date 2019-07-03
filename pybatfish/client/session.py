@@ -341,7 +341,6 @@ class Session(object):
     def get_session_types(cls):
         # type: () -> Dict[str, Any]
         """Get a dict of possible session types mapping their names to session modules."""
-        # Start with this module, which contains the base Pybatfish Session
         return {
             entry_point.name: entry_point.load()
             for entry_point in
