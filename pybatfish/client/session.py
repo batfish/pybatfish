@@ -18,7 +18,6 @@ from __future__ import absolute_import, print_function
 import base64
 import logging
 import os
-import sys
 import tempfile
 from typing import (Any, Dict, List, Optional,  # noqa: F401
                     Text, Union)
@@ -221,8 +220,6 @@ class Session(object):
     :ivar api_key: Your API key
     """
 
-    BATFISH_SESSION_ENTRY_POINT = 'batfish_session'
-
     def __init__(self, host=Options.coordinator_host,
                  port_v1=Options.coordinator_work_port,
                  port_v2=Options.coordinator_work_v2_port,
@@ -345,13 +342,11 @@ class Session(object):
         # type: () -> Dict[str, Any]
         """Get a dict of possible session types mapping their names to session modules."""
         # Start with this module, which contains the base Pybatfish Session
-        sessions = {
-            'bf': sys.modules[__name__],
+        return {
+            entry_point.name: entry_point.load()
+            for entry_point in
+            pkg_resources.iter_entry_points('batfish_session')
         }
-        for entry_point in pkg_resources.iter_entry_points(
-                cls.BATFISH_SESSION_ENTRY_POINT):
-            sessions[entry_point.name] = entry_point.load()
-        return sessions
 
     @classmethod
     def get(cls, type_='bf', **params):

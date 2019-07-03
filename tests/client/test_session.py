@@ -39,14 +39,17 @@ def test_get_session_types():
     dummy_session_type = 'dummy'
     dummy_session_module = 'dummy_session_module'
 
+    entry_points = [i for i in
+                    pkg_resources.iter_entry_points('batfish_session')] + [
+                       MockEntryPoint(dummy_session_type, dummy_session_module)]
     # Add in a dummy entry_point
     with patch.object(pkg_resources, 'iter_entry_points',
-                      return_value=[MockEntryPoint(dummy_session_type,
-                                                   dummy_session_module)]):
+                      return_value=entry_points):
         session_types = Session.get_session_types()
 
     # Confirm both the base and our mock types show up
-    assert set(session_types.keys()) == {'bf', dummy_session_type}
+    assert 'bf' in session_types.keys()
+    assert dummy_session_type in session_types.keys()
 
 
 def test_get_session():
