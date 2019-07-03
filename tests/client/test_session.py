@@ -73,7 +73,7 @@ def test_get_session_default():
 
 
 def test_get_session_bad():
-    """Confirm an exception is thrown when a bad session type passed to Session.get."""
+    """Confirm an exception is thrown when a bad session type passed in."""
     bogus_type = 'bogus_session_type'
     with pytest.raises(ValueError) as e:
         Session.get(type_=bogus_type)
