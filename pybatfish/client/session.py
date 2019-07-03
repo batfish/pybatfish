@@ -342,7 +342,7 @@ class Session(object):
 
     @classmethod
     def get_session_types(cls):
-        # type: (None) -> Dict[str, Any]
+        # type: () -> Dict[str, Any]
         """Get a dict of possible session types mapping their names to session modules."""
         # Start with this module, which contains the base Pybatfish Session
         sessions = {
@@ -354,16 +354,17 @@ class Session(object):
         return sessions
 
     @classmethod
-    def get(cls, type_=None, **params):
+    def get(cls, type_='bf', **params):
         # type: (str, **Any) -> Session
         """Instantiate and return a session object of the specified type with the specified params."""
         sessions = cls.get_session_types()
-        session = sessions.get(type_)
-        if session is None or getattr(session, 'Session') is None:
+        session_module = sessions.get(type_)
+        if session_module is None:
             raise ValueError(
                 "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
                     type_, sessions.keys()))
-        return session.Session(**params)
+        session = getattr(session_module, 'Session')(**params)  # type: Session
+        return session
 
     def delete_network(self, name):
         # type: (str) -> None
