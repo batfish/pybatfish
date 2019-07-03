@@ -19,9 +19,11 @@ import base64
 import logging
 import os
 import tempfile
-from typing import (Any, Dict, List, Optional,  # noqa: F401
-                    Text, Union)
+from typing import (
+    Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+)
 
+import pkg_resources
 import six
 from deprecated import deprecated
 from requests import HTTPError
@@ -335,6 +337,29 @@ class Session(object):
     @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self, val):
         self.verify_ssl_certs = val
+
+    @classmethod
+    def get_session_types(cls):
+        # type: () -> Dict[str, Callable]
+        """Get a dict of possible session types mapping their names to session classes."""
+        return {
+            entry_point.name: entry_point.load()
+            for entry_point in
+            pkg_resources.iter_entry_points('batfish_session')
+        }
+
+    @classmethod
+    def get(cls, type_='bf', **params):
+        # type: (str, **Any) -> Session
+        """Instantiate and return a Session object of the specified type with the specified params."""
+        sessions = cls.get_session_types()
+        session_module = sessions.get(type_)
+        if session_module is None:
+            raise ValueError(
+                "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
+                    type_, sessions.keys()))
+        session = session_module(**params)  # type: Session
+        return session
 
     def delete_network(self, name):
         # type: (str) -> None
