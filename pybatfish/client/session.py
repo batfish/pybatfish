@@ -18,10 +18,12 @@ from __future__ import absolute_import, print_function
 import base64
 import logging
 import os
+import sys
 import tempfile
 from typing import (Any, Dict, List, Optional,  # noqa: F401
                     Text, Union)
 
+import pkg_resources
 import six
 from deprecated import deprecated
 from requests import HTTPError
@@ -219,6 +221,8 @@ class Session(object):
     :ivar api_key: Your API key
     """
 
+    BATFISH_SESSION_ENTRY_POINT = 'batfish_session'
+
     def __init__(self, host=Options.coordinator_host,
                  port_v1=Options.coordinator_work_port,
                  port_v2=Options.coordinator_work_v2_port,
@@ -335,6 +339,31 @@ class Session(object):
     @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self, val):
         self.verify_ssl_certs = val
+
+    @classmethod
+    def get_session_types(cls):
+        # type: (None) -> Dict[str, Any]
+        """Get a dict of possible session types mapping their names to session modules."""
+        # Start with this module, which contains the base Pybatfish Session
+        sessions = {
+            'bf': sys.modules[__name__],
+        }
+        for entry_point in pkg_resources.iter_entry_points(
+                cls.BATFISH_SESSION_ENTRY_POINT):
+            sessions[entry_point.name] = entry_point.load()
+        return sessions
+
+    @classmethod
+    def get(cls, type_=None, **params):
+        # type: (str, **Any) -> Session
+        """Instantiate and return a session object of the specified type with the specified params."""
+        sessions = cls.get_session_types()
+        session = sessions.get(type_)
+        if session is None or getattr(session, 'Session') is None:
+            raise ValueError(
+                "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
+                    type_, sessions.keys()))
+        return session.Session(**params)
 
     def delete_network(self, name):
         # type: (str) -> None
