@@ -350,7 +350,7 @@ class Session(object):
     @classmethod
     def get(cls, type_='bf', **params):
         # type: (str, **Any) -> Session
-        """Instantiate and return a session object of the specified type with the specified params."""
+        """Instantiate and return a Session object of the specified type with the specified params."""
         sessions = cls.get_session_types()
         session_module = sessions.get(type_)
         if session_module is None:
