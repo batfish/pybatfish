@@ -413,7 +413,7 @@ class Session(object):
                                      json_data)
 
     def extract_facts(self, nodes='/.*/', output_directory=None):
-        # type: (Text, Text) -> Dict[Text, Any]
+        # type: (Text, Optional[Text]) -> Dict[Text, Any]
         """
         Extract and return a dictionary of facts about the specified nodes on the current network snapshot.
 
@@ -1014,19 +1014,17 @@ class Session(object):
         return upload_diagnostics(self, metadata=metadata, dry_run=dry_run,
                                   netconan_config=netconan_config)
 
-    def validate_facts(self, expected_facts, nodes='/.*/'):
-        # type: (Text, Text) -> Dict[Text, Any]
+    def validate_facts(self, expected_facts):
+        # type: (Text) -> Dict[Text, Any]
         """
         Return a dictionary of mismatched facts between the loaded expected facts and the actual facts.
 
         :param expected_facts: path to directory to read expected fact YAML files from
         :type expected_facts: Text
-        :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to validate facts for.
-        :type nodes: Text
         :return: facts about the specified nodes on the current network snapshot
         :rtype: dict
         """
-        actual_facts = get_facts(self, nodes)
+        actual_facts = get_facts(self)
         expected_facts_ = load_facts(expected_facts)
         return validate_facts(expected_facts_, actual_facts)
 
