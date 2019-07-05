@@ -47,8 +47,7 @@ def test_extract_facts(tmpdir, session):
 def test_validate_facts_matching(session):
     """Test validation of facts for the current snapshot against matching facts."""
     validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, 'facts', 'expected_facts'),
-        nodes='basic')
+        expected_facts=join(_this_dir, 'facts', 'expected_facts'))
 
     assert validation_results == {}, 'No differences between expected and actual facts'
 
@@ -56,8 +55,7 @@ def test_validate_facts_matching(session):
 def test_validate_facts_different(session):
     """Test validation of facts for the current snapshot against different facts."""
     validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, 'facts', 'unexpected_facts'),
-        nodes='basic')
+        expected_facts=join(_this_dir, 'facts', 'unexpected_facts'))
 
     assert validation_results == {
         'basic': {

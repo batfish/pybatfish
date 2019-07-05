@@ -48,7 +48,7 @@ NODE_PROPERTIES_REORG = dict([
 ])  # type: Dict[Text, Text]
 
 
-def get_facts(session, nodes_specifier):
+def get_facts(session, nodes_specifier='/.*/'):
     # type: (Session, Text) -> Dict[Text, Any]
     """Get current-snapshot facts from the specified session for nodes matching the nodes specifier."""
     args = {}
