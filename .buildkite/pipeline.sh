@@ -23,7 +23,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install flake8 flake8-docstrings flake8-import-order"
+      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order"
       - "flake8 pybatfish tests"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
