@@ -132,6 +132,7 @@ setup(
                 'matplotlib<3.1.0',
                 'nbformat',
                 'nbconvert',
+                'pydocstyle<4.0.0',
                 'pytest>=4.2.0,<5.0.0',
                 'pytz',
                 'requests_mock',
