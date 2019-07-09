@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import pytest
 
 from pybatfish.datamodel.referencelibrary import AddressGroup, NodeRolesData, \
-    ReferenceLibrary
+    ReferenceLibrary, ReferenceBook, InterfaceGroup
 
 
 def test_addressgroup_both_subfields():
@@ -86,7 +86,68 @@ def test_addressgroup_only_child_groups():
     assert len(address_group.childGroupNames) == 2
 
 
-def test_empty_referencelibrary():
+def test_referencebook_construction_empty():
+    """Check that we construct empty reference books properly."""
+    ref_book = ReferenceBook("book1")
+
+    assert ref_book.name == "book1"
+    assert len(ref_book.addressGroups) == 0
+    assert len(ref_book.interfaceGroups) == 0
+
+
+def test_referencebook_construction_addressgroup_badtype():
+    """Check that we throw an error when address group is wrong type."""
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", addressGroups="ag")
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", addressGroups=["ag"])
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", addressGroups=["ag", AddressGroup("ag1")])
+
+
+def test_referencebook_construction_addressgroup_item():
+    """Check that we construct reference books where address group is not a list."""
+    ref_book = ReferenceBook("book1", addressGroups=AddressGroup("ag"))
+
+    assert ref_book.name == "book1"
+    assert ref_book.addressGroups == [AddressGroup("ag")]
+
+
+def test_referencebook_construction_addressgroup_list():
+    """Check that we construct reference books where address group is a list."""
+    ref_book = ReferenceBook("book1", addressGroups=[AddressGroup("ag")])
+
+    assert ref_book.name == "book1"
+    assert ref_book.addressGroups == [AddressGroup("ag")]
+
+
+def test_referencebook_construction_interfacegroup_badtype():
+    """Check that we throw an error when interface group is wrong type."""
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", interfaceGroups="g")
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", interfaceGroups=["g"])
+    with pytest.raises(ValueError):
+        ReferenceBook("book1", interfaceGroups=["g", InterfaceGroup("g1")])
+
+
+def test_referencebook_construction_interfacegroup_item():
+    """Check that we construct reference books where interface group is not a list."""
+    ref_book = ReferenceBook("book1", interfaceGroups=InterfaceGroup("g"))
+
+    assert ref_book.name == "book1"
+    assert ref_book.interfaceGroups == [InterfaceGroup("g")]
+
+
+def test_referencebook_construction_interfacegroup_list():
+    """Check that we construct reference books where interface group is a list."""
+    ref_book = ReferenceBook("book1", interfaceGroups=[InterfaceGroup("g")])
+
+    assert ref_book.name == "book1"
+    assert ref_book.interfaceGroups == [InterfaceGroup("g")]
+
+
+def test_referencelibrary_deser_empty():
     """Check proper deserialization for a reference library dict."""
     dict = {}
     reference_library = ReferenceLibrary(**dict)
@@ -99,7 +160,7 @@ def test_empty_referencelibrary():
     assert len(reference_library.books) == 0
 
 
-def test_referencelibrary_addressgroups():
+def test_referencelibrary_deser_addressgroups():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "books": [
@@ -133,7 +194,7 @@ def test_referencelibrary_addressgroups():
     assert len(reference_library.books[0].addressGroups[0].addresses) == 3
 
 
-def test_referencelibrary_interfacegroups():
+def test_referencelibrary_deser_interfacegroups():
     """Test deserialization for a reference library with interface groups."""
     dict = {
         "books": [
