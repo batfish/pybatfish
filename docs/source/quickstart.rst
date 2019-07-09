@@ -52,7 +52,7 @@ on the dataframe will print the first 5 rows:
 7. Next, let's ask a question about interfaces. For example, to see all prefixes present on the interface
 ``GigabitEthernet0/0`` of the node ``as1border1`` we can use the ``interfaceProperties`` question like below:
 
->>> iface_ans = bfq.interfaceProperties(nodes='as1border1', interfaces='GigabitEthernet0/0', properties='all-prefixes').answer()
+>>> iface_ans = bfq.interfaceProperties(nodes='as1border1', interfaces='GigabitEthernet0/0', properties='all_prefixes').answer()
 >>> iface_ans
                            Interface
     0  as1border1[GigabitEthernet0/0]
