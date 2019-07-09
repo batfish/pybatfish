@@ -54,8 +54,8 @@ on the dataframe will print the first 5 rows:
 
 >>> iface_ans = bfq.interfaceProperties(nodes='as1border1', interfaces='GigabitEthernet0/0', properties='all_prefixes').answer()
 >>> iface_ans
-                           Interface
-    0  as1border1[GigabitEthernet0/0]
+                            Interface     All_Prefixes
+    0  as1border1[GigabitEthernet0/0]  [u'1.0.1.1/24']
 
 For additional and more in-depth examples, check out the
 `Jupyter Notebooks <https://github.com/batfish/pybatfish/tree/master/jupyter_notebooks>`_.
