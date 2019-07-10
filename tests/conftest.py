@@ -17,7 +17,7 @@ COMPLETION_TYPES = [
     VariableType.IP,
     VariableType.IP_PROTOCOL_SPEC,
     VariableType.IP_SPACE_SPEC,
-    VariableType.IPSEC_SESSION_STATUS,
+    VariableType.IPSEC_SESSION_STATUS_SPEC,
     VariableType.LOCATION_SPEC,
     VariableType.NAMED_STRUCTURE_SPEC,
     VariableType.NODE_PROPERTY_SPEC,

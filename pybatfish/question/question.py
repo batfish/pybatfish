@@ -765,7 +765,7 @@ def _validateType(value, expectedType):
         VariableType.INTERFACES_SPEC,
         VariableType.IP_PROTOCOL_SPEC,
         VariableType.IP_SPACE_SPEC,
-        VariableType.IPSEC_SESSION_STATUS,
+        VariableType.IPSEC_SESSION_STATUS_SPEC,
         VariableType.JAVA_REGEX,
         VariableType.JSON_PATH_REGEX,
         VariableType.LOCATION_SPEC,

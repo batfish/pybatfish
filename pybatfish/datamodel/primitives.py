@@ -122,7 +122,7 @@ class VariableType(str, Enum):
     IP_PROTOCOL_SPEC = "ipProtocolSpec"  #: ip protocol specifier
     IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
     IP_WILDCARD = "ipWildcard"  #: ip protocols
-    IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
+    IPSEC_SESSION_STATUS_SPEC = "ipsecSessionStatusSpec"  #: ipsec session statuses
     JAVA_REGEX = "javaRegex"  #: java regex
     JSON_PATH = "jsonPath"  #: json path
     JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
