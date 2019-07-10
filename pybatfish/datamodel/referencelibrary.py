@@ -12,6 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import six
 from typing import Any, Dict, List  # noqa: F401
 
 import attr
@@ -22,9 +23,13 @@ __all__ = ['AddressGroup', 'InterfaceGroup', 'NodeRole', 'NodeRoleDimension',
            'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary']
 
 
-def _check_type(value, type):
-    if not isinstance(value, type):
-        raise ValueError("Invalid value {} for type {}".format(value, type))
+def _check_type(value, expected_type):
+    if not isinstance(value, expected_type):
+        raise ValueError(
+            "Invalid value '{}' of type {}. Expected type '{}'".format(value,
+                                                                       type(
+                                                                           value),
+                                                                       expected_type))
 
 
 def _make_typed_list(value, item_type):
@@ -41,7 +46,7 @@ def _make_typed_list(value, item_type):
 
 def _make_string_list(value):
     # type: (Any) -> List[str]
-    return _make_typed_list(value, str)
+    return _make_typed_list(value, six.string_types)
 
 
 @attr.s(frozen=True)
