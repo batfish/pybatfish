@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, List  # noqa: F401
 
 import attr
 
@@ -129,6 +129,35 @@ class NodeRolesData(DataModelElement):
                               json_dict.get("roleDimensions", [])])
 
 
+def _check_type(value, type):
+    if not isinstance(value, type):
+        raise ValueError("Invalid value {} for type {}".format(value, type))
+
+
+def _make_address_groups(value):
+    # type: (Any) -> List[AddressGroup]
+    if value is None:
+        return []
+    if isinstance(value, list):
+        for item in value:
+            _check_type(item, AddressGroup)
+        return value
+    _check_type(value, AddressGroup)
+    return [value]
+
+
+def _make_interface_groups(value):
+    # type: (Any) -> List[InterfaceGroup]
+    if value is None:
+        return []
+    if isinstance(value, list):
+        for item in value:
+            _check_type(item, InterfaceGroup)
+        return value
+    _check_type(value, InterfaceGroup)
+    return [value]
+
+
 # TODO: Extend ReferenceBook other types of references beyond address groups
 
 @attr.s(frozen=True)
@@ -142,8 +171,10 @@ class ReferenceBook(DataModelElement):
     """
 
     name = attr.ib(type=str)
-    addressGroups = attr.ib(type=List[AddressGroup], factory=list)
-    interfaceGroups = attr.ib(type=List[InterfaceGroup], factory=list)
+    addressGroups = attr.ib(type=List[AddressGroup], factory=list,
+                            converter=_make_address_groups)
+    interfaceGroups = attr.ib(type=List[InterfaceGroup], factory=list,
+                              converter=_make_interface_groups)
 
     @classmethod
     def from_dict(cls, json_dict):
