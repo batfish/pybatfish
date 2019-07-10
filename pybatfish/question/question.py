@@ -769,6 +769,8 @@ def _validateType(value, expectedType):
         VariableType.JAVA_REGEX,
         VariableType.JSON_PATH_REGEX,
         VariableType.LOCATION_SPEC,
+        VariableType.MLAG_ID,
+        VariableType.MLAG_ID_SPEC,
         VariableType.NAMED_STRUCTURE_SPEC,
         VariableType.NODE_PROPERTY_SPEC,
         VariableType.NODE_ROLE_DIMENSION_NAME,

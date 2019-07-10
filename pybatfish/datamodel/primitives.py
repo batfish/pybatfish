@@ -128,6 +128,8 @@ class VariableType(str, Enum):
     JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
     LOCATION_SPEC = "locationSpec"  #: location specifier
     LONG = "long"  #: long values
+    MLAG_ID = "mlagId"  #: mlag id
+    MLAG_ID_SPEC = "mlagIdSpec"  #: mlag id specifier
     NAMED_STRUCTURE_SPEC = "namedStructureSpec"  #: named structure type
     NODE_NAME = "nodeName"  #: name of nodes
     NODE_PROPERTY_SPEC = "nodePropertySpec"  #: node properties

@@ -19,6 +19,7 @@ COMPLETION_TYPES = [
     VariableType.IP_SPACE_SPEC,
     VariableType.IPSEC_SESSION_STATUS,
     VariableType.LOCATION_SPEC,
+    VariableType.MLAG_ID_SPEC,
     VariableType.NAMED_STRUCTURE_SPEC,
     VariableType.NODE_PROPERTY_SPEC,
     VariableType.NODE_ROLE_DIMENSION_NAME,
