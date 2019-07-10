@@ -6,7 +6,7 @@ COMPLETION_TYPES = [
     VariableType.BGP_PEER_PROPERTY_SPEC,
     VariableType.BGP_PROCESS_PROPERTY_SPEC,
     VariableType.BGP_SESSION_STATUS,
-    VariableType.BGP_SESSION_TYPE,
+    VariableType.BGP_SESSION_TYPE_SPEC,
     VariableType.DISPOSITION_SPEC,
     VariableType.FILTER,
     VariableType.FILTER_SPEC,

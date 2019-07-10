@@ -99,7 +99,7 @@ class VariableType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
-    BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
+    BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
     COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
     DOUBLE = "double"  #: double values
