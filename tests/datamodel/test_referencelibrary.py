@@ -18,12 +18,56 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.referencelibrary import (AddressGroup, InterfaceGroup,
-                                                  NodeRolesData, ReferenceBook,
+from pybatfish.datamodel import Interface
+from pybatfish.datamodel.referencelibrary import (AddressGroup,
+                                                  InterfaceGroup,
+                                                  NodeRole,
+                                                  NodeRoleDimension,
+                                                  NodeRolesData,
+                                                  ReferenceBook,
                                                   ReferenceLibrary)
 
 
-def test_addressgroup_both_subfields():
+def test_addressgroup_construction_empty():
+    """Check that we construct empty address groups properly."""
+    empty_group = AddressGroup("g1", addresses=[], childGroupNames=[])
+
+    assert AddressGroup("g1") == empty_group
+    assert AddressGroup("g1", addresses=None,
+                        childGroupNames=None) == empty_group
+
+
+def test_addressgroup_construction_badtype():
+    """Check that we throw an error when address group is built with wrong type."""
+    with pytest.raises(ValueError):
+        AddressGroup("g1", addresses=AddressGroup("g1"))
+    with pytest.raises(ValueError):
+        AddressGroup("g1", childGroupNames=AddressGroup("g1"))
+    with pytest.raises(ValueError):
+        AddressGroup("book1", addresses=["ag", AddressGroup("ag1")])
+    with pytest.raises(ValueError):
+        AddressGroup("book1", childGroupNames=["ag", AddressGroup("ag1")])
+
+
+def test_addressgroup_construction_item():
+    """Check that we construct address groups when sub-props are not a list."""
+    assert AddressGroup("g1", addresses="ag") == AddressGroup("g1",
+                                                              addresses=["ag"])
+    assert AddressGroup("g1", childGroupNames="ag") == AddressGroup("g1",
+                                                                    childGroupNames=[
+                                                                        "ag"])
+
+
+def test_addressgroup_construction_list():
+    """Check that we construct address groups where sub-props are lists."""
+    group = AddressGroup("g1", addresses=["ag"], childGroupNames=["cg"])
+
+    assert group.name == "g1"
+    assert group.addresses == ["ag"]
+    assert group.childGroupNames == ["cg"]
+
+
+def test_addressgroup_deser_both_subfields():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "name": "ag1",
@@ -43,7 +87,7 @@ def test_addressgroup_both_subfields():
     assert len(address_group.childGroupNames) == 2
 
 
-def test_addressgroup_none_subfields():
+def test_addressgroup_deser_none_subfields():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "name": "ag1"
@@ -55,7 +99,7 @@ def test_addressgroup_none_subfields():
     assert len(address_group.childGroupNames) == 0
 
 
-def test_addressgroup_only_addresses():
+def test_addressgroup_deser_only_addresses():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "name": "ag1",
@@ -71,7 +115,7 @@ def test_addressgroup_only_addresses():
     assert len(address_group.childGroupNames) == 0
 
 
-def test_addressgroup_only_child_groups():
+def test_addressgroup_deser_only_child_groups():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "name": "ag1",
@@ -85,6 +129,102 @@ def test_addressgroup_only_child_groups():
 
     assert len(address_group.addresses) == 0
     assert len(address_group.childGroupNames) == 2
+
+
+def test_interfacegroup_construction_empty():
+    """Check that we construct empty interface groups properly."""
+    empty_group = InterfaceGroup("g1", interfaces=[])
+
+    assert InterfaceGroup("g1") == empty_group
+    assert InterfaceGroup("g1", interfaces=None) == empty_group
+
+
+def test_interfacegroup_construction_badtype():
+    """Check that we throw an error when interface group is built with wrong type."""
+    with pytest.raises(ValueError):
+        InterfaceGroup("g1", interfaces="i1")
+    with pytest.raises(ValueError):
+        InterfaceGroup("book1", interfaces=["ag", Interface(hostname="h1",
+                                                            interface="i1")])
+
+
+def test_interfacegroup_construction_item():
+    """Check that we construct address groups when sub-props are not a list."""
+    interface = Interface(hostname="h1", interface="i1")
+    interface_group = InterfaceGroup("g1", interfaces=[interface])
+    assert InterfaceGroup("g1", interfaces=interface) == interface_group
+
+
+def test_interfacegroup_construction_list():
+    """Check that we construct interface groups where sub-props are lists."""
+    interface = Interface(hostname="h1", interface="i1")
+    group = InterfaceGroup("g1", interfaces=[interface])
+
+    assert group.name == "g1"
+    assert group.interfaces == [interface]
+
+
+def test_noderoledimension_construction_empty():
+    """Check that we construct empty node role dimension properly."""
+    empty = NodeRoleDimension("g1", roles=[])
+
+    assert NodeRoleDimension("g1") == empty
+    assert NodeRoleDimension("g1", roles=None) == empty
+
+
+def test_noderoledimension_construction_badtype():
+    """Check that we throw an error when node role dimension is built with wrong type."""
+    with pytest.raises(ValueError):
+        NodeRoleDimension("g1", roles="i1")
+    with pytest.raises(ValueError):
+        NodeRoleDimension("book1", roles=["ag", NodeRole("a", "b")])
+
+
+def test_noderoledimension_construction_item():
+    """Check that we construct node role dimension when sub-props are not a list."""
+    role = NodeRole("a", "b")
+    dimension = NodeRoleDimension("g1", roles=[role])
+    assert NodeRoleDimension("g1", roles=role) == dimension
+
+
+def test_noderoledimension_construction_list():
+    """Check that we construct interface groups where sub-props are lists."""
+    role = NodeRole("a", "b")
+    dimension = NodeRoleDimension("g1", roles=[role])
+
+    assert dimension.name == "g1"
+    assert dimension.roles == [role]
+
+
+def test_noderolesdata_construction_empty():
+    """Check that we construct empty node role data properly."""
+    empty = NodeRolesData(roleDimensions=[])
+
+    assert NodeRolesData() == empty
+    assert NodeRolesData(None) == empty
+
+
+def test_noderolesdata_construction_badtype():
+    """Check that we throw an error when node role data is built with wrong type."""
+    with pytest.raises(ValueError):
+        NodeRolesData(roleDimensions="i1")
+    with pytest.raises(ValueError):
+        NodeRolesData(roleDimensions=["ag", NodeRoleDimension("a")])
+
+
+def test_noderolesdata_construction_item():
+    """Check that we construct node role data when sub-props are not a list."""
+    dimension = NodeRoleDimension("a", "b")
+    data = NodeRolesData(roleDimensions=[dimension])
+    assert NodeRolesData(roleDimensions=dimension) == data
+
+
+def test_noderolesdata_construction_list():
+    """Check that we construct node role data where sub-props are lists."""
+    dimension = NodeRoleDimension("a", "b")
+    data = NodeRolesData(roleDimensions=[dimension])
+
+    assert data.roleDimensions == [dimension]
 
 
 def test_referencebook_construction_empty():
@@ -146,6 +286,37 @@ def test_referencebook_construction_interfacegroup_list():
 
     assert ref_book.name == "book1"
     assert ref_book.interfaceGroups == [InterfaceGroup("g")]
+
+
+def test_referencelibrary_construction_empty():
+    """Check that we construct empty reference library properly."""
+    empty = ReferenceLibrary(books=[])
+
+    assert ReferenceLibrary() == empty
+    assert ReferenceLibrary(None) == empty
+
+
+def test_referencelibrary_construction_badtype():
+    """Check that we throw an error when reference library is built with wrong type."""
+    with pytest.raises(ValueError):
+        ReferenceLibrary(books="i1")
+    with pytest.raises(ValueError):
+        ReferenceLibrary(books=["ag", ReferenceBook("a")])
+
+
+def test_referencelibrary_construction_item():
+    """Check that we construct reference library when sub-props are not a list."""
+    book = ReferenceBook("a")
+    library = ReferenceLibrary(books=[book])
+    assert ReferenceLibrary(books=book) == library
+
+
+def test_referencelibrary_construction_list():
+    """Check that we construct reference library where sub-props are lists."""
+    book = ReferenceBook("a")
+    library = ReferenceLibrary(books=[book])
+
+    assert library.books == [book]
 
 
 def test_referencelibrary_deser_empty():
