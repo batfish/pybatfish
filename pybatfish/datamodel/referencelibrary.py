@@ -151,7 +151,8 @@ def _make_interface_groups(value):
     if value is None:
         return []
     if isinstance(value, list):
-        [_check_type(item, InterfaceGroup) for item in value]
+        for item in value:
+            _check_type(item, InterfaceGroup)
         return value
     _check_type(value, InterfaceGroup)
     return [value]
