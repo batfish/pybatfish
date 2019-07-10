@@ -18,8 +18,9 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.referencelibrary import AddressGroup, InterfaceGroup, \
-    NodeRolesData, ReferenceBook, ReferenceLibrary
+from pybatfish.datamodel.referencelibrary import (AddressGroup, InterfaceGroup,
+                                                  NodeRolesData, ReferenceBook,
+                                                  ReferenceLibrary)
 
 
 def test_addressgroup_both_subfields():
@@ -88,11 +89,11 @@ def test_addressgroup_only_child_groups():
 
 def test_referencebook_construction_empty():
     """Check that we construct empty reference books properly."""
-    ref_book = ReferenceBook("book1")
+    empty_book = ReferenceBook("b1", addressGroups=[], interfaceGroups=[])
 
-    assert ref_book.name == "book1"
-    assert len(ref_book.addressGroups) == 0
-    assert len(ref_book.interfaceGroups) == 0
+    assert ReferenceBook("b1") == empty_book
+    assert ReferenceBook("b1", addressGroups=None,
+                         interfaceGroups=None) == empty_book
 
 
 def test_referencebook_construction_addressgroup_badtype():
