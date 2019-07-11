@@ -149,7 +149,11 @@ setup(
     # If there are data files included in your packages that need to be
     # installed, specify them here.  If using Python 2.6 or less, then these
     # have to be included in MANIFEST.in as well.
-    package_data={},
+    package_data={
+        # Indicate Pybatfish supports type hinting
+        # https://www.python.org/dev/peps/pep-0561/
+        'pybatfish': ['py.typed']
+    },
 
     # Although 'package_data' is the preferred approach, in some case you may
     # need to place data files outside of your packages. See:
@@ -165,4 +169,6 @@ setup(
             'bf = pybatfish.client.session:Session',
         ],
     },
+    # Required for mypy to find Pybatfish (see https://mypy.readthedocs.io/en/latest/installed_packages.html#making-pep-561-compatible-packages)
+    zip_safe=False,
 )
