@@ -99,7 +99,7 @@ class VariableType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
-    BGP_SESSION_TYPE = "bgpSessionType"  #: bgp session types
+    BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
     COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
     DOUBLE = "double"  #: double values
@@ -122,7 +122,7 @@ class VariableType(str, Enum):
     IP_PROTOCOL_SPEC = "ipProtocolSpec"  #: ip protocol specifier
     IP_SPACE_SPEC = "ipSpaceSpec"  #: ip space specifier
     IP_WILDCARD = "ipWildcard"  #: ip protocols
-    IPSEC_SESSION_STATUS = "ipsecSessionStatus"  #: ipsec session statuses
+    IPSEC_SESSION_STATUS_SPEC = "ipsecSessionStatusSpec"  #: ipsec session statuses
     JAVA_REGEX = "javaRegex"  #: java regex
     JSON_PATH = "jsonPath"  #: json path
     JSON_PATH_REGEX = "jsonPathRegex"  #: json path regex
