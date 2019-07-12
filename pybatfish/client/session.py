@@ -646,12 +646,12 @@ class Session(object):
             restv2helper.get_reference_library(self))
 
     def get_snapshot(self, snapshot=None):
-        # type: (Optional[str]) -> str
+        # type: (Optional[Union[str, Text]]) -> str
         """
         Get the specified or active snapshot name.
 
         :param snapshot: if specified, this name is returned instead of active snapshot
-        :type snapshot: str
+        :type snapshot: str or Text
 
         :return: name of the active snapshot, or the specified snapshot if applicable
         :rtype: str
@@ -659,7 +659,7 @@ class Session(object):
         :raises ValueError: if there is no active snapshot and no snapshot was specified
         """
         if snapshot is not None:
-            return snapshot
+            return str(snapshot)
         elif self.snapshot is not None:
             return self.snapshot
         else:
