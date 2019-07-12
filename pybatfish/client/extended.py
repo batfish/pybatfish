@@ -16,7 +16,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Optional  # noqa: F401
+from typing import Any, Optional, Text  # noqa: F401
 
 from pybatfish.client import resthelper, workhelper
 from pybatfish.client.consts import CoordConsts
@@ -68,7 +68,7 @@ def bf_get_snapshot_input_object_text(key, encoding='utf-8', snapshot=None):
 
 
 def bf_get_snapshot_object_stream(key, snapshot=None):
-    # type: (str, Optional[str]) -> Any
+    # type: (Text, Optional[Text]) -> Any
     """Returns a binary stream of the content of the snapshot object with specified key."""
     return restv2helper.get_snapshot_object(bf_session, key, snapshot)
 
@@ -88,7 +88,7 @@ def bf_put_network_object(key, data):
 
 
 def bf_put_snapshot_object(key, data, snapshot=None):
-    # type: (str, Any, Optional[str]) -> None
+    # type: (Text, Any, Optional[Text]) -> None
     """Puts data as the snapshot object with specified key."""
     restv2helper.put_snapshot_object(bf_session, key, data, snapshot)
 

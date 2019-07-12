@@ -216,7 +216,7 @@ def get_snapshot_input_object(session, key, snapshot=None):
 
 
 def get_snapshot_object(session, key, snapshot=None):
-    # type: (Session, str, Optional[str]) -> Any
+    # type: (Session, Text, Optional[Text]) -> Any
     """Gets extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
@@ -386,7 +386,7 @@ def put_reference_book(session, book):
 
 
 def put_snapshot_object(session, key, data, snapshot=None):
-    # type: (Session, str, Any, Optional[str]) -> None
+    # type: (Session, Text, Any, Optional[Text]) -> None
     """Put data as extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
