@@ -221,7 +221,8 @@ def get_snapshot_object(session, key, snapshot=None):
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(str(snapshot)),
+                                        session.get_snapshot(str(
+                                            snapshot) if snapshot is not None else None),
                                         CoordConstsV2.RSC_OBJECTS)
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
@@ -391,7 +392,8 @@ def put_snapshot_object(session, key, data, snapshot=None):
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
                                         CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(str(snapshot)),
+                                        session.get_snapshot(str(
+                                            snapshot) if snapshot is not None else None),
                                         CoordConstsV2.RSC_OBJECTS)
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
