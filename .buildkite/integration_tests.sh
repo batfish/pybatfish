@@ -10,4 +10,4 @@ java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coor
 pip install -e .[dev] -q
 pytest tests/integration --cov=pybatfish
 pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules
-bash <(curl -s https://codecov.io/bash) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F integration-${version//.}
+bash <(curl -s https://codecov.io/bash) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -CF integration-${version//.}
