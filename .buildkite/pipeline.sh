@@ -75,7 +75,7 @@ cat <<EOF
           image: "python:${version}"
           always-pull: true
     artifact_paths:
-      - workspace/.coverage
+      - .coverage
 EOF
 done
 
@@ -105,7 +105,7 @@ cat <<EOF
             - workspace/questions.tgz
             - workspace/.coverage
     artifact_paths:
-      - workspace/.coverage
+      - .coverage
 EOF
 done
 
@@ -122,5 +122,5 @@ cat <<EOF
           propagate-environment: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
           download:
-            - workspace/.coverage
+            - .coverage
 EOF
