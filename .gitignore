@@ -1,6 +1,7 @@
 # Python files not to be committed: binaries, eggs, etc.
 build
 .cache
+.coverage
 dist
 *.egg-info
 .eggs

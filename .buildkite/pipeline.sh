@@ -23,7 +23,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order"
+      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order codecov"
       - "flake8 pybatfish tests"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
@@ -69,11 +69,13 @@ cat <<EOF
   - label: "Python ${version} unit tests"
     command:
       - "pip install -e .[dev]"
-      - "pytest tests"
+      - "pytest tests --cov=pybatfish"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+    artifact_paths:
+      - workspace/.coverage
 EOF
 done
 
@@ -91,7 +93,7 @@ cat <<EOF
       - "tar -xzf workspace/questions.tgz"
       - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > workspace/batfish.log &"
       - "pip install -e .[dev] -q"
-      - "pytest tests/integration"
+      - "pytest tests/integration --cov=pybatfish --cov-append"
       - "pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
@@ -101,8 +103,24 @@ cat <<EOF
           download:
             - workspace/allinone.jar
             - workspace/questions.tgz
+            - workspace/.coverage
     artifact_paths:
-      - workspace/batfish.log
+      - workspace/.coverage
 EOF
 done
 
+###### Code coverage
+cat <<EOF
+  - wait
+  - label: ":coverage: Report coverage"
+    command:
+      - "codecov -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc"
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: "${BATFISH_DOCKER_CI_BASE_IMAGE}"
+          always-pull: true
+          propagate-environment: true
+      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
+          download:
+            - workspace/.coverage
+EOF
