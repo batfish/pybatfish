@@ -70,17 +70,12 @@ cat <<EOF
     command:
       - "pip install -e .[dev]"
       - "pytest tests --cov=pybatfish"
+      - "codecov -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F unit-${version}"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
 EOF
-if [ "$version" == "3.7" ]; then
-cat <<EOF
-    artifact_paths:
-      - .coverage
-EOF
-fi
 done
 
 ###### After unit tests pass, run integration tests
@@ -99,6 +94,7 @@ cat <<EOF
       - "pip install -e .[dev] -q"
       - "pytest tests/integration --cov=pybatfish --cov-append"
       - "pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules"
+      - "codecov -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F integration-${version}"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
@@ -108,26 +104,4 @@ cat <<EOF
             - workspace/allinone.jar
             - workspace/questions.tgz
 EOF
-if [ "$version" == "3.7" ]; then
-cat <<EOF
-    artifact_paths:
-      - .coverage
-EOF
-fi
 done
-
-###### Code coverage
-cat <<EOF
-  - wait
-  - label: ":coverage: Report coverage"
-    command:
-      - "codecov -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc"
-    plugins:
-      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: "${BATFISH_DOCKER_CI_BASE_IMAGE}"
-          always-pull: true
-          propagate-environment: true
-      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
-          download:
-            - .coverage
-EOF
