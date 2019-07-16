@@ -74,9 +74,13 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+EOF
+if [ "$version" == "3.7" ]; then
+cat <<EOF
     artifact_paths:
       - .coverage
 EOF
+fi
 done
 
 ###### After unit tests pass, run integration tests
@@ -103,10 +107,13 @@ cat <<EOF
           download:
             - workspace/allinone.jar
             - workspace/questions.tgz
-            - .coverage
+EOF
+if [ "$version" == "3.7" ]; then
+cat <<EOF
     artifact_paths:
       - .coverage
 EOF
+fi
 done
 
 ###### Code coverage
