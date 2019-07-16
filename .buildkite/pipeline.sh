@@ -103,7 +103,7 @@ cat <<EOF
           download:
             - workspace/allinone.jar
             - workspace/questions.tgz
-            - workspace/.coverage
+            - .coverage
     artifact_paths:
       - .coverage
 EOF
