@@ -98,7 +98,8 @@ class VariableType(str, Enum):
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
-    BGP_SESSION_STATUS = "bgpSessionStatus"  #: bgp session statuses
+    BGP_SESSION_COMPAT_STATUS_SPEC = "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
+    BGP_SESSION_STATUS_SPEC = "bgpSessionStatusSpec"  #: bgp session statuses
     BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
     COMPARATOR = "comparator"  #: comparators (<, <=, ==, >=, >, !=)
@@ -136,7 +137,8 @@ class VariableType(str, Enum):
     NODE_ROLE_DIMENSION_NAME = "nodeRoleDimensionName"  #: names of node role dimension
     NODE_ROLE_NAME = "nodeRoleName"  #: node role name
     NODE_SPEC = "nodeSpec"  #: node specifier
-    OSPF_PROPERTY_SPEC = "ospfPropertySpec"  #: ospf properties
+    OSPF_INTERFACE_PROPERTY_SPEC = "ospfInterfacePropertySpec"  #: ospf interface properties
+    OSPF_PROCESS_PROPERTY_SPEC = "ospfProcessPropertySpec"  #: ospf process properties
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
     PREFIX = "prefix"  #: prefixes
     PREFIX_RANGE = "prefixRange"  #: prefix ranges
