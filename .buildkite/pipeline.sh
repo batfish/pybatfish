@@ -23,7 +23,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order codecov"
+      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order"
       - "flake8 pybatfish tests"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
@@ -70,7 +70,7 @@ cat <<EOF
     command:
       - "pip install -e .[dev]"
       - "pytest tests --cov=pybatfish"
-      - "bash <(curl -s https://codecov.io/bash) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F unit-${version}"
+      - "bash <\(curl -s https://codecov.io/bash\) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F unit-${version}"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
@@ -94,7 +94,7 @@ cat <<EOF
       - "pip install -e .[dev] -q"
       - "pytest tests/integration --cov=pybatfish"
       - "pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules"
-      - "bash <(curl -s https://codecov.io/bash) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F integration-${version}"
+      - "bash <\(curl -s https://codecov.io/bash\) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F integration-${version}"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
