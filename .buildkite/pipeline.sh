@@ -68,7 +68,7 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} unit tests"
     command:
-      - bash unit_tests.sh ${version}
+      - bash .buildkite/unit_tests.sh ${version}
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
@@ -86,7 +86,7 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} integration tests"
     command:
-      - bash integration_tests.sh ${version}
+      - bash .buildkite/integration_tests.sh ${version}
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
