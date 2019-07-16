@@ -208,7 +208,7 @@ def assert_has_no_route(routes, expected_route, node, vrf='default',
 
 def assert_filter_denies(filters, headers, startLocation=None, soft=False,
                          snapshot=None, session=None, df_format="table"):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session], str) -> bool
+    # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if a filter (e.g., ACL) denies a specified set of flows.
 
@@ -241,7 +241,7 @@ def assert_filter_denies(filters, headers, startLocation=None, soft=False,
 
 def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
                                            session=None, df_format="table"):
-    # type: (str, bool, bool, Optional[Session], str) -> bool
+    # type: (str, bool, Optional[str], Optional[Session], str) -> bool
     """
     Check that a filter (e.g. an ACL) has no unreachable lines.
 
@@ -275,7 +275,7 @@ def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None,
 
 def assert_filter_permits(filters, headers, startLocation=None, soft=False,
                           snapshot=None, session=None, df_format="table"):
-    # type: (str, HeaderConstraints, str, bool, Optional[str], Optional[Session], str) -> bool
+    # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], Optional[Session], str) -> bool
     """
     Check if a filter (e.g., ACL) permits a specified set of flows.
 
