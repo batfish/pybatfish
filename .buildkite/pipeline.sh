@@ -68,12 +68,12 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} unit tests"
     command:
-      - "pip install -e .[dev]"
-      - "pytest tests"
+      - bash .buildkite/unit_tests.sh ${version}
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+          propagate-environment: true
 EOF
 done
 
@@ -87,22 +87,15 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
 cat <<EOF
   - label: "Python ${version} integration tests"
     command:
-      - "apt update -qq && apt -qq install -y openjdk-11-jre-headless"
-      - "tar -xzf workspace/questions.tgz"
-      - "java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > workspace/batfish.log &"
-      - "pip install -e .[dev] -q"
-      - "pytest tests/integration"
-      - "pytest docs pybatfish --doctest-glob='docs/source/*.rst' --doctest-modules"
+      - bash .buildkite/integration_tests.sh ${version}
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
           always-pull: true
+          propagate-environment: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
           download:
             - workspace/allinone.jar
             - workspace/questions.tgz
-    artifact_paths:
-      - workspace/batfish.log
 EOF
 done
-

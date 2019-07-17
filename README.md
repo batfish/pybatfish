@@ -1,5 +1,7 @@
 **Got questions, feedback, or feature requests? Join our community on [Slack!](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA)**
 
+[![codecov](https://codecov.io/gh/batfish/pybatfish/branch/master/graph/badge.svg)](https://codecov.io/gh/batfish/pybatfish)
+
 # Pybatfish
 
 Pybatfish is a Python client for [Batfish](https://github.com/batfish/batfish). ![Analytics](https://ga-beacon.appspot.com/UA-100596389-3/open-source/pybatfish?pixel&useReferer)
@@ -36,7 +38,7 @@ The [Batfish YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60
 * End-to-end reachability is identical across the current and a planned configuration
 * Planned ACL or firewall changes are provably correct and causes no collateral damage for other traffic
 * Two configurations, potentially from different vendors, are functionally equivalent
-  
+
 ## How do I get started?
 
 If you haven't already installed Batfish, follow the instructions listed in the [batfish github repository](https://github.com/batfish/batfish/blob/master/README.md) to do so.
@@ -60,4 +62,4 @@ Our notebooks provide a quick start guide for different use cases. Beyond that, 
 
 ### Pybatfish documentation
 
-Complete documentation of pybatfish APIs is [here](https://pybatfish.readthedocs.io/en/latest/). 
+Complete documentation of pybatfish APIs is [here](https://pybatfish.readthedocs.io/en/latest/).
