@@ -51,7 +51,7 @@ __all__ = [
     'assert_zero_results',
 ]
 
-_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*'
+_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '/(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*/'
 
 
 def assert_zero_results(answer, soft=False):
