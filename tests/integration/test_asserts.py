@@ -18,15 +18,25 @@ import pytest
 
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
+from pybatfish.exception import BatfishAssertException
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
 
-# Just use a single session for all assertion tests
+# Just use a single session and snapshot for all passing assertion tests
 @pytest.fixture(scope='module')
-def session():
+def session_pass():
     s = Session()
     name = s.init_snapshot(join(_this_dir, 'snapshots', 'asserts'))
+    yield s
+    s.delete_snapshot(name)
+
+
+# Just use a single session and snapshot for all failing assertion tests
+@pytest.fixture(scope='module')
+def session_fail():
+    s = Session()
+    name = s.init_snapshot(join(_this_dir, 'snapshots', 'asserts_fail'))
     yield s
     s.delete_snapshot(name)
 
@@ -75,7 +85,58 @@ def session():
      {}
      ),
 ])
-def test_asserts_run(session, assert_func, params):
+def test_asserts_pass(session_pass, assert_func, params):
     """Test that each assertion runs successfully."""
     # Assertion should run without errors and return True (passing assert)
-    assert getattr(session.asserts, assert_func)(**params)
+    assert getattr(session_pass.asserts, assert_func)(**params)
+
+
+@pytest.mark.parametrize('assert_func, params', [
+    ('assert_filter_denies',
+     {
+         'filters': '/101/',
+         'headers': HeaderConstraints(srcIps='1.0.1.0', dstIps='8.8.8.8'),
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
+     }
+     ),
+    ('assert_filter_has_no_unreachable_lines',
+     {
+         'filters': '/101/',
+     }
+     ),
+    ('assert_filter_permits',
+     {
+         'filters': '/101/',
+         'headers': HeaderConstraints(srcIps='12.34.56.78'),
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
+     }
+     ),
+    ('assert_flows_fail',
+     {
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
+         'headers': HeaderConstraints(srcIps='2.0.1.0', dstIps='1.0.1.0',
+                                      ipProtocols=['TCP']),
+     }
+     ),
+    ('assert_flows_succeed',
+     {
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
+         'headers': HeaderConstraints(srcIps='12.34.56.78', dstIps='1.0.1.0',
+                                      ipProtocols=['TCP']),
+     }
+     ),
+    ('assert_no_incompatible_bgp_sessions',
+     {}
+     ),
+    ('assert_no_unestablished_bgp_sessions',
+     {}
+     ),
+    ('assert_no_undefined_references',
+     {}
+     ),
+])
+def test_asserts_fail(session_fail, assert_func, params):
+    """Test that each assertion fails as expected."""
+    # Assertion should fail and raise a BatfishAssertException
+    with pytest.raises(BatfishAssertException):
+        getattr(session_fail.asserts, assert_func)(**params)

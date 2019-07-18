@@ -51,7 +51,11 @@ __all__ = [
     'assert_zero_results',
 ]
 
-_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '/(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*/'
+# Following regex is matching anything other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, or `UNKNOWN_REMOTE`
+# ?! groups are negative lookaheads, meaning don't match the specified text but also don't consume the checked characters
+# ^ and $ anchors are needed to prevent substring matching in Batfish
+# e.g. within the string `UNKNOWN_REMOTE`, technically this regex matches any substring starting after position 0 (e.g. `NKNOWN_REMOTE`)
+_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '/^(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*$/'
 
 
 def assert_zero_results(answer, soft=False):
