@@ -31,15 +31,12 @@ def session():
     s.delete_snapshot(name)
 
 
-null = ()
-
-
 @pytest.mark.parametrize('assert_func, params', [
     ('assert_filter_denies',
      {
          'filters': '/101/',
          'headers': HeaderConstraints(srcIps='12.34.56.78'),
-         'startLocation': 'GigabitEthernet1/0',
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
      }
      ),
     ('assert_filter_has_no_unreachable_lines',
@@ -51,7 +48,7 @@ null = ()
      {
          'filters': '/101/',
          'headers': HeaderConstraints(srcIps='1.0.1.0', dstIps='8.8.8.8'),
-         'startLocation': 'GigabitEthernet1/0',
+         'startLocation': '@enter(node[GigabitEthernet1/0])',
      }
      ),
     ('assert_flows_fail',
