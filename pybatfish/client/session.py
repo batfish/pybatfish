@@ -35,7 +35,7 @@ from pybatfish.client._facts import (
     get_facts, load_facts, validate_facts, write_facts
 )
 from pybatfish.client.asserts import (
-    _INCOMPATIBLE_BGP_SESSION_STATUS_REGEX, assert_filter_denies,
+    assert_filter_denies,
     assert_filter_has_no_unreachable_lines, assert_filter_permits,
     assert_flows_fail, assert_flows_succeed,
     assert_no_incompatible_bgp_sessions, assert_no_undefined_references,
@@ -158,15 +158,15 @@ class Asserts(object):
                                     self.session, df_format)
 
     def assert_no_incompatible_bgp_sessions(self, nodes=None, remote_nodes=None,
-                                            status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
+                                            status=None,
                                             snapshot=None, soft=False,
                                             df_format="table"):
-        # type: (Optional[str], Optional[str], str, Optional[str], bool, str) -> bool
+        # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, str) -> bool
         """Assert that there are no incompatible BGP sessions present in the snapshot.
 
         :param nodes: search sessions with specified nodes on one side of the sessions.
         :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
-        :param status: select sessions matching the specified session status.
+        :param status: select sessions matching the specified `BGP session status specifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#bgp-session-compat-status-specifier>`_, if none is specified then all statuses other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, and `UNKNOWN_REMOTE` are selected.
         :param snapshot: the snapshot on which to check the assertion
         :param soft: whether this assertion is soft (i.e., generates a warning but
             not a failure)
