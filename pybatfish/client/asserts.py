@@ -51,12 +51,6 @@ __all__ = [
     'assert_zero_results',
 ]
 
-# Following regex is matching anything other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, or `UNKNOWN_REMOTE`
-# ?! groups are negative lookaheads, meaning don't match the specified text but also don't consume the checked characters
-# ^ and $ anchors are needed to prevent substring matching in Batfish
-# e.g. within the string `UNKNOWN_REMOTE`, technically this regex matches any substring starting after position 0 (e.g. `NKNOWN_REMOTE`)
-_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX = '/^(?!UNIQUE_MATCH)(?!DYNAMIC_MATCH)(?!UNKNOWN_REMOTE).*$/'
-
 
 def assert_zero_results(answer, soft=False):
     # type: (Union[Answer, TableAnswer, DataFrame], bool) -> bool
@@ -375,16 +369,15 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None,
 
 
 def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
-                                        status=_INCOMPATIBLE_BGP_SESSION_STATUS_REGEX,
-                                        snapshot=None,
+                                        status=None, snapshot=None,
                                         soft=False, session=None,
                                         df_format="table"):
-    # type: (Optional[str], Optional[str], str, Optional[str], bool, Optional[Session], str) -> bool
+    # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
     """Assert that there are no incompatible BGP sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
     :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
-    :param status: select sessions matching the specified session status.
+    :param status: select sessions matching the specified session status, if none is specified then all statuses other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, and `UNKNOWN_REMOTE` are selected.
     :param snapshot: the snapshot on which to check the assertion
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
@@ -395,16 +388,28 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    kwargs = dict(status=status)
+    kwargs = dict()  # type: Dict
+    if status is not None:
+        kwargs.update(status=status)
     if nodes is not None:
         kwargs.update(nodes=nodes)
     if remote_nodes is not None:
         kwargs.update(remote_nodes=remote_nodes)
 
-    df = _get_question_object(session,
-                              'bgpSessionCompatibility').bgpSessionCompatibility(
+    df_raw = _get_question_object(session,
+                                  'bgpSessionCompatibility').bgpSessionCompatibility(
         **kwargs).answer(
         snapshot).frame()  # type: ignore
+
+    # Filter out UNIQUE_MATCH, DYNAMIC_MATCH, UNKNOWN_REMOTE statuses
+    # unless user has provided status
+    if status is None:
+        ignored_statuses = ['UNIQUE_MATCH', 'DYNAMIC_MATCH', 'UNKNOWN_REMOTE']
+        df = df_raw[df_raw['Configured_Status'].apply(
+            lambda x: x not in ignored_statuses)]
+    else:
+        df = df_raw
+
     if len(df) > 0:
         return _raise_common(
             "Found incompatible BGP session(s), when none were expected\n{}".format(
