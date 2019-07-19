@@ -377,7 +377,7 @@ def assert_no_incompatible_bgp_sessions(nodes=None, remote_nodes=None,
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
     :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
-    :param status: select sessions matching the specified session status, if none is specified then all statuses other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, and `UNKNOWN_REMOTE` are selected.
+    :param status: select sessions matching the specified `BGP session status specifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#bgp-session-status-specifier>`_, if none is specified then all statuses other than `UNIQUE_MATCH`, `DYNAMIC_MATCH`, and `UNKNOWN_REMOTE` are selected.
     :param snapshot: the snapshot on which to check the assertion
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
