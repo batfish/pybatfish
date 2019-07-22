@@ -344,7 +344,7 @@ def get_work_log(session, snapshot, work_id):
 
 
 def get_component_versions(session):
-    # type: (Session) -> Dict[Text, Text]
+    # type: (Session) -> Dict[str, Any]
     """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
     return _get_dict(session, "/version")
 

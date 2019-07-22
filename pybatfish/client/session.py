@@ -683,6 +683,7 @@ class Session(object):
         return get_work_status(work_item, self)
 
     def get_component_versions(self):
+        # type: () -> Dict[str, Any]
         """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
         return get_component_versions(self)
 
