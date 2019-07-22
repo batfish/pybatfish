@@ -42,6 +42,7 @@ from pybatfish.client.asserts import (
     assert_no_unestablished_bgp_sessions,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
+from pybatfish.client.restv2helper import get_component_versions
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (
     HeaderConstraints, Interface, NodeRoleDimension, NodeRolesData,
@@ -680,6 +681,10 @@ class Session(object):
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
         return get_work_status(work_item, self)
+
+    def get_component_versions(self):
+        """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
+        return get_component_versions(self)
 
     def init_snapshot(self, upload, name=None, overwrite=False,
                       extra_args=None):
