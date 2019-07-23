@@ -343,6 +343,12 @@ def get_work_log(session, snapshot, work_id):
     return _get(session, url_tail, dict()).text
 
 
+def get_component_versions(session):
+    # type: (Session) -> Dict[str, Any]
+    """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
+    return _get_dict(session, "/version")
+
+
 def put_network_object(session, key, data):
     # type: (Session, str, Any) -> None
     """Put data as extended object with given key for the current network."""
