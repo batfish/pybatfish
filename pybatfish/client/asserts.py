@@ -44,6 +44,7 @@ __all__ = [
     'assert_flows_succeed',
     'assert_has_no_route',
     'assert_has_route',
+    'assert_no_forwarding_loops',
     'assert_no_incompatible_bgp_sessions',
     'assert_no_unestablished_bgp_sessions',
     'assert_no_undefined_references',
@@ -473,6 +474,31 @@ def assert_no_undefined_references(snapshot=None, soft=False,
     if len(df) > 0:
         return _raise_common(
             "Found undefined reference(s), when none were expected\n{}".format(
+                _format_df(df, df_format)), soft)
+    return True
+
+
+def assert_no_forwarding_loops(snapshot=None, soft=False,
+                               session=None, df_format="table"):
+    # type: (Optional[str], bool, Optional[Session], str) -> bool
+    """Assert that there are no forwarding loops in the snapshot.
+
+    :param snapshot: the snapshot on which to check the assertion
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance",
+                                              BatfishAssertException)
+
+    df = _get_question_object(session,
+                              'detectLoops').detectLoops().answer(
+        snapshot).frame()  # type: ignore
+    if len(df) > 0:
+        return _raise_common(
+            "Found forwarding loops, when none were expected\n{}".format(
                 _format_df(df, df_format)), soft)
     return True
 
