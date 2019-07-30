@@ -23,6 +23,7 @@ from pybatfish.client.asserts import (_format_df, _get_question_object,
                                       assert_filter_permits,
                                       assert_flows_fail,
                                       assert_flows_succeed,
+                                      assert_no_forwarding_loops,
                                       assert_no_incompatible_bgp_sessions,
                                       assert_no_undefined_references,
                                       assert_no_unestablished_bgp_sessions)
@@ -698,6 +699,62 @@ def test_no_undefined_references_no_session():
             MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_no_undefined_references()
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_no_forwarding_loops():
+    """Confirm no-forwarding-loops assert passes and fails as expected when specifying a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'detectLoops',
+                      create=True) as detectLoops:
+        # Test success
+        detectLoops.return_value = MockQuestion()
+        assert_no_forwarding_loops(session=bf)
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'Loop': 'found', 'More': 'data'}])
+        detectLoops.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_forwarding_loops(session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_no_forwarding_loops_from_session():
+    """Confirm no-forwarding-loops assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'detectLoops',
+                      create=True) as detectLoops:
+        # Test success
+        detectLoops.return_value = MockQuestion()
+        bf.asserts.assert_no_forwarding_loops()
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'Loop': 'found', 'More': 'data'}])
+        detectLoops.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_forwarding_loops()
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_no_forwarding_loops_no_session():
+    """Confirm no-forwarding-loops assert passes and fails as expected when not specifying a session."""
+    with patch.object(bfq, 'detectLoops',
+                      create=True) as detectLoops:
+        # Test success
+        detectLoops.return_value = MockQuestion()
+        assert_no_forwarding_loops()
+        # Test failure
+        mock_df = DataFrame.from_records(
+            [{'Loop': 'found', 'More': 'data'}])
+        detectLoops.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_forwarding_loops()
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
 
