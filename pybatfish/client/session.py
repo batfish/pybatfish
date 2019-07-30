@@ -160,7 +160,7 @@ class Asserts(object):
                                     self.session, df_format)
 
     def assert_no_forwarding_loops(self, snapshot=None, soft=False,
-                                  df_format="table"):
+                                   df_format="table"):
         # type: (Optional[str], bool, str) -> bool
         """Assert that there are no forwarding loops in the snapshot.
 
