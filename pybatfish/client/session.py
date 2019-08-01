@@ -373,7 +373,7 @@ class Session(object):
         if session_module is None:
             raise ValueError(
                 "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
-                    type_, sessions.keys()))
+                    type_, set(sessions.keys())))
         session = session_module(**params)  # type: Session
         return session
 
