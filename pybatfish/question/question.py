@@ -114,7 +114,7 @@ class QuestionMeta(type):
                 if var_name not in additional_kwargs:
                     instance_vars[var_name]['value'] = var_value
 
-        # Define signature. Helps with tab completion and doc generation. Python3 centric
+        # Define signature. Helps with tab completion. Python3 centric
         if PY3:
             from inspect import Signature, Parameter
             # Merge constructor params with question variables
@@ -459,7 +459,7 @@ def _load_question_dict(question, session):
         'session': session,
         'tags': tags,
         'template': deepcopy(question),
-        'variables': variables
+        'variables': variables,
     })
     return question_name, question_class
 
