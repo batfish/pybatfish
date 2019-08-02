@@ -118,8 +118,7 @@ class QuestionMeta(type):
         if PY3:
             from inspect import Signature, Parameter
             # Merge constructor params with question variables
-            params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY,
-                                annotation=dct.get('ivars', {}).get(param))
+            params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
                       for param in dct.get("variables", []) +
                       [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
@@ -460,8 +459,7 @@ def _load_question_dict(question, session):
         'session': session,
         'tags': tags,
         'template': deepcopy(question),
-        'variables': variables,
-        'ivars': ivars,
+        'variables': variables
     })
     return question_name, question_class
 

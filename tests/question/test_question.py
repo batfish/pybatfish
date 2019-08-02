@@ -410,8 +410,6 @@ def test_question_params(session):
     parameters = inspect.signature(qclass.__init__).parameters
 
     assert parameters.keys() == {"var1", "question_name"}
-    assert parameters.get("var1").annotation == TEST_QUESTION_DICT.get(
-        "instance").get("variables").get("var1")
 
 
 if __name__ == "__main__":
