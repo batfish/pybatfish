@@ -114,11 +114,12 @@ class QuestionMeta(type):
                 if var_name not in additional_kwargs:
                     instance_vars[var_name]['value'] = var_value
 
-        # Define signature. Helps with tab completion. Python3 centric
+        # Define signature. Helps with tab completion and doc generation. Python3 centric
         if PY3:
             from inspect import Signature, Parameter
             # Merge constructor params with question variables
-            params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
+            params = [Parameter(name=param, kind=Parameter.KEYWORD_ONLY,
+                                annotation=dct.get('ivars', {}).get(param))
                       for param in dct.get("variables", []) +
                       [p for p in additional_kwargs if
                        p not in ('kwargs', 'self')]]
@@ -460,6 +461,7 @@ def _load_question_dict(question, session):
         'tags': tags,
         'template': deepcopy(question),
         'variables': variables,
+        'ivars': ivars,
     })
     return question_name, question_class
 

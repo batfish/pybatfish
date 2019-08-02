@@ -11,6 +11,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import inspect
 import json
 
 import pytest
@@ -34,6 +35,14 @@ TEST_QUESTION_DICT = {
     'instance': {
         'instanceName': TEST_QUESTION_NAME,
         'description': 'a test question',
+        'variables': {
+            "var1": {
+                "description": "desc1",
+                "type": "type1",
+                "value": "val1",
+                "displayName": "display1"
+            }
+        }
     }
 }
 
@@ -391,6 +400,16 @@ def test_question_positional_args(session):
     qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
     with pytest.raises(TypeError):
         qclass("positional")
+
+
+def test_question_params(session):
+    """Test that a question constructor has right parameters."""
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
+    parameters = inspect.signature(qclass.__init__).parameters
+
+    assert parameters.keys() == {"var1", "question_name"}
+    assert parameters.get("var1").annotation == TEST_QUESTION_DICT.get(
+        "instance").get("variables").get("var1")
 
 
 if __name__ == "__main__":
