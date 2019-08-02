@@ -13,6 +13,7 @@
 #   limitations under the License.
 import inspect
 import json
+import sys
 
 import pytest
 
@@ -29,6 +30,7 @@ from pybatfish.question.question import (_compute_docstring,
                                          _validate,
                                          list_questions,
                                          load_questions)
+from six import PY3
 
 TEST_QUESTION_NAME = 'testQuestionName'
 TEST_QUESTION_DICT = {
@@ -402,6 +404,7 @@ def test_question_positional_args(session):
         qclass("positional")
 
 
+@pytest.mark.skipif(not PY3, reason="requires python3")
 def test_question_params(session):
     """Test that a question constructor has right parameters."""
     qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
