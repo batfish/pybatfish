@@ -13,9 +13,9 @@
 #   limitations under the License.
 import inspect
 import json
-import sys
 
 import pytest
+from six import PY3
 
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
@@ -30,7 +30,6 @@ from pybatfish.question.question import (_compute_docstring,
                                          _validate,
                                          list_questions,
                                          load_questions)
-from six import PY3
 
 TEST_QUESTION_NAME = 'testQuestionName'
 TEST_QUESTION_DICT = {
