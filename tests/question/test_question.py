@@ -11,9 +11,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import inspect
 import json
 
 import pytest
+from six import PY3
 
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
@@ -34,6 +36,14 @@ TEST_QUESTION_DICT = {
     'instance': {
         'instanceName': TEST_QUESTION_NAME,
         'description': 'a test question',
+        'variables': {
+            "var1": {
+                "description": "desc1",
+                "type": "type1",
+                "value": "val1",
+                "displayName": "display1"
+            }
+        }
     }
 }
 
@@ -391,6 +401,15 @@ def test_question_positional_args(session):
     qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
     with pytest.raises(TypeError):
         qclass("positional")
+
+
+@pytest.mark.skipif(not PY3, reason="requires python3")
+def test_question_params(session):
+    """Test that a question constructor has right parameters."""
+    qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)
+    parameters = inspect.signature(qclass.__init__).parameters
+
+    assert parameters.keys() == {"var1", "question_name"}
 
 
 if __name__ == "__main__":
