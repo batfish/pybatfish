@@ -26,8 +26,6 @@ __all__ = [
     'ExitOutputIfaceStepDetail',
     'FilterStepDetail',
     'Flow',
-    'FlowTrace',
-    'FlowTraceHop',
     'HeaderConstraints',
     'Hop',
     'InboundStepDetail',
