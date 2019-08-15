@@ -16,7 +16,7 @@ from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
 
-from pybatfish.client._facts import load_facts
+from pybatfish.client._facts import load_facts, validate_facts
 from pybatfish.client.session import Session
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -40,8 +40,10 @@ def test_extract_facts(tmpdir, session):
     written_facts = load_facts(str(out_dir))
     expected_facts = load_facts(join(_this_dir, 'facts', 'expected_facts'))
 
-    assert extracted_facts == expected_facts, 'Extracted facts match expected facts'
-    assert written_facts == expected_facts, 'Facts written to disk match expected facts'
+    assert validate_facts(expected_facts,
+                          extracted_facts) == {}, 'Extracted facts match expected facts'
+    assert validate_facts(expected_facts,
+                          written_facts) == {}, 'Written facts match expected facts'
 
 
 def test_validate_facts_matching(session):
