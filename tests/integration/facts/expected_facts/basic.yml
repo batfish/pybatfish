@@ -120,7 +120,6 @@ nodes:
         OSPF_Cost: null
         OSPF_Enabled: false
         OSPF_Passive: false
-        OSPF_Point_To_Point: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: null
@@ -162,7 +161,6 @@ nodes:
         OSPF_Cost: 1
         OSPF_Enabled: true
         OSPF_Passive: false
-        OSPF_Point_To_Point: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 1.0.1.1/24
@@ -204,7 +202,6 @@ nodes:
         OSPF_Cost: null
         OSPF_Enabled: false
         OSPF_Passive: false
-        OSPF_Point_To_Point: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 10.12.11.1/24
@@ -246,7 +243,6 @@ nodes:
         OSPF_Cost: 1
         OSPF_Enabled: true
         OSPF_Passive: true
-        OSPF_Point_To_Point: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 1.1.1.1/32
