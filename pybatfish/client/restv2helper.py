@@ -205,7 +205,7 @@ def get_network_object(session, key):
 
 
 def get_snapshot_input_object(session, key, snapshot=None):
-    # type: (Session, str, Optional[str]) -> Any
+    # type: (Session, Text, Optional[Text]) -> Any
     """Gets input object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
                                         session.network,
