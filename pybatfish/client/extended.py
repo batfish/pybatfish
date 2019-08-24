@@ -54,13 +54,13 @@ def bf_get_network_object_text(key, encoding='utf-8'):
 
 
 def bf_get_snapshot_input_object_stream(key, snapshot=None):
-    # type: (str, Optional[str]) -> Any
+    # type: (Text, Optional[Text]) -> Any
     """Returns a binary stream of the content of the snapshot input object with specified key."""
     return restv2helper.get_snapshot_input_object(bf_session, key, snapshot)
 
 
 def bf_get_snapshot_input_object_text(key, encoding='utf-8', snapshot=None):
-    # type: (str, str, Optional[str]) -> str
+    # type: (Text, Text, Optional[Text]) -> str
     """Returns the text content of the snapshot input object with specified key."""
     with bf_get_snapshot_input_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
