@@ -34,19 +34,19 @@ __all__ = ['bf_delete_network_object',
 
 
 def bf_delete_network_object(key):
-    # type: (Text) -> None
+    # type: (str) -> None
     """Deletes the network object with specified key."""
     return restv2helper.delete_network_object(bf_session, key)
 
 
 def bf_get_network_object_stream(key):
-    # type: (Text) -> Any
+    # type: (str) -> Any
     """Returns a binary stream of the content of the network object with specified key."""
     return restv2helper.get_network_object(bf_session, key)
 
 
 def bf_get_network_object_text(key, encoding='utf-8'):
-    # type: (Text, Text) -> str
+    # type: (str, str) -> str
     """Returns the text content of the network object with specified key."""
     with bf_get_network_object_stream(key) as stream:
         text = stream.read().decode(encoding)
@@ -74,7 +74,7 @@ def bf_get_snapshot_object_stream(key, snapshot=None):
 
 
 def bf_get_snapshot_object_text(key, encoding='utf-8', snapshot=None):
-    # type: (Text, Text, Optional[Text]) -> str
+    # type: (str, str, Optional[str]) -> str
     """Returns the text content of the snapshot object with specified key."""
     with bf_get_snapshot_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
@@ -82,7 +82,7 @@ def bf_get_snapshot_object_text(key, encoding='utf-8', snapshot=None):
 
 
 def bf_put_network_object(key, data):
-    # type: (Text, Any) -> None
+    # type: (str, Any) -> None
     """Puts data as the network object with specified key."""
     restv2helper.put_network_object(bf_session, key, data)
 
