@@ -116,10 +116,6 @@ nodes:
         MLAG_ID: null
         MTU: 1500
         Native_VLAN: null
-        OSPF_Area_Name: null
-        OSPF_Cost: null
-        OSPF_Enabled: false
-        OSPF_Passive: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: null
@@ -157,10 +153,6 @@ nodes:
         MLAG_ID: null
         MTU: 1500
         Native_VLAN: null
-        OSPF_Area_Name: 1
-        OSPF_Cost: 1
-        OSPF_Enabled: true
-        OSPF_Passive: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 1.0.1.1/24
@@ -198,10 +190,6 @@ nodes:
         MLAG_ID: null
         MTU: 1500
         Native_VLAN: null
-        OSPF_Area_Name: null
-        OSPF_Cost: null
-        OSPF_Enabled: false
-        OSPF_Passive: false
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 10.12.11.1/24
@@ -239,10 +227,6 @@ nodes:
         MLAG_ID: null
         MTU: 1500
         Native_VLAN: null
-        OSPF_Area_Name: 1
-        OSPF_Cost: 1
-        OSPF_Enabled: true
-        OSPF_Passive: true
         Outgoing_Filter_Name: null
         PBR_Policy_Name: null
         Primary_Address: 1.1.1.1/32
