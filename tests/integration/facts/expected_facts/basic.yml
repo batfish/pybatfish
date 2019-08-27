@@ -257,7 +257,6 @@ nodes:
                   Dead_Interval: 120
                   Enabled: true
                   Hello_Interval: 30
-                  Inbound_Distribute_List_Policy: null
                   Network_Type: null
                   Passive: false
                 Loopback0:
@@ -265,7 +264,6 @@ nodes:
                   Dead_Interval: 120
                   Enabled: true
                   Hello_Interval: 30
-                  Inbound_Distribute_List_Policy: null
                   Network_Type: null
                   Passive: true
           Reference_Bandwidth: 100000000.0

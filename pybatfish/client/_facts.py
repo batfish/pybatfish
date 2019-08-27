@@ -241,8 +241,6 @@ def _process_ospf_interfaces(node_dict, ospf_props):
             'Dead_Interval': r.get('OSPF_Dead_Interval'),
             'Hello_Interval': r.get('OSPF_Hello_Interval'),
             'Network_Type': r.get('OSPF_Network_Type'),
-            'Inbound_Distribute_List_Policy': r.get(
-                'OSPF_Inbound_Distribute_List_Policy'),
         }
 
 
