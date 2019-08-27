@@ -245,6 +245,32 @@ nodes:
     NTP:
       NTP_Servers: []
       NTP_Source_Interface: null
+    OSPF:
+      Processes:
+        '1':
+          Areas:
+            '1':
+              Area_Type: NONE
+              Interfaces:
+                GigabitEthernet0/0:
+                  Cost: 1
+                  Dead_Interval: 120
+                  Enabled: true
+                  Hello_Interval: 30
+                  Inbound_Distribute_List_Policy: null
+                  Network_Type: null
+                  Passive: false
+                Loopback0:
+                  Cost: 1
+                  Dead_Interval: 120
+                  Enabled: true
+                  Hello_Interval: 30
+                  Inbound_Distribute_List_Policy: null
+                  Network_Type: null
+                  Passive: true
+          Reference_Bandwidth: 100000000.0
+          Router_ID: 1.1.1.1
+          VRF: default
     PBR_Policies: []
     Route6_Filter_Lists: []
     Route_Filter_Lists:
