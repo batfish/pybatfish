@@ -257,7 +257,7 @@ nodes:
                   Dead_Interval: 120
                   Enabled: true
                   Hello_Interval: 30
-                  Network_Type: null
+                  Network_Type: BROADCAST
                   Passive: false
                 Loopback0:
                   Cost: 1
