@@ -68,8 +68,7 @@ def _parse_timestamp(timestamp_str):
 def _print_timestamp(timestamp):
     # type: (datetime.datetime) -> str
     # Print the timestamp in the appropriate locale
-    return timestamp.astimezone(tzlocal()).isoformat(sep=' ',
-                                                     timespec='seconds')
+    return timestamp.astimezone(tzlocal()).isoformat(sep=' ')
 
 
 def execute(work_item, session, background=False, extra_args=None):
