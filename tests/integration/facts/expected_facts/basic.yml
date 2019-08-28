@@ -259,13 +259,6 @@ nodes:
                   Hello_Interval: 10
                   Network_Type: BROADCAST
                   Passive: false
-                Loopback0:
-                  Cost: 1
-                  Dead_Interval: 120
-                  Enabled: true
-                  Hello_Interval: 30
-                  Network_Type: null
-                  Passive: true
           Reference_Bandwidth: 100000000.0
           Router_ID: 1.1.1.1
           VRF: default
