@@ -114,7 +114,7 @@ def test_parse_rfc3339_timestamp():
 
 def test_print_timestamp():
     ref = datetime.datetime(2017, 11, 29, 18, 51, 23, 456000, tzinfo=UTC)
-    assert _print_timestamp(ref) == ref.astimezone(tzlocal()).strftime("%c %Z")
+    assert _print_timestamp(ref) == ref.astimezone(tzlocal()).isoformat(' ')
 
 
 def test_print_workstatus_fresh_task(caplog):
