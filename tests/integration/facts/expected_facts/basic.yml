@@ -254,9 +254,9 @@ nodes:
               Interfaces:
                 GigabitEthernet0/0:
                   Cost: 1
-                  Dead_Interval: 120
+                  Dead_Interval: 40
                   Enabled: true
-                  Hello_Interval: 30
+                  Hello_Interval: 10
                   Network_Type: BROADCAST
                   Passive: false
                 Loopback0:
