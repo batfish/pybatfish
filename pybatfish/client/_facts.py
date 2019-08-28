@@ -245,7 +245,7 @@ def _process_ospf_interfaces(node_dict, ospf_props):
 
 
 def _get_or_create_ospf_interfaces(node_dict, node, process, area):
-    # type: (Dict, Text, Text, Text) -> Any
+    # type: (Dict[Text, Any], Text, Text, Text) -> Any
     """
     Get the OSPF interfaces dict under the specified OSPF area and process on the specified node.
 
@@ -256,7 +256,7 @@ def _get_or_create_ospf_interfaces(node_dict, node, process, area):
 
 
 def _get_or_create_ospf_areas(node_dict, node, process):
-    # type: (Dict, Text, Text) -> Any
+    # type: (Dict[Text, Any], Text, Text) -> Any
     """
     Get the OSPF areas dict under the specified OSPF process on the specified node.
 
@@ -267,7 +267,7 @@ def _get_or_create_ospf_areas(node_dict, node, process):
 
 
 def _get_or_create_ospf_processes(node_dict, node):
-    # type: (Dict, Text) -> Any
+    # type: (Dict[Text, Any], Text) -> Any
     """
     Get the OSPF processes dict under the specified node.
 
