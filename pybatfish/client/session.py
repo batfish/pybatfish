@@ -19,6 +19,7 @@ import base64
 import logging
 import os
 import tempfile
+import zipfile
 from typing import (
     Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
 )
@@ -797,6 +798,10 @@ class Session(object):
             with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
                 zip_dir(file_to_send, temp_zip_file)
                 tmp_file_name = file_to_send = temp_zip_file.name
+        elif os.path.isfile(file_to_send):
+            if not zipfile.is_zipfile(file_to_send):
+                raise ValueError(
+                    "{} is not a valid zip file".format(file_to_send))
 
         with open(file_to_send, 'rb') as fd:
             self.__init_snapshot_from_io(name, fd)
@@ -833,6 +838,8 @@ class Session(object):
         if isinstance(upload, six.string_types):
             self.__init_snapshot_from_file(name, upload)
         else:
+            if not zipfile.is_zipfile(upload):
+                raise ValueError("The provided data is not a valid zip file")
             # upload is an IO-like object already
             self.__init_snapshot_from_io(name, upload)
 
@@ -1118,7 +1125,6 @@ def _create_in_memory_zip(text, filename, platform):
     # type: (str, str, Optional[str]) -> IO
     """Creates an in-memory zip file for a single file snapshot."""
     from io import BytesIO
-    import zipfile
     data = BytesIO()
     with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
         zipfilename = os.path.join('snapshot', 'configs', filename)
