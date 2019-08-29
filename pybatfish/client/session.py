@@ -20,7 +20,7 @@ import logging
 import os
 import tempfile
 from typing import (
-    Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+    Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
 )
 
 import pkg_resources
@@ -789,10 +789,15 @@ class Session(object):
                 ss_name, six.string_types)  # Guaranteed since background=False
             return ss_name
 
+    def __init_snapshot_from_io(self, name, fd):
+        json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+        resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data)
+
     def _init_snapshot(self, upload, name=None, overwrite=False,
                        background=False,
                        extra_args=None):
-        # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        # type: (Union[str, IO], Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
         if self.network is None:
             self.set_network()
 
@@ -809,28 +814,30 @@ class Session(object):
                     'Use overwrite = True if you want to overwrite the '
                     'existing snapshot'.format(name, self.network))
 
-        file_to_send = upload
-        tmp_file_name = None  # type: Optional[Text]
-        if os.path.isdir(upload):
-            # delete=False because we re-open for reading
-            with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
-                zip_dir(upload, temp_zip_file)
-                tmp_file_name = file_to_send = temp_zip_file.name
+        if isinstance(upload, six.string_types):
+            # upload is a file or directory name
+            file_to_send = upload
+            tmp_file_name = None  # type: Optional[Text]
+            if os.path.isdir(upload):
+                # delete=False because we re-open for reading
+                with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
+                    zip_dir(upload, temp_zip_file)
+                    tmp_file_name = file_to_send = temp_zip_file.name
 
-        with open(file_to_send, 'rb') as fd:
-            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+            with open(file_to_send, 'rb') as fd:
+                self.__init_snapshot_from_io(name, fd)
 
-            resthelper.get_json_response(self,
-                                         CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
-                                         json_data)
-        # Cleanup tmp file if we made one
-        if tmp_file_name is not None:
-            try:
-                os.remove(tmp_file_name)
-            except (OSError, IOError):
-                # If we can't delete the file for some reason, let it be,
-                # no need to crash initialization
-                pass
+            # Cleanup tmp file if we made one
+            if tmp_file_name is not None:
+                try:
+                    os.remove(tmp_file_name)
+                except (OSError, IOError):
+                    # If we can't delete the file for some reason, let it be,
+                    # no need to crash initialization
+                    pass
+        else:
+            # upload is an IO-like object already
+            self.__init_snapshot_from_io(name, upload)
 
         return self._parse_snapshot(name, background, extra_args)
 
