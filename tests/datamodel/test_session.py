@@ -17,10 +17,11 @@
 from __future__ import absolute_import, print_function
 
 import os
+import zipfile
 
 import pytest
 
-from pybatfish.client.session import _create_single_file_zip
+from pybatfish.client.session import _create_in_memory_zip, _text_with_platform
 
 
 def _files(dir):
@@ -32,52 +33,26 @@ def _files(dir):
     return ret
 
 
-def test_create_single_file_zip_basic(tmp_path):
-    """Creates the expected directory structure in default config."""
+def test_create_single_file_zip():
+    """Creates the expected zip."""
     text = "abcdefgh\n"
-    path = str(tmp_path)
-    _create_single_file_zip(path, text, 'config', None)
+    expected_filename = os.path.join('snapshot', 'configs', 'myfile')
+    expected_text = '!RANCID-CONTENT-TYPE: arista\n' + text
 
-    filename = os.path.join(path, 'configs', 'config')
-    assert _files(path) == [filename]
-    with open(filename, 'r') as infile:
-        assert infile.read() == text
+    with zipfile.ZipFile(
+            _create_in_memory_zip(text, 'myfile', 'arista'), 'r') as zf:
+        assert zf.namelist() == [expected_filename]
+        assert expected_text == zf.read(expected_filename).decode('utf-8')
 
 
-def test_create_single_file_zip_platform(tmp_path):
+def test_text_with_platform():
     """Creates the expected file text with provided platform."""
     text = "abcdefgh\n"
-    path = str(tmp_path)
-    _create_single_file_zip(path, text, 'config', 'arista')
+    assert text == _text_with_platform(text, None)
 
-    filename = os.path.join(path, 'configs', 'config')
-    assert _files(path) == [filename]
-    with open(filename, 'r') as infile:
-        assert infile.read() == '!RANCID-CONTENT-TYPE: arista\n' + text
-
-
-def test_create_single_file_zip_custom_platform(tmp_path):
-    """Creates the expected file text with provided poorly typed platform."""
-    text = "abcdefgh\n"
-    path = str(tmp_path)
-    _create_single_file_zip(path, text, 'config', ' aRiStA \t')
-
-    filename = os.path.join(path, 'configs', 'config')
-    assert _files(path) == [filename]
-    with open(filename, 'r') as infile:
-        assert infile.read() == '!RANCID-CONTENT-TYPE: arista\n' + text
-
-
-def test_create_single_file_zip_custom_filename(tmp_path):
-    """Creates the expected file text in the expected filename."""
-    text = "abcdefgh\n"
-    path = str(tmp_path)
-    _create_single_file_zip(path, text, 'somefile', None)
-
-    filename = os.path.join(path, 'configs', 'somefile')
-    assert _files(path) == [filename]
-    with open(filename, 'r') as infile:
-        assert infile.read() == text
+    expected_arista = '!RANCID-CONTENT-TYPE: arista\n' + text
+    assert expected_arista == _text_with_platform(text, 'arista')
+    assert expected_arista == _text_with_platform(text, ' aRiStA \t')
 
 
 if __name__ == "__main__":

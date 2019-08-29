@@ -20,7 +20,7 @@ import logging
 import os
 import tempfile
 from typing import (
-    Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+    Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
 )
 
 import pkg_resources
@@ -772,27 +772,48 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        if six.PY2:
-            from backports.tempfile import TemporaryDirectory
-        else:
-            from tempfile import TemporaryDirectory
-
         if filename is None:
             filename = 'config'
 
-        with TemporaryDirectory(prefix='_batfish_temp.') as dirname:
-            _create_single_file_zip(dirname, text, filename, platform)
-            ss_name = self._init_snapshot(dirname, name=snapshot_name,
-                                          overwrite=overwrite,
-                                          extra_args=extra_args)
-            assert isinstance(
-                ss_name, six.string_types)  # Guaranteed since background=False
-            return ss_name
+        data = _create_in_memory_zip(text, filename, platform)
+        ss_name = self._init_snapshot(data, name=snapshot_name,
+                                      overwrite=overwrite,
+                                      extra_args=extra_args)
+        assert isinstance(
+            ss_name, six.string_types)  # Guaranteed since background=False
+        return ss_name
+
+    def __init_snapshot_from_io(self, name, fd):
+        # type: (str, IO) -> None
+        json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+        resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data)
+
+    def __init_snapshot_from_file(self, name, file_to_send):
+        # type: (str, str) -> None
+        tmp_file_name = None  # type: Optional[Text]
+        if os.path.isdir(file_to_send):
+            # delete=False because we re-open for reading
+            with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
+                zip_dir(file_to_send, temp_zip_file)
+                tmp_file_name = file_to_send = temp_zip_file.name
+
+        with open(file_to_send, 'rb') as fd:
+            self.__init_snapshot_from_io(name, fd)
+
+        # Cleanup tmp file if we made one
+        if tmp_file_name is not None:
+            try:
+                os.remove(tmp_file_name)
+            except (OSError, IOError):
+                # If we can't delete the file for some reason, let it be,
+                # no need to crash initialization
+                pass
 
     def _init_snapshot(self, upload, name=None, overwrite=False,
                        background=False,
                        extra_args=None):
-        # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        # type: (Union[str, IO], Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
         if self.network is None:
             self.set_network()
 
@@ -809,28 +830,11 @@ class Session(object):
                     'Use overwrite = True if you want to overwrite the '
                     'existing snapshot'.format(name, self.network))
 
-        file_to_send = upload
-        tmp_file_name = None  # type: Optional[Text]
-        if os.path.isdir(upload):
-            # delete=False because we re-open for reading
-            with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
-                zip_dir(upload, temp_zip_file)
-                tmp_file_name = file_to_send = temp_zip_file.name
-
-        with open(file_to_send, 'rb') as fd:
-            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
-
-            resthelper.get_json_response(self,
-                                         CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT,
-                                         json_data)
-        # Cleanup tmp file if we made one
-        if tmp_file_name is not None:
-            try:
-                os.remove(tmp_file_name)
-            except (OSError, IOError):
-                # If we can't delete the file for some reason, let it be,
-                # no need to crash initialization
-                pass
+        if isinstance(upload, six.string_types):
+            self.__init_snapshot_from_file(name, upload)
+        else:
+            # upload is an IO-like object already
+            self.__init_snapshot_from_io(name, upload)
 
         return self._parse_snapshot(name, background, extra_args)
 
@@ -1101,14 +1105,22 @@ class Session(object):
             return self.snapshot
 
 
-def _create_single_file_zip(dirname, text, filename, platform):
-    # type: (str, str, str, Optional[str]) -> None
-    """Utility function for Session.init_snapshot_from_text."""
-    configs = os.path.join(dirname, 'configs')
-    config_file = os.path.join(configs, filename)
-    os.makedirs(configs)
-    with open(config_file, 'w') as outfile:
-        if platform is not None:
-            p = platform.strip().lower()
-            outfile.write('!RANCID-CONTENT-TYPE: {}\n'.format(p))
-        outfile.write(text)
+def _text_with_platform(text, platform):
+    # type: (str, Optional[str]) -> str
+    """Returns the text with platform prepended if needed."""
+    if platform is None:
+        return text
+    p = platform.strip().lower()
+    return '!RANCID-CONTENT-TYPE: {}\n{}'.format(p, text)
+
+
+def _create_in_memory_zip(text, filename, platform):
+    # type: (str, str, Optional[str]) -> IO
+    """Creates an in-memory zip file for a single file snapshot."""
+    from io import BytesIO
+    import zipfile
+    data = BytesIO()
+    with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
+        zipfilename = os.path.join('snapshot', 'configs', filename)
+        zf.writestr(zipfilename, _text_with_platform(text, platform))
+    return data
