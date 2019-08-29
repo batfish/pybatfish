@@ -64,17 +64,32 @@ def test_get_facts_questions():
                          create=True) as mock_peers, \
             patch.object(bf.q,
                          'bgpProcessConfiguration',
-                         create=True) as mock_proc:
+                         create=True) as mock_proc, \
+            patch.object(bf.q,
+                         'ospfProcessConfiguration',
+                         create=True) as mock_ospf_proc, \
+            patch.object(bf.q,
+                         'ospfAreaConfiguration',
+                         create=True) as mock_ospf_area, \
+            patch.object(bf.q,
+                         'ospfInterfaceConfiguration',
+                         create=True) as mock_ospf_iface:
         mock_node.return_value = MockQuestion(MockTableAnswer())
         mock_iface.return_value = MockQuestion(MockTableAnswer())
         mock_proc.return_value = MockQuestion(MockTableAnswer())
         mock_peers.return_value = MockQuestion(MockTableAnswer())
+        mock_ospf_proc.return_value = MockQuestion(MockTableAnswer())
+        mock_ospf_area.return_value = MockQuestion(MockTableAnswer())
+        mock_ospf_iface.return_value = MockQuestion(MockTableAnswer())
         get_facts(bf, nodes)
 
         mock_node.assert_called_with(nodes=nodes)
         mock_iface.assert_called_with(nodes=nodes)
         mock_proc.assert_called_with(nodes=nodes)
         mock_peers.assert_called_with(nodes=nodes)
+        mock_ospf_proc.assert_called_with(nodes=nodes)
+        mock_ospf_area.assert_called_with(nodes=nodes)
+        mock_ospf_iface.assert_called_with(nodes=nodes)
 
 
 def test_load_facts(tmpdir):
