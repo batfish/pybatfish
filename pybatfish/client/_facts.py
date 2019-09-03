@@ -63,11 +63,20 @@ def get_facts(session, nodes_specifier='/.*/'):
         **args).answer()
     bgp_peer_properties = session.q.bgpPeerConfiguration(  # type: ignore
         **args).answer()
+    ospf_proc = session.q.ospfProcessConfiguration(  # type: ignore
+        **args).answer()
+    ospf_area = session.q.ospfAreaConfiguration(  # type: ignore
+        **args).answer()
+    ospf_iface = session.q.ospfInterfaceConfiguration(  # type: ignore
+        **args).answer()
 
     return _encapsulate_nodes_facts(_process_facts(node_properties,
                                                    interface_properties,
                                                    bgp_process_properties,
-                                                   bgp_peer_properties),
+                                                   bgp_peer_properties,
+                                                   ospf_proc,
+                                                   ospf_area,
+                                                   ospf_iface),
                                     BATFISH_FACT_VERSION)
 
 
@@ -133,14 +142,18 @@ def validate_facts(expected, actual, verbose=False):
     return failures
 
 
-def _process_facts(node_props, iface_props, bgp_process_props, bgp_peer_props):
-    # type: (TableAnswer, TableAnswer, TableAnswer, TableAnswer) -> Dict[Text, Any]
+def _process_facts(node_props, iface_props, bgp_process_props, bgp_peer_props,
+                   ospf_proc, ospf_area, ospf_iface):
+    # type: (TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer) -> Dict[Text, Any]
     """Process properties answers into a fact dict."""
     # out = {}
     out = _process_nodes(node_props)
     _process_interfaces(out, iface_props)
     _process_bgp_processes(out, bgp_process_props)
     _process_bgp_peers(out, bgp_peer_props)
+    _process_ospf_processes(out, ospf_proc)
+    _process_ospf_areas(out, ospf_area)
+    _process_ospf_interfaces(out, ospf_iface)
 
     return _convert_listwrapper(out)
 
@@ -179,6 +192,89 @@ def _process_bgp_peers(node_dict, bgp_peer_props):
         node = r.pop('Node')
         ip = r.get('Remote_IP')
         node_dict[node]['BGP']['Neighbors'][str(ip)] = r
+
+
+def _process_ospf_processes(node_dict, ospf_props):
+    # type: (Dict[Text, Any], TableAnswer) -> None
+    """Update fact dict with processed ospf process properties answer added to it."""
+    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    for r in ospf_dict:
+        node = r.pop('Node')
+        proc = r.pop('Process_ID')
+
+        _get_or_create_ospf_processes(node_dict, node)[proc] = {
+            'VRF': r.get('VRF'),
+            'Reference_Bandwidth': r.get('Reference_Bandwidth'),
+            'Router_ID': r.get('Router_ID'),
+        }
+
+
+def _process_ospf_areas(node_dict, ospf_props):
+    # type: (Dict[Text, Any], TableAnswer) -> None
+    """Update fact dict with processed ospf area properties answer added to it."""
+    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    for r in ospf_dict:
+        node = r.pop('Node')
+        proc = r.pop('Process_ID')
+        area = r.pop('Area')
+
+        _get_or_create_ospf_areas(node_dict, node, proc)[area] = {
+            'Area_Type': r.get('Area_Type'),
+        }
+
+
+def _process_ospf_interfaces(node_dict, ospf_props):
+    # type: (Dict[Text, Any], TableAnswer) -> None
+    """Update fact dict with processed ospf interface properties answer added to it."""
+    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    for r in ospf_dict:
+        iface = r.pop('Interface')
+        node = iface.hostname
+        proc = r.pop('Process_ID')
+        area = str(r.pop('OSPF_Area_Name'))
+
+        _get_or_create_ospf_interfaces(node_dict, node, proc, area)[
+            iface.interface] = {
+            'Enabled': r.get('OSPF_Enabled'),
+            'Passive': r.get('OSPF_Passive'),
+            'Cost': r.get('OSPF_Cost'),
+            'Dead_Interval': r.get('OSPF_Dead_Interval'),
+            'Hello_Interval': r.get('OSPF_Hello_Interval'),
+            'Network_Type': r.get('OSPF_Network_Type'),
+        }
+
+
+def _get_or_create_ospf_interfaces(node_dict, node, process, area):
+    # type: (Dict[Text, Any], Text, Text, Text) -> Any
+    """
+    Get the OSPF interfaces dict under the specified OSPF area and process on the specified node.
+
+    If it or any of its parents does not already exist, create them.
+    """
+    areas = _get_or_create_ospf_areas(node_dict, node, process)
+    return areas.setdefault(area, {}).setdefault('Interfaces', {})
+
+
+def _get_or_create_ospf_areas(node_dict, node, process):
+    # type: (Dict[Text, Any], Text, Text) -> Any
+    """
+    Get the OSPF areas dict under the specified OSPF process on the specified node.
+
+    If it or any of its parents does not already exist, create them.
+    """
+    procs = _get_or_create_ospf_processes(node_dict, node)
+    return procs.setdefault(process, {}).setdefault('Areas', {})
+
+
+def _get_or_create_ospf_processes(node_dict, node):
+    # type: (Dict[Text, Any], Text) -> Any
+    """
+    Get the OSPF processes dict under the specified node.
+
+    If it or any of its parents does not already exist, create them.
+    """
+    return node_dict.setdefault(node, {}).setdefault('OSPF', {}).setdefault(
+        'Processes', {})
 
 
 def _process_interfaces(node_dict, iface_props):
