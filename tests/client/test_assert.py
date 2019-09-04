@@ -571,7 +571,7 @@ def test_no_incompatible_bgp_sessions_no_session():
 
 
 def test_no_incompatible_ospf_sessions():
-    """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when specifying a session."""
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
     with patch.object(bf.q, 'ospfSessionCompatibility',
                       create=True) as ospfSessionCompatibility:
@@ -599,7 +599,7 @@ def test_no_incompatible_ospf_sessions():
 
 
 def test_no_incompatible_ospf_sessions_from_session():
-    """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when called from a session."""
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when called from a session."""
     bf = Session(load_questions=False)
     with patch.object(bf.q, 'ospfSessionCompatibility',
                       create=True) as ospfSessionCompatibility:
@@ -625,7 +625,7 @@ def test_no_incompatible_ospf_sessions_from_session():
 
 
 def test_no_incompatible_ospf_sessions_no_session():
-    """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when not specifying a session."""
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when not specifying a session."""
     with patch.object(bfq, 'ospfSessionCompatibility',
                       create=True) as ospfSessionCompatibility:
         # Test success
