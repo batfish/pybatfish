@@ -200,7 +200,7 @@ class Asserts(object):
                                              remote_nodes=None,
                                              snapshot=None, soft=False,
                                              df_format="table"):
-        # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
         """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
 
         :param nodes: search sessions with specified nodes on one side of the sessions.
