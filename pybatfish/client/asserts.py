@@ -52,6 +52,7 @@ __all__ = [
     'assert_zero_results',
 ]
 
+# Match any OSPF status other than those beginning with ESTABLISHED
 UNESTABLISHED_OSPF_SESSION_STATUS_SPEC = '/^(?!ESTABLISHED).*$/'
 
 
@@ -438,7 +439,6 @@ def assert_no_incompatible_ospf_sessions(nodes=None, remote_nodes=None,
     __tracebackhide__ = operator.methodcaller("errisinstance",
                                               BatfishAssertException)
 
-    # Match anything other than statuses beginning with ESTABLISHED
     kwargs = dict(statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
     if nodes is not None:
         kwargs.update(nodes=nodes)
