@@ -139,6 +139,7 @@ class VariableType(str, Enum):
     NODE_SPEC = "nodeSpec"  #: node specifier
     OSPF_INTERFACE_PROPERTY_SPEC = "ospfInterfacePropertySpec"  #: ospf interface properties
     OSPF_PROCESS_PROPERTY_SPEC = "ospfProcessPropertySpec"  #: ospf process properties
+    OSPF_SESSION_STATUS_SPEC = "ospfSessionStatusSpec"  #: ospf session statuses
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
     PREFIX = "prefix"  #: prefixes
     PREFIX_RANGE = "prefixRange"  #: prefix ranges

@@ -28,6 +28,7 @@ COMPLETION_TYPES = [
     VariableType.NODE_SPEC,
     VariableType.OSPF_INTERFACE_PROPERTY_SPEC,
     VariableType.OSPF_PROCESS_PROPERTY_SPEC,
+    VariableType.OSPF_SESSION_STATUS_SPEC,
     VariableType.PREFIX,
     VariableType.PROTOCOL,
     VariableType.REFERENCE_BOOK_NAME,
