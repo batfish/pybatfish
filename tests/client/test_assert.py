@@ -16,7 +16,8 @@ import pytest
 import six
 from pandas import DataFrame
 
-from pybatfish.client.asserts import (_format_df, _get_question_object,
+from pybatfish.client.asserts import (UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
+                                      _format_df, _get_question_object,
                                       _raise_common,
                                       assert_filter_denies,
                                       assert_filter_has_no_unreachable_lines,
@@ -25,6 +26,7 @@ from pybatfish.client.asserts import (_format_df, _get_question_object,
                                       assert_flows_succeed,
                                       assert_no_forwarding_loops,
                                       assert_no_incompatible_bgp_sessions,
+                                      assert_no_incompatible_ospf_sessions,
                                       assert_no_undefined_references,
                                       assert_no_unestablished_bgp_sessions)
 from pybatfish.client.session import Session
@@ -566,6 +568,85 @@ def test_no_incompatible_bgp_sessions_no_session():
         bgpSessionCompatibility.assert_called_with(nodes='nodes',
                                                    remote_nodes='remote_nodes',
                                                    status='.*')
+
+
+def test_no_incompatible_ospf_sessions():
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when specifying a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'ospfSessionCompatibility',
+                      create=True) as ospfSessionCompatibility:
+        # Test success
+        ospfSessionCompatibility.return_value = MockQuestion()
+        assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                             remote_nodes='remote_nodes',
+                                             session=bf)
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        ospfSessionCompatibility.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                                 remote_nodes='remote_nodes',
+                                                 session=bf)
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
+
+
+def test_no_incompatible_ospf_sessions_from_session():
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(bf.q, 'ospfSessionCompatibility',
+                      create=True) as ospfSessionCompatibility:
+        # Test success
+        ospfSessionCompatibility.return_value = MockQuestion()
+        bf.asserts.assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                                        remote_nodes='remote_nodes')
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        ospfSessionCompatibility.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                                            remote_nodes='remote_nodes')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
+
+
+def test_no_incompatible_ospf_sessions_no_session():
+    """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when not specifying a session."""
+    with patch.object(bfq, 'ospfSessionCompatibility',
+                      create=True) as ospfSessionCompatibility:
+        # Test success
+        ospfSessionCompatibility.return_value = MockQuestion()
+        assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                             remote_nodes='remote_nodes')
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
+        # Test failure
+        mock_df = DataFrame.from_records([{'Session': 'found', 'More': 'data'}])
+        ospfSessionCompatibility.return_value = MockQuestion(
+            MockTableAnswer(mock_df))
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_incompatible_ospf_sessions(nodes='nodes',
+                                                 remote_nodes='remote_nodes')
+        # Ensure found answer is printed
+        assert mock_df.to_string() in str(excinfo.value)
+        ospfSessionCompatibility.assert_called_with(nodes='nodes',
+                                                    remote_nodes='remote_nodes',
+                                                    statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
 
 
 def test_no_unestablished_bgp_sessions():
