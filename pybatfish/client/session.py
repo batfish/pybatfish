@@ -40,7 +40,9 @@ from pybatfish.client.asserts import (
     assert_filter_has_no_unreachable_lines, assert_filter_permits,
     assert_flows_fail, assert_flows_succeed,
     assert_no_forwarding_loops,
-    assert_no_incompatible_bgp_sessions, assert_no_undefined_references,
+    assert_no_incompatible_bgp_sessions,
+    assert_no_incompatible_ospf_sessions,
+    assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
@@ -193,6 +195,26 @@ class Asserts(object):
         return assert_no_incompatible_bgp_sessions(nodes, remote_nodes, status,
                                                    snapshot, soft, self.session,
                                                    df_format)
+
+    def assert_no_incompatible_ospf_sessions(self, nodes=None,
+                                             remote_nodes=None,
+                                             snapshot=None, soft=False,
+                                             df_format="table"):
+        # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
+
+        :param nodes: search sessions with specified nodes on one side of the sessions.
+        :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
+        :param snapshot: the snapshot on which to check the assertion
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_incompatible_ospf_sessions(nodes, remote_nodes,
+                                                    snapshot, soft,
+                                                    self.session,
+                                                    df_format)
 
     def assert_no_unestablished_bgp_sessions(self, nodes=None,
                                              remote_nodes=None,
