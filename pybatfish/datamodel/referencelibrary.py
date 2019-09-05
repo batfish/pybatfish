@@ -22,7 +22,7 @@ from deprecated import deprecated
 from .primitives import DataModelElement, Interface
 
 __all__ = ['AddressGroup', 'InterfaceGroup', 'NodeRole', 'NodeRoleDimension',
-           'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary', 
+           'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary',
            'RoleDimensionMapping']
 
 
@@ -106,6 +106,7 @@ class InterfaceGroup(DataModelElement):
                               [Interface.from_dict(d) for d in
                                json_dict.get('interfaces', [])])
 
+
 @deprecated(reason="Use the new RoleDimensionMapping class instead")
 @attr.s(frozen=True)
 class NodeRole(DataModelElement):
@@ -126,6 +127,7 @@ class NodeRole(DataModelElement):
         # type: (Dict) -> NodeRole
         return NodeRole(json_dict["name"], json_dict["regex"])
 
+
 def _make_node_roles(value):
     # type: (Any) -> List[NodeRole]
     return _make_typed_list(value, NodeRole)
@@ -136,11 +138,11 @@ class RoleDimensionMapping(DataModelElement):
     """
     Information about a role dimension mapping.
     :ivar regex: A regular expression over node names to describe nodes that
-        belong to this role. The regular expression must be a valid **Java** 
+        belong to this role. The regular expression must be a valid **Java**
         regex.
     :ivar groups: A list of group numbers (integers) that identify the role
         name for a given node name.
-    :ivar canonicalRoleNames: A map from Java regexes over role names determined 
+    :ivar canonicalRoleNames: A map from Java regexes over role names determined
         from the groups to a canonical set of role names for this dimension.
     :ivar caseSensitive: A flag indicating whether regex matching should be
         case sensitive.
@@ -155,7 +157,7 @@ class RoleDimensionMapping(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleDimensionMapping
         return RoleDimensionMapping(json_dict["regex"], json_dict["groups"],
-            json_dict["canonicalRoleNames"], json_dict["caseSensitive"])
+                                    json_dict["canonicalRoleNames"], json_dict["caseSensitive"])
 
 
 def _make_role_dimension_mappings(value):
@@ -172,7 +174,7 @@ class NodeRoleDimension(DataModelElement):
     :ivar type: to capture if the dimension contains automatically inferred
         roles (``AUTO``) or user-defined roles (``CUSTOM``).
     :ivar roles: The list of :py:class:`NodeRole` objects in this dimension (deprecated).
-    :ivar roleDimensionMappings: The list of :py:class:`RoleDimensionMapping` objects 
+    :ivar roleDimensionMappings: The list of :py:class:`RoleDimensionMapping` objects
         in this dimension.
     """
 
@@ -180,8 +182,8 @@ class NodeRoleDimension(DataModelElement):
     type = attr.ib(type=str, default="CUSTOM")
     roles = attr.ib(type=List[NodeRole], factory=list,
                     converter=_make_node_roles)
-    roleDimensionMappings = attr.ib(type=List[RoleDimensionMapping], 
-                    factory=list, converter=_make_role_dimension_mappings)
+    roleDimensionMappings = attr.ib(type=List[RoleDimensionMapping],
+                                    factory=list, converter=_make_role_dimension_mappings)
 
     @classmethod
     def from_dict(cls, json_dict):

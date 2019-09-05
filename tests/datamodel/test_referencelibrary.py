@@ -450,8 +450,8 @@ def test_noderolesdata():
                 "roleDimensionMappings": [
                     {
                         "regex": "regex",
-                        "groups": [1,2],
-                        "canonicalRoleNames": {"foo":"bar"},
+                        "groups": [1, 2],
+                        "canonicalRoleNames": {"foo": "bar"},
                         "caseSensitive": False
                     },
                     {
