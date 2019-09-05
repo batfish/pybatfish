@@ -136,7 +136,7 @@ def _make_node_roles(value):
 class RoleDimensionMapping(DataModelElement):
     """
     Information about a role dimension mapping.
-    
+
     :ivar regex: A regular expression over node names to describe nodes that
         belong to this role. The regular expression must be a valid **Java**
         regex.
