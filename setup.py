@@ -121,7 +121,9 @@ setup(
     # $ pip install -e .[dev]
     extras_require={
         'capirca': ['capirca'] + (['ipaddress'] if PY2 else []),
-        'dev': ['capirca',
+        'dev': ['autoflake',
+                'autopep8',
+                'capirca',
                 'check-manifest',
                 'coverage',
                 'flake8',
