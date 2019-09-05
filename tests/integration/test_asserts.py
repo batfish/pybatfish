@@ -78,6 +78,9 @@ def session_fail():
     ('assert_no_incompatible_bgp_sessions',
      {}
      ),
+    ('assert_no_incompatible_ospf_sessions',
+     {}
+     ),
     ('assert_no_unestablished_bgp_sessions',
      {}
      ),
@@ -126,6 +129,9 @@ def test_asserts_pass(session_pass, assert_func, params):
      }
      ),
     ('assert_no_incompatible_bgp_sessions',
+     {}
+     ),
+    ('assert_no_incompatible_ospf_sessions',
      {}
      ),
     ('assert_no_unestablished_bgp_sessions',
