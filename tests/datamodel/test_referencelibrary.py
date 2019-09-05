@@ -209,16 +209,10 @@ def test_noderoledimension_construction_list():
     assert dimension2.name == "g1"
     assert dimension2.roleDimensionMappings == [rdMap]
 
-
-def test_noderoledimension_construction_lists():
-    """Check that we construct interface groups where sub-props are lists
-    when providing both node roles and role dimension mappings."""
-    role = NodeRole("a", "b")
-    rdMap = RoleDimensionMapping("a", [], {}, False)
-    dimension = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
-    assert dimension.name == "g1"
-    assert dimension.roles == [role]
-    assert dimension.roleDimensionMappings == [rdMap]
+    dimension3 = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
+    assert dimension3.name == "g1"
+    assert dimension3.roles == [role]
+    assert dimension3.roleDimensionMappings == [rdMap]
 
 
 def test_noderolesdata_construction_empty():

@@ -16,7 +16,6 @@ from typing import Any, Dict, List  # noqa: F401
 
 import attr
 import six
-
 from deprecated import deprecated
 
 from .primitives import DataModelElement, Interface
@@ -137,6 +136,7 @@ def _make_node_roles(value):
 class RoleDimensionMapping(DataModelElement):
     """
     Information about a role dimension mapping.
+    
     :ivar regex: A regular expression over node names to describe nodes that
         belong to this role. The regular expression must be a valid **Java**
         regex.
