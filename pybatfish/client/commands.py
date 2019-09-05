@@ -470,8 +470,7 @@ def bf_put_node_role_dimension(dimension):
 
     Overwrites the old dimension if one of the same name already exists.
 
-    Individual roles within the dimension must have a valid (java) regex.
-    The node list within those roles, if present, is ignored by the server.
+    Individual role dimension mappings within the dimension must have a valid (java) regex.
 
     :param dimension: The NodeRoleDimension object for the dimension to add
     :type dimension: :class:`pybatfish.datamodel.referencelibrary.NodeRoleDimension`

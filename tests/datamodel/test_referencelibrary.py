@@ -25,7 +25,8 @@ from pybatfish.datamodel.referencelibrary import (AddressGroup,
                                                   NodeRoleDimension,
                                                   NodeRolesData,
                                                   ReferenceBook,
-                                                  ReferenceLibrary)
+                                                  ReferenceLibrary,
+                                                  RoleDimensionMapping)
 
 
 def test_addressgroup_construction_empty():
@@ -166,10 +167,11 @@ def test_interfacegroup_construction_list():
 
 def test_noderoledimension_construction_empty():
     """Check that we construct empty node role dimension properly."""
-    empty = NodeRoleDimension("g1", roles=[])
+    empty = NodeRoleDimension("g1", roleDimensionMappings=[])
 
     assert NodeRoleDimension("g1") == empty
     assert NodeRoleDimension("g1", roles=None) == empty
+    assert NodeRoleDimension("g1", roleDimensionMappings=None) == empty
 
 
 def test_noderoledimension_construction_badtype():
@@ -178,22 +180,45 @@ def test_noderoledimension_construction_badtype():
         NodeRoleDimension("g1", roles="i1")
     with pytest.raises(ValueError):
         NodeRoleDimension("book1", roles=["ag", NodeRole("a", "b")])
+    with pytest.raises(ValueError):
+        NodeRoleDimension("g1", roleDimensionMappings="i1")
+    with pytest.raises(ValueError):
+        NodeRoleDimension("book1", roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c", "d")])
 
 
 def test_noderoledimension_construction_item():
     """Check that we construct node role dimension when sub-props are not a list."""
     role = NodeRole("a", "b")
-    dimension = NodeRoleDimension("g1", roles=[role])
-    assert NodeRoleDimension("g1", roles=role) == dimension
+    dimension1 = NodeRoleDimension("g1", roles=[role])
+    assert NodeRoleDimension("g1", roles=role) == dimension1
+
+    rdMap = RoleDimensionMapping("a", [], {}, False)
+    dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
+    assert NodeRoleDimension("g1", roleDimensionMappings=rdMap) == dimension2
 
 
 def test_noderoledimension_construction_list():
     """Check that we construct interface groups where sub-props are lists."""
     role = NodeRole("a", "b")
-    dimension = NodeRoleDimension("g1", roles=[role])
+    dimension1 = NodeRoleDimension("g1", roles=[role])
+    assert dimension1.name == "g1"
+    assert dimension1.roles == [role]
 
+    rdMap = RoleDimensionMapping("a", [], {}, False)
+    dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
+    assert dimension2.name == "g1"
+    assert dimension2.roleDimensionMappings == [rdMap]
+
+
+def test_noderoledimension_construction_lists():
+    """Check that we construct interface groups where sub-props are lists
+    when providing both node roles and role dimension mappings."""
+    role = NodeRole("a", "b")
+    rdMap = RoleDimensionMapping("a", [], {}, False)
+    dimension = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
     assert dimension.name == "g1"
     assert dimension.roles == [role]
+    assert dimension.roleDimensionMappings == [rdMap]
 
 
 def test_noderolesdata_construction_empty():
@@ -421,6 +446,20 @@ def test_noderolesdata():
                         "name": "role2",
                         "regex": "regex",
                     },
+                ],
+                "roleDimensionMappings": [
+                    {
+                        "regex": "regex",
+                        "groups": [1,2],
+                        "canonicalRoleNames": {"foo":"bar"},
+                        "caseSensitive": False
+                    },
+                    {
+                        "regex": "regex2",
+                        "groups": [],
+                        "canonicalRoleNames": {},
+                        "caseSensitive": True
+                    }
                 ]
             },
         ]
@@ -430,6 +469,8 @@ def test_noderolesdata():
     assert len(nodeRoleData.roleDimensions) == 1
     assert len(nodeRoleData.roleDimensions[0].roles) == 2
     assert nodeRoleData.roleDimensions[0].roles[0].name == "role1"
+    assert len(nodeRoleData.roleDimensions[0].roleDimensionMappings) == 2
+    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].regex == "regex"
 
 
 if __name__ == "__main__":
