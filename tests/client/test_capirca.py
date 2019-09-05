@@ -14,7 +14,7 @@
 
 import re
 from io import StringIO
-from typing import Text
+from typing import Text  # noqa: F401
 
 import six
 from capirca.lib import naming, policy

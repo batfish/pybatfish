@@ -15,14 +15,14 @@
 import os
 from collections import Mapping
 from copy import deepcopy
-from typing import Any, Dict, Optional, TYPE_CHECKING, Text, Tuple
+from typing import Any, Dict, Optional, TYPE_CHECKING, Text, Tuple  # noqa: F401
 
 import yaml
 
 from pybatfish.datamodel import ListWrapper
-from pybatfish.datamodel.answer import TableAnswer
 
 if TYPE_CHECKING:
+    from pybatfish.datamodel.answer import TableAnswer  # noqa: F401
     from pybatfish.client.session import Session  # noqa: F401
 
 BATFISH_FACT_VERSION = "batfish_v0"
