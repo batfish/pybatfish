@@ -429,7 +429,7 @@ def test_roledimensionmapping_default_values():
     rdMap = RoleDimensionMapping("a")
     assert rdMap.groups == [1]
     assert rdMap.canonicalRoleNames == {}
-    assert rdMap.caseSensitive == False
+    assert rdMap.caseSensitive is False
 
 
 def test_noderolesdata():

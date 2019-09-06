@@ -141,11 +141,12 @@ class RoleDimensionMapping(DataModelElement):
         belong to this role. The regular expression must be a valid **Java**
         regex.
     :ivar groups: A list of group numbers (integers) that identify the role
-        name for a given node name.
+        name for a given node name (default value is [1]).
     :ivar canonicalRoleNames: A map from Java regexes over role names determined
-        from the groups to a canonical set of role names for this dimension.
+        from the groups to a canonical set of role names for this dimension
+        (default value is {}).
     :ivar caseSensitive: A flag indicating whether regex matching should be
-        case sensitive.
+        case sensitive (default value is False).
     """
 
     regex = attr.ib(type=str)
