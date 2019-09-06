@@ -452,9 +452,6 @@ def test_noderolesdata():
                 "roleDimensionMappings": [
                     {
                         "regex": "regex",
-                        "groups": [1, 2],
-                        "canonicalRoleNames": {"foo": "bar"},
-                        "caseSensitive": False
                     },
                     {
                         "regex": "regex2",
@@ -473,6 +470,9 @@ def test_noderolesdata():
     assert nodeRoleData.roleDimensions[0].roles[0].name == "role1"
     assert len(nodeRoleData.roleDimensions[0].roleDimensionMappings) == 2
     assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].regex == "regex"
+    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].groups == [1]
+    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].canonicalRoleNames == {}
+    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].caseSensitive == False
 
 
 if __name__ == "__main__":

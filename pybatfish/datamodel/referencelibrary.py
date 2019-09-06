@@ -157,8 +157,9 @@ class RoleDimensionMapping(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleDimensionMapping
-        return RoleDimensionMapping(json_dict["regex"], json_dict["groups"],
-                                    json_dict["canonicalRoleNames"], json_dict["caseSensitive"])
+        return RoleDimensionMapping(json_dict["regex"], json_dict.get("groups", [1]),
+                                    json_dict.get("canonicalRoleNames", {}), 
+                                    json_dict.get("caseSensitive", False))
 
 
 def _make_role_dimension_mappings(value):
