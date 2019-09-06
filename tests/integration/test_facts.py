@@ -52,7 +52,7 @@ def test_extract_facts(tmpdir, session):
 
 
 def test_extract_facts_specific_snapshot(tmpdir, session):
-    """Test extraction of facts for a specific snapshot with a basic config."""
+    """Test extraction of facts for a specific snapshot."""
     out_dir = tmpdir.join('output')
     extracted_facts = session.extract_facts(output_directory=str(out_dir),
                                             snapshot=OLD_SNAPSHOT_NAME)

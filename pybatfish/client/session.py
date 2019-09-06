@@ -454,11 +454,11 @@ class Session(object):
     def extract_facts(self, nodes='/.*/', output_directory=None, snapshot=None):
         # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
         """
-        Extract and return a dictionary of facts about the specified nodes on the current network snapshot.
-
-        If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
+        Extract and return a dictionary of facts about the specified nodes on a network snapshot.
 
         If a snapshot is specified, facts are collected for that snapshot, otherwise facts are collected for the current snapshot.
+
+        If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
 
         :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to extract facts for.
         :type nodes: Text

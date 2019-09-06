@@ -51,7 +51,7 @@ NODE_PROPERTIES_REORG = dict([
 def get_facts(session, nodes_specifier='/.*/', snapshot=None):
     # type: (Session, Text, Optional[Text]) -> Dict[Text, Any]
     """
-    Get current-snapshot facts from the specified session for nodes matching the nodes specifier.
+    Get snapshot facts from the specified session for nodes matching the nodes specifier.
 
     If a snapshot is specified, facts are collected for that snapshot, otherwise facts are collected for the current snapshot.
     """
