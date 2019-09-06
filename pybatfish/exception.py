@@ -24,16 +24,12 @@ __all__ = [
 class BatfishException(Exception):
     """Base exception for Batfish-related errors."""
 
-    pass
-
 
 class BatfishAssertException(BatfishException):
     """Raised if a pybatfish assertion fails.
 
     .. seealso:: :py:module:`~pybatfish.client.assert`
     """
-
-    pass
 
 
 class BatfishAssertWarning(UserWarning):
@@ -42,10 +38,6 @@ class BatfishAssertWarning(UserWarning):
     .. seealso:: :py:module:`~pybatfish.client.assert`
     """
 
-    pass
-
 
 class QuestionValidationException(BatfishException):
     """Raised when an invalid Batfish question is encountered."""
-
-    pass

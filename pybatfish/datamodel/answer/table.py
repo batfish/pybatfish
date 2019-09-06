@@ -98,8 +98,6 @@ class TableAnswer(Answer):
 class Row(dict):
     """Represents a table row."""
 
-    pass
-
 
 class TableMetadata:
     """Metadata for a Batfish table answer.

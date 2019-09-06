@@ -25,7 +25,7 @@ from .options import Options
 from .workhelper import _get_data_get_question_templates
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session
+    from pybatfish.client.session import Session  # noqa: F401
 
 
 def _bf_answer_obj(session, question_str, parameters_str, question_name,
