@@ -149,9 +149,9 @@ class RoleDimensionMapping(DataModelElement):
     """
 
     regex = attr.ib(type=str)
-    groups = attr.ib(type=List[int])
-    canonicalRoleNames = attr.ib(type=Dict[str, str])
-    caseSensitive = attr.ib(type=bool)
+    groups = attr.ib(type=List[int], default=[1])
+    canonicalRoleNames = attr.ib(type=Dict[str, str], default={})
+    caseSensitive = attr.ib(type=bool, default=False)
 
     @classmethod
     def from_dict(cls, json_dict):

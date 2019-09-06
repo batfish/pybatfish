@@ -424,6 +424,14 @@ def test_referencelibrary_deser_interfacegroups():
     assert len(reference_library.books[0].interfaceGroups[0].interfaces) == 2
 
 
+def test_roledimensionmapping_default_values():
+    """Check the default values for role dimension mappings."""
+    rdMap = RoleDimensionMapping("a")
+    assert rdMap.groups == [1]
+    assert rdMap.canonicalRoleNames == {}
+    assert rdMap.caseSensitive == False
+
+
 def test_noderolesdata():
     """Check proper deserialization for a node roles data."""
     dict = {
