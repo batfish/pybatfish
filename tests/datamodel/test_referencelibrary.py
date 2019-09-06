@@ -472,7 +472,7 @@ def test_noderolesdata():
     assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].regex == "regex"
     assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].groups == [1]
     assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].canonicalRoleNames == {}
-    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].caseSensitive == False
+    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].caseSensitive is False
 
 
 if __name__ == "__main__":
