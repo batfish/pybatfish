@@ -28,8 +28,10 @@ OLD_SNAPSHOT_NAME = 'old_snapshot'
 @pytest.fixture()
 def session():
     s = Session()
+    # Snapshot which can be referenced by name
     s.init_snapshot(join(_this_dir, 'snapshots', 'fact_snapshot2'),
                     OLD_SNAPSHOT_NAME)
+    # Current snapshot
     name = s.init_snapshot(join(_this_dir, 'snapshots', 'fact_snapshot'))
     yield s
     s.delete_snapshot(name)
@@ -75,7 +77,7 @@ def test_validate_facts_matching(session):
 
 
 def test_validate_facts_matching_specific_snapshot(session):
-    """Test validation of facts for a specific snapshot against matching facts."""
+    """Test validation of facts against matching facts, for a specific snapshot."""
     validation_results = session.validate_facts(
         expected_facts=join(_this_dir, 'facts', 'expected_facts2'),
         snapshot=OLD_SNAPSHOT_NAME)
