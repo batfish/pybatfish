@@ -42,16 +42,6 @@ class MockTableAnswer(TableAnswer):
 
 
 class MockQuestion(QuestionBase):
-    def __init__(self, answer=None):
-        self._answer = answer if answer is not None else MockTableAnswer()
-        self._snapshot = None
-
-    def answer(self, *args, **kwargs):
-        self._snapshot = kwargs.get('snapshot')
-        return self._answer
-
-
-class MockQuestion2(QuestionBase):
     def __init__(self, answer):
         self._answer = answer
 
@@ -84,13 +74,13 @@ def test_get_facts_questions():
             patch.object(bf.q,
                          'ospfInterfaceConfiguration',
                          create=True) as mock_ospf_iface:
-        mock_node.return_value = MockQuestion(MockTableAnswer())
-        mock_iface.return_value = MockQuestion(MockTableAnswer())
-        mock_proc.return_value = MockQuestion(MockTableAnswer())
-        mock_peers.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_proc.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_area.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_iface.return_value = MockQuestion(MockTableAnswer())
+        mock_node.return_value = MockQuestion(MockTableAnswer)
+        mock_iface.return_value = MockQuestion(MockTableAnswer)
+        mock_proc.return_value = MockQuestion(MockTableAnswer)
+        mock_peers.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_proc.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_area.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_iface.return_value = MockQuestion(MockTableAnswer)
         get_facts(bf, nodes)
 
         mock_node.assert_called_with(nodes=nodes)
@@ -102,20 +92,8 @@ def test_get_facts_questions():
         mock_ospf_iface.assert_called_with(nodes=nodes)
 
 
-def test_tmp():
-    mock_node_a = Mock(return_value=MockTableAnswer())
-    mock_node_q = MockQuestion2(mock_node_a)
-    mock_node = Mock()
-    mock_node.return_value = mock_node_q
-    mock_node(nodes='nodes').answer(snapshot='arg')
-    mock_node.assert_called_with(nodes='nodes')
-    mock_node_a.assert_called_with(snapshot='arg')
-
-
 def test_get_facts_questions_specific_snapshot():
-    """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
     bf = Session(load_questions=False)
-    name = 'specific_snapshot'
     nodes = 'foo'
     with patch.object(bf.q,
                       'nodeProperties',
@@ -138,26 +116,27 @@ def test_get_facts_questions_specific_snapshot():
             patch.object(bf.q,
                          'ospfInterfaceConfiguration',
                          create=True) as mock_ospf_iface:
-        # mock_node_q = MockQuestion(MockTableAnswer())
+        # Setup mock answers for each underlying question
         mock_node_a = Mock(return_value=MockTableAnswer())
-        mock_node_q = MockQuestion2(mock_node_a)
-        mock_iface_q = MockQuestion(MockTableAnswer())
-        mock_proc_q = MockQuestion(MockTableAnswer())
-        mock_peers_q = MockQuestion(MockTableAnswer())
-        mock_ospf_proc_q = MockQuestion(MockTableAnswer())
-        mock_ospf_area_q = MockQuestion(MockTableAnswer())
-        mock_ospf_iface_q = MockQuestion(MockTableAnswer())
+        mock_iface_a = Mock(return_value=MockTableAnswer())
+        mock_proc_a = Mock(return_value=MockTableAnswer())
+        mock_peers_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_proc_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_area_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_iface_a = Mock(return_value=MockTableAnswer())
 
-        mock_node.return_value = mock_node_q
-        mock_iface.return_value = mock_iface_q
-        mock_proc.return_value = mock_proc_q
-        mock_peers.return_value = mock_peers_q
-        mock_ospf_proc.return_value = mock_ospf_proc_q
-        mock_ospf_area.return_value = mock_ospf_area_q
-        mock_ospf_iface.return_value = mock_ospf_iface_q
-        get_facts(bf, nodes, snapshot=name)
+        # Setup mock questions for all underlying questions
+        mock_node.return_value = MockQuestion(mock_node_a)
+        mock_iface.return_value = MockQuestion(mock_iface_a)
+        mock_proc.return_value = MockQuestion(mock_proc_a)
+        mock_peers.return_value = MockQuestion(mock_peers_a)
+        mock_ospf_proc.return_value = MockQuestion(mock_ospf_proc_a)
+        mock_ospf_area.return_value = MockQuestion(mock_ospf_area_a)
+        mock_ospf_iface.return_value = MockQuestion(mock_ospf_iface_a)
 
-        # Confirm questions were called with correct node params
+        get_facts(bf, nodes, snapshot='snapshot')
+
+        # Make sure questions were all called with expected params
         mock_node.assert_called_with(nodes=nodes)
         mock_iface.assert_called_with(nodes=nodes)
         mock_proc.assert_called_with(nodes=nodes)
@@ -166,16 +145,14 @@ def test_get_facts_questions_specific_snapshot():
         mock_ospf_area.assert_called_with(nodes=nodes)
         mock_ospf_iface.assert_called_with(nodes=nodes)
 
-        # Confirm answer()'s were called with correct snapshot param
-        assert mock_node_a.called
-        assert mock_node_a.assert_called_with(snapshot=name)
-
-        assert mock_iface_q._snapshot == name
-        assert mock_proc_q._snapshot == name
-        assert mock_peers_q._snapshot == name
-        assert mock_ospf_proc_q._snapshot == name
-        assert mock_ospf_area_q._snapshot == name
-        assert mock_ospf_iface_q._snapshot == name
+        # Make sure answer functions were all called with expected params
+        mock_node_a.assert_called_with(snapshot='snapshot')
+        mock_iface_a.assert_called_with(snapshot='snapshot')
+        mock_proc_a.assert_called_with(snapshot='snapshot')
+        mock_peers_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_proc_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_area_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_iface_a.assert_called_with(snapshot='snapshot')
 
 
 def test_load_facts(tmpdir):
