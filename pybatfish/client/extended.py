@@ -60,7 +60,7 @@ def bf_get_snapshot_input_object_stream(key, snapshot=None):
 
 
 def bf_get_snapshot_input_object_text(key, encoding='utf-8', snapshot=None):
-    # type: (Text, Text, Optional[Text]) -> str
+    # type: (Text, Text, Optional[Text]) -> Text
     """Returns the text content of the snapshot input object with specified key."""
     with bf_get_snapshot_input_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
@@ -74,7 +74,7 @@ def bf_get_snapshot_object_stream(key, snapshot=None):
 
 
 def bf_get_snapshot_object_text(key, encoding='utf-8', snapshot=None):
-    # type: (Text, Text, Optional[Text]) -> str
+    # type: (Text, Text, Optional[Text]) -> Text
     """Returns the text content of the snapshot object with specified key."""
     with bf_get_snapshot_object_stream(key, snapshot) as stream:
         text = stream.read().decode(encoding)
