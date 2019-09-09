@@ -126,7 +126,7 @@ def fork_snapshot(session, obj):
 
 
 def delete_network_object(session, key):
-    # type: (Session, str) -> None
+    # type: (Session, Text) -> None
     """Deletes extended object with given key for the current network."""
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_OBJECTS)
@@ -197,7 +197,7 @@ def get_network(session, network):
 
 
 def get_network_object(session, key):
-    # type: (Session, str) -> Any
+    # type: (Session, Text) -> Any
     """Gets extended object with given key for the current network."""
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_OBJECTS)
@@ -350,7 +350,7 @@ def get_component_versions(session):
 
 
 def put_network_object(session, key, data):
-    # type: (Session, str, Any) -> None
+    # type: (Session, Text, Any) -> None
     """Put data as extended object with given key for the current network."""
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
                                   CoordConstsV2.RSC_OBJECTS)
