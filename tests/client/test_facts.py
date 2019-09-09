@@ -28,9 +28,9 @@ from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.question.question import QuestionBase
 
 if six.PY3:
-    from unittest.mock import patch
+    from unittest.mock import Mock, patch
 else:
-    from mock import patch
+    from mock import Mock, patch
 
 
 class MockTableAnswer(TableAnswer):
@@ -44,9 +44,19 @@ class MockTableAnswer(TableAnswer):
 class MockQuestion(QuestionBase):
     def __init__(self, answer=None):
         self._answer = answer if answer is not None else MockTableAnswer()
+        self._snapshot = None
 
     def answer(self, *args, **kwargs):
+        self._snapshot = kwargs.get('snapshot')
         return self._answer
+
+
+class MockQuestion2(QuestionBase):
+    def __init__(self, answer):
+        self._answer = answer
+
+    def answer(self, *args, **kwargs):
+        return self._answer(*args, **kwargs)
 
 
 def test_get_facts_questions():
@@ -90,6 +100,82 @@ def test_get_facts_questions():
         mock_ospf_proc.assert_called_with(nodes=nodes)
         mock_ospf_area.assert_called_with(nodes=nodes)
         mock_ospf_iface.assert_called_with(nodes=nodes)
+
+
+def test_tmp():
+    mock_node_a = Mock(return_value=MockTableAnswer())
+    mock_node_q = MockQuestion2(mock_node_a)
+    mock_node = Mock()
+    mock_node.return_value = mock_node_q
+    mock_node(nodes='nodes').answer(snapshot='arg')
+    mock_node.assert_called_with(nodes='nodes')
+    mock_node_a.assert_called_with(snapshot='arg')
+
+
+def test_get_facts_questions_specific_snapshot():
+    """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
+    bf = Session(load_questions=False)
+    name = 'specific_snapshot'
+    nodes = 'foo'
+    with patch.object(bf.q,
+                      'nodeProperties',
+                      create=True) as mock_node, \
+            patch.object(bf.q,
+                         'interfaceProperties',
+                         create=True) as mock_iface, \
+            patch.object(bf.q,
+                         'bgpPeerConfiguration',
+                         create=True) as mock_peers, \
+            patch.object(bf.q,
+                         'bgpProcessConfiguration',
+                         create=True) as mock_proc, \
+            patch.object(bf.q,
+                         'ospfProcessConfiguration',
+                         create=True) as mock_ospf_proc, \
+            patch.object(bf.q,
+                         'ospfAreaConfiguration',
+                         create=True) as mock_ospf_area, \
+            patch.object(bf.q,
+                         'ospfInterfaceConfiguration',
+                         create=True) as mock_ospf_iface:
+        # mock_node_q = MockQuestion(MockTableAnswer())
+        mock_node_a = Mock(return_value=MockTableAnswer())
+        mock_node_q = MockQuestion2(mock_node_a)
+        mock_iface_q = MockQuestion(MockTableAnswer())
+        mock_proc_q = MockQuestion(MockTableAnswer())
+        mock_peers_q = MockQuestion(MockTableAnswer())
+        mock_ospf_proc_q = MockQuestion(MockTableAnswer())
+        mock_ospf_area_q = MockQuestion(MockTableAnswer())
+        mock_ospf_iface_q = MockQuestion(MockTableAnswer())
+
+        mock_node.return_value = mock_node_q
+        mock_iface.return_value = mock_iface_q
+        mock_proc.return_value = mock_proc_q
+        mock_peers.return_value = mock_peers_q
+        mock_ospf_proc.return_value = mock_ospf_proc_q
+        mock_ospf_area.return_value = mock_ospf_area_q
+        mock_ospf_iface.return_value = mock_ospf_iface_q
+        get_facts(bf, nodes, snapshot=name)
+
+        # Confirm questions were called with correct node params
+        mock_node.assert_called_with(nodes=nodes)
+        mock_iface.assert_called_with(nodes=nodes)
+        mock_proc.assert_called_with(nodes=nodes)
+        mock_peers.assert_called_with(nodes=nodes)
+        mock_ospf_proc.assert_called_with(nodes=nodes)
+        mock_ospf_area.assert_called_with(nodes=nodes)
+        mock_ospf_iface.assert_called_with(nodes=nodes)
+
+        # Confirm answer()'s were called with correct snapshot param
+        assert mock_node_a.called
+        assert mock_node_a.assert_called_with(snapshot=name)
+
+        assert mock_iface_q._snapshot == name
+        assert mock_proc_q._snapshot == name
+        assert mock_peers_q._snapshot == name
+        assert mock_ospf_proc_q._snapshot == name
+        assert mock_ospf_area_q._snapshot == name
+        assert mock_ospf_iface_q._snapshot == name
 
 
 def test_load_facts(tmpdir):
