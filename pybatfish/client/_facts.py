@@ -132,13 +132,12 @@ def validate_facts(expected, actual, verbose=False):
                 }
             } for n in expected_facts
         }
-    for node in actual_facts:
-        if node in expected_facts:
-            res = _assert_dict_subset(actual_facts[node],
-                                      expected_facts[node],
-                                      verbose=verbose)
-            if res:
-                failures[node] = res
+    for node in expected_facts:
+        res = _assert_dict_subset(actual_facts.get(node, {}),
+                                  expected_facts[node],
+                                  verbose=verbose)
+        if res:
+            failures[node] = res
     return failures
 
 
