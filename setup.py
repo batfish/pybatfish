@@ -33,6 +33,9 @@ import pybatfish
 here = path.abspath(path.dirname(__file__))
 PY2 = version_info[0] == 2
 
+# Capirca dependencies
+CAPIRCA_DEPS = ['capirca', 'absl-py>=0.8.0'] + (['ipaddress'] if PY2 else [])
+
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
     long_description = f.read()
@@ -120,10 +123,9 @@ setup(
     # for example:
     # $ pip install -e .[dev]
     extras_require={
-        'capirca': ['capirca'] + (['ipaddress'] if PY2 else []),
+        'capirca': CAPIRCA_DEPS,
         'dev': ['autoflake',
                 'autopep8',
-                'capirca',
                 'check-manifest',
                 'coverage',
                 'flake8',
@@ -143,7 +145,8 @@ setup(
                 'sphinx>=1.8.0',
                 'sphinx_rtd_theme',
                 ] + \
-               (['ipaddress', 'mock'] if PY2 else ['mypy']),
+               CAPIRCA_DEPS + \
+               (['mock'] if PY2 else ['mypy']),
     },
 
     # List pytest requirements for running unit tests
