@@ -48,27 +48,35 @@ NODE_PROPERTIES_REORG = dict([
 ])  # type: Dict[Text, Text]
 
 
-def get_facts(session, nodes_specifier='/.*/'):
-    # type: (Session, Text) -> Dict[Text, Any]
-    """Get current-snapshot facts from the specified session for nodes matching the nodes specifier."""
+def get_facts(session, nodes_specifier='/.*/', snapshot=None):
+    # type: (Session, Text, Optional[Text]) -> Dict[Text, Any]
+    """
+    Get snapshot facts from the specified session for nodes matching the nodes specifier.
+
+    If a snapshot is specified, facts are collected for that snapshot, otherwise facts are collected for the current snapshot.
+    """
     args = {}
     if nodes_specifier:
         args['nodes'] = nodes_specifier
 
+    ans_args = {}
+    if snapshot is not None:
+        ans_args['snapshot'] = snapshot
+
     node_properties = session.q.nodeProperties(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     interface_properties = session.q.interfaceProperties(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     bgp_process_properties = session.q.bgpProcessConfiguration(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     bgp_peer_properties = session.q.bgpPeerConfiguration(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     ospf_proc = session.q.ospfProcessConfiguration(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     ospf_area = session.q.ospfAreaConfiguration(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
     ospf_iface = session.q.ospfInterfaceConfiguration(  # type: ignore
-        **args).answer()
+        **args).answer(**ans_args)
 
     return _encapsulate_nodes_facts(_process_facts(node_properties,
                                                    interface_properties,
