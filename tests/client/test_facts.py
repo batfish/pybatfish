@@ -28,9 +28,9 @@ from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.question.question import QuestionBase
 
 if six.PY3:
-    from unittest.mock import patch
+    from unittest.mock import Mock, patch
 else:
-    from mock import patch
+    from mock import Mock, patch
 
 
 class MockTableAnswer(TableAnswer):
@@ -42,11 +42,11 @@ class MockTableAnswer(TableAnswer):
 
 
 class MockQuestion(QuestionBase):
-    def __init__(self, answer=None):
-        self._answer = answer if answer is not None else MockTableAnswer()
+    def __init__(self, answer):
+        self._answer = answer
 
     def answer(self, *args, **kwargs):
-        return self._answer
+        return self._answer(*args, **kwargs)
 
 
 def test_get_facts_questions():
@@ -74,13 +74,13 @@ def test_get_facts_questions():
             patch.object(bf.q,
                          'ospfInterfaceConfiguration',
                          create=True) as mock_ospf_iface:
-        mock_node.return_value = MockQuestion(MockTableAnswer())
-        mock_iface.return_value = MockQuestion(MockTableAnswer())
-        mock_proc.return_value = MockQuestion(MockTableAnswer())
-        mock_peers.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_proc.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_area.return_value = MockQuestion(MockTableAnswer())
-        mock_ospf_iface.return_value = MockQuestion(MockTableAnswer())
+        mock_node.return_value = MockQuestion(MockTableAnswer)
+        mock_iface.return_value = MockQuestion(MockTableAnswer)
+        mock_proc.return_value = MockQuestion(MockTableAnswer)
+        mock_peers.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_proc.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_area.return_value = MockQuestion(MockTableAnswer)
+        mock_ospf_iface.return_value = MockQuestion(MockTableAnswer)
         get_facts(bf, nodes)
 
         mock_node.assert_called_with(nodes=nodes)
@@ -90,6 +90,70 @@ def test_get_facts_questions():
         mock_ospf_proc.assert_called_with(nodes=nodes)
         mock_ospf_area.assert_called_with(nodes=nodes)
         mock_ospf_iface.assert_called_with(nodes=nodes)
+
+
+def test_get_facts_questions_specific_snapshot():
+    """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
+    bf = Session(load_questions=False)
+    nodes = 'foo'
+    with patch.object(bf.q,
+                      'nodeProperties',
+                      create=True) as mock_node, \
+            patch.object(bf.q,
+                         'interfaceProperties',
+                         create=True) as mock_iface, \
+            patch.object(bf.q,
+                         'bgpPeerConfiguration',
+                         create=True) as mock_peers, \
+            patch.object(bf.q,
+                         'bgpProcessConfiguration',
+                         create=True) as mock_proc, \
+            patch.object(bf.q,
+                         'ospfProcessConfiguration',
+                         create=True) as mock_ospf_proc, \
+            patch.object(bf.q,
+                         'ospfAreaConfiguration',
+                         create=True) as mock_ospf_area, \
+            patch.object(bf.q,
+                         'ospfInterfaceConfiguration',
+                         create=True) as mock_ospf_iface:
+        # Setup mock answers for each underlying question
+        mock_node_a = Mock(return_value=MockTableAnswer())
+        mock_iface_a = Mock(return_value=MockTableAnswer())
+        mock_proc_a = Mock(return_value=MockTableAnswer())
+        mock_peers_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_proc_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_area_a = Mock(return_value=MockTableAnswer())
+        mock_ospf_iface_a = Mock(return_value=MockTableAnswer())
+
+        # Setup mock questions for all underlying questions
+        mock_node.return_value = MockQuestion(mock_node_a)
+        mock_iface.return_value = MockQuestion(mock_iface_a)
+        mock_proc.return_value = MockQuestion(mock_proc_a)
+        mock_peers.return_value = MockQuestion(mock_peers_a)
+        mock_ospf_proc.return_value = MockQuestion(mock_ospf_proc_a)
+        mock_ospf_area.return_value = MockQuestion(mock_ospf_area_a)
+        mock_ospf_iface.return_value = MockQuestion(mock_ospf_iface_a)
+
+        get_facts(bf, nodes, snapshot='snapshot')
+
+        # Make sure questions were all called with expected params
+        mock_node.assert_called_with(nodes=nodes)
+        mock_iface.assert_called_with(nodes=nodes)
+        mock_proc.assert_called_with(nodes=nodes)
+        mock_peers.assert_called_with(nodes=nodes)
+        mock_ospf_proc.assert_called_with(nodes=nodes)
+        mock_ospf_area.assert_called_with(nodes=nodes)
+        mock_ospf_iface.assert_called_with(nodes=nodes)
+
+        # Make sure answer functions were all called with expected params
+        mock_node_a.assert_called_with(snapshot='snapshot')
+        mock_iface_a.assert_called_with(snapshot='snapshot')
+        mock_proc_a.assert_called_with(snapshot='snapshot')
+        mock_peers_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_proc_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_area_a.assert_called_with(snapshot='snapshot')
+        mock_ospf_iface_a.assert_called_with(snapshot='snapshot')
 
 
 def test_load_facts(tmpdir):
@@ -214,6 +278,31 @@ def test_validate_facts_not_matching_data():
                 'expected': 1,
                 'key_present': False,
             }
+        }
+    }
+
+
+def test_validate_facts_no_matching_node():
+    """Test that fact validation works when actual facts are missing expected node."""
+    expected = {
+        'node1': {'foo': 1, 'bar': 1, 'baz': 1},
+        'node2': {'foo': 2},
+    }
+    actual = {
+        'node1': {'foo': 1, 'bar': 1, 'baz': 1},
+        # missing node2
+    }
+    version = 'version'
+    res = validate_facts(_encapsulate_nodes_facts(expected, version),
+                         _encapsulate_nodes_facts(actual, version))
+
+    # Result should identify the missing node
+    assert res == {
+        'node2': {
+            'foo': {
+                'expected': 2,
+                'key_present': False,
+            },
         }
     }
 

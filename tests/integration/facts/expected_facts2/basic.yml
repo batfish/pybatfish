@@ -1,0 +1,10 @@
+nodes:
+  basic:
+    OSPF:
+      Processes:
+        '2':
+          Areas:
+            '2':
+              Area_Type: NONE
+          Router_ID: 1.1.1.2
+          VRF: default

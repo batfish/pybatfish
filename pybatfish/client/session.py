@@ -451,10 +451,12 @@ class Session(object):
                                      CoordConsts.SVC_RSC_DEL_SNAPSHOT,
                                      json_data)
 
-    def extract_facts(self, nodes='/.*/', output_directory=None):
-        # type: (Text, Optional[Text]) -> Dict[Text, Any]
+    def extract_facts(self, nodes='/.*/', output_directory=None, snapshot=None):
+        # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
         """
-        Extract and return a dictionary of facts about the specified nodes on the current network snapshot.
+        Extract and return a dictionary of facts about the specified nodes on a network snapshot.
+
+        If a snapshot is specified, facts are collected for that snapshot, otherwise facts are collected for the current snapshot.
 
         If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
 
@@ -462,10 +464,12 @@ class Session(object):
         :type nodes: Text
         :param output_directory: path to directory to write facts to
         :type output_directory: Text
+        :param snapshot: name of the snapshot to extract facts for, defaults to the current snapshot
+        :type snapshot: Text
         :return: facts about the specified nodes on the current network snapshot
         :rtype: dict
         """
-        facts = get_facts(self, nodes)
+        facts = get_facts(self, nodes, snapshot=snapshot)
         if output_directory:
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
@@ -1067,17 +1071,19 @@ class Session(object):
         return upload_diagnostics(self, metadata=metadata, dry_run=dry_run,
                                   netconan_config=netconan_config)
 
-    def validate_facts(self, expected_facts):
-        # type: (Text) -> Dict[Text, Any]
+    def validate_facts(self, expected_facts, snapshot=None):
+        # type: (Text, Optional[Text]) -> Dict[Text, Any]
         """
         Return a dictionary of mismatched facts between the loaded expected facts and the actual facts.
 
         :param expected_facts: path to directory to read expected fact YAML files from
         :type expected_facts: Text
+        :param snapshot: name of the snapshot to validate facts for, defaults to the current snapshot
+        :type snapshot: Text
         :return: facts about the specified nodes on the current network snapshot
         :rtype: dict
         """
-        actual_facts = get_facts(self)
+        actual_facts = get_facts(self, snapshot=snapshot)
         expected_facts_ = load_facts(expected_facts)
         return validate_facts(expected_facts_, actual_facts)
 
