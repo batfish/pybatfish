@@ -93,6 +93,7 @@ def test_get_facts_questions():
 
 
 def test_get_facts_questions_specific_snapshot():
+    """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
     bf = Session(load_questions=False)
     nodes = 'foo'
     with patch.object(bf.q,

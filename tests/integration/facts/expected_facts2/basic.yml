@@ -1,5 +1,5 @@
 nodes:
-  basic2:
+  basic:
     OSPF:
       Processes:
         '2':
