@@ -218,6 +218,31 @@ def test_validate_facts_not_matching_data():
     }
 
 
+def test_validate_facts_no_matching_node():
+    """Test that fact validation works when actual facts are missing expected node."""
+    expected = {
+        'node1': {'foo': 1, 'bar': 1, 'baz': 1},
+        'node2': {'foo': 2},
+    }
+    actual = {
+        'node1': {'foo': 1, 'bar': 1, 'baz': 1},
+        # missing node2
+    }
+    version = 'version'
+    res = validate_facts(_encapsulate_nodes_facts(expected, version),
+                         _encapsulate_nodes_facts(actual, version))
+
+    # Result should identify the missing node
+    assert res == {
+        'node2': {
+            'foo': {
+                'expected': 2,
+                'key_present': False,
+            },
+        }
+    }
+
+
 def test_validate_facts_verbose():
     """Test that fact validation returns both matching and mismatched facts when running in verbose mode."""
     expected = {
