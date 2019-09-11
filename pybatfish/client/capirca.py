@@ -35,7 +35,7 @@ from pybatfish.datamodel import AddressGroup, ReferenceBook
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
 
-__all__ = ["create_reference_book"]
+__all__ = ["create_reference_book", "init_snapshot_from_acl"]
 
 
 def _item_to_python_repr(item, definitions):
