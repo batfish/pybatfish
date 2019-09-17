@@ -491,7 +491,8 @@ class FilterStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        return FilterStepDetail(json_dict.get("filter", ""), json_dict.get("type", ""))
+        return FilterStepDetail(json_dict.get("filter", ""),
+                                json_dict.get("type", ""))
 
     def __str__(self):
         # type: () -> str
@@ -951,6 +952,38 @@ class HeaderConstraints(DataModelElement):
         d['flowStates'] = d['firewallClassifications']
         del d['firewallClassifications']
         return d
+
+    @classmethod
+    def of(cls, flow):
+        # type: (Flow) -> HeaderConstraints
+        """Create header constraints from an existing flow."""
+        srcPorts = dstPorts = icmpCodes = icmpTypes = tcpFlags = None
+        if flow._has_ports():
+            srcPorts = str(flow.srcPort)
+            dstPorts = str(flow.dstPort)
+        if flow.ipProtocol.lower() == 'icmp':
+            icmpCodes = flow.icmpCode
+            icmpTypes = flow.icmpVar
+        if flow.ipProtocol.lower() == 'tcp':
+            tcpFlags = MatchTcpFlags(
+                tcpFlags=TcpFlags(bool(flow.tcpFlagsAck),
+                                  bool(flow.tcpFlagsCwr),
+                                  bool(flow.tcpFlagsEce),
+                                  bool(flow.tcpFlagsFin),
+                                  bool(flow.tcpFlagsPsh),
+                                  bool(flow.tcpFlagsRst),
+                                  bool(flow.tcpFlagsSyn),
+                                  bool(flow.tcpFlagsUrg)))
+        return HeaderConstraints(srcIps=flow.srcIp, dstIps=flow.dstIp,
+                                 ipProtocols=[str(flow.ipProtocol)],
+                                 srcPorts=srcPorts,
+                                 dstPorts=dstPorts,
+                                 icmpCodes=icmpCodes,
+                                 icmpTypes=icmpTypes,
+                                 tcpFlags=tcpFlags,
+                                 firewallClassifications=flow.state,
+                                 fragmentOffsets=flow.fragmentOffset,
+                                 packetLengths=flow.packetLength)
 
 
 @attr.s(frozen=True)
