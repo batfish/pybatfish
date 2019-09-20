@@ -46,6 +46,7 @@ __all__ = [
     'assert_has_route',
     'assert_no_forwarding_loops',
     'assert_no_incompatible_bgp_sessions',
+    'assert_no_incompatible_ospf_sessions',
     'assert_no_unestablished_bgp_sessions',
     'assert_no_undefined_references',
     'assert_num_results',
