@@ -17,7 +17,7 @@ import pkg_resources
 import pytest
 import six
 
-from pybatfish.client.session import Session
+from pybatfish.client.session import Session, _is_open_source
 
 if six.PY3:
     from unittest.mock import patch
@@ -41,8 +41,8 @@ def test_get_session_types():
 
     # Add in a dummy entry point in addition to installed entry_points
     entry_points = (
-        [i for i in pkg_resources.iter_entry_points('batfish_session')] +
-        [MockEntryPoint(dummy_session_type, dummy_session_module)]
+            [i for i in pkg_resources.iter_entry_points('batfish_session')] +
+            [MockEntryPoint(dummy_session_type, dummy_session_module)]
     )
     with patch.object(pkg_resources, 'iter_entry_points',
                       return_value=entry_points):
@@ -81,3 +81,12 @@ def test_get_session_bad():
     e_msg = str(e.value)
     assert 'Invalid session type' in e_msg
     assert "type '{}' does not match".format(bogus_type) in e_msg
+
+
+def test__is_open_source():
+    """Test detecting open source Batfish."""
+    assert _is_open_source({})
+    assert _is_open_source({'Batfish': 'v2019.09.20'})
+    assert _is_open_source({'Batfish': 'v2019.09.20', 'Z3': '1.2.3'})
+    assert not _is_open_source({'Batfish': 'v2019.09.20', 'Z3': '1.2.3',
+                                'Batfish-Extension-Pack': 'v2019.09.20'})

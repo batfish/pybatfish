@@ -292,9 +292,27 @@ class Session(object):
         self.stale_timeout = 5  # type: int
         self.enable_diagnostics = True  # type: bool
 
+        # Whether the client has confirmed it's connecting to the correct
+        # service
+        self._initialized = False  # type: bool
+
         # Auto-load question templates
         if load_questions:
             self.q.load()
+
+    def _ensure_initialized(self):
+        """Initialize the session if it has not yet been done."""
+        if self._initialized:
+            return
+
+        if not _is_open_source(restv2helper.get_component_versions(self)):
+            msg = ("You must use Pybatfish Enterprise to connect to Batfish "
+                   "Enterprise server. Please uninstall pybatfish and then "
+                   "follow these instructions to continue: "
+                   "https://pypi.org/project/pybfe/")
+            raise RuntimeError(msg)
+
+        self._initialized = True
 
     # Support old property names
     @property  # type: ignore
@@ -408,6 +426,7 @@ class Session(object):
         :param name: name of the network to delete
         :type name: str
         """
+        self._ensure_initialized()
         if name is None:
             raise ValueError('Network to be deleted must be supplied')
         json_data = workhelper.get_data_delete_network(self, name)
@@ -423,6 +442,7 @@ class Session(object):
         :param dimension: name of the dimension to delete
         :type dimension: str
         """
+        self._ensure_initialized()
         restv2helper.delete_node_role_dimension(self, dimension)
 
     def delete_reference_book(self, name):
@@ -433,6 +453,7 @@ class Session(object):
         :param name: name of the reference book to delete
         :type name: str
         """
+        self._ensure_initialized()
         restv2helper.delete_reference_book(self, name)
 
     def delete_snapshot(self, name):
@@ -443,6 +464,7 @@ class Session(object):
         :param name: name of the snapshot to delete
         :type name: str
         """
+        self._ensure_initialized()
         self._check_network()
         if name is None:
             raise ValueError('Snapshot to be deleted must be supplied')
@@ -528,6 +550,7 @@ class Session(object):
                        restore_nodes=None, add_files=None,
                        extra_args=None):
         # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        self._ensure_initialized()
         self._check_network()
 
         if name is None:
@@ -579,6 +602,7 @@ class Session(object):
         :param extra_args: extra arguments to be passed to Batfish
         :type extra_args: dict
         """
+        self._ensure_initialized()
         snapshot = self.get_snapshot(snapshot)
 
         work_item = workhelper.get_workitem_generate_dataplane(self,
@@ -601,6 +625,7 @@ class Session(object):
         :return: answer to the specified question
         :rtype: :py:class:`Answer`
         """
+        self._ensure_initialized()
         params = {
             'snapshot': snapshot,
             'referenceSnapshot': reference_snapshot,
@@ -630,6 +655,7 @@ class Session(object):
     def get_info(self):
         # type: () -> Dict[str, Any]
         """Get basic info about the Batfish service (including name, version, ...)."""
+        self._ensure_initialized()
         return resthelper.get_json_response(self, '', useHttpGet=True)
 
     def get_node_role_dimension(self, dimension, inferred=False):
@@ -645,6 +671,7 @@ class Session(object):
         :return: the definition of the given node role dimension for the active network, or inferred definition for the active snapshot if inferred=True.
         :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
         """
+        self._ensure_initialized()
         if inferred:
             self._check_snapshot()
             return NodeRoleDimension.from_dict(
@@ -665,6 +692,7 @@ class Session(object):
         :return: the definitions of node roles for the active network, or inferred definitions for the active snapshot if inferred=True.
         :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
         """
+        self._ensure_initialized()
         if inferred:
             self._check_snapshot()
             return NodeRolesData.from_dict(
@@ -679,12 +707,14 @@ class Session(object):
         :param name: name of the reference book to fetch
         :type name: str
         """
+        self._ensure_initialized()
         return ReferenceBook.from_dict(
             restv2helper.get_reference_book(self, name))
 
     def get_reference_library(self):
         # type: () -> ReferenceLibrary
         """Returns the reference library for the active network."""
+        self._ensure_initialized()
         return ReferenceLibrary.from_dict(
             restv2helper.get_reference_library(self))
 
@@ -812,6 +842,7 @@ class Session(object):
 
     def __init_snapshot_from_io(self, name, fd):
         # type: (str, IO) -> None
+        self._ensure_initialized()
         json_data = workhelper.get_data_upload_snapshot(self, name, fd)
         resthelper.get_json_response(
             self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data)
@@ -879,6 +910,7 @@ class Session(object):
         :return: network names
         :rtype: list
         """
+        self._ensure_initialized()
         json_data = workhelper.get_data_list_networks(self)
         json_response = resthelper.get_json_response(
             self, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
@@ -893,6 +925,7 @@ class Session(object):
         :return: JSON dictionary of question name to question object
         :rtype: dict
         """
+        self._ensure_initialized()
         json_data = workhelper.get_data_list_incomplete_work(self)
         response = resthelper.get_json_response(self,
                                                 CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK,
@@ -912,6 +945,7 @@ class Session(object):
             and metadata (if `verbose=True`)
         :rtype: list
         """
+        self._ensure_initialized()
         return restv2helper.list_snapshots(self, verbose)
 
     def put_reference_book(self, book):
@@ -924,6 +958,7 @@ class Session(object):
         :param book: The ReferenceBook object to add
         :type book: :class:`~pybatfish.datamodel.referencelibrary.ReferenceBook`
         """
+        self._ensure_initialized()
         restv2helper.put_reference_book(self, book)
 
     def put_node_role_dimension(self, dimension):
@@ -940,6 +975,7 @@ class Session(object):
         """
         if dimension.type == "AUTO":
             raise ValueError("Cannot put a dimension of type AUTO")
+        self._ensure_initialized()
         restv2helper.put_node_role_dimension(self, dimension)
 
     def put_node_roles(self, node_roles_data):
@@ -950,6 +986,7 @@ class Session(object):
         :param node_roles_data: node roles definitions to add to the active network
         :type node_roles_data: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
         """
+        self._ensure_initialized()
         restv2helper.put_node_roles(self, node_roles_data)
 
     def set_network(self, name=None, prefix=Options.default_network_prefix):
@@ -970,6 +1007,7 @@ class Session(object):
             name = prefix + get_uuid()
         validate_name(name, "network")
 
+        self._ensure_initialized()
         try:
             net = restv2helper.get_network(self, name)
             self.network = str(net['name'])
@@ -1089,11 +1127,13 @@ class Session(object):
 
     def _check_network(self):
         """Check if current network is set."""
+        self._ensure_initialized()
         if self.network is None:
             raise ValueError("Network is not set")
 
     def _check_snapshot(self):
         """Check if current snapshot (and network) is set."""
+        self._ensure_initialized()
         self._check_network()
         if self.snapshot is None:
             raise ValueError("Snapshot is not set")
@@ -1113,6 +1153,7 @@ class Session(object):
         :return: name of initialized snapshot, or JSON dictionary of task status if background=True
         :rtype: Union[str, Dict]
         """
+        self._ensure_initialized()
         work_item = workhelper.get_workitem_parse(self, name)
         answer_dict = workhelper.execute(work_item, self,
                                          background=background,
@@ -1157,3 +1198,9 @@ def _create_in_memory_zip(text, filename, platform):
         zipfilename = os.path.join('snapshot', 'configs', filename)
         zf.writestr(zipfilename, _text_with_platform(text, platform))
     return data
+
+
+def _is_open_source(components):
+    # type: (Dict) -> bool
+    """Returns true if the given list of components corresponds to Batfish."""
+    return not ('Batfish-Extension-Pack' in components)
