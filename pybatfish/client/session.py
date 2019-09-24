@@ -441,12 +441,10 @@ class Session(object):
         :type name: str
         """
         self._check_network()
+        assert self.network is not None  # guaranteed by _check_network
         if name is None:
             raise ValueError('Snapshot to be deleted must be supplied')
-        json_data = workhelper.get_data_delete_snapshot(self, name)
-        resthelper.get_json_response(self,
-                                     CoordConsts.SVC_RSC_DEL_SNAPSHOT,
-                                     json_data)
+        restv2helper.delete_snapshot(self, name, self.network)
 
     def extract_facts(self, nodes='/.*/', output_directory=None, snapshot=None):
         # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
@@ -623,11 +621,6 @@ class Session(object):
         return '{0}://{1}:{2}{3}'.format(protocol, self.host,
                                          self.port_v2,
                                          self._base_uri_v2)
-
-    def get_info(self):
-        # type: () -> Dict[str, Any]
-        """Get basic info about the Batfish service (including name, version, ...)."""
-        return resthelper.get_json_response(self, '', useHttpGet=True)
 
     def get_node_role_dimension(self, dimension, inferred=False):
         # type: (str, bool) -> NodeRoleDimension
@@ -876,11 +869,7 @@ class Session(object):
         :return: network names
         :rtype: list
         """
-        json_data = workhelper.get_data_list_networks(self)
-        json_response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
-
-        return list(map(str, json_response['networklist']))
+        return [d['name'] for d in restv2helper.list_networks(self)]
 
     def list_incomplete_works(self):
         # type: () -> Dict[str, Any]

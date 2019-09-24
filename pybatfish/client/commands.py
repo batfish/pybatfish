@@ -67,7 +67,6 @@ __all__ = ['bf_add_analysis',
            'bf_generate_dataplane',
            'bf_get_analysis_answers',
            'bf_get_answer',
-           'bf_get_info',
            'bf_get_issue_config',
            'bf_get_node_role_dimension',
            'bf_get_node_roles',
@@ -292,10 +291,6 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     """
     return bf_session.get_answer(question=questionName, snapshot=snapshot,
                                  reference_snapshot=reference_snapshot)
-
-
-def bf_get_info():
-    return bf_session.get_info()
 
 
 def bf_get_issue_config(major, minor):
