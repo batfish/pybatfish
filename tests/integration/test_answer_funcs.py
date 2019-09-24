@@ -30,6 +30,7 @@ _stable_question_dir = abspath(join(_root_dir, 'questions', 'stable'))
 _experimental_question_dir = abspath(
     join(_root_dir, 'questions', 'experimental'))
 TEST_NETWORK = 'ref_network'
+TEST_NETWORK_TR = 'ref_network_tr'
 
 
 @pytest.fixture(scope='module')
@@ -50,13 +51,13 @@ def traceroute_network():
     load_questions(_stable_question_dir)
     load_questions(_experimental_question_dir)
     try:
-        bf_delete_network(TEST_NETWORK)
+        bf_delete_network(TEST_NETWORK_TR)
     except Exception:
         pass
-    bf_set_network(TEST_NETWORK)
+    bf_set_network(TEST_NETWORK_TR)
     yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"),
                            name="snapshot_tracert")
-    bf_delete_network(TEST_NETWORK)
+    bf_delete_network(TEST_NETWORK_TR)
 
 
 def test_answer_background(network):

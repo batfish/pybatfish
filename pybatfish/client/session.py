@@ -410,10 +410,7 @@ class Session(object):
         """
         if name is None:
             raise ValueError('Network to be deleted must be supplied')
-        json_data = workhelper.get_data_delete_network(self, name)
-        resthelper.get_json_response(self,
-                                     CoordConsts.SVC_RSC_DEL_NETWORK,
-                                     json_data)
+        restv2helper.delete_network(self, name)
 
     def delete_node_role_dimension(self, dimension):
         # type: (str) -> None
