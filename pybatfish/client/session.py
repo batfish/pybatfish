@@ -621,11 +621,6 @@ class Session(object):
                                          self.port_v2,
                                          self._base_uri_v2)
 
-    def get_info(self):
-        # type: () -> Dict[str, Any]
-        """Get basic info about the Batfish service (including name, version, ...)."""
-        return resthelper.get_json_response(self, '', useHttpGet=True)
-
     def get_node_role_dimension(self, dimension, inferred=False):
         # type: (str, bool) -> NodeRoleDimension
         """
