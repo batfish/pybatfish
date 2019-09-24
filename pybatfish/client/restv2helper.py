@@ -53,8 +53,10 @@ _encoder = BfJsonEncoder()
 __all__ = [
     'add_issue_config',
     'delete_issue_config',
+    'delete_network',
     'delete_node_role_dimension',
     'delete_reference_book',
+    'delete_snapshot',
     'fork_snapshot',
     'get_answer',
     'get_issue_config',
@@ -165,6 +167,14 @@ def delete_reference_book(session, book_name):
                                      session.network,
                                      CoordConstsV2.RSC_REFERENCE_LIBRARY,
                                      book_name)
+    return _delete(session, url_tail)
+
+
+def delete_snapshot(session, snapshot, network):
+    # type: (Session, Text, Text) -> None
+    """Deletes the snapshot with the given name."""
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network,
+                                     CoordConstsV2.RSC_SNAPSHOTS, snapshot)
     return _delete(session, url_tail)
 
 

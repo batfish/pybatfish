@@ -443,10 +443,7 @@ class Session(object):
         self._check_network()
         if name is None:
             raise ValueError('Snapshot to be deleted must be supplied')
-        json_data = workhelper.get_data_delete_snapshot(self, name)
-        resthelper.get_json_response(self,
-                                     CoordConsts.SVC_RSC_DEL_SNAPSHOT,
-                                     json_data)
+        restv2helper.delete_snapshot(self, name, self.network)
 
     def extract_facts(self, nodes='/.*/', output_directory=None, snapshot=None):
         # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
