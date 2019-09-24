@@ -598,6 +598,7 @@ def load_questions(question_dir=None, from_server=False,
     if not session:
         from pybatfish.client.commands import bf_session
         s = bf_session
+        s._ensure_initialized()
     else:
         s = session
     new_names = set()  # type: Set[str]

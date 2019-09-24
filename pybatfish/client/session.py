@@ -298,6 +298,7 @@ class Session(object):
 
         # Auto-load question templates
         if load_questions:
+            self._ensure_initialized()
             self.q.load()
 
     def _ensure_initialized(self):
