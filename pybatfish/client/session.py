@@ -441,6 +441,7 @@ class Session(object):
         :type name: str
         """
         self._check_network()
+        assert self.network is not None  # guaranteed by _check_network
         if name is None:
             raise ValueError('Snapshot to be deleted must be supplied')
         restv2helper.delete_snapshot(self, name, self.network)
