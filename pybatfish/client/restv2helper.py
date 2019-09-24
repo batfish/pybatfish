@@ -125,6 +125,13 @@ def fork_snapshot(session, obj):
     return _post(session, url_tail, obj)
 
 
+def delete_network(session, name):
+    # type: (Session, Text) -> None
+    """Deletes the network with the given name."""
+    url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, name)
+    return _delete(session, url_tail)
+
+
 def delete_network_object(session, key):
     # type: (Session, Text) -> None
     """Deletes extended object with given key for the current network."""
