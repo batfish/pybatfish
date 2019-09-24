@@ -68,6 +68,8 @@ __all__ = [
     'get_reference_library',
     'get_snapshot_input_object',
     'get_snapshot_object',
+    'list_networks',
+    'list_snapshots',
     'put_network_object',
     'put_node_role_dimension',
     'put_reference_book',
@@ -106,8 +108,16 @@ def delete_issue_config(session, major, minor):
     return _delete(session, url_tail)
 
 
+def list_networks(session):
+    # type: (Session) -> List[Dict[str, Any]]
+    """List the networks in the current session."""
+    url_tail = "/{}".format(CoordConstsV2.RSC_NETWORKS)
+    return _get_list(session, url_tail)
+
+
 def list_snapshots(session, verbose):
     # type: (Session, bool) -> Union[List[str], List[Dict[str,str]]]
+    """List the snapshots in the current network."""
     if not session.network:
         raise ValueError("Network must be set to list snapshots")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,

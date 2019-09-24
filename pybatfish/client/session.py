@@ -873,11 +873,7 @@ class Session(object):
         :return: network names
         :rtype: list
         """
-        json_data = workhelper.get_data_list_networks(self)
-        json_response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_LIST_NETWORKS, json_data)
-
-        return list(map(str, json_response['networklist']))
+        return [d['name'] for d in restv2helper.list_networks(self)]
 
     def list_incomplete_works(self):
         # type: () -> Dict[str, Any]
