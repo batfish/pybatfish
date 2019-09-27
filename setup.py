@@ -106,7 +106,7 @@ setup(
     install_requires=['attrs>=18.1.0',
                       'deepdiff<=3.3.0',
                       'deprecated',
-                      'netconan>=0.9.2',
+                      'netconan>=0.11.0',
                       'pandas>=0.24.1,<0.25.0',
                       'python-dateutil',
                       'PyYAML',
