@@ -53,8 +53,10 @@ _encoder = BfJsonEncoder()
 __all__ = [
     'add_issue_config',
     'delete_issue_config',
+    'delete_network',
     'delete_node_role_dimension',
     'delete_reference_book',
+    'delete_snapshot',
     'fork_snapshot',
     'get_answer',
     'get_issue_config',
@@ -66,6 +68,8 @@ __all__ = [
     'get_reference_library',
     'get_snapshot_input_object',
     'get_snapshot_object',
+    'list_networks',
+    'list_snapshots',
     'put_network_object',
     'put_node_role_dimension',
     'put_reference_book',
@@ -104,8 +108,16 @@ def delete_issue_config(session, major, minor):
     return _delete(session, url_tail)
 
 
+def list_networks(session):
+    # type: (Session) -> List[Dict[str, Any]]
+    """List the networks in the current session."""
+    url_tail = "/{}".format(CoordConstsV2.RSC_NETWORKS)
+    return _get_list(session, url_tail)
+
+
 def list_snapshots(session, verbose):
     # type: (Session, bool) -> Union[List[str], List[Dict[str,str]]]
+    """List the snapshots in the current network."""
     if not session.network:
         raise ValueError("Network must be set to list snapshots")
     url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
@@ -123,6 +135,13 @@ def fork_snapshot(session, obj):
                                      CoordConstsV2.RSC_SNAPSHOTS,
                                      CoordConstsV2.RSC_FORK)
     return _post(session, url_tail, obj)
+
+
+def delete_network(session, name):
+    # type: (Session, Text) -> None
+    """Deletes the network with the given name."""
+    url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, name)
+    return _delete(session, url_tail)
 
 
 def delete_network_object(session, key):
@@ -158,6 +177,14 @@ def delete_reference_book(session, book_name):
                                      session.network,
                                      CoordConstsV2.RSC_REFERENCE_LIBRARY,
                                      book_name)
+    return _delete(session, url_tail)
+
+
+def delete_snapshot(session, snapshot, network):
+    # type: (Session, Text, Text) -> None
+    """Deletes the snapshot with the given name."""
+    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network,
+                                     CoordConstsV2.RSC_SNAPSHOTS, snapshot)
     return _delete(session, url_tail)
 
 

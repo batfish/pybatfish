@@ -6,7 +6,7 @@ BATFISH_DOCKER_PLUGIN_VERSION="${BATFISH_DOCKER_PLUGIN_VERSION:-v3.3.0}"
 BATFISH_DOCKER_CI_BASE_IMAGE="${BATFISH_DOCKER_CI_BASE_IMAGE:-batfish/ci-base:latest}"
 BATFISH_GITHUB_BATFISH_REF="${BATFISH_GITHUB_BATFISH_REF:-master}"
 BATFISH_GITHUB_BATFISH_REPO="${BATFISH_GITHUB_BATFISH_REPO:-https://github.com/batfish/batfish}"
-PYBATFISH_PYTHON_TEST_VERSIONS=(2.7 3.5 3.6 3.7)
+PYBATFISH_PYTHON_TEST_VERSIONS=(3.5 3.6 3.7)
 
 cat <<EOF
 steps:
@@ -35,7 +35,6 @@ cat <<EOF
       - ". .venv/bin/activate"
       - "python3 -m pip install mypy"
       - "mypy pybatfish"
-      - "mypy --py2 pybatfish"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
