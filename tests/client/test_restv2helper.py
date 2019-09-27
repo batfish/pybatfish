@@ -34,7 +34,7 @@ def test_check_response_status_error():
     response.status_code = 400
     with pytest.raises(HTTPError) as e:
         restv2helper._check_response_status(response)
-    assert "error detail" in str(e)
+    assert "error detail" in str(e.value)
 
 
 def test_check_response_status_ok():

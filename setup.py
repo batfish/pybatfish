@@ -23,7 +23,6 @@ from __future__ import absolute_import, print_function
 # To use a consistent encoding
 from codecs import open
 from os import path
-from sys import version_info
 
 # Always prefer setuptools over distutils
 from setuptools import find_packages, setup
@@ -31,7 +30,6 @@ from setuptools import find_packages, setup
 import pybatfish
 
 here = path.abspath(path.dirname(__file__))
-PY2 = version_info[0] == 2
 
 # Capirca dependencies
 CAPIRCA_DEPS = ['capirca', 'absl-py>=0.8.0']
@@ -81,8 +79,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
