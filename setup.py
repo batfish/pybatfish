@@ -23,7 +23,6 @@ from __future__ import absolute_import, print_function
 # To use a consistent encoding
 from codecs import open
 from os import path
-from sys import version_info
 
 # Always prefer setuptools over distutils
 from setuptools import find_packages, setup
@@ -31,10 +30,9 @@ from setuptools import find_packages, setup
 import pybatfish
 
 here = path.abspath(path.dirname(__file__))
-PY2 = version_info[0] == 2
 
 # Capirca dependencies
-CAPIRCA_DEPS = ['capirca', 'absl-py>=0.8.0'] + (['ipaddress'] if PY2 else [])
+CAPIRCA_DEPS = ['capirca', 'absl-py>=0.8.0']
 
 # Get the long description from the README file
 with open(path.join(here, 'README.md'), encoding='utf-8') as f:
@@ -81,8 +79,6 @@ setup(
 
         # Specify the Python versions you support here. In particular, ensure
         # that you indicate whether you support Python 2, Python 3 or both.
-        'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
@@ -104,19 +100,17 @@ setup(
     # requirements files see:
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=['attrs>=18.1.0',
-                      'deepdiff<=3.3.0',
+                      'deepdiff',
                       'deprecated',
-                      'netconan>=0.9.2',
-                      'pandas>=0.24.1,<0.25.0',
+                      'netconan>=0.11.0',
+                      'pandas>=0.24.1',
                       'python-dateutil',
                       'PyYAML',
                       'requests',
                       'requests-toolbelt',
                       'simplejson',
                       'six',
-                      ] + (
-                         ['backports.tempfile', 'enum34', 'typing']
-                         if PY2 else []),
+                      ],
 
     # List additional groups of dependencies here (e.g. development
     # dependencies). You can install these using the following syntax,
@@ -132,12 +126,11 @@ setup(
                 'flake8-docstrings',
                 'flake8-import-order',
                 'jupyter',
-                # brought in by jupyter; needs to work with py3.5
-                'matplotlib<3.1.0',
+                'mypy',
                 'nbformat',
                 'nbconvert',
-                'pydocstyle<4.0.0',
-                'pytest>=4.2.0,<5.0.0',
+                'pydocstyle',
+                'pytest>=4.2.0',
                 'pytest-cov',
                 'pytz',
                 'requests_mock',
@@ -145,8 +138,7 @@ setup(
                 'sphinx>=1.8.0',
                 'sphinx_rtd_theme',
                 ] + \
-               CAPIRCA_DEPS + \
-               (['mock'] if PY2 else ['mypy']),
+               CAPIRCA_DEPS,
     },
 
     # List pytest requirements for running unit tests
