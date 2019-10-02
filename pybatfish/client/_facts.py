@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import os
-from collections import Mapping
+from collections.abc import Mapping
 from copy import deepcopy
 from typing import Any, Dict, Optional, TYPE_CHECKING, Text, Tuple  # noqa: F401
 
