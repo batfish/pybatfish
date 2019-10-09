@@ -255,6 +255,9 @@ def test_match_tcp_generators():
     assert len(MatchTcpFlags.match_established()) == 2
     assert MatchTcpFlags.match_established() == [MatchTcpFlags.match_ack(),
                                                  MatchTcpFlags.match_rst()]
+    assert MatchTcpFlags.match_not_established() == [
+        MatchTcpFlags(useAck=True, useRst=True,
+                      tcpFlags=TcpFlags(ack=False, rst=False))]
 
 
 def test_flow_repr_html_ports():
