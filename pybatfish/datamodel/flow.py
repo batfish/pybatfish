@@ -804,9 +804,9 @@ class MatchTcpFlags(DataModelElement):
     @staticmethod
     def match_not_established():
         # type: () -> List[MatchTcpFlags]
-        """Return a list of match conditions matching a non-established flow
-        (both ACK and RST bits are unset).
+        """Return a list of match conditions matching a non-established flow.
 
+        Meaning both ACK and RST bits are unset.
         Other bits may take any value.
         """
         return [MatchTcpFlags(useAck=True, useRst=True,
