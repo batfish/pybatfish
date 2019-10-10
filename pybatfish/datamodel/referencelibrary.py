@@ -132,6 +132,7 @@ def _make_node_roles(value):
     return _make_typed_list(value, NodeRole)
 
 
+@deprecated
 @attr.s(frozen=True)
 class RoleDimensionMapping(DataModelElement):
     """
@@ -157,7 +158,8 @@ class RoleDimensionMapping(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleDimensionMapping
-        return RoleDimensionMapping(json_dict["regex"], json_dict.get("groups", [1]),
+        return RoleDimensionMapping(json_dict["regex"],
+                                    json_dict.get("groups", [1]),
                                     json_dict.get("canonicalRoleNames", {}),
                                     json_dict.get("caseSensitive", False))
 
@@ -167,25 +169,24 @@ def _make_role_dimension_mappings(value):
     return _make_typed_list(value, RoleDimensionMapping)
 
 
+@deprecated
 @attr.s(frozen=True)
 class NodeRoleDimension(DataModelElement):
     """
     Information about a node role dimension.
 
     :ivar name: Name of the node role dimension.
-    :ivar type: to capture if the dimension contains automatically inferred
-        roles (``AUTO``) or user-defined roles (``CUSTOM``).
     :ivar roles: The list of :py:class:`NodeRole` objects in this dimension (deprecated).
     :ivar roleDimensionMappings: The list of :py:class:`RoleDimensionMapping` objects
         in this dimension.
     """
 
     name = attr.ib(type=str)
-    type = attr.ib(type=str, default="CUSTOM")
     roles = attr.ib(type=List[NodeRole], factory=list,
                     converter=_make_node_roles)
     roleDimensionMappings = attr.ib(type=List[RoleDimensionMapping],
-                                    factory=list, converter=_make_role_dimension_mappings)
+                                    factory=list,
+                                    converter=_make_role_dimension_mappings)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -203,21 +204,58 @@ def _make_node_role_dimensions(value):
 
 
 @attr.s(frozen=True)
+class RoleMapping(DataModelElement):
+    """
+    :ivar name: (Optional) the name of the role mapping
+    :ivar regex: A java regex
+    :ivar roleDimensionGroups: specify the regex group(s) for each role dimension.
+    :ivar canonicalRoleNames: (Optional)
+    """
+
+    name = attr.ib(type=str)
+    regex = attr.ib(type=str)
+    roleDimensionGroups = attr.ib(type=Dict[str, int])
+    canonicalRoleNames = attr.ib(type=Dict[str, Dict[str, str]], factory=dict)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> RoleMapping
+        return RoleMapping(
+            json_dict.get('name'),
+            json_dict['regex'],
+            json_dict.get('roleDimensionGroups', {}),
+            json_dict.get('canonicalRoleNames', {}))
+
+
+def _make_role_mappings(value):
+    # type: (Any) -> List[RoleMapping]
+    return _make_typed_list(value, RoleMapping)
+
+
+@attr.s(frozen=True)
 class NodeRolesData(DataModelElement):
     """
     Information about a node roles data.
 
-    :ivar roleDimensions: A list of :py:class:`NodeRoleDimension` objects
+    :ivar defaultDimension
+    :ivar roleDimensionOrder: The precedence order of role dimensions.
+    :ivar roleMappings: A list of :py:class:`RoleMapping` objects
     """
 
-    roleDimensions = attr.ib(type=List[NodeRoleDimension], factory=list,
-                             converter=_make_node_role_dimensions)
+    defaultDimension = attr.ib(type=str, factory=lambda: None)
+    roleDimensionOrder = attr.ib(type=List[str], factory=list,
+                                 converter=_make_string_list)
+    roleMappings = attr.ib(type=List[RoleMapping], factory=list,
+                           converter=_make_role_mappings)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> NodeRolesData
-        return NodeRolesData([NodeRoleDimension.from_dict(d) for d in
-                              json_dict.get("roleDimensions", [])])
+        return NodeRolesData(
+            json_dict.get('defaultDimension'),
+            json_dict.get('roleDimensionOrder', []),
+            [RoleMapping.from_dict(d) for d in
+             json_dict.get('roleMappings', [])])
 
 
 def _make_address_groups(value):

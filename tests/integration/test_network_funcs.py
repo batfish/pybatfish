@@ -37,7 +37,7 @@ from pybatfish.client.extended import (bf_delete_network_object,
 from pybatfish.client.options import Options
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData, ReferenceBook, RoleDimensionMapping
+    NodeRolesData, ReferenceBook, RoleDimensionMapping, RoleMapping
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -88,6 +88,24 @@ def test_add_node_role_dimension():
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[rdMap])
         bf_add_node_role_dimension(dim)
         assert bf_get_node_role_dimension(dim_name) == dim
+    finally:
+        bf_delete_network(network_name)
+
+
+def test_add_node_roles_data():
+    try:
+        network_name = 'n1'
+        bf_set_network(network_name)
+        mappings = [
+            RoleMapping(
+                'mapping1',
+                '(.*)-(.*)',
+                {'type': [1], 'index': [2]},
+                {})
+        ]
+        roles_data = NodeRolesData(None, ['type', 'index'], mappings)
+        bf_put_node_roles(roles_data)
+        assert bf_get_node_roles() == roles_data
     finally:
         bf_delete_network(network_name)
 

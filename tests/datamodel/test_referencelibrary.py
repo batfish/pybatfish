@@ -26,7 +26,8 @@ from pybatfish.datamodel.referencelibrary import (AddressGroup,
                                                   NodeRolesData,
                                                   ReferenceBook,
                                                   ReferenceLibrary,
-                                                  RoleDimensionMapping)
+                                                  RoleDimensionMapping,
+                                                  RoleMapping)
 
 
 def test_addressgroup_construction_empty():
@@ -183,7 +184,10 @@ def test_noderoledimension_construction_badtype():
     with pytest.raises(ValueError):
         NodeRoleDimension("g1", roleDimensionMappings="i1")
     with pytest.raises(ValueError):
-        NodeRoleDimension("book1", roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c", "d")])
+        NodeRoleDimension("book1", roleDimensionMappings=["ag",
+                                                          RoleDimensionMapping(
+                                                              "a", "b", "c",
+                                                              "d")])
 
 
 def test_noderoledimension_construction_item():
@@ -209,7 +213,8 @@ def test_noderoledimension_construction_list():
     assert dimension2.name == "g1"
     assert dimension2.roleDimensionMappings == [rdMap]
 
-    dimension3 = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
+    dimension3 = NodeRoleDimension("g1", roles=[role],
+                                   roleDimensionMappings=[rdMap])
     assert dimension3.name == "g1"
     assert dimension3.roles == [role]
     assert dimension3.roleDimensionMappings == [rdMap]
@@ -217,33 +222,59 @@ def test_noderoledimension_construction_list():
 
 def test_noderolesdata_construction_empty():
     """Check that we construct empty node role data properly."""
-    empty = NodeRolesData(roleDimensions=[])
+    empty = NodeRolesData(defaultDimension=None, roleDimensionOrder=[],
+                          roleMappings=[])
 
     assert NodeRolesData() == empty
     assert NodeRolesData(None) == empty
+    assert NodeRolesData(None, []) == empty
+    assert NodeRolesData(None, [], []) == empty
 
 
 def test_noderolesdata_construction_badtype():
     """Check that we throw an error when node role data is built with wrong type."""
     with pytest.raises(ValueError):
-        NodeRolesData(roleDimensions="i1")
+        NodeRolesData('', [1], [])
     with pytest.raises(ValueError):
-        NodeRolesData(roleDimensions=["ag", NodeRoleDimension("a")])
+        NodeRolesData('', [], [1])
 
 
 def test_noderolesdata_construction_item():
     """Check that we construct node role data when sub-props are not a list."""
-    dimension = NodeRoleDimension("a", "b")
-    data = NodeRolesData(roleDimensions=[dimension])
-    assert NodeRolesData(roleDimensions=dimension) == data
+    dimension = 'dim'
+    expected = NodeRolesData(defaultDimension=None,
+                             roleDimensionOrder=[dimension],
+                             roleMappings=[])
+    actual = NodeRolesData(defaultDimension=None,
+                           roleDimensionOrder=dimension,
+                           roleMappings=[])
+    assert actual == expected
+
+    mapping = RoleMapping(None, '', {}, {})
+    expected = NodeRolesData(defaultDimension=None,
+                             roleDimensionOrder=[],
+                             roleMappings=[mapping])
+    actual = NodeRolesData(defaultDimension=None,
+                           roleDimensionOrder=[],
+                           roleMappings=mapping)
+    assert actual == expected
 
 
 def test_noderolesdata_construction_list():
     """Check that we construct node role data where sub-props are lists."""
-    dimension = NodeRoleDimension("a", "b")
-    data = NodeRolesData(roleDimensions=[dimension])
+    dimension = 'dim'
+    data = NodeRolesData(defaultDimension=None,
+                         roleDimensionOrder=[dimension],
+                         roleMappings=[])
 
-    assert data.roleDimensions == [dimension]
+    assert data.roleDimensionOrder == [dimension]
+
+    mapping = RoleMapping(None, '', {}, {})
+    data = NodeRolesData(defaultDimension=None,
+                         roleDimensionOrder=[],
+                         roleMappings=[mapping])
+
+    assert data.roleMappings == [mapping]
 
 
 def test_referencebook_construction_empty():
@@ -435,44 +466,34 @@ def test_roledimensionmapping_default_values():
 def test_noderolesdata():
     """Check proper deserialization for a node roles data."""
     dict = {
-        "roleDimensions": [
-            {
-                "name": "dim1",
-                "type": "CUSTOM",
-                "roles": [
-                    {
-                        "name": "role1",
-                        "regex": "regex",
-                    },
-                    {
-                        "name": "role2",
-                        "regex": "regex",
-                    },
-                ],
-                "roleDimensionMappings": [
-                    {
-                        "regex": "regex",
-                    },
-                    {
-                        "regex": "regex2",
-                        "groups": [],
-                        "canonicalRoleNames": {},
-                        "caseSensitive": True
-                    }
-                ]
-            },
-        ]
+        "roleDimensionOrder": ["dim1", "dim2"],
+        "roleMappings": []
     }
     nodeRoleData = NodeRolesData.from_dict(dict)
 
-    assert len(nodeRoleData.roleDimensions) == 1
-    assert len(nodeRoleData.roleDimensions[0].roles) == 2
-    assert nodeRoleData.roleDimensions[0].roles[0].name == "role1"
-    assert len(nodeRoleData.roleDimensions[0].roleDimensionMappings) == 2
-    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].regex == "regex"
-    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].groups == [1]
-    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].canonicalRoleNames == {}
-    assert nodeRoleData.roleDimensions[0].roleDimensionMappings[0].caseSensitive is False
+    assert nodeRoleData.defaultDimension == None
+    assert nodeRoleData.roleDimensionOrder == ["dim1", "dim2"]
+    assert nodeRoleData.roleMappings == []
+
+
+def test_rolemapping():
+    """Test deserialization of RoleMapping"""
+    regex = "re"
+    roleDimensionGroups = {"dim1": [1], "dim2": [1, 2]}
+    canonicalRoleNames = {"dim1": {"a": "A"}, "dim2": {"a-b": "AB"}}
+    dict = {
+        "regex": regex,
+        "roleDimensionGroups": roleDimensionGroups,
+        "canonicalRoleNames": canonicalRoleNames
+    }
+    roleMapping = RoleMapping.from_dict(dict)
+    assert roleMapping.name is None
+    assert roleMapping.roleDimensionGroups == roleDimensionGroups
+    assert roleMapping.canonicalRoleNames == canonicalRoleNames
+
+    dict["name"] = "name"
+    roleMapping = roleMapping.from_dict(dict)
+    assert roleMapping.name == "name"
 
 
 if __name__ == "__main__":
