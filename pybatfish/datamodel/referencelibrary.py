@@ -207,9 +207,11 @@ def _make_node_role_dimensions(value):
 class RoleMapping(DataModelElement):
     """
     :ivar name: (Optional) the name of the role mapping
-    :ivar regex: A java regex
-    :ivar roleDimensionGroups: specify the regex group(s) for each role dimension.
-    :ivar canonicalRoleNames: (Optional)
+    :ivar regex: A java regex over hostnames, with groups to extract role data
+    :ivar roleDimensionGroups: a map from each role dimension name to the list
+        of regex groups that signify the role name for that dimension.
+    :ivar canonicalRoleNames: for each role dimension, a map from the default
+        role name that was obtained from the node name to a canonical role name
     """
 
     name = attr.ib(type=str)
