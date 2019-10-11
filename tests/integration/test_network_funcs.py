@@ -130,21 +130,15 @@ def test_get_node_role_dimension():
         bf_delete_network(network_name)
 
 
-def test_get_node_roles():
-    try:
-        network_name = 'n1'
-        bf_set_network(network_name)
-        assert bf_get_node_roles() == NodeRolesData([])
-    finally:
-        bf_delete_network(network_name)
-
-
 def test_delete_node_role_dimension():
     try:
         network_name = 'n1'
         bf_set_network(network_name)
         dim_name = 'd1'
-        dim = NodeRoleDimension(dim_name)
+        mapping = RoleDimensionMapping(regex='(regex)')
+        dim = NodeRoleDimension(
+            name=dim_name,
+            roleDimensionMappings=[mapping])
         bf_add_node_role_dimension(dim)
         # should not crash
         bf_get_node_role_dimension(dim_name)
@@ -165,7 +159,8 @@ def test_put_node_role_dimension():
         network_name = 'n1'
         bf_set_network(network_name)
         dim_name = 'd1'
-        dim = NodeRoleDimension(dim_name)
+        mapping = RoleDimensionMapping(regex='(regex)')
+        dim = NodeRoleDimension(dim_name, roleDimensionMappings=[mapping])
         bf_put_node_role_dimension(dim)
         assert bf_get_node_role_dimension(dim_name) == dim
         # put again to check for idempotence
@@ -179,7 +174,14 @@ def test_put_node_roles():
     try:
         network_name = 'n1'
         bf_set_network(network_name)
-        node_roles = NodeRolesData([NodeRoleDimension('dim1')])
+        mapping = RoleMapping(
+            name='mapping',
+            regex='(regex)',
+            roleDimensionGroups={'dim1': [1]})
+        node_roles = NodeRolesData(
+            defaultDimension='dim1',
+            roleDimensionOrder=['dim1'],
+            roleMappings=[mapping])
         bf_put_node_roles(node_roles)
         assert bf_get_node_roles() == node_roles
     finally:
