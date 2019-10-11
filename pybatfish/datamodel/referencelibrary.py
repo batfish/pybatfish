@@ -206,6 +206,8 @@ def _make_node_role_dimensions(value):
 @attr.s(frozen=True)
 class RoleMapping(DataModelElement):
     """
+    A mapping from node name to role dimensions.
+
     :ivar name: (Optional) the name of the role mapping
     :ivar regex: A java regex over hostnames, with groups to extract role data
     :ivar roleDimensionGroups: a map from each role dimension name to the list

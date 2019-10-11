@@ -477,7 +477,7 @@ def test_noderolesdata():
 
 
 def test_rolemapping():
-    """Test deserialization of RoleMapping"""
+    """Test deserialization of RoleMapping."""
     regex = "re"
     roleDimensionGroups = {"dim1": [1], "dim2": [1, 2]}
     canonicalRoleNames = {"dim1": {"a": "A"}, "dim2": {"a-b": "AB"}}
