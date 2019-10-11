@@ -471,7 +471,7 @@ def test_noderolesdata():
     }
     nodeRoleData = NodeRolesData.from_dict(dict)
 
-    assert nodeRoleData.defaultDimension == None
+    assert nodeRoleData.defaultDimension is None
     assert nodeRoleData.roleDimensionOrder == ["dim1", "dim2"]
     assert nodeRoleData.roleMappings == []
 
