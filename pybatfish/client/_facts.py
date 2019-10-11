@@ -63,6 +63,14 @@ def get_facts(session, nodes_specifier='/.*/', snapshot=None):
     if snapshot is not None:
         ans_args['snapshot'] = snapshot
 
+    # These questions should not be visible in policies.
+    # Temporarily unset policy ID to hide them.
+
+    pol_id_var = 'bf_policy_id'
+    policy_id = None
+    if pol_id_var in os.environ:
+        policy_id = os.environ[pol_id_var]
+        del os.environ[pol_id_var]
     node_properties = session.q.nodeProperties(  # type: ignore
         **args).answer(**ans_args)
     interface_properties = session.q.interfaceProperties(  # type: ignore
@@ -77,6 +85,8 @@ def get_facts(session, nodes_specifier='/.*/', snapshot=None):
         **args).answer(**ans_args)
     ospf_iface = session.q.ospfInterfaceConfiguration(  # type: ignore
         **args).answer(**ans_args)
+    if policy_id is not None:
+        os.environ[pol_id_var] = policy_id
 
     return _encapsulate_nodes_facts(_process_facts(node_properties,
                                                    interface_properties,
