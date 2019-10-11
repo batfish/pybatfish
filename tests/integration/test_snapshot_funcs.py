@@ -34,8 +34,7 @@ from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
                                        bf_get_snapshot_object_text,
                                        bf_put_snapshot_object)
 from pybatfish.datamodel import Interface
-from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
-                                                  NodeRolesData)
+from pybatfish.datamodel.referencelibrary import (NodeRolesData, RoleMapping)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -213,7 +212,7 @@ def test_get_snapshot_inferred_node_roles(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
     # should not be empty
-    assert len(bf_get_snapshot_inferred_node_roles().roleDimensions) > 0
+    assert len(bf_get_snapshot_inferred_node_roles().roleMappings) > 0
 
 
 def test_get_snapshot_input_object(network, example_snapshot):
@@ -229,7 +228,13 @@ def test_get_snapshot_input_object(network, example_snapshot):
 def test_get_snapshot_node_role_dimension(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
-    node_roles = NodeRolesData([NodeRoleDimension('dim1')])
+    mapping = RoleMapping(
+        name='mapping',
+        regex='regex',
+        roleDimensionGroups={'dim1': [1]})
+    node_roles = NodeRolesData(
+        roleDimensionOrder=['dim1'],
+        roleMappings=[mapping])
     bf_put_node_roles(node_roles)
     # should not crash
     bf_get_snapshot_node_role_dimension('dim1')
@@ -239,12 +244,18 @@ def test_get_snapshot_node_roles(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
     dimension_name = 'dim1'
-    node_roles = NodeRolesData([NodeRoleDimension(dimension_name)])
+    mapping = RoleMapping(
+        name='mapping',
+        regex='regex',
+        roleDimensionGroups={dimension_name: [1]})
+    node_roles = NodeRolesData(
+        roleDimensionOrder=[dimension_name],
+        roleMappings=[mapping])
     bf_put_node_roles(node_roles)
     # there should be 1 role dimension
     snapshot_node_roles = bf_get_snapshot_node_roles()
-    assert len(snapshot_node_roles.roleDimensions) == 1
-    assert snapshot_node_roles.roleDimensions[0].name == dimension_name
+    assert len(snapshot_node_roles.roleDimensionOrder) == 1
+    assert snapshot_node_roles.roleDimensionOrder[0] == dimension_name
 
 
 def test_get_snapshot_object(network, example_snapshot):
