@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Any, Dict, List  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
 import six
@@ -191,7 +191,7 @@ class NodeRoleDimension(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> NodeRoleDimension
-        return NodeRoleDimension(json_dict["name"], json_dict["type"],
+        return NodeRoleDimension(json_dict["name"],
                                  [NodeRole.from_dict(d) for d in
                                   json_dict.get("roles", [])],
                                  [RoleDimensionMapping.from_dict(d) for d in
@@ -225,7 +225,7 @@ class RoleMapping(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleMapping
         return RoleMapping(
-            json_dict.get('name'),
+            json_dict.get('name', None),
             json_dict['regex'],
             json_dict.get('roleDimensionGroups', {}),
             json_dict.get('canonicalRoleNames', {}))
@@ -246,7 +246,7 @@ class NodeRolesData(DataModelElement):
     :ivar roleMappings: A list of :py:class:`RoleMapping` objects
     """
 
-    defaultDimension = attr.ib(type=str, factory=lambda: None)
+    defaultDimension = attr.ib(type=Optional[str], default=None)
     roleDimensionOrder = attr.ib(type=List[str], factory=list,
                                  converter=_make_string_list)
     roleMappings = attr.ib(type=List[RoleMapping], factory=list,
