@@ -28,7 +28,7 @@ def _files(dir):
     ret = []
     for root, _, filenames in os.walk(dir):
         for f in filenames:
-            if f != '.lock':  # void pytest lock files
+            if f != ".lock":  # void pytest lock files
                 ret.append(os.path.join(root, f))
     return ret
 
@@ -36,13 +36,12 @@ def _files(dir):
 def test_create_single_file_zip():
     """Creates the expected zip."""
     text = "abcdefgh\n"
-    expected_filename = os.path.join('snapshot', 'configs', 'myfile')
-    expected_text = '!RANCID-CONTENT-TYPE: arista\n' + text
+    expected_filename = os.path.join("snapshot", "configs", "myfile")
+    expected_text = "!RANCID-CONTENT-TYPE: arista\n" + text
 
-    with zipfile.ZipFile(
-            _create_in_memory_zip(text, 'myfile', 'arista'), 'r') as zf:
+    with zipfile.ZipFile(_create_in_memory_zip(text, "myfile", "arista"), "r") as zf:
         assert zf.namelist() == [expected_filename]
-        assert expected_text == zf.read(expected_filename).decode('utf-8')
+        assert expected_text == zf.read(expected_filename).decode("utf-8")
 
 
 def test_text_with_platform():
@@ -50,9 +49,9 @@ def test_text_with_platform():
     text = "abcdefgh\n"
     assert text == _text_with_platform(text, None)
 
-    expected_arista = '!RANCID-CONTENT-TYPE: arista\n' + text
-    assert expected_arista == _text_with_platform(text, 'arista')
-    assert expected_arista == _text_with_platform(text, ' aRiStA \t')
+    expected_arista = "!RANCID-CONTENT-TYPE: arista\n" + text
+    assert expected_arista == _text_with_platform(text, "arista")
+    assert expected_arista == _text_with_platform(text, " aRiStA \t")
 
 
 if __name__ == "__main__":

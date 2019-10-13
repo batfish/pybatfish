@@ -18,26 +18,35 @@ from conftest import COMPLETION_TYPES
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
-from pybatfish.client.commands import (bf_add_node_role_dimension,
-                                       bf_auto_complete,
-                                       bf_delete_network,
-                                       bf_delete_node_role_dimension,
-                                       bf_get_node_role_dimension,
-                                       bf_get_node_roles,
-                                       bf_get_reference_book,
-                                       bf_init_snapshot,
-                                       bf_list_networks,
-                                       bf_put_node_role_dimension,
-                                       bf_put_node_roles,
-                                       bf_put_reference_book,
-                                       bf_set_network)
-from pybatfish.client.extended import (bf_delete_network_object,
-                                       bf_get_network_object_text,
-                                       bf_put_network_object)
+from pybatfish.client.commands import (
+    bf_add_node_role_dimension,
+    bf_auto_complete,
+    bf_delete_network,
+    bf_delete_node_role_dimension,
+    bf_get_node_role_dimension,
+    bf_get_node_roles,
+    bf_get_reference_book,
+    bf_init_snapshot,
+    bf_list_networks,
+    bf_put_node_role_dimension,
+    bf_put_node_roles,
+    bf_put_reference_book,
+    bf_set_network,
+)
+from pybatfish.client.extended import (
+    bf_delete_network_object,
+    bf_get_network_object_text,
+    bf_put_network_object,
+)
 from pybatfish.client.options import Options
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
-from pybatfish.datamodel.referencelibrary import NodeRoleDimension, \
-    NodeRolesData, ReferenceBook, RoleDimensionMapping, RoleMapping
+from pybatfish.datamodel.referencelibrary import (
+    NodeRoleDimension,
+    NodeRolesData,
+    ReferenceBook,
+    RoleDimensionMapping,
+    RoleMapping,
+)
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -51,18 +60,18 @@ def network():
 
 
 def test_delete_network_object(network):
-    bf_put_network_object('new_object', 'goodbye')
-    bf_delete_network_object('new_object')
+    bf_put_network_object("new_object", "goodbye")
+    bf_delete_network_object("new_object")
     # the object should be non-existent now
-    with raises(HTTPError, match='404'):
-        bf_get_network_object_text('new_object')
+    with raises(HTTPError, match="404"):
+        bf_get_network_object_text("new_object")
 
 
 def test_set_network():
     try:
-        assert bf_set_network('foobar') == 'foobar'
+        assert bf_set_network("foobar") == "foobar"
     finally:
-        bf_delete_network('foobar')
+        bf_delete_network("foobar")
 
     name = bf_set_network()
     try:
@@ -81,9 +90,9 @@ def test_list_networks():
 
 def test_add_node_role_dimension():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
-        dim_name = 'd1'
+        dim_name = "d1"
         rdMap = RoleDimensionMapping("a", [1], {}, False)
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[rdMap])
         bf_add_node_role_dimension(dim)
@@ -94,16 +103,12 @@ def test_add_node_role_dimension():
 
 def test_add_node_roles_data():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
         mappings = [
-            RoleMapping(
-                'mapping1',
-                '(.*)-(.*)',
-                {'type': [1], 'index': [2]},
-                {})
+            RoleMapping("mapping1", "(.*)-(.*)", {"type": [1], "index": [2]}, {})
         ]
-        roles_data = NodeRolesData(None, ['type', 'index'], mappings)
+        roles_data = NodeRolesData(None, ["type", "index"], mappings)
         bf_put_node_roles(roles_data)
         assert bf_get_node_roles() == roles_data
     finally:
@@ -112,19 +117,19 @@ def test_add_node_roles_data():
 
 def test_get_network_object(network):
     # non-existent object should yield 404
-    with raises(HTTPError, match='404'):
-        bf_get_network_object_text('missing_object')
+    with raises(HTTPError, match="404"):
+        bf_get_network_object_text("missing_object")
     # object should exist after being placed
-    bf_put_network_object('new_object', 'goodbye')
-    assert bf_get_network_object_text('new_object') == 'goodbye'
+    bf_put_network_object("new_object", "goodbye")
+    assert bf_get_network_object_text("new_object") == "goodbye"
 
 
 def test_get_node_role_dimension():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
-        dim_name = 'd1'
-        with raises(HTTPError, match='404'):
+        dim_name = "d1"
+        with raises(HTTPError, match="404"):
             bf_get_node_role_dimension(dim_name)
     finally:
         bf_delete_network(network_name)
@@ -132,22 +137,20 @@ def test_get_node_role_dimension():
 
 def test_delete_node_role_dimension():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
-        dim_name = 'd1'
-        mapping = RoleDimensionMapping(regex='(regex)')
-        dim = NodeRoleDimension(
-            name=dim_name,
-            roleDimensionMappings=[mapping])
+        dim_name = "d1"
+        mapping = RoleDimensionMapping(regex="(regex)")
+        dim = NodeRoleDimension(name=dim_name, roleDimensionMappings=[mapping])
         bf_add_node_role_dimension(dim)
         # should not crash
         bf_get_node_role_dimension(dim_name)
         bf_delete_node_role_dimension(dim_name)
         # dimension should no longer exist
-        with raises(HTTPError, match='404'):
+        with raises(HTTPError, match="404"):
             bf_get_node_role_dimension(dim_name)
         # second delete should fail
-        with raises(HTTPError, match='404'):
+        with raises(HTTPError, match="404"):
             bf_delete_node_role_dimension(dim_name)
 
     finally:
@@ -156,10 +159,10 @@ def test_delete_node_role_dimension():
 
 def test_put_node_role_dimension():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
-        dim_name = 'd1'
-        mapping = RoleDimensionMapping(regex='(regex)')
+        dim_name = "d1"
+        mapping = RoleDimensionMapping(regex="(regex)")
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[mapping])
         bf_put_node_role_dimension(dim)
         assert bf_get_node_role_dimension(dim_name) == dim
@@ -172,16 +175,14 @@ def test_put_node_role_dimension():
 
 def test_put_node_roles():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
         mapping = RoleMapping(
-            name='mapping',
-            regex='(regex)',
-            roleDimensionGroups={'dim1': [1]})
+            name="mapping", regex="(regex)", roleDimensionGroups={"dim1": [1]}
+        )
         node_roles = NodeRolesData(
-            defaultDimension='dim1',
-            roleDimensionOrder=['dim1'],
-            roleMappings=[mapping])
+            defaultDimension="dim1", roleDimensionOrder=["dim1"], roleMappings=[mapping]
+        )
         bf_put_node_roles(node_roles)
         assert bf_get_node_roles() == node_roles
     finally:
@@ -190,9 +191,9 @@ def test_put_node_roles():
 
 def test_put_reference_book():
     try:
-        network_name = 'n1'
+        network_name = "n1"
         bf_set_network(network_name)
-        book_name = 'b1'
+        book_name = "b1"
         book = ReferenceBook(book_name)
         bf_put_reference_book(book)
         assert bf_get_reference_book(book_name) == book
@@ -206,7 +207,7 @@ def test_put_reference_book():
 def test_auto_complete():
     try:
         name = bf_set_network()
-        bf_init_snapshot(join(_this_dir, 'snapshot'))
+        bf_init_snapshot(join(_this_dir, "snapshot"))
         for completion_type in COMPLETION_TYPES:
             suggestions = bf_auto_complete(completion_type, ".*")
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.

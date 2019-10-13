@@ -23,12 +23,7 @@ from pybatfish.settings.issues import IssueConfig
 
 def test_issue_config():
     """Check proper deserialization for issue config."""
-    dict = {
-        "major": "maj",
-        "minor": "min",
-        "severity": 23,
-        "url": "www.cnn"
-    }
+    dict = {"major": "maj", "minor": "min", "severity": 23, "url": "www.cnn"}
     config = IssueConfig(**dict)
 
     assert config.major == "maj"
@@ -39,10 +34,7 @@ def test_issue_config():
 
 def test_issue_config_missing_optional():
     """Check proper deserialization for issue config."""
-    dict = {
-        "major": "maj",
-        "minor": "min"
-    }
+    dict = {"major": "maj", "minor": "min"}
     IssueConfig.from_dict(dict)  # should not barf
 
 

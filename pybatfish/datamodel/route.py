@@ -18,11 +18,7 @@ import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
 
-__all__ = [
-    "BgpRoute",
-    "BgpRouteDiff",
-    "BgpRouteDiffs"
-]
+__all__ = ["BgpRoute", "BgpRouteDiff", "BgpRouteDiffs"]
 
 
 @attr.s(frozen=True)
@@ -52,48 +48,50 @@ class BgpRoute(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> BgpRoute
-        return BgpRoute(json_dict["network"],
-                        json_dict["originatorIp"],
-                        json_dict["originType"],
-                        json_dict["protocol"],
-                        json_dict.get("asPath", []),
-                        json_dict.get("communities", []),
-                        json_dict.get("localPreference", 0),
-                        json_dict.get("metric", 0),
-                        json_dict.get("srcProtocol", None))
+        return BgpRoute(
+            json_dict["network"],
+            json_dict["originatorIp"],
+            json_dict["originType"],
+            json_dict["protocol"],
+            json_dict.get("asPath", []),
+            json_dict.get("communities", []),
+            json_dict.get("localPreference", 0),
+            json_dict.get("metric", 0),
+            json_dict.get("srcProtocol", None),
+        )
 
     def dict(self):
         # type: () -> Dict
         return {
             # needed for batfish jackson deserialization
-            'class': 'org.batfish.datamodel.BgpRoute',
-            'network': self.network,
-            'asPath': self.asPath,
-            'communities': self.communities,
-            'localPreference': self.localPreference,
-            'metric': self.metric,
-            'originatorIp': self.originatorIp,
-            'originType': self.originType,
-            'protocol': self.protocol,
-            'srcProtocol': self.sourceProtocol
+            "class": "org.batfish.datamodel.BgpRoute",
+            "network": self.network,
+            "asPath": self.asPath,
+            "communities": self.communities,
+            "localPreference": self.localPreference,
+            "metric": self.metric,
+            "originatorIp": self.originatorIp,
+            "originType": self.originType,
+            "protocol": self.protocol,
+            "srcProtocol": self.sourceProtocol,
         }
 
     def _repr_html_(self):
         # type: () -> str
-        return '<br>'.join(self._repr_html_lines())
+        return "<br>".join(self._repr_html_lines())
 
     def _repr_html_lines(self):
         # type: () -> List[str]
         lines = []
-        lines.append('Network: {node}'.format(node=self.network))
-        lines.append('AS Path: %s' % self.asPath)
-        lines.append('Communities: %s' % self.communities)
-        lines.append('Local Preference: %s' % self.localPreference)
-        lines.append('Metric: %s' % self.metric)
-        lines.append('Originator IP: %s' % self.originatorIp)
-        lines.append('Origin Type: %s' % self.originType)
-        lines.append('Protocol: %s' % self.protocol)
-        lines.append('Source Protocol: %s' % self.sourceProtocol)
+        lines.append("Network: {node}".format(node=self.network))
+        lines.append("AS Path: %s" % self.asPath)
+        lines.append("Communities: %s" % self.communities)
+        lines.append("Local Preference: %s" % self.localPreference)
+        lines.append("Metric: %s" % self.metric)
+        lines.append("Originator IP: %s" % self.originatorIp)
+        lines.append("Origin Type: %s" % self.originType)
+        lines.append("Protocol: %s" % self.protocol)
+        lines.append("Source Protocol: %s" % self.sourceProtocol)
         return lines
 
 
@@ -113,16 +111,15 @@ class BgpRouteDiff(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> BgpRouteDiff
-        return BgpRouteDiff(json_dict["fieldName"],
-                            json_dict["oldValue"],
-                            json_dict["newValue"])
+        return BgpRouteDiff(
+            json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"]
+        )
 
     def _repr_html_(self):
         # type: () -> str
         return "{fieldName}: {oldValue} -> {newValue}".format(
-            fieldName=self.fieldName,
-            oldValue=self.oldValue,
-            newValue=self.newValue)
+            fieldName=self.fieldName, oldValue=self.oldValue, newValue=self.newValue
+        )
 
 
 @attr.s(frozen=True)
@@ -138,8 +135,11 @@ class BgpRouteDiffs(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> BgpRouteDiffs
         return BgpRouteDiffs(
-            [BgpRouteDiff.from_dict(route_dict)
-             for route_dict in json_dict.get('diffs', [])])
+            [
+                BgpRouteDiff.from_dict(route_dict)
+                for route_dict in json_dict.get("diffs", [])
+            ]
+        )
 
     def _repr_html_(self):
         # type: () -> str

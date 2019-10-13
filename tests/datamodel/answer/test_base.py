@@ -20,33 +20,35 @@ import json
 
 import pytest
 
-from pybatfish.datamodel.answer.base import (_get_base_schema,
-                                             _is_iterable_schema,
-                                             _parse_json_with_schema)
+from pybatfish.datamodel.answer.base import (
+    _get_base_schema,
+    _is_iterable_schema,
+    _parse_json_with_schema,
+)
 
 
 def test_get_display_value_self_describing_object():
     """Check that SelfDescribingObject is displayed correctly."""
-    json_object = json.loads("{\"schema\" : \"Integer\", \"value\": 23}")
-    assert _parse_json_with_schema('SelfDescribing', json_object) == 23
+    json_object = json.loads('{"schema" : "Integer", "value": 23}')
+    assert _parse_json_with_schema("SelfDescribing", json_object) == 23
 
-    json_object = json.loads("{\"schema\" : \"Integer\"}")
-    assert _parse_json_with_schema('SelfDescribing', json_object) is None
+    json_object = json.loads('{"schema" : "Integer"}')
+    assert _parse_json_with_schema("SelfDescribing", json_object) is None
 
 
 def test_get_display_value_integer():
     """Check that Integer values are extracted correctly."""
-    assert _parse_json_with_schema('Integer', "0") == 0
-    assert _parse_json_with_schema('Integer', 0) == 0
-    assert _parse_json_with_schema('Integer', -1) == -1
-    assert _parse_json_with_schema('Integer', "-1") == -1
+    assert _parse_json_with_schema("Integer", "0") == 0
+    assert _parse_json_with_schema("Integer", 0) == 0
+    assert _parse_json_with_schema("Integer", -1) == -1
+    assert _parse_json_with_schema("Integer", "-1") == -1
 
 
 def test_get_display_value_unknown_schema():
     """Check that Integer values are extracted correctly."""
-    assert _parse_json_with_schema('bogus', None) is None
-    json_object = json.loads("{\"foo\" : 23}")
-    assert _parse_json_with_schema('bogus', json_object) == json_object
+    assert _parse_json_with_schema("bogus", None) is None
+    json_object = json.loads('{"foo" : 23}')
+    assert _parse_json_with_schema("bogus", json_object) == json_object
 
 
 def test_is_iterable_schema():

@@ -19,15 +19,17 @@ from __future__ import absolute_import, print_function
 import pytest
 
 from pybatfish.datamodel import Interface
-from pybatfish.datamodel.referencelibrary import (AddressGroup,
-                                                  InterfaceGroup,
-                                                  NodeRole,
-                                                  NodeRoleDimension,
-                                                  NodeRolesData,
-                                                  ReferenceBook,
-                                                  ReferenceLibrary,
-                                                  RoleDimensionMapping,
-                                                  RoleMapping)
+from pybatfish.datamodel.referencelibrary import (
+    AddressGroup,
+    InterfaceGroup,
+    NodeRole,
+    NodeRoleDimension,
+    NodeRolesData,
+    ReferenceBook,
+    ReferenceLibrary,
+    RoleDimensionMapping,
+    RoleMapping,
+)
 
 
 def test_addressgroup_construction_empty():
@@ -35,8 +37,7 @@ def test_addressgroup_construction_empty():
     empty_group = AddressGroup("g1", addresses=[], childGroupNames=[])
 
     assert AddressGroup("g1") == empty_group
-    assert AddressGroup("g1", addresses=None,
-                        childGroupNames=None) == empty_group
+    assert AddressGroup("g1", addresses=None, childGroupNames=None) == empty_group
 
 
 def test_addressgroup_construction_badtype():
@@ -53,11 +54,10 @@ def test_addressgroup_construction_badtype():
 
 def test_addressgroup_construction_item():
     """Check that we construct address groups when sub-props are not a list."""
-    assert AddressGroup("g1", addresses="ag") == AddressGroup("g1",
-                                                              addresses=["ag"])
-    assert AddressGroup("g1", childGroupNames="ag") == AddressGroup("g1",
-                                                                    childGroupNames=[
-                                                                        "ag"])
+    assert AddressGroup("g1", addresses="ag") == AddressGroup("g1", addresses=["ag"])
+    assert AddressGroup("g1", childGroupNames="ag") == AddressGroup(
+        "g1", childGroupNames=["ag"]
+    )
 
 
 def test_addressgroup_construction_list():
@@ -73,14 +73,8 @@ def test_addressgroup_deser_both_subfields():
     """Test deserialization for a reference library with address groups."""
     dict = {
         "name": "ag1",
-        "addresses": [
-            "1.1.1.1/24",
-            "2.2.2.2"
-        ],
-        "childGroupNames": [
-            "child1",
-            "child2"
-        ]
+        "addresses": ["1.1.1.1/24", "2.2.2.2"],
+        "childGroupNames": ["child1", "child2"],
     }
 
     address_group = AddressGroup.from_dict(dict)
@@ -91,9 +85,7 @@ def test_addressgroup_deser_both_subfields():
 
 def test_addressgroup_deser_none_subfields():
     """Test deserialization for a reference library with address groups."""
-    dict = {
-        "name": "ag1"
-    }
+    dict = {"name": "ag1"}
 
     address_group = AddressGroup.from_dict(dict)
 
@@ -103,13 +95,7 @@ def test_addressgroup_deser_none_subfields():
 
 def test_addressgroup_deser_only_addresses():
     """Test deserialization for a reference library with address groups."""
-    dict = {
-        "name": "ag1",
-        "addresses": [
-            "1.1.1.1/24",
-            "2.2.2.2"
-        ]
-    }
+    dict = {"name": "ag1", "addresses": ["1.1.1.1/24", "2.2.2.2"]}
 
     address_group = AddressGroup.from_dict(dict)
 
@@ -119,13 +105,7 @@ def test_addressgroup_deser_only_addresses():
 
 def test_addressgroup_deser_only_child_groups():
     """Test deserialization for a reference library with address groups."""
-    dict = {
-        "name": "ag1",
-        "childGroupNames": [
-            "child1",
-            "child2"
-        ]
-    }
+    dict = {"name": "ag1", "childGroupNames": ["child1", "child2"]}
 
     address_group = AddressGroup.from_dict(dict)
 
@@ -146,8 +126,9 @@ def test_interfacegroup_construction_badtype():
     with pytest.raises(ValueError):
         InterfaceGroup("g1", interfaces="i1")
     with pytest.raises(ValueError):
-        InterfaceGroup("book1", interfaces=["ag", Interface(hostname="h1",
-                                                            interface="i1")])
+        InterfaceGroup(
+            "book1", interfaces=["ag", Interface(hostname="h1", interface="i1")]
+        )
 
 
 def test_interfacegroup_construction_item():
@@ -184,10 +165,10 @@ def test_noderoledimension_construction_badtype():
     with pytest.raises(ValueError):
         NodeRoleDimension("g1", roleDimensionMappings="i1")
     with pytest.raises(ValueError):
-        NodeRoleDimension("book1", roleDimensionMappings=["ag",
-                                                          RoleDimensionMapping(
-                                                              "a", "b", "c",
-                                                              "d")])
+        NodeRoleDimension(
+            "book1",
+            roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c", "d")],
+        )
 
 
 def test_noderoledimension_construction_item():
@@ -213,8 +194,7 @@ def test_noderoledimension_construction_list():
     assert dimension2.name == "g1"
     assert dimension2.roleDimensionMappings == [rdMap]
 
-    dimension3 = NodeRoleDimension("g1", roles=[role],
-                                   roleDimensionMappings=[rdMap])
+    dimension3 = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
     assert dimension3.name == "g1"
     assert dimension3.roles == [role]
     assert dimension3.roleDimensionMappings == [rdMap]
@@ -222,8 +202,7 @@ def test_noderoledimension_construction_list():
 
 def test_noderolesdata_construction_empty():
     """Check that we construct empty node role data properly."""
-    empty = NodeRolesData(defaultDimension=None, roleDimensionOrder=[],
-                          roleMappings=[])
+    empty = NodeRolesData(defaultDimension=None, roleDimensionOrder=[], roleMappings=[])
 
     assert NodeRolesData() == empty
     assert NodeRolesData(None) == empty
@@ -234,45 +213,45 @@ def test_noderolesdata_construction_empty():
 def test_noderolesdata_construction_badtype():
     """Check that we throw an error when node role data is built with wrong type."""
     with pytest.raises(ValueError):
-        NodeRolesData('', [1], [])
+        NodeRolesData("", [1], [])
     with pytest.raises(ValueError):
-        NodeRolesData('', [], [1])
+        NodeRolesData("", [], [1])
 
 
 def test_noderolesdata_construction_item():
     """Check that we construct node role data when sub-props are not a list."""
-    dimension = 'dim'
-    expected = NodeRolesData(defaultDimension=None,
-                             roleDimensionOrder=[dimension],
-                             roleMappings=[])
-    actual = NodeRolesData(defaultDimension=None,
-                           roleDimensionOrder=dimension,
-                           roleMappings=[])
+    dimension = "dim"
+    expected = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[]
+    )
+    actual = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=dimension, roleMappings=[]
+    )
     assert actual == expected
 
-    mapping = RoleMapping(None, '', {}, {})
-    expected = NodeRolesData(defaultDimension=None,
-                             roleDimensionOrder=[],
-                             roleMappings=[mapping])
-    actual = NodeRolesData(defaultDimension=None,
-                           roleDimensionOrder=[],
-                           roleMappings=mapping)
+    mapping = RoleMapping(None, "", {}, {})
+    expected = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping]
+    )
+    actual = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=[], roleMappings=mapping
+    )
     assert actual == expected
 
 
 def test_noderolesdata_construction_list():
     """Check that we construct node role data where sub-props are lists."""
-    dimension = 'dim'
-    data = NodeRolesData(defaultDimension=None,
-                         roleDimensionOrder=[dimension],
-                         roleMappings=[])
+    dimension = "dim"
+    data = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[]
+    )
 
     assert data.roleDimensionOrder == [dimension]
 
-    mapping = RoleMapping(None, '', {}, {})
-    data = NodeRolesData(defaultDimension=None,
-                         roleDimensionOrder=[],
-                         roleMappings=[mapping])
+    mapping = RoleMapping(None, "", {}, {})
+    data = NodeRolesData(
+        defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping]
+    )
 
     assert data.roleMappings == [mapping]
 
@@ -282,8 +261,7 @@ def test_referencebook_construction_empty():
     empty_book = ReferenceBook("b1", addressGroups=[], interfaceGroups=[])
 
     assert ReferenceBook("b1") == empty_book
-    assert ReferenceBook("b1", addressGroups=None,
-                         interfaceGroups=None) == empty_book
+    assert ReferenceBook("b1", addressGroups=None, interfaceGroups=None) == empty_book
 
 
 def test_referencebook_construction_addressgroup_badtype():
@@ -375,9 +353,7 @@ def test_referencelibrary_deser_empty():
     reference_library = ReferenceLibrary(**dict)
     assert len(reference_library.books) == 0
 
-    dict = {
-        "books": []
-    }
+    dict = {"books": []}
     reference_library = ReferenceLibrary(**dict)
     assert len(reference_library.books) == 0
 
@@ -391,20 +367,12 @@ def test_referencelibrary_deser_addressgroups():
                 "addressGroups": [
                     {
                         "name": "ag1",
-                        "addresses": [
-                            "1.1.1.1/24",
-                            "2.2.2.2",
-                            "3.3.3.3:0.0.0.8"
-                        ]
+                        "addresses": ["1.1.1.1/24", "2.2.2.2", "3.3.3.3:0.0.0.8"],
                     },
-                    {
-                        "name": "ag2"
-                    }
-                ]
+                    {"name": "ag2"},
+                ],
             },
-            {
-                "name": "book2",
-            }
+            {"name": "book2"},
         ]
     }
     reference_library = ReferenceLibrary.from_dict(dict)
@@ -426,24 +394,14 @@ def test_referencelibrary_deser_interfacegroups():
                     {
                         "name": "g1",
                         "interfaces": [
-                            {
-                                "hostname": "h1",
-                                "interface": "i1"
-                            },
-                            {
-                                "hostname": "h2",
-                                "interface": "i2"
-                            }
-                        ]
+                            {"hostname": "h1", "interface": "i1"},
+                            {"hostname": "h2", "interface": "i2"},
+                        ],
                     },
-                    {
-                        "name": "g2"
-                    }
-                ]
+                    {"name": "g2"},
+                ],
             },
-            {
-                "name": "book2",
-            }
+            {"name": "book2"},
         ]
     }
     reference_library = ReferenceLibrary.from_dict(dict)
@@ -465,10 +423,7 @@ def test_roledimensionmapping_default_values():
 
 def test_noderolesdata():
     """Check proper deserialization for a node roles data."""
-    dict = {
-        "roleDimensionOrder": ["dim1", "dim2"],
-        "roleMappings": []
-    }
+    dict = {"roleDimensionOrder": ["dim1", "dim2"], "roleMappings": []}
     nodeRoleData = NodeRolesData.from_dict(dict)
 
     assert nodeRoleData.defaultDimension is None
@@ -484,7 +439,7 @@ def test_rolemapping():
     dict = {
         "regex": regex,
         "roleDimensionGroups": roleDimensionGroups,
-        "canonicalRoleNames": canonicalRoleNames
+        "canonicalRoleNames": canonicalRoleNames,
     }
     roleMapping = RoleMapping.from_dict(dict)
     assert roleMapping.name is None

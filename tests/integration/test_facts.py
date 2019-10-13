@@ -27,9 +27,9 @@ _root_dir = abspath(join(_this_dir, pardir, pardir))
 def session():
     s = Session()
     # Snapshot which can be referenced by name
-    other_name = s.init_snapshot(join(_this_dir, 'snapshots', 'fact_snapshot2'))
+    other_name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot2"))
     # Current snapshot
-    name = s.init_snapshot(join(_this_dir, 'snapshots', 'fact_snapshot'))
+    name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot"))
     yield s
     s.delete_snapshot(name)
     s.delete_snapshot(other_name)
@@ -37,63 +37,67 @@ def session():
 
 def test_extract_facts(tmpdir, session):
     """Test extraction of facts for the current snapshot with a basic config."""
-    out_dir = tmpdir.join('output')
-    extracted_facts = session.extract_facts(nodes='basic',
-                                            output_directory=str(out_dir))
+    out_dir = tmpdir.join("output")
+    extracted_facts = session.extract_facts(
+        nodes="basic", output_directory=str(out_dir)
+    )
 
     written_facts = load_facts(str(out_dir))
-    expected_facts = load_facts(join(_this_dir, 'facts', 'expected_facts'))
+    expected_facts = load_facts(join(_this_dir, "facts", "expected_facts"))
 
-    assert validate_facts(expected_facts,
-                          extracted_facts) == {}, 'Extracted facts match expected facts'
-    assert validate_facts(expected_facts,
-                          written_facts) == {}, 'Written facts match expected facts'
+    assert (
+        validate_facts(expected_facts, extracted_facts) == {}
+    ), "Extracted facts match expected facts"
+    assert (
+        validate_facts(expected_facts, written_facts) == {}
+    ), "Written facts match expected facts"
 
 
 def test_extract_facts_specific_snapshot(tmpdir, session):
     """Test extraction of facts for a specific snapshot."""
-    out_dir = tmpdir.join('output')
+    out_dir = tmpdir.join("output")
     non_current_snapshot = session.list_snapshots()[-1]
-    extracted_facts = session.extract_facts(output_directory=str(out_dir),
-                                            snapshot=non_current_snapshot)
+    extracted_facts = session.extract_facts(
+        output_directory=str(out_dir), snapshot=non_current_snapshot
+    )
 
     written_facts = load_facts(str(out_dir))
-    expected_facts = load_facts(join(_this_dir, 'facts', 'expected_facts2'))
+    expected_facts = load_facts(join(_this_dir, "facts", "expected_facts2"))
 
-    assert validate_facts(expected_facts,
-                          extracted_facts) == {}, 'Extracted facts match expected facts'
-    assert validate_facts(expected_facts,
-                          written_facts) == {}, 'Written facts match expected facts'
+    assert (
+        validate_facts(expected_facts, extracted_facts) == {}
+    ), "Extracted facts match expected facts"
+    assert (
+        validate_facts(expected_facts, written_facts) == {}
+    ), "Written facts match expected facts"
 
 
 def test_validate_facts_matching(session):
     """Test validation of facts for the current snapshot against matching facts."""
     validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, 'facts', 'expected_facts'))
+        expected_facts=join(_this_dir, "facts", "expected_facts")
+    )
 
-    assert validation_results == {}, 'No differences between expected and actual facts'
+    assert validation_results == {}, "No differences between expected and actual facts"
 
 
 def test_validate_facts_matching_specific_snapshot(session):
     """Test validation of facts against matching facts, for a specific snapshot."""
     non_current_snapshot = session.list_snapshots()[-1]
     validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, 'facts', 'expected_facts2'),
-        snapshot=non_current_snapshot)
+        expected_facts=join(_this_dir, "facts", "expected_facts2"),
+        snapshot=non_current_snapshot,
+    )
 
-    assert validation_results == {}, 'No differences between expected and actual facts'
+    assert validation_results == {}, "No differences between expected and actual facts"
 
 
 def test_validate_facts_different(session):
     """Test validation of facts for the current snapshot against different facts."""
     validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, 'facts', 'unexpected_facts'))
+        expected_facts=join(_this_dir, "facts", "unexpected_facts")
+    )
 
     assert validation_results == {
-        'basic': {
-            'DNS.DNS_Servers': {
-                'actual': [],
-                'expected': ['1.2.3.4'],
-            },
-        }
-    }, 'Only DNS servers should be different between expected and actual facts'
+        "basic": {"DNS.DNS_Servers": {"actual": [], "expected": ["1.2.3.4"]}}
+    }, "Only DNS servers should be different between expected and actual facts"

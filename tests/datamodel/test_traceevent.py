@@ -21,10 +21,7 @@ from pybatfish.datamodel.acl import AclTraceEvent
 
 # test if a trace event with description is deserialized and string-ified properly
 def test_trace_event_with_description():
-    dict = {
-        "description": "aa",
-        "class": "Permitted"
-    }
+    dict = {"description": "aa", "class": "Permitted"}
 
     # check deserialization
     trace_event = AclTraceEvent.from_dict(dict)
@@ -39,9 +36,7 @@ def test_trace_event_with_description():
 
 # test if a trace event without description is deserialized and string-ified properly
 def test_trace_event_without_description():
-    dict = {
-        "class": "Permitted"
-    }
+    dict = {"class": "Permitted"}
 
     # check deserialization
     trace_event = AclTraceEvent.from_dict(dict)

@@ -18,7 +18,7 @@ import attr
 
 from .primitives import DataModelElement
 
-__all__ = ['AclTrace', 'AclTraceEvent']
+__all__ = ["AclTrace", "AclTraceEvent"]
 
 
 @attr.s(frozen=True)
@@ -40,7 +40,8 @@ class AclTraceEvent(DataModelElement):
         return AclTraceEvent(
             json_dict.get("class"),
             json_dict.get("description"),
-            json_dict.get("lineDescription"))
+            json_dict.get("lineDescription"),
+        )
 
     def __str__(self):
         # type: () -> str
@@ -64,8 +65,8 @@ class AclTrace(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> AclTrace
         return AclTrace(
-            [AclTraceEvent.from_dict(event) for event in
-             json_dict.get("events", [])])
+            [AclTraceEvent.from_dict(event) for event in json_dict.get("events", [])]
+        )
 
     def __str__(self):
         # type: () -> str

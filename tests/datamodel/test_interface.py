@@ -22,21 +22,19 @@ from pybatfish.datamodel.primitives import Interface
 
 def test_str():
     # no escaping
-    assert str(Interface(hostname="node", interface="iface")) == 'node[iface]'
+    assert str(Interface(hostname="node", interface="iface")) == "node[iface]"
 
     # escape hostname
-    assert str(
-        Interface(hostname="0node", interface="iface")) == '"0node"[iface]'
+    assert str(Interface(hostname="0node", interface="iface")) == '"0node"[iface]'
 
     # escape interface
-    assert str(
-        Interface(hostname="node", interface="/iface")) == 'node["/iface"]'
+    assert str(Interface(hostname="node", interface="/iface")) == 'node["/iface"]'
 
 
 def test_html():
-    i = Interface(hostname='host', interface='special&')
+    i = Interface(hostname="host", interface="special&")
     assert i._repr_html_() == "host[&quot;special&amp;&quot;]"
-    i = Interface(hostname='host', interface='normal:0/0.0')
+    i = Interface(hostname="host", interface="normal:0/0.0")
     assert i._repr_html_() == "host[normal:0/0.0]"
 
 

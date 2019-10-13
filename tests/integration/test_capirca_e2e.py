@@ -17,13 +17,14 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
-from pybatfish.client.asserts import (
-    assert_filter_denies, assert_filter_permits)
-from pybatfish.client.capirca import (
-    create_reference_book, init_snapshot_from_acl)
+from pybatfish.client.asserts import assert_filter_denies, assert_filter_permits
+from pybatfish.client.capirca import create_reference_book, init_snapshot_from_acl
 from pybatfish.client.commands import (
-    bf_delete_network, bf_get_reference_book,
-    bf_put_reference_book, bf_set_network)
+    bf_delete_network,
+    bf_get_reference_book,
+    bf_put_reference_book,
+    bf_set_network,
+)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 
@@ -45,28 +46,30 @@ def network(session):
 
 
 def test_create_reference_book(session, network):
-    book = create_reference_book(os.path.join(_this_dir, 'capirca', 'defs'))
+    book = create_reference_book(os.path.join(_this_dir, "capirca", "defs"))
     bf_put_reference_book(book)
 
-    getbook = bf_get_reference_book('capirca')
+    getbook = bf_get_reference_book("capirca")
     # TODO: can this just be book equality? Right now, books are implemented
     #  with contents that are lists, and converting to set broke a bunch of
     #  tests that expect those lists to be indexable.
     assert getbook.name == book.name
-    assert (set(g.name for g in getbook.addressGroups) ==
-            set(g.name for g in book.addressGroups))
+    assert set(g.name for g in getbook.addressGroups) == set(
+        g.name for g in book.addressGroups
+    )
 
 
 def test_init_snapshot_from_acl(session, network):
-    defs = os.path.join(_this_dir, 'capirca', 'defs')
-    pol = os.path.join(_this_dir, 'capirca', 'test.pol')
+    defs = os.path.join(_this_dir, "capirca", "defs")
+    pol = os.path.join(_this_dir, "capirca", "test.pol")
     ss = init_snapshot_from_acl(
-        session, pol, defs, platform='cisco', filename='some_cfg')
+        session, pol, defs, platform="cisco", filename="some_cfg"
+    )
 
-    ssh = HeaderConstraints(applications='ssh')
-    dns = HeaderConstraints(applications='dns')
-    http = HeaderConstraints(applications='http')
+    ssh = HeaderConstraints(applications="ssh")
+    dns = HeaderConstraints(applications="dns")
+    http = HeaderConstraints(applications="http")
 
-    assert_filter_permits('some_acl', ssh, snapshot=ss, session=session)
-    assert_filter_permits('some_acl', dns, snapshot=ss, session=session)
-    assert_filter_denies('some_acl', http, snapshot=ss, session=session)
+    assert_filter_permits("some_acl", ssh, snapshot=ss, session=session)
+    assert_filter_permits("some_acl", dns, snapshot=ss, session=session)
+    assert_filter_denies("some_acl", http, snapshot=ss, session=session)
