@@ -52,9 +52,7 @@ class TableAnswer(Answer):
         super(TableAnswer, self).__init__(dictionary)
         answer_element = dictionary["answerElements"][0]
         self.metadata = TableMetadata(answer_element["metadata"])
-        # type: TableMetadata
         self.rows = [Row(row) for row in answer_element.get("rows", [])]
-        # type: List[Row]
 
         self.table_data = _rows_to_frame(self.metadata, self.rows)
 
@@ -103,7 +101,6 @@ class TableMetadata:
         self.column_metadata = [
             ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])
         ]
-        # type: List[ColumnMetadata]
         self.hints = dictionary.get("displayHints")  # type: Optional[Dict]
 
     def get_column_names(self):
