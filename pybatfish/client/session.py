@@ -924,8 +924,6 @@ class Session(object):
         :param dimension: The NodeRoleDimension object for the dimension to add
         :type dimension: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
         """
-        if dimension.type == "AUTO":
-            raise ValueError("Cannot put a dimension of type AUTO")
         restv2helper.put_node_role_dimension(self, dimension)
 
     def put_node_roles(self, node_roles_data):
