@@ -6,7 +6,6 @@
         <option value="activate" />
         <option value="activateOnShortcut" />
         <option value="organizeImports" />
-        <option value="reformat" />
       </set>
     </option>
   </component>
