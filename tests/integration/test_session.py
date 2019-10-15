@@ -25,4 +25,4 @@ def session():
 def test_get_component_versions(session):
     """Confirm component versions can be fetched from the service."""
     # Make sure Batfish is one of the versioned components
-    assert 'Batfish' in session.get_component_versions()
+    assert "Batfish" in session.get_component_versions()

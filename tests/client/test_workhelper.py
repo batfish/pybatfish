@@ -24,9 +24,13 @@ from pytz import UTC
 from pybatfish.client import resthelper
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
-from pybatfish.client.workhelper import (_format_elapsed_time, _parse_timestamp,
-                                         _print_timestamp,
-                                         _print_work_status_helper, execute)
+from pybatfish.client.workhelper import (
+    _format_elapsed_time,
+    _parse_timestamp,
+    _print_timestamp,
+    _print_work_status_helper,
+    execute,
+)
 from pybatfish.client.workitem import WorkItem
 
 if six.PY3:
@@ -36,13 +40,12 @@ else:
 
 
 def __execute_and_return_request_params(work_item, session, extra_args=None):
-    work_item.requestParams[BfConsts.ARG_TESTRIG] = 'snapshot'
-    with patch.object(resthelper,
-                      'get_json_response') as mock_get_json_response:
+    work_item.requestParams[BfConsts.ARG_TESTRIG] = "snapshot"
+    with patch.object(resthelper, "get_json_response") as mock_get_json_response:
         execute(work_item, session, True, extra_args)
     args, kwargs = mock_get_json_response.call_args
-    witem = json.loads(args[2]['workitem'])
-    return witem['requestParams']
+    witem = json.loads(args[2]["workitem"])
+    return witem["requestParams"]
 
 
 def test_execute_request_params():
@@ -51,34 +54,37 @@ def test_execute_request_params():
     # Unmodified work item
     work_item = WorkItem(session)
     witem = __execute_and_return_request_params(work_item, session)
-    assert 'TESTARG' not in witem
+    assert "TESTARG" not in witem
 
-    session.additional_args['TESTARG'] = 'addl'
+    session.additional_args["TESTARG"] = "addl"
 
     # Work item with additional args
     work_item = WorkItem(session)
     witem = __execute_and_return_request_params(work_item, session)
-    assert witem.get('TESTARG') == 'addl'
+    assert witem.get("TESTARG") == "addl"
 
     # Work item with additional args and extra args
     work_item = WorkItem(session)
     witem = __execute_and_return_request_params(
-        work_item, session, extra_args={'TESTARG': 'extra'})
-    assert witem.get('TESTARG') == 'extra'
+        work_item, session, extra_args={"TESTARG": "extra"}
+    )
+    assert witem.get("TESTARG") == "extra"
 
     # Confirm additional args not messed up
     work_item = WorkItem(session)
     witem = __execute_and_return_request_params(work_item, session)
-    assert witem.get('TESTARG') == 'addl'
+    assert witem.get("TESTARG") == "addl"
 
 
 def test_format_elapsed_time():
-    delta1 = relativedelta(years=7, months=6, days=5, hours=4, minutes=3,
-                           seconds=2, microsecond=1)
+    delta1 = relativedelta(
+        years=7, months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1
+    )
     ref1 = "7y6m5d04:03:02"
     assert _format_elapsed_time(delta1) == ref1
-    delta2 = relativedelta(months=6, days=5, hours=4, minutes=3, seconds=2,
-                           microsecond=1)
+    delta2 = relativedelta(
+        months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1
+    )
     ref2 = "6m5d04:03:02"
     assert _format_elapsed_time(delta2) == ref2
     delta3 = relativedelta(days=5, hours=4, minutes=3, seconds=2, microsecond=1)
@@ -101,112 +107,148 @@ def test_format_elapsed_time():
 def test_parse_numeric_timestamp():
     # When older versions of Batfish sent numeric timestamps, they were in
     # server's local time.
-    s = '1511981483456'
+    s = "1511981483456"
     ref = datetime.datetime(2017, 11, 29, 18, 51, 23, 456000)
     assert _parse_timestamp(s) == ref
 
 
 def test_parse_rfc3339_timestamp():
-    s = '2017-11-29T18:51:23.456+0000'
+    s = "2017-11-29T18:51:23.456+0000"
     ref = datetime.datetime(2017, 11, 29, 18, 51, 23, 456000, tzinfo=UTC)
     assert _parse_timestamp(s) == ref
 
 
 def test_print_timestamp():
     ref = datetime.datetime(2017, 11, 29, 18, 51, 23, 456000, tzinfo=UTC)
-    assert _print_timestamp(ref) == ref.astimezone(tzlocal()).isoformat(' ')
+    assert _print_timestamp(ref) == ref.astimezone(tzlocal()).isoformat(" ")
 
 
 def test_print_workstatus_fresh_task(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
-                                                   tzinfo=tzinfo)
+    nowFunction = lambda tzinfo: datetime.datetime(
+        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
+    )
     workStatus = "TEST"
-    taskDetails = json.dumps({
-        "obtained": "2017-12-20 00:00:00 UTC",
-        "batches": [{
-            "completed": 0,
-            "description": "Fooing the bar",
-            "size": 0,
-            "startDate": "2017-12-20 00:00:00 UTC"
-        }]
-    })
+    taskDetails = json.dumps(
+        {
+            "obtained": "2017-12-20 00:00:00 UTC",
+            "batches": [
+                {
+                    "completed": 0,
+                    "description": "Fooing the bar",
+                    "size": 0,
+                    "startDate": "2017-12-20 00:00:00 UTC",
+                }
+            ],
+        }
+    )
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar".format(
-        obtained=_print_timestamp(
-            _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
-           in caplog.text
+    assert (
+        ".... {obtained} Fooing the bar".format(
+            obtained=_print_timestamp(
+                _parse_timestamp(json.loads(taskDetails)["obtained"])
+            )
+        )
+        in caplog.text
+    )
 
 
 def test_print_workstatus_fresh_task_subtasks(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
-                                                   tzinfo=tzinfo)
+    nowFunction = lambda tzinfo: datetime.datetime(
+        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
+    )
     workStatus = "TEST"
-    taskDetails = json.dumps({
-        "obtained": "2017-12-20 00:00:00 UTC",
-        "batches": [{
-            "completed": 1,
-            "description": "Fooing the bar",
-            "size": 2,
-            "startDate": "2017-12-20 00:00:00 UTC"
-        }]
-    })
+    taskDetails = json.dumps(
+        {
+            "obtained": "2017-12-20 00:00:00 UTC",
+            "batches": [
+                {
+                    "completed": 1,
+                    "description": "Fooing the bar",
+                    "size": 2,
+                    "startDate": "2017-12-20 00:00:00 UTC",
+                }
+            ],
+        }
+    )
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar 1 / 2.".format(
-        obtained=_print_timestamp(
-            _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
-           in caplog.text
+    assert (
+        ".... {obtained} Fooing the bar 1 / 2.".format(
+            obtained=_print_timestamp(
+                _parse_timestamp(json.loads(taskDetails)["obtained"])
+            )
+        )
+        in caplog.text
+    )
 
 
 def test_print_workstatus_old_task(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
-                                                   tzinfo=tzinfo)
+    nowFunction = lambda tzinfo: datetime.datetime(
+        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
+    )
     workStatus = "TEST"
-    taskDetails = json.dumps({
-        "obtained": "2016-11-22 10:43:21 UTC",
-        "batches": [{
-            "completed": 0,
-            "description": "Fooing the bar.",
-            "size": 0,
-            "startDate": "2016-11-22 10:43:22 UTC"
-        }]
-    })
+    taskDetails = json.dumps(
+        {
+            "obtained": "2016-11-22 10:43:21 UTC",
+            "batches": [
+                {
+                    "completed": 0,
+                    "description": "Fooing the bar.",
+                    "size": 0,
+                    "startDate": "2016-11-22 10:43:22 UTC",
+                }
+            ],
+        }
+    )
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar. (1y27d13:16:39 elapsed)".format(
-        obtained=_print_timestamp(
-            _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
-           in caplog.text
+    assert (
+        ".... {obtained} Fooing the bar. (1y27d13:16:39 elapsed)".format(
+            obtained=_print_timestamp(
+                _parse_timestamp(json.loads(taskDetails)["obtained"])
+            )
+        )
+        in caplog.text
+    )
 
 
 def test_print_workstatus_old_task_subtasks(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(2017, 12, 20, 0, 0, 0, 0,
-                                                   tzinfo=tzinfo)
+    nowFunction = lambda tzinfo: datetime.datetime(
+        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
+    )
     workStatus = "TEST"
-    taskDetails = json.dumps({
-        "obtained": "2016-11-22 10:43:21 UTC",
-        "batches": [{
-            "completed": 1,
-            "description": "Fooing the bar",
-            "size": 2,
-            "startDate": "2016-11-22 10:43:22 UTC"
-        }]
-    })
+    taskDetails = json.dumps(
+        {
+            "obtained": "2016-11-22 10:43:21 UTC",
+            "batches": [
+                {
+                    "completed": 1,
+                    "description": "Fooing the bar",
+                    "size": 2,
+                    "startDate": "2016-11-22 10:43:22 UTC",
+                }
+            ],
+        }
+    )
     _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
-    assert ".... {obtained} Fooing the bar 1 / 2. (1y27d13:16:39 elapsed)".format(
-        obtained=_print_timestamp(
-            _parse_timestamp(json.loads(taskDetails)["obtained"]))) \
-           in caplog.text
+    assert (
+        ".... {obtained} Fooing the bar 1 / 2. (1y27d13:16:39 elapsed)".format(
+            obtained=_print_timestamp(
+                _parse_timestamp(json.loads(taskDetails)["obtained"])
+            )
+        )
+        in caplog.text
+    )
 
 
 if __name__ == "__main__":

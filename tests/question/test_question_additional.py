@@ -26,31 +26,31 @@ from pybatfish.question import question
 
 
 def testInvalidSubRange():
-    subRange = '100, 200'
+    subRange = "100, 200"
     actualResult = question._isSubRange(subRange)
-    expectMessage = 'Invalid subRange: {}'.format(subRange)
+    expectMessage = "Invalid subRange: {}".format(subRange)
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testInvalidStartSubRange():
-    subRange = 's100-200'
+    subRange = "s100-200"
     actualResult = question._isSubRange(subRange)
-    expectMessage = 'Invalid subRange start: s100'
+    expectMessage = "Invalid subRange start: s100"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testInvalidEndSubRange():
-    subRange = '100-s200'
+    subRange = "100-s200"
     actualResult = question._isSubRange(subRange)
-    expectMessage = 'Invalid subRange end: s200'
+    expectMessage = "Invalid subRange end: s200"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testValidSubRange():
-    subRange = '100-200'
+    subRange = "100-200"
     actualResult = question._isSubRange(subRange)
     assert actualResult[0]
     assert actualResult[1] is None
@@ -58,7 +58,7 @@ def testValidSubRange():
 
 # Tests for isIp
 def testInvalidIp():
-    ip = '192.168.11'
+    ip = "192.168.11"
     actualResult = question._isIp(ip)
     expectMessage = "Invalid ip string: '{}'".format(ip)
     assert not actualResult[0]
@@ -66,7 +66,7 @@ def testInvalidIp():
 
 
 def testInvalidIpAddressWithIndicator():
-    ip = 'INVALID_IP(100)'
+    ip = "INVALID_IP(100)"
     actualResult = question._isIp(ip)
     expectMessage = "Invalid ip string: '{}'".format(ip)
     assert not actualResult[0]
@@ -74,14 +74,14 @@ def testInvalidIpAddressWithIndicator():
 
 
 def testValidIpAddressWithIndicator():
-    ip = 'INVALID_IP(100l)'
+    ip = "INVALID_IP(100l)"
     actualResult = question._isIp(ip)
     assert actualResult[0]
     assert actualResult[1] is None
 
 
 def testInvalidSegmentsIpAddress():
-    ipAddress = '192.168.11.s'
+    ipAddress = "192.168.11.s"
     actualResult = question._isIp(ipAddress)
     expectMessage = "Ip segment is not a number: 's' in ip string: '192.168.11.s'"
     assert not actualResult[0]
@@ -89,23 +89,27 @@ def testInvalidSegmentsIpAddress():
 
 
 def testInvalidSegmentRangeIpAddress():
-    ipAddress = '192.168.11.256'
+    ipAddress = "192.168.11.256"
     actualResult = question._isIp(ipAddress)
-    expectMessage = "Ip segment is out of range 0-255: '256' in ip string: '192.168.11.256'"
+    expectMessage = (
+        "Ip segment is out of range 0-255: '256' in ip string: '192.168.11.256'"
+    )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testInvalidSegmentRangeIpAddress2():
-    ipAddress = '192.168.11.-1'
+    ipAddress = "192.168.11.-1"
     actualResult = question._isIp(ipAddress)
-    expectMessage = "Ip segment is out of range 0-255: '-1' in ip string: '192.168.11.-1'"
+    expectMessage = (
+        "Ip segment is out of range 0-255: '-1' in ip string: '192.168.11.-1'"
+    )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testValidIpAddress():
-    ipAddress = '192.168.1.1'
+    ipAddress = "192.168.1.1"
     actualResult = question._isIp(ipAddress)
     assert actualResult[0]
     assert actualResult[1] is None
@@ -113,7 +117,7 @@ def testValidIpAddress():
 
 # Tests for _isPrefix
 def testInvalidIpInPrefix():
-    prefix = '192.168.1.s/100'
+    prefix = "192.168.1.s/100"
     actualResult = question._isPrefix(prefix)
     expectMessage = "Ip segment is not a number: 's' in ip string: '192.168.1.s'"
     assert not actualResult[0]
@@ -121,15 +125,15 @@ def testInvalidIpInPrefix():
 
 
 def testInvalidLengthInPrefix():
-    prefix = '192.168.1.1/s'
+    prefix = "192.168.1.1/s"
     actualResult = question._isPrefix(prefix)
-    expectMessage = 'Prefix length must be an integer'
+    expectMessage = "Prefix length must be an integer"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testValidPrefix():
-    prefix = '192.168.1.1/100'
+    prefix = "192.168.1.1/100"
     actualResult = question._isPrefix(prefix)
     assert actualResult[0]
     assert actualResult[1] is None
@@ -137,7 +141,7 @@ def testValidPrefix():
 
 # Tests for _isPrefixRange
 def testInvalidPrefixRangeInput():
-    prefixRange = '192.168.1.s/100:100:100'
+    prefixRange = "192.168.1.s/100:100:100"
     actualResult = question._isPrefixRange(prefixRange)
     expectMessage = "Invalid PrefixRange string: '{}'".format(prefixRange)
     assert not actualResult[0]
@@ -145,16 +149,17 @@ def testInvalidPrefixRangeInput():
 
 
 def testInvalidPrefixInput():
-    prefixRange = '192.168.1.s/100:100'
+    prefixRange = "192.168.1.s/100:100"
     actualResult = question._isPrefixRange(prefixRange)
     expectMessage = "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
-        prefixRange)
+        prefixRange
+    )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testInvalidRangeInput():
-    prefixRange = '192.168.1.1/100:100-s110'
+    prefixRange = "192.168.1.1/100:100-s110"
     actualResult = question._isPrefixRange(prefixRange)
     expectMessage = "Invalid subRange end: s110"
     assert not actualResult[0]
@@ -162,7 +167,7 @@ def testInvalidRangeInput():
 
 
 def testValidPrefixRange():
-    prefixRange = '192.168.1.1/100:100-110'
+    prefixRange = "192.168.1.1/100:100-110"
     actualResult = question._isPrefixRange(prefixRange)
     assert actualResult[0]
     assert actualResult[1] is None
@@ -170,7 +175,7 @@ def testValidPrefixRange():
 
 # Tests for _isIpWildcard
 def testInvalidIpWildcardWithColon():
-    ipWildcard = '192.168.1.s:192.168.10.10:192'
+    ipWildcard = "192.168.1.s:192.168.10.10:192"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Invalid IpWildcard string: '{}'".format(ipWildcard)
     assert not actualResult[0]
@@ -178,7 +183,7 @@ def testInvalidIpWildcardWithColon():
 
 
 def testInvalidStartIpWildcardWithColon():
-    ipWildcard = '192.168.1.s:192.168.1.1'
+    ipWildcard = "192.168.1.s:192.168.1.1"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Invalid ip string: '192.168.1.s'"
     assert not actualResult[0]
@@ -186,7 +191,7 @@ def testInvalidStartIpWildcardWithColon():
 
 
 def testInvalidEndIpWildcardWithColon():
-    ipWildcard = '192.168.1.1:192.168.10.s'
+    ipWildcard = "192.168.1.1:192.168.10.s"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Ip segment is not a number: 's' in ip string: '192.168.10.s'"
     assert not actualResult[0]
@@ -194,14 +199,14 @@ def testInvalidEndIpWildcardWithColon():
 
 
 def testValidIpWildcardWithColon():
-    ipWildcard = '192.168.1.1:192.168.10.10'
+    ipWildcard = "192.168.1.1:192.168.10.10"
     actualResult = question._isIpWildcard(ipWildcard)
     assert actualResult[0]
     assert actualResult[1] is None
 
 
 def testInvalidIpWildcardWithSlash():
-    ipWildcard = '192.168.1.s/192.168.10.10/192'
+    ipWildcard = "192.168.1.s/192.168.10.10/192"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Invalid IpWildcard string: '{}'".format(ipWildcard)
     assert not actualResult[0]
@@ -209,7 +214,7 @@ def testInvalidIpWildcardWithSlash():
 
 
 def testInvalidStartIpWildcardWithSlash():
-    ipWildcard = '192.168.1.s/s'
+    ipWildcard = "192.168.1.s/s"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Invalid ip string: '192.168.1.s'"
     assert not actualResult[0]
@@ -217,23 +222,24 @@ def testInvalidStartIpWildcardWithSlash():
 
 
 def testInvalidEndIpWildcardWithSlash():
-    ipWildcard = '192.168.1.1/s'
+    ipWildcard = "192.168.1.1/s"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Invalid prefix length: 's' in IpWildcard string: '{}'".format(
-        ipWildcard)
+        ipWildcard
+    )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
 
 def testValidIpWildcardWithSlash():
-    ipWildcard = '192.168.1.1/100'
+    ipWildcard = "192.168.1.1/100"
     actualResult = question._isIpWildcard(ipWildcard)
     assert actualResult[0]
     assert actualResult[1] is None
 
 
 def testInvalidIpAddressIpWildcard():
-    ipWildcard = '192.168.11.s'
+    ipWildcard = "192.168.11.s"
     actualResult = question._isIpWildcard(ipWildcard)
     expectMessage = "Ip segment is not a number: 's' in ip string: '192.168.11.s'"
     assert not actualResult[0]
@@ -241,7 +247,7 @@ def testInvalidIpAddressIpWildcard():
 
 
 def testValidIpAddressIpWildcard():
-    ipWildcard = '192.168.11.1'
+    ipWildcard = "192.168.11.1"
     actualResult = question._isIpWildcard(ipWildcard)
     assert actualResult[0]
     assert actualResult[1] is None
@@ -249,163 +255,165 @@ def testValidIpAddressIpWildcard():
 
 # Tests for validateType
 def testInvalidBooleanValidateType():
-    result = question._validateType(1.5, 'boolean')
+    result = question._validateType(1.5, "boolean")
     assert not result[0]
 
 
 def testValidBooleanValidateType():
-    result = question._validateType(True, 'boolean')
+    result = question._validateType(True, "boolean")
     assert result[0]
 
 
 def testInvalidIntegerValidateType():
-    result = question._validateType(1.5, 'integer')
+    result = question._validateType(1.5, "integer")
     assert not result[0]
 
 
 def testValidIntegerValidateType():
-    result = question._validateType(10, 'integer')
+    result = question._validateType(10, "integer")
     assert result[0]
 
 
 def testInvalidComparatorValidateType():
-    result = question._validateType('<==', 'comparator')
-    expectMessage = "'<==' is not a known comparator. Valid options are: '<, <=, ==, >=, >, !='"
+    result = question._validateType("<==", "comparator")
+    expectMessage = (
+        "'<==' is not a known comparator. Valid options are: '<, <=, ==, >=, >, !='"
+    )
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidComparatorValidateType():
-    result = question._validateType('<=', 'comparator')
+    result = question._validateType("<=", "comparator")
     assert result[0]
 
 
 def testInvalidFloatValidateType():
-    result = question._validateType(10, 'float')
+    result = question._validateType(10, "float")
     assert not result[0]
 
 
 def testValidFloatValidateType():
-    result = question._validateType(10.0, 'float')
+    result = question._validateType(10.0, "float")
     assert result[0]
 
 
 def testInvalidDoubleValidateType():
-    result = question._validateType(10, 'double')
+    result = question._validateType(10, "double")
     assert not result[0]
 
 
 def testValidDoubleValidateType():
-    result = question._validateType(10.0, 'double')
+    result = question._validateType(10.0, "double")
     assert result[0]
 
 
 def testInvalidLongValidateType():
-    result = question._validateType(5.3, 'long')
+    result = question._validateType(5.3, "long")
     assert not result[0]
-    result = question._validateType(2 ** 64, 'long')
+    result = question._validateType(2 ** 64, "long")
     assert not result[0]
 
 
 def testValidLongValidateType():
-    result = question._validateType(10, 'long')
+    result = question._validateType(10, "long")
     assert result[0]
-    result = question._validateType(2 ** 40, 'long')
+    result = question._validateType(2 ** 40, "long")
     assert result[0]
 
 
 def testInvalidJavaRegexValidateType():
-    result = question._validateType(10, 'javaRegex')
+    result = question._validateType(10, "javaRegex")
     expectMessage = "A Batfish javaRegex must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidNonDictionaryJsonPathValidateType():
-    result = question._validateType(10, 'jsonPath')
+    result = question._validateType(10, "jsonPath")
     expectMessage = "Expected a jsonPath dictionary with elements 'path' (string) and optional 'suffix' (boolean)"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidDictionaryJsonPathValidateType():
-    result = question._validateType({'value': 10}, 'jsonPath')
+    result = question._validateType({"value": 10}, "jsonPath")
     expectMessage = "Missing 'path' element of jsonPath"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testPathNonStringJsonPathValidateType():
-    result = question._validateType({'path': 10}, 'jsonPath')
+    result = question._validateType({"path": 10}, "jsonPath")
     expectMessage = "'path' element of jsonPath dictionary should be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testSuffixNonBooleanJsonPathValidateType():
-    result = question._validateType({'path': 'I am path', 'suffix': 'hi'},
-                                    'jsonPath')
+    result = question._validateType({"path": "I am path", "suffix": "hi"}, "jsonPath")
     expectMessage = "'suffix' element of jsonPath dictionary should be a boolean"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidJsonPathValidateType():
-    result = question._validateType({'path': 'I am path', 'suffix': True},
-                                    'jsonPath')
+    result = question._validateType({"path": "I am path", "suffix": True}, "jsonPath")
     assert result[0]
     assert result[1] is None
 
 
 def testInvalidTypeSubRangeValidateType():
-    result = question._validateType(10.0, 'subrange')
+    result = question._validateType(10.0, "subrange")
     expectMessage = "A Batfish subrange must either be a string or an integer"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidIntegerSubRangeValidateType():
-    result = question._validateType(10, 'subrange')
+    result = question._validateType(10, "subrange")
     assert result[0]
     assert result[1] is None
 
 
 def testNonStringProtocolValidateType():
-    result = question._validateType(10.0, 'protocol')
+    result = question._validateType(10.0, "protocol")
     expectMessage = "A Batfish protocol must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidProtocolValidateType():
-    result = question._validateType('TCPP', 'protocol')
-    expectMessage = "'TCPP' is not a valid protocols. Valid options are: 'dns, ssh, tcp, udp'"
+    result = question._validateType("TCPP", "protocol")
+    expectMessage = (
+        "'TCPP' is not a valid protocols. Valid options are: 'dns, ssh, tcp, udp'"
+    )
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidProtocolValidateType():
-    result = question._validateType('TCP', 'protocol')
+    result = question._validateType("TCP", "protocol")
     assert result[0]
     assert result[1] is None
 
 
 def testNonStringIpProtocolValidateType():
-    result = question._validateType(10.0, 'ipProtocol')
+    result = question._validateType(10.0, "ipProtocol")
     expectMessage = "A Batfish ipProtocol must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidIntegerIpProtocolValidateType():
-    result = question._validateType('1000', 'ipProtocol')
+    result = question._validateType("1000", "ipProtocol")
     expectMessage = "'1000' is not in valid ipProtocol range: 0-255"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidIntegerIpProtocolValidateType():
-    result = question._validateType('10', 'ipProtocol')
+    result = question._validateType("10", "ipProtocol")
     assert result[0]
     assert result[1] is None
 
@@ -422,10 +430,12 @@ def testValidCompletionTypes():
     values = {
         VariableType.IP: "1.2.3.4",
         VariableType.PREFIX: "1.2.3.4/24",
-        VariableType.PROTOCOL: "ssh"
+        VariableType.PROTOCOL: "ssh",
     }
     for completion_type in COMPLETION_TYPES:
-        result = question._validateType(values.get(completion_type, ".*"), completion_type)
+        result = question._validateType(
+            values.get(completion_type, ".*"), completion_type
+        )
         assert result[0]
         assert result[1] is None
 

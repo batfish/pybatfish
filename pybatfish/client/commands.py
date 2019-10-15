@@ -28,21 +28,25 @@ from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     Interface,
-    VariableType)
-from pybatfish.datamodel.referencelibrary import (NodeRoleDimension,
-                                                  NodeRolesData, ReferenceBook,
-                                                  ReferenceLibrary)
+    VariableType,
+)
+from pybatfish.datamodel.referencelibrary import (
+    NodeRoleDimension,
+    NodeRolesData,
+    ReferenceBook,
+    ReferenceLibrary,
+)
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from pybatfish.util import (BfJsonEncoder)
+from pybatfish.util import BfJsonEncoder
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
-from .workhelper import (kill_work)
+from .workhelper import kill_work
 
 
 def _configure_default_logging():
-    logger = logging.getLogger('pybatfish')
+    logger = logging.getLogger("pybatfish")
     logger.setLevel(logging.INFO)
     logger.addHandler(logging.StreamHandler())
 
@@ -51,54 +55,55 @@ def _configure_default_logging():
 _configure_default_logging()
 bf_session = Session(load_questions=False)
 
-__all__ = ['bf_add_analysis',
-           'bf_add_issue_config',
-           'bf_add_node_role_dimension',
-           'bf_add_reference_book',
-           'bf_auto_complete',
-           'bf_delete_analysis',
-           'bf_delete_issue_config',
-           'bf_delete_network',
-           'bf_delete_node_role_dimension',
-           'bf_delete_reference_book',
-           'bf_delete_snapshot',
-           'bf_extract_answer_summary',
-           'bf_fork_snapshot',
-           'bf_generate_dataplane',
-           'bf_get_analysis_answers',
-           'bf_get_answer',
-           'bf_get_issue_config',
-           'bf_get_node_role_dimension',
-           'bf_get_node_roles',
-           'bf_get_reference_book',
-           'bf_get_reference_library',
-           'bf_get_snapshot_inferred_node_role_dimension',
-           'bf_get_snapshot_inferred_node_roles',
-           'bf_get_snapshot_node_role_dimension',
-           'bf_get_snapshot_node_roles',
-           'bf_get_work_status',
-           'bf_init_analysis',
-           'bf_init_snapshot',
-           'bf_kill_work',
-           'bf_list_analyses',
-           'bf_list_networks',
-           'bf_list_incomplete_works',
-           'bf_list_snapshots',
-           'bf_put_node_role_dimension',
-           'bf_put_node_roles',
-           'bf_read_question_settings',
-           'bf_put_reference_book',
-           'bf_run_analysis',
-           'bf_session',
-           'bf_set_network',
-           'bf_set_snapshot',
-           'bf_upload_diagnostics',
-           'bf_write_question_settings']
+__all__ = [
+    "bf_add_analysis",
+    "bf_add_issue_config",
+    "bf_add_node_role_dimension",
+    "bf_add_reference_book",
+    "bf_auto_complete",
+    "bf_delete_analysis",
+    "bf_delete_issue_config",
+    "bf_delete_network",
+    "bf_delete_node_role_dimension",
+    "bf_delete_reference_book",
+    "bf_delete_snapshot",
+    "bf_extract_answer_summary",
+    "bf_fork_snapshot",
+    "bf_generate_dataplane",
+    "bf_get_analysis_answers",
+    "bf_get_answer",
+    "bf_get_issue_config",
+    "bf_get_node_role_dimension",
+    "bf_get_node_roles",
+    "bf_get_reference_book",
+    "bf_get_reference_library",
+    "bf_get_snapshot_inferred_node_role_dimension",
+    "bf_get_snapshot_inferred_node_roles",
+    "bf_get_snapshot_node_role_dimension",
+    "bf_get_snapshot_node_roles",
+    "bf_get_work_status",
+    "bf_init_analysis",
+    "bf_init_snapshot",
+    "bf_kill_work",
+    "bf_list_analyses",
+    "bf_list_networks",
+    "bf_list_incomplete_works",
+    "bf_list_snapshots",
+    "bf_put_node_role_dimension",
+    "bf_put_node_roles",
+    "bf_read_question_settings",
+    "bf_put_reference_book",
+    "bf_run_analysis",
+    "bf_session",
+    "bf_set_network",
+    "bf_set_snapshot",
+    "bf_upload_diagnostics",
+    "bf_write_question_settings",
+]
 
 
 def bf_add_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
-                                    False)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory, False)
 
 
 def bf_add_issue_config(issue_config):
@@ -146,15 +151,17 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
     :param max_suggestions: Optional max number of suggestions to be returned
     :type max_suggestions: int
     """
-    jsonData = workhelper.get_data_auto_complete(bf_session, completion_type,
-                                                 query, max_suggestions)
-    response = resthelper.get_json_response(bf_session,
-                                            CoordConsts.SVC_RSC_AUTO_COMPLETE,
-                                            jsonData)
+    jsonData = workhelper.get_data_auto_complete(
+        bf_session, completion_type, query, max_suggestions
+    )
+    response = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_AUTO_COMPLETE, jsonData
+    )
     if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-        suggestions = [AutoCompleteSuggestion.from_dict(json.loads(suggestion))
-                       for suggestion in
-                       response[CoordConsts.SVC_KEY_SUGGESTIONS]]
+        suggestions = [
+            AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+            for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
+        ]
         return suggestions
 
     raise BatfishException("Unexpected response: {}.".format(response))
@@ -162,9 +169,9 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
 
 def bf_delete_analysis(analysisName):
     jsonData = workhelper.get_data_delete_analysis(bf_session, analysisName)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_DEL_ANALYSIS,
-                                                jsonData)
+    jsonResponse = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_DEL_ANALYSIS, jsonData
+    )
     return jsonResponse
 
 
@@ -217,10 +224,18 @@ def bf_extract_answer_summary(answer_dict):
     return answer_dict["summary"]
 
 
-def bf_fork_snapshot(base_name, name=None, overwrite=False,
-                     background=False, deactivate_interfaces=None,
-                     deactivate_nodes=None, restore_interfaces=None,
-                     restore_nodes=None, add_files=None, extra_args=None):
+def bf_fork_snapshot(
+    base_name,
+    name=None,
+    overwrite=False,
+    background=False,
+    deactivate_interfaces=None,
+    deactivate_nodes=None,
+    restore_interfaces=None,
+    restore_nodes=None,
+    add_files=None,
+    extra_args=None,
+):
     # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
     """Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
@@ -249,33 +264,37 @@ def bf_fork_snapshot(base_name, name=None, overwrite=False,
         background=True, or None if the call fails
     :rtype: Union[str, Dict, None]
     """
-    return bf_session._fork_snapshot(base_name, name=name, overwrite=overwrite,
-                                     background=background,
-                                     deactivate_interfaces=deactivate_interfaces,
-                                     deactivate_nodes=deactivate_nodes,
-                                     restore_interfaces=restore_interfaces,
-                                     restore_nodes=restore_nodes,
-                                     add_files=add_files,
-                                     extra_args=extra_args)
+    return bf_session._fork_snapshot(
+        base_name,
+        name=name,
+        overwrite=overwrite,
+        background=background,
+        deactivate_interfaces=deactivate_interfaces,
+        deactivate_nodes=deactivate_nodes,
+        restore_interfaces=restore_interfaces,
+        restore_nodes=restore_nodes,
+        add_files=add_files,
+        extra_args=extra_args,
+    )
 
 
 def bf_generate_dataplane(snapshot=None, extra_args=None):
     # type: (Optional[str], Optional[Dict[str, Any]]) -> str
     """Generates the data plane for the supplied snapshot. If no snapshot argument is given, uses the last snapshot initialized."""
-    return bf_session.generate_dataplane(snapshot=snapshot,
-                                         extra_args=extra_args)
+    return bf_session.generate_dataplane(snapshot=snapshot, extra_args=extra_args)
 
 
-def bf_get_analysis_answers(name, snapshot=None,
-                            reference_snapshot=None):
+def bf_get_analysis_answers(name, snapshot=None, reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
     json_data = workhelper.get_data_get_analysis_answers(
-        bf_session, name, snapshot, reference_snapshot)
+        bf_session, name, snapshot, reference_snapshot
+    )
     json_response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS, json_data)
-    answers_dict = json.loads(json_response['answers'])
+        bf_session, CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS, json_data
+    )
+    answers_dict = json.loads(json_response["answers"])
     return answers_dict
 
 
@@ -289,15 +308,17 @@ def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     :param reference_snapshot: if present, the snapshot against which the answer
         was computed differentially.
     """
-    return bf_session.get_answer(question=questionName, snapshot=snapshot,
-                                 reference_snapshot=reference_snapshot)
+    return bf_session.get_answer(
+        question=questionName, snapshot=snapshot, reference_snapshot=reference_snapshot
+    )
 
 
 def bf_get_issue_config(major, minor):
     # type: (str, str) -> IssueConfig
     """Returns the issue config for the active network."""
     return IssueConfig.from_dict(
-        restv2helper.get_issue_config(bf_session, major, minor))
+        restv2helper.get_issue_config(bf_session, major, minor)
+    )
 
 
 def bf_get_node_role_dimension(dimension):
@@ -339,24 +360,24 @@ def bf_get_snapshot_inferred_node_role_dimension(dimension):
 def bf_get_snapshot_node_roles():
     # type: () -> NodeRolesData
     """Returns the definitions and assignments of node roles for the active network and snapshot."""
-    return NodeRolesData.from_dict(
-        restv2helper.get_snapshot_node_roles(bf_session))
+    return NodeRolesData.from_dict(restv2helper.get_snapshot_node_roles(bf_session))
 
 
 def bf_get_snapshot_node_role_dimension(dimension):
     # type: (str) -> NodeRoleDimension
     """Returns the defintion and assignments of node roles for the given dimension for the active network and snapshot."""
     return NodeRoleDimension.from_dict(
-        restv2helper.get_snapshot_node_role_dimension(bf_session, dimension))
+        restv2helper.get_snapshot_node_role_dimension(bf_session, dimension)
+    )
 
 
 def bf_get_work_status(wItemId):
     return bf_session.get_work_status(work_item=wItemId)
 
 
-def _bf_init_or_add_analysis(session, analysisName, questionDirectory,
-                             newAnalysis):
+def _bf_init_or_add_analysis(session, analysisName, questionDirectory, newAnalysis):
     from pybatfish.question.question import _load_questions_from_dir
+
     _check_network()
     questions = _load_questions_from_dir(questionDirectory, session)
     analysis = {
@@ -364,23 +385,26 @@ def _bf_init_or_add_analysis(session, analysisName, questionDirectory,
         for question_name, question_class in six.iteritems(questions)
     }
     with tempfile.NamedTemporaryFile() as tempFile:
-        with open(tempFile.name, 'w') as analysisFile:
-            json.dump(analysis, analysisFile, indent=2, sort_keys=True,
-                      cls=BfJsonEncoder)
+        with open(tempFile.name, "w") as analysisFile:
+            json.dump(
+                analysis, analysisFile, indent=2, sort_keys=True, cls=BfJsonEncoder
+            )
         json_data = workhelper.get_data_configure_analysis(
-            bf_session, newAnalysis, analysisName, tempFile.name, None)
+            bf_session, newAnalysis, analysisName, tempFile.name, None
+        )
         json_response = resthelper.get_json_response(
-            bf_session, CoordConsts.SVC_RSC_CONFIGURE_ANALYSIS, json_data)
+            bf_session, CoordConsts.SVC_RSC_CONFIGURE_ANALYSIS, json_data
+        )
     return json_response
 
 
 def bf_init_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory,
-                                    True)
+    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory, True)
 
 
-def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
-                     extra_args=None):
+def bf_init_snapshot(
+    upload, name=None, overwrite=False, background=False, extra_args=None
+):
     # type: (str, Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
     """Initialize a new snapshot.
 
@@ -398,9 +422,13 @@ def bf_init_snapshot(upload, name=None, overwrite=False, background=False,
     :return: name of initialized snapshot, or JSON dictionary of task status if background=True
     :rtype: Union[str, Dict]
     """
-    return bf_session._init_snapshot(upload, name=name, overwrite=overwrite,
-                                     background=background,
-                                     extra_args=extra_args)
+    return bf_session._init_snapshot(
+        upload,
+        name=name,
+        overwrite=overwrite,
+        background=background,
+        extra_args=extra_args,
+    )
 
 
 def bf_kill_work(wItemId):
@@ -410,10 +438,10 @@ def bf_kill_work(wItemId):
 def bf_list_analyses():
     _check_network()
     jsonData = workhelper.get_data_list_analyses(bf_session)
-    jsonResponse = resthelper.get_json_response(bf_session,
-                                                CoordConsts.SVC_RSC_LIST_ANALYSES,
-                                                jsonData)
-    answer = jsonResponse['analysislist']
+    jsonResponse = resthelper.get_json_response(
+        bf_session, CoordConsts.SVC_RSC_LIST_ANALYSES, jsonData
+    )
+    answer = jsonResponse["analysislist"]
     return answer
 
 
@@ -491,16 +519,15 @@ def bf_read_question_settings(question_class, json_path=None):
     :type json_path: list
 
     """
-    return restv2helper.read_question_settings(bf_session, question_class,
-                                               json_path)
+    return restv2helper.read_question_settings(bf_session, question_class, json_path)
 
 
 def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
     # type: (str, str, Optional[str], Optional[Dict[str, Any]]) -> Any
     work_item = workhelper.get_workitem_run_analysis(
-        bf_session, name, snapshot, reference_snapshot)
-    work_answer = workhelper.execute(work_item, bf_session,
-                                     extra_args=extra_args)
+        bf_session, name, snapshot, reference_snapshot
+    )
+    work_answer = workhelper.execute(work_item, bf_session, extra_args=extra_args)
     if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
         raise BatfishException("Failed to run analysis")
 
@@ -539,8 +566,7 @@ def bf_set_snapshot(name=None, index=None):
     return bf_session.set_snapshot(name=name, index=index)
 
 
-def bf_upload_diagnostics(dry_run=True, netconan_config=None,
-                          contact_info=None):
+def bf_upload_diagnostics(dry_run=True, netconan_config=None, contact_info=None):
     # type: (bool, str, Optional[str]) -> str
     """
     Fetch, anonymize, and optionally upload snapshot diagnostics information.
@@ -571,9 +597,9 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None,
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
-    return bf_session.upload_diagnostics(dry_run=dry_run,
-                                         netconan_config=netconan_config,
-                                         contact_info=contact_info)
+    return bf_session.upload_diagnostics(
+        dry_run=dry_run, netconan_config=netconan_config, contact_info=contact_info
+    )
 
 
 def bf_write_question_settings(settings, question_class, json_path=None):
@@ -591,8 +617,9 @@ def bf_write_question_settings(settings, question_class, json_path=None):
     :type json_path: list
 
     """
-    restv2helper.write_question_settings(bf_session, settings, question_class,
-                                         json_path)
+    restv2helper.write_question_settings(
+        bf_session, settings, question_class, json_path
+    )
 
 
 def _check_network():

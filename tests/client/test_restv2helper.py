@@ -19,7 +19,6 @@ from pybatfish.client import restv2helper
 
 
 class MockResponse(Response):
-
     def __init__(self, text):
         super(MockResponse, self).__init__()
         self._text = text

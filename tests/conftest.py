@@ -35,5 +35,5 @@ COMPLETION_TYPES = [
     VariableType.ROUTING_PROTOCOL_SPEC,
     VariableType.STRUCTURE_NAME,
     VariableType.VRF,
-    VariableType.ZONE
+    VariableType.ZONE,
 ]

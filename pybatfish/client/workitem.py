@@ -40,11 +40,11 @@ class WorkItem(object):
     def to_json(self):
         # type: () -> str
         params = {
-            'containerName': self.network,
-            'id': self.id,
-            'requestParams': self.requestParams,
+            "containerName": self.network,
+            "id": self.id,
+            "requestParams": self.requestParams,
         }
-        trName = self.requestParams.get('testrig')
+        trName = self.requestParams.get("testrig")
         if trName is not None:
-            params['testrigName'] = trName
+            params["testrigName"] = trName
         return json.dumps(params)

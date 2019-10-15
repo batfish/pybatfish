@@ -20,9 +20,7 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import (
-    Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
-)
+from typing import Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
 
 import pkg_resources
 import six
@@ -30,15 +28,14 @@ from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
-from pybatfish.client._diagnostics import (upload_diagnostics,
-                                           warn_on_snapshot_failure)
-from pybatfish.client._facts import (
-    get_facts, load_facts, validate_facts, write_facts
-)
+from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
+from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
 from pybatfish.client.asserts import (
     assert_filter_denies,
-    assert_filter_has_no_unreachable_lines, assert_filter_permits,
-    assert_flows_fail, assert_flows_succeed,
+    assert_filter_has_no_unreachable_lines,
+    assert_filter_permits,
+    assert_flows_fail,
+    assert_flows_succeed,
     assert_no_forwarding_loops,
     assert_no_incompatible_bgp_sessions,
     assert_no_incompatible_ospf_sessions,
@@ -49,13 +46,17 @@ from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.restv2helper import get_component_versions
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (
-    HeaderConstraints, Interface, NodeRoleDimension, NodeRolesData,
-    ReferenceBook, ReferenceLibrary
+    HeaderConstraints,
+    Interface,
+    NodeRoleDimension,
+    NodeRolesData,
+    ReferenceBook,
+    ReferenceLibrary,
 )
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
-from pybatfish.question.question import (Questions)
+from pybatfish.question.question import Questions
 from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
 
@@ -66,8 +67,15 @@ class Asserts(object):
     def __init__(self, session):
         self.session = session
 
-    def assert_filter_denies(self, filters, headers, startLocation=None,
-                             soft=False, snapshot=None, df_format="table"):
+    def assert_filter_denies(
+        self,
+        filters,
+        headers,
+        startLocation=None,
+        soft=False,
+        snapshot=None,
+        df_format="table",
+    ):
         # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], str) -> bool
         """
         Check if a filter (e.g., ACL) denies a specified set of flows.
@@ -82,12 +90,13 @@ class Asserts(object):
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_denies(filters, headers, startLocation, soft,
-                                    snapshot, self.session, df_format)
+        return assert_filter_denies(
+            filters, headers, startLocation, soft, snapshot, self.session, df_format
+        )
 
-    def assert_filter_has_no_unreachable_lines(self, filters, soft=False,
-                                               snapshot=None,
-                                               df_format="table"):
+    def assert_filter_has_no_unreachable_lines(
+        self, filters, soft=False, snapshot=None, df_format="table"
+    ):
         # type: (str, bool, Optional[str], str) -> bool
         """
         Check that a filter (e.g. an ACL) has no unreachable lines.
@@ -104,11 +113,19 @@ class Asserts(object):
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_has_no_unreachable_lines(filters, soft, snapshot,
-                                                      self.session, df_format)
+        return assert_filter_has_no_unreachable_lines(
+            filters, soft, snapshot, self.session, df_format
+        )
 
-    def assert_filter_permits(self, filters, headers, startLocation=None,
-                              soft=False, snapshot=None, df_format="table"):
+    def assert_filter_permits(
+        self,
+        filters,
+        headers,
+        startLocation=None,
+        soft=False,
+        snapshot=None,
+        df_format="table",
+    ):
         # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], str) -> bool
         """
         Check if a filter (e.g., ACL) permits a specified set of flows.
@@ -123,11 +140,13 @@ class Asserts(object):
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_permits(filters, headers, startLocation, soft,
-                                     snapshot, self.session, df_format)
+        return assert_filter_permits(
+            filters, headers, startLocation, soft, snapshot, self.session, df_format
+        )
 
-    def assert_flows_fail(self, startLocation, headers, soft=False,
-                          snapshot=None, df_format="table"):
+    def assert_flows_fail(
+        self, startLocation, headers, soft=False, snapshot=None, df_format="table"
+    ):
         # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
         """
         Check if the specified set of flows, denoted by starting locations and headers, fail.
@@ -141,11 +160,13 @@ class Asserts(object):
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_flows_fail(startLocation, headers, soft, snapshot,
-                                 self.session, df_format)
+        return assert_flows_fail(
+            startLocation, headers, soft, snapshot, self.session, df_format
+        )
 
-    def assert_flows_succeed(self, startLocation, headers, soft=False,
-                             snapshot=None, df_format="table"):
+    def assert_flows_succeed(
+        self, startLocation, headers, soft=False, snapshot=None, df_format="table"
+    ):
         # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
         """
         Check if the specified set of flows, denoted by starting locations and headers, succeed.
@@ -159,11 +180,11 @@ class Asserts(object):
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_flows_succeed(startLocation, headers, soft, snapshot,
-                                    self.session, df_format)
+        return assert_flows_succeed(
+            startLocation, headers, soft, snapshot, self.session, df_format
+        )
 
-    def assert_no_forwarding_loops(self, snapshot=None, soft=False,
-                                   df_format="table"):
+    def assert_no_forwarding_loops(self, snapshot=None, soft=False, df_format="table"):
         # type: (Optional[str], bool, str) -> bool
         """Assert that there are no forwarding loops in the snapshot.
 
@@ -173,13 +194,17 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_forwarding_loops(snapshot, soft, self.session,
-                                          df_format)
+        return assert_no_forwarding_loops(snapshot, soft, self.session, df_format)
 
-    def assert_no_incompatible_bgp_sessions(self, nodes=None, remote_nodes=None,
-                                            status=None,
-                                            snapshot=None, soft=False,
-                                            df_format="table"):
+    def assert_no_incompatible_bgp_sessions(
+        self,
+        nodes=None,
+        remote_nodes=None,
+        status=None,
+        snapshot=None,
+        soft=False,
+        df_format="table",
+    ):
         # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, str) -> bool
         """Assert that there are no incompatible BGP sessions present in the snapshot.
 
@@ -192,14 +217,18 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_incompatible_bgp_sessions(nodes, remote_nodes, status,
-                                                   snapshot, soft, self.session,
-                                                   df_format)
+        return assert_no_incompatible_bgp_sessions(
+            nodes, remote_nodes, status, snapshot, soft, self.session, df_format
+        )
 
-    def assert_no_incompatible_ospf_sessions(self, nodes=None,
-                                             remote_nodes=None,
-                                             snapshot=None, soft=False,
-                                             df_format="table"):
+    def assert_no_incompatible_ospf_sessions(
+        self,
+        nodes=None,
+        remote_nodes=None,
+        snapshot=None,
+        soft=False,
+        df_format="table",
+    ):
         # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
         """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
 
@@ -211,15 +240,18 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_incompatible_ospf_sessions(nodes, remote_nodes,
-                                                    snapshot, soft,
-                                                    self.session,
-                                                    df_format)
+        return assert_no_incompatible_ospf_sessions(
+            nodes, remote_nodes, snapshot, soft, self.session, df_format
+        )
 
-    def assert_no_unestablished_bgp_sessions(self, nodes=None,
-                                             remote_nodes=None,
-                                             snapshot=None, soft=False,
-                                             df_format="table"):
+    def assert_no_unestablished_bgp_sessions(
+        self,
+        nodes=None,
+        remote_nodes=None,
+        snapshot=None,
+        soft=False,
+        df_format="table",
+    ):
         # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
         """Assert that there are no BGP sessions that are compatible but not established.
 
@@ -231,12 +263,13 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_unestablished_bgp_sessions(nodes, remote_nodes,
-                                                    snapshot, soft,
-                                                    self.session, df_format)
+        return assert_no_unestablished_bgp_sessions(
+            nodes, remote_nodes, snapshot, soft, self.session, df_format
+        )
 
-    def assert_no_undefined_references(self, snapshot=None, soft=False,
-                                       df_format="table"):
+    def assert_no_undefined_references(
+        self, snapshot=None, soft=False, df_format="table"
+    ):
         # type: (Optional[str], bool, str) -> bool
         """Assert that there are no undefined references present in the snapshot.
 
@@ -246,8 +279,7 @@ class Asserts(object):
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_undefined_references(snapshot, soft, self.session,
-                                              df_format)
+        return assert_no_undefined_references(snapshot, soft, self.session, df_format)
 
 
 class Session(object):
@@ -260,12 +292,15 @@ class Session(object):
     :ivar api_key: Your API key
     """
 
-    def __init__(self, host=Options.coordinator_host,
-                 port_v1=Options.coordinator_work_port,
-                 port_v2=Options.coordinator_work_v2_port,
-                 ssl=Options.use_ssl,
-                 verify_ssl_certs=Options.verify_ssl_certs,
-                 load_questions=True):
+    def __init__(
+        self,
+        host=Options.coordinator_host,
+        port_v1=Options.coordinator_work_port,
+        port_v2=Options.coordinator_work_v2_port,
+        ssl=Options.use_ssl,
+        verify_ssl_certs=Options.verify_ssl_certs,
+        load_questions=True,
+    ):
         # type: (Text, int, int, bool, bool, bool) -> None
         # Coordinator args
         self.host = host  # type: Text
@@ -383,12 +418,11 @@ class Session(object):
         """Get a dict of possible session types mapping their names to session classes."""
         return {
             entry_point.name: entry_point.load()
-            for entry_point in
-            pkg_resources.iter_entry_points('batfish_session')
+            for entry_point in pkg_resources.iter_entry_points("batfish_session")
         }
 
     @classmethod
-    def get(cls, type_='bf', **params):
+    def get(cls, type_="bf", **params):
         # type: (str, **Any) -> Session
         """Instantiate and return a Session object of the specified type with the specified params."""
         sessions = cls.get_session_types()
@@ -396,7 +430,9 @@ class Session(object):
         if session_module is None:
             raise ValueError(
                 "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
-                    type_, set(sessions.keys())))
+                    type_, set(sessions.keys())
+                )
+            )
         session = session_module(**params)  # type: Session
         return session
 
@@ -409,7 +445,7 @@ class Session(object):
         :type name: str
         """
         if name is None:
-            raise ValueError('Network to be deleted must be supplied')
+            raise ValueError("Network to be deleted must be supplied")
         restv2helper.delete_network(self, name)
 
     def delete_node_role_dimension(self, dimension):
@@ -443,10 +479,10 @@ class Session(object):
         self._check_network()
         assert self.network is not None  # guaranteed by _check_network
         if name is None:
-            raise ValueError('Snapshot to be deleted must be supplied')
+            raise ValueError("Snapshot to be deleted must be supplied")
         restv2helper.delete_snapshot(self, name, self.network)
 
-    def extract_facts(self, nodes='/.*/', output_directory=None, snapshot=None):
+    def extract_facts(self, nodes="/.*/", output_directory=None, snapshot=None):
         # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
         """
         Extract and return a dictionary of facts about the specified nodes on a network snapshot.
@@ -470,15 +506,25 @@ class Session(object):
                 os.makedirs(output_directory)
             if os.path.isfile(output_directory):
                 raise ValueError(
-                    'Cannot write facts to file, must be a directory: {}'.format(
-                        output_directory))
+                    "Cannot write facts to file, must be a directory: {}".format(
+                        output_directory
+                    )
+                )
             write_facts(output_directory, facts)
         return facts
 
-    def fork_snapshot(self, base_name, name=None, overwrite=False,
-                      deactivate_interfaces=None, deactivate_nodes=None,
-                      restore_interfaces=None, restore_nodes=None,
-                      add_files=None, extra_args=None):
+    def fork_snapshot(
+        self,
+        base_name,
+        name=None,
+        overwrite=False,
+        deactivate_interfaces=None,
+        deactivate_nodes=None,
+        restore_interfaces=None,
+        restore_nodes=None,
+        add_files=None,
+        extra_args=None,
+    ):
         # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Optional[str]
         """
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
@@ -506,22 +552,35 @@ class Session(object):
         :return: name of initialized snapshot or None if the call fails
         :rtype: Optional[str]
         """
-        ss_name = self._fork_snapshot(base_name, name=name, overwrite=overwrite,
-                                      deactivate_interfaces=deactivate_interfaces,
-                                      deactivate_nodes=deactivate_nodes,
-                                      restore_interfaces=restore_interfaces,
-                                      restore_nodes=restore_nodes,
-                                      add_files=add_files,
-                                      extra_args=extra_args)
+        ss_name = self._fork_snapshot(
+            base_name,
+            name=name,
+            overwrite=overwrite,
+            deactivate_interfaces=deactivate_interfaces,
+            deactivate_nodes=deactivate_nodes,
+            restore_interfaces=restore_interfaces,
+            restore_nodes=restore_nodes,
+            add_files=add_files,
+            extra_args=extra_args,
+        )
         assert isinstance(
-            ss_name, six.string_types)  # Guaranteed since background=False
+            ss_name, six.string_types
+        )  # Guaranteed since background=False
         return ss_name
 
-    def _fork_snapshot(self, base_name, name=None, overwrite=False,
-                       background=False, deactivate_interfaces=None,
-                       deactivate_nodes=None, restore_interfaces=None,
-                       restore_nodes=None, add_files=None,
-                       extra_args=None):
+    def _fork_snapshot(
+        self,
+        base_name,
+        name=None,
+        overwrite=False,
+        background=False,
+        deactivate_interfaces=None,
+        deactivate_nodes=None,
+        restore_interfaces=None,
+        restore_nodes=None,
+        add_files=None,
+        extra_args=None,
+    ):
         # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
         self._check_network()
 
@@ -534,9 +593,14 @@ class Session(object):
                 self.delete_snapshot(name)
             else:
                 raise ValueError(
-                    'A snapshot named ''{}'' already exists in network ''{}''. '
-                    'Use overwrite = True if you want to overwrite the '
-                    'existing snapshot'.format(name, self.network))
+                    "A snapshot named "
+                    "{}"
+                    " already exists in network "
+                    "{}"
+                    ". "
+                    "Use overwrite = True if you want to overwrite the "
+                    "existing snapshot".format(name, self.network)
+                )
 
         encoded_file = None
         if add_files is not None:
@@ -548,8 +612,7 @@ class Session(object):
 
             if os.path.isfile(file_to_send):
                 with open(file_to_send, "rb") as f:
-                    encoded_file = base64.b64encode(f.read()).decode(
-                        'ascii')
+                    encoded_file = base64.b64encode(f.read()).decode("ascii")
 
         json_data = {
             "snapshotBase": base_name,
@@ -558,7 +621,7 @@ class Session(object):
             "deactivateNodes": deactivate_nodes,
             "restoreInterfaces": restore_interfaces,
             "restoreNodes": restore_nodes,
-            "zipFile": encoded_file
+            "zipFile": encoded_file,
         }
         restv2helper.fork_snapshot(self, json_data)
 
@@ -576,10 +639,8 @@ class Session(object):
         """
         snapshot = self.get_snapshot(snapshot)
 
-        work_item = workhelper.get_workitem_generate_dataplane(self,
-                                                               snapshot)
-        answer_dict = workhelper.execute(work_item, self,
-                                         extra_args=extra_args)
+        work_item = workhelper.get_workitem_generate_dataplane(self, snapshot)
+        answer_dict = workhelper.execute(work_item, self, extra_args=extra_args)
         return str(answer_dict["status"].value)
 
     def get_answer(self, question, snapshot, reference_snapshot=None):
@@ -596,10 +657,7 @@ class Session(object):
         :return: answer to the specified question
         :rtype: :py:class:`Answer`
         """
-        params = {
-            'snapshot': snapshot,
-            'referenceSnapshot': reference_snapshot,
-        }
+        params = {"snapshot": snapshot, "referenceSnapshot": reference_snapshot}
         ans = restv2helper.get_answer(self, question, params)
         if is_table_ans(ans):
             return TableAnswer(ans)
@@ -610,17 +668,17 @@ class Session(object):
         # type: () -> str
         """Generate the base URL for connecting to Batfish coordinator."""
         protocol = "https" if self.ssl else "http"
-        return '{0}://{1}:{2}{3}'.format(protocol, self.host,
-                                         self.port_v1,
-                                         self._base_uri_v1)
+        return "{0}://{1}:{2}{3}".format(
+            protocol, self.host, self.port_v1, self._base_uri_v1
+        )
 
     def get_base_url2(self):
         # type: () -> str
         """Generate the base URL for V2 of the coordinator APIs."""
         protocol = "https" if self.ssl else "http"
-        return '{0}://{1}:{2}{3}'.format(protocol, self.host,
-                                         self.port_v2,
-                                         self._base_uri_v2)
+        return "{0}://{1}:{2}{3}".format(
+            protocol, self.host, self.port_v2, self._base_uri_v2
+        )
 
     def get_node_role_dimension(self, dimension, inferred=False):
         # type: (str, bool) -> NodeRoleDimension
@@ -638,11 +696,11 @@ class Session(object):
         if inferred:
             self._check_snapshot()
             return NodeRoleDimension.from_dict(
-                restv2helper.get_snapshot_inferred_node_role_dimension(
-                    self,
-                    dimension))
+                restv2helper.get_snapshot_inferred_node_role_dimension(self, dimension)
+            )
         return NodeRoleDimension.from_dict(
-            restv2helper.get_node_role_dimension(self, dimension))
+            restv2helper.get_node_role_dimension(self, dimension)
+        )
 
     def get_node_roles(self, inferred=False):
         # type: (bool) -> NodeRolesData
@@ -658,7 +716,8 @@ class Session(object):
         if inferred:
             self._check_snapshot()
             return NodeRolesData.from_dict(
-                restv2helper.get_snapshot_inferred_node_roles(self))
+                restv2helper.get_snapshot_inferred_node_roles(self)
+            )
         return NodeRolesData.from_dict(restv2helper.get_node_roles(self))
 
     def get_reference_book(self, name):
@@ -669,14 +728,12 @@ class Session(object):
         :param name: name of the reference book to fetch
         :type name: str
         """
-        return ReferenceBook.from_dict(
-            restv2helper.get_reference_book(self, name))
+        return ReferenceBook.from_dict(restv2helper.get_reference_book(self, name))
 
     def get_reference_library(self):
         # type: () -> ReferenceLibrary
         """Returns the reference library for the active network."""
-        return ReferenceLibrary.from_dict(
-            restv2helper.get_reference_library(self))
+        return ReferenceLibrary.from_dict(restv2helper.get_reference_library(self))
 
     def get_snapshot(self, snapshot=None):
         # type: (Optional[Union[str, Text]]) -> str
@@ -698,7 +755,8 @@ class Session(object):
         else:
             raise ValueError(
                 "snapshot must be either provided or set using "
-                "set_snapshot (e.g. bf_session.set_snapshot('NAME')")
+                "set_snapshot (e.g. bf_session.set_snapshot('NAME')"
+            )
 
     def get_url(self, resource):
         # type: (str) -> str
@@ -708,7 +766,7 @@ class Session(object):
         :param resource: URI of the requested resource
         :type resource: str
         """
-        return '{0}/{1}'.format(self.get_base_url(), resource)
+        return "{0}/{1}".format(self.get_base_url(), resource)
 
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
@@ -719,8 +777,7 @@ class Session(object):
         """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
         return get_component_versions(self)
 
-    def init_snapshot(self, upload, name=None, overwrite=False,
-                      extra_args=None):
+    def init_snapshot(self, upload, name=None, overwrite=False, extra_args=None):
         # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
         Initialize a new snapshot.
@@ -738,16 +795,23 @@ class Session(object):
         :return: name of initialized snapshot
         :rtype: str
         """
-        ss_name = self._init_snapshot(upload, name=name,
-                                      overwrite=overwrite,
-                                      extra_args=extra_args)
+        ss_name = self._init_snapshot(
+            upload, name=name, overwrite=overwrite, extra_args=extra_args
+        )
         assert isinstance(
-            ss_name, six.string_types)  # Guaranteed since background=False
+            ss_name, six.string_types
+        )  # Guaranteed since background=False
         return ss_name
 
     def init_snapshot_from_text(
-            self, text, filename=None, snapshot_name=None, platform=None,
-            overwrite=False, extra_args=None):
+        self,
+        text,
+        filename=None,
+        snapshot_name=None,
+        platform=None,
+        overwrite=False,
+        extra_args=None,
+    ):
         # type: (str, Optional[str], Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
         """
         Initialize a snapshot of a single configuration file with given text.
@@ -790,21 +854,23 @@ class Session(object):
         :rtype: str
         """
         if filename is None:
-            filename = 'config'
+            filename = "config"
 
         data = _create_in_memory_zip(text, filename, platform)
-        ss_name = self._init_snapshot(data, name=snapshot_name,
-                                      overwrite=overwrite,
-                                      extra_args=extra_args)
+        ss_name = self._init_snapshot(
+            data, name=snapshot_name, overwrite=overwrite, extra_args=extra_args
+        )
         assert isinstance(
-            ss_name, six.string_types)  # Guaranteed since background=False
+            ss_name, six.string_types
+        )  # Guaranteed since background=False
         return ss_name
 
     def __init_snapshot_from_io(self, name, fd):
         # type: (str, IO) -> None
         json_data = workhelper.get_data_upload_snapshot(self, name, fd)
         resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data)
+            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
+        )
 
     def __init_snapshot_from_file(self, name, file_to_send):
         # type: (str, str) -> None
@@ -816,10 +882,9 @@ class Session(object):
                 tmp_file_name = file_to_send = temp_zip_file.name
         elif os.path.isfile(file_to_send):
             if not zipfile.is_zipfile(file_to_send):
-                raise ValueError(
-                    "{} is not a valid zip file".format(file_to_send))
+                raise ValueError("{} is not a valid zip file".format(file_to_send))
 
-        with open(file_to_send, 'rb') as fd:
+        with open(file_to_send, "rb") as fd:
             self.__init_snapshot_from_io(name, fd)
 
         # Cleanup tmp file if we made one
@@ -831,9 +896,9 @@ class Session(object):
                 # no need to crash initialization
                 pass
 
-    def _init_snapshot(self, upload, name=None, overwrite=False,
-                       background=False,
-                       extra_args=None):
+    def _init_snapshot(
+        self, upload, name=None, overwrite=False, background=False, extra_args=None
+    ):
         # type: (Union[str, IO], Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
         if self.network is None:
             self.set_network()
@@ -847,9 +912,14 @@ class Session(object):
                 self.delete_snapshot(name)
             else:
                 raise ValueError(
-                    'A snapshot named ''{}'' already exists in network ''{}''. '
-                    'Use overwrite = True if you want to overwrite the '
-                    'existing snapshot'.format(name, self.network))
+                    "A snapshot named "
+                    "{}"
+                    " already exists in network "
+                    "{}"
+                    ". "
+                    "Use overwrite = True if you want to overwrite the "
+                    "existing snapshot".format(name, self.network)
+                )
 
         if isinstance(upload, six.string_types):
             self.__init_snapshot_from_file(name, upload)
@@ -869,7 +939,7 @@ class Session(object):
         :return: network names
         :rtype: list
         """
-        return [d['name'] for d in restv2helper.list_networks(self)]
+        return [d["name"] for d in restv2helper.list_networks(self)]
 
     def list_incomplete_works(self):
         # type: () -> Dict[str, Any]
@@ -880,9 +950,9 @@ class Session(object):
         :rtype: dict
         """
         json_data = workhelper.get_data_list_incomplete_work(self)
-        response = resthelper.get_json_response(self,
-                                                CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK,
-                                                json_data)
+        response = resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
+        )
         return response
 
     def list_snapshots(self, verbose=False):
@@ -956,21 +1026,24 @@ class Session(object):
 
         try:
             net = restv2helper.get_network(self, name)
-            self.network = str(net['name'])
+            self.network = str(net["name"])
             return self.network
         except HTTPError as e:
             if e.response.status_code != 404:
-                raise BatfishException('Unknown error accessing network', e)
+                raise BatfishException("Unknown error accessing network", e)
 
         json_data = workhelper.get_data_init_network(self, name)
         json_response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data)
+            self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
+        )
 
         network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
         if network_name is None:
             raise BatfishException(
                 "Network initialization failed. Server response: {}".format(
-                    json_response))
+                    json_response
+                )
+            )
 
         self.network = str(network_name)
         return self.network
@@ -989,9 +1062,9 @@ class Session(object):
         :rtype: str
         """
         if name is None and index is None:
-            raise ValueError('One of name and index must be set')
+            raise ValueError("One of name and index must be set")
         if name is not None and index is not None:
-            raise ValueError('Only one of name and index can be set')
+            raise ValueError("Only one of name and index can be set")
 
         snapshots = self.list_snapshots()
 
@@ -999,8 +1072,8 @@ class Session(object):
         if index is not None:
             if not (-len(snapshots) <= index < len(snapshots)):
                 raise IndexError(
-                    "Server has only {} snapshots: {}".format(
-                        len(snapshots), snapshots))
+                    "Server has only {} snapshots: {}".format(len(snapshots), snapshots)
+                )
             self.snapshot = str(snapshots[index])
 
         # Name specified, make sure it exists.
@@ -1008,17 +1081,20 @@ class Session(object):
             assert name is not None  # type-hint to Python
             if name not in snapshots:
                 raise ValueError(
-                    'No snapshot named ''{}'' was found in network ''{}'': {}'.format(
-                        name, self.network, snapshots))
+                    "No snapshot named "
+                    "{}"
+                    " was found in network "
+                    "{}"
+                    ": {}".format(name, self.network, snapshots)
+                )
             self.snapshot = name
 
         logging.getLogger(__name__).info(
-            "Default snapshot is now set to %s",
-            self.snapshot)
+            "Default snapshot is now set to %s", self.snapshot
+        )
         return self.snapshot
 
-    def upload_diagnostics(self, dry_run=True, netconan_config=None,
-                           contact_info=None):
+    def upload_diagnostics(self, dry_run=True, netconan_config=None, contact_info=None):
         # type: (bool, str, Optional[str]) -> str
         """
         Fetch, anonymize, and optionally upload snapshot diagnostics information.
@@ -1051,9 +1127,10 @@ class Session(object):
         """
         metadata = {}
         if contact_info:
-            metadata['contact_info'] = contact_info
-        return upload_diagnostics(self, metadata=metadata, dry_run=dry_run,
-                                  netconan_config=netconan_config)
+            metadata["contact_info"] = contact_info
+        return upload_diagnostics(
+            self, metadata=metadata, dry_run=dry_run, netconan_config=netconan_config
+        )
 
     def validate_facts(self, expected_facts, snapshot=None):
         # type: (Text, Optional[Text]) -> Dict[Text, Any]
@@ -1098,9 +1175,9 @@ class Session(object):
         :rtype: Union[str, Dict]
         """
         work_item = workhelper.get_workitem_parse(self, name)
-        answer_dict = workhelper.execute(work_item, self,
-                                         background=background,
-                                         extra_args=extra_args)
+        answer_dict = workhelper.execute(
+            work_item, self, background=background, extra_args=extra_args
+        )
         if background:
             self.snapshot = name
             return answer_dict
@@ -1110,13 +1187,15 @@ class Session(object):
         if status != WorkStatusCode.TERMINATEDNORMALLY:
             init_log = restv2helper.get_work_log(self, name, work_item.id)
             raise BatfishException(
-                'Initializing snapshot {ss} failed with status {status}\n{log}'.format(
-                    ss=name, status=status, log=init_log))
+                "Initializing snapshot {ss} failed with status {status}\n{log}".format(
+                    ss=name, status=status, log=init_log
+                )
+            )
         else:
             self.snapshot = name
             logging.getLogger(__name__).info(
-                "Default snapshot is now set to %s",
-                self.snapshot)
+                "Default snapshot is now set to %s", self.snapshot
+            )
             if self.enable_diagnostics:
                 warn_on_snapshot_failure(self)
 
@@ -1129,15 +1208,16 @@ def _text_with_platform(text, platform):
     if platform is None:
         return text
     p = platform.strip().lower()
-    return '!RANCID-CONTENT-TYPE: {}\n{}'.format(p, text)
+    return "!RANCID-CONTENT-TYPE: {}\n{}".format(p, text)
 
 
 def _create_in_memory_zip(text, filename, platform):
     # type: (str, str, Optional[str]) -> IO
     """Creates an in-memory zip file for a single file snapshot."""
     from io import BytesIO
+
     data = BytesIO()
     with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
-        zipfilename = os.path.join('snapshot', 'configs', filename)
+        zipfilename = os.path.join("snapshot", "configs", filename)
         zf.writestr(zipfilename, _text_with_platform(text, platform))
     return data

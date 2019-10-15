@@ -30,5 +30,5 @@ def test_list_wrapper_is_immutable():
         alist[1] = 5
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     pytest.main()

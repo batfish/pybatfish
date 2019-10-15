@@ -43,15 +43,15 @@ _MIN_ZIP_TIMESTAMP = 315561600.0
 _NAME_SPECIAL_CHARS_ = " \t,\\&()[]@" + "!#$%^;?<>={}"
 
 __all__ = [
-    'BfJsonEncoder',
-    'conditional_str',
-    'escape_html',
-    'escape_name',
-    'get_html',
-    'get_uuid',
-    'validate_name',
-    'validate_question_name',
-    'zip_dir',
+    "BfJsonEncoder",
+    "conditional_str",
+    "escape_html",
+    "escape_name",
+    "get_html",
+    "get_uuid",
+    "validate_name",
+    "validate_question_name",
+    "zip_dir",
 ]
 
 
@@ -83,8 +83,9 @@ def conditional_str(prefix, obj, suffix):
     Returns empty string if obj is not "truthy" (i.e., not None or empty
     container)
     """
-    return " ".join([prefix, str(obj), suffix]) \
-        if obj is not None and len(obj) > 0 else ""
+    return (
+        " ".join([prefix, str(obj), suffix]) if obj is not None and len(obj) > 0 else ""
+    )
 
 
 def get_uuid():
@@ -104,30 +105,34 @@ def validate_name(name, entity_type="snapshot"):
     :return: True if the name is valid
     :raises ValueError if the name is deemed not valid
     """
-    _reserved_words = ['settings']
-    _valid_chars = set(string.ascii_letters).union(string.digits).union(
-        ["-", "_"])
+    _reserved_words = ["settings"]
+    _valid_chars = set(string.ascii_letters).union(string.digits).union(["-", "_"])
     try:
-        if '/' in name:
+        if "/" in name:
             raise ValueError(
-                "{} name cannot contain slashes ('/')".format(
-                    entity_type.capitalize()))
+                "{} name cannot contain slashes ('/')".format(entity_type.capitalize())
+            )
         if len(name) > _MAX_FILENAME_LEN:
             raise ValueError(
                 "{} names cannot be longer than {} characters".format(
-                    entity_type.capitalize(), _MAX_FILENAME_LEN))
+                    entity_type.capitalize(), _MAX_FILENAME_LEN
+                )
+            )
         if name.lower() in _reserved_words:
             raise ValueError(
                 "'{}' is a reserved word. Please rename the {}".format(
-                    name, entity_type))
+                    name, entity_type
+                )
+            )
         # Catch all:
         if set(str(name)).difference(_valid_chars):
-            raise ValueError(
-                "{} is not a valid name for {}".format(name, entity_type))
+            raise ValueError("{} is not a valid name for {}".format(name, entity_type))
     except (TypeError, AttributeError):
         raise ValueError(
             "{} name has the wrong type ({}), a string is expected".format(
-                entity_type.capitalize(), type(name)))
+                entity_type.capitalize(), type(name)
+            )
+        )
     return True
 
 
@@ -141,17 +146,22 @@ def validate_question_name(name):
     :raises QuestionValidationException if the name is not valid
     """
     try:
-        if '/' in name:
+        if "/" in name:
             raise QuestionValidationException(
-                "Question name cannot contain slashes ('/')")
+                "Question name cannot contain slashes ('/')"
+            )
         if len(name) > _MAX_FILENAME_LEN:
             raise QuestionValidationException(
                 "Question name cannot be longer than {} characters".format(
-                    _MAX_FILENAME_LEN))
+                    _MAX_FILENAME_LEN
+                )
+            )
     except (TypeError, AttributeError):
         raise QuestionValidationException(
             "Question name has the wrong type ({}), a string is expected".format(
-                type(name)))
+                type(name)
+            )
+        )
     return True
 
 
@@ -165,12 +175,11 @@ def zip_dir(dir_path, out_file):
     :param out_file: path to the resulting zipfile
     :type out_file: str
     """
-    with zipfile.ZipFile(out_file, 'w', zipfile.ZIP_DEFLATED) as zipWriter:
+    with zipfile.ZipFile(out_file, "w", zipfile.ZIP_DEFLATED) as zipWriter:
         rel_root = os.path.abspath(os.path.join(dir_path, os.path.pardir))
 
         for root, _dirs, files in os.walk(dir_path):
-            zipWriter.write(root, os.path.relpath(root, rel_root),
-                            zipfile.ZIP_STORED)
+            zipWriter.write(root, os.path.relpath(root, rel_root), zipfile.ZIP_STORED)
             for f in files:
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
@@ -178,8 +187,9 @@ def zip_dir(dir_path, out_file):
                 # Zipped files must be from 1980 or later
                 # So copy any file older than that to a tempfile to bump the timestamp
                 if os.path.getmtime(filename) < _MIN_ZIP_TIMESTAMP:
-                    with tempfile.NamedTemporaryFile('w+b') as temp_file, open(
-                            filename, 'rb') as file_src:
+                    with tempfile.NamedTemporaryFile("w+b") as temp_file, open(
+                        filename, "rb"
+                    ) as file_src:
                         temp_file.write(file_src.read())
                         temp_file.flush()
                         zipWriter.write(temp_file.name, arcname)
@@ -191,9 +201,11 @@ def escape_html(s):
     # type: (str) -> str
     if six.PY2:
         from cgi import escape
+
         return escape(s, quote=True)
     else:
         from html import escape
+
         return escape(s)
 
 
@@ -205,9 +217,18 @@ def escape_name(s):
     A name should be quoted if it begins with '"', '/', or digit, or if it
     contains a special character (_NAME_SPECIAL_CHARS_).
     """
-    return "\"{}\"".format(s) if s is not None and len(s) != 0 and (
-        s.startswith("\"") or s.startswith("/") or s[0].isdigit() or
-        any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)) else s
+    return (
+        '"{}"'.format(s)
+        if s is not None
+        and len(s) != 0
+        and (
+            s.startswith('"')
+            or s.startswith("/")
+            or s[0].isdigit()
+            or any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)
+        )
+        else s
+    )
 
 
 def get_html(element):

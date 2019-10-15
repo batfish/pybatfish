@@ -27,13 +27,14 @@ def _load_test_definitions(netstr, svcstr=None):
     """Parses a Capirca Naming from the given network and services strings."""
     defs = naming.Naming()
     if netstr:
-        defs._ParseFile(StringIO(netstr), 'networks')
+        defs._ParseFile(StringIO(netstr), "networks")
     if svcstr:
-        defs._ParseFile(StringIO(svcstr), 'services')
+        defs._ParseFile(StringIO(svcstr), "services")
     return defs
 
 
-TEST_DATABASE = six.u("""
+TEST_DATABASE = six.u(
+    """
     HOST_BITS = 1.2.3.4/8        # some prefix with host bits present
 
     RFC1918_10 = 10.0.0.0/8      # non-public
@@ -65,59 +66,59 @@ TEST_DATABASE = six.u("""
         MULTICAST
         CLASS-E
         UNDEFINED
-""")
+"""
+)
 DEFINITIONS = _load_test_definitions(TEST_DATABASE)
 
 
 def _get_group(name):
-    return capirca._entry_to_group(name, DEFINITIONS.networks[name].items,
-                                   DEFINITIONS)
+    return capirca._entry_to_group(name, DEFINITIONS.networks[name].items, DEFINITIONS)
 
 
 def test_entry_to_group_naive():
-    g = _get_group('RFC1918_10')
-    assert set(g.addresses) == {'10.0.0.0/8'}
+    g = _get_group("RFC1918_10")
+    assert set(g.addresses) == {"10.0.0.0/8"}
     assert not g.childGroupNames
 
-    g = _get_group('RFC1918_172')
-    assert set(g.addresses) == {'172.16.0.0/12'}
+    g = _get_group("RFC1918_172")
+    assert set(g.addresses) == {"172.16.0.0/12"}
     assert not g.childGroupNames
 
-    g = _get_group('RFC1918_192')
-    assert set(g.addresses) == {'192.168.0.0/16'}
+    g = _get_group("RFC1918_192")
+    assert set(g.addresses) == {"192.168.0.0/16"}
     assert not g.childGroupNames
 
 
 def test_entry_to_group_host_bits():
-    g = _get_group('HOST_BITS')
-    assert set(g.addresses) == {'1.0.0.0/8'}
+    g = _get_group("HOST_BITS")
+    assert set(g.addresses) == {"1.0.0.0/8"}
 
 
 def test_entry_to_group_recursive():
-    g = _get_group('RFC1918')
+    g = _get_group("RFC1918")
     assert not g.addresses
-    assert set(g.childGroupNames) == {'RFC1918_10', 'RFC1918_172',
-                                      'RFC1918_192'}
+    assert set(g.childGroupNames) == {"RFC1918_10", "RFC1918_172", "RFC1918_192"}
 
 
 def test_entry_to_group_mixed_6_4(caplog):
-    g = _get_group('LOOPBACK')
-    assert set(g.addresses) == {'127.0.0.0/8'}
+    g = _get_group("LOOPBACK")
+    assert set(g.addresses) == {"127.0.0.0/8"}
     assert not g.childGroupNames
 
-    assert 'Skipping IPv6 addresses in LOOPBACK' in caplog.text
+    assert "Skipping IPv6 addresses in LOOPBACK" in caplog.text
 
 
 def test_entry_to_group_error_undefined(caplog):
-    g = _get_group('DENY-EXTERNAL-SRC')
+    g = _get_group("DENY-EXTERNAL-SRC")
     assert not g.addresses
     assert not g.childGroupNames
 
-    assert 'error converting DENY-EXTERNAL-SRC, creating empty group' in caplog.text
+    assert "error converting DENY-EXTERNAL-SRC, creating empty group" in caplog.text
 
 
 def test_create_reference_book():
-    simple_database = six.u("""
+    simple_database = six.u(
+        """
         RFC1918_10 = 10.0.0.0/8      # non-public
 
         RFC1918_172 = 172.16.0.0/12  # non-public
@@ -127,28 +128,36 @@ def test_create_reference_book():
         RFC1918 = RFC1918_10
                   RFC1918_172
                   RFC1918_192
-    """)
+    """
+    )
     defs = _load_test_definitions(simple_database)
 
     book = capirca.create_reference_book(defs)
-    assert book.name == 'capirca'
+    assert book.name == "capirca"
     assert len(book.addressGroups) == 4
     assert set(g.name for g in book.addressGroups) == {
-        'RFC1918', 'RFC1918_10', 'RFC1918_172', 'RFC1918_192'}
+        "RFC1918",
+        "RFC1918_10",
+        "RFC1918_172",
+        "RFC1918_192",
+    }
     assert not book.interfaceGroups
 
-    book_custom = capirca.create_reference_book(defs, 'testbook')
-    assert book_custom.name == 'testbook'
+    book_custom = capirca.create_reference_book(defs, "testbook")
+    assert book_custom.name == "testbook"
     assert book_custom.addressGroups == book.addressGroups
     assert book_custom.interfaceGroups == book.interfaceGroups
 
 
-TEST_SVCS = six.u("""
+TEST_SVCS = six.u(
+    """
 SSH = 22/tcp
 DNS = 53/udp
-""")
+"""
+)
 
-TEST_POLICY = six.u("""
+TEST_POLICY = six.u(
+    """
 header {
   target:: arista some_acl
   target:: cisco some_acl
@@ -171,37 +180,35 @@ term permit_dns {
 term deny_all {
   action:: reject
 }
-""")
+"""
+)
 
 
 def test_get_acl_text():
     defs = _load_test_definitions(TEST_DATABASE, TEST_SVCS)
     pol = policy.ParsePolicy(TEST_POLICY, defs)
 
-    cisco = capirca._get_acl_text(pol, 'cisco')
-    assert 'permit tcp any any eq 22' in cisco
-    assert 'permit udp any any eq 53' in cisco
-    assert 'deny ip any any' in cisco
+    cisco = capirca._get_acl_text(pol, "cisco")
+    assert "permit tcp any any eq 22" in cisco
+    assert "permit udp any any eq 53" in cisco
+    assert "deny ip any any" in cisco
 
-    cisco_wrong = capirca._get_acl_text(pol, ' CISCO ')
+    cisco_wrong = capirca._get_acl_text(pol, " CISCO ")
     assert cisco_wrong == cisco
 
-    juniper = capirca._get_acl_text(pol, 'juniper')
-    assert re.search(
-        r'from {\s*protocol tcp;\s*destination-port 22;\s*}', juniper)
-    assert re.search(
-        r'from {\s*protocol udp;\s*destination-port 53;\s*}', juniper)
-    assert re.search(
-        r'term deny_all {\s*then {\s*reject;\s*}\s*}', juniper)
+    juniper = capirca._get_acl_text(pol, "juniper")
+    assert re.search(r"from {\s*protocol tcp;\s*destination-port 22;\s*}", juniper)
+    assert re.search(r"from {\s*protocol udp;\s*destination-port 53;\s*}", juniper)
+    assert re.search(r"term deny_all {\s*then {\s*reject;\s*}\s*}", juniper)
 
-    arista = capirca._get_acl_text(pol, 'arista')
-    assert 'permit tcp any any eq ssh' in arista
-    assert 'permit udp any any eq domain' in arista
-    assert 'deny ip any any' in arista
+    arista = capirca._get_acl_text(pol, "arista")
+    assert "permit tcp any any eq ssh" in arista
+    assert "permit udp any any eq domain" in arista
+    assert "deny ip any any" in arista
 
     # palo alto currently unsupported
     try:
-        capirca._get_acl_text(pol, 'paloalto')
+        capirca._get_acl_text(pol, "paloalto")
         assert False
     except ValueError as e:
-        assert 'Batfish' in str(e)
+        assert "Batfish" in str(e)

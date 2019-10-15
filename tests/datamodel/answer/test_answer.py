@@ -25,16 +25,10 @@ def test_blank_question_name():
     """Answer sets question name to None if there is no question name."""
     answer = Answer({})
     assert answer.question_name() is None
-    dictionary = {
-        "question": {}
-    }
+    dictionary = {"question": {}}
     answer = Answer(dictionary)
     assert answer.question_name() is None
-    dictionary = {
-        "question": {
-            "instance": {}
-        }
-    }
+    dictionary = {"question": {"instance": {}}}
     answer = Answer(dictionary)
     assert answer.question_name() is None
 
@@ -43,11 +37,7 @@ def test_question_name():
     """Answer provides correct question name."""
     dictionary = {
         "answerElements": [],
-        "question": {
-            "instance": {
-                "instanceName": "q_name"
-            }
-        }
+        "question": {"instance": {"instanceName": "q_name"}},
     }
     answer = Answer(dictionary)
     assert answer.question_name() == "q_name"

@@ -17,24 +17,31 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 from requests import HTTPError
 
-from pybatfish.client._diagnostics import (get_snapshot_parse_status)
-from pybatfish.client.commands import (bf_delete_network,
-                                       bf_delete_snapshot, bf_fork_snapshot,
-                                       bf_generate_dataplane,
-                                       bf_get_snapshot_inferred_node_role_dimension,
-                                       bf_get_snapshot_inferred_node_roles,
-                                       bf_get_snapshot_node_role_dimension,
-                                       bf_get_snapshot_node_roles,
-                                       bf_init_snapshot, bf_list_snapshots,
-                                       bf_put_node_roles,
-                                       bf_session, bf_set_network,
-                                       bf_set_snapshot)
+from pybatfish.client._diagnostics import get_snapshot_parse_status
+from pybatfish.client.commands import (
+    bf_delete_network,
+    bf_delete_snapshot,
+    bf_fork_snapshot,
+    bf_generate_dataplane,
+    bf_get_snapshot_inferred_node_role_dimension,
+    bf_get_snapshot_inferred_node_roles,
+    bf_get_snapshot_node_role_dimension,
+    bf_get_snapshot_node_roles,
+    bf_init_snapshot,
+    bf_list_snapshots,
+    bf_put_node_roles,
+    bf_session,
+    bf_set_network,
+    bf_set_snapshot,
+)
 from pybatfish.client.consts import BfConsts
-from pybatfish.client.extended import (bf_get_snapshot_input_object_text,
-                                       bf_get_snapshot_object_text,
-                                       bf_put_snapshot_object)
+from pybatfish.client.extended import (
+    bf_get_snapshot_input_object_text,
+    bf_get_snapshot_object_text,
+    bf_put_snapshot_object,
+)
 from pybatfish.datamodel import Interface
-from pybatfish.datamodel.referencelibrary import (NodeRolesData, RoleMapping)
+from pybatfish.datamodel.referencelibrary import NodeRolesData, RoleMapping
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -53,7 +60,7 @@ def test_init_snapshot_no_crash(network):
     bf_set_network(network)
     uid = uuid.uuid4().hex
     try:
-        bf_init_snapshot(join(_this_dir, 'snapshot'), uid)
+        bf_init_snapshot(join(_this_dir, "snapshot"), uid)
         bf_generate_dataplane()
     finally:
         # cleanup
@@ -64,7 +71,7 @@ def test_init_snapshot_no_crash(network):
 def example_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'snapshot'), name)
+    bf_init_snapshot(join(_this_dir, "snapshot"), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -74,7 +81,7 @@ def example_snapshot(network):
 def file_status_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'snapshot_file_status'), name)
+    bf_init_snapshot(join(_this_dir, "snapshot_file_status"), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -84,7 +91,7 @@ def file_status_snapshot(network):
 def roles_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'roles_snapshot'), name)
+    bf_init_snapshot(join(_this_dir, "roles_snapshot"), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -93,10 +100,10 @@ def roles_snapshot(network):
 def test_get_snapshot_file_status(network, file_status_snapshot):
     """Confirm we get correct init info statuses for example snapshot."""
     statuses = get_snapshot_parse_status(bf_session)
-    assert (statuses == {
-        'configs/unrecognized.cfg': 'PARTIALLY_UNRECOGNIZED',
-        'configs/recognized.cfg': 'PASSED',
-    })
+    assert statuses == {
+        "configs/unrecognized.cfg": "PARTIALLY_UNRECOGNIZED",
+        "configs/recognized.cfg": "PASSED",
+    }
 
 
 def test_fork_snapshot(network, example_snapshot):
@@ -122,8 +129,9 @@ def test_fork_snapshot_add_files(network, example_snapshot):
     bf_set_network(network)
     try:
         # Should succeed uploading a zip with a new file
-        bf_fork_snapshot(base_name=example_snapshot, name=name,
-                         add_files=join(_this_dir, 'fork'))
+        bf_fork_snapshot(
+            base_name=example_snapshot, name=name, add_files=join(_this_dir, "fork")
+        )
 
     finally:
         bf_delete_snapshot(name)
@@ -132,34 +140,41 @@ def test_fork_snapshot_add_files(network, example_snapshot):
 def test_fork_snapshot_bad_restore(network, example_snapshot):
     """Run fork snapshot with invalid restore item."""
     fail_name = uuid.uuid4().hex
-    node = 'as2border1'
+    node = "as2border1"
 
     bf_set_network(network)
     # Should fail when trying to restore an item that was never deactivated
     # in base snapshot
     with pytest.raises(HTTPError):
-        bf_fork_snapshot(base_name=example_snapshot, name=fail_name,
-                         restore_nodes=[node])
+        bf_fork_snapshot(
+            base_name=example_snapshot, name=fail_name, restore_nodes=[node]
+        )
 
 
 def test_fork_snapshot_deactivate(network, example_snapshot):
     """Use fork snapshot to deactivate and restore items."""
     deactivate_name = uuid.uuid4().hex
     restore_name = uuid.uuid4().hex
-    node = 'as2border1'
-    interface = Interface(hostname='as1border1', interface='GigabitEthernet1/0')
+    node = "as2border1"
+    interface = Interface(hostname="as1border1", interface="GigabitEthernet1/0")
 
     bf_set_network(network)
     try:
         # Should succeed with deactivations
-        bf_fork_snapshot(base_name=example_snapshot, name=deactivate_name,
-                         deactivate_interfaces=[interface],
-                         deactivate_nodes=[node])
+        bf_fork_snapshot(
+            base_name=example_snapshot,
+            name=deactivate_name,
+            deactivate_interfaces=[interface],
+            deactivate_nodes=[node],
+        )
 
         # Should succeed with valid restorations from snapshot with deactivation
-        bf_fork_snapshot(base_name=deactivate_name, name=restore_name,
-                         restore_interfaces=[interface],
-                         restore_nodes=[node])
+        bf_fork_snapshot(
+            base_name=deactivate_name,
+            name=restore_name,
+            restore_interfaces=[interface],
+            restore_nodes=[node],
+        )
     finally:
         bf_delete_snapshot(deactivate_name)
         bf_delete_snapshot(restore_name)
@@ -205,7 +220,7 @@ def test_get_snapshot_inferred_node_role_dimension(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
     # should not crash
-    bf_get_snapshot_inferred_node_role_dimension('auto1')
+    bf_get_snapshot_inferred_node_role_dimension("auto1")
 
 
 def test_get_snapshot_inferred_node_roles(network, roles_snapshot):
@@ -219,38 +234,34 @@ def test_get_snapshot_input_object(network, example_snapshot):
     bf_set_network(network)
     bf_set_snapshot(example_snapshot)
     # non-existent input object should yield 404
-    with pytest.raises(HTTPError, match='404'):
-        bf_get_snapshot_input_object_text('missing_object')
+    with pytest.raises(HTTPError, match="404"):
+        bf_get_snapshot_input_object_text("missing_object")
     # should be able to retrieve input object text
-    assert bf_get_snapshot_input_object_text('other_dir/other_file') == 'hello'
+    assert bf_get_snapshot_input_object_text("other_dir/other_file") == "hello"
 
 
 def test_get_snapshot_node_role_dimension(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
     mapping = RoleMapping(
-        name='mapping',
-        regex='regex',
-        roleDimensionGroups={'dim1': [1]})
-    node_roles = NodeRolesData(
-        roleDimensionOrder=['dim1'],
-        roleMappings=[mapping])
+        name="mapping", regex="regex", roleDimensionGroups={"dim1": [1]}
+    )
+    node_roles = NodeRolesData(roleDimensionOrder=["dim1"], roleMappings=[mapping])
     bf_put_node_roles(node_roles)
     # should not crash
-    bf_get_snapshot_node_role_dimension('dim1')
+    bf_get_snapshot_node_role_dimension("dim1")
 
 
 def test_get_snapshot_node_roles(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)
-    dimension_name = 'dim1'
+    dimension_name = "dim1"
     mapping = RoleMapping(
-        name='mapping',
-        regex='regex',
-        roleDimensionGroups={dimension_name: [1]})
+        name="mapping", regex="regex", roleDimensionGroups={dimension_name: [1]}
+    )
     node_roles = NodeRolesData(
-        roleDimensionOrder=[dimension_name],
-        roleMappings=[mapping])
+        roleDimensionOrder=[dimension_name], roleMappings=[mapping]
+    )
     bf_put_node_roles(node_roles)
     # there should be 1 role dimension
     snapshot_node_roles = bf_get_snapshot_node_roles()
@@ -262,8 +273,8 @@ def test_get_snapshot_object(network, example_snapshot):
     bf_set_network(network)
     bf_set_snapshot(example_snapshot)
     # non-existent object should yield 404
-    with pytest.raises(HTTPError, match='404'):
-        bf_get_snapshot_object_text('missing_object')
+    with pytest.raises(HTTPError, match="404"):
+        bf_get_snapshot_object_text("missing_object")
     # object should exist after being placed
-    bf_put_snapshot_object('new_object', 'goodbye')
-    assert bf_get_snapshot_object_text('new_object') == 'goodbye'
+    bf_put_snapshot_object("new_object", "goodbye")
+    assert bf_get_snapshot_object_text("new_object") == "goodbye"

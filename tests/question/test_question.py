@@ -20,30 +20,31 @@ from six import PY3
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question.question import (_compute_docstring,
-                                         _compute_var_help,
-                                         _has_valid_ordered_variable_names,
-                                         _load_question_dict,
-                                         _load_questions_from_dir,
-                                         _process_variables,
+from pybatfish.question.question import (
+    _compute_docstring,
+    _compute_var_help,
+    _has_valid_ordered_variable_names,
+    _load_question_dict,
+    _load_questions_from_dir,
+    _process_variables,
+    _validate,
+    list_questions,
+    load_questions,
+)
 
-                                         _validate,
-                                         list_questions,
-                                         load_questions)
-
-TEST_QUESTION_NAME = 'testQuestionName'
+TEST_QUESTION_NAME = "testQuestionName"
 TEST_QUESTION_DICT = {
-    'instance': {
-        'instanceName': TEST_QUESTION_NAME,
-        'description': 'a test question',
-        'variables': {
+    "instance": {
+        "instanceName": TEST_QUESTION_NAME,
+        "description": "a test question",
+        "variables": {
             "var1": {
                 "description": "desc1",
                 "type": "type1",
                 "value": "val1",
-                "displayName": "display1"
+                "displayName": "display1",
             }
-        }
+        },
     }
 }
 
@@ -56,18 +57,12 @@ def session():
 
 def test_min_length():
     numbers = {
-        'minElements': 0,
-        'minLength': 4,
-        'type': 'string',
-        'value': ['one', 'three', 'four', 'five', 'seven']
+        "minElements": 0,
+        "minLength": 4,
+        "type": "string",
+        "value": ["one", "three", "four", "five", "seven"],
     }
-    sample_question = {
-        'instance': {
-            'variables': {
-                'numbers': numbers
-            }
-        }
-    }
+    sample_question = {"instance": {"variables": {"numbers": numbers}}}
     expected_message = "\n   Length of value: 'one' for element : 0 of parameter: 'numbers' below minimum length: 4\n"
     with pytest.raises(QuestionValidationException) as err:
         _validate(sample_question)
@@ -75,65 +70,44 @@ def test_min_length():
 
 
 def test_valid_comparator():
-    comparators = {
-        'type': 'comparator',
-        'value': '>'
-    }
-    sample_question = {
-        'instance': {
-            'comparators': comparators
-        }
-    }
+    comparators = {"type": "comparator", "value": ">"}
+    sample_question = {"instance": {"comparators": comparators}}
     assert _validate(sample_question)
 
 
 def test_validate_allowed_values():
     # Test that parameter validates based on "values", not "allowedValues"
     variable = {
-        'allowedValues': ['obsolete value'],
-        'type': 'string',
-        'value': 'v1',
-        'values': [{
-            'name': 'v1'
-        }]
+        "allowedValues": ["obsolete value"],
+        "type": "string",
+        "value": "v1",
+        "values": [{"name": "v1"}],
     }
-    sample_question = {
-        'instance': {
-            'variables': {
-                'v': variable
-            }
-        }
-    }
+    sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = "\n   Value: 'obsolete value' is not among allowed" \
-                       + " values ['v1'] of parameter: 'v'\n"
+    expected_message = (
+        "\n   Value: 'obsolete value' is not among allowed"
+        + " values ['v1'] of parameter: 'v'\n"
+    )
     with pytest.raises(QuestionValidationException) as err:
-        variable['value'] = 'obsolete value'
+        variable["value"] = "obsolete value"
         _validate(sample_question)
     assert expected_message == str(err.value)
 
 
 def test_validate_old_allowed_values():
     # Test that parameter with only "allowedValues" validates based on that
-    variable = {
-        'allowedValues': ['v1'],
-        'type': 'string',
-        'value': 'v1'
-    }
-    sample_question = {
-        'instance': {
-            'variables': {
-                'v': variable
-            }
-        }
-    }
+    variable = {"allowedValues": ["v1"], "type": "string", "value": "v1"}
+    sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = "\n   Value: 'bad value' is not among allowed values " \
-                       + "['v1'] of parameter: 'v'\n"
+    expected_message = (
+        "\n   Value: 'bad value' is not among allowed values "
+        + "['v1'] of parameter: 'v'\n"
+    )
     with pytest.raises(QuestionValidationException) as err:
-        variable['value'] = 'bad value'
+        variable["value"] = "bad value"
         _validate(sample_question)
     assert expected_message == str(err.value)
 
@@ -141,27 +115,21 @@ def test_validate_old_allowed_values():
 def test_validate_allowed_values_list():
     # Test that list parameter validates based on "values", not "allowedValues"
     variable = {
-        'minElements': 0,
-        'allowedValues': ['obsolete value'],
-        'type': 'string',
-        'value': ['v1'],
-        'values': [{
-            'name': 'v1'
-        }]
+        "minElements": 0,
+        "allowedValues": ["obsolete value"],
+        "type": "string",
+        "value": ["v1"],
+        "values": [{"name": "v1"}],
     }
-    sample_question = {
-        'instance': {
-            'variables': {
-                'v': variable
-            }
-        }
-    }
+    sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = "\n   Value: 'obsolete value' is not among allowed" \
-                       + " values ['v1'] of parameter: 'v'\n"
+    expected_message = (
+        "\n   Value: 'obsolete value' is not among allowed"
+        + " values ['v1'] of parameter: 'v'\n"
+    )
     with pytest.raises(QuestionValidationException) as err:
-        variable['value'][0] = 'obsolete value'
+        variable["value"][0] = "obsolete value"
         _validate(sample_question)
     assert expected_message == str(err.value)
 
@@ -169,24 +137,20 @@ def test_validate_allowed_values_list():
 def test_validate_old_allowed_values_list():
     # Test that list parameter with only "allowedValues" validates based on that
     variable = {
-        'minElements': 0,
-        'allowedValues': ['v1'],
-        'type': 'string',
-        'value': ['v1']
+        "minElements": 0,
+        "allowedValues": ["v1"],
+        "type": "string",
+        "value": ["v1"],
     }
-    sample_question = {
-        'instance': {
-            'variables': {
-                'v': variable
-            }
-        }
-    }
+    sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = "\n   Value: 'bad value' is not among allowed values " \
-                       + "['v1'] of parameter: 'v'\n"
+    expected_message = (
+        "\n   Value: 'bad value' is not among allowed values "
+        + "['v1'] of parameter: 'v'\n"
+    )
     with pytest.raises(QuestionValidationException) as err:
-        variable['value'][0] = 'bad value'
+        variable["value"][0] = "bad value"
         _validate(sample_question)
     assert expected_message == str(err.value)
 
@@ -200,23 +164,20 @@ def test_compute_var_help_default_value_falsy():
         "optional": True,
         "description": "Desc",
         "type": "boolean",
-        "value": False
+        "value": False,
     }
-    expected_help = ":param v: Desc\n" \
-                    + "\n" \
-                    + "    Default value: ``False``\n" \
-                    + ":type v: boolean"
+    expected_help = (
+        ":param v: Desc\n"
+        + "\n"
+        + "    Default value: ``False``\n"
+        + ":type v: boolean"
+    )
     assert _compute_var_help("v", var_data) == expected_help
 
 
 def test_compute_var_help_with_no_allowed_values():
-    var_data = {
-        "optional": True,
-        "description": "Desc",
-        "type": "boolean"
-    }
-    expected_help = ":param v: Desc\n" \
-                    + ":type v: boolean"
+    var_data = {"optional": True, "description": "Desc", "type": "boolean"}
+    expected_help = ":param v: Desc\n" + ":type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -226,15 +187,17 @@ def test_compute_var_help_with_allowed_values():
         "description": "variable description",
         "values": [
             {"name": "v1", "description": "v1 description"},
-            {"name": "v2", "description": "v2 description"}
+            {"name": "v2", "description": "v2 description"},
         ],
-        "type": "boolean"
+        "type": "boolean",
     }
-    expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:\n" \
-                    + "\n    * v1: v1 description" \
-                    + "\n    * v2: v2 description" \
-                    + "\n:type v: boolean"
+    expected_help = (
+        ":param v: variable description"
+        + "\n    Allowed values:\n"
+        + "\n    * v1: v1 description"
+        + "\n    * v2: v2 description"
+        + "\n:type v: boolean"
+    )
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -244,12 +207,14 @@ def test_compute_var_help_with_new_and_old_allowed_values():
         "optional": True,
         "description": "variable description",
         "values": [{"name": "v1", "description": "allowed value description"}],
-        "type": "boolean"
+        "type": "boolean",
     }
-    expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:\n" \
-                    + "\n    * v1: allowed value description" \
-                    + "\n:type v: boolean"
+    expected_help = (
+        ":param v: variable description"
+        + "\n    Allowed values:\n"
+        + "\n    * v1: allowed value description"
+        + "\n:type v: boolean"
+    )
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -258,12 +223,14 @@ def test_compute_var_help_with_old_allowed_values():
         "allowedValues": ["v1"],
         "optional": True,
         "description": "variable description",
-        "type": "boolean"
+        "type": "boolean",
     }
-    expected_help = ":param v: variable description" \
-                    + "\n    Allowed values:\n" \
-                    + "\n    * v1" \
-                    + "\n:type v: boolean"
+    expected_help = (
+        ":param v: variable description"
+        + "\n    Allowed values:\n"
+        + "\n    * v1"
+        + "\n:type v: boolean"
+    )
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -276,25 +243,25 @@ def test_process_variables():
             "description": "c description",
             "optional": True,
             "type": "boolean",
-            "displayName": "c display name"
+            "displayName": "c display name",
         },
         "d": {
             "description": "d description",
             "optional": False,
             "type": "boolean",
-            "displayName": "d display name"
+            "displayName": "d display name",
         },
         "a": {
             "description": "a description",
             "optional": True,
             "type": "boolean",
-            "displayName": "a display name"
+            "displayName": "a display name",
         },
         "b": {
             "description": "b description",
             "optional": False,
             "type": "boolean",
-            "displayName": "b display name"
+            "displayName": "b display name",
         },
     }
 
@@ -304,50 +271,47 @@ def test_process_variables():
 
     # no ordered_variable_names returns variables in default order
     ordered_variable_names = []
-    assert _process_variables("foo", variables,
-                              ordered_variable_names) == default_variables
+    assert (
+        _process_variables("foo", variables, ordered_variable_names)
+        == default_variables
+    )
 
     # invalid ordered_variable_names returns variables in default order
     ordered_variable_names = ["d", "c", "b"]
-    assert _process_variables("foo", variables,
-                              ordered_variable_names) == default_variables
+    assert (
+        _process_variables("foo", variables, ordered_variable_names)
+        == default_variables
+    )
 
     # valid ordered_variable_names returns ordered_variable_names
     ordered_variable_names = ["d", "c", "b", "a"]
-    assert _process_variables("foo", variables,
-                              ordered_variable_names) == ordered_variable_names
+    assert (
+        _process_variables("foo", variables, ordered_variable_names)
+        == ordered_variable_names
+    )
 
 
 def test_has_valid_ordered_variable_names():
     """Test if question has valid orderedVariableNames."""
-    variables = {
-        "a": {},
-        "b": {},
-        "c": {},
-    }
+    variables = {"a": {}, "b": {}, "c": {}}
 
     # empty ordered_variable_names returns False
     ordered_variable_names = []
-    assert not _has_valid_ordered_variable_names(ordered_variable_names,
-                                                 variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
     # incomplete ordered_variable_names returns False
     ordered_variable_names = ["a"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names,
-                                                 variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
     ordered_variable_names = ["a", "c"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names,
-                                                 variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
     # complete ordered_variable_names but with duplicate returns False
     ordered_variable_names = ["a", "c", "b", "b"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names,
-                                                 variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
     # ordered_variable_names with extraneous variable returns False
     ordered_variable_names = ["a", "c", "b", "d"]
-    assert not _has_valid_ordered_variable_names(ordered_variable_names,
-                                                 variables)
+    assert not _has_valid_ordered_variable_names(ordered_variable_names, variables)
 
     # complete ordered_variable_names return True
     ordered_variable_names = ["a", "c", "b"]
@@ -357,14 +321,12 @@ def test_has_valid_ordered_variable_names():
 def test_load_dir_questions(tmpdir, session):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    loaded = _load_questions_from_dir(question_dir=dir.strpath,
-                                      session=session)
+    loaded = _load_questions_from_dir(question_dir=dir.strpath, session=session)
     assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
     # test fault tolerance to bad questions
-    dir.join("badq.json").write('{')
-    loaded = _load_questions_from_dir(question_dir=dir.strpath,
-                                      session=session)
+    dir.join("badq.json").write("{")
+    loaded = _load_questions_from_dir(question_dir=dir.strpath, session=session)
     assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
 
@@ -372,7 +334,7 @@ def test_list_questions(tmpdir, session):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
     load_questions(question_dir=dir.strpath, session=session)
-    names = [q['name'] for q in list_questions()]
+    names = [q["name"] for q in list_questions()]
     assert names == [TEST_QUESTION_NAME]
 
 
@@ -380,8 +342,7 @@ def test_make_check(session):
     """Make a check out of the first available question."""
     name, q = _load_question_dict(TEST_QUESTION_DICT, session)
     qdict = q().make_check().dict()
-    assert qdict.get('assertion') == Assertion(AssertionType.COUNT_EQUALS,
-                                               0).dict()
+    assert qdict.get("assertion") == Assertion(AssertionType.COUNT_EQUALS, 0).dict()
 
 
 def test_question_name(session):
@@ -392,8 +353,7 @@ def test_question_name(session):
     assert has_name.get_name() == "manually set"
 
     inferred_name = qclass()
-    assert inferred_name.get_name().startswith(
-        '__{}_'.format(TEST_QUESTION_NAME))
+    assert inferred_name.get_name().startswith("__{}_".format(TEST_QUESTION_NAME))
 
 
 def test_question_positional_args(session):

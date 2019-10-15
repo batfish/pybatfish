@@ -22,22 +22,22 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
-    'EnterInputIfaceStepDetail',
-    'ExitOutputIfaceStepDetail',
-    'FilterStepDetail',
-    'Flow',
-    'HeaderConstraints',
-    'Hop',
-    'InboundStepDetail',
-    'MatchSessionStepDetail',
-    'MatchTcpFlags',
-    'OriginateStepDetail',
-    'RoutingStepDetail',
-    'SetupSessionStepDetail',
-    'PathConstraints',
-    'TcpFlags',
-    'Trace',
-    'TransformationStepDetail'
+    "EnterInputIfaceStepDetail",
+    "ExitOutputIfaceStepDetail",
+    "FilterStepDetail",
+    "Flow",
+    "HeaderConstraints",
+    "Hop",
+    "InboundStepDetail",
+    "MatchSessionStepDetail",
+    "MatchTcpFlags",
+    "OriginateStepDetail",
+    "RoutingStepDetail",
+    "SetupSessionStepDetail",
+    "PathConstraints",
+    "TcpFlags",
+    "Trace",
+    "TransformationStepDetail",
 ]
 
 
@@ -119,15 +119,16 @@ class Flow(DataModelElement):
             json_dict.get("tcpFlagsPsh"),
             json_dict.get("tcpFlagsRst"),
             json_dict.get("tcpFlagsSyn"),
-            json_dict.get("tcpFlagsUrg"))
+            json_dict.get("tcpFlagsUrg"),
+        )
 
     def __str__(self):
         # type: () -> str
         # exclude the tag field
         iface_str = self._iface_str()
         vrf_str = self._vrf_str()
-        return \
-            "start={node}{iface}{vrf} [{src}->{dst}" \
+        return (
+            "start={node}{iface}{vrf} [{src}->{dst}"
             " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
                 node=self.ingressNode,
                 iface=iface_str,
@@ -137,36 +138,53 @@ class Flow(DataModelElement):
                 ip_proto=self.get_ip_protocol_str(),
                 dscp=(" dscp={}".format(self.dscp) if self.dscp != 0 else ""),
                 ecn=(" ecn={}".format(self.ecn) if self.ecn != 0 else ""),
-                offset=(" fragmentOffset={}".format(self.fragmentOffset)
-                        if self.fragmentOffset != 0 else ""),
-                length=(" length={}".format(self.packetLength)
-                        if self.packetLength != 0 else ""),
-                state=(" state={}".format(self.state)
-                       if self.state != "NEW" else ""),
-                flags=(" tcpFlags={}".format(self.get_flag_str()) if
-                       self.ipProtocol == 6 and
-                       self.get_flag_str() != "00000000" else ""))
+                offset=(
+                    " fragmentOffset={}".format(self.fragmentOffset)
+                    if self.fragmentOffset != 0
+                    else ""
+                ),
+                length=(
+                    " length={}".format(self.packetLength)
+                    if self.packetLength != 0
+                    else ""
+                ),
+                state=(" state={}".format(self.state) if self.state != "NEW" else ""),
+                flags=(
+                    " tcpFlags={}".format(self.get_flag_str())
+                    if self.ipProtocol == 6 and self.get_flag_str() != "00000000"
+                    else ""
+                ),
+            )
+        )
 
     def _vrf_str(self):
-        vrf_str = " vrf={}".format(self.ingressVrf) \
-            if self.ingressVrf not in ["default", None] else ""
+        vrf_str = (
+            " vrf={}".format(self.ingressVrf)
+            if self.ingressVrf not in ["default", None]
+            else ""
+        )
         return vrf_str
 
     def _iface_str(self):
-        iface_str = " interface={}".format(self.ingressInterface) \
-            if self.ingressInterface is not None else ""
+        iface_str = (
+            " interface={}".format(self.ingressInterface)
+            if self.ingressInterface is not None
+            else ""
+        )
         return iface_str
 
     def get_flag_str(self):
         # type: () -> str
-        return "{}{}{}{}{}{}{}{}".format(self.tcpFlagsAck,
-                                         self.tcpFlagsCwr,
-                                         self.tcpFlagsEce,
-                                         self.tcpFlagsFin,
-                                         self.tcpFlagsPsh,
-                                         self.tcpFlagsRst,
-                                         self.tcpFlagsSyn,
-                                         self.tcpFlagsUrg)
+        return "{}{}{}{}{}{}{}{}".format(
+            self.tcpFlagsAck,
+            self.tcpFlagsCwr,
+            self.tcpFlagsEce,
+            self.tcpFlagsFin,
+            self.tcpFlagsPsh,
+            self.tcpFlagsRst,
+            self.tcpFlagsSyn,
+            self.tcpFlagsUrg,
+        )
 
     def get_ip_protocol_str(self):
         # type: () -> str
@@ -178,32 +196,35 @@ class Flow(DataModelElement):
 
     def _has_ports(self):
         # type: () -> bool
-        return (self.ipProtocol in ['TCP', 'UDP', 'DCCP', 'SCTP']
-                and self.srcPort is not None
-                and self.dstPort is not None)
+        return (
+            self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
+            and self.srcPort is not None
+            and self.dstPort is not None
+        )
 
     def _repr_html_(self):
         # type: () -> str
-        return '<br>'.join(self._repr_html_lines())
+        return "<br>".join(self._repr_html_lines())
 
     def _repr_html_lines(self):
         # type: () -> List[str]
         lines = []
-        lines.append('Start Location: {node}{iface}{vrf}'.format(
-            node=self.ingressNode,
-            iface=self._iface_str(),
-            vrf=self._vrf_str()))
-        lines.append('Src IP: %s' % self.srcIp)
+        lines.append(
+            "Start Location: {node}{iface}{vrf}".format(
+                node=self.ingressNode, iface=self._iface_str(), vrf=self._vrf_str()
+            )
+        )
+        lines.append("Src IP: %s" % self.srcIp)
         if self._has_ports():
             assert self.srcPort is not None
-            lines.append('Src Port: %d' % self.srcPort)
-        lines.append('Dst IP: %s' % self.dstIp)
+            lines.append("Src Port: %d" % self.srcPort)
+        lines.append("Dst IP: %s" % self.dstIp)
         if self._has_ports():
             assert self.dstPort is not None
-            lines.append('Dst Port: %d' % self.dstPort)
-        lines.append('IP Protocol: %s' % self.get_ip_protocol_str())
+            lines.append("Dst Port: %d" % self.dstPort)
+        lines.append("IP Protocol: %s" % self.get_ip_protocol_str())
         if self.state != "NEW":
-            lines.append('Firewall Classification: %s' % self.state)
+            lines.append("Firewall Classification: %s" % self.state)
         return lines
 
     def _ip_port(self, ip, port):
@@ -231,16 +252,15 @@ class FlowDiff(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FlowDiff
-        return FlowDiff(json_dict["fieldName"],
-                        json_dict["oldValue"],
-                        json_dict["newValue"])
+        return FlowDiff(
+            json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"]
+        )
 
     def __str__(self):
         # type: () -> str
         return "{fieldName}: {oldValue} -> {newValue}".format(
-            fieldName=self.fieldName,
-            oldValue=self.oldValue,
-            newValue=self.newValue)
+            fieldName=self.fieldName, oldValue=self.oldValue, newValue=self.newValue
+        )
 
 
 @attr.s(frozen=True)
@@ -261,17 +281,20 @@ class FlowTrace(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FlowTrace
-        return FlowTrace(json_dict["disposition"],
-                         [FlowTraceHop.from_dict(hop) for hop in
-                          json_dict.get("hops", [])],
-                         json_dict.get("notes"))
+        return FlowTrace(
+            json_dict["disposition"],
+            [FlowTraceHop.from_dict(hop) for hop in json_dict.get("hops", [])],
+            json_dict.get("notes"),
+        )
 
     def __str__(self):
         # type: () -> str
         return "{hops}\n{notes}".format(
-            hops="\n".join(["{} {}".format(num, hop) for num, hop in
-                            enumerate(self.hops, start=1)]),
-            notes=self.notes)
+            hops="\n".join(
+                ["{} {}".format(num, hop) for num, hop in enumerate(self.hops, start=1)]
+            ),
+            notes=self.notes,
+        )
 
     def __len__(self):
         return len(self.hops)
@@ -284,15 +307,21 @@ class FlowTrace(DataModelElement):
         return "{notes}<br>{hops}".format(
             notes=self.format_notes_html(),
             hops="<br><br>".join(
-                ["<strong>{num}</strong> {hop}".format(num=num,
-                                                       hop=hop._repr_html_())
-                 for num, hop in enumerate(self.hops, start=1)]))
+                [
+                    "<strong>{num}</strong> {hop}".format(
+                        num=num, hop=hop._repr_html_()
+                    )
+                    for num, hop in enumerate(self.hops, start=1)
+                ]
+            ),
+        )
 
     def format_notes_html(self):
         # type: () -> str
         return '<span style="color:{color}; text-weight:bold;">{notes}</span>'.format(
             color=_get_color_for_disposition(self.disposition),
-            notes=escape_html(self.notes))
+            notes=escape_html(self.notes),
+        )
 
 
 @attr.s(frozen=True)
@@ -312,18 +341,19 @@ class FlowTraceHop(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> FlowTraceHop
         transformed_flow = json_dict.get("transformedFlow")
-        return FlowTraceHop(Edge.from_dict(json_dict["edge"]),
-                            list(json_dict.get("routes", [])),
-                            Flow.from_dict(transformed_flow)
-                            if transformed_flow else None)
+        return FlowTraceHop(
+            Edge.from_dict(json_dict["edge"]),
+            list(json_dict.get("routes", [])),
+            Flow.from_dict(transformed_flow) if transformed_flow else None,
+        )
 
     def __str__(self):
         # type: () -> str
         ret_str = "{}\n    Route(s):\n    {}".format(
-            self.edge, "\n    ".join(self.routes))
+            self.edge, "\n    ".join(self.routes)
+        )
         if self.transformedFlow:
-            ret_str += "\n    Transformed flow: {}".format(
-                self.transformedFlow)
+            ret_str += "\n    Transformed flow: {}".format(self.transformedFlow)
         return ret_str
 
     def _repr_html_(self):
@@ -331,11 +361,13 @@ class FlowTraceHop(DataModelElement):
         indent = "&nbsp;" * 4
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
-            routes=indent + ("<br>" + indent).join(
-                [escape_html(r) for r in self.routes]))
+            routes=indent
+            + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
+        )
         if self.transformedFlow:
             result += "<br>Transformed flow: {}".format(
-                self.transformedFlow._repr_html_())
+                self.transformedFlow._repr_html_()
+            )
         return result
 
 
@@ -355,7 +387,8 @@ class EnterInputIfaceStepDetail(DataModelElement):
         # type: (Dict) -> EnterInputIfaceStepDetail
         return EnterInputIfaceStepDetail(
             json_dict.get("inputInterface", {}).get("interface"),
-            json_dict.get("inputVrf"))
+            json_dict.get("inputVrf"),
+        )
 
     def __str__(self):
         # type: () -> str
@@ -379,7 +412,8 @@ class ExitOutputIfaceStepDetail(DataModelElement):
         # type: (Dict) -> ExitOutputIfaceStepDetail
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            json_dict.get("transformedFlow"))
+            json_dict.get("transformedFlow"),
+        )
 
     def __str__(self):
         # type: () -> str
@@ -425,8 +459,7 @@ class OriginateStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> OriginateStepDetail
-        return OriginateStepDetail(
-            json_dict.get("originatingVrf", ""))
+        return OriginateStepDetail(json_dict.get("originatingVrf", ""))
 
     def __str__(self):
         # type: () -> str
@@ -445,8 +478,7 @@ class RoutingStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoutingStepDetail
-        return RoutingStepDetail(
-            [route for route in json_dict.get("routes", [])])
+        return RoutingStepDetail([route for route in json_dict.get("routes", [])])
 
     def __str__(self):
         # type: () -> str
@@ -459,7 +491,9 @@ class RoutingStepDetail(DataModelElement):
                 "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
                     protocol=route.get("protocol"),
                     network=route.get("network"),
-                    next_hop_ip=route.get("nextHopIp")))
+                    next_hop_ip=route.get("nextHopIp"),
+                )
+            )
         return "Routes: " + ",".join(routes_str)
 
 
@@ -491,8 +525,7 @@ class FilterStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        return FilterStepDetail(json_dict.get("filter", ""),
-                                json_dict.get("type", ""))
+        return FilterStepDetail(json_dict.get("filter", ""), json_dict.get("type", ""))
 
     def __str__(self):
         # type: () -> str
@@ -515,7 +548,8 @@ class TransformationStepDetail(DataModelElement):
         # type: (Dict) -> TransformationStepDetail
         return TransformationStepDetail(
             json_dict["transformationType"],
-            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])])
+            [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
+        )
 
     def __str__(self):
         # type: () -> str
@@ -523,7 +557,8 @@ class TransformationStepDetail(DataModelElement):
             return self.transformationType
         return "{type} {diffs}".format(
             type=self.transformationType,
-            diffs=', '.join(str(flowDiff) for flowDiff in self.flowDiffs))
+            diffs=", ".join(str(flowDiff) for flowDiff in self.flowDiffs),
+        )
 
 
 @attr.s(frozen=True)
@@ -550,7 +585,7 @@ class Step(DataModelElement):
             "Routing": RoutingStepDetail.from_dict,
             "SetupSession": SetupSessionStepDetail.from_dict,
             "Transformation": TransformationStepDetail.from_dict,
-            "Filter": FilterStepDetail.from_dict
+            "Filter": FilterStepDetail.from_dict,
         }
 
         action = json_dict.get("action")
@@ -596,7 +631,7 @@ class Hop(DataModelElement):
             step_obj = Step.from_dict(step)
             if step_obj is not None:
                 steps.append(step_obj)
-        return Hop(json_dict.get('node', {}).get('name'), steps)
+        return Hop(json_dict.get("node", {}).get("name"), steps)
 
     def __len__(self):
         return len(self.steps)
@@ -607,15 +642,15 @@ class Hop(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "node: {node}\n  {steps}".format(
-            node=self.node,
-            steps="\n  ".join(map(str, self.steps)))
+            node=self.node, steps="\n  ".join(map(str, self.steps))
+        )
 
     def _repr_html_(self):
         # type: () -> str
         return "node: {node}<br>&nbsp;&nbsp;{steps}".format(
             node=self.node,
-            steps="<br>&nbsp;&nbsp;".join(
-                [step._repr_html_() for step in self.steps]))
+            steps="<br>&nbsp;&nbsp;".join([step._repr_html_() for step in self.steps]),
+        )
 
     @staticmethod
     def _get_routes_data(routes):
@@ -626,7 +661,9 @@ class Hop(DataModelElement):
                 "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
                     protocol=route.get("protocol"),
                     network=route.get("network"),
-                    next_hop_ip=route.get("nextHopIp")))
+                    next_hop_ip=route.get("nextHopIp"),
+                )
+            )
         return routes_str
 
 
@@ -646,8 +683,10 @@ class Trace(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> Trace
-        return Trace(json_dict["disposition"],
-                     [Hop.from_dict(hop) for hop in json_dict.get("hops", [])])
+        return Trace(
+            json_dict["disposition"],
+            [Hop.from_dict(hop) for hop in json_dict.get("hops", [])],
+        )
 
     def __len__(self):
         return len(self.hops)
@@ -660,20 +699,30 @@ class Trace(DataModelElement):
         return "{disposition}\n{hops}".format(
             disposition=self.disposition,
             hops="\n".join(
-                ["{num}. {hop}".format(num=num, hop=hop) for num, hop in
-                 enumerate(self.hops, start=1)]))
+                [
+                    "{num}. {hop}".format(num=num, hop=hop)
+                    for num, hop in enumerate(self.hops, start=1)
+                ]
+            ),
+        )
 
     def _repr_html_(self):
         # type: () -> str
         disposition_span = '<span style="color:{color}; text-weight:bold;">{disposition}</span>'.format(
             color=_get_color_for_disposition(self.disposition),
-            disposition=self.disposition)
+            disposition=self.disposition,
+        )
         return "{disposition_span}<br>{hops}".format(
             disposition_span=disposition_span,
             hops="<br>".join(
-                ["<strong>{num}</strong>. {hop}".format(num=num,
-                                                        hop=hop._repr_html_())
-                 for num, hop in enumerate(self.hops, start=1)]))
+                [
+                    "<strong>{num}</strong>. {hop}".format(
+                        num=num, hop=hop._repr_html_()
+                    )
+                    for num, hop in enumerate(self.hops, start=1)
+                ]
+            ),
+        )
 
 
 @attr.s(frozen=True)
@@ -703,14 +752,15 @@ class TcpFlags(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         return TcpFlags(
-            ack=json_dict['ack'],
-            cwr=json_dict['cwr'],
-            ece=json_dict['ece'],
-            fin=json_dict['fin'],
-            psh=json_dict['psh'],
-            rst=json_dict['rst'],
-            syn=json_dict['syn'],
-            urg=json_dict['urg'])
+            ack=json_dict["ack"],
+            cwr=json_dict["cwr"],
+            ece=json_dict["ece"],
+            fin=json_dict["fin"],
+            psh=json_dict["psh"],
+            rst=json_dict["rst"],
+            syn=json_dict["syn"],
+            urg=json_dict["urg"],
+        )
 
 
 @attr.s(frozen=True)
@@ -745,15 +795,16 @@ class MatchTcpFlags(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         return MatchTcpFlags(
-            TcpFlags.from_dict(json_dict['tcpFlags']),
-            json_dict['useAck'],
-            json_dict['useCwr'],
-            json_dict['useEce'],
-            json_dict['useFin'],
-            json_dict['usePsh'],
-            json_dict['useRst'],
-            json_dict['useSyn'],
-            json_dict['useUrg'])
+            TcpFlags.from_dict(json_dict["tcpFlags"]),
+            json_dict["useAck"],
+            json_dict["useCwr"],
+            json_dict["useEce"],
+            json_dict["useFin"],
+            json_dict["usePsh"],
+            json_dict["useRst"],
+            json_dict["useSyn"],
+            json_dict["useUrg"],
+        )
 
     @staticmethod
     def match_ack():
@@ -789,8 +840,7 @@ class MatchTcpFlags(DataModelElement):
 
         Other bits may take any value.
         """
-        return MatchTcpFlags(
-            TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
+        return MatchTcpFlags(TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
 
     @staticmethod
     def match_established():
@@ -809,8 +859,11 @@ class MatchTcpFlags(DataModelElement):
         Meaning both ACK and RST bits are unset.
         Other bits may take any value.
         """
-        return [MatchTcpFlags(useAck=True, useRst=True,
-                              tcpFlags=TcpFlags(ack=False, rst=False))]
+        return [
+            MatchTcpFlags(
+                useAck=True, useRst=True, tcpFlags=TcpFlags(ack=False, rst=False)
+            )
+        ]
 
 
 def _get_color_for_disposition(disposition):
@@ -915,30 +968,38 @@ class HeaderConstraints(DataModelElement):
     # Order params in likelihood of specification
     srcIps = attr.ib(default=None, type=Optional[str])
     dstIps = attr.ib(default=None, type=Optional[str])
-    srcPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_intspace)
-    dstPorts = attr.ib(default=None, type=Optional[str],
-                       converter=_normalize_phc_intspace)
-    ipProtocols = attr.ib(default=None, type=Optional[List[str]],
-                          converter=_normalize_phc_list)
-    applications = attr.ib(default=None, type=Optional[List[str]],
-                           converter=_normalize_phc_list)
-    icmpCodes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_intspace)
-    icmpTypes = attr.ib(default=None, type=Optional[str],
-                        converter=_normalize_phc_intspace)
-    firewallClassifications = attr.ib(default=None, type=Optional[List[str]],
-                                      converter=_normalize_phc_list)
-    ecns = attr.ib(default=None, type=Optional[str],
-                   converter=_normalize_phc_intspace)
-    dscps = attr.ib(default=None, type=Optional[str],
-                    converter=_normalize_phc_intspace)
-    packetLengths = attr.ib(default=None, type=Optional[str],
-                            converter=_normalize_phc_intspace)
-    fragmentOffsets = attr.ib(default=None, type=Optional[str],
-                              converter=_normalize_phc_intspace)
-    tcpFlags = attr.ib(default=None, type=Optional[MatchTcpFlags],
-                       converter=_normalize_phc_tcpflags)
+    srcPorts = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    dstPorts = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    ipProtocols = attr.ib(
+        default=None, type=Optional[List[str]], converter=_normalize_phc_list
+    )
+    applications = attr.ib(
+        default=None, type=Optional[List[str]], converter=_normalize_phc_list
+    )
+    icmpCodes = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    icmpTypes = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    firewallClassifications = attr.ib(
+        default=None, type=Optional[List[str]], converter=_normalize_phc_list
+    )
+    ecns = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
+    dscps = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
+    packetLengths = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    fragmentOffsets = attr.ib(
+        default=None, type=Optional[str], converter=_normalize_phc_intspace
+    )
+    tcpFlags = attr.ib(
+        default=None, type=Optional[MatchTcpFlags], converter=_normalize_phc_tcpflags
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -955,13 +1016,14 @@ class HeaderConstraints(DataModelElement):
             ecns=json_dict.get("ecns"),
             dscps=json_dict.get("dscps"),
             packetLengths=json_dict.get("packetLengths"),
-            fragmentOffsets=json_dict.get("fragmentOffsets"))
+            fragmentOffsets=json_dict.get("fragmentOffsets"),
+        )
 
     def dict(self):
         d = super(HeaderConstraints, self).dict()
         # Rename firewallClassifications to flowStates (expected on the backend)
-        d['flowStates'] = d['firewallClassifications']
-        del d['firewallClassifications']
+        d["flowStates"] = d["firewallClassifications"]
+        del d["firewallClassifications"]
         return d
 
     @classmethod
@@ -972,29 +1034,35 @@ class HeaderConstraints(DataModelElement):
         if flow._has_ports():
             srcPorts = str(flow.srcPort)
             dstPorts = str(flow.dstPort)
-        if flow.ipProtocol.lower() == 'icmp':
+        if flow.ipProtocol.lower() == "icmp":
             icmpCodes = flow.icmpCode
             icmpTypes = flow.icmpVar
-        if flow.ipProtocol.lower() == 'tcp':
+        if flow.ipProtocol.lower() == "tcp":
             tcpFlags = MatchTcpFlags(
-                tcpFlags=TcpFlags(bool(flow.tcpFlagsAck),
-                                  bool(flow.tcpFlagsCwr),
-                                  bool(flow.tcpFlagsEce),
-                                  bool(flow.tcpFlagsFin),
-                                  bool(flow.tcpFlagsPsh),
-                                  bool(flow.tcpFlagsRst),
-                                  bool(flow.tcpFlagsSyn),
-                                  bool(flow.tcpFlagsUrg)))
-        return HeaderConstraints(srcIps=flow.srcIp, dstIps=flow.dstIp,
-                                 ipProtocols=[str(flow.ipProtocol)],
-                                 srcPorts=srcPorts,
-                                 dstPorts=dstPorts,
-                                 icmpCodes=icmpCodes,
-                                 icmpTypes=icmpTypes,
-                                 tcpFlags=tcpFlags,
-                                 firewallClassifications=flow.state,
-                                 fragmentOffsets=flow.fragmentOffset,
-                                 packetLengths=flow.packetLength)
+                tcpFlags=TcpFlags(
+                    bool(flow.tcpFlagsAck),
+                    bool(flow.tcpFlagsCwr),
+                    bool(flow.tcpFlagsEce),
+                    bool(flow.tcpFlagsFin),
+                    bool(flow.tcpFlagsPsh),
+                    bool(flow.tcpFlagsRst),
+                    bool(flow.tcpFlagsSyn),
+                    bool(flow.tcpFlagsUrg),
+                )
+            )
+        return HeaderConstraints(
+            srcIps=flow.srcIp,
+            dstIps=flow.dstIp,
+            ipProtocols=[str(flow.ipProtocol)],
+            srcPorts=srcPorts,
+            dstPorts=dstPorts,
+            icmpCodes=icmpCodes,
+            icmpTypes=icmpTypes,
+            tcpFlags=tcpFlags,
+            firewallClassifications=flow.state,
+            fragmentOffsets=flow.fragmentOffset,
+            packetLengths=flow.packetLength,
+        )
 
 
 @attr.s(frozen=True)
@@ -1019,4 +1087,5 @@ class PathConstraints(DataModelElement):
             startLocation=json_dict.get("startLocation"),
             endLocation=json_dict.get("endLocation"),
             transitLocations=json_dict.get("transitLocations"),
-            forbiddenLocations=json_dict.get("forbiddenLocations"))
+            forbiddenLocations=json_dict.get("forbiddenLocations"),
+        )

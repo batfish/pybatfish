@@ -19,13 +19,12 @@ from typing import Any, Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace
 from pybatfish.datamodel.flow import Flow, FlowTrace, Trace
-from pybatfish.datamodel.primitives import (FileLines, Interface, Issue,
-                                            ListWrapper)
+from pybatfish.datamodel.primitives import FileLines, Interface, Issue, ListWrapper
 from pybatfish.datamodel.route import BgpRoute, BgpRouteDiffs
 
-__all__ = ['Answer']
+__all__ = ["Answer"]
 
-_ITERABLE_SCHEMA_PATTERN = re.compile(r'^(List|Set)<(.+)>$', re.IGNORECASE)
+_ITERABLE_SCHEMA_PATTERN = re.compile(r"^(List|Set)<(.+)>$", re.IGNORECASE)
 
 
 class Answer(dict):
@@ -37,8 +36,11 @@ class Answer(dict):
     def question_name(self):
         # type: () -> Optional[str]
         """Return the name of the question that produced this answer."""
-        if "question" in self and "instance" in self["question"] \
-                and "instanceName" in self["question"]["instance"]:
+        if (
+            "question" in self
+            and "instance" in self["question"]
+            and "instanceName" in self["question"]["instance"]
+        ):
             return str(self["question"]["instance"]["instanceName"])
         return None
 
@@ -70,10 +72,13 @@ def _parse_json_with_schema(schema, json_object):
         if not isinstance(json_object, list):
             raise ValueError(
                 "Got non-list value for list/set schema {schema}. Value: {value}".format(
-                    schema=schema, value=json_object))
+                    schema=schema, value=json_object
+                )
+            )
         base_schema = _get_base_schema(schema)
-        return ListWrapper([_parse_json_with_schema(base_schema, element) for
-                            element in json_object])
+        return ListWrapper(
+            [_parse_json_with_schema(base_schema, element) for element in json_object]
+        )
 
     # Handle "primitive" schemas
     if schema == "AclTrace":
@@ -101,8 +106,7 @@ def _parse_json_with_schema(schema, json_object):
     if schema == "Prefix":
         return str(json_object)
     if schema == "SelfDescribing":
-        return _parse_json_with_schema(json_object["schema"],
-                                       json_object.get("value"))
+        return _parse_json_with_schema(json_object["schema"], json_object.get("value"))
     if schema == "String":
         return str(json_object)
     if schema == "Trace":

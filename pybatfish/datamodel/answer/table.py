@@ -19,12 +19,7 @@ import pandas
 
 from pybatfish.datamodel.answer.base import Answer, _parse_json_with_schema
 
-__all__ = [
-    "ColumnMetadata",
-    "TableAnswer",
-    "Row",
-    "TableMetadata"
-]
+__all__ = ["ColumnMetadata", "TableAnswer", "Row", "TableMetadata"]
 
 
 class ColumnMetadata(object):
@@ -38,7 +33,8 @@ class ColumnMetadata(object):
         self.name = dictionary["name"]  # type: str
         self.schema = dictionary["schema"]  # type: str
         self.description = dictionary.get(
-            "description", "No description provided")  # type: str
+            "description", "No description provided"
+        )  # type: str
         self.isKey = dictionary.get("isKey", True)  # type: bool
         self.isValue = dictionary.get("isValue", True)  # type: bool
 
@@ -55,10 +51,8 @@ class TableAnswer(Answer):
             raise ValueError("TableMetadata not found in dictionary")
         super(TableAnswer, self).__init__(dictionary)
         answer_element = dictionary["answerElements"][0]
-        self.metadata = TableMetadata(answer_element["metadata"]) \
-            # type: TableMetadata
-        self.rows = [Row(row) for row in answer_element.get("rows", [])] \
-            # type: List[Row]
+        self.metadata = TableMetadata(answer_element["metadata"])
+        self.rows = [Row(row) for row in answer_element.get("rows", [])]
 
         self.table_data = _rows_to_frame(self.metadata, self.rows)
 
@@ -66,15 +60,13 @@ class TableAnswer(Answer):
         for exclusion in answer_element.get("excludedRows", []):
             if "exclusionName" not in exclusion:
                 raise ValueError("Exclusion does not have 'exclusionName'")
-            self.excluded_rows[exclusion["exclusionName"]] = exclusion.get(
-                "rows", [])
+            self.excluded_rows[exclusion["exclusionName"]] = exclusion.get("rows", [])
 
     def excluded_frame(self, exclusion_name):
         # type: (str) -> pandas.DataFrame
         """Return the excluded data for exclusion_name as a :py:class:`pandas.DataFrame`."""
         if exclusion_name not in self.excluded_rows:
-            raise ValueError(
-                "Exclusion name {} does not exist".format(exclusion_name))
+            raise ValueError("Exclusion name {} does not exist".format(exclusion_name))
         return _rows_to_frame(self.metadata, self.excluded_rows[exclusion_name])
 
     def frame(self):
@@ -106,9 +98,9 @@ class TableMetadata:
     """
 
     def __init__(self, dictionary):
-        self.column_metadata = [ColumnMetadata(column) for column in
-                                dictionary.get("columnMetadata", [])] \
-            # type: List[ColumnMetadata]
+        self.column_metadata = [
+            ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])
+        ]
         self.hints = dictionary.get("displayHints")  # type: Optional[Dict]
 
     def get_column_names(self):
@@ -118,26 +110,33 @@ class TableMetadata:
 
 def _rows_to_frame(table_metadata, rows):
     # type: (TableMetadata, List[Row]) -> pandas.DataFrame
-    row_based = [[_parse_json_with_schema(cm.schema, row.get(cm.name))
-                  for cm in table_metadata.column_metadata]
-                 for row in rows]
+    row_based = [
+        [
+            _parse_json_with_schema(cm.schema, row.get(cm.name))
+            for cm in table_metadata.column_metadata
+        ]
+        for row in rows
+    ]
     column_names = table_metadata.get_column_names()
     # convert data to column format and force dtype=object on Series
     # This gets us consistent `None` values across columns -- no columns
     # are treated as numeric.
-    col_based = {column_names[i]: pandas.Series(column, dtype='object')
-                 for i, column in enumerate(zip(*row_based))}
-    df = pandas.DataFrame.from_dict(col_based, orient='columns',
-                                    dtype='object')
+    col_based = {
+        column_names[i]: pandas.Series(column, dtype="object")
+        for i, column in enumerate(zip(*row_based))
+    }
+    df = pandas.DataFrame.from_dict(col_based, orient="columns", dtype="object")
     # Re-index to:
     # 1. Force ordering of columns
     # 2. Set columns even if the dataframe is empty
-    return df.reindex(labels=column_names, axis='columns')
+    return df.reindex(labels=column_names, axis="columns")
 
 
 def is_table_ans(d):
     # type: (Dict) -> bool
     """Check if a given dictionary represents a table answer."""
-    return ("answerElements" in d and
-            d["answerElements"][0].get("class") ==
-            "org.batfish.datamodel.table.TableAnswerElement")
+    return (
+        "answerElements" in d
+        and d["answerElements"][0].get("class")
+        == "org.batfish.datamodel.table.TableAnswerElement"
+    )

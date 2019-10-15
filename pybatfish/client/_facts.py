@@ -28,27 +28,29 @@ if TYPE_CHECKING:
 BATFISH_FACT_VERSION = "batfish_v0"
 
 # Map of property name to new parent key
-NODE_PROPERTIES_REORG = dict([
-    ('DNS_Servers', 'DNS'),
-    ('DNS_Source_Interface', 'DNS'),
-    ('IKE_Phase1_Keys', 'IPsec'),
-    ('IKE_Phase1_Policies', 'IPsec'),
-    ('IKE_Phase1_Proposals', 'IPsec'),
-    ('IPsec_Peer_Configs', 'IPsec'),
-    ('IPsec_Phase2_Policies', 'IPsec'),
-    ('IPsec_Phase2_Proposals', 'IPsec'),
-    ('NTP_Servers', 'NTP'),
-    ('NTP_Source_Interface', 'NTP'),
-    ('Logging_Servers', 'Syslog'),
-    ('Logging_Source_Interface', 'Syslog'),
-    ('SNMP_Source_Interface', 'SNMP'),
-    ('SNMP_Trap_Servers', 'SNMP'),
-    ('TACACS_Servers', 'TACACS'),
-    ('TACACS_Source_Interface', 'TACACS'),
-])  # type: Dict[Text, Text]
+NODE_PROPERTIES_REORG = dict(
+    [
+        ("DNS_Servers", "DNS"),
+        ("DNS_Source_Interface", "DNS"),
+        ("IKE_Phase1_Keys", "IPsec"),
+        ("IKE_Phase1_Policies", "IPsec"),
+        ("IKE_Phase1_Proposals", "IPsec"),
+        ("IPsec_Peer_Configs", "IPsec"),
+        ("IPsec_Phase2_Policies", "IPsec"),
+        ("IPsec_Phase2_Proposals", "IPsec"),
+        ("NTP_Servers", "NTP"),
+        ("NTP_Source_Interface", "NTP"),
+        ("Logging_Servers", "Syslog"),
+        ("Logging_Source_Interface", "Syslog"),
+        ("SNMP_Source_Interface", "SNMP"),
+        ("SNMP_Trap_Servers", "SNMP"),
+        ("TACACS_Servers", "TACACS"),
+        ("TACACS_Source_Interface", "TACACS"),
+    ]
+)  # type: Dict[Text, Text]
 
 
-def get_facts(session, nodes_specifier='/.*/', snapshot=None):
+def get_facts(session, nodes_specifier="/.*/", snapshot=None):
     # type: (Session, Text, Optional[Text]) -> Dict[Text, Any]
     """
     Get snapshot facts from the specified session for nodes matching the nodes specifier.
@@ -57,49 +59,72 @@ def get_facts(session, nodes_specifier='/.*/', snapshot=None):
     """
     args = {}
     if nodes_specifier:
-        args['nodes'] = nodes_specifier
+        args["nodes"] = nodes_specifier
 
     ans_args = {}
     if snapshot is not None:
-        ans_args['snapshot'] = snapshot
+        ans_args["snapshot"] = snapshot
 
     node_properties = session.q.nodeProperties(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
     interface_properties = session.q.interfaceProperties(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
     bgp_process_properties = session.q.bgpProcessConfiguration(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(**ans_args)
     bgp_peer_properties = session.q.bgpPeerConfiguration(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
     ospf_proc = session.q.ospfProcessConfiguration(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
     ospf_area = session.q.ospfAreaConfiguration(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
     ospf_iface = session.q.ospfInterfaceConfiguration(  # type: ignore
-        **args).answer(**ans_args)
+        **args
+    ).answer(
+        **ans_args
+    )
 
-    return _encapsulate_nodes_facts(_process_facts(node_properties,
-                                                   interface_properties,
-                                                   bgp_process_properties,
-                                                   bgp_peer_properties,
-                                                   ospf_proc,
-                                                   ospf_area,
-                                                   ospf_iface),
-                                    BATFISH_FACT_VERSION)
+    return _encapsulate_nodes_facts(
+        _process_facts(
+            node_properties,
+            interface_properties,
+            bgp_process_properties,
+            bgp_peer_properties,
+            ospf_proc,
+            ospf_area,
+            ospf_iface,
+        ),
+        BATFISH_FACT_VERSION,
+    )
 
 
 def load_facts(input_directory):
     # type: (Text) -> Dict[Text, Any]
     """Load facts from text files in the specified directory."""
-    out = {'version': None, 'nodes': {}}  # type: Dict[Text, Any]
-    out_nodes = out['nodes']
+    out = {"version": None, "nodes": {}}  # type: Dict[Text, Any]
+    out_nodes = out["nodes"]
 
     files = os.listdir(input_directory)
     if not len(files):
-        raise ValueError('No files present in specified directory')
+        raise ValueError("No files present in specified directory")
 
     for filename in files:
-        with open(os.path.join(input_directory, filename), 'r') as f:
+        with open(os.path.join(input_directory, filename), "r") as f:
             dict_ = yaml.safe_load(f.read())
             nodes, version = _unencapsulate_facts(dict_)
 
@@ -110,9 +135,9 @@ def load_facts(input_directory):
                 version_text = version
 
             # Make sure version is consistent
-            if out['version'] and version_text != out['version']:
-                raise ValueError('Input file version mismatch!')
-            out['version'] = version_text
+            if out["version"] and version_text != out["version"]:
+                raise ValueError("Input file version mismatch!")
+            out["version"] = version_text
 
             # We allow a single input file to specify more than one node
             for node in nodes:
@@ -127,30 +152,33 @@ def validate_facts(expected, actual, verbose=False):
     If the `verbose` flag is set, matching facts are returned in addition-to non-matching facts.
     """
     failures = {}
-    expected_facts = expected['nodes']
-    actual_facts = actual['nodes']
-    expected_version = expected['version']
-    actual_version = actual['version']
+    expected_facts = expected["nodes"]
+    actual_facts = actual["nodes"]
+    expected_version = expected["version"]
+    actual_version = actual["version"]
     if expected_version != actual_version:
         return {
-            n: {
-                'Version': {
-                    'expected': expected_version,
-                    'actual': actual_version
-                }
-            } for n in expected_facts
+            n: {"Version": {"expected": expected_version, "actual": actual_version}}
+            for n in expected_facts
         }
     for node in expected_facts:
-        res = _assert_dict_subset(actual_facts.get(node, {}),
-                                  expected_facts[node],
-                                  verbose=verbose)
+        res = _assert_dict_subset(
+            actual_facts.get(node, {}), expected_facts[node], verbose=verbose
+        )
         if res:
             failures[node] = res
     return failures
 
 
-def _process_facts(node_props, iface_props, bgp_process_props, bgp_peer_props,
-                   ospf_proc, ospf_area, ospf_iface):
+def _process_facts(
+    node_props,
+    iface_props,
+    bgp_process_props,
+    bgp_peer_props,
+    ospf_proc,
+    ospf_area,
+    ospf_iface,
+):
     # type: (TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer) -> Dict[Text, Any]
     """Process properties answers into a fact dict."""
     # out = {}
@@ -183,71 +211,70 @@ def _convert_listwrapper(dict_):
 def _process_bgp_processes(node_dict, bgp_proc_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Return fact dict with processed bgp process properties answer added to it."""
-    bgp_proc_dict = bgp_proc_props.frame().to_dict(orient='records')
+    bgp_proc_dict = bgp_proc_props.frame().to_dict(orient="records")
     for r in bgp_proc_dict:
-        node = r.pop('Node')
+        node = r.pop("Node")
         # These will be replaced by bgp peers when we process them
-        r['Neighbors'] = {}
-        node_dict[node]['BGP'] = r
+        r["Neighbors"] = {}
+        node_dict[node]["BGP"] = r
 
 
 def _process_bgp_peers(node_dict, bgp_peer_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Return fact dict with processed bgp peer properties answer added to it."""
-    bgp_peer_dict = bgp_peer_props.frame().to_dict(orient='records')
+    bgp_peer_dict = bgp_peer_props.frame().to_dict(orient="records")
     for r in bgp_peer_dict:
-        node = r.pop('Node')
-        ip = r.get('Remote_IP')
-        node_dict[node]['BGP']['Neighbors'][str(ip)] = r
+        node = r.pop("Node")
+        ip = r.get("Remote_IP")
+        node_dict[node]["BGP"]["Neighbors"][str(ip)] = r
 
 
 def _process_ospf_processes(node_dict, ospf_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Update fact dict with processed ospf process properties answer added to it."""
-    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
-        node = r.pop('Node')
-        proc = r.pop('Process_ID')
+        node = r.pop("Node")
+        proc = r.pop("Process_ID")
 
         _get_or_create_ospf_processes(node_dict, node)[proc] = {
-            'VRF': r.get('VRF'),
-            'Reference_Bandwidth': r.get('Reference_Bandwidth'),
-            'Router_ID': r.get('Router_ID'),
+            "VRF": r.get("VRF"),
+            "Reference_Bandwidth": r.get("Reference_Bandwidth"),
+            "Router_ID": r.get("Router_ID"),
         }
 
 
 def _process_ospf_areas(node_dict, ospf_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Update fact dict with processed ospf area properties answer added to it."""
-    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
-        node = r.pop('Node')
-        proc = r.pop('Process_ID')
-        area = r.pop('Area')
+        node = r.pop("Node")
+        proc = r.pop("Process_ID")
+        area = r.pop("Area")
 
         _get_or_create_ospf_areas(node_dict, node, proc)[area] = {
-            'Area_Type': r.get('Area_Type'),
+            "Area_Type": r.get("Area_Type")
         }
 
 
 def _process_ospf_interfaces(node_dict, ospf_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Update fact dict with processed ospf interface properties answer added to it."""
-    ospf_dict = ospf_props.frame().to_dict(orient='records')
+    ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
-        iface = r.pop('Interface')
+        iface = r.pop("Interface")
         node = iface.hostname
-        proc = r.pop('Process_ID')
-        area = str(r.pop('OSPF_Area_Name'))
+        proc = r.pop("Process_ID")
+        area = str(r.pop("OSPF_Area_Name"))
 
-        _get_or_create_ospf_interfaces(node_dict, node, proc, area)[
-            iface.interface] = {
-            'Enabled': r.get('OSPF_Enabled'),
-            'Passive': r.get('OSPF_Passive'),
-            'Cost': r.get('OSPF_Cost'),
-            'Dead_Interval': r.get('OSPF_Dead_Interval'),
-            'Hello_Interval': r.get('OSPF_Hello_Interval'),
-            'Network_Type': r.get('OSPF_Network_Type'),
+        _get_or_create_ospf_interfaces(node_dict, node, proc, area)[iface.interface] = {
+            "Enabled": r.get("OSPF_Enabled"),
+            "Passive": r.get("OSPF_Passive"),
+            "Cost": r.get("OSPF_Cost"),
+            "Dead_Interval": r.get("OSPF_Dead_Interval"),
+            "Hello_Interval": r.get("OSPF_Hello_Interval"),
+            "Network_Type": r.get("OSPF_Network_Type"),
         }
 
 
@@ -259,7 +286,7 @@ def _get_or_create_ospf_interfaces(node_dict, node, process, area):
     If it or any of its parents does not already exist, create them.
     """
     areas = _get_or_create_ospf_areas(node_dict, node, process)
-    return areas.setdefault(area, {}).setdefault('Interfaces', {})
+    return areas.setdefault(area, {}).setdefault("Interfaces", {})
 
 
 def _get_or_create_ospf_areas(node_dict, node, process):
@@ -270,7 +297,7 @@ def _get_or_create_ospf_areas(node_dict, node, process):
     If it or any of its parents does not already exist, create them.
     """
     procs = _get_or_create_ospf_processes(node_dict, node)
-    return procs.setdefault(process, {}).setdefault('Areas', {})
+    return procs.setdefault(process, {}).setdefault("Areas", {})
 
 
 def _get_or_create_ospf_processes(node_dict, node):
@@ -280,33 +307,34 @@ def _get_or_create_ospf_processes(node_dict, node):
 
     If it or any of its parents does not already exist, create them.
     """
-    return node_dict.setdefault(node, {}).setdefault('OSPF', {}).setdefault(
-        'Processes', {})
+    return (
+        node_dict.setdefault(node, {})
+        .setdefault("OSPF", {})
+        .setdefault("Processes", {})
+    )
 
 
 def _process_interfaces(node_dict, iface_props):
     # type: (Dict[Text, Any], TableAnswer) -> None
     """Return fact dict with processed interface properties answer added to it."""
-    iface_dict = iface_props.frame().to_dict(orient='records')
+    iface_dict = iface_props.frame().to_dict(orient="records")
     for i in iface_dict:
-        node = i['Interface'].hostname
+        node = i["Interface"].hostname
         if node in node_dict:
             _add_interface(node_dict[node], i)
         else:
             # Should be impossible for ifaceProps to have node not in nodeProps
-            raise ValueError(
-                'Interface belongs to non-existent node {}'.format(node)
-            )
+            raise ValueError("Interface belongs to non-existent node {}".format(node))
 
 
 def _process_nodes(node_props):
     # type: (TableAnswer) -> Dict[Text, Any]
     """Return fact dict corresponding to processed node properties answer."""
     out = {}
-    node_dict = node_props.frame().to_dict(orient='records')
+    node_dict = node_props.frame().to_dict(orient="records")
     for record in node_dict:
-        node = record.pop('Node')
-        record.pop('Interfaces')
+        node = record.pop("Node")
+        record.pop("Interfaces")
 
         # Remove Batfish-constructed structures e.g.:
         # routing policies like ~BGP_COMMON_EXPORT_POLICY:default~
@@ -326,20 +354,20 @@ def _remove_constructed_names(dict_):
     """
     for k in dict_:
         if isinstance(dict_[k], list):
-            dict_[k] = [i for i in dict_[k] if not i.startswith('~')]
+            dict_[k] = [i for i in dict_[k] if not i.startswith("~")]
 
 
 def _add_interface(node_dict, iface_dict_in):
     # type: (Dict[Text, Any], Dict[Text, Any]) -> None
     """Update and add interface dict to the specified node dict."""
-    if 'Interfaces' not in node_dict:
-        node_dict['Interfaces'] = {}
+    if "Interfaces" not in node_dict:
+        node_dict["Interfaces"] = {}
     iface_dict = deepcopy(iface_dict_in)
 
-    iface_name = iface_dict_in['Interface'].interface
-    iface_dict.pop('Interface')
+    iface_name = iface_dict_in["Interface"].interface
+    iface_dict.pop("Interface")
 
-    node_dict['Interfaces'][iface_name] = iface_dict
+    node_dict["Interfaces"][iface_name] = iface_dict
 
 
 def _reorg_dict(dict, reorg_map):
@@ -354,7 +382,7 @@ def _reorg_dict(dict, reorg_map):
 
 def _write_yaml_file(dict_, filepath):
     # type: (Dict[Text, Any], Text) -> None
-    with open(filepath, 'w') as f:
+    with open(filepath, "w") as f:
         # default_flow_style=False dumps lists as hyphen lists instead of
         # square bracket lists
         yaml.safe_dump(dict_, stream=f, default_flow_style=False)
@@ -368,30 +396,28 @@ def write_facts(output_directory, facts):
     if version:
         version_text = version
     else:
-        raise ValueError('Version must be specified to write facts.')
+        raise ValueError("Version must be specified to write facts.")
 
     # Write facts for each node in its own file
     for node in nodes:
-        filepath = os.path.join(output_directory, '{}.yml'.format(node))
-        node_facts = _encapsulate_nodes_facts({node: facts['nodes'][node]},
-                                              version_text)
+        filepath = os.path.join(output_directory, "{}.yml".format(node))
+        node_facts = _encapsulate_nodes_facts(
+            {node: facts["nodes"][node]}, version_text
+        )
         _write_yaml_file(node_facts, filepath)
 
 
 def _encapsulate_nodes_facts(nodes_facts, version):
     # type: (Dict[Text, Any], Text) -> Dict[Text, Any]
     """Format node(s) facts in final fact format (the way they are written to file)."""
-    return {
-        'nodes': nodes_facts,
-        'version': version,
-    }
+    return {"nodes": nodes_facts, "version": version}
 
 
 def _unencapsulate_facts(facts):
     # type: (Dict[Text, Any]) -> Tuple[Any, Optional[Any]]
     """Extract node facts and version from final fact format."""
-    assert 'nodes' in facts, 'No nodes present in parsed facts file(s)'
-    return facts['nodes'], facts.get('version')
+    assert "nodes" in facts, "No nodes present in parsed facts file(s)"
+    return facts["nodes"], facts.get("version")
 
 
 def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
@@ -407,20 +433,15 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
     else:
         diffs_out = diffs
     for k in expected:
-        key_name = '{}{}'.format(prefix, k)
+        key_name = "{}{}".format(prefix, k)
         if k not in actual:
-            diffs_out[key_name] = {
-                'key_present': False,
-                'expected': expected[k],
-            }
+            diffs_out[key_name] = {"key_present": False, "expected": expected[k]}
         else:
             if isinstance(expected[k], Mapping):
-                _assert_dict_subset(actual[k], expected[k], key_name + '.',
-                                    diffs_out, verbose=verbose)
+                _assert_dict_subset(
+                    actual[k], expected[k], key_name + ".", diffs_out, verbose=verbose
+                )
             else:
                 if expected[k] != actual[k] or verbose:
-                    diffs_out[key_name] = {
-                        'expected': expected[k],
-                        'actual': actual[k],
-                    }
+                    diffs_out[key_name] = {"expected": expected[k], "actual": actual[k]}
     return diffs_out

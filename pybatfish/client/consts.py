@@ -143,7 +143,8 @@ class WorkStatusCode(str, Enum):
             WorkStatusCode.REQUEUEFAILURE,
             WorkStatusCode.TERMINATEDABNORMALLY,
             WorkStatusCode.TERMINATEDBYUSER,
-            WorkStatusCode.TERMINATEDNORMALLY]
+            WorkStatusCode.TERMINATEDNORMALLY,
+        ]
 
 
 class CoordConsts(object):

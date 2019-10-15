@@ -17,11 +17,19 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 import requests
 
-from pybatfish.client._diagnostics import (_INIT_INFO_QUESTIONS, _S3_BUCKET,
-                                           _S3_REGION, upload_diagnostics)
-from pybatfish.client.commands import (bf_delete_network,
-                                       bf_delete_snapshot, bf_init_snapshot,
-                                       bf_session, bf_set_network)
+from pybatfish.client._diagnostics import (
+    _INIT_INFO_QUESTIONS,
+    _S3_BUCKET,
+    _S3_REGION,
+    upload_diagnostics,
+)
+from pybatfish.client.commands import (
+    bf_delete_network,
+    bf_delete_snapshot,
+    bf_init_snapshot,
+    bf_session,
+    bf_set_network,
+)
 from pybatfish.question.question import QuestionBase
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -40,7 +48,7 @@ def network():
 def example_snapshot(network):
     bf_set_network(network)
     name = uuid.uuid4().hex
-    bf_init_snapshot(join(_this_dir, 'snapshot'), name)
+    bf_init_snapshot(join(_this_dir, "snapshot"), name)
     yield name
     # cleanup
     bf_delete_snapshot(name)
@@ -56,13 +64,15 @@ def test_questions(network, example_snapshot):
 def test_upload_diagnostics(network, example_snapshot):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
-    resource = upload_diagnostics(session=bf_session, metadata={},
-                                  dry_run=False, resource_prefix='test/')
-    base_url = 'https://{bucket}.s3-{region}.amazonaws.com'.format(
-        bucket=_S3_BUCKET, region=_S3_REGION)
+    resource = upload_diagnostics(
+        session=bf_session, metadata={}, dry_run=False, resource_prefix="test/"
+    )
+    base_url = "https://{bucket}.s3-{region}.amazonaws.com".format(
+        bucket=_S3_BUCKET, region=_S3_REGION
+    )
 
     # Confirm none of the uploaded questions are accessible
     for template in _INIT_INFO_QUESTIONS:
         q = QuestionBase(template, bf_session)
-        r = requests.get('{}/{}/{}'.format(base_url, resource, q.get_name()))
-        assert (r.status_code == 403)
+        r = requests.get("{}/{}/{}".format(base_url, resource, q.get_name()))
+        assert r.status_code == 403

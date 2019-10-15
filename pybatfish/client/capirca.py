@@ -27,7 +27,8 @@ try:
     from capirca.lib import naming, policy
 except ImportError:
     logging.exception(
-        'Capirca must be installed to use the Pybatfish Capirca extensions')
+        "Capirca must be installed to use the Pybatfish Capirca extensions"
+    )
     raise
 
 from pybatfish.datamodel import AddressGroup, ReferenceBook
@@ -41,7 +42,7 @@ __all__ = ["create_reference_book", "init_snapshot_from_acl"]
 def _item_to_python_repr(item, definitions):
     """Converts the given Capirca item into a typed Python object."""
     # Capirca comments are just appended to item strings
-    s = item.split('#')[0].strip()
+    s = item.split("#")[0].strip()
 
     # A reference to another network
     if s in definitions.networks:
@@ -67,33 +68,36 @@ def _item_to_python_repr(item, definitions):
     except ValueError:
         pass
 
-    raise ValueError('Unknown how to convert {s}'.format(s=s))
+    raise ValueError("Unknown how to convert {s}".format(s=s))
 
 
 def _entry_to_group(name, items, definitions):
     """Converts one network definition into a Batfish AddressGroup."""
     logger = logging.getLogger(__name__)
     try:
-        converted = [_item_to_python_repr(i, definitions) for i in
-                     items]
+        converted = [_item_to_python_repr(i, definitions) for i in items]
     except ValueError:
-        logger.exception('error converting %s, creating empty group', name)
+        logger.exception("error converting %s, creating empty group", name)
         return AddressGroup(name)
 
-    if any(isinstance(c, (ipaddress.IPv6Address, ipaddress.IPv6Network))
-           for c in converted):
-        logger.warning('Skipping IPv6 addresses in %s', name)
+    if any(
+        isinstance(c, (ipaddress.IPv6Address, ipaddress.IPv6Network)) for c in converted
+    ):
+        logger.warning("Skipping IPv6 addresses in %s", name)
 
-    converted_v4 = [str(c) for c in converted if
-                    isinstance(c,
-                               (ipaddress.IPv4Address, ipaddress.IPv4Network))]
+    converted_v4 = [
+        str(c)
+        for c in converted
+        if isinstance(c, (ipaddress.IPv4Address, ipaddress.IPv4Network))
+    ]
 
-    converted_group = [c for c in converted if
-                       isinstance(c, six.string_types)]
+    converted_group = [c for c in converted if isinstance(c, six.string_types)]
 
     return AddressGroup(
-        '{name}'.format(name=name), addresses=converted_v4,
-        childGroupNames=converted_group)
+        "{name}".format(name=name),
+        addresses=converted_v4,
+        childGroupNames=converted_group,
+    )
 
 
 def _get_acl_text(pol, platform):
@@ -105,32 +109,41 @@ def _get_acl_text(pol, platform):
 
     platform = platform.strip().lower()
 
-    if platform == 'arista':
+    if platform == "arista":
         from capirca.lib import arista
+
         return str(arista.Arista(pol, exp_info_weeks))
-    elif platform == 'cisco' or platform == 'cisco-nx':
+    elif platform == "cisco" or platform == "cisco-nx":
         from capirca.lib import cisco
+
         return str(cisco.Cisco(pol, exp_info_weeks))
-    elif platform == 'cisco-xr':
+    elif platform == "cisco-xr":
         from capirca.lib import ciscoxr
+
         return str(ciscoxr.CiscoXR(pol, exp_info_weeks))
-    elif platform == 'ciscoasa':
+    elif platform == "ciscoasa":
         from capirca.lib import ciscoasa
+
         return str(ciscoasa.CiscoASA(pol, exp_info_weeks))
-    elif platform == 'juniper':
+    elif platform == "juniper":
         from capirca.lib import juniper
+
         return str(juniper.Juniper(pol, exp_info_weeks))
-    elif platform == 'juniper-srx':
+    elif platform == "juniper-srx":
         from capirca.lib import junipersrx
+
         return str(junipersrx.JuniperSRX(pol, exp_info_weeks))
-    elif platform == 'paloalto':
+    elif platform == "paloalto":
         # from capirca.lib import paloaltofw
         # return str(paloaltofw.PaloAltoFW(pol, exp_info_weeks))
         raise ValueError(
-            'Capirca generates Palo Alto ACLs in XML form, which Batfish does not yet parse')
+            "Capirca generates Palo Alto ACLs in XML form, which Batfish does not yet parse"
+        )
     else:
         raise ValueError(
-            'Either Capirca or Pybatfish does not handle converting to ACLs in platform: ' + platform)
+            "Either Capirca or Pybatfish does not handle converting to ACLs in platform: "
+            + platform
+        )
 
 
 def _init_definitions(definitions_or_path):
@@ -141,9 +154,16 @@ def _init_definitions(definitions_or_path):
     return naming.Naming(naming_dir=definitions_or_path)
 
 
-def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
-                           snapshot_name=None, overwrite=False,
-                           extra_args=None):
+def init_snapshot_from_acl(
+    session,
+    pol,
+    definitions,
+    platform,
+    filename=None,
+    snapshot_name=None,
+    overwrite=False,
+    extra_args=None,
+):
     # type: (Session, Union[str, policy.Policy], Union[str, naming.Naming], str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
     """
     Initialize a snapshot containing a single host with the given ACL.
@@ -177,7 +197,7 @@ def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
     definitions = _init_definitions(definitions)
 
     if not isinstance(pol, policy.Policy):
-        with open(pol, 'r') as pol_file:
+        with open(pol, "r") as pol_file:
             pol_text = pol_file.read()
         pol_dir = os.path.dirname(pol)
 
@@ -187,16 +207,22 @@ def init_snapshot_from_acl(session, pol, definitions, platform, filename=None,
         optimize = False
 
         pol = policy.ParsePolicy(
-            pol_text, definitions, base_dir=pol_dir, optimize=optimize)
+            pol_text, definitions, base_dir=pol_dir, optimize=optimize
+        )
 
     file_text = _get_acl_text(pol, platform)
 
     return session.init_snapshot_from_text(
-        file_text, filename=filename, platform=platform,
-        snapshot_name=snapshot_name, overwrite=overwrite, extra_args=extra_args)
+        file_text,
+        filename=filename,
+        platform=platform,
+        snapshot_name=snapshot_name,
+        overwrite=overwrite,
+        extra_args=extra_args,
+    )
 
 
-def create_reference_book(definitions, book_name='capirca'):
+def create_reference_book(definitions, book_name="capirca"):
     # type: (Union[str, naming.Naming], str) -> ReferenceBook
     """
     Create a :py:class:~pybatfish.datamodel.referencelibrary.ReferenceBook containing the given Capirca network definitions.
@@ -210,7 +236,9 @@ def create_reference_book(definitions, book_name='capirca'):
     """
     definitions = _init_definitions(definitions)
 
-    groups = [_entry_to_group(network.name, network.items, definitions)
-              for network in definitions.networks.values()]
+    groups = [
+        _entry_to_group(network.name, network.items, definitions)
+        for network in definitions.networks.values()
+    ]
 
     return ReferenceBook(name=book_name, addressGroups=groups)

@@ -27,7 +27,7 @@ def testColumnMetadataDeserialization():
         "schema": "Node",
         "description": "itsme",
         "isKey": False,
-        "isValue": False
+        "isValue": False,
     }
     column = ColumnMetadata(columnMetadata)
 
@@ -40,30 +40,21 @@ def testColumnMetadataDeserialization():
 
 # exception is thrown if name is missing
 def testColumnMetadataNoName():
-    columnMetadata = {
-        "noName": "col1",
-        "schema": "Node"
-    }
+    columnMetadata = {"noName": "col1", "schema": "Node"}
     with pytest.raises(ValueError):
         ColumnMetadata(columnMetadata)
 
 
 # exception is thrown is schema is missing
 def testColumnMetadataNoSchema():
-    columnMetadata = {
-        "name": "col1",
-        "noSchema": "Node"
-    }
+    columnMetadata = {"name": "col1", "noSchema": "Node"}
     with pytest.raises(ValueError):
         ColumnMetadata(columnMetadata)
 
 
 # optional fields are populated
 def testColumnMetadataOptionalFields():
-    columnMetadata = {
-        "name": "col1",
-        "schema": "Node"
-    }
+    columnMetadata = {"name": "col1", "schema": "Node"}
     column = ColumnMetadata(columnMetadata)
 
     assert column.description
