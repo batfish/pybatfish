@@ -29,6 +29,7 @@ __all__ = [
     "ReferenceBook",
     "ReferenceLibrary",
     "RoleDimensionMapping",
+    "RoleMapping",
 ]
 
 
