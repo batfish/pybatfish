@@ -14,8 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import (Any, Dict, List, Optional, TYPE_CHECKING,  # noqa: F401
-                    Text, Union)
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, Union  # noqa: F401
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -28,7 +27,8 @@ from pybatfish.client.consts import CoordConstsV2
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     NodeRolesData,
-    ReferenceBook)
+    ReferenceBook,
+)
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
 from .options import Options
@@ -42,40 +42,45 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # Setup a session, configure retry policy
 _requests_session = requests.Session()
 # Prefix "http" will cover both "http" & "https"
-_requests_session.mount("http", HTTPAdapter(
-    max_retries=Retry(
-        connect=Options.max_tries_to_connect_to_coordinator,
-        read=Options.max_tries_to_connect_to_coordinator,
-        backoff_factor=Options.request_backoff_factor)))
+_requests_session.mount(
+    "http",
+    HTTPAdapter(
+        max_retries=Retry(
+            connect=Options.max_tries_to_connect_to_coordinator,
+            read=Options.max_tries_to_connect_to_coordinator,
+            backoff_factor=Options.request_backoff_factor,
+        )
+    ),
+)
 
 _encoder = BfJsonEncoder()
 
 __all__ = [
-    'add_issue_config',
-    'delete_issue_config',
-    'delete_network',
-    'delete_node_role_dimension',
-    'delete_reference_book',
-    'delete_snapshot',
-    'fork_snapshot',
-    'get_answer',
-    'get_issue_config',
-    'get_network',
-    'get_network_object',
-    'get_node_role_dimension',
-    'get_node_roles',
-    'get_reference_book',
-    'get_reference_library',
-    'get_snapshot_input_object',
-    'get_snapshot_object',
-    'list_networks',
-    'list_snapshots',
-    'put_network_object',
-    'put_node_role_dimension',
-    'put_reference_book',
-    'put_snapshot_object',
-    'read_question_settings',
-    'write_question_settings'
+    "add_issue_config",
+    "delete_issue_config",
+    "delete_network",
+    "delete_node_role_dimension",
+    "delete_reference_book",
+    "delete_snapshot",
+    "fork_snapshot",
+    "get_answer",
+    "get_issue_config",
+    "get_network",
+    "get_network_object",
+    "get_node_role_dimension",
+    "get_node_roles",
+    "get_reference_book",
+    "get_reference_library",
+    "get_snapshot_input_object",
+    "get_snapshot_object",
+    "list_networks",
+    "list_snapshots",
+    "put_network_object",
+    "put_node_role_dimension",
+    "put_reference_book",
+    "put_snapshot_object",
+    "read_question_settings",
+    "write_question_settings",
 ]
 
 
@@ -84,10 +89,12 @@ def add_issue_config(session, issue_config):
     """Adds the issue configuration to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add issue config")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_SETTINGS,
-                                     CoordConstsV2.RSC_ISSUES)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SETTINGS,
+        CoordConstsV2.RSC_ISSUES,
+    )
     _post(session, url_tail, issue_config)
 
 
@@ -99,12 +106,14 @@ def delete_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to delete issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to delete issue config")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SETTINGS,
-                                           CoordConstsV2.RSC_ISSUES,
-                                           major,
-                                           minor)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SETTINGS,
+        CoordConstsV2.RSC_ISSUES,
+        major,
+        minor,
+    )
     return _delete(session, url_tail)
 
 
@@ -120,9 +129,9 @@ def list_snapshots(session, verbose):
     """List the snapshots in the current network."""
     if not session.network:
         raise ValueError("Network must be set to list snapshots")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                  session.network,
-                                  CoordConstsV2.RSC_SNAPSHOTS)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_SNAPSHOTS
+    )
     return _get_list(session, url_tail, {CoordConstsV2.QP_VERBOSE: verbose})
 
 
@@ -130,10 +139,12 @@ def fork_snapshot(session, obj):
     # type: (Session, Dict[str, Any]) -> None
     if not session.network:
         raise ValueError("Network must be set to fork a snapshot")
-    url_tail = "/{}/{}/{}:{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_SNAPSHOTS,
-                                     CoordConstsV2.RSC_FORK)
+    url_tail = "/{}/{}/{}:{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        CoordConstsV2.RSC_FORK,
+    )
     return _post(session, url_tail, obj)
 
 
@@ -147,8 +158,9 @@ def delete_network(session, name):
 def delete_network_object(session, key):
     # type: (Session, Text) -> None
     """Deletes extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS
+    )
     return _delete(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
@@ -159,10 +171,12 @@ def delete_node_role_dimension(session, dimension):
         raise ValueError("Network must be set to delete a node role dimension")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_NODE_ROLES,
-                                     dimension)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_NODE_ROLES,
+        dimension,
+    )
     return _delete(session, url_tail)
 
 
@@ -173,29 +187,34 @@ def delete_reference_book(session, book_name):
         raise ValueError("Network must be set to delete a reference book")
     if not book_name:
         raise ValueError("Book name must be a non-empty string")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
-                                     book_name)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_REFERENCE_LIBRARY,
+        book_name,
+    )
     return _delete(session, url_tail)
 
 
 def delete_snapshot(session, snapshot, network):
     # type: (Session, Text, Text) -> None
     """Deletes the snapshot with the given name."""
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network,
-                                     CoordConstsV2.RSC_SNAPSHOTS, snapshot)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, network, CoordConstsV2.RSC_SNAPSHOTS, snapshot
+    )
     return _delete(session, url_tail)
 
 
 def get_answer(session, question, params):
     # type: (Session, str, Dict[str, Optional[str]]) -> Dict[str, Any]
     """Get answer for the specified question."""
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_QUESTIONS,
-                                        question,
-                                        CoordConstsV2.RSC_ANSWER)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_QUESTIONS,
+        question,
+        CoordConstsV2.RSC_ANSWER,
+    )
     return _get_dict(session, url_tail, params)
 
 
@@ -207,12 +226,14 @@ def get_issue_config(session, major, minor):
         raise ValueError("Major issue type must be set to get issue config")
     if not minor:
         raise ValueError("Minor issue type must be set to get issue config")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SETTINGS,
-                                           CoordConstsV2.RSC_ISSUES,
-                                           major,
-                                           minor)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SETTINGS,
+        CoordConstsV2.RSC_ISSUES,
+        major,
+        minor,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -226,30 +247,35 @@ def get_network(session, network):
 def get_network_object(session, key):
     # type: (Session, Text) -> Any
     """Gets extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS
+    )
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
 def get_snapshot_input_object(session, key, snapshot=None):
     # type: (Session, Text, Optional[Text]) -> Any
     """Gets input object with given key for the current snapshot."""
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(snapshot),
-                                        CoordConstsV2.RSC_INPUT)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_INPUT,
+    )
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
 def get_snapshot_object(session, key, snapshot=None):
     # type: (Session, Text, Optional[Text]) -> Any
     """Gets extended object with given key for the current snapshot."""
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(snapshot),
-                                        CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_OBJECTS,
+    )
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
@@ -260,10 +286,12 @@ def get_node_role_dimension(session, dimension):
         raise ValueError("Network must be set to get node roles")
     if not dimension:
         raise ValueError("Dimension must be a non-empty string")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_NODE_ROLES,
-                                     dimension)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_NODE_ROLES,
+        dimension,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -272,8 +300,9 @@ def get_node_roles(session):
     """Gets the definitions of node roles for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_NODE_ROLES)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_NODE_ROLES
+    )
     return _get_dict(session, url_tail)
 
 
@@ -284,10 +313,12 @@ def get_reference_book(session, book_name):
         raise ValueError("Network must be set to get a reference book")
     if not book_name:
         raise ValueError("Book name must be a non-empty string")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
-                                     book_name)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_REFERENCE_LIBRARY,
+        book_name,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -296,8 +327,9 @@ def get_reference_library(session):
     """Gets the reference library for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get the reference library")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_REFERENCE_LIBRARY)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_REFERENCE_LIBRARY
+    )
     return _get_dict(session, url_tail)
 
 
@@ -306,26 +338,29 @@ def get_snapshot_inferred_node_roles(session, snapshot=None):
     """Gets suggested definitions and hypothetical assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(snapshot),
-                                        CoordConstsV2.RSC_INFERRED_NODE_ROLES)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_INFERRED_NODE_ROLES,
+    )
     return _get_dict(session, url_tail)
 
 
-def get_snapshot_inferred_node_role_dimension(session, dimension,
-                                              snapshot=None):
+def get_snapshot_inferred_node_role_dimension(session, dimension, snapshot=None):
     # type: (Session, str, Optional[str]) -> Dict
     """Gets the suggested definition and hypothetical assignments of node roles for the given inferred dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.get_snapshot(snapshot),
-                                           CoordConstsV2.RSC_INFERRED_NODE_ROLES,
-                                           dimension)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_INFERRED_NODE_ROLES,
+        dimension,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -334,11 +369,13 @@ def get_snapshot_node_roles(session, snapshot=None):
     """Gets the definitions and assignments of node roles for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(snapshot),
-                                        CoordConstsV2.RSC_NODE_ROLES)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_NODE_ROLES,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -347,12 +384,14 @@ def get_snapshot_node_role_dimension(session, dimension, snapshot=None):
     """Gets the definition and assignments of node roles for the given dimension for the active network and snapshot."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SNAPSHOTS,
-                                           session.get_snapshot(snapshot),
-                                           CoordConstsV2.RSC_NODE_ROLES,
-                                           dimension)
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_NODE_ROLES,
+        dimension,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -363,9 +402,13 @@ def get_work_log(session, snapshot, work_id):
         raise ValueError("Network must be set to get node roles")
 
     url_tail = "/{}/{}/{}/{}/{}/{}".format(
-        CoordConstsV2.RSC_NETWORKS, session.network,
-        CoordConstsV2.RSC_SNAPSHOTS, session.get_snapshot(snapshot),
-        CoordConstsV2.RSC_WORK_LOG, work_id)
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_WORK_LOG,
+        work_id,
+    )
 
     return _get(session, url_tail, dict()).text
 
@@ -379,8 +422,9 @@ def get_component_versions(session):
 def put_network_object(session, key, data):
     # type: (Session, Text, Any) -> None
     """Put data as extended object with given key for the current network."""
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_OBJECTS
+    )
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
 
@@ -389,10 +433,12 @@ def put_node_role_dimension(session, dimension):
     """Adds a new node role dimension to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add node role dimension")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_NODE_ROLES,
-                                     dimension.name)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_NODE_ROLES,
+        dimension.name,
+    )
     _put_json(session, url_tail, dimension)
 
 
@@ -401,8 +447,9 @@ def put_node_roles(session, node_roles_data):
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
-    url_tail = "/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS, session.network,
-                                  CoordConstsV2.RSC_NODE_ROLES)
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_NODE_ROLES
+    )
     return _put_json(session, url_tail, node_roles_data)
 
 
@@ -411,21 +458,25 @@ def put_reference_book(session, book):
     """Put a reference book to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add reference book")
-    url_tail = "/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                     session.network,
-                                     CoordConstsV2.RSC_REFERENCE_LIBRARY,
-                                     book.name)
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_REFERENCE_LIBRARY,
+        book.name,
+    )
     _put_json(session, url_tail, book)
 
 
 def put_snapshot_object(session, key, data, snapshot=None):
     # type: (Session, Text, Any, Optional[Text]) -> None
     """Put data as extended object with given key for the current snapshot."""
-    url_tail = "/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                        session.network,
-                                        CoordConstsV2.RSC_SNAPSHOTS,
-                                        session.get_snapshot(snapshot),
-                                        CoordConstsV2.RSC_OBJECTS)
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_OBJECTS,
+    )
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
 
@@ -434,13 +485,15 @@ def read_question_settings(session, question_class, json_path):
     """Retrieves the settings for a question class."""
     if not session.network:
         raise ValueError("Network must be set to read question class settings")
-    json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SETTINGS,
-                                           CoordConstsV2.RSC_QUESTIONS,
-                                           question_class,
-                                           json_path_tail)
+    json_path_tail = "/".join(json_path) if json_path else ""
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SETTINGS,
+        CoordConstsV2.RSC_QUESTIONS,
+        question_class,
+        json_path_tail,
+    )
     return _get_dict(session, url_tail)
 
 
@@ -449,13 +502,15 @@ def write_question_settings(session, settings, question_class, json_path):
     """Writes settings for a question class."""
     if not session.network:
         raise ValueError("Network must be set to write question class settings")
-    json_path_tail = '/'.join(json_path) if json_path else ""
-    url_tail = "/{}/{}/{}/{}/{}/{}".format(CoordConstsV2.RSC_NETWORKS,
-                                           session.network,
-                                           CoordConstsV2.RSC_SETTINGS,
-                                           CoordConstsV2.RSC_QUESTIONS,
-                                           question_class,
-                                           json_path_tail)
+    json_path_tail = "/".join(json_path) if json_path else ""
+    url_tail = "/{}/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SETTINGS,
+        CoordConstsV2.RSC_QUESTIONS,
+        question_class,
+        json_path_tail,
+    )
     _put_json(session, url_tail, settings)
 
 
@@ -475,13 +530,14 @@ def _delete(session, url_tail, params=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
-               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {
+        CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
+        CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__,
+    }
     url = session.get_base_url2() + url_tail
-    response = requests.delete(url,
-                               headers=headers,
-                               params=params,
-                               verify=session.verify_ssl_certs)
+    response = requests.delete(
+        url, headers=headers, params=params, verify=session.verify_ssl_certs
+    )
     _check_response_status(response)
 
 
@@ -492,14 +548,18 @@ def _get(session, url_tail, params, stream=False):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
-               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {
+        CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
+        CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__,
+    }
     url = session.get_base_url2() + url_tail
-    response = requests.get(url,
-                            headers=headers,
-                            params=params,
-                            stream=stream,
-                            verify=session.verify_ssl_certs)
+    response = requests.get(
+        url,
+        headers=headers,
+        params=params,
+        stream=stream,
+        verify=session.verify_ssl_certs,
+    )
     _check_response_status(response)
     return response
 
@@ -545,14 +605,18 @@ def _post(session, url_tail, obj, params=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
-               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {
+        CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
+        CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__,
+    }
     url = session.get_base_url2() + url_tail
-    response = requests.post(url,
-                             json=_encoder.default(obj),
-                             headers=headers,
-                             params=params,
-                             verify=session.verify_ssl_certs)
+    response = requests.post(
+        url,
+        json=_encoder.default(obj),
+        headers=headers,
+        params=params,
+        verify=session.verify_ssl_certs,
+    )
     _check_response_status(response)
     return None
 
@@ -564,17 +628,21 @@ def _put(session, url_tail, params=None, json=None, stream=None):
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    headers = {CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
-               CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__}
+    headers = {
+        CoordConstsV2.HTTP_HEADER_BATFISH_APIKEY: session.api_key,
+        CoordConstsV2.HTTP_HEADER_BATFISH_VERSION: pybatfish.__version__,
+    }
     if stream:
-        headers['Content-Type'] = 'application/octet-stream'
+        headers["Content-Type"] = "application/octet-stream"
     url = session.get_base_url2() + url_tail
-    response = requests.put(url,
-                            json=json,
-                            data=stream,
-                            headers=headers,
-                            verify=session.verify_ssl_certs,
-                            params=params)
+    response = requests.put(
+        url,
+        json=json,
+        data=stream,
+        headers=headers,
+        verify=session.verify_ssl_certs,
+        params=params,
+    )
     _check_response_status(response)
     return None
 

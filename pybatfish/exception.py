@@ -14,10 +14,10 @@
 #   limitations under the License.
 
 __all__ = [
-    'BatfishAssertException',
-    'BatfishAssertWarning',
-    'BatfishException',
-    'QuestionValidationException',
+    "BatfishAssertException",
+    "BatfishAssertWarning",
+    "BatfishException",
+    "QuestionValidationException",
 ]
 
 

@@ -286,6 +286,5 @@ nodes:
       TACACS_Source_Interface: null
     VRFs:
     - default
-    Vendor_Family: CISCO
     Zones: []
 version: batfish_v0

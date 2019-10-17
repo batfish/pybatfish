@@ -16,9 +16,14 @@ from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
 
-from pybatfish.client.commands import (bf_delete_network, bf_get_work_status,
-                                       bf_init_analysis, bf_init_snapshot,
-                                       bf_session, bf_set_network)
+from pybatfish.client.commands import (
+    bf_delete_network,
+    bf_get_work_status,
+    bf_init_analysis,
+    bf_init_snapshot,
+    bf_session,
+    bf_set_network,
+)
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.exception import BatfishException
 from pybatfish.question import bfq
@@ -26,14 +31,13 @@ from pybatfish.question.question import load_questions
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_stable_question_dir = abspath(join(_root_dir, 'questions', 'stable'))
-_experimental_question_dir = abspath(
-    join(_root_dir, 'questions', 'experimental'))
-TEST_NETWORK = 'ref_network'
-TEST_NETWORK_TR = 'ref_network_tr'
+_stable_question_dir = abspath(join(_root_dir, "questions", "stable"))
+_experimental_question_dir = abspath(join(_root_dir, "questions", "experimental"))
+TEST_NETWORK = "ref_network"
+TEST_NETWORK_TR = "ref_network_tr"
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def network():
     load_questions(_stable_question_dir)
     load_questions(_experimental_question_dir)
@@ -46,7 +50,7 @@ def network():
     bf_delete_network(TEST_NETWORK)
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def traceroute_network():
     load_questions(_stable_question_dir)
     load_questions(_experimental_question_dir)
@@ -55,8 +59,7 @@ def traceroute_network():
     except Exception:
         pass
     bf_set_network(TEST_NETWORK_TR)
-    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"),
-                           name="snapshot_tracert")
+    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
     bf_delete_network(TEST_NETWORK_TR)
 
 
@@ -84,13 +87,18 @@ def test_init_analysis(network):
 
 
 def test_answer_traceroute(traceroute_network):
-    bf_session.additional_args = {'debugflags': 'traceroute'}
-    answer = bfq.traceroute(startLocation="hop1", headers=HeaderConstraints(
-        dstIps="1.0.0.2")).answer().frame()
-    list_traces = answer.iloc[0]['Traces']
+    bf_session.additional_args = {"debugflags": "traceroute"}
+    answer = (
+        bfq.traceroute(
+            startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")
+        )
+        .answer()
+        .frame()
+    )
+    list_traces = answer.iloc[0]["Traces"]
     assert len(list_traces) == 1
     trace = list_traces[0]
     assert trace.disposition == "ACCEPTED"
     hops = trace.hops
     assert len(hops) == 2
-    assert hops[-1].steps[-1].action == 'ACCEPTED'
+    assert hops[-1].steps[-1].action == "ACCEPTED"

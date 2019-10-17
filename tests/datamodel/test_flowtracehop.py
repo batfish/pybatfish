@@ -26,11 +26,9 @@ def testFlowTraceHopDeserialization():
             "node1": "node1",
             "node1interface": "Ethernet9",
             "node2": "(none)",
-            "node2interface": "null_interface"
+            "node2interface": "null_interface",
         },
-        "routes": [
-            "BgpRoute<12.10.16.8/25,nhip:9.1.1.2,nhint:dynamic>_fnhip:9.1.1.2"
-        ],
+        "routes": ["BgpRoute<12.10.16.8/25,nhip:9.1.1.2,nhint:dynamic>_fnhip:9.1.1.2"],
         "transformedFlow": {
             "dscp": 0,
             "dstIp": "2.1.1.1",
@@ -54,8 +52,8 @@ def testFlowTraceHopDeserialization():
             "tcpFlagsPsh": 0,
             "tcpFlagsRst": 0,
             "tcpFlagsSyn": 0,
-            "tcpFlagsUrg": 0
-        }
+            "tcpFlagsUrg": 0,
+        },
     }
     hop = FlowTraceHop.from_dict(hopDict)
     hopStr = str(hop)
@@ -78,7 +76,7 @@ def testFlowTraceHopDeserialization_noRoutes():
             "node1": "node1",
             "node1interface": "Ethernet9",
             "node2": "(none)",
-            "node2interface": "null_interface"
+            "node2interface": "null_interface",
         }
     }
     hop = FlowTraceHop.from_dict(hopDict)

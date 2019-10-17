@@ -36,27 +36,25 @@ class MockEntryPoint(object):
 
 def test_get_session_types():
     """Test getting possible session types."""
-    dummy_session_type = 'dummy'
-    dummy_session_module = 'dummy_session_module'
+    dummy_session_type = "dummy"
+    dummy_session_module = "dummy_session_module"
 
     # Add in a dummy entry point in addition to installed entry_points
-    entry_points = (
-        [i for i in pkg_resources.iter_entry_points('batfish_session')] +
-        [MockEntryPoint(dummy_session_type, dummy_session_module)]
-    )
-    with patch.object(pkg_resources, 'iter_entry_points',
-                      return_value=entry_points):
+    entry_points = [i for i in pkg_resources.iter_entry_points("batfish_session")] + [
+        MockEntryPoint(dummy_session_type, dummy_session_module)
+    ]
+    with patch.object(pkg_resources, "iter_entry_points", return_value=entry_points):
         session_types = Session.get_session_types()
 
     # Confirm both the base and our mock types show up
-    assert 'bf' in session_types.keys()
+    assert "bf" in session_types.keys()
     assert dummy_session_type in session_types.keys()
 
 
 def test_get_session():
     """Confirm Session object is built for a specified session type."""
-    session_host = 'foobar'
-    session = Session.get(type_='bf', load_questions=False, host=session_host)
+    session_host = "foobar"
+    session = Session.get(type_="bf", load_questions=False, host=session_host)
     # Confirm the session is the correct type
     assert isinstance(session, Session)
     # Confirm params were passed through
@@ -65,7 +63,7 @@ def test_get_session():
 
 def test_get_session_default():
     """Confirm default Session object is built when no type is specified."""
-    session_host = 'foobar'
+    session_host = "foobar"
     session = Session.get(load_questions=False, host=session_host)
     # Confirm the session is the correct type
     assert isinstance(session, Session)
@@ -75,9 +73,9 @@ def test_get_session_default():
 
 def test_get_session_bad():
     """Confirm an exception is thrown when a bad session type passed in."""
-    bogus_type = 'bogus_session_type'
+    bogus_type = "bogus_session_type"
     with pytest.raises(ValueError) as e:
         Session.get(type_=bogus_type)
     e_msg = str(e.value)
-    assert 'Invalid session type' in e_msg
+    assert "Invalid session type" in e_msg
     assert "type '{}' does not match".format(bogus_type) in e_msg

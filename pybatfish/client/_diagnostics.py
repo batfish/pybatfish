@@ -32,28 +32,22 @@ from pybatfish.question.question import QuestionBase
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
 
-METADATA_FILENAME = 'metadata'
+METADATA_FILENAME = "metadata"
 
 _FILE_PARSE_STATUS_QUESTION = {
     "class": "org.batfish.question.initialization.FileParseStatusQuestion",
     "differential": False,
-    "instance": {
-        "instanceName": "__fileParseStatus",
-    }
+    "instance": {"instanceName": "__fileParseStatus"},
 }
 _INIT_INFO_QUESTION = {
     "class": "org.batfish.question.InitInfoQuestionPlugin$InitInfoQuestion",
     "differential": False,
-    "instance": {
-        "instanceName": "__initInfo"
-    },
+    "instance": {"instanceName": "__initInfo"},
 }
 _INIT_ISSUES_QUESTION = {
     "class": "org.batfish.question.initialization.InitIssuesQuestion",
     "differential": False,
-    "instance": {
-        "instanceName": "__initIssues"
-    },
+    "instance": {"instanceName": "__initIssues"},
 }
 
 # Note: this is a Tuple to enforce immutability.
@@ -63,14 +57,20 @@ _INIT_INFO_QUESTIONS = (
     _FILE_PARSE_STATUS_QUESTION,
 )
 
-_S3_BUCKET = 'batfish-diagnostics'
-_S3_REGION = 'us-west-2'
+_S3_BUCKET = "batfish-diagnostics"
+_S3_REGION = "us-west-2"
 
 
-def upload_diagnostics(session, metadata, bucket=_S3_BUCKET, region=_S3_REGION,
-                       dry_run=True,
-                       netconan_config=None, questions=_INIT_INFO_QUESTIONS,
-                       resource_prefix=''):
+def upload_diagnostics(
+    session,
+    metadata,
+    bucket=_S3_BUCKET,
+    region=_S3_REGION,
+    dry_run=True,
+    netconan_config=None,
+    questions=_INIT_INFO_QUESTIONS,
+    resource_prefix="",
+):
     # type: (Session, Dict[str, Any], str, str, bool, Optional[str], Iterable[Dict[str, object]], str) -> str
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
@@ -104,14 +104,14 @@ def upload_diagnostics(session, metadata, bucket=_S3_BUCKET, region=_S3_REGION,
                 ans = q.answer()
                 if not isinstance(ans, Answer):
                     raise BatfishException(
-                        "question.answer() did not return an Answer: {}".format(
-                            ans))
+                        "question.answer() did not return an Answer: {}".format(ans)
+                    )
                 content = json.dumps(ans.dict(), indent=4, sort_keys=True)
             except BatfishException as e:
                 content = "Failed to answer {}: {}".format(instance_name, e)
                 logger.warning(content)
 
-            with open(os.path.join(tmp_dir, instance_name), 'w') as f:
+            with open(os.path.join(tmp_dir, instance_name), "w") as f:
                 f.write(content)
 
         tmp_dir_anon = tempfile.mkdtemp()
@@ -120,29 +120,33 @@ def upload_diagnostics(session, metadata, bucket=_S3_BUCKET, region=_S3_REGION,
     finally:
         shutil.rmtree(tmp_dir)
 
-    with open(os.path.join(tmp_dir_anon, METADATA_FILENAME), 'w') as f:
+    with open(os.path.join(tmp_dir_anon, METADATA_FILENAME), "w") as f:
         f.write(json.dumps(metadata))
 
     if dry_run:
         logger.info(
-            'See anonymized files produced by dry-run here: {}'.format(
-                tmp_dir_anon))
+            "See anonymized files produced by dry-run here: {}".format(tmp_dir_anon)
+        )
         return tmp_dir_anon
 
     try:
         if bucket is None:
-            raise ValueError('Bucket must be set to upload init info.')
+            raise ValueError("Bucket must be set to upload init info.")
         if region is None:
-            raise ValueError('Region must be set to upload init info.')
+            raise ValueError("Region must be set to upload init info.")
 
         # Generate anonymous S3 subdirectory name
-        anon_dir = '{}{}'.format(resource_prefix, uuid.uuid4().hex)
-        upload_dest = 'https://{bucket}.s3-{region}.amazonaws.com/{resource}'.format(
-            bucket=bucket, region=region, resource=anon_dir)
+        anon_dir = "{}{}".format(resource_prefix, uuid.uuid4().hex)
+        upload_dest = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
+            bucket=bucket, region=region, resource=anon_dir
+        )
 
-        _upload_dir_to_url(upload_dest, tmp_dir_anon,
-                           headers={'x-amz-acl': 'bucket-owner-full-control'})
-        logger.debug('Uploaded files to: {}'.format(upload_dest))
+        _upload_dir_to_url(
+            upload_dest,
+            tmp_dir_anon,
+            headers={"x-amz-acl": "bucket-owner-full-control"},
+        )
+        logger.debug("Uploaded files to: {}".format(upload_dest))
     finally:
         shutil.rmtree(tmp_dir_anon)
 
@@ -163,19 +167,11 @@ def _anonymize_dir(input_dir, output_dir, netconan_config=None):
     :param netconan_config: path to Netconan configuration file
     :type netconan_config: string
     """
-    args = [
-        '-i', str(input_dir),
-        '-o', str(output_dir),
-    ]
+    args = ["-i", str(input_dir), "-o", str(output_dir)]
     if netconan_config is not None:
-        args.extend([
-            '-c', netconan_config
-        ])
+        args.extend(["-c", netconan_config])
     else:
-        args.extend([
-            '-a',
-            '-p',
-        ])
+        args.extend(["-a", "-p"])
     netconan.main(args)
 
 
@@ -194,19 +190,18 @@ def get_snapshot_parse_status(session):
         answer = QuestionBase(_INIT_INFO_QUESTION, session).answer()
         if not isinstance(answer, Answer):
             raise BatfishException(
-                "question.answer() did not return an Answer: {}".format(
-                    answer))
+                "question.answer() did not return an Answer: {}".format(answer)
+            )
 
-        if 'answerElements' not in answer:
-            raise BatfishException('Invalid answer format for init info')
-        answer_elements = answer['answerElements']
+        if "answerElements" not in answer:
+            raise BatfishException("Invalid answer format for init info")
+        answer_elements = answer["answerElements"]
         if not len(answer_elements):
-            raise BatfishException('Invalid answer format for init info')
+            raise BatfishException("Invalid answer format for init info")
         # These statuses contain parse and conversion status
-        parse_status = answer_elements[0].get('parseStatus', {})
+        parse_status = answer_elements[0].get("parseStatus", {})
     except BatfishException as e:
-        logging.getLogger(__name__).warning(
-            "Failed to check snapshot init info: %s", e)
+        logging.getLogger(__name__).warning("Failed to check snapshot init info: %s", e)
 
     return parse_status
 
@@ -221,7 +216,7 @@ def check_if_all_passed(statuses):
     :return: boolean indicating if all files and nodes in current snapshot passed parsing and conversion
     :rtype: bool
     """
-    return all(statuses[key] == 'PASSED' for key in statuses)
+    return all(statuses[key] == "PASSED" for key in statuses)
 
 
 def check_if_any_failed(statuses):
@@ -234,7 +229,7 @@ def check_if_any_failed(statuses):
     :return: boolean indicating if any file or node in current snapshot failed parsing or conversion
     :rtype: bool
     """
-    return any(statuses[key] == 'FAILED' for key in statuses)
+    return any(statuses[key] == "FAILED" for key in statuses)
 
 
 def _upload_dir_to_url(base_url, src_dir, headers=None):
@@ -251,13 +246,15 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
         for name in files:
             path = os.path.join(root, name)
             rel_path = os.path.relpath(path, src_dir)
-            with open(path, 'rb') as data:
-                resource = '{}/{}'.format(base_url, rel_path)
+            with open(path, "rb") as data:
+                resource = "{}/{}".format(base_url, rel_path)
                 r = requests.put(resource, data=data, headers=headers)
                 if r.status_code != 200:
                     raise HTTPError(
-                        'Failed to upload resource: {} with status code {}'.format(
-                            resource, r.status_code))
+                        "Failed to upload resource: {} with status code {}".format(
+                            resource, r.status_code
+                        )
+                    )
 
 
 def warn_on_snapshot_failure(session):
@@ -271,20 +268,24 @@ def warn_on_snapshot_failure(session):
     logger = logging.getLogger(__name__)
     statuses = get_snapshot_parse_status(session)
     if check_if_any_failed(statuses):
-        logger.warning("""\
+        logger.warning(
+            """\
 Your snapshot was initialized but Batfish failed to parse one or more input files. You can proceed but some analyses may be incorrect. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
-    help(bf_upload_diagnostics)""")
+    help(bf_upload_diagnostics)"""
+        )
     elif not check_if_all_passed(statuses):
-        logger.warning("""\
+        logger.warning(
+            """\
 Your snapshot was successfully initialized but Batfish failed to fully recognized some lines in one or more input files. Some unrecognized configuration lines are not uncommon for new networks, and it is often fine to proceed with further analysis. You can help the Batfish developers improve support for your network by running:
 
     bf_upload_diagnostics(dry_run=False, contact_info='<optional email address>')
 
 to share private, anonymized information. For more information, see the documentation with:
 
-    help(bf_upload_diagnostics)""")
+    help(bf_upload_diagnostics)"""
+        )

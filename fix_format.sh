@@ -1,7 +1,14 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
-set -eou pipefail
-files=$(find pybatfish tests -name '*.py')
-echo "Formatting files"
-autopep8 -ia ${files}
-autoflake -i --remove-all-unused-imports --remove-unused-variables ${files}
+args=""
+if [[ ${1-} == '-c' ]] || [[ ${1-} == '--check' ]]; then
+  args="${args} --check"
+fi
+
+files="pybatfish tests setup.py"
+black ${args} ${files}
+black_exit_code=$?
+if [[ ${black_exit_code} != 0 ]]; then
+  echo "Some files are not formatted correctly. Use $0 to fix these issues."
+fi

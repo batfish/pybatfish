@@ -20,18 +20,25 @@ from deprecated import deprecated
 
 from .primitives import DataModelElement, Interface
 
-__all__ = ['AddressGroup', 'InterfaceGroup', 'NodeRole', 'NodeRoleDimension',
-           'NodeRolesData', 'ReferenceBook', 'ReferenceLibrary',
-           'RoleDimensionMapping']
+__all__ = [
+    "AddressGroup",
+    "InterfaceGroup",
+    "NodeRole",
+    "NodeRoleDimension",
+    "NodeRolesData",
+    "ReferenceBook",
+    "ReferenceLibrary",
+    "RoleDimensionMapping",
+]
 
 
 def _check_type(value, expected_type):
     if not isinstance(value, expected_type):
         raise ValueError(
-            "Invalid value '{}' of type {}. Expected type '{}'".format(value,
-                                                                       type(
-                                                                           value),
-                                                                       expected_type))
+            "Invalid value '{}' of type {}. Expected type '{}'".format(
+                value, type(value), expected_type
+            )
+        )
 
 
 def _make_typed_list(value, item_type):
@@ -68,16 +75,17 @@ class AddressGroup(DataModelElement):
     """
 
     name = attr.ib(type=str)
-    addresses = attr.ib(type=List[str], factory=list,
-                        converter=_make_string_list)
-    childGroupNames = attr.ib(type=List[str], factory=list,
-                              converter=_make_string_list)
+    addresses = attr.ib(type=List[str], factory=list, converter=_make_string_list)
+    childGroupNames = attr.ib(type=List[str], factory=list, converter=_make_string_list)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> AddressGroup
-        return AddressGroup(json_dict["name"], json_dict.get("addresses", []),
-                            json_dict.get("childGroupNames", []))
+        return AddressGroup(
+            json_dict["name"],
+            json_dict.get("addresses", []),
+            json_dict.get("childGroupNames", []),
+        )
 
 
 def _make_interface_list(value):
@@ -95,15 +103,17 @@ class InterfaceGroup(DataModelElement):
     """
 
     name = attr.ib(type=str)
-    interfaces = attr.ib(type=List[Interface], factory=list,
-                         converter=_make_interface_list)
+    interfaces = attr.ib(
+        type=List[Interface], factory=list, converter=_make_interface_list
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> InterfaceGroup
-        return InterfaceGroup(json_dict["name"],
-                              [Interface.from_dict(d) for d in
-                               json_dict.get('interfaces', [])])
+        return InterfaceGroup(
+            json_dict["name"],
+            [Interface.from_dict(d) for d in json_dict.get("interfaces", [])],
+        )
 
 
 @deprecated(reason="Use the new RoleDimensionMapping class instead")
@@ -158,10 +168,12 @@ class RoleDimensionMapping(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleDimensionMapping
-        return RoleDimensionMapping(json_dict["regex"],
-                                    json_dict.get("groups", [1]),
-                                    json_dict.get("canonicalRoleNames", {}),
-                                    json_dict.get("caseSensitive", False))
+        return RoleDimensionMapping(
+            json_dict["regex"],
+            json_dict.get("groups", [1]),
+            json_dict.get("canonicalRoleNames", {}),
+            json_dict.get("caseSensitive", False),
+        )
 
 
 def _make_role_dimension_mappings(value):
@@ -182,20 +194,24 @@ class NodeRoleDimension(DataModelElement):
     """
 
     name = attr.ib(type=str)
-    roles = attr.ib(type=List[NodeRole], factory=list,
-                    converter=_make_node_roles)
-    roleDimensionMappings = attr.ib(type=List[RoleDimensionMapping],
-                                    factory=list,
-                                    converter=_make_role_dimension_mappings)
+    roles = attr.ib(type=List[NodeRole], factory=list, converter=_make_node_roles)
+    roleDimensionMappings = attr.ib(
+        type=List[RoleDimensionMapping],
+        factory=list,
+        converter=_make_role_dimension_mappings,
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> NodeRoleDimension
-        return NodeRoleDimension(json_dict["name"],
-                                 [NodeRole.from_dict(d) for d in
-                                  json_dict.get("roles", [])],
-                                 [RoleDimensionMapping.from_dict(d) for d in
-                                  json_dict.get("roleDimensionMappings", [])])
+        return NodeRoleDimension(
+            json_dict["name"],
+            [NodeRole.from_dict(d) for d in json_dict.get("roles", [])],
+            [
+                RoleDimensionMapping.from_dict(d)
+                for d in json_dict.get("roleDimensionMappings", [])
+            ],
+        )
 
 
 def _make_node_role_dimensions(value):
@@ -225,10 +241,11 @@ class RoleMapping(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoleMapping
         return RoleMapping(
-            json_dict.get('name', None),
-            json_dict['regex'],
-            json_dict.get('roleDimensionGroups', {}),
-            json_dict.get('canonicalRoleNames', {}))
+            json_dict.get("name", None),
+            json_dict["regex"],
+            json_dict.get("roleDimensionGroups", {}),
+            json_dict.get("canonicalRoleNames", {}),
+        )
 
 
 def _make_role_mappings(value):
@@ -247,19 +264,21 @@ class NodeRolesData(DataModelElement):
     """
 
     defaultDimension = attr.ib(type=Optional[str], default=None)
-    roleDimensionOrder = attr.ib(type=List[str], factory=list,
-                                 converter=_make_string_list)
-    roleMappings = attr.ib(type=List[RoleMapping], factory=list,
-                           converter=_make_role_mappings)
+    roleDimensionOrder = attr.ib(
+        type=List[str], factory=list, converter=_make_string_list
+    )
+    roleMappings = attr.ib(
+        type=List[RoleMapping], factory=list, converter=_make_role_mappings
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> NodeRolesData
         return NodeRolesData(
-            json_dict.get('defaultDimension'),
-            json_dict.get('roleDimensionOrder', []),
-            [RoleMapping.from_dict(d) for d in
-             json_dict.get('roleMappings', [])])
+            json_dict.get("defaultDimension"),
+            json_dict.get("roleDimensionOrder", []),
+            [RoleMapping.from_dict(d) for d in json_dict.get("roleMappings", [])],
+        )
 
 
 def _make_address_groups(value):
@@ -274,6 +293,7 @@ def _make_interface_groups(value):
 
 # TODO: Extend ReferenceBook other types of references beyond address groups
 
+
 @attr.s(frozen=True)
 class ReferenceBook(DataModelElement):
     """
@@ -285,19 +305,21 @@ class ReferenceBook(DataModelElement):
     """
 
     name = attr.ib(type=str)
-    addressGroups = attr.ib(type=List[AddressGroup], factory=list,
-                            converter=_make_address_groups)
-    interfaceGroups = attr.ib(type=List[InterfaceGroup], factory=list,
-                              converter=_make_interface_groups)
+    addressGroups = attr.ib(
+        type=List[AddressGroup], factory=list, converter=_make_address_groups
+    )
+    interfaceGroups = attr.ib(
+        type=List[InterfaceGroup], factory=list, converter=_make_interface_groups
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ReferenceBook
-        return ReferenceBook(json_dict["name"],
-                             [AddressGroup.from_dict(d) for d in
-                              json_dict.get("addressGroups", [])],
-                             [InterfaceGroup.from_dict(d) for d in
-                              json_dict.get("interfaceGroups", [])])
+        return ReferenceBook(
+            json_dict["name"],
+            [AddressGroup.from_dict(d) for d in json_dict.get("addressGroups", [])],
+            [InterfaceGroup.from_dict(d) for d in json_dict.get("interfaceGroups", [])],
+        )
 
 
 def _make_reference_books(value):
@@ -313,11 +335,13 @@ class ReferenceLibrary(DataModelElement):
     :ivar books: A list of books of type :py:class:`~ReferenceBook`.
     """
 
-    books = attr.ib(type=List[ReferenceBook], factory=list,
-                    converter=_make_reference_books)
+    books = attr.ib(
+        type=List[ReferenceBook], factory=list, converter=_make_reference_books
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ReferenceLibrary
         return ReferenceLibrary(
-            [ReferenceBook.from_dict(d) for d in json_dict.get('books', [])])
+            [ReferenceBook.from_dict(d) for d in json_dict.get("books", [])]
+        )

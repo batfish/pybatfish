@@ -38,11 +38,16 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 # Setup a session, configure retry policy
 _requests_session = requests.Session()
 # Prefix "http" will cover both "http" & "https"
-_requests_session.mount("http", HTTPAdapter(
-    max_retries=Retry(
-        connect=Options.max_tries_to_connect_to_coordinator,
-        read=Options.max_tries_to_connect_to_coordinator,
-        backoff_factor=Options.request_backoff_factor)))
+_requests_session.mount(
+    "http",
+    HTTPAdapter(
+        max_retries=Retry(
+            connect=Options.max_tries_to_connect_to_coordinator,
+            read=Options.max_tries_to_connect_to_coordinator,
+            backoff_factor=Options.request_backoff_factor,
+        )
+    ),
+)
 
 
 # uncomment line below if you want http capture by fiddler
@@ -67,7 +72,8 @@ def get_json_response(session, resource, jsonData=None, useHttpGet=False):
     json_response = response.json()
     if json_response[0] != CoordConsts.SVC_KEY_SUCCESS:
         raise BatfishException(
-            "Coordinator returned failure: {}".format(json_response[1]))
+            "Coordinator returned failure: {}".format(json_response[1])
+        )
 
     return dict(json_response[1])
 
@@ -84,8 +90,7 @@ def _get_data(session, resource, stream=False):
     return _make_request(session, resource, stream=stream, use_http_get=True)
 
 
-def _make_request(session, resource, json_data=None, stream=False,
-                  use_http_get=False):
+def _make_request(session, resource, json_data=None, stream=False, use_http_get=False):
     # type: (Session, str, Optional[Dict], bool, bool) -> Response
     """Actually make a HTTP(s) request to Batfish coordinator.
 
@@ -95,15 +100,20 @@ def _make_request(session, resource, json_data=None, stream=False,
     url = session.get_url(resource)
     if use_http_get:
         response = _requests_session.get(
-            url, verify=session.verify_ssl_certs, stream=stream)
+            url, verify=session.verify_ssl_certs, stream=stream
+        )
     else:
         if json_data is None:
             json_data = {}
         json_data[CoordConsts.SVC_KEY_VERSION] = pybatfish.__version__
         multipart_data = MultipartEncoder(json_data)
-        headers = {'Content-Type': multipart_data.content_type}
+        headers = {"Content-Type": multipart_data.content_type}
         response = _requests_session.post(
-            url, data=multipart_data, verify=session.verify_ssl_certs,
-            stream=stream, headers=headers)
+            url,
+            data=multipart_data,
+            verify=session.verify_ssl_certs,
+            stream=stream,
+            headers=headers,
+        )
     response.raise_for_status()
     return response

@@ -19,12 +19,12 @@ EOF
 
 ###### Initial checks plus building the wheel and jar
 cat <<EOF
-  - label: "Format detection with flake8"
+  - label: ":python-black: Format checking"
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install flake8 'pydocstyle<4.0.0' flake8-docstrings flake8-import-order"
-      - "flake8 pybatfish tests"
+      - "python3 -m pip install black"
+      - "./fix_format.sh --check"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
@@ -64,7 +64,7 @@ cat <<EOF
 EOF
 
 for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
-cat <<EOF
+  cat <<EOF
   - label: "Python ${version} unit tests"
     command:
       - bash .buildkite/unit_tests.sh ${version}
@@ -83,7 +83,7 @@ EOF
 
 ###### Integration tests and doctests
 for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
-cat <<EOF
+  cat <<EOF
   - label: "Python ${version} integration tests"
     command:
       - bash .buildkite/integration_tests.sh ${version}

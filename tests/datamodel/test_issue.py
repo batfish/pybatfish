@@ -25,10 +25,7 @@ def test_issue_deserialization():
     issue_dict = {
         "severity": 100,
         "explanation": "itsme",
-        "type": {
-            "major": "maj",
-            "minor": "min"
-        }
+        "type": {"major": "maj", "minor": "min"},
     }
     issue = Issue.from_dict(issue_dict)
 
@@ -40,9 +37,7 @@ def test_issue_deserialization():
 
 def test_column_metadata_bad_severity():
     """Throw exception if severity is not an integer or cannot be converted."""
-    issue = {
-        "severity": "100",
-    }
+    issue = {"severity": "100"}
     assert Issue.from_dict(issue).severity == 100
 
     issue["severity"] = "i_am_string"
@@ -62,9 +57,7 @@ def test_column_metadata_no_severity():
 
 def test_column_metadata_optional_fields():
     """Ensure that optional fields are populated if missing."""
-    issue_dict = {
-        "severity": 100,
-    }
+    issue_dict = {"severity": 100}
     issue = Issue.from_dict(issue_dict)
 
     assert issue.explanation

@@ -34,17 +34,11 @@ def test_table_answer_no_answer_elements():
 
 def test_table_answer_element_no_metadata():
     """Exception is raised when metadata field is not present."""
-    answer = {
-        "answerElements": [
-            {"nometadata": {}}
-        ]
-    }
+    answer = {"answerElements": [{"nometadata": {}}]}
     with pytest.raises(ValueError):
         TableAnswer(answer)
 
-    answer = {
-        "answerElements": [{}]
-    }
+    answer = {"answerElements": [{}]}
     with pytest.raises(ValueError):
         TableAnswer(answer)
 
@@ -52,25 +46,17 @@ def test_table_answer_element_no_metadata():
 def test_table_answer_element_deser():
     """Check proper deserialization for a valid table answer."""
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata":
-                    [
-                        {
-                            "name": "col1",
-                            "schema": "String"
-                        },
-                        {
-                            "name": "col2",
-                            "schema": "String"
-                        }
+        "answerElements": [
+            {
+                "metadata": {
+                    "columnMetadata": [
+                        {"name": "col1", "schema": "String"},
+                        {"name": "col2", "schema": "String"},
                     ]
-            },
-            "rows": [{
-                "col1": "value1",
-                "col2": "value2"
-            }]
-        }]
+                },
+                "rows": [{"col1": "value1", "col2": "value2"}],
+            }
+        ]
     }
     table = TableAnswer(answer)
 
@@ -85,17 +71,9 @@ def test_table_answer_element_deser():
 def test_table_answer_element_deser_no_rows():
     """Check deserialization creates empty table when no rows are present."""
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata":
-                    [
-                        {
-                            "name": "col1",
-                            "schema": "Node"
-                        }
-                    ]
-            }
-        }]
+        "answerElements": [
+            {"metadata": {"columnMetadata": [{"name": "col1", "schema": "Node"}]}}
+        ]
     }
     table = TableAnswer(answer)
 
@@ -104,29 +82,21 @@ def test_table_answer_element_deser_no_rows():
     assert len(table.rows) == 0
     assert table.frame().empty
     assert table.frame().columns == list(
-        map(attrgetter('name'), table.metadata.column_metadata))
+        map(attrgetter("name"), table.metadata.column_metadata)
+    )
 
 
 def test_table_answer_element_excluded_rows():
     """Check deserialization creates empty table when no rows are present."""
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata":
-                    [
-                        {
-                            "name": "col1",
-                            "schema": "String"
-                        }
-                    ]
-            },
-            "excludedRows": [{
-                "exclusionName": "myEx",
-                "rows": [{
-                    "col1": "stringValue"
-                }]
-            }]
-        }]
+        "answerElements": [
+            {
+                "metadata": {"columnMetadata": [{"name": "col1", "schema": "String"}]},
+                "excludedRows": [
+                    {"exclusionName": "myEx", "rows": [{"col1": "stringValue"}]}
+                ],
+            }
+        ]
     }
     table = TableAnswer(answer)
 
@@ -137,21 +107,18 @@ def test_table_answer_element_excluded_rows():
 
 def test_table_answer_immutable_lists():
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata": [{
-                    "name": "col1",
-                    "schema": "List<String>"
-                }]
-            },
-            "rows": [{
-                "col1": ['e1', 'e2', 'e3']
-            }]
-        }]
+        "answerElements": [
+            {
+                "metadata": {
+                    "columnMetadata": [{"name": "col1", "schema": "List<String>"}]
+                },
+                "rows": [{"col1": ["e1", "e2", "e3"]}],
+            }
+        ]
     }
 
     table = TableAnswer(answer)
-    assert isinstance(table.frame().loc[0]['col1'], ListWrapper)
+    assert isinstance(table.frame().loc[0]["col1"], ListWrapper)
 
 
 def test_table_answer_dtype_object():
@@ -161,60 +128,47 @@ def test_table_answer_dtype_object():
     This also means converting missing values to None (and not ``numpy.nan``)
     """
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata": [
-                    {
-                        "name": "col1",
-                        "schema": "String"
-                    },
-                    {
-                        "name": "col2",
-                        "schema": "Integer"
-                    }
-                ]
-            },
-            "rows": [{
-                "col1": "v1",
-                "col2": 1
-            }, {
-                "col1": "v2",
-                "col2": None
-            }, {
-                "col1": "v3",
-                "col2": -1
-            }, {
-                "col1": "v4",
-                "col2": "-1"
-            }]
-        }]
+        "answerElements": [
+            {
+                "metadata": {
+                    "columnMetadata": [
+                        {"name": "col1", "schema": "String"},
+                        {"name": "col2", "schema": "Integer"},
+                    ]
+                },
+                "rows": [
+                    {"col1": "v1", "col2": 1},
+                    {"col1": "v2", "col2": None},
+                    {"col1": "v3", "col2": -1},
+                    {"col1": "v4", "col2": "-1"},
+                ],
+            }
+        ]
     }
 
     df = TableAnswer(answer).frame()
-    assert df['col1'].dtype == 'object'
-    assert df['col2'].dtype == 'object'
-    assert df['col2'][1] is None
-    assert str(df['col2'][1]) == 'None'
+    assert df["col1"].dtype == "object"
+    assert df["col2"].dtype == "object"
+    assert df["col2"][1] is None
+    assert str(df["col2"][1]) == "None"
 
 
 def test_is_table_answer():
     answer = {
-        "answerElements": [{
-            "metadata": {
-                "columnMetadata": [{
-                    "name": "col1",
-                    "schema": "List<String>"
-                }]
-            },
-            "rows": [{
-                "col1": ['e1', 'e2', 'e3']
-            }]
-        }]
+        "answerElements": [
+            {
+                "metadata": {
+                    "columnMetadata": [{"name": "col1", "schema": "List<String>"}]
+                },
+                "rows": [{"col1": ["e1", "e2", "e3"]}],
+            }
+        ]
     }
     assert not is_table_ans(answer)
     # Fix up metadata
     answer["answerElements"][0][
-        "class"] = "org.batfish.datamodel.table.TableAnswerElement"
+        "class"
+    ] = "org.batfish.datamodel.table.TableAnswerElement"
     assert is_table_ans(answer)
 
 

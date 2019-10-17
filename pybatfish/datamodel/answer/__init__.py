@@ -16,4 +16,4 @@
 from pybatfish.datamodel.answer.base import Answer
 from pybatfish.datamodel.answer.table import TableAnswer
 
-__all__ = ['Answer', 'TableAnswer']
+__all__ = ["Answer", "TableAnswer"]

@@ -20,17 +20,18 @@ from pandas.core.indexes.frozen import FrozenList
 
 from pybatfish.util import escape_html, escape_name, get_html
 
-__all__ = ['Assertion',
-           'AssertionType',
-           'VariableType',
-           'AutoCompleteSuggestion',
-           'Edge',
-           'FileLines',
-           'Interface',
-           'Issue',
-           'IssueType',
-           'ListWrapper',
-           ]
+__all__ = [
+    "Assertion",
+    "AssertionType",
+    "VariableType",
+    "AutoCompleteSuggestion",
+    "Edge",
+    "FileLines",
+    "Interface",
+    "Issue",
+    "IssueType",
+    "ListWrapper",
+]
 
 
 @attr.s
@@ -44,8 +45,7 @@ class DataModelElement(object):
     @classmethod
     @abstractmethod
     def from_dict(cls, json_dict):
-        raise NotImplementedError(
-            "Datamodel elements must implement from_dict")
+        raise NotImplementedError("Datamodel elements must implement from_dict")
 
     def _repr_html_(self):
         # type: () -> str
@@ -98,7 +98,9 @@ class VariableType(str, Enum):
     BGP_PEER_PROPERTY_SPEC = "bgpPeerPropertySpec"  #: bgp peer properties
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
-    BGP_SESSION_COMPAT_STATUS_SPEC = "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
+    BGP_SESSION_COMPAT_STATUS_SPEC = (
+        "bgpSessionCompatStatusSpec"
+    )  #: bgp session compatibility statuses
     BGP_SESSION_STATUS_SPEC = "bgpSessionStatusSpec"  #: bgp session statuses
     BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
@@ -137,7 +139,9 @@ class VariableType(str, Enum):
     NODE_ROLE_DIMENSION_NAME = "nodeRoleDimensionName"  #: names of node role dimension
     NODE_ROLE_NAME = "nodeRoleName"  #: node role name
     NODE_SPEC = "nodeSpec"  #: node specifier
-    OSPF_INTERFACE_PROPERTY_SPEC = "ospfInterfacePropertySpec"  #: ospf interface properties
+    OSPF_INTERFACE_PROPERTY_SPEC = (
+        "ospfInterfacePropertySpec"
+    )  #: ospf interface properties
     OSPF_PROCESS_PROPERTY_SPEC = "ospfProcessPropertySpec"  #: ospf process properties
     OSPF_SESSION_STATUS_SPEC = "ospfSessionStatusSpec"  #: ospf session statuses
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
@@ -174,21 +178,27 @@ class AutoCompleteSuggestion(DataModelElement):
     rank = attr.ib(type=int)
     text = attr.ib(type=str)
 
-    DEFAULT_RANK = 0x7fffffff
+    DEFAULT_RANK = 0x7FFFFFFF
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> AutoCompleteSuggestion
-        return AutoCompleteSuggestion(json_dict.get("description", None),
-                                      json_dict.get("insertionIndex", 0),
-                                      json_dict["isPartial"],
-                                      json_dict["rank"], json_dict["text"])
+        return AutoCompleteSuggestion(
+            json_dict.get("description", None),
+            json_dict.get("insertionIndex", 0),
+            json_dict["isPartial"],
+            json_dict["rank"],
+            json_dict["text"],
+        )
 
     def dict(self):
-        return dict(description=self.description,
-                    insertion_index=self.insertion_index,
-                    is_partial=self.is_partial,
-                    rank=self.rank, text=self.text)
+        return dict(
+            description=self.description,
+            insertion_index=self.insertion_index,
+            is_partial=self.is_partial,
+            rank=self.rank,
+            text=self.text,
+        )
 
 
 @attr.s(frozen=True)
@@ -209,8 +219,7 @@ class Interface(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{}[{}]".format(escape_name(self.hostname),
-                               escape_name(self.interface))
+        return "{}[{}]".format(escape_name(self.hostname), escape_name(self.interface))
 
     def _repr_html_(self):
         # type: () -> str
@@ -247,17 +256,20 @@ class Edge(DataModelElement):
             node1=json_dict["node1"],
             node1interface=json_dict["node1interface"],
             node2=json_dict["node2"],
-            node2interface=json_dict["node2interface"])
+            node2interface=json_dict["node2interface"],
+        )
 
     def __str__(self):
         # type: () -> str
-        return "{}:{} -> {}:{}".format(self.node1, self.node1interface,
-                                       self.node2, self.node2interface)
+        return "{}:{} -> {}:{}".format(
+            self.node1, self.node1interface, self.node2, self.node2interface
+        )
 
     def _repr_html_(self):
         # type: () -> str
-        return "{}:{} &rarr; {}:{}".format(self.node1, self.node1interface,
-                                           self.node2, self.node2interface)
+        return "{}:{} &rarr; {}:{}".format(
+            self.node1, self.node1interface, self.node2, self.node2interface
+        )
 
 
 @attr.s(frozen=True)
@@ -273,14 +285,14 @@ class FileLines(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{filename}:{lines}".format(filename=self.filename,
-                                           lines=self.lines)
+        return "{filename}:{lines}".format(filename=self.filename, lines=self.lines)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FileLines
-        return FileLines(filename=json_dict['filename'],
-                         lines=json_dict.get('lines', []))
+        return FileLines(
+            filename=json_dict["filename"], lines=json_dict.get("lines", [])
+        )
 
 
 @attr.s(frozen=True)
@@ -328,11 +340,11 @@ class Issue(DataModelElement):
         # type: (Dict) -> Issue
         if "severity" not in json_dict:
             raise ValueError("'severity' not present in the Issue object")
-        return Issue(json_dict["severity"],
-                     json_dict.get("explanation", "No explanation"),
-                     IssueType(**json_dict.get("type",
-                                               dict(major="Unknown",
-                                                    minor="Unknown"))))
+        return Issue(
+            json_dict["severity"],
+            json_dict.get("explanation", "No explanation"),
+            IssueType(**json_dict.get("type", dict(major="Unknown", minor="Unknown"))),
+        )
 
     def __str__(self):
         # type: () -> str
@@ -344,6 +356,5 @@ class ListWrapper(FrozenList):
 
     def _repr_html_(self):
         # type: () -> str
-        result = "<br><br>".join(
-            [get_html(element) for element in self])  # type: str
+        result = "<br><br>".join([get_html(element) for element in self])  # type: str
         return result

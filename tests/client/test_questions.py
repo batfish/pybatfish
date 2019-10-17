@@ -19,39 +19,37 @@ import responses
 
 from pybatfish.client.consts import CoordConsts
 from pybatfish.client.session import Session
-from pybatfish.question.question import (QuestionBase, QuestionMeta,
-                                         _install_questions)
+from pybatfish.question.question import QuestionBase, QuestionMeta, _install_questions
 
 
 def create_question(name, session, description, tags):
     """Create question to manually install into Session.q."""
-    return (name, QuestionMeta(name, (QuestionBase,), {
-        'docstring': 'docstring',
-        'description': description,
-        'session': session,
-        'tags': tags,
-        'template': {},
-        'variables': [],
-    }))
+    return (
+        name,
+        QuestionMeta(
+            name,
+            (QuestionBase,),
+            {
+                "docstring": "docstring",
+                "description": description,
+                "session": session,
+                "tags": tags,
+                "template": {},
+                "variables": [],
+            },
+        ),
+    )
 
 
-@pytest.fixture(scope='module')
+@pytest.fixture(scope="module")
 def questions():
     """Basic pseudo-questions for questions tests."""
-    q1 = {
-        'name': 'qName1',
-        'description': 'description1.',
-        'tags': ['tag1'],
-    }
-    q2 = {
-        'name': 'qName2',
-        'description': 'description2.',
-        'tags': ['tags2'],
-    }
+    q1 = {"name": "qName1", "description": "description1.", "tags": ["tag1"]}
+    q2 = {"name": "qName2", "description": "description2.", "tags": ["tags2"]}
     yield [q1, q2]
 
 
-@pytest.fixture(scope='function')
+@pytest.fixture(scope="function")
 def session():
     s = Session(load_questions=False)
     yield s
@@ -62,15 +60,15 @@ def test_list_tags(session):
     # Should have no tags to start with
     assert len(session.q.list_tags()) == 0
 
-    q1_tags = ['tag1', 'tag2']
-    q3_tags = ['tag2']
+    q1_tags = ["tag1", "tag2"]
+    q3_tags = ["tag2"]
     all_tags = set()
     all_tags.update(q1_tags)
     all_tags.update(q3_tags)
 
-    q1 = create_question('qName1', session, 'description', q1_tags)
-    q2 = create_question('qName2', session, 'description', [])
-    q3 = create_question('qName3', session, 'description', q3_tags)
+    q1 = create_question("qName1", session, "description", q1_tags)
+    q2 = create_question("qName2", session, "description", [])
+    q3 = create_question("qName3", session, "description", q3_tags)
     _install_questions([q1, q2, q3], session.q)
 
     # Make sure all tags show up when listing tags
@@ -82,8 +80,10 @@ def test_list_questions(session, questions):
     # Should have no questions to start with
     assert len(session.q.list()) == 0
 
-    qs = [create_question(q.get('name'), session, q.get('description'),
-                          q.get('tags')) for q in questions]
+    qs = [
+        create_question(q.get("name"), session, q.get("description"), q.get("tags"))
+        for q in questions
+    ]
     _install_questions(qs, session.q)
 
     # Make sure all questions show up when listing questions
@@ -98,21 +98,25 @@ def test_load_questions_local(session, tmpdir, questions):
     assert len(session.q.list()) == 0
 
     # Should still have no questions after loading an empty dir
-    dir_path = str(tmpdir.mkdir('questions'))
+    dir_path = str(tmpdir.mkdir("questions"))
     session.q.load(dir_path)
     assert len(session.q.list()) == 0
 
     for q in questions:
-        filename = '{}.json'.format(q['name'])
-        with open(os.path.join(dir_path, filename), 'w') as f:
-            f.write(json.dumps({
-                'class': 'class',
-                'instance': {
-                    'description': q['description'],
-                    'instanceName': q['name'],
-                    'tags': q['tags'],
-                }
-            }))
+        filename = "{}.json".format(q["name"])
+        with open(os.path.join(dir_path, filename), "w") as f:
+            f.write(
+                json.dumps(
+                    {
+                        "class": "class",
+                        "instance": {
+                            "description": q["description"],
+                            "instanceName": q["name"],
+                            "tags": q["tags"],
+                        },
+                    }
+                )
+            )
             f.flush()
     session.q.load(dir_path)
 
@@ -131,20 +135,25 @@ def test_load_questions_remote(session, questions):
     # Build correctly formatted getquestiontemplates response
     qs = {CoordConsts.SVC_KEY_QUESTION_LIST: {}}
     for q in questions:
-        qs[CoordConsts.SVC_KEY_QUESTION_LIST][q['name']] = json.dumps({
-            'class': 'class',
-            'instance': {
-                'description': q['description'],
-                'instanceName': q['name'],
-                'tags': q['tags'],
+        qs[CoordConsts.SVC_KEY_QUESTION_LIST][q["name"]] = json.dumps(
+            {
+                "class": "class",
+                "instance": {
+                    "description": q["description"],
+                    "instanceName": q["name"],
+                    "tags": q["tags"],
+                },
             }
-        })
+        )
 
     # Intercept the POST request destined for the Batfish service, and just return json response
     # (Success + question templates)
-    responses.add(responses.POST,
-                  session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
-                  json=[CoordConsts.SVC_KEY_SUCCESS, qs], status=200)
+    responses.add(
+        responses.POST,
+        session.get_url(CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES),
+        json=[CoordConsts.SVC_KEY_SUCCESS, qs],
+        status=200,
+    )
 
     session.q.load()
     listed_questions = session.q.list()

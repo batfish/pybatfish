@@ -21,10 +21,7 @@ from pybatfish.datamodel.acl import AclTrace
 
 # test if an acl trace is deserialized properly
 def test_acl_trace_deserialization():
-    trace_dict = {"events": [
-        {"description": "aa"},
-        {"description": "bb"}
-    ]}
+    trace_dict = {"events": [{"description": "aa"}, {"description": "bb"}]}
 
     # check deserialization
     acl_trace = AclTrace.from_dict(trace_dict)

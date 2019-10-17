@@ -17,7 +17,7 @@ from typing import Dict, Optional  # noqa: F401
 
 import attr
 
-__all__ = ['IssueConfig']
+__all__ = ["IssueConfig"]
 
 
 @attr.s(frozen=True)
@@ -45,6 +45,9 @@ class IssueConfig(object):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> IssueConfig
-        return IssueConfig(json_dict["major"], json_dict["minor"],
-                           json_dict.get("severity"),
-                           json_dict.get("url"))
+        return IssueConfig(
+            json_dict["major"],
+            json_dict["minor"],
+            json_dict.get("severity"),
+            json_dict.get("url"),
+        )
