@@ -90,7 +90,7 @@ setup(
         "deepdiff",
         "deprecated",
         "netconan>=0.11.0",
-        "pandas>=0.24.1",
+        "pandas>=0.25.2",
         "python-dateutil",
         "PyYAML",
         "requests",
