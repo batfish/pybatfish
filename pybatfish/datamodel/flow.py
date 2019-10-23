@@ -533,6 +533,25 @@ class FilterStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class PolicyStepDetail(DataModelElement):
+    """Details of a step representing a generic policy processing step
+       (e.g., PBR or equivalent).
+
+    :ivar policy: policy name
+    :ivar type: filter type
+    """
+
+    policy = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict) -> "PolicyStepDetail":
+        return PolicyStepDetail(json_dict.get("policy", ""))
+
+    def __str__(self) -> str:
+        return "{}".format(self.policy)
+
+
+@attr.s(frozen=True)
 class TransformationStepDetail(DataModelElement):
     """Details of a step representation a packet transformation.
 
@@ -585,6 +604,7 @@ class Step(DataModelElement):
             "Routing": RoutingStepDetail.from_dict,
             "SetupSession": SetupSessionStepDetail.from_dict,
             "Transformation": TransformationStepDetail.from_dict,
+            "Policy": PolicyStepDetail.from_dict,
             "Filter": FilterStepDetail.from_dict,
         }
 
