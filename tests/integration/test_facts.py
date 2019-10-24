@@ -26,7 +26,7 @@ _CURRENT_SNAPSHOT = "current_snapshot"
 _PREVIOUS_SNAPSHOT = "previous_snapshot"
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def session():
     s = Session()
     # Snapshot which can be referenced by name
