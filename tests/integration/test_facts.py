@@ -22,14 +22,21 @@ from pybatfish.client.session import Session
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 
+_CURRENT_SNAPSHOT = "current_snapshot"
+_PREVIOUS_SNAPSHOT = "previous_snapshot"
+
 
 @pytest.fixture()
 def session():
     s = Session()
     # Snapshot which can be referenced by name
-    other_name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot2"))
+    other_name = s.init_snapshot(
+        join(_this_dir, "snapshots", "fact_snapshot2"), _PREVIOUS_SNAPSHOT
+    )
     # Current snapshot
-    name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot"))
+    name = s.init_snapshot(
+        join(_this_dir, "snapshots", "fact_snapshot"), _CURRENT_SNAPSHOT
+    )
     yield s
     s.delete_snapshot(name)
     s.delete_snapshot(other_name)
@@ -56,9 +63,8 @@ def test_extract_facts(tmpdir, session):
 def test_extract_facts_specific_snapshot(tmpdir, session):
     """Test extraction of facts for a specific snapshot."""
     out_dir = tmpdir.join("output")
-    non_current_snapshot = session.list_snapshots()[-1]
     extracted_facts = session.extract_facts(
-        output_directory=str(out_dir), snapshot=non_current_snapshot
+        output_directory=str(out_dir), snapshot=_PREVIOUS_SNAPSHOT
     )
 
     written_facts = load_facts(str(out_dir))
