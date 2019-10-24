@@ -89,10 +89,9 @@ def test_validate_facts_matching(session):
 
 def test_validate_facts_matching_specific_snapshot(session):
     """Test validation of facts against matching facts, for a specific snapshot."""
-    non_current_snapshot = session.list_snapshots()[-1]
     validation_results = session.validate_facts(
         expected_facts=join(_this_dir, "facts", "expected_facts2"),
-        snapshot=non_current_snapshot,
+        snapshot=_PREVIOUS_SNAPSHOT,
     )
 
     assert validation_results == {}, "No differences between expected and actual facts"
