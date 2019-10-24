@@ -54,9 +54,10 @@ def _version_less_than(version, min_version):
 
 def requires_bf(version):
     """
-    Decorator that will skip a test if the Bf version is older than the specified version.
+    Decorator that will skip a test if the Batfish or Pybatfish version is older than the specified version.
 
     Bf version is pulled from bf_version env var if set and non-empty, otherwise pulls from the first session object passed into the test.
+    Pybatfish version is pulled from pybf_version env var if set and non-empty, otherwise pulls from __version__ in pybatfish module.
     """
 
     # This outer decorator only accepts version string, not the actual
