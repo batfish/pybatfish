@@ -14,7 +14,6 @@
 #   limitations under the License.
 from os.path import abspath, dirname, join, realpath
 
-from conftest import COMPLETION_TYPES
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
@@ -47,6 +46,7 @@ from pybatfish.datamodel.referencelibrary import (
     RoleDimensionMapping,
     RoleMapping,
 )
+from tests.conftest import COMPLETION_TYPES
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
