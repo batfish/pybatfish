@@ -15,12 +15,13 @@
 from __future__ import absolute_import, print_function
 
 import pytest
-from conftest import COMPLETION_TYPES
-
-# Tests for isSubRange
 
 from pybatfish.datamodel.primitives import VariableType
 from pybatfish.question import question
+from tests.conftest import COMPLETION_TYPES
+
+
+# Tests for isSubRange
 
 # These two tests will fail with original code due to typo in the code
 

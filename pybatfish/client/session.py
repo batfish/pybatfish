@@ -436,6 +436,11 @@ class Session(object):
         session = session_module(**params)  # type: Session
         return session
 
+    def _get_bf_version(self):
+        # type: () -> Optional[Text]
+        """Get the Batfish backend version."""
+        return get_component_versions(self).get("Batfish")
+
     def delete_network(self, name):
         # type: (str) -> None
         """
