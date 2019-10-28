@@ -294,14 +294,14 @@ class Session(object):
 
     def __init__(
         self,
-        host=Options.coordinator_host,
-        port_v1=Options.coordinator_work_port,
-        port_v2=Options.coordinator_work_v2_port,
-        ssl=Options.use_ssl,
-        verify_ssl_certs=Options.verify_ssl_certs,
-        load_questions=True,
+        host: str = Options.coordinator_host,
+        port_v1: int = Options.coordinator_work_port,
+        port_v2: int = Options.coordinator_work_v2_port,
+        ssl: bool = Options.use_ssl,
+        verify_ssl_certs: bool = Options.verify_ssl_certs,
+        api_key: str = CoordConsts.DEFAULT_API_KEY,
+        load_questions: bool = True,
     ):
-        # type: (Text, int, int, bool, bool, bool) -> None
         # Coordinator args
         self.host = host  # type: Text
         self.port_v1 = port_v1  # type: int
@@ -312,7 +312,7 @@ class Session(object):
         self.verify_ssl_certs = verify_ssl_certs  # type: bool
 
         # Session args
-        self.api_key = CoordConsts.DEFAULT_API_KEY  # type: str
+        self.api_key = api_key  # type: str
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
 
