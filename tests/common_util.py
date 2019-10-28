@@ -28,15 +28,14 @@ def _version_to_tuple(version):
 
 def _get_pybf_version():
     """
-    Get version tuple for Pybatfish.
+    Get version string for Pybatfish.
 
     Pybatfish version is pulled from pybf_version env var if set and non-empty, otherwise pulls from __version__ in pybatfish module.
     """
     pybf_version = os.environ.get("pybf_version")
     if pybf_version is None:
         pybf_version = pybatfish.__version__
-
-    return _version_to_tuple(pybf_version)
+    return pybf_version
 
 
 def _version_less_than(version, min_version):
@@ -89,11 +88,10 @@ def requires_bf(version):
                 pytest.skip(
                     "Batfish version too low ({} < {})".format(bf_version, version)
                 )
-            if _version_less_than(_get_pybf_version(), min_version):
+            pybf_version = _get_pybf_version()
+            if _version_less_than(_version_to_tuple(pybf_version), min_version):
                 pytest.skip(
-                    "Pybatfish version too low ({} < {})".format(
-                        _get_pybf_version(), version
-                    )
+                    "Pybatfish version too low ({} < {})".format(pybf_version, version)
                 )
             return func(*args, **kwargs)
 
