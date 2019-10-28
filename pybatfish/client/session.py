@@ -20,7 +20,8 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
+from typing import Any, Callable, Dict, IO, List, Optional, Text, \
+    Union  # noqa: F401
 
 import pkg_resources
 import six
@@ -28,8 +29,10 @@ from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
-from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
-from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
+from pybatfish.client._diagnostics import upload_diagnostics, \
+    warn_on_snapshot_failure
+from pybatfish.client._facts import get_facts, load_facts, validate_facts, \
+    write_facts
 from pybatfish.client.asserts import (
     assert_filter_denies,
     assert_filter_has_no_unreachable_lines,
@@ -303,7 +306,7 @@ class Session(object):
         load_questions: bool = True,
     ):
         # Coordinator args
-        self.host = host  # type: Text
+        self.host = host  # type: str
         self.port_v1 = port_v1  # type: int
         self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
         self.port_v2 = port_v2  # type: int
