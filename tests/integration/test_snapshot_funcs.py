@@ -36,6 +36,7 @@ from pybatfish.client.commands import (
 )
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.extended import (
+    bf_delete_snapshot_object,
     bf_get_snapshot_input_object_text,
     bf_get_snapshot_object_text,
     bf_put_snapshot_object,
@@ -269,7 +270,7 @@ def test_get_snapshot_node_roles(network, roles_snapshot):
     assert snapshot_node_roles.roleDimensionOrder[0] == dimension_name
 
 
-def test_get_snapshot_object(network, example_snapshot):
+def test_snapshot_object(network, example_snapshot):
     bf_set_network(network)
     bf_set_snapshot(example_snapshot)
     # non-existent object should yield 404
@@ -278,3 +279,7 @@ def test_get_snapshot_object(network, example_snapshot):
     # object should exist after being placed
     bf_put_snapshot_object("new_object", "goodbye")
     assert bf_get_snapshot_object_text("new_object") == "goodbye"
+    # object should no longer exist after being deleted
+    bf_delete_snapshot_object("new_object")
+    with pytest.raises(HTTPError, match="404"):
+        bf_get_snapshot_object_text("new_object")
