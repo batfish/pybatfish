@@ -99,8 +99,8 @@ class VariableType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_SESSION_COMPAT_STATUS_SPEC = (
-        "bgpSessionCompatStatusSpec"
-    )  #: bgp session compatibility statuses
+        "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
+    )
     BGP_SESSION_STATUS_SPEC = "bgpSessionStatusSpec"  #: bgp session statuses
     BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
@@ -140,8 +140,8 @@ class VariableType(str, Enum):
     NODE_ROLE_NAME = "nodeRoleName"  #: node role name
     NODE_SPEC = "nodeSpec"  #: node specifier
     OSPF_INTERFACE_PROPERTY_SPEC = (
-        "ospfInterfacePropertySpec"
-    )  #: ospf interface properties
+        "ospfInterfacePropertySpec"  #: ospf interface properties
+    )
     OSPF_PROCESS_PROPERTY_SPEC = "ospfProcessPropertySpec"  #: ospf process properties
     OSPF_SESSION_STATUS_SPEC = "ospfSessionStatusSpec"  #: ospf session statuses
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
