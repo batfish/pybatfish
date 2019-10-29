@@ -24,6 +24,7 @@ from .commands import bf_session, restv2helper
 
 __all__ = [
     "bf_delete_network_object",
+    "bf_delete_snapshot_object",
     "bf_get_network_object_stream",
     "bf_get_network_object_text",
     "bf_get_snapshot_input_object_stream",
@@ -39,6 +40,12 @@ def bf_delete_network_object(key):
     # type: (Text) -> None
     """Deletes the network object with specified key."""
     return restv2helper.delete_network_object(bf_session, key)
+
+
+def bf_delete_snapshot_object(key, snapshot=None):
+    # type: (str, Optional[str]) -> None
+    """Deletes the snapshot object with specified key."""
+    restv2helper.delete_snapshot_object(bf_session, key, snapshot)
 
 
 def bf_get_network_object_stream(key):

@@ -62,6 +62,7 @@ __all__ = [
     "delete_node_role_dimension",
     "delete_reference_book",
     "delete_snapshot",
+    "delete_snapshot_object",
     "fork_snapshot",
     "get_answer",
     "get_issue_config",
@@ -203,6 +204,19 @@ def delete_snapshot(session, snapshot, network):
         CoordConstsV2.RSC_NETWORKS, network, CoordConstsV2.RSC_SNAPSHOTS, snapshot
     )
     return _delete(session, url_tail)
+
+
+def delete_snapshot_object(session, key, snapshot=None):
+    # type: (Session, str, Optional[str]) -> None
+    """Deletes extended object with given key for the current snapshot."""
+    url_tail = "/{}/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        session.get_snapshot(snapshot),
+        CoordConstsV2.RSC_OBJECTS,
+    )
+    _delete(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
 def get_answer(session, question, params):
