@@ -649,9 +649,9 @@ def assert_no_duplicate_router_ids(
             .frame()
         )  # type: ignore
         bgp_df_duplicate = bgp_df[
-            bgp_df.duplicated("Router_ID", keep=False)
+            bgp_df.duplicated(["VRF", "Router_ID"], keep=False)
         ].sort_values(
-            "Router_ID"
+            ["VRF", "Router_ID"]
         )  # type: ignore
         if not bgp_df_duplicate.empty:
             found_duplicates = True
@@ -667,9 +667,9 @@ def assert_no_duplicate_router_ids(
             .frame()
         )  # type: ignore
         ospf_df_duplicate = ospf_df[
-            ospf_df.duplicated("Router_ID", keep=False)
+            ospf_df.duplicated(["VRF", "Router_ID"], keep=False)
         ].sort_values(
-            "Router_ID"
+            ["VRF", "Router_ID"]
         )  # type: ignore
         if not ospf_df_duplicate.empty:
             found_duplicates = True

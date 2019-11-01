@@ -788,7 +788,40 @@ def test_no_undefined_references_no_session():
         assert mock_df.to_string() in str(excinfo.value)
 
 
-def test_no_duplicate_router_ids():
+def test_no_duplicate_router_ids_ospf():
+    """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
+    bf = Session(load_questions=False)
+    with patch.object(
+        bf.q, "ospfProcessConfiguration", create=True
+    ) as ospfProcessConfiguration:
+        # Test success
+        mock_df_unique = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+            ]
+        )
+        ospfProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_unique)
+        )
+        assert_no_duplicate_router_ids(session=bf, protocols=["ospf"])
+        # Test failure
+        mock_df_duplicate = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+            ]
+        )
+        ospfProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_duplicate)
+        )
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_duplicate_router_ids(session=bf, protocols=["ospf"])
+        # Ensure found answer is printed
+        assert mock_df_duplicate.to_string() in str(excinfo.value)
+
+
+def test_no_duplicate_router_ids_bgp():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
     with patch.object(
@@ -796,7 +829,10 @@ def test_no_duplicate_router_ids():
     ) as bgpProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
-            [{"Router_ID": "1.1.1.1", "More": "data"}]
+            [
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+            ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
             MockTableAnswer(mock_df_unique)
@@ -805,8 +841,8 @@ def test_no_duplicate_router_ids():
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
             [
-                {"Router_ID": "1.1.1.1", "More": "data"},
-                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -826,7 +862,10 @@ def test_no_duplicate_router_ids_from_session():
     ) as bgpProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
-            [{"Router_ID": "1.1.1.1", "More": "data"}]
+            [
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+            ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
             MockTableAnswer(mock_df_unique)
@@ -835,8 +874,8 @@ def test_no_duplicate_router_ids_from_session():
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
             [
-                {"Router_ID": "1.1.1.1", "More": "data"},
-                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -855,7 +894,10 @@ def test_no_duplicate_router_ids_no_session():
     ) as bgpProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
-            [{"Router_ID": "1.1.1.1", "More": "data"}]
+            [
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+            ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
             MockTableAnswer(mock_df_unique)
@@ -864,8 +906,8 @@ def test_no_duplicate_router_ids_no_session():
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
             [
-                {"Router_ID": "1.1.1.1", "More": "data"},
-                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
