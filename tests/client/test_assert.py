@@ -31,6 +31,7 @@ from pybatfish.client.asserts import (
     assert_no_incompatible_ospf_sessions,
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
+    assert_no_duplicate_router_ids,
 )
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
@@ -785,6 +786,95 @@ def test_no_undefined_references_no_session():
             assert_no_undefined_references()
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
+
+
+def test_no_duplicate_router_ids():
+    """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
+    bf = Session(load_questions=False)
+    with patch.object(
+        bf.q, "bgpProcessConfiguration", create=True
+    ) as bgpProcessConfiguration:
+        # Test success
+        mock_df_unique = DataFrame.from_records(
+            [{"Router_ID": "1.1.1.1", "More": "data"}]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_unique)
+        )
+        assert_no_duplicate_router_ids(session=bf, protocols=["bgp"])
+        # Test failure
+        mock_df_duplicate = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "More": "data"},
+            ]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_duplicate)
+        )
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_duplicate_router_ids(session=bf, protocols=["bgp"])
+        # Ensure found answer is printed
+        assert mock_df_duplicate.to_string() in str(excinfo.value)
+
+
+def test_no_duplicate_router_ids_from_session():
+    """Confirm no-duplicate-router-ids assert passes and fails as expected when called from a session."""
+    bf = Session(load_questions=False)
+    with patch.object(
+        bf.q, "bgpProcessConfiguration", create=True
+    ) as bgpProcessConfiguration:
+        # Test success
+        mock_df_unique = DataFrame.from_records(
+            [{"Router_ID": "1.1.1.1", "More": "data"}]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_unique)
+        )
+        bf.asserts.assert_no_duplicate_router_ids(protocols=["bgp"])
+        # Test failure
+        mock_df_duplicate = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "More": "data"},
+            ]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_duplicate)
+        )
+        with pytest.raises(BatfishAssertException) as excinfo:
+            bf.asserts.assert_no_duplicate_router_ids(protocols=["bgp"])
+        # Ensure found answer is printed
+        assert mock_df_duplicate.to_string() in str(excinfo.value)
+
+
+def test_no_duplicate_router_ids_no_session():
+    """Confirm no-duplicate-router-ids assert passes and fails as expected when not specifying a session."""
+    with patch.object(
+        bfq, "bgpProcessConfiguration", create=True
+    ) as bgpProcessConfiguration:
+        # Test success
+        mock_df_unique = DataFrame.from_records(
+            [{"Router_ID": "1.1.1.1", "More": "data"}]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_unique)
+        )
+        assert_no_duplicate_router_ids(protocols=["bgp"])
+        # Test failure
+        mock_df_duplicate = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "More": "data"},
+                {"Router_ID": "1.1.1.1", "More": "data"},
+            ]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_duplicate)
+        )
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_duplicate_router_ids(protocols=["bgp"])
+        # Ensure found answer is printed
+        assert mock_df_duplicate.to_string() in str(excinfo.value)
 
 
 def test_no_forwarding_loops():

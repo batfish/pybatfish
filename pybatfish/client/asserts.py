@@ -21,7 +21,15 @@ fails.
 
 import operator
 import warnings
-from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING, Union  # noqa: F401
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Optional,
+    TYPE_CHECKING,
+    Union,
+    List,
+)  # noqa: F401
 
 from deepdiff import DeepDiff
 from pandas import DataFrame
@@ -46,6 +54,7 @@ __all__ = [
     "assert_flows_succeed",
     "assert_has_no_route",
     "assert_has_route",
+    "assert_no_duplicate_router_ids",
     "assert_no_forwarding_loops",
     "assert_no_incompatible_bgp_sessions",
     "assert_no_incompatible_ospf_sessions",
@@ -597,6 +606,81 @@ def assert_no_undefined_references(
         return _raise_common(
             "Found undefined reference(s), when none were expected\n{}".format(
                 _format_df(df, df_format)
+            ),
+            soft,
+        )
+    return True
+
+
+def assert_no_duplicate_router_ids(
+    snapshot=None,
+    nodes=None,
+    protocols=None,
+    soft=False,
+    session=None,
+    df_format="table",
+):
+    # type: (Optional[str], Optional[str], Optional[List[str]], bool, Optional[Session], str) -> bool
+    """Assert that there are no duplicate router IDs present in the snapshot.
+
+    :param snapshot: the snapshot on which to check the assertion
+    :param protocols: the protocol on which to use the assertion, e.g. bgp, ospf, etc.
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+
+    kwargs = dict()  # type: Dict
+    if nodes is not None:
+        kwargs.update(nodes=nodes)
+
+    protocols_to_fetch = ["bgp", "ospf"] if protocols is None else protocols
+
+    found_duplicates = False
+    duplicate_results = ""
+    if "bgp" in protocols_to_fetch:
+        bgp_df = (
+            _get_question_object(session, "bgpProcessConfiguration")
+            .bgpProcessConfiguration()
+            .answer(snapshot)
+            .frame()
+        )  # type: ignore
+        bgp_df_duplicate = bgp_df[
+            bgp_df.duplicated("Router_ID", keep=False)
+        ].sort_values(
+            "Router_ID"
+        )  # type: ignore
+        if not bgp_df_duplicate.empty:
+            found_duplicates = True
+            duplicate_results += "BGP: {}\n".format(
+                _format_df(bgp_df_duplicate, df_format)
+            )
+
+    if "ospf" in protocols_to_fetch:
+        ospf_df = (
+            _get_question_object(session, "ospfProcessConfiguration")
+            .ospfProcessConfiguration()
+            .answer(snapshot)
+            .frame()
+        )  # type: ignore
+        ospf_df_duplicate = ospf_df[
+            ospf_df.duplicated("Router_ID", keep=False)
+        ].sort_values(
+            "Router_ID"
+        )  # type: ignore
+        if not ospf_df_duplicate.empty:
+            found_duplicates = True
+            duplicate_results += "OSPF: {}\n".format(
+                _format_df(ospf_df_duplicate, df_format)
+            )
+
+    if found_duplicates:
+        return _raise_common(
+            "Found duplicate router-id(s), when none were expected\n{}".format(
+                duplicate_results
             ),
             soft,
         )
