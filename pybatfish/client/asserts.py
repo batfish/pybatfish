@@ -114,6 +114,26 @@ def _subdict(d, keys):
     return {k: d.get(k) for k in keys}
 
 
+def _get_duplicate_router_ids_per_vrf(question_name, session=None, snapshot=None):
+    # type: (str, Optional[Session], Optional[str]) -> DataFrame
+    """Helper function to get rows with duplicate router IDs for a given protocol.
+
+    :param question_name: The question name to be used to fetch the protocol process configuration
+    :param session: Batfish session to use for asking the question
+    :param snapshot: Snapshot on which to ask the question
+    """
+    df = (
+        getattr(_get_question_object(session, question_name), question_name)()
+        .answer(snapshot)
+        .frame()
+    )  # type: ignore
+    df_duplicate = df[df.duplicated(["VRF", "Router_ID"], keep=False)].sort_values(
+        ["VRF", "Router_ID"]
+    )  # type: ignore
+
+    return df_duplicate
+
+
 def _is_dict_match(actual, expected):
     # type: (Dict, Dict) -> bool
     """Matches two dictionaries. `expected` can be a subset of `actual`."""
@@ -624,7 +644,7 @@ def assert_no_duplicate_router_ids(
     """Assert that there are no duplicate router IDs present in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
-    :param protocols: the protocol on which to use the assertion, e.g. bgp, ospf, etc.
+    :param protocols: the protocols on which to run the assertion, currently BGP and OSPF are supported
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :param session: Batfish session to use for the assertion
@@ -637,44 +657,27 @@ def assert_no_duplicate_router_ids(
     if nodes is not None:
         kwargs.update(nodes=nodes)
 
-    protocols_to_fetch = ["bgp", "ospf"] if protocols is None else protocols
-
+    supported_protocols = {"bgp", "ospf"}
+    protocols_to_fetch = (
+        supported_protocols if protocols is None else set(map(str.lower, protocols))
+    )
+    if not protocols_to_fetch.issubset(supported_protocols):
+        raise ValueError(
+            "Unsupported protocols supplied: {}".format(
+                protocols_to_fetch.difference(supported_protocols)
+            )
+        )
     found_duplicates = False
     duplicate_results = ""
-    if "bgp" in protocols_to_fetch:
-        bgp_df = (
-            _get_question_object(session, "bgpProcessConfiguration")
-            .bgpProcessConfiguration()
-            .answer(snapshot)
-            .frame()
-        )  # type: ignore
-        bgp_df_duplicate = bgp_df[
-            bgp_df.duplicated(["VRF", "Router_ID"], keep=False)
-        ].sort_values(
-            ["VRF", "Router_ID"]
-        )  # type: ignore
-        if not bgp_df_duplicate.empty:
-            found_duplicates = True
-            duplicate_results += "BGP: {}\n".format(
-                _format_df(bgp_df_duplicate, df_format)
-            )
 
-    if "ospf" in protocols_to_fetch:
-        ospf_df = (
-            _get_question_object(session, "ospfProcessConfiguration")
-            .ospfProcessConfiguration()
-            .answer(snapshot)
-            .frame()
-        )  # type: ignore
-        ospf_df_duplicate = ospf_df[
-            ospf_df.duplicated(["VRF", "Router_ID"], keep=False)
-        ].sort_values(
-            ["VRF", "Router_ID"]
-        )  # type: ignore
-        if not ospf_df_duplicate.empty:
+    for protocol in protocols_to_fetch:
+        df_duplicate = _get_duplicate_router_ids_per_vrf(
+            protocol + "ProcessConfiguration", session, snapshot
+        )
+        if not df_duplicate.empty:
             found_duplicates = True
-            duplicate_results += "OSPF: {}\n".format(
-                _format_df(ospf_df_duplicate, df_format)
+            duplicate_results += "{}: {}\n".format(
+                protocol.upper(), _format_df(df_duplicate, df_format)
             )
 
     if found_duplicates:
