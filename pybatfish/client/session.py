@@ -192,6 +192,7 @@ class Asserts(object):
         """Assert that there are no duplicate router IDs present in the snapshot.
 
         :param snapshot: the snapshot on which to check the assertion
+        :param nodes: the nodes on which to run the assertion
         :param protocols: the protocol on which to use the assertion, e.g. bgp, ospf, etc.
         :param soft: whether this assertion is soft (i.e., generates a warning but
             not a failure)
