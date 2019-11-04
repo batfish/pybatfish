@@ -798,7 +798,7 @@ def test_no_duplicate_router_ids_ospf():
         mock_df_unique = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
         ospfProcessConfiguration.return_value = MockQuestion(
@@ -809,7 +809,7 @@ def test_no_duplicate_router_ids_ospf():
         mock_df_duplicate = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
         ospfProcessConfiguration.return_value = MockQuestion(
@@ -831,7 +831,7 @@ def test_no_duplicate_router_ids_bgp():
         mock_df_unique = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -842,7 +842,7 @@ def test_no_duplicate_router_ids_bgp():
         mock_df_duplicate = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -864,7 +864,7 @@ def test_no_duplicate_router_ids_from_session():
         mock_df_unique = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -875,7 +875,7 @@ def test_no_duplicate_router_ids_from_session():
         mock_df_duplicate = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -896,7 +896,7 @@ def test_no_duplicate_router_ids_no_session():
         mock_df_unique = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(
@@ -907,7 +907,7 @@ def test_no_duplicate_router_ids_no_session():
         mock_df_duplicate = DataFrame.from_records(
             [
                 {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
-                {"Router_ID": "1.1.1.1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
         bgpProcessConfiguration.return_value = MockQuestion(

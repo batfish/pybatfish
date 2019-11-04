@@ -127,8 +127,8 @@ def _get_duplicate_router_ids_per_vrf(question_name, session=None, snapshot=None
         .answer(snapshot)
         .frame()
     )  # type: ignore
-    df_duplicate = df[df.duplicated(["VRF", "Router_ID"], keep=False)].sort_values(
-        ["VRF", "Router_ID"]
+    df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
+        ["Router_ID"]
     )  # type: ignore
 
     return df_duplicate
