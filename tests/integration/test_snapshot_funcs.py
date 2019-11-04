@@ -42,9 +42,15 @@ from pybatfish.client.extended import (
 )
 from pybatfish.datamodel import Interface
 from pybatfish.datamodel.referencelibrary import NodeRolesData, RoleMapping
+from tests.common_util import requires_bf
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
+
+
+@pytest.fixture(scope="module")
+def session():
+    yield bf_session
 
 
 @pytest.fixture()
@@ -267,6 +273,21 @@ def test_get_snapshot_node_roles(network, roles_snapshot):
     snapshot_node_roles = bf_get_snapshot_node_roles()
     assert len(snapshot_node_roles.roleDimensionOrder) == 1
     assert snapshot_node_roles.roleDimensionOrder[0] == dimension_name
+
+
+@requires_bf("2019.10.28")
+def test_delete_snapshot_object(session, network, example_snapshot):
+    from pybatfish.client.extended import bf_delete_snapshot_object
+
+    bf_set_network(network)
+    bf_set_snapshot(example_snapshot)
+    # object should exist after being placed
+    bf_put_snapshot_object("new_object", "goodbye")
+    assert bf_get_snapshot_object_text("new_object") == "goodbye"
+    # object should no longer exist after being deleted
+    bf_delete_snapshot_object("new_object")
+    with pytest.raises(HTTPError, match="404"):
+        bf_get_snapshot_object_text("new_object")
 
 
 def test_get_snapshot_object(network, example_snapshot):

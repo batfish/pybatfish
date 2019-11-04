@@ -79,3 +79,9 @@ def test_get_session_bad():
     e_msg = str(e.value)
     assert "Invalid session type" in e_msg
     assert "type '{}' does not match".format(bogus_type) in e_msg
+
+
+def test_session_api_key():
+    """Ensure we use api key from constructor."""
+    s = Session(api_key="foo", load_questions=False)
+    assert s.api_key == "foo"

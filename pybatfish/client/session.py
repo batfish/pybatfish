@@ -41,6 +41,7 @@ from pybatfish.client.asserts import (
     assert_no_incompatible_ospf_sessions,
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
+    assert_no_duplicate_router_ids,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.restv2helper import get_component_versions
@@ -184,6 +185,24 @@ class Asserts(object):
             startLocation, headers, soft, snapshot, self.session, df_format
         )
 
+    def assert_no_duplicate_router_ids(
+        self, snapshot=None, nodes=None, protocols=None, soft=False, df_format="table"
+    ):
+        # type: (Optional[str], Optional[str], Optional[List[str]], bool, str) -> bool
+        """Assert that there are no duplicate router IDs present in the snapshot.
+
+        :param snapshot: the snapshot on which to check the assertion
+        :param nodes: the nodes on which to run the assertion
+        :param protocols: the protocol on which to use the assertion, e.g. bgp, ospf, etc.
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_duplicate_router_ids(
+            snapshot, nodes, protocols, soft, self.session, df_format
+        )
+
     def assert_no_forwarding_loops(self, snapshot=None, soft=False, df_format="table"):
         # type: (Optional[str], bool, str) -> bool
         """Assert that there are no forwarding loops in the snapshot.
@@ -294,16 +313,16 @@ class Session(object):
 
     def __init__(
         self,
-        host=Options.coordinator_host,
-        port_v1=Options.coordinator_work_port,
-        port_v2=Options.coordinator_work_v2_port,
-        ssl=Options.use_ssl,
-        verify_ssl_certs=Options.verify_ssl_certs,
-        load_questions=True,
+        host: str = Options.coordinator_host,
+        port_v1: int = Options.coordinator_work_port,
+        port_v2: int = Options.coordinator_work_v2_port,
+        ssl: bool = Options.use_ssl,
+        verify_ssl_certs: bool = Options.verify_ssl_certs,
+        api_key: str = CoordConsts.DEFAULT_API_KEY,
+        load_questions: bool = True,
     ):
-        # type: (Text, int, int, bool, bool, bool) -> None
         # Coordinator args
-        self.host = host  # type: Text
+        self.host = host  # type: str
         self.port_v1 = port_v1  # type: int
         self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
         self.port_v2 = port_v2  # type: int
@@ -312,7 +331,7 @@ class Session(object):
         self.verify_ssl_certs = verify_ssl_certs  # type: bool
 
         # Session args
-        self.api_key = CoordConsts.DEFAULT_API_KEY  # type: str
+        self.api_key = api_key  # type: str
         self.network = None  # type: Optional[str]
         self.snapshot = None  # type: Optional[str]
 
@@ -435,6 +454,11 @@ class Session(object):
             )
         session = session_module(**params)  # type: Session
         return session
+
+    def _get_bf_version(self):
+        # type: () -> Optional[Text]
+        """Get the Batfish backend version."""
+        return get_component_versions(self).get("Batfish")
 
     def delete_network(self, name):
         # type: (str) -> None
