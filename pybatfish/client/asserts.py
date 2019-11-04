@@ -114,7 +114,7 @@ def _subdict(d, keys):
     return {k: d.get(k) for k in keys}
 
 
-def _get_duplicate_router_ids_per_vrf(question_name, session=None, snapshot=None):
+def _get_duplicate_router_ids(question_name, session=None, snapshot=None):
     # type: (str, Optional[Session], Optional[str]) -> DataFrame
     """Helper function to get rows with duplicate router IDs for a given protocol.
 
@@ -671,7 +671,7 @@ def assert_no_duplicate_router_ids(
     duplicate_results = ""
 
     for protocol in protocols_to_fetch:
-        df_duplicate = _get_duplicate_router_ids_per_vrf(
+        df_duplicate = _get_duplicate_router_ids(
             protocol + "ProcessConfiguration", session, snapshot
         )
         if not df_duplicate.empty:
