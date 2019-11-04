@@ -21,7 +21,15 @@ fails.
 
 import operator
 import warnings
-from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING, Union  # noqa: F401
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    Optional,
+    TYPE_CHECKING,
+    Union,
+    List,
+)  # noqa: F401
 
 from deepdiff import DeepDiff
 from pandas import DataFrame
@@ -46,6 +54,7 @@ __all__ = [
     "assert_flows_succeed",
     "assert_has_no_route",
     "assert_has_route",
+    "assert_no_duplicate_router_ids",
     "assert_no_forwarding_loops",
     "assert_no_incompatible_bgp_sessions",
     "assert_no_incompatible_ospf_sessions",
@@ -103,6 +112,26 @@ def _subdict(d, keys):
     # type: (Dict, Iterable[str]) -> Dict[str, Any]
     """Helper function that retrieves a subset of a dictionary given some keys."""
     return {k: d.get(k) for k in keys}
+
+
+def _get_duplicate_router_ids(question_name, session=None, snapshot=None):
+    # type: (str, Optional[Session], Optional[str]) -> DataFrame
+    """Helper function to get rows with duplicate router IDs for a given protocol.
+
+    :param question_name: The question name to be used to fetch the protocol process configuration
+    :param session: Batfish session to use for asking the question
+    :param snapshot: Snapshot on which to ask the question
+    """
+    df = (
+        getattr(_get_question_object(session, question_name), question_name)()
+        .answer(snapshot)
+        .frame()
+    )  # type: ignore
+    df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
+        ["Router_ID"]
+    )  # type: ignore
+
+    return df_duplicate
 
 
 def _is_dict_match(actual, expected):
@@ -597,6 +626,64 @@ def assert_no_undefined_references(
         return _raise_common(
             "Found undefined reference(s), when none were expected\n{}".format(
                 _format_df(df, df_format)
+            ),
+            soft,
+        )
+    return True
+
+
+def assert_no_duplicate_router_ids(
+    snapshot=None,
+    nodes=None,
+    protocols=None,
+    soft=False,
+    session=None,
+    df_format="table",
+):
+    # type: (Optional[str], Optional[str], Optional[List[str]], bool, Optional[Session], str) -> bool
+    """Assert that there are no duplicate router IDs present in the snapshot.
+
+    :param snapshot: the snapshot on which to check the assertion
+    :param protocols: the protocols on which to run the assertion, currently BGP and OSPF are supported
+    :param soft: whether this assertion is soft (i.e., generates a warning but
+        not a failure)
+    :param session: Batfish session to use for the assertion
+    :param df_format: How to format the Dataframe content in the output message.
+        Valid options are 'table' and 'records' (each row is a key-value pairs).
+    """
+    __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+
+    kwargs = dict()  # type: Dict
+    if nodes is not None:
+        kwargs.update(nodes=nodes)
+
+    supported_protocols = {"bgp", "ospf"}
+    protocols_to_fetch = (
+        supported_protocols if protocols is None else set(map(str.lower, protocols))
+    )
+    if not protocols_to_fetch.issubset(supported_protocols):
+        raise ValueError(
+            "Unsupported protocols supplied: {}".format(
+                protocols_to_fetch.difference(supported_protocols)
+            )
+        )
+    found_duplicates = False
+    duplicate_results = ""
+
+    for protocol in protocols_to_fetch:
+        df_duplicate = _get_duplicate_router_ids(
+            protocol + "ProcessConfiguration", session, snapshot
+        )
+        if not df_duplicate.empty:
+            found_duplicates = True
+            duplicate_results += "{}: {}\n".format(
+                protocol.upper(), _format_df(df_duplicate, df_format)
+            )
+
+    if found_duplicates:
+        return _raise_common(
+            "Found duplicate router-id(s), when none were expected\n{}".format(
+                duplicate_results
             ),
             soft,
         )

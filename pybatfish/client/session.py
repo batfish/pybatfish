@@ -41,6 +41,7 @@ from pybatfish.client.asserts import (
     assert_no_incompatible_ospf_sessions,
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
+    assert_no_duplicate_router_ids,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.restv2helper import get_component_versions
@@ -182,6 +183,24 @@ class Asserts(object):
         """
         return assert_flows_succeed(
             startLocation, headers, soft, snapshot, self.session, df_format
+        )
+
+    def assert_no_duplicate_router_ids(
+        self, snapshot=None, nodes=None, protocols=None, soft=False, df_format="table"
+    ):
+        # type: (Optional[str], Optional[str], Optional[List[str]], bool, str) -> bool
+        """Assert that there are no duplicate router IDs present in the snapshot.
+
+        :param snapshot: the snapshot on which to check the assertion
+        :param nodes: the nodes on which to run the assertion
+        :param protocols: the protocol on which to use the assertion, e.g. bgp, ospf, etc.
+        :param soft: whether this assertion is soft (i.e., generates a warning but
+            not a failure)
+        :param df_format: How to format the Dataframe content in the output message.
+            Valid options are 'table' and 'records' (each row is a key-value pairs).
+        """
+        return assert_no_duplicate_router_ids(
+            snapshot, nodes, protocols, soft, self.session, df_format
         )
 
     def assert_no_forwarding_loops(self, snapshot=None, soft=False, df_format="table"):
