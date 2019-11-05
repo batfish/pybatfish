@@ -19,6 +19,7 @@ import pytest
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.exception import BatfishAssertException
+from tests.common_util import requires_bf
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -79,7 +80,6 @@ def session_fail():
                 ),
             },
         ),
-        ("assert_no_duplicate_router_ids", {}),
         ("assert_no_incompatible_bgp_sessions", {}),
         ("assert_no_incompatible_ospf_sessions", {}),
         ("assert_no_unestablished_bgp_sessions", {}),
@@ -130,7 +130,6 @@ def test_asserts_pass(session_pass, assert_func, params):
                 ),
             },
         ),
-        ("assert_no_duplicate_router_ids", {}),
         ("assert_no_incompatible_bgp_sessions", {}),
         ("assert_no_incompatible_ospf_sessions", {}),
         ("assert_no_unestablished_bgp_sessions", {}),
@@ -142,3 +141,21 @@ def test_asserts_fail(session_fail, assert_func, params):
     # Assertion should fail and raise a BatfishAssertException
     with pytest.raises(BatfishAssertException):
         getattr(session_fail.asserts, assert_func)(**params)
+
+
+# Assertions which require a minimum release version of Pybatfish and Batfish
+
+
+@requires_bf("2019.11.05")
+def test_assert_no_duplicate_router_ids_pass(session_pass):
+    """Test that there are no duplicate router IDs. """
+    # Assertion should run without errors and return True (passing assert)
+    assert session_pass.asserts.assert_no_duplicate_router_ids()
+
+
+@requires_bf("2019.11.05")
+def test_assert_no_duplicate_router_ids_fail(session_fail):
+    """Test that there are duplicate router IDs."""
+    # Assertion should fail and raise a BatfishAssertException
+    with pytest.raises(BatfishAssertException):
+        assert session_fail.asserts.assert_no_duplicate_router_ids()
