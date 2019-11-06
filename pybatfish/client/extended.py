@@ -20,6 +20,8 @@ from typing import Any, Optional, Text  # noqa: F401
 
 from pybatfish.client import resthelper, workhelper
 from pybatfish.client.consts import CoordConsts
+from pybatfish.client.session import Session
+from pybatfish.util import first_non_none
 from .commands import bf_session, restv2helper
 
 __all__ = [
@@ -36,70 +38,97 @@ __all__ = [
 ]
 
 
-def bf_delete_network_object(key):
-    # type: (Text) -> None
+def bf_delete_network_object(key: Text, session: Optional[Session] = None) -> None:
     """Deletes the network object with specified key."""
-    return restv2helper.delete_network_object(bf_session, key)
+    return restv2helper.delete_network_object(
+        first_non_none((session, bf_session)), key
+    )
 
 
-def bf_delete_snapshot_object(key, snapshot=None):
-    # type: (str, Optional[str]) -> None
+def bf_delete_snapshot_object(
+    key: str, snapshot: Optional[str] = None, session: Optional[Session] = None
+) -> None:
     """Deletes the snapshot object with specified key."""
-    restv2helper.delete_snapshot_object(bf_session, key, snapshot)
+    restv2helper.delete_snapshot_object(
+        first_non_none((session, bf_session)), key, snapshot
+    )
 
 
-def bf_get_network_object_stream(key):
-    # type: (Text) -> Any
+def bf_get_network_object_stream(key: str, session: Optional[Session] = None):
     """Returns a binary stream of the content of the network object with specified key."""
-    return restv2helper.get_network_object(bf_session, key)
+    return restv2helper.get_network_object(first_non_none((session, bf_session)), key)
 
 
-def bf_get_network_object_text(key, encoding="utf-8"):
-    # type: (Text, Text) -> str
+def bf_get_network_object_text(
+    key: str, encoding: str = "utf-8", session: Optional[Session] = None
+):
     """Returns the text content of the network object with specified key."""
-    with bf_get_network_object_stream(key) as stream:
+    with bf_get_network_object_stream(key, session=session) as stream:
         text = stream.read().decode(encoding)
     return str(text)
 
 
-def bf_get_snapshot_input_object_stream(key, snapshot=None):
-    # type: (Text, Optional[Text]) -> Any
+def bf_get_snapshot_input_object_stream(
+    key: str, snapshot: Optional[str] = None, session: Optional[Session] = None
+):
     """Returns a binary stream of the content of the snapshot input object with specified key."""
-    return restv2helper.get_snapshot_input_object(bf_session, key, snapshot)
+    return restv2helper.get_snapshot_input_object(
+        first_non_none((session, bf_session)), key, snapshot
+    )
 
 
-def bf_get_snapshot_input_object_text(key, encoding="utf-8", snapshot=None):
-    # type: (Text, Text, Optional[Text]) -> Text
+def bf_get_snapshot_input_object_text(
+    key: str,
+    encoding: str = "utf-8",
+    snapshot: Optional[str] = None,
+    session: Optional[Session] = None,
+):
     """Returns the text content of the snapshot input object with specified key."""
-    with bf_get_snapshot_input_object_stream(key, snapshot) as stream:
+    with bf_get_snapshot_input_object_stream(
+        key, snapshot=snapshot, session=session
+    ) as stream:
         text = stream.read().decode(encoding)
     return str(text)
 
 
-def bf_get_snapshot_object_stream(key, snapshot=None):
-    # type: (Text, Optional[Text]) -> Any
+def bf_get_snapshot_object_stream(
+    key: str, snapshot: Optional[str] = None, session: Optional[Session] = None
+):
     """Returns a binary stream of the content of the snapshot object with specified key."""
-    return restv2helper.get_snapshot_object(bf_session, key, snapshot)
+    return restv2helper.get_snapshot_object(
+        first_non_none((session, bf_session)), key, snapshot
+    )
 
 
-def bf_get_snapshot_object_text(key, encoding="utf-8", snapshot=None):
-    # type: (Text, Text, Optional[Text]) -> Text
+def bf_get_snapshot_object_text(
+    key: str,
+    encoding: str = "utf-8",
+    snapshot: Optional[str] = None,
+    session: Optional[Session] = None,
+):
     """Returns the text content of the snapshot object with specified key."""
-    with bf_get_snapshot_object_stream(key, snapshot) as stream:
+    with bf_get_snapshot_object_stream(
+        key, snapshot=snapshot, session=session
+    ) as stream:
         text = stream.read().decode(encoding)
     return str(text)
 
 
-def bf_put_network_object(key, data):
-    # type: (Text, Any) -> None
+def bf_put_network_object(key: str, data: Any, session: Optional[Session] = None):
     """Puts data as the network object with specified key."""
-    restv2helper.put_network_object(bf_session, key, data)
+    restv2helper.put_network_object(first_non_none((session, bf_session)), key, data)
 
 
-def bf_put_snapshot_object(key, data, snapshot=None):
-    # type: (Text, Any, Optional[Text]) -> None
+def bf_put_snapshot_object(
+    key: str,
+    data: Any,
+    snapshot: Optional[str] = None,
+    session: Optional[Session] = None,
+):
     """Puts data as the snapshot object with specified key."""
-    restv2helper.put_snapshot_object(bf_session, key, data, snapshot)
+    restv2helper.put_snapshot_object(
+        first_non_none((session, bf_session)), key, data, snapshot
+    )
 
 
 def bf_sync_snapshots_sync_now(plugin, force=False):

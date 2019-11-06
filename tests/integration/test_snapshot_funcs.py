@@ -283,11 +283,11 @@ def test_delete_snapshot_object(session, network, example_snapshot):
     bf_set_snapshot(example_snapshot)
     # object should exist after being placed
     bf_put_snapshot_object("new_object", "goodbye")
-    assert bf_get_snapshot_object_text("new_object") == "goodbye"
+    assert bf_get_snapshot_object_text("new_object", session=session) == "goodbye"
     # object should no longer exist after being deleted
     bf_delete_snapshot_object("new_object")
     with pytest.raises(HTTPError, match="404"):
-        bf_get_snapshot_object_text("new_object")
+        bf_get_snapshot_object_text("new_object", session=session)
 
 
 def test_get_snapshot_object(network, example_snapshot):

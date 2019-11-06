@@ -237,3 +237,11 @@ def get_html(element):
         return element._repr_html_()
     except AttributeError:
         return escape_html(str(element))
+
+
+def first_non_none(iterable: Iterable):
+    """Return first not `None` value in the given iterable (or raise ValueError)."""
+    try:
+        return next(filter(lambda x: x is not None, iterable))
+    except StopIteration:
+        raise ValueError("All values given to first_non_none were None")

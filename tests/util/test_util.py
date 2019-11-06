@@ -25,6 +25,7 @@ from pybatfish.util import (
     conditional_str,
     escape_html,
     escape_name,
+    first_non_none,
     get_html,
     validate_name,
     validate_question_name,
@@ -195,3 +196,12 @@ def test_zip_dir_bad_file_time(tmpdir):
 
     # Make sure the zip contains the file with the correct contents
     _assert_zip_contents(zip_file, os.path.join(dirname, filename), contents, tmpdir)
+
+
+def test_first_non_none():
+    """Tests for first_non_none()."""
+    assert first_non_none((None, 1)) == 1
+    assert first_non_none((None, 1, 2)) == 1
+    with pytest.raises(ValueError) as e:
+        first_non_none((None, None))
+        assert "All values given to first_non_none were None" in str(e.value)
