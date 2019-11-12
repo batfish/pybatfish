@@ -433,6 +433,18 @@ def get_component_versions(session):
     return _get_dict(session, "/version")
 
 
+def get_question_templates(session: "Session", verbose: bool):
+    """Get question templates from the backend.
+
+    :param verbose: if True, even hidden questions will be returned.
+    """
+    return _get_dict(
+        session,
+        url_tail="/{}".format(CoordConstsV2.RSC_QUESTION_TEMPLATES),
+        params={CoordConstsV2.QP_VERBOSE: verbose},
+    )
+
+
 def put_network_object(session, key, data):
     # type: (Session, Text, Any) -> None
     """Put data as extended object with given key for the current network."""

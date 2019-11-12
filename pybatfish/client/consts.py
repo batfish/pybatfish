@@ -291,6 +291,7 @@ class CoordConstsV2(object):
     RSC_NODE_ROLES = "noderoles"
     RSC_OBJECTS = "objects"
     RSC_QUESTIONS = "questions"
+    RSC_QUESTION_TEMPLATES = "question_templates"
     RSC_REFERENCE_LIBRARY = "referencelibrary"
     RSC_SETTINGS = "settings"
     RSC_SNAPSHOTS = "snapshots"

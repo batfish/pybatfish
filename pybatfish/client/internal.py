@@ -17,12 +17,12 @@
 import json
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
+from pybatfish.client import restv2helper
 from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import get_uuid
 from . import resthelper, workhelper
 from .options import Options
-from .workhelper import _get_data_get_question_templates
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
@@ -64,9 +64,5 @@ def _bf_answer_obj(
     return session.get_answer(question_name, snapshot, reference_snapshot)
 
 
-def _bf_get_question_templates(session):
-    jsonData = _get_data_get_question_templates(session)
-    jsonResponse = resthelper.get_json_response(
-        session, CoordConsts.SVC_RSC_GET_QUESTION_TEMPLATES, jsonData
-    )
-    return jsonResponse[CoordConsts.SVC_KEY_QUESTION_LIST]
+def _bf_get_question_templates(session: "Session", verbose: bool = False):
+    return restv2helper.get_question_templates(session, verbose)
