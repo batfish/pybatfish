@@ -1124,7 +1124,7 @@ class Session(object):
         netconan_config: str = None,
         contact_info: Optional[str] = None,
         proxy: Optional[str] = None,
-    ):
+    ) -> str:
         """
         Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
