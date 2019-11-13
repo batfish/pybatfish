@@ -36,12 +36,12 @@ from pybatfish.client.asserts import (
     assert_filter_permits,
     assert_flows_fail,
     assert_flows_succeed,
+    assert_no_duplicate_router_ids,
     assert_no_forwarding_loops,
     assert_no_incompatible_bgp_sessions,
     assert_no_incompatible_ospf_sessions,
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
-    assert_no_duplicate_router_ids,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.restv2helper import get_component_versions
@@ -1118,8 +1118,13 @@ class Session(object):
         )
         return self.snapshot
 
-    def upload_diagnostics(self, dry_run=True, netconan_config=None, contact_info=None):
-        # type: (bool, str, Optional[str]) -> str
+    def upload_diagnostics(
+        self,
+        dry_run: bool = True,
+        netconan_config: str = None,
+        contact_info: Optional[str] = None,
+        proxy: Optional[str] = None,
+    ):
         """
         Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
@@ -1146,6 +1151,7 @@ class Session(object):
         :type netconan_config: str
         :param contact_info: optional contact info associated with this upload
         :type contact_info: str
+        :param proxy: a proxy URL to use when uploading data.
         :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
         :rtype: str
         """
@@ -1153,7 +1159,11 @@ class Session(object):
         if contact_info:
             metadata["contact_info"] = contact_info
         return upload_diagnostics(
-            self, metadata=metadata, dry_run=dry_run, netconan_config=netconan_config
+            self,
+            metadata=metadata,
+            dry_run=dry_run,
+            netconan_config=netconan_config,
+            proxy=proxy,
         )
 
     def validate_facts(self, expected_facts, snapshot=None):
