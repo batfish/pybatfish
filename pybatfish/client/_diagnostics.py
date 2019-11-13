@@ -62,16 +62,16 @@ _S3_REGION = "us-west-2"
 
 
 def upload_diagnostics(
-    session,
-    metadata,
-    bucket=_S3_BUCKET,
-    region=_S3_REGION,
-    dry_run=True,
-    netconan_config=None,
-    questions=_INIT_INFO_QUESTIONS,
-    resource_prefix="",
-):
-    # type: (Session, Dict[str, Any], str, str, bool, Optional[str], Iterable[Dict[str, object]], str) -> str
+    session: "Session",
+    metadata: Dict[str, Any],
+    bucket: str = _S3_BUCKET,
+    region: str = _S3_REGION,
+    dry_run: bool = True,
+    netconan_config: Optional[str] = None,
+    questions: Iterable[Dict[str, Any]] = _INIT_INFO_QUESTIONS,
+    resource_prefix: str = "",
+    proxy: Optional[str] = None,
+) -> str:
     """
     Fetch, anonymize, and optionally upload snapshot initialization information.
 
@@ -91,6 +91,7 @@ def upload_diagnostics(
     :type questions: list[QuestionBase]
     :param resource_prefix: prefix to append to any uploaded resources
     :type resource_prefix: str
+    :param proxy: proxy URL to use when uploading data.
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
@@ -145,6 +146,7 @@ def upload_diagnostics(
             upload_dest,
             tmp_dir_anon,
             headers={"x-amz-acl": "bucket-owner-full-control"},
+            proxies={"https": proxy},
         )
         logger.debug("Uploaded files to: {}".format(upload_dest))
     finally:
@@ -232,8 +234,12 @@ def check_if_any_failed(statuses):
     return any(statuses[key] == "FAILED" for key in statuses)
 
 
-def _upload_dir_to_url(base_url, src_dir, headers=None):
-    # type: (str, str, Optional[Dict]) -> None
+def _upload_dir_to_url(
+    base_url: str,
+    src_dir: str,
+    headers: Optional[Dict] = None,
+    proxies: Optional[Dict] = None,
+):
     """
     Recursively put files from the specified directory to the specified URL.
 
@@ -248,7 +254,7 @@ def _upload_dir_to_url(base_url, src_dir, headers=None):
             rel_path = os.path.relpath(path, src_dir)
             with open(path, "rb") as data:
                 resource = "{}/{}".format(base_url, rel_path)
-                r = requests.put(resource, data=data, headers=headers)
+                r = requests.put(resource, data=data, headers=headers, proxies=proxies)
                 if r.status_code != 200:
                     raise HTTPError(
                         "Failed to upload resource: {} with status code {}".format(
