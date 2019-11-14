@@ -146,7 +146,7 @@ def upload_diagnostics(
             upload_dest,
             tmp_dir_anon,
             headers={"x-amz-acl": "bucket-owner-full-control"},
-            proxies={"https": proxy},
+            proxies={"https": proxy} if proxy is not None else None,
         )
         logger.debug("Uploaded files to: {}".format(upload_dest))
     finally:
