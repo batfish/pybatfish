@@ -566,8 +566,12 @@ def bf_set_snapshot(name=None, index=None):
     return bf_session.set_snapshot(name=name, index=index)
 
 
-def bf_upload_diagnostics(dry_run=True, netconan_config=None, contact_info=None):
-    # type: (bool, str, Optional[str]) -> str
+def bf_upload_diagnostics(
+    dry_run: bool = True,
+    netconan_config: str = None,
+    contact_info: Optional[str] = None,
+    proxy: Optional[str] = None,
+) -> str:
     """
     Fetch, anonymize, and optionally upload snapshot diagnostics information.
 
@@ -594,11 +598,15 @@ def bf_upload_diagnostics(dry_run=True, netconan_config=None, contact_info=None)
     :type netconan_config: string
     :param contact_info: optional contact info associated with this upload
     :type contact_info: str
+    :param proxy: a proxy URL to use when uploading data.
     :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
     :rtype: string
     """
     return bf_session.upload_diagnostics(
-        dry_run=dry_run, netconan_config=netconan_config, contact_info=contact_info
+        dry_run=dry_run,
+        netconan_config=netconan_config,
+        contact_info=contact_info,
+        proxy=proxy,
     )
 
 
