@@ -157,14 +157,11 @@ class RoleDimensionMapping(DataModelElement):
     :ivar canonicalRoleNames: A map from Java regexes over role names determined
         from the groups to a canonical set of role names for this dimension
         (default value is {}).
-    :ivar caseSensitive: A flag indicating whether regex matching should be
-        case sensitive (default value is False).
     """
 
     regex = attr.ib(type=str)
     groups = attr.ib(type=List[int], default=[1])
     canonicalRoleNames = attr.ib(type=Dict[str, str], default={})
-    caseSensitive = attr.ib(type=bool, default=False)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -173,7 +170,6 @@ class RoleDimensionMapping(DataModelElement):
             json_dict["regex"],
             json_dict.get("groups", [1]),
             json_dict.get("canonicalRoleNames", {}),
-            json_dict.get("caseSensitive", False),
         )
 
 
