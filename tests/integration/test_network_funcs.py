@@ -93,7 +93,7 @@ def test_add_node_role_dimension():
         network_name = "n1"
         bf_set_network(network_name)
         dim_name = "d1"
-        rdMap = RoleDimensionMapping("a", [1], {}, False)
+        rdMap = RoleDimensionMapping("a", [1], {})
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[rdMap])
         bf_add_node_role_dimension(dim)
         assert bf_get_node_role_dimension(dim_name) == dim

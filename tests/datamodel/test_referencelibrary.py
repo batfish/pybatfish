@@ -156,7 +156,7 @@ def test_noderoledimension_construction_empty():
     assert NodeRoleDimension("g1", roleDimensionMappings=None) == empty
 
 
-def test_noderoledimension_construction_badtype():
+def test_noderoledimension_construction():
     """Check that we throw an error when node role dimension is built with wrong type."""
     with pytest.raises(ValueError):
         NodeRoleDimension("g1", roles="i1")
@@ -166,8 +166,7 @@ def test_noderoledimension_construction_badtype():
         NodeRoleDimension("g1", roleDimensionMappings="i1")
     with pytest.raises(ValueError):
         NodeRoleDimension(
-            "book1",
-            roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c", "d")],
+            "book1", roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c")]
         )
 
 
@@ -177,7 +176,7 @@ def test_noderoledimension_construction_item():
     dimension1 = NodeRoleDimension("g1", roles=[role])
     assert NodeRoleDimension("g1", roles=role) == dimension1
 
-    rdMap = RoleDimensionMapping("a", [], {}, False)
+    rdMap = RoleDimensionMapping("a", [], {})
     dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
     assert NodeRoleDimension("g1", roleDimensionMappings=rdMap) == dimension2
 
@@ -189,7 +188,7 @@ def test_noderoledimension_construction_list():
     assert dimension1.name == "g1"
     assert dimension1.roles == [role]
 
-    rdMap = RoleDimensionMapping("a", [], {}, False)
+    rdMap = RoleDimensionMapping("a", [], {})
     dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
     assert dimension2.name == "g1"
     assert dimension2.roleDimensionMappings == [rdMap]
@@ -418,7 +417,6 @@ def test_roledimensionmapping_default_values():
     rdMap = RoleDimensionMapping("a")
     assert rdMap.groups == [1]
     assert rdMap.canonicalRoleNames == {}
-    assert rdMap.caseSensitive is False
 
 
 def test_noderolesdata():
