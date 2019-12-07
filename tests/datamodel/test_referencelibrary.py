@@ -166,8 +166,7 @@ def test_noderoledimension_construction():
         NodeRoleDimension("g1", roleDimensionMappings="i1")
     with pytest.raises(ValueError):
         NodeRoleDimension(
-            "book1",
-            roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c")],
+            "book1", roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c")]
         )
 
 
@@ -418,6 +417,7 @@ def test_roledimensionmapping_default_values():
     rdMap = RoleDimensionMapping("a")
     assert rdMap.groups == [1]
     assert rdMap.canonicalRoleNames == {}
+
 
 def test_noderolesdata():
     """Check proper deserialization for a node roles data."""
