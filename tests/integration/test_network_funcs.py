@@ -38,6 +38,7 @@ from pybatfish.client.extended import (
     bf_put_network_object,
 )
 from pybatfish.client.options import Options
+from pybatfish.client.session import Session
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 from pybatfish.datamodel.referencelibrary import (
     NodeRoleDimension,
@@ -58,6 +59,12 @@ def network():
     yield name
     # cleanup
     bf_delete_network(name)
+
+
+@fixture(scope="module")
+def session():
+    s = Session()
+    return s
 
 
 def test_delete_network_object(network):
