@@ -90,7 +90,7 @@ def test_list_networks():
 
 
 @requires_bf("2019.12.07")
-def test_add_node_role_dimension():
+def test_add_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
@@ -138,7 +138,7 @@ def test_get_node_role_dimension():
 
 
 @requires_bf("2019.12.07")
-def test_delete_node_role_dimension():
+def test_delete_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
@@ -161,7 +161,7 @@ def test_delete_node_role_dimension():
 
 
 @requires_bf("2019.12.07")
-def test_put_node_role_dimension():
+def test_put_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
