@@ -46,6 +46,7 @@ from pybatfish.datamodel.referencelibrary import (
     RoleDimensionMapping,
     RoleMapping,
 )
+from tests.common_util import requires_bf
 from tests.conftest import COMPLETION_TYPES
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -88,6 +89,7 @@ def test_list_networks():
         bf_delete_network(name)
 
 
+@requires_bf("2019.12.07")
 def test_add_node_role_dimension():
     try:
         network_name = "n1"
@@ -135,6 +137,7 @@ def test_get_node_role_dimension():
         bf_delete_network(network_name)
 
 
+@requires_bf("2019.12.07")
 def test_delete_node_role_dimension():
     try:
         network_name = "n1"
@@ -157,6 +160,7 @@ def test_delete_node_role_dimension():
         bf_delete_network(network_name)
 
 
+@requires_bf("2019.12.07")
 def test_put_node_role_dimension():
     try:
         network_name = "n1"
