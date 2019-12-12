@@ -222,13 +222,6 @@ def test_list_snapshots(network, example_snapshot):
     assert verbose[0][BfConsts.PROP_NAME] == example_snapshot
 
 
-def test_get_snapshot_inferred_node_role_dimension(network, roles_snapshot):
-    bf_set_network(network)
-    bf_set_snapshot(roles_snapshot)
-    # should not crash
-    bf_get_snapshot_inferred_node_role_dimension("auto0")
-
-
 def test_get_snapshot_inferred_node_roles(network, roles_snapshot):
     bf_set_network(network)
     bf_set_snapshot(roles_snapshot)

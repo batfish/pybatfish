@@ -38,6 +38,7 @@ from pybatfish.client.extended import (
     bf_put_network_object,
 )
 from pybatfish.client.options import Options
+from pybatfish.client.session import Session
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion
 from pybatfish.datamodel.referencelibrary import (
     NodeRoleDimension,
@@ -46,6 +47,7 @@ from pybatfish.datamodel.referencelibrary import (
     RoleDimensionMapping,
     RoleMapping,
 )
+from tests.common_util import requires_bf
 from tests.conftest import COMPLETION_TYPES
 
 _this_dir = abspath(dirname(realpath(__file__)))
@@ -57,6 +59,12 @@ def network():
     yield name
     # cleanup
     bf_delete_network(name)
+
+
+@fixture(scope="module")
+def session():
+    s = Session()
+    return s
 
 
 def test_delete_network_object(network):
@@ -88,7 +96,8 @@ def test_list_networks():
         bf_delete_network(name)
 
 
-def test_add_node_role_dimension():
+@requires_bf("2019.12.07")
+def test_add_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
@@ -135,7 +144,8 @@ def test_get_node_role_dimension():
         bf_delete_network(network_name)
 
 
-def test_delete_node_role_dimension():
+@requires_bf("2019.12.07")
+def test_delete_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
@@ -157,7 +167,8 @@ def test_delete_node_role_dimension():
         bf_delete_network(network_name)
 
 
-def test_put_node_role_dimension():
+@requires_bf("2019.12.07")
+def test_put_node_role_dimension(session):
     try:
         network_name = "n1"
         bf_set_network(network_name)
