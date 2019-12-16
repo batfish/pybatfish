@@ -474,11 +474,17 @@ class RoutingStepDetail(DataModelElement):
     """
 
     routes = attr.ib(type=List[Any])
+    arpIp = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoutingStepDetail
-        return RoutingStepDetail([route for route in json_dict.get("routes", [])])
+        return RoutingStepDetail(
+            [route for route in json_dict.get("routes", [])],
+            json_dict.get("arpIp"),
+            json_dict.get("outputInterface"),
+        )
 
     def __str__(self):
         # type: () -> str
@@ -488,13 +494,17 @@ class RoutingStepDetail(DataModelElement):
         routes_str = []  # type: List[str]
         for route in self.routes:
             routes_str.append(
-                "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
+                "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
                     protocol=route.get("protocol"),
                     network=route.get("network"),
                     next_hop_ip=route.get("nextHopIp"),
                 )
             )
-        return "Routes: " + ",".join(routes_str)
+        return (
+            ("Routes: " + "[" + ",".join(routes_str) + "]")
+            + (", " + self.arpIp if self.arpIp is not None else "")
+            + (", " + self.outputInterface if self.outputInterface is not None else "")
+        )
 
 
 @attr.s(frozen=True)
