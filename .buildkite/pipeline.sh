@@ -23,7 +23,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install regex=2019.11.1 black"
+      - "python3 -m pip install regex==2019.11.1 black"
       - "./fix_format.sh --check"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
