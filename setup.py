@@ -106,6 +106,7 @@ setup(
     extras_require={
         "capirca": CAPIRCA_DEPS,
         "dev": [
+            "regex=2019.11.1",  # https://github.com/psf/black/issues/1207
             "black; python_version >= '3.6.0'",
             "check-manifest",
             "coverage",
