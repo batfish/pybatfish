@@ -501,9 +501,13 @@ class RoutingStepDetail(DataModelElement):
                 )
             )
         return (
-            ("Routes: " + "[" + ",".join(routes_str) + "]")
-            + (", " + self.arpIp if self.arpIp is not None else "")
-            + (", " + self.outputInterface if self.outputInterface is not None else "")
+            ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
+            + (
+                ", Output Interface: " + self.outputInterface
+                if self.outputInterface is not None
+                else ""
+            )
+            + (", Routes: " + "[" + ",".join(routes_str) + "]")
         )
 
 
