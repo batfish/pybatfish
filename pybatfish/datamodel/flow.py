@@ -22,6 +22,8 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
+    "ArpErrorStepDetail",
+    "DeliveredStepDetail",
     "EnterInputIfaceStepDetail",
     "ExitOutputIfaceStepDetail",
     "FilterStepDetail",
@@ -197,9 +199,9 @@ class Flow(DataModelElement):
     def _has_ports(self):
         # type: () -> bool
         return (
-            self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
-            and self.srcPort is not None
-            and self.dstPort is not None
+                self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
+                and self.srcPort is not None
+                and self.dstPort is not None
         )
 
     def _repr_html_(self):
@@ -362,13 +364,61 @@ class FlowTraceHop(DataModelElement):
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
             routes=indent
-            + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
+                   + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
         )
         if self.transformedFlow:
             result += "<br>Transformed flow: {}".format(
                 self.transformedFlow._repr_html_()
             )
         return result
+
+
+@attr.s(frozen=True)
+class ArpErrorStepDetail(DataModelElement):
+    """Details of a step representing the arp error of a flow when sending out of a Hop.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=str)
+    resolvedNexthopIp = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ArpErrorStepDetail
+        return ArpErrorStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        return "output interface: {}, resolved nexthop ip: {}".format(self.outputInterface, self.resolvedNexthopIp)
+
+
+@attr.s(frozen=True)
+class DeliveredStepDetail(DataModelElement):
+    """Details of a step representing the flow is delivered or exiting the network.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=str)
+    resolvedNexthopIp = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> DeliveredStepDetail
+        return DeliveredStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        return "output interface: {}, resolved nexthop ip: {}".format(self.outputInterface, self.resolvedNexthopIp)
 
 
 @attr.s(frozen=True)
@@ -501,13 +551,13 @@ class RoutingStepDetail(DataModelElement):
                 )
             )
         return (
-            ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
-            + (
-                ", Output Interface: " + self.outputInterface
-                if self.outputInterface is not None
-                else ""
-            )
-            + (", Routes: " + "[" + ",".join(routes_str) + "]")
+                ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
+                + (
+                    ", Output Interface: " + self.outputInterface
+                    if self.outputInterface is not None
+                    else ""
+                )
+                + (", Routes: " + "[" + ",".join(routes_str) + "]")
         )
 
 
@@ -610,6 +660,8 @@ class Step(DataModelElement):
         # type: (Dict) -> Optional[Step]
 
         from_dicts = {
+            "ArpError": ArpErrorStepDetail.from_dict,
+            "Delivered": DeliveredStepDetail.from_dict,
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
