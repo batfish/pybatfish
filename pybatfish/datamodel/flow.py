@@ -389,7 +389,7 @@ class ArpErrorStepDetail(DataModelElement):
         # type: (Dict) -> ArpErrorStepDetail
         return ArpErrorStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            json_dict.get("resolvedNexthopIp"),
+            json_dict.get("resolvedNexthopIp", ""),
         )
 
     def __str__(self):
@@ -415,7 +415,7 @@ class DeliveredStepDetail(DataModelElement):
         # type: (Dict) -> DeliveredStepDetail
         return DeliveredStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            json_dict.get("resolvedNexthopIp"),
+            json_dict.get("resolvedNexthopIp", ""),
         )
 
     def __str__(self):
