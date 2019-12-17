@@ -283,6 +283,19 @@ def test_hop_repr_str():
     )
 
 
+def test_only_routes_str():
+    routingStepDetail = RoutingStepDetail(
+        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
+        None,
+        None,
+    )
+
+    assert (
+        str(routingStepDetail)
+        == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
 def test_no_route():
     step = Step(RoutingStepDetail([], None, None), "NO_ROUTE")
     assert str(step) == "NO_ROUTE"
