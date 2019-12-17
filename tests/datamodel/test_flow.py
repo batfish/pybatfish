@@ -44,7 +44,7 @@ def test_arp_error_step_detail_str():
     detail = ArpErrorStepDetail("iface", "1.1.1.1")
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(output interface: iface, resolved nexthop ip: 1.1.1.1)"
+    assert str(step) == "ACTION(Output Interface: iface, Resolved Next Hop IP: 1.1.1.1)"
 
 
 def test_arp_error_step_detail_deserialization():
@@ -57,7 +57,7 @@ def test_delivered_step_detail_str():
     detail = DeliveredStepDetail("iface", "1.1.1.1")
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(output interface: iface, resolved nexthop ip: 1.1.1.1)"
+    assert str(step) == "ACTION(Output Interface: iface, Resolved Next Hop IP: 1.1.1.1)"
 
 
 def test_delivered_step_detail_deserialization():

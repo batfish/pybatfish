@@ -382,21 +382,28 @@ class ArpErrorStepDetail(DataModelElement):
     """
 
     outputInterface = attr.ib(type=Optional[str])
-    resolvedNexthopIp = attr.ib(type=str)
+    resolvedNexthopIp = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ArpErrorStepDetail
         return ArpErrorStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
-            json_dict.get("resolvedNexthopIp", ""),
+            json_dict.get("resolvedNexthopIp"),
         )
 
     def __str__(self):
         # type: () -> str
-        return "output interface: {}, resolved nexthop ip: {}".format(
-            self.outputInterface, self.resolvedNexthopIp
-        )
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        if detail_info:
+            return ", ".join(detail_info)
+        return ""
 
 
 @attr.s(frozen=True)
@@ -420,9 +427,16 @@ class DeliveredStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "output interface: {}, resolved nexthop ip: {}".format(
-            self.outputInterface, self.resolvedNexthopIp
-        )
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        if detail_info:
+            return ", ".join(detail_info)
+        return ""
 
 
 @attr.s(frozen=True)
