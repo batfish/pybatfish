@@ -265,7 +265,9 @@ def test_hop_repr_str():
                             "protocol": "static",
                             "nextHopIp": "1.2.3.5",
                         },
-                    ]
+                    ],
+                    "12.123.1.2",
+                    "iface1",
                 ),
                 "FORWARDED",
             ),
@@ -275,13 +277,14 @@ def test_hop_repr_str():
     )
 
     assert (
-        str(hop)
-        == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+        str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
+        "  FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)])\n  "
+        "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
     )
 
 
 def test_no_route():
-    step = Step(RoutingStepDetail([]), "NO_ROUTE")
+    step = Step(RoutingStepDetail([], None, None), "NO_ROUTE")
     assert str(step) == "NO_ROUTE"
 
 
