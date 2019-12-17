@@ -552,27 +552,23 @@ class RoutingStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        if not self.routes:
-            return ""
-
-        routes_str = []  # type: List[str]
-        for route in self.routes:
-            routes_str.append(
-                "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
-                    protocol=route.get("protocol"),
-                    network=route.get("network"),
-                    next_hop_ip=route.get("nextHopIp"),
+        output = []
+        if self.arpIp is not None:
+            output.append("ARP IP: " + self.arpIp)
+        if self.outputInterface is not None:
+            output.append("Output Interface: " + self.outputInterface)
+        if self.routes:
+            routes_str = []  # type: List[str]
+            for route in self.routes:
+                routes_str.append(
+                    "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
+                        protocol=route.get("protocol"),
+                        network=route.get("network"),
+                        next_hop_ip=route.get("nextHopIp"),
+                    )
                 )
-            )
-        return (
-            ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
-            + (
-                ", Output Interface: " + self.outputInterface
-                if self.outputInterface is not None
-                else ""
-            )
-            + (", Routes: " + "[" + ",".join(routes_str) + "]")
-        )
+            output.append("Routes: " + "[" + ",".join(routes_str) + "]")
+        return ", ".join(output)
 
 
 @attr.s(frozen=True)
