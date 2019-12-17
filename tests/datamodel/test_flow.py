@@ -48,10 +48,7 @@ def test_arp_error_step_detail_str():
 
 
 def test_arp_error_step_detail_deserialization():
-    json = {
-        "outputInterface": {"interface": "iface"},
-        "resolvedNexthopIp": "1.1.1.1"
-    }
+    json = {"outputInterface": {"interface": "iface"}, "resolvedNexthopIp": "1.1.1.1"}
     detail = ArpErrorStepDetail.from_dict(json)
     assert detail == ArpErrorStepDetail("iface", "1.1.1.1")
 
@@ -64,10 +61,7 @@ def test_delivered_step_detail_str():
 
 
 def test_delivered_step_detail_deserialization():
-    json = {
-        "outputInterface": {"interface": "iface"},
-        "resolvedNexthopIp": "1.1.1.1"
-    }
+    json = {"outputInterface": {"interface": "iface"}, "resolvedNexthopIp": "1.1.1.1"}
     detail = DeliveredStepDetail.from_dict(json)
     assert detail == DeliveredStepDetail("iface", "1.1.1.1")
 

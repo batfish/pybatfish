@@ -199,9 +199,9 @@ class Flow(DataModelElement):
     def _has_ports(self):
         # type: () -> bool
         return (
-                self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
-                and self.srcPort is not None
-                and self.dstPort is not None
+            self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
+            and self.srcPort is not None
+            and self.dstPort is not None
         )
 
     def _repr_html_(self):
@@ -364,7 +364,7 @@ class FlowTraceHop(DataModelElement):
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
             routes=indent
-                   + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
+            + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
         )
         if self.transformedFlow:
             result += "<br>Transformed flow: {}".format(
@@ -394,7 +394,9 @@ class ArpErrorStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "output interface: {}, resolved nexthop ip: {}".format(self.outputInterface, self.resolvedNexthopIp)
+        return "output interface: {}, resolved nexthop ip: {}".format(
+            self.outputInterface, self.resolvedNexthopIp
+        )
 
 
 @attr.s(frozen=True)
@@ -418,7 +420,9 @@ class DeliveredStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "output interface: {}, resolved nexthop ip: {}".format(self.outputInterface, self.resolvedNexthopIp)
+        return "output interface: {}, resolved nexthop ip: {}".format(
+            self.outputInterface, self.resolvedNexthopIp
+        )
 
 
 @attr.s(frozen=True)
@@ -551,13 +555,13 @@ class RoutingStepDetail(DataModelElement):
                 )
             )
         return (
-                ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
-                + (
-                    ", Output Interface: " + self.outputInterface
-                    if self.outputInterface is not None
-                    else ""
-                )
-                + (", Routes: " + "[" + ",".join(routes_str) + "]")
+            ("ARP IP: " + self.arpIp if self.arpIp is not None else "")
+            + (
+                ", Output Interface: " + self.outputInterface
+                if self.outputInterface is not None
+                else ""
+            )
+            + (", Routes: " + "[" + ",".join(routes_str) + "]")
         )
 
 
