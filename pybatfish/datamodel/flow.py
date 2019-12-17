@@ -22,6 +22,8 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
+    "ArpErrorStepDetail",
+    "DeliveredStepDetail",
     "EnterInputIfaceStepDetail",
     "ExitOutputIfaceStepDetail",
     "FilterStepDetail",
@@ -372,6 +374,68 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class ArpErrorStepDetail(DataModelElement):
+    """Details of a step representing the arp error of a flow when sending out of a Hop.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=Optional[str])
+    resolvedNexthopIp = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ArpErrorStepDetail
+        return ArpErrorStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        return ", ".join(detail_info)
+
+
+@attr.s(frozen=True)
+class DeliveredStepDetail(DataModelElement):
+    """Details of a step representing the flow is delivered or exiting the network.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=Optional[str])
+    resolvedNexthopIp = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> DeliveredStepDetail
+        return DeliveredStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        return ", ".join(detail_info)
+
+
+@attr.s(frozen=True)
 class EnterInputIfaceStepDetail(DataModelElement):
     """Details of a step representing the entering of a flow into a Hop.
 
@@ -610,6 +674,8 @@ class Step(DataModelElement):
         # type: (Dict) -> Optional[Step]
 
         from_dicts = {
+            "ArpError": ArpErrorStepDetail.from_dict,
+            "Delivered": DeliveredStepDetail.from_dict,
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
