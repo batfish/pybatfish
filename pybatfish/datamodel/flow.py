@@ -401,9 +401,7 @@ class ArpErrorStepDetail(DataModelElement):
             detail_info.append(
                 "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
             )
-        if detail_info:
-            return ", ".join(detail_info)
-        return ""
+        return ", ".join(detail_info)
 
 
 @attr.s(frozen=True)
@@ -434,9 +432,7 @@ class DeliveredStepDetail(DataModelElement):
             detail_info.append(
                 "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
             )
-        if detail_info:
-            return ", ".join(detail_info)
-        return ""
+        return ", ".join(detail_info)
 
 
 @attr.s(frozen=True)
