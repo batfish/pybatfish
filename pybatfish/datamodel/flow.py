@@ -415,7 +415,7 @@ class DeliveredStepDetail(DataModelElement):
     """
 
     outputInterface = attr.ib(type=Optional[str])
-    resolvedNexthopIp = attr.ib(type=str)
+    resolvedNexthopIp = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
