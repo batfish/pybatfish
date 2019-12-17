@@ -381,7 +381,7 @@ class ArpErrorStepDetail(DataModelElement):
     :ivar resolvedNexthopIp: Resolve next hop Ip address
     """
 
-    outputInterface = attr.ib(type=str)
+    outputInterface = attr.ib(type=Optional[str])
     resolvedNexthopIp = attr.ib(type=str)
 
     @classmethod
@@ -407,7 +407,7 @@ class DeliveredStepDetail(DataModelElement):
     :ivar resolvedNexthopIp: Resolve next hop Ip address
     """
 
-    outputInterface = attr.ib(type=str)
+    outputInterface = attr.ib(type=Optional[str])
     resolvedNexthopIp = attr.ib(type=str)
 
     @classmethod
