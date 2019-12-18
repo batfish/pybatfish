@@ -486,15 +486,20 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class InboundStepDetail(DataModelElement):
-    """Details of a step representing the receiving (acceptance) of a flow into a Hop."""
+    """Details of a step representing the receiving (acceptance) of a flow into a Hop.
+
+    :ivar interface: interface that owns the destination IP
+    """
+
+    interface = attr.ib(type=str)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> InboundStepDetail
-        return InboundStepDetail()  # Currently has no attributes
+        return InboundStepDetail(json_dict.get("interface", ""))
 
     def __str__(self):
-        return "InboundStep"
+        return str(self.interface)
 
 
 @attr.s(frozen=True)

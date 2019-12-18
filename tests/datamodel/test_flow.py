@@ -30,6 +30,7 @@ from pybatfish.datamodel.flow import (
     FlowTraceHop,
     HeaderConstraints,
     Hop,
+    InboundStepDetail,
     MatchSessionStepDetail,
     MatchTcpFlags,
     RoutingStepDetail,
@@ -519,6 +520,17 @@ def test_flow_str_ports():
     s = repr(Flow.from_dict(flow_dict))
     assert "2.1.1.1:1234" not in s
     assert "5.5.1.1:2345" not in s
+
+
+def test_InboundStepDetail_from_dict():
+    interface = "GigabitEthernet1/0"
+    d = {"type": "InboundStep", "interface": interface, "action": "ACCEPTED"}
+    assert InboundStepDetail.from_dict(d) == InboundStepDetail(interface)
+
+
+def test_InboundStepDetail_str():
+    interface = "GigabitEthernet1/0"
+    assert str(InboundStepDetail(interface)) == interface
 
 
 def test_SetupSessionStepDetail_from_dict():
