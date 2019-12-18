@@ -486,7 +486,10 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class InboundStepDetail(DataModelElement):
-    """Details of a step representing the receiving (acceptance) of a flow into a Hop."""
+    """Details of a step representing the receiving (acceptance) of a flow into a Hop.
+
+    :ivar interface: interface that owns the destination IP
+    """
 
     interface = attr.ib(type=str)
 
