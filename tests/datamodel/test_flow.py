@@ -20,6 +20,8 @@ import attr
 import pytest
 
 from pybatfish.datamodel.flow import (
+    ArpErrorStepDetail,
+    DeliveredStepDetail,
     EnterInputIfaceStepDetail,
     ExitOutputIfaceStepDetail,
     FilterStepDetail,
@@ -28,6 +30,7 @@ from pybatfish.datamodel.flow import (
     FlowTraceHop,
     HeaderConstraints,
     Hop,
+    InboundStepDetail,
     MatchSessionStepDetail,
     MatchTcpFlags,
     RoutingStepDetail,
@@ -36,6 +39,32 @@ from pybatfish.datamodel.flow import (
     TcpFlags,
     TransformationStepDetail,
 )
+
+
+def test_arp_error_step_detail_str():
+    detail = ArpErrorStepDetail("iface", "1.1.1.1")
+
+    step = Step(detail, "ACTION")
+    assert str(step) == "ACTION(Output Interface: iface, Resolved Next Hop IP: 1.1.1.1)"
+
+
+def test_arp_error_step_detail_deserialization():
+    json = {"outputInterface": {"interface": "iface"}, "resolvedNexthopIp": "1.1.1.1"}
+    detail = ArpErrorStepDetail.from_dict(json)
+    assert detail == ArpErrorStepDetail("iface", "1.1.1.1")
+
+
+def test_delivered_step_detail_str():
+    detail = DeliveredStepDetail("iface", "1.1.1.1")
+
+    step = Step(detail, "ACTION")
+    assert str(step) == "ACTION(Output Interface: iface, Resolved Next Hop IP: 1.1.1.1)"
+
+
+def test_delivered_step_detail_deserialization():
+    json = {"outputInterface": {"interface": "iface"}, "resolvedNexthopIp": "1.1.1.1"}
+    detail = DeliveredStepDetail.from_dict(json)
+    assert detail == DeliveredStepDetail("iface", "1.1.1.1")
 
 
 def test_exit_output_iface_step_detail_str():
@@ -265,7 +294,9 @@ def test_hop_repr_str():
                             "protocol": "static",
                             "nextHopIp": "1.2.3.5",
                         },
-                    ]
+                    ],
+                    "12.123.1.2",
+                    "iface1",
                 ),
                 "FORWARDED",
             ),
@@ -275,13 +306,51 @@ def test_hop_repr_str():
     )
 
     assert (
-        str(hop)
-        == "node: node1\n  SENT_IN(in_iface1)\n  FORWARDED(Routes: bgp [Network: 1.1.1.1/24, Next Hop IP:1.2.3.4],static [Network: 1.1.1.2/24, Next Hop IP:1.2.3.5])\n  PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+        str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
+        "  FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)])\n  "
+        "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+    )
+
+
+def test_only_routes_str():
+    routingStepDetail = RoutingStepDetail(
+        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
+        None,
+        None,
+    )
+
+    assert (
+        str(routingStepDetail)
+        == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
+def test_no_output_iface_str():
+    routingStepDetail = RoutingStepDetail(
+        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
+        "1.2.3.4",
+        None,
+    )
+    assert (
+        str(routingStepDetail)
+        == "ARP IP: 1.2.3.4, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
+def test_no_arp_ip_str():
+    routingStepDetail = RoutingStepDetail(
+        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
+        None,
+        "iface1",
+    )
+    assert (
+        str(routingStepDetail)
+        == "Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
     )
 
 
 def test_no_route():
-    step = Step(RoutingStepDetail([]), "NO_ROUTE")
+    step = Step(RoutingStepDetail([], None, None), "NO_ROUTE")
     assert str(step) == "NO_ROUTE"
 
 
@@ -451,6 +520,17 @@ def test_flow_str_ports():
     s = repr(Flow.from_dict(flow_dict))
     assert "2.1.1.1:1234" not in s
     assert "5.5.1.1:2345" not in s
+
+
+def test_InboundStepDetail_from_dict():
+    interface = "GigabitEthernet1/0"
+    d = {"type": "InboundStep", "interface": interface, "action": "ACCEPTED"}
+    assert InboundStepDetail.from_dict(d) == InboundStepDetail(interface)
+
+
+def test_InboundStepDetail_str():
+    interface = "GigabitEthernet1/0"
+    assert str(InboundStepDetail(interface)) == interface
 
 
 def test_SetupSessionStepDetail_from_dict():

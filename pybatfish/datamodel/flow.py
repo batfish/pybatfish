@@ -22,6 +22,8 @@ from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
 
 __all__ = [
+    "ArpErrorStepDetail",
+    "DeliveredStepDetail",
     "EnterInputIfaceStepDetail",
     "ExitOutputIfaceStepDetail",
     "FilterStepDetail",
@@ -372,6 +374,68 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class ArpErrorStepDetail(DataModelElement):
+    """Details of a step representing the arp error of a flow when sending out of a Hop.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=Optional[str])
+    resolvedNexthopIp = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ArpErrorStepDetail
+        return ArpErrorStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        return ", ".join(detail_info)
+
+
+@attr.s(frozen=True)
+class DeliveredStepDetail(DataModelElement):
+    """Details of a step representing the flow is delivered or exiting the network.
+
+    :ivar outputInterface: Interface of the Hop from which the flow exits
+    :ivar resolvedNexthopIp: Resolve next hop Ip address
+    """
+
+    outputInterface = attr.ib(type=Optional[str])
+    resolvedNexthopIp = attr.ib(type=Optional[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> DeliveredStepDetail
+        return DeliveredStepDetail(
+            json_dict.get("outputInterface", {}).get("interface"),
+            json_dict.get("resolvedNexthopIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        detail_info = []
+        if self.outputInterface:
+            detail_info.append("Output Interface: {}".format(self.outputInterface))
+        if self.resolvedNexthopIp:
+            detail_info.append(
+                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
+            )
+        return ", ".join(detail_info)
+
+
+@attr.s(frozen=True)
 class EnterInputIfaceStepDetail(DataModelElement):
     """Details of a step representing the entering of a flow into a Hop.
 
@@ -422,15 +486,20 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class InboundStepDetail(DataModelElement):
-    """Details of a step representing the receiving (acceptance) of a flow into a Hop."""
+    """Details of a step representing the receiving (acceptance) of a flow into a Hop.
+
+    :ivar interface: interface that owns the destination IP
+    """
+
+    interface = attr.ib(type=str)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> InboundStepDetail
-        return InboundStepDetail()  # Currently has no attributes
+        return InboundStepDetail(json_dict.get("interface", ""))
 
     def __str__(self):
-        return "InboundStep"
+        return str(self.interface)
 
 
 @attr.s(frozen=True)
@@ -474,27 +543,37 @@ class RoutingStepDetail(DataModelElement):
     """
 
     routes = attr.ib(type=List[Any])
+    arpIp = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> RoutingStepDetail
-        return RoutingStepDetail([route for route in json_dict.get("routes", [])])
+        return RoutingStepDetail(
+            [route for route in json_dict.get("routes", [])],
+            json_dict.get("arpIp"),
+            json_dict.get("outputInterface"),
+        )
 
     def __str__(self):
         # type: () -> str
-        if not self.routes:
-            return ""
-
-        routes_str = []  # type: List[str]
-        for route in self.routes:
-            routes_str.append(
-                "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
-                    protocol=route.get("protocol"),
-                    network=route.get("network"),
-                    next_hop_ip=route.get("nextHopIp"),
+        output = []
+        if self.arpIp is not None:
+            output.append("ARP IP: " + self.arpIp)
+        if self.outputInterface is not None:
+            output.append("Output Interface: " + self.outputInterface)
+        if self.routes:
+            routes_str = []  # type: List[str]
+            for route in self.routes:
+                routes_str.append(
+                    "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
+                        protocol=route.get("protocol"),
+                        network=route.get("network"),
+                        next_hop_ip=route.get("nextHopIp"),
+                    )
                 )
-            )
-        return "Routes: " + ",".join(routes_str)
+            output.append("Routes: " + "[" + ",".join(routes_str) + "]")
+        return ", ".join(output)
 
 
 @attr.s(frozen=True)
@@ -596,6 +675,8 @@ class Step(DataModelElement):
         # type: (Dict) -> Optional[Step]
 
         from_dicts = {
+            "ArpError": ArpErrorStepDetail.from_dict,
+            "Delivered": DeliveredStepDetail.from_dict,
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
