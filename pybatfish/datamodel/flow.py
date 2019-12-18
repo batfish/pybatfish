@@ -493,7 +493,7 @@ class InboundStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> InboundStepDetail
-        return InboundStepDetail(json_dict.get("interface"))
+        return InboundStepDetail(json_dict.get("interface", ""))
 
     def __str__(self):
         return str(self.interface)
