@@ -82,7 +82,6 @@ class Flow(DataModelElement):
     srcIp = attr.ib(type=str, converter=str)
     srcPort = attr.ib(type=Optional[int], converter=_optional_int)
     state = attr.ib(type=str, converter=str)
-    tag = attr.ib(type=Optional[str])
     tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
@@ -95,8 +94,7 @@ class Flow(DataModelElement):
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> Flow
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "Flow":
         return Flow(
             json_dict["dscp"],
             json_dict["dstIp"],
@@ -113,7 +111,6 @@ class Flow(DataModelElement):
             json_dict["srcIp"],
             json_dict.get("srcPort"),
             json_dict["state"],
-            json_dict.get("tag"),
             json_dict.get("tcpFlagsAck"),
             json_dict.get("tcpFlagsCwr"),
             json_dict.get("tcpFlagsEce"),
