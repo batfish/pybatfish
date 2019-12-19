@@ -82,7 +82,7 @@ class Flow(DataModelElement):
     srcIp = attr.ib(type=str, converter=str)
     srcPort = attr.ib(type=Optional[int], converter=_optional_int)
     state = attr.ib(type=str, converter=str)
-    tag = attr.ib(type=str, converter=str)
+    tag = attr.ib(type=Optional[str])
     tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
@@ -113,7 +113,7 @@ class Flow(DataModelElement):
             json_dict["srcIp"],
             json_dict.get("srcPort"),
             json_dict["state"],
-            json_dict["tag"],
+            json_dict.get("tag"),
             json_dict.get("tcpFlagsAck"),
             json_dict.get("tcpFlagsCwr"),
             json_dict.get("tcpFlagsEce"),
