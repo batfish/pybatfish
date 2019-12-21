@@ -521,21 +521,15 @@ class OriginateStepDetail(DataModelElement):
     """
 
     originatingVrf = attr.ib(type=str)
-    originatingInterface = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> OriginateStepDetail
-        return OriginateStepDetail(
-            json_dict.get("originatingVrf", ""), json_dict.get("originatingInterface"),
-        )
+        return OriginateStepDetail(json_dict.get("originatingVrf", ""))
 
     def __str__(self):
         # type: () -> str
-        output = "Originating VRF: " + str(self.originatingVrf)
-        if self.originatingInterface:
-            output += ", Originating Interface: " + self.originatingInterface
-        return output
+        return str(self.originatingVrf)
 
 
 @attr.s(frozen=True)
