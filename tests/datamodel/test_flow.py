@@ -38,7 +38,6 @@ from pybatfish.datamodel.flow import (
     Step,
     TcpFlags,
     TransformationStepDetail,
-    OriginateStepDetail,
 )
 
 
@@ -324,18 +323,6 @@ def test_only_routes_str():
         str(routingStepDetail)
         == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
     )
-
-
-def test_originate_step_no_iface():
-    detail = OriginateStepDetail("vrf1", None)
-
-    assert str(detail) == "Originating VRF: vrf1"
-
-
-def test_originate_step():
-    detail = OriginateStepDetail("vrf1", "iface1")
-
-    assert str(detail) == "Originating VRF: vrf1, Originating Interface: iface1"
 
 
 def test_no_output_iface_str():
