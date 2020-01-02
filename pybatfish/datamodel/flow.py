@@ -371,6 +371,44 @@ class FlowTraceHop(DataModelElement):
 
 
 @attr.s(frozen=True)
+class SessionMatchExpr(DataModelElement):
+    """
+    Represents a match criteria for a firewall session.
+
+    :ivar ipProtocol: IP protocol of the flow
+    :ivar srcIp: Source IP of the flow
+    :ivar dstIp: Destination IP of the flow
+    :ivar srcPort: Source port of the flow
+    :ivar dstPort: Destination port of the flow
+    """
+
+    ipProtocol = attr.ib(type=str)
+    srcIp = attr.ib(type=str)
+    dstIp = attr.ib(type=str)
+    srcPort = attr.ib(type=Optional[int], default=None)
+    dstPort = attr.ib(type=Optional[int], default=None)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> SessionMatchExpr
+        return SessionMatchExpr(
+            json_dict.get("ipProtocol"),
+            json_dict.get("srcIp"),
+            json_dict.get("dstIp"),
+            json_dict.get("srcPort"),
+            json_dict.get("dstPort"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        matchers = ["ipProtocol", "srcIp", "dstIp"]
+        if self.srcPort is not None and self.dstPort is not None:
+            matchers.extend(["srcPort", "dstPort"])
+        strings = ["{}={}".format(field, getattr(self, field)) for field in matchers]
+        return "[{}]".format(", ".join(strings))
+
+
+@attr.s(frozen=True)
 class ArpErrorStepDetail(DataModelElement):
     """Details of a step representing the arp error of a flow when sending out of a Hop.
 
@@ -504,10 +542,12 @@ class MatchSessionStepDetail(DataModelElement):
     """Details of a step for when a flow matches a firewall session.
 
     :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar matchCriteria: A SessionMatchExpr that describes the match criteria of the session
     :ivar transformation: List of FlowDiffs that will be applied after session match
     """
 
     incomingInterfaces = attr.ib(type=List[str])
+    matchCriteria = attr.ib(type=SessionMatchExpr)
     transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
 
     @classmethod
@@ -515,6 +555,7 @@ class MatchSessionStepDetail(DataModelElement):
         # type: (Dict) -> MatchSessionStepDetail
         return MatchSessionStepDetail(
             json_dict.get("incomingInterfaces", []),
+            SessionMatchExpr.from_dict(json_dict.get("matchCriteria")),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
         )
 
@@ -522,6 +563,7 @@ class MatchSessionStepDetail(DataModelElement):
         # type: () -> str
         strings = [
             "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+            "Match Criteria: {}".format(self.matchCriteria),
         ]
         if self.transformation:
             strings.append(
