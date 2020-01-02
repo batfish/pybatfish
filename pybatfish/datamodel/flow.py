@@ -501,16 +501,33 @@ class InboundStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class MatchSessionStepDetail(DataModelElement):
-    """Details of a step for when a flow matches a firewall session."""
+    """Details of a step for when a flow matches a firewall session.
+
+    :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar transformation: List of FlowDiffs that will be applied after session match
+    """
+
+    incomingInterfaces = attr.ib(type=List[str])
+    transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> MatchSessionStepDetail
-        return MatchSessionStepDetail()
+        return MatchSessionStepDetail(
+            json_dict.get("incomingInterfaces", []),
+            [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
+        )
 
     def __str__(self):
         # type: () -> str
-        return ""
+        strings = [
+            "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+        ]
+        if self.transformation:
+            strings.append(
+                "Transformation: [{}]".format(", ".join(map(str, self.transformation)))
+            )
+        return ", ".join(strings)
 
 
 @attr.s(frozen=True)
