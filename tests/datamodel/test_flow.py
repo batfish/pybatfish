@@ -32,6 +32,7 @@ from pybatfish.datamodel.flow import (
     Hop,
     InboundStepDetail,
     MatchSessionStepDetail,
+    SessionMatchExpr,
     MatchTcpFlags,
     RoutingStepDetail,
     SetupSessionStepDetail,
@@ -544,24 +545,70 @@ def test_SetupSessionStepDetail_str():
 def test_MatchSessionStepDetail_from_dict():
     d = {
         "incomingInterfaces": ["reth0.6"],
+        "matchCriteria": {
+            "ipProtocol": "ICMP",
+            "srcIp": "2.2.2.2",
+            "dstIp": "3.3.3.3",
+        },
         "transformation": [
             {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
         ],
     }
     assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
-        ["reth0.6"], [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+        ["reth0.6"],
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
     )
 
 
 def test_MatchSessionStepDetail_str():
     detail = MatchSessionStepDetail(
-        ["reth0.6"], [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+        ["reth0.6"],
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
     )
     assert str(detail) == (
-        "Incoming Interfaces: [reth0.6], Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
+        "Incoming Interfaces: [reth0.6], "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3], "
+        "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
-    detail = MatchSessionStepDetail(["reth0.6"])
-    assert str(detail) == "Incoming Interfaces: [reth0.6]"
+    detail = MatchSessionStepDetail(
+        ["reth0.6"], SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3]"
+    )
+
+
+def test_SessionMatchExpr_from_dict():
+    d = {
+        "ipProtocol": "ICMP",
+        "srcIp": "1.1.1.1",
+        "dstIp": "2.2.2.2",
+    }
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
+        "ICMP", "1.1.1.1", "2.2.2.2",
+    )
+    d = {
+        "ipProtocol": "ICMP",
+        "srcIp": "1.1.1.1",
+        "dstIp": "2.2.2.2",
+        "srcPort": 1111,
+        "dstPort": 2222,
+    }
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
+        "ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222,
+    )
+
+
+def test_SessionMatchExpr_str():
+    match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2")
+    assert str(match) == "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2]"
+    match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222)
+    assert str(match) == (
+        "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2, srcPort=1111, dstPort=2222]"
+    )
 
 
 def test_header_constraints_of():
