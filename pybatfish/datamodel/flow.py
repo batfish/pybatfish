@@ -392,9 +392,9 @@ class SessionMatchExpr(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> SessionMatchExpr
         return SessionMatchExpr(
-            json_dict.get("ipProtocol"),
-            json_dict.get("srcIp"),
-            json_dict.get("dstIp"),
+            json_dict.get("ipProtocol", ""),
+            json_dict.get("srcIp", ""),
+            json_dict.get("dstIp", ""),
             json_dict.get("srcPort"),
             json_dict.get("dstPort"),
         )
@@ -555,7 +555,7 @@ class MatchSessionStepDetail(DataModelElement):
         # type: (Dict) -> MatchSessionStepDetail
         return MatchSessionStepDetail(
             json_dict.get("incomingInterfaces", []),
-            SessionMatchExpr.from_dict(json_dict.get("matchCriteria")),
+            SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
         )
 
