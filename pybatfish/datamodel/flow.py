@@ -370,6 +370,75 @@ class FlowTraceHop(DataModelElement):
         return result
 
 
+class SessionAction(DataModelElement):
+    """An action that a firewall session takes for return traffic matching the session."""
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> SessionAction
+        action = json_dict.get("type")
+        if action == "Accept":
+            return Accept()
+        if action == "FibLookup":
+            return FibLookup()
+        if action == "ForwardOutInterface":
+            return ForwardOutInterface.from_dict(json_dict)
+        raise ValueError("Invalid session action type: {}".format(action))
+
+
+@attr.s(frozen=True)
+class Accept(SessionAction):
+    """A SessionAction whereby return traffic is accepted by the node from which it
+    originated.
+    """
+
+    def __str__(self):
+        # type: () -> str
+        return "Accept"
+
+
+@attr.s(frozen=True)
+class FibLookup(SessionAction):
+    """A SessionAction whereby return traffic is forwarded according to the result of a lookup
+    on the FIB of the interface on which the return traffic is received.
+    """
+
+    def __str__(self):
+        # type: () -> str
+        return "FibLookup"
+
+
+@attr.s(frozen=True)
+class ForwardOutInterface(SessionAction):
+    """A SessionAction whereby a return flow is forwarded out a specified interface to a
+    specified next hop with neither FIB resolution nor ARP lookup.
+
+    :ivar nextHopHostname: Hostname of the next hop
+    :ivar nextHopInterface: Interface that the next hop receives
+    :ivar outgoingInterface: Interface of the outgoing traffic from this hop
+    """
+
+    nextHopHostname = attr.ib(type=str)
+    nextHopInterface = attr.ib(type=str)
+    outgoingInterface = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ForwardOutInterface
+        next_hop = json_dict.get("nextHop", {})
+        return ForwardOutInterface(
+            next_hop.get("hostname", ""),
+            next_hop.get("interface", ""),
+            json_dict.get("outgoingInterface", ""),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        return "ForwardOutInterface(Next Hop: {}, Next Hop Interface: {}, Outgoing Interface: {})".format(
+            self.nextHopHostname, self.nextHopInterface, self.outgoingInterface,
+        )
+
+
 @attr.s(frozen=True)
 class SessionMatchExpr(DataModelElement):
     """
@@ -542,11 +611,13 @@ class MatchSessionStepDetail(DataModelElement):
     """Details of a step for when a flow matches a firewall session.
 
     :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar sessionAction: A SessionAction that the firewall takes for a matching session
     :ivar matchCriteria: A SessionMatchExpr that describes the match criteria of the session
     :ivar transformation: List of FlowDiffs that will be applied after session match
     """
 
     incomingInterfaces = attr.ib(type=List[str])
+    sessionAction = attr.ib(type=SessionAction)
     matchCriteria = attr.ib(type=SessionMatchExpr)
     transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
 
@@ -555,6 +626,7 @@ class MatchSessionStepDetail(DataModelElement):
         # type: (Dict) -> MatchSessionStepDetail
         return MatchSessionStepDetail(
             json_dict.get("incomingInterfaces", []),
+            SessionAction.from_dict(json_dict.get("sessionAction", {})),
             SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
         )
@@ -563,6 +635,7 @@ class MatchSessionStepDetail(DataModelElement):
         # type: () -> str
         strings = [
             "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+            "Action: {}".format(self.sessionAction),
             "Match Criteria: {}".format(self.matchCriteria),
         ]
         if self.transformation:
