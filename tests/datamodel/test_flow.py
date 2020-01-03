@@ -542,12 +542,26 @@ def test_SetupSessionStepDetail_str():
 
 
 def test_MatchSessionStepDetail_from_dict():
-    d = {"type": "MatchSession", "action": "MATCHED_SESSION"}
-    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail()
+    d = {
+        "incomingInterfaces": ["reth0.6"],
+        "transformation": [
+            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
+        ],
+    }
+    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
+        ["reth0.6"], [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
 
 
 def test_MatchSessionStepDetail_str():
-    assert str(MatchSessionStepDetail()) == ""
+    detail = MatchSessionStepDetail(
+        ["reth0.6"], [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
+    )
+    detail = MatchSessionStepDetail(["reth0.6"])
+    assert str(detail) == "Incoming Interfaces: [reth0.6]"
 
 
 def test_header_constraints_of():
