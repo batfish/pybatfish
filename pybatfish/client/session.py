@@ -965,20 +965,6 @@ class Session(object):
         """
         return [d["name"] for d in restv2helper.list_networks(self)]
 
-    def list_incomplete_works(self):
-        # type: () -> Dict[str, Any]
-        """
-        Get pending work that is incomplete.
-
-        :return: JSON dictionary of question name to question object
-        :rtype: dict
-        """
-        json_data = workhelper.get_data_list_incomplete_work(self)
-        response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
-        )
-        return response
-
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
         """

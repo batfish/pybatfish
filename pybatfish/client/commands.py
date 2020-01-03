@@ -455,10 +455,6 @@ def bf_list_networks():
     return bf_session.list_networks()
 
 
-def bf_list_incomplete_works():
-    return bf_session.list_incomplete_works()
-
-
 def bf_list_snapshots(verbose=False):
     # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
     """
