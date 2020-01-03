@@ -707,16 +707,41 @@ class RoutingStepDetail(DataModelElement):
 
 @attr.s(frozen=True)
 class SetupSessionStepDetail(DataModelElement):
-    """Details of a step for when a firewall session is created."""
+    """Details of a step for when a firewall session is created.
+
+    :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar sessionAction: A SessionAction that the firewall takes for a return traffic matching the session
+    :ivar matchCriteria: A SessionMatchExpr that describes the match criteria of the session
+    :ivar transformation: List of FlowDiffs that will be applied on the return traffic matching the session
+    """
+
+    incomingInterfaces = attr.ib(type=List[str])
+    sessionAction = attr.ib(type=SessionAction)
+    matchCriteria = attr.ib(type=SessionMatchExpr)
+    transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> SetupSessionStepDetail
-        return SetupSessionStepDetail()
+        return SetupSessionStepDetail(
+            json_dict.get("incomingInterfaces", []),
+            SessionAction.from_dict(json_dict.get("sessionAction", {})),
+            SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
+            [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
+        )
 
     def __str__(self):
         # type: () -> str
-        return ""
+        strings = [
+            "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+            "Action: {}".format(self.sessionAction),
+            "Match Criteria: {}".format(self.matchCriteria),
+        ]
+        if self.transformation:
+            strings.append(
+                "Transformation: [{}]".format(", ".join(map(str, self.transformation)))
+            )
+        return ", ".join(strings)
 
 
 @attr.s(frozen=True)
