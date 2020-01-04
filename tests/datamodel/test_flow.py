@@ -32,6 +32,11 @@ from pybatfish.datamodel.flow import (
     Hop,
     InboundStepDetail,
     MatchSessionStepDetail,
+    SessionMatchExpr,
+    SessionAction,
+    Accept,
+    FibLookup,
+    ForwardOutInterface,
     MatchTcpFlags,
     RoutingStepDetail,
     SetupSessionStepDetail,
@@ -533,21 +538,144 @@ def test_InboundStepDetail_str():
 
 
 def test_SetupSessionStepDetail_from_dict():
-    d = {"type": "SetupSession", "action": "SETUP_SESSION"}
-    assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail()
+    d = {
+        "incomingInterfaces": ["reth0.6"],
+        "sessionAction": {"type": "Accept"},
+        "matchCriteria": {
+            "ipProtocol": "ICMP",
+            "srcIp": "2.2.2.2",
+            "dstIp": "3.3.3.3",
+        },
+        "transformation": [
+            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
+        ],
+    }
+    assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail(
+        ["reth0.6"],
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
 
 
 def test_SetupSessionStepDetail_str():
-    assert str(SetupSessionStepDetail()) == ""
+    detail = SetupSessionStepDetail(
+        ["reth0.6"],
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], "
+        "Action: Accept, "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3], "
+        "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
+    )
+    detail = SetupSessionStepDetail(
+        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], "
+        "Action: Accept, "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3]"
+    )
 
 
 def test_MatchSessionStepDetail_from_dict():
-    d = {"type": "MatchSession", "action": "MATCHED_SESSION"}
-    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail()
+    d = {
+        "incomingInterfaces": ["reth0.6"],
+        "sessionAction": {"type": "Accept"},
+        "matchCriteria": {
+            "ipProtocol": "ICMP",
+            "srcIp": "2.2.2.2",
+            "dstIp": "3.3.3.3",
+        },
+        "transformation": [
+            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
+        ],
+    }
+    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
+        ["reth0.6"],
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
 
 
 def test_MatchSessionStepDetail_str():
-    assert str(MatchSessionStepDetail()) == ""
+    detail = MatchSessionStepDetail(
+        ["reth0.6"],
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], "
+        "Action: Accept, "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3], "
+        "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
+    )
+    detail = MatchSessionStepDetail(
+        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+    )
+    assert str(detail) == (
+        "Incoming Interfaces: [reth0.6], "
+        "Action: Accept, "
+        "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3]"
+    )
+
+
+def test_SessionMatchExpr_from_dict():
+    d = {
+        "ipProtocol": "ICMP",
+        "srcIp": "1.1.1.1",
+        "dstIp": "2.2.2.2",
+    }
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
+        "ICMP", "1.1.1.1", "2.2.2.2",
+    )
+    d = {
+        "ipProtocol": "ICMP",
+        "srcIp": "1.1.1.1",
+        "dstIp": "2.2.2.2",
+        "srcPort": 1111,
+        "dstPort": 2222,
+    }
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
+        "ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222,
+    )
+
+
+def test_SessionMatchExpr_str():
+    match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2")
+    assert str(match) == "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2]"
+    match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222)
+    assert str(match) == (
+        "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2, srcPort=1111, dstPort=2222]"
+    )
+
+
+def test_SessionAction_from_dict():
+    assert SessionAction.from_dict({"type": "Accept"}) == Accept()
+    assert SessionAction.from_dict({"type": "FibLookup"}) == FibLookup()
+    d = {
+        "type": "ForwardOutInterface",
+        "nextHop": {"hostname": "1.1.1.1", "interface": "iface1",},
+        "outgoingInterface": "iface2",
+    }
+    assert SessionAction.from_dict(d) == ForwardOutInterface(
+        "1.1.1.1", "iface1", "iface2"
+    )
+    with pytest.raises(ValueError):
+        SessionAction.from_dict({"type": "NotAType"})
+
+
+def test_SessionAction_str():
+    assert str(Accept()) == "Accept"
+    assert str(FibLookup()) == "FibLookup"
+    assert str(ForwardOutInterface("1.1.1.1", "iface1", "iface2")) == (
+        "ForwardOutInterface(Next Hop: 1.1.1.1, Next Hop Interface: iface1, Outgoing Interface: iface2)"
+    )
 
 
 def test_header_constraints_of():
