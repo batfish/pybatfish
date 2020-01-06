@@ -112,7 +112,7 @@ setup(
             "coverage",
             "jupyter",
             "mypy",
-            "nbformat",
+            "nbformat<5.0.0",
             "nbconvert",
             "pytest>=4.2.0",
             "pytest-cov",
