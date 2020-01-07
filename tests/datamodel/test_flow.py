@@ -96,6 +96,52 @@ def test_transformation_step_detail_str():
     assert str(step) == "ACTION(type field1: old1 -> new1, field2: old2 -> new2)"
 
 
+def test_filter_step_detail():
+    json_dict = {
+        "filter": "ACL",
+        "type": "ingressAcl",
+        "inputInterface": "iface",
+        "flow": {
+            "dscp": 0,
+            "dstIp": "2.1.1.1",
+            "dstPort": 0,
+            "ecn": 0,
+            "fragmentOffset": 0,
+            "icmpCode": 255,
+            "icmpVar": 255,
+            "ingressInterface": "intface",
+            "ingressNode": "ingress",
+            "ingressVrf": "vrfAbc",
+            "ipProtocol": "IP",
+            "packetLength": 0,
+            "srcIp": "5.5.1.1",
+            "srcPort": 0,
+            "state": "NEW",
+            "tag": "BASE",
+            "tcpFlagsAck": 0,
+            "tcpFlagsCwr": 0,
+            "tcpFlagsEce": 0,
+            "tcpFlagsFin": 0,
+            "tcpFlagsPsh": 0,
+            "tcpFlagsRst": 0,
+            "tcpFlagsSyn": 0,
+            "tcpFlagsUrg": 0,
+        }
+    }
+
+    detail = FilterStepDetail.from_dict(json_dict)
+
+    assert detail.filter == "ACL"
+    assert detail.filterType == "ingressAcl"
+    assert detail.inputInterface == "iface"
+
+    flow = detail.flow
+
+    assert flow.srcIp == "5.5.1.1"
+    assert flow.ingressInterface == "intface"
+    assert flow.ingressVrf == "vrfAbc"
+
+
 def test_flow_deserialization():
     hop_dict = {
         "dscp": 0,

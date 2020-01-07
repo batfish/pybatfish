@@ -750,15 +750,24 @@ class FilterStepDetail(DataModelElement):
 
     :ivar filter: filter name
     :ivar type: filter type
+    :ivar inputInterface: input interface of the flow
+    :ivar flow: current flow
     """
 
     filter = attr.ib(type=str)
     filterType = attr.ib(type=str)
+    inputInterface = attr.ib(type=str)
+    flow = attr.ib(type=Flow)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        return FilterStepDetail(json_dict.get("filter", ""), json_dict.get("type", ""))
+        return FilterStepDetail(
+            json_dict.get("filter", ""),
+            json_dict.get("type", ""),
+            json_dict.get("inputInterface", ""),
+            Flow.from_dict(json_dict.get("flow", ""))
+        )
 
     def __str__(self):
         # type: () -> str
