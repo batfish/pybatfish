@@ -351,7 +351,7 @@ def test_hop_repr_str():
                 ),
                 "FORWARDED",
             ),
-            Step(FilterStepDetail("preSourceNat_filter", "PRENAT"), "PERMITTED"),
+            Step(FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"),
             Step(ExitOutputIfaceStepDetail("out_iface1", None), "SENT_OUT"),
         ],
     )
