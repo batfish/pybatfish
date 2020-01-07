@@ -435,7 +435,7 @@ class ForwardOutInterface(SessionAction):
     def __str__(self):
         # type: () -> str
         return "ForwardOutInterface(Next Hop: {}, Next Hop Interface: {}, Outgoing Interface: {})".format(
-            self.nextHopHostname, self.nextHopInterface, self.outgoingInterface,
+            self.nextHopHostname, self.nextHopInterface, self.outgoingInterface
         )
 
 
@@ -766,7 +766,7 @@ class FilterStepDetail(DataModelElement):
             json_dict.get("filter", ""),
             json_dict.get("type", ""),
             json_dict.get("inputInterface", ""),
-            Flow.from_dict(json_dict.get("flow", ""))
+            Flow.from_dict(json_dict.get("flow", "")),
         )
 
     def __str__(self):
