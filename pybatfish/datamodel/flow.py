@@ -762,12 +762,12 @@ class FilterStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
-        f = None if "flow" not in json_dict else Flow.from_dict(json_dict.get("flow"))
+        flowObj = json_dict.get("flow", {})
         return FilterStepDetail(
             json_dict.get("filter", ""),
             json_dict.get("type", ""),
             json_dict.get("inputInterface", ""),
-            f,
+            Flow.from_dict(flowObj) if flowObj else None,
         )
 
     def __str__(self):
