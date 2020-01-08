@@ -239,7 +239,7 @@ def _upload_dir_to_url(
     src_dir: str,
     headers: Optional[Dict] = None,
     proxies: Optional[Dict] = None,
-):
+) -> None:
     """
     Recursively put files from the specified directory to the specified URL.
 

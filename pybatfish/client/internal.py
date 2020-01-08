@@ -64,5 +64,5 @@ def _bf_answer_obj(
     return session.get_answer(question_name, snapshot, reference_snapshot)
 
 
-def _bf_get_question_templates(session: "Session", verbose: bool = False):
+def _bf_get_question_templates(session: "Session", verbose: bool = False) -> Dict:
     return restv2helper.get_question_templates(session, verbose)

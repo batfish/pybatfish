@@ -13,7 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import re
-from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: F401
 
 import attr
 import six
@@ -273,9 +273,9 @@ class FlowTrace(DataModelElement):
     :ivar notes: Additional notes that help explain the disposition, if applicable.
     """
 
-    disposition = attr.ib()
-    hops = attr.ib()
-    notes = attr.ib()
+    disposition = attr.ib(type=str)
+    hops = attr.ib(type=Sequence)
+    notes = attr.ib(type=Any)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -787,7 +787,7 @@ class PolicyStepDetail(DataModelElement):
     policy = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict) -> "PolicyStepDetail":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "PolicyStepDetail":
         return PolicyStepDetail(json_dict.get("policy", ""))
 
     def __str__(self) -> str:

@@ -433,7 +433,7 @@ def get_component_versions(session):
     return _get_dict(session, "/version")
 
 
-def get_question_templates(session: "Session", verbose: bool):
+def get_question_templates(session: "Session", verbose: bool) -> Dict:
     """Get question templates from the backend.
 
     :param verbose: if True, even hidden questions will be returned.
