@@ -96,6 +96,52 @@ def test_transformation_step_detail_str():
     assert str(step) == "ACTION(type field1: old1 -> new1, field2: old2 -> new2)"
 
 
+def test_filter_step_detail():
+    json_dict = {
+        "filter": "ACL",
+        "type": "ingressAcl",
+        "inputInterface": "iface",
+        "flow": {
+            "dscp": 0,
+            "dstIp": "2.1.1.1",
+            "dstPort": 0,
+            "ecn": 0,
+            "fragmentOffset": 0,
+            "icmpCode": 255,
+            "icmpVar": 255,
+            "ingressInterface": "intface",
+            "ingressNode": "ingress",
+            "ingressVrf": "vrfAbc",
+            "ipProtocol": "IP",
+            "packetLength": 0,
+            "srcIp": "5.5.1.1",
+            "srcPort": 0,
+            "state": "NEW",
+            "tag": "BASE",
+            "tcpFlagsAck": 0,
+            "tcpFlagsCwr": 0,
+            "tcpFlagsEce": 0,
+            "tcpFlagsFin": 0,
+            "tcpFlagsPsh": 0,
+            "tcpFlagsRst": 0,
+            "tcpFlagsSyn": 0,
+            "tcpFlagsUrg": 0,
+        },
+    }
+
+    detail = FilterStepDetail.from_dict(json_dict)
+
+    assert detail.filter == "ACL"
+    assert detail.filterType == "ingressAcl"
+    assert detail.inputInterface == "iface"
+
+    flow = detail.flow
+
+    assert flow.srcIp == "5.5.1.1"
+    assert flow.ingressInterface == "intface"
+    assert flow.ingressVrf == "vrfAbc"
+
+
 def test_flow_deserialization():
     hop_dict = {
         "dscp": 0,
@@ -305,7 +351,9 @@ def test_hop_repr_str():
                 ),
                 "FORWARDED",
             ),
-            Step(FilterStepDetail("preSourceNat_filter", "PRENAT"), "PERMITTED"),
+            Step(
+                FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"
+            ),
             Step(ExitOutputIfaceStepDetail("out_iface1", None), "SENT_OUT"),
         ],
     )
@@ -541,11 +589,7 @@ def test_SetupSessionStepDetail_from_dict():
     d = {
         "incomingInterfaces": ["reth0.6"],
         "sessionAction": {"type": "Accept"},
-        "matchCriteria": {
-            "ipProtocol": "ICMP",
-            "srcIp": "2.2.2.2",
-            "dstIp": "3.3.3.3",
-        },
+        "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
         "transformation": [
             {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
         ],
@@ -572,7 +616,7 @@ def test_SetupSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = SetupSessionStepDetail(
-        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
     )
     assert str(detail) == (
         "Incoming Interfaces: [reth0.6], "
@@ -585,11 +629,7 @@ def test_MatchSessionStepDetail_from_dict():
     d = {
         "incomingInterfaces": ["reth0.6"],
         "sessionAction": {"type": "Accept"},
-        "matchCriteria": {
-            "ipProtocol": "ICMP",
-            "srcIp": "2.2.2.2",
-            "dstIp": "3.3.3.3",
-        },
+        "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
         "transformation": [
             {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
         ],
@@ -616,7 +656,7 @@ def test_MatchSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = MatchSessionStepDetail(
-        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
     )
     assert str(detail) == (
         "Incoming Interfaces: [reth0.6], "
@@ -626,13 +666,9 @@ def test_MatchSessionStepDetail_str():
 
 
 def test_SessionMatchExpr_from_dict():
-    d = {
-        "ipProtocol": "ICMP",
-        "srcIp": "1.1.1.1",
-        "dstIp": "2.2.2.2",
-    }
+    d = {"ipProtocol": "ICMP", "srcIp": "1.1.1.1", "dstIp": "2.2.2.2"}
     assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
-        "ICMP", "1.1.1.1", "2.2.2.2",
+        "ICMP", "1.1.1.1", "2.2.2.2"
     )
     d = {
         "ipProtocol": "ICMP",
@@ -642,7 +678,7 @@ def test_SessionMatchExpr_from_dict():
         "dstPort": 2222,
     }
     assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
-        "ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222,
+        "ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222
     )
 
 
@@ -660,7 +696,7 @@ def test_SessionAction_from_dict():
     assert SessionAction.from_dict({"type": "FibLookup"}) == FibLookup()
     d = {
         "type": "ForwardOutInterface",
-        "nextHop": {"hostname": "1.1.1.1", "interface": "iface1",},
+        "nextHop": {"hostname": "1.1.1.1", "interface": "iface1"},
         "outgoingInterface": "iface2",
     }
     assert SessionAction.from_dict(d) == ForwardOutInterface(
