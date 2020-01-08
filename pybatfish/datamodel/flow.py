@@ -757,16 +757,17 @@ class FilterStepDetail(DataModelElement):
     filter = attr.ib(type=str)
     filterType = attr.ib(type=str)
     inputInterface = attr.ib(type=str)
-    flow = attr.ib(type=Flow)
+    flow = attr.ib(type=Optional[Flow])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
+        flowObj = json_dict.get("flow", {})
         return FilterStepDetail(
             json_dict.get("filter", ""),
             json_dict.get("type", ""),
             json_dict.get("inputInterface", ""),
-            Flow.from_dict(json_dict.get("flow", "")),
+            Flow.from_dict(flowObj) if flowObj else None,
         )
 
     def __str__(self):
