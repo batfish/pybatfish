@@ -25,7 +25,6 @@ from collections.abc import Iterable, Mapping
 from typing import Any, IO, Sized, Union  # noqa: F401
 
 import simplejson
-import six
 from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
@@ -197,16 +196,10 @@ def zip_dir(dir_path, out_file):
                     zipWriter.write(filename, arcname)
 
 
-def escape_html(s):
-    # type: (str) -> str
-    if six.PY2:
-        from cgi import escape
+def escape_html(s: str) -> str:
+    from html import escape
 
-        return escape(s, quote=True)
-    else:
-        from html import escape
-
-        return escape(s)
+    return escape(s)
 
 
 def escape_name(s: str) -> str:
