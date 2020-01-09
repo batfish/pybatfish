@@ -1030,8 +1030,9 @@ class Session(object):
         """
         restv2helper.put_node_roles(self, node_roles_data)
 
-    def set_network(self, name=None, prefix=Options.default_network_prefix):
-        # type: (str, str) -> str
+    def set_network(
+        self, name: Optional[str] = None, prefix: str = Options.default_network_prefix
+    ) -> str:
         """
         Configure the network used for analysis.
 
@@ -1121,7 +1122,7 @@ class Session(object):
     def upload_diagnostics(
         self,
         dry_run: bool = True,
-        netconan_config: str = None,
+        netconan_config: Optional[str] = None,
         contact_info: Optional[str] = None,
         proxy: Optional[str] = None,
     ) -> str:

@@ -34,7 +34,7 @@ cat <<EOF
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
       - "python3 -m pip install mypy"
-      - "mypy pybatfish"
+      - "mypy pybatfish tests"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}

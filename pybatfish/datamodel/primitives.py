@@ -76,7 +76,7 @@ class Assertion(DataModelElement):
     """
 
     type = attr.ib(type=AssertionType)
-    expect = attr.ib()
+    expect = attr.ib(type=Any)
 
     @classmethod
     def from_dict(cls, json_dict):

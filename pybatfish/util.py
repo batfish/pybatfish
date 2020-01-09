@@ -209,8 +209,7 @@ def escape_html(s):
         return escape(s)
 
 
-def escape_name(s):
-    # type: (str) -> str
+def escape_name(s: str) -> str:
     """
     Escapes the given name string with double quotes if needed.
 
@@ -219,8 +218,7 @@ def escape_name(s):
     """
     return (
         '"{}"'.format(s)
-        if s is not None
-        and len(s) != 0
+        if len(s) != 0
         and (
             s.startswith('"')
             or s.startswith("/")
