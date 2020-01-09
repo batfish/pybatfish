@@ -284,8 +284,9 @@ def bf_generate_dataplane(snapshot=None, extra_args=None):
     return bf_session.generate_dataplane(snapshot=snapshot, extra_args=extra_args)
 
 
-def bf_get_analysis_answers(name, snapshot=None, reference_snapshot=None):
-    # type: (str, str, Optional[str]) -> Any
+def bf_get_analysis_answers(
+    name: str, snapshot: Optional[str] = None, reference_snapshot: Optional[str] = None
+) -> Any:
     """Get the answers for a previously asked analysis."""
     snapshot = bf_session.get_snapshot(snapshot)
     json_data = workhelper.get_data_get_analysis_answers(
@@ -534,8 +535,9 @@ def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
     return bf_get_analysis_answers(name, snapshot, reference_snapshot)
 
 
-def bf_set_network(name=None, prefix=Options.default_network_prefix):
-    # type: (str, str) -> str
+def bf_set_network(
+    name: Optional[str] = None, prefix: str = Options.default_network_prefix
+) -> str:
     """
     Configure the network used for analysis.
 
@@ -568,7 +570,7 @@ def bf_set_snapshot(name=None, index=None):
 
 def bf_upload_diagnostics(
     dry_run: bool = True,
-    netconan_config: str = None,
+    netconan_config: Optional[str] = None,
     contact_info: Optional[str] = None,
     proxy: Optional[str] = None,
 ) -> str:

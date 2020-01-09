@@ -155,8 +155,9 @@ def upload_diagnostics(
     return anon_dir
 
 
-def _anonymize_dir(input_dir, output_dir, netconan_config=None):
-    # type: (str, str, str) -> None
+def _anonymize_dir(
+    input_dir: str, output_dir: str, netconan_config: Optional[str] = None
+) -> None:
     """
     Anonymize files in input dir and save to output dir.
 
