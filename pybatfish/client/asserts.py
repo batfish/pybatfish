@@ -25,10 +25,10 @@ from typing import (
     Any,
     Dict,
     Iterable,
+    List,
     Optional,
     TYPE_CHECKING,
     Union,
-    List,
 )  # noqa: F401
 
 from deepdiff import DeepDiff
@@ -126,10 +126,10 @@ def _get_duplicate_router_ids(question_name, session=None, snapshot=None):
         getattr(_get_question_object(session, question_name), question_name)()
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
         ["Router_ID"]
-    )  # type: ignore
+    )
 
     return df_duplicate
 
@@ -275,7 +275,7 @@ def assert_filter_denies(
         .searchFilters(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was permitted, when expected to be denied\n{}".format(
@@ -315,7 +315,7 @@ def assert_filter_has_no_unreachable_lines(
         .filterLineReachability(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found unreachable filter line(s), when none were expected\n{}".format(
@@ -361,7 +361,7 @@ def assert_filter_permits(
         .searchFilters(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found a flow that was denied, when expected to be permitted\n{}".format(
@@ -402,7 +402,7 @@ def assert_flows_fail(
         .reachability(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found a flow that succeed, when expected to fail\n{}".format(
@@ -443,7 +443,7 @@ def assert_flows_succeed(
         .reachability(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found a flow that failed, when expected to succeed\n{}".format(
@@ -491,7 +491,7 @@ def assert_no_incompatible_bgp_sessions(
         .bgpSessionCompatibility(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
 
     # Filter out UNIQUE_MATCH, DYNAMIC_MATCH, UNKNOWN_REMOTE statuses
     # unless user has provided status
@@ -546,7 +546,7 @@ def assert_no_incompatible_ospf_sessions(
         .ospfSessionCompatibility(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found OSPF session(s) that were not established, when none were expected\n{}".format(
@@ -590,7 +590,7 @@ def assert_no_unestablished_bgp_sessions(
         .bgpSessionStatus(**kwargs)
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found compatible BGP session(s) that were not established, when none were expected\n{}".format(
@@ -621,7 +621,7 @@ def assert_no_undefined_references(
         .undefinedReferences()
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found undefined reference(s), when none were expected\n{}".format(
@@ -710,7 +710,7 @@ def assert_no_forwarding_loops(
         .detectLoops()
         .answer(snapshot)
         .frame()
-    )  # type: ignore
+    )
     if len(df) > 0:
         return _raise_common(
             "Found forwarding loops, when none were expected\n{}".format(
