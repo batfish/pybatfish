@@ -43,8 +43,6 @@ def testFlowTraceHopDeserialization():
             "packetLength": 0,
             "srcIp": "5.5.1.1",
             "srcPort": 0,
-            "state": "NEW",
-            "tag": "BASE",
             "tcpFlagsAck": 0,
             "tcpFlagsCwr": 0,
             "tcpFlagsEce": 0,

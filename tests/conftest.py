@@ -11,7 +11,6 @@ COMPLETION_TYPES = [
     VariableType.DISPOSITION_SPEC,
     VariableType.FILTER,
     VariableType.FILTER_SPEC,
-    VariableType.FLOW_STATE,
     VariableType.INTERFACE,
     VariableType.INTERFACE_GROUP_NAME,
     VariableType.INTERFACE_PROPERTY_SPEC,
