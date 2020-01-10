@@ -351,26 +351,6 @@ def get_data_list_testrigs(session, network):
     return json_data
 
 
-def get_data_sync_snapshots_sync_now(session, plugin_id, force):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-        CoordConsts.SVC_KEY_PLUGIN_ID: plugin_id,
-        CoordConsts.SVC_KEY_FORCE: str(force),
-    }
-    return json_data
-
-
-def get_data_sync_snapshots_update_settings(session, plugin_id, settings_dict):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-        CoordConsts.SVC_KEY_PLUGIN_ID: plugin_id,
-        CoordConsts.SVC_KEY_SETTINGS: json.dumps(settings_dict),
-    }
-    return json_data
-
-
 def get_data_upload_snapshot(session, snapshot, fd):
     # type: (Session, str, IO) -> Dict
     json_data = {

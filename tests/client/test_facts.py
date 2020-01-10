@@ -13,9 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import os
+from unittest.mock import Mock, patch
 
 import pytest
-import six
 import yaml
 from pandas import DataFrame
 
@@ -31,11 +31,6 @@ from pybatfish.client._facts import (
 from pybatfish.client.session import Session
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.question.question import QuestionBase
-
-if six.PY3:
-    from unittest.mock import Mock, patch
-else:
-    from mock import Mock, patch
 
 
 class MockTableAnswer(TableAnswer):

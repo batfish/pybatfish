@@ -13,10 +13,9 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import re
-from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: F401
 
 import attr
-import six
 
 from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
@@ -273,9 +272,9 @@ class FlowTrace(DataModelElement):
     :ivar notes: Additional notes that help explain the disposition, if applicable.
     """
 
-    disposition = attr.ib()
-    hops = attr.ib()
-    notes = attr.ib()
+    disposition = attr.ib(type=str)
+    hops = attr.ib(type=Sequence)
+    notes = attr.ib(type=Any)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -757,16 +756,17 @@ class FilterStepDetail(DataModelElement):
     filter = attr.ib(type=str)
     filterType = attr.ib(type=str)
     inputInterface = attr.ib(type=str)
-    flow = attr.ib(type=Flow)
+    flow = attr.ib(type=Optional[Flow])
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> FilterStepDetail
+        flowObj = json_dict.get("flow", {})
         return FilterStepDetail(
             json_dict.get("filter", ""),
             json_dict.get("type", ""),
             json_dict.get("inputInterface", ""),
-            Flow.from_dict(json_dict.get("flow", "")),
+            Flow.from_dict(flowObj) if flowObj else None,
         )
 
     def __str__(self):
@@ -786,7 +786,7 @@ class PolicyStepDetail(DataModelElement):
     policy = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict) -> "PolicyStepDetail":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "PolicyStepDetail":
         return PolicyStepDetail(json_dict.get("policy", ""))
 
     def __str__(self) -> str:
@@ -1141,7 +1141,7 @@ def _get_color_for_disposition(disposition):
 
 def _normalize_phc_intspace(value):
     # type: (Any) -> Optional[Text]
-    if value is None or isinstance(value, six.string_types):
+    if value is None or isinstance(value, str):
         return value
     if isinstance(value, int):
         return str(value)
@@ -1155,7 +1155,7 @@ def _normalize_phc_list(value):
     # type: (Any) -> Optional[List[Text]]
     if value is None or isinstance(value, list):
         return value
-    elif isinstance(value, six.string_types):
+    elif isinstance(value, str):
         # only collect truthy values
         alist = [v for v in [v.strip() for v in value.split(",")] if v]
         if not alist:
@@ -1176,7 +1176,7 @@ def _normalize_phc_tcpflags(value):
 
 def _normalize_phc_strings(value):
     # type: (Any) -> Optional[Text]
-    if value is None or isinstance(value, six.string_types):
+    if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: Text

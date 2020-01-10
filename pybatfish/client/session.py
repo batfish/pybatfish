@@ -23,7 +23,6 @@ import zipfile
 from typing import Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
 
 import pkg_resources
-import six
 from deprecated import deprecated
 from requests import HTTPError
 
@@ -587,9 +586,7 @@ class Session(object):
             add_files=add_files,
             extra_args=extra_args,
         )
-        assert isinstance(
-            ss_name, six.string_types
-        )  # Guaranteed since background=False
+        assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
     def _fork_snapshot(
@@ -822,9 +819,7 @@ class Session(object):
         ss_name = self._init_snapshot(
             upload, name=name, overwrite=overwrite, extra_args=extra_args
         )
-        assert isinstance(
-            ss_name, six.string_types
-        )  # Guaranteed since background=False
+        assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
     def init_snapshot_from_text(
@@ -884,9 +879,7 @@ class Session(object):
         ss_name = self._init_snapshot(
             data, name=snapshot_name, overwrite=overwrite, extra_args=extra_args
         )
-        assert isinstance(
-            ss_name, six.string_types
-        )  # Guaranteed since background=False
+        assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
     def __init_snapshot_from_io(self, name, fd):
@@ -945,7 +938,7 @@ class Session(object):
                     "existing snapshot".format(name, self.network)
                 )
 
-        if isinstance(upload, six.string_types):
+        if isinstance(upload, str):
             self.__init_snapshot_from_file(name, upload)
         else:
             if not zipfile.is_zipfile(upload):
@@ -1030,8 +1023,9 @@ class Session(object):
         """
         restv2helper.put_node_roles(self, node_roles_data)
 
-    def set_network(self, name=None, prefix=Options.default_network_prefix):
-        # type: (str, str) -> str
+    def set_network(
+        self, name: Optional[str] = None, prefix: str = Options.default_network_prefix
+    ) -> str:
         """
         Configure the network used for analysis.
 
@@ -1121,7 +1115,7 @@ class Session(object):
     def upload_diagnostics(
         self,
         dry_run: bool = True,
-        netconan_config: str = None,
+        netconan_config: Optional[str] = None,
         contact_info: Optional[str] = None,
         proxy: Optional[str] = None,
     ) -> str:

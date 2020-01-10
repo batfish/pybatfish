@@ -15,7 +15,6 @@
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
-import six
 from deprecated import deprecated
 
 from .primitives import DataModelElement, Interface
@@ -56,7 +55,7 @@ def _make_typed_list(value, item_type):
 
 def _make_string_list(value):
     # type: (Any) -> List[str]
-    return _make_typed_list(value, six.string_types)
+    return _make_typed_list(value, str)
 
 
 @attr.s(frozen=True)

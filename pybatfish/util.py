@@ -25,8 +25,6 @@ from collections.abc import Iterable, Mapping
 from typing import Any, IO, Sized, Union  # noqa: F401
 
 import simplejson
-import six
-from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
 
@@ -59,10 +57,10 @@ class BfJsonEncoder(simplejson.JSONEncoder):
     """A default encoder for Batfish question and datamodel objects."""
 
     def default(self, obj):
-        if isinstance(obj, (int, float, bool, string_types)) or obj is None:
+        if isinstance(obj, (int, float, bool, str)) or obj is None:
             return obj
         elif isinstance(obj, Mapping):
-            return {k: self.default(v) for k, v in iteritems(obj)}
+            return {k: self.default(v) for k, v in obj.items()}
         elif isinstance(obj, Iterable):
             return list(map(self.default, obj))
         else:
@@ -197,20 +195,13 @@ def zip_dir(dir_path, out_file):
                     zipWriter.write(filename, arcname)
 
 
-def escape_html(s):
-    # type: (str) -> str
-    if six.PY2:
-        from cgi import escape
+def escape_html(s: str) -> str:
+    from html import escape
 
-        return escape(s, quote=True)
-    else:
-        from html import escape
-
-        return escape(s)
+    return escape(s)
 
 
-def escape_name(s):
-    # type: (str) -> str
+def escape_name(s: str) -> str:
     """
     Escapes the given name string with double quotes if needed.
 
@@ -219,8 +210,7 @@ def escape_name(s):
     """
     return (
         '"{}"'.format(s)
-        if s is not None
-        and len(s) != 0
+        if len(s) != 0
         and (
             s.startswith('"')
             or s.startswith("/")

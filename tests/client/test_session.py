@@ -13,16 +13,12 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from unittest.mock import patch
+
 import pkg_resources
 import pytest
-import six
 
 from pybatfish.client.session import Session
-
-if six.PY3:
-    from unittest.mock import patch
-else:
-    from mock import patch
 
 
 class MockEntryPoint(object):

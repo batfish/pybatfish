@@ -11,4 +11,3 @@ PyYAML
 requests
 requests-toolbelt
 simplejson
-six

@@ -21,8 +21,6 @@ import logging
 import os
 from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
 
-import six
-
 try:
     from capirca.lib import naming, policy
 except ImportError:
@@ -91,7 +89,7 @@ def _entry_to_group(name, items, definitions):
         if isinstance(c, (ipaddress.IPv4Address, ipaddress.IPv4Network))
     ]
 
-    converted_group = [c for c in converted if isinstance(c, six.string_types)]
+    converted_group = [c for c in converted if isinstance(c, str)]
 
     return AddressGroup(
         "{name}".format(name=name),
