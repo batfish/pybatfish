@@ -25,7 +25,6 @@ from collections.abc import Iterable, Mapping
 from typing import Any, IO, Sized, Union  # noqa: F401
 
 import simplejson
-from six import iteritems, string_types
 
 from pybatfish.exception import QuestionValidationException
 
@@ -58,10 +57,10 @@ class BfJsonEncoder(simplejson.JSONEncoder):
     """A default encoder for Batfish question and datamodel objects."""
 
     def default(self, obj):
-        if isinstance(obj, (int, float, bool, string_types)) or obj is None:
+        if isinstance(obj, (int, float, bool, str)) or obj is None:
             return obj
         elif isinstance(obj, Mapping):
-            return {k: self.default(v) for k, v in iteritems(obj)}
+            return {k: self.default(v) for k, v in obj.items()}
         elif isinstance(obj, Iterable):
             return list(map(self.default, obj))
         else:

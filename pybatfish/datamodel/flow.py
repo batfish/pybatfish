@@ -16,7 +16,6 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: F401
 
 import attr
-import six
 
 from pybatfish.util import escape_html
 from .primitives import DataModelElement, Edge
@@ -1142,7 +1141,7 @@ def _get_color_for_disposition(disposition):
 
 def _normalize_phc_intspace(value):
     # type: (Any) -> Optional[Text]
-    if value is None or isinstance(value, six.string_types):
+    if value is None or isinstance(value, str):
         return value
     if isinstance(value, int):
         return str(value)
@@ -1156,7 +1155,7 @@ def _normalize_phc_list(value):
     # type: (Any) -> Optional[List[Text]]
     if value is None or isinstance(value, list):
         return value
-    elif isinstance(value, six.string_types):
+    elif isinstance(value, str):
         # only collect truthy values
         alist = [v for v in [v.strip() for v in value.split(",")] if v]
         if not alist:
@@ -1177,7 +1176,7 @@ def _normalize_phc_tcpflags(value):
 
 def _normalize_phc_strings(value):
     # type: (Any) -> Optional[Text]
-    if value is None or isinstance(value, six.string_types):
+    if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: Text

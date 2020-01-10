@@ -21,7 +21,6 @@ import logging
 import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
-import six
 from deprecated import deprecated
 
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
@@ -383,7 +382,7 @@ def _bf_init_or_add_analysis(session, analysisName, questionDirectory, newAnalys
     questions = _load_questions_from_dir(questionDirectory, session)
     analysis = {
         question_name: question_class(question_name=question_name)
-        for question_name, question_class in six.iteritems(questions)
+        for question_name, question_class in questions.items()
     }
     with tempfile.NamedTemporaryFile() as tempFile:
         with open(tempFile.name, "w") as analysisFile:

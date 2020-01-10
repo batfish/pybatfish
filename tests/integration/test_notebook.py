@@ -21,7 +21,6 @@ from os.path import abspath, dirname, join, pardir, realpath
 import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
-from six import PY3
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -63,9 +62,7 @@ def executed_notebook(notebook):
     nb = deepcopy(orig_nb)
     exec_path = dirname(filepath)
     # Run all cells in the notebook, with a time bound, continuing on errors
-    ep = ExecutePreprocessor(
-        timeout=60, allow_errors=True, kernel_name="python3" if PY3 else "python2"
-    )
+    ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
     ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
 
     # Filter out the deprecation warning, if it exists
