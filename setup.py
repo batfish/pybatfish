@@ -118,7 +118,7 @@ setup(
             "pytz",
             "requests_mock",
             "responses",
-            "sphinx>=1.8.0",
+            "sphinx>=2.3.1",
             "sphinx_rtd_theme",
         ]
         + CAPIRCA_DEPS,

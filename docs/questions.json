@@ -1,0 +1,415 @@
+{
+  "configProperties": {
+    "comment": "Configuration Properties",
+    "questions": [
+      {
+        "Node Properties": {
+          "question": "nodeProperties"
+        }
+      },
+      {
+        "Interface Properties": {
+          "question": "interfaceProperties"
+        }
+      },
+      {
+        "BGP Process Configuration": {
+          "question": "bgpProcessConfiguration"
+        }
+      },
+      {
+        "BGP Peer Configuration": {
+          "question": "bgpPeerConfiguration"
+        }
+      },
+      {
+        "OSPF Process Configuration": {
+          "question": "ospfProcessConfiguration"
+        }
+      },
+      {
+        "OSPF Interface Configuration": {
+          "question": "ospfInterfaceConfiguration"
+        }
+      },
+      {
+        "OSPF Area Configuration": {
+          "question": "ospfAreaConfiguration"
+        }
+      },
+      {
+        "Multi-chassis LAG": {
+          "question": "mlagProperties",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "F5 BIG-IP VIP Configuration": {
+          "question": "f5BigipVipConfiguration",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "IP Owners": {
+          "question": "ipOwners"
+        }
+      },
+      {
+        "Named Structures": {
+          "question": "namedStructures"
+        }
+      },
+      {
+        "Defined Structures": {
+          "question": "definedStructures"
+        }
+      },
+      {
+        "Referenced Structures": {
+          "question": "referencedStructures"
+        }
+      },
+      {
+        "Undefined References": {
+          "question": "undefinedReferences"
+        }
+      },
+      {
+        "Unused Structures": {
+          "question": "unusedStructures"
+        }
+      },
+      {
+        "VLAN Properties": {
+          "question": "switchedVlanProperties",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "Interface MTU": {
+          "question": "interfaceMtu",
+          "parameters": "mtuBytes=2000, comparator='<'"
+        }
+      }
+    ]
+  },
+  "topology": {
+    "comment": "Topology",
+    "questions": [
+      {
+        "Layer 1 Topology": {
+          "question": "layer1Edges",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "Layer 3 Topology": {
+          "question": "layer3Edges"
+        }
+      }
+    ]
+  },
+  "routingProtocols": {
+    "comment": "Routing Protocols",
+    "questions": [
+      {
+        "BGP Session Compatibility": {
+          "question": "bgpSessionCompatibility"
+        }
+      },
+      {
+        "BGP Session Status": {
+          "question": "bgpSessionStatus"
+        }
+      },
+      {
+        "BGP Edges": {
+          "question": "bgpEdges"
+        }
+      },
+      {
+        "OSPF Session Compatibility": {
+          "question": "ospfSessionCompatibility"
+        }
+      },
+      {
+        "OSPF Edges": {
+          "question": "ospfEdges"
+        }
+      },
+      {
+        "ISIS Edges": {
+          "question": "isisEdges",
+          "type": "skip"
+        }
+      },
+      {
+        "EIGRP Edges": {
+          "question": "eigrpEdges",
+          "type": "skip"
+        }
+      }
+    ]
+  },
+  "routingTables": {
+    "comment": "Routing and Forwarding Tables",
+    "questions": [
+      {
+        "Routes": {
+          "question": "routes"
+        }
+      },
+      {
+        "Longest Prefix Match": {
+          "question": "lpmRoutes",
+          "parameters": "ip = '2.34.201.10'"
+        }
+      },
+      {
+        "Prefix Tracer": {
+          "question": "prefixTracer",
+          "parameters": "prefix = '2.34.201.0/24'"
+        }
+      }
+    ]
+  },
+  "forwarding": {
+    "comment": "Packet Forwarding",
+    "questions": [
+      {
+        "Traceroute": {
+          "question": "traceroute",
+          "parameters": "startLocation = '@enter(as2border1[GigabitEthernet2/0])', \n \t headers=HeaderConstraints(dstIps='2.34.201.10', srcIps='8.8.8.8')\n",
+          "type": "singleflow"
+        }
+      },
+      {
+        "Bi-directional Traceroute": {
+          "question": "bidirectionalTraceroute",
+          "parameters": "startLocation = '@enter(as2border1[GigabitEthernet2/0])', \n \t headers=HeaderConstraints(dstIps='2.34.201.10', srcIps='8.8.8.8')\n",
+          "type": "dualflow"
+        }
+      },
+      {
+        "Reachability": {
+          "question": "reachability",
+          "parameters": "pathConstraints=PathConstraints(startLocation = '/as2/'), \n \t headers=HeaderConstraints(dstIps='host1', srcIps='0.0.0.0/0', applications='DNS'), \n \t actions='success'\n",
+          "type": "singleflow"
+        }
+      },
+      {
+        "Bi-directional Reachability": {
+          "question": "bidirectionalReachability",
+          "parameters": "pathConstraints=PathConstraints(startLocation = '/as2dist1/'), \n \t headers=HeaderConstraints(dstIps='host1', srcIps='0.0.0.0/0', applications='DNS'), \n \t returnFlowType='SUCCESS'\n",
+          "type": "dualflow"
+        }
+      },
+      {
+        "Loop detection": {
+          "question": "detectLoops",
+          "type": "no-result"
+        }
+      },
+      {
+        "Virtual NMAP": {
+          "question": "nmap",
+          "parameters": "startLocation = '@enter(as2border1[GigabitEthernet2/0])'\n",
+          "type": "skip"
+        }
+      },
+      {
+        "Multipath Consistency for host-subnets": {
+          "question": "subnetMultipathConsistency",
+          "type": "singleflow"
+        }
+      },
+      {
+        "Multipath Consistency for router loopbacks": {
+          "question": "loopbackMultipathConsistency",
+          "type": "singleflow"
+        }
+      }
+    ]
+  },
+  "filters": {
+    "comment": "Access-lists and firewall rules",
+    "questions": [
+      {
+        "Filter Line Reachability": {
+          "question": "filterLineReachability"
+        }
+      },
+      {
+        "Search Filters": {
+          "question": "searchFilters",
+          "parameters": "headers=HeaderConstraints(srcIps='10.10.10.0/24', \n \t dstIps='218.8.104.58', \n \t applications = ['dns']), \n \t action='deny', \n \t filters='acl_in'\n",
+          "snapshot": [
+            "filters",
+            "networks/example-filters/current"
+          ],
+          "type": "basic"
+        }
+      },
+      {
+        "Test Filters": {
+          "question": "testFilters",
+          "parameters": "headers=HeaderConstraints(srcIps='10.10.10.1', \n \t dstIps='218.8.104.58', \n \t applications = ['dns']), \n \t nodes='rtr-with-acl', \n \t filters='acl_in'\n",
+          "snapshot": [
+            "filters",
+            "networks/example-filters/current"
+          ],
+          "type": "basic"
+        }
+      },
+      {
+        "Find Matching Filter Lines": {
+          "question": "findMatchingFilterLines",
+          "parameters": "headers=HeaderConstraints(applications='DNS')\n"
+        }
+      }
+    ]
+  },
+  "tunnels": {
+    "comment": "Tunnels and Overlays",
+    "questions": [
+      {
+        "IPSec Session Status": {
+          "question": "ipsecSessionStatus",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "IPSec Edges": {
+          "question": "ipsecEdges",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "VXLAN VNI Properties": {
+          "question": "vxlanVniProperties",
+          "parameters": "",
+          "type": "skip"
+        }
+      },
+      {
+        "VXLAN Edges": {
+          "question": "vxlanEdges",
+          "parameters": "",
+          "type": "skip"
+        }
+      }
+    ]
+  },
+  "snapshot": {
+    "comment": "Snapshot Input",
+    "questions": [
+      {
+        "Snapshot Initialization Issues": {
+          "question": "initIssues"
+        }
+      },
+      {
+        "Snapshot Input File Parse Status": {
+          "question": "fileParseStatus"
+        }
+      },
+      {
+        "Snapshot Input File Parse Warnings": {
+          "question": "parseWarning",
+          "type": "no-result"
+        }
+      }
+    ]
+  },
+  "resolvingSpecifiers": {
+    "comment": "Resolving Specifiers",
+    "questions": [
+      {
+        "Resolve Location Specifier": {
+          "question": "resolveLocationSpecifier",
+          "type": "basic",
+          "parameters": "\n\tlocations='@enter(as2border1[GigabitEthernet2/0])'\n"
+        },
+        "Resolve Filter Specifier": {
+          "question": "resolveFilterSpecifier",
+          "type": "basic",
+          "parameters": "\n\tfilters='@in(as2border1[GigabitEthernet0/0])'\n"
+        },
+        "Resolve Node Specifier": {
+          "question": "resolveNodeSpecifier",
+          "type": "basic",
+          "parameters": "nodes='/border/'"
+        },
+        "Resolve Interface Specifier": {
+          "question": "resolveInterfaceSpecifier",
+          "type": "basic",
+          "parameters": "interfaces='/border/[.*Ethernet]'"
+        },
+        "Resolve IPs from Location Specifier": {
+          "question": "resolveIpsOfLocationSpecifier",
+          "type": "basic",
+          "parameters": "\n\tlocations='@enter(as2border1[GigabitEthernet2/0])'\n"
+        },
+        "Resolve IP Specifier": {
+          "question": "resolveIpSpecifier",
+          "type": "basic",
+          "parameters": "ips='/border/[.*Ethernet]'"
+        }
+      }
+    ]
+  },
+  "differentialQuestions": {
+    "comment": "Differential Questions",
+    "questions": [
+      {
+        "Compare Filters": {
+          "question": "compareFilters",
+          "type": "diff",
+          "parameters": "nodes='rtr-with-acl'",
+          "reference_snapshot": [
+            "filters",
+            "networks/example-filters/current"
+          ],
+          "snapshot": [
+            "filters-change",
+            "networks/example-filters/candidate1"
+          ]
+        }
+      },
+      {
+        "Differential Reachability": {
+          "question": "differentialReachability",
+          "type": "diff",
+          "reference_snapshot": [
+            "forwarding",
+            "networks/forwarding-change-validation/base"
+          ],
+          "snapshot": [
+            "forwarding-change",
+            "networks/forwarding-change-validation/change1"
+          ]
+        }
+      },
+      {
+        "Differential Routes": {
+          "question": "routes",
+          "type": "skip",
+          "reference_snapshot": [
+            "forwarding",
+            "networks/forwarding-change-validation/base"
+          ],
+          "snapshot": [
+            "forwarding-change",
+            "networks/forwarding-change-validation/change1"
+          ]
+        }
+      }
+    ]
+  }
+}

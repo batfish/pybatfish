@@ -13,6 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import io
+import json
 import sys
 from copy import deepcopy
 from os import remove, walk
@@ -22,9 +23,13 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
+from pybatfish.client.session import Session
+
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, "jupyter_notebooks")
+_docs_dir = join(_root_dir, "docs")
+_docs_nb_dir = join(_docs_dir, "source", "notebooks")
 
 notebook_files = [
     join(root, filename)
@@ -33,12 +38,25 @@ notebook_files = [
     if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
 ]
 
-for root, dirs, files in walk(_jupyter_nb_dir):
-    for filename in files:
-        if filename.endswith(".testout"):
-            remove(join(root, filename))
+notebook_files += [
+    join(root, filename)
+    for root, dirs, files in walk(join(_docs_nb_dir))
+    for filename in files
+    if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
+]
 
 assert len(notebook_files) > 0
+
+
+def cleanup_testout_files(top_dirs):
+    for top_dir in top_dirs:
+        for root, dirs, files in walk(top_dir):
+            for filename in files:
+                if filename.endswith(".testout"):
+                    remove(join(root, filename))
+
+
+cleanup_testout_files([_jupyter_nb_dir, _docs_nb_dir])
 
 _check_cell_types = ["execute_result", "display_data"]
 
@@ -55,12 +73,52 @@ def _is_warning_output(o):
 
 
 @pytest.fixture(scope="module")
-def executed_notebook(notebook):
+def session():
+    return Session()
+
+
+@pytest.fixture(scope="module")
+def snapshots(session):
+    with open(join(_docs_dir, "questions.json"), "r") as f:
+        questions_by_category = json.load(f)
+
+    session.set_network("generate_questions")
+    _example_snapshot_tuple = ("generate_questions", "networks/example")
+
+    # collect list of snapshots that need to be initialized
+    snapshot_set = set()
+
+    for q_category, v in questions_by_category.items():
+        # v['questions'] is the list of questions in that category
+        for item in v["questions"]:
+            # item is the question metadata dictionary
+            for q in item.keys():
+                snapshot = item[q].get("snapshot", _example_snapshot_tuple)
+                # Tuple here is (name, dir)
+                snapshot_set.add(tuple(snapshot))
+
+                if item[q].get("type", "basic") == "diff":
+                    snapshot = item[q].get(
+                        "reference_snapshot", _example_snapshot_tuple
+                    )
+                    snapshot_set.add(tuple(snapshot))
+
+    for item in snapshot_set:
+        snapshot_name = item[0]
+        snapshot_path = join(_docs_dir, item[1])
+        session.init_snapshot(snapshot_path, name=snapshot_name, overwrite=True)
+
+
+@pytest.fixture(scope="module")
+def executed_notebook(notebook, snapshots):
     filepath, orig_nb = notebook
     filepath, nb = notebook  # Make a deep copy of the original notebook.
     # - This is important or else the underlying object gets mutated!!
     nb = deepcopy(orig_nb)
     exec_path = dirname(filepath)
+    if "/docs/notebooks/" in filepath:
+        # override exec path for documentation notebooks
+        exec_path = abspath(join(dirname(filepath), pardir))
     # Run all cells in the notebook, with a time bound, continuing on errors
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
     ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
