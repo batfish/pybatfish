@@ -111,7 +111,6 @@ class VariableType(str, Enum):
     FILTER_NAME = "filter"  #: name of filters
     FILTER_SPEC = "filterSpec"  #: filter specifier
     FLOAT = "float"  #: float values
-    FLOW_STATE = "flowState"  #: flow states
     HEADER_CONSTRAINT = "headerConstraint"  #: packet header constraints
     INTEGER = "integer"  #: integer values
     INTEGER_SPACE = "integerSpace"  #: integer spaces

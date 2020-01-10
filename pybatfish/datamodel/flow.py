@@ -80,7 +80,6 @@ class Flow(DataModelElement):
     packetLength = attr.ib(type=str)
     srcIp = attr.ib(type=str, converter=str)
     srcPort = attr.ib(type=Optional[int], converter=_optional_int)
-    state = attr.ib(type=str, converter=str)
     tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
     tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
@@ -109,7 +108,6 @@ class Flow(DataModelElement):
             json_dict["packetLength"],
             json_dict["srcIp"],
             json_dict.get("srcPort"),
-            json_dict["state"],
             json_dict.get("tcpFlagsAck"),
             json_dict.get("tcpFlagsCwr"),
             json_dict.get("tcpFlagsEce"),
@@ -122,12 +120,11 @@ class Flow(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        # exclude the tag field
         iface_str = self._iface_str()
         vrf_str = self._vrf_str()
         return (
             "start={node}{iface}{vrf} [{src}->{dst}"
-            " {ip_proto}{dscp}{ecn}{offset}{length}{state}{flags}]".format(
+            " {ip_proto}{dscp}{ecn}{offset}{length}{flags}]".format(
                 node=self.ingressNode,
                 iface=iface_str,
                 vrf=vrf_str,
@@ -146,7 +143,6 @@ class Flow(DataModelElement):
                     if self.packetLength != 0
                     else ""
                 ),
-                state=(" state={}".format(self.state) if self.state != "NEW" else ""),
                 flags=(
                     " tcpFlags={}".format(self.get_flag_str())
                     if self.ipProtocol == 6 and self.get_flag_str() != "00000000"
@@ -221,8 +217,6 @@ class Flow(DataModelElement):
             assert self.dstPort is not None
             lines.append("Dst Port: %d" % self.dstPort)
         lines.append("IP Protocol: %s" % self.get_ip_protocol_str())
-        if self.state != "NEW":
-            lines.append("Firewall Classification: %s" % self.state)
         return lines
 
     def _ip_port(self, ip, port):
@@ -1201,7 +1195,6 @@ class HeaderConstraints(DataModelElement):
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
     :ivar icmpTypes: List of integer ICMP types
-    :ivar firewallClassifications: List of flow states as classified by a stateful firewall (e.g., "new", "established")
     :ivar dscps: List of allowed DSCP value ranges
     :ivar ecns: List of allowed ECN values ranges
     :ivar packetLengths: List of allowed packet length value ranges
@@ -1214,7 +1207,7 @@ class HeaderConstraints(DataModelElement):
 
     >>> HeaderConstraints(ipProtocols=["TCP", "UDP"])
     HeaderConstraints(srcIps=None, dstIps=None, srcPorts=None, dstPorts=None, ipProtocols=['TCP', 'UDP'], applications=None,
-    icmpCodes=None, icmpTypes=None, firewallClassifications=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
+    icmpCodes=None, icmpTypes=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means allow TCP OR UDP.
 
@@ -1222,7 +1215,7 @@ class HeaderConstraints(DataModelElement):
 
     >>> HeaderConstraints(srcIps="1.1.1.1", dstIps="2.2.2.2", applications=["SSH"])
     HeaderConstraints(srcIps='1.1.1.1', dstIps='2.2.2.2', srcPorts=None, dstPorts=None, ipProtocols=None, applications=['SSH'],
-    icmpCodes=None, icmpTypes=None, firewallClassifications=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
+    icmpCodes=None, icmpTypes=None, ecns=None, dscps=None, packetLengths=None, fragmentOffsets=None, tcpFlags=None)
 
     means an SSH connection originating at ``1.1.1.1`` and going to ``2.2.2.2``
 
@@ -1250,9 +1243,6 @@ class HeaderConstraints(DataModelElement):
     icmpTypes = attr.ib(
         default=None, type=Optional[str], converter=_normalize_phc_intspace
     )
-    firewallClassifications = attr.ib(
-        default=None, type=Optional[List[str]], converter=_normalize_phc_list
-    )
     ecns = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
     dscps = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
     packetLengths = attr.ib(
@@ -1276,19 +1266,11 @@ class HeaderConstraints(DataModelElement):
             applications=json_dict.get("applications"),
             icmpCodes=json_dict.get("icmpCodes"),
             icmpTypes=json_dict.get("icmpTypes"),
-            firewallClassifications=json_dict.get("flowStates"),
             ecns=json_dict.get("ecns"),
             dscps=json_dict.get("dscps"),
             packetLengths=json_dict.get("packetLengths"),
             fragmentOffsets=json_dict.get("fragmentOffsets"),
         )
-
-    def dict(self):
-        d = super(HeaderConstraints, self).dict()
-        # Rename firewallClassifications to flowStates (expected on the backend)
-        d["flowStates"] = d["firewallClassifications"]
-        del d["firewallClassifications"]
-        return d
 
     @classmethod
     def of(cls, flow):
@@ -1323,7 +1305,6 @@ class HeaderConstraints(DataModelElement):
             icmpCodes=icmpCodes,
             icmpTypes=icmpTypes,
             tcpFlags=tcpFlags,
-            firewallClassifications=flow.state,
             fragmentOffsets=flow.fragmentOffset,
             packetLengths=flow.packetLength,
         )
