@@ -16,7 +16,6 @@ import datetime
 import json
 
 import pytest
-import six
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 from pytz import UTC
@@ -33,10 +32,7 @@ from pybatfish.client.workhelper import (
 )
 from pybatfish.client.workitem import WorkItem
 
-if six.PY3:
-    from unittest.mock import patch
-else:
-    from mock import patch
+from unittest.mock import patch
 
 
 def __execute_and_return_request_params(work_item, session, extra_args=None):

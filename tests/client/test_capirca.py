@@ -16,7 +16,6 @@ import re
 from io import StringIO
 from typing import Text  # noqa: F401
 
-import six
 from capirca.lib import naming, policy
 
 from pybatfish.client import capirca
@@ -33,8 +32,7 @@ def _load_test_definitions(netstr, svcstr=None):
     return defs
 
 
-TEST_DATABASE = six.u(
-    """
+TEST_DATABASE = """
     HOST_BITS = 1.2.3.4/8        # some prefix with host bits present
 
     RFC1918_10 = 10.0.0.0/8      # non-public
@@ -67,7 +65,6 @@ TEST_DATABASE = six.u(
         CLASS-E
         UNDEFINED
 """
-)
 DEFINITIONS = _load_test_definitions(TEST_DATABASE)
 
 
@@ -117,8 +114,7 @@ def test_entry_to_group_error_undefined(caplog):
 
 
 def test_create_reference_book():
-    simple_database = six.u(
-        """
+    simple_database = """
         RFC1918_10 = 10.0.0.0/8      # non-public
 
         RFC1918_172 = 172.16.0.0/12  # non-public
@@ -129,7 +125,6 @@ def test_create_reference_book():
                   RFC1918_172
                   RFC1918_192
     """
-    )
     defs = _load_test_definitions(simple_database)
 
     book = capirca.create_reference_book(defs)
@@ -149,15 +144,12 @@ def test_create_reference_book():
     assert book_custom.interfaceGroups == book.interfaceGroups
 
 
-TEST_SVCS = six.u(
-    """
+TEST_SVCS = """
 SSH = 22/tcp
 DNS = 53/udp
 """
-)
 
-TEST_POLICY = six.u(
-    """
+TEST_POLICY = """
 header {
   target:: arista some_acl
   target:: cisco some_acl
@@ -181,7 +173,6 @@ term deny_all {
   action:: reject
 }
 """
-)
 
 
 def test_get_acl_text():

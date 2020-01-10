@@ -15,7 +15,6 @@ import inspect
 import json
 
 import pytest
-from six import PY3
 
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
@@ -363,7 +362,6 @@ def test_question_positional_args(session):
         qclass("positional")
 
 
-@pytest.mark.skipif(not PY3, reason="requires python3")
 def test_question_params(session):
     """Test that a question constructor has right parameters."""
     qname, qclass = _load_question_dict(TEST_QUESTION_DICT, session)

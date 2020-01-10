@@ -11,9 +11,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from unittest.mock import patch
+
 import pandas as pd
 import pytest
-import six
 from pandas import DataFrame
 
 from pybatfish.client.asserts import (
@@ -26,12 +27,12 @@ from pybatfish.client.asserts import (
     assert_filter_permits,
     assert_flows_fail,
     assert_flows_succeed,
+    assert_no_duplicate_router_ids,
     assert_no_forwarding_loops,
     assert_no_incompatible_bgp_sessions,
     assert_no_incompatible_ospf_sessions,
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
-    assert_no_duplicate_router_ids,
 )
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
@@ -43,11 +44,6 @@ from pybatfish.exception import (
 )
 from pybatfish.question import bfq
 from pybatfish.question.question import QuestionBase
-
-if six.PY3:
-    from unittest.mock import patch
-else:
-    from mock import patch
 
 
 def test_raise_common_default():

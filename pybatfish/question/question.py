@@ -29,15 +29,13 @@ from typing import (
     Iterable,
     List,
     Optional,
-    Set,  # noqa: F401
+    Set,
     TYPE_CHECKING,
     Tuple,
     Union,
-)
+)  # noqa: F401
 
 import attr
-import six
-from six import PY3, integer_types, string_types
 
 from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
 from pybatfish.datamodel import (
@@ -123,16 +121,15 @@ class QuestionMeta(type):
                     instance_vars[var_name]["value"] = var_value
 
         # Define signature. Helps with tab completion. Python3 centric
-        if PY3:
-            from inspect import Signature, Parameter
+        from inspect import Signature, Parameter
 
-            # Merge constructor params with question variables
-            params = [
-                Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-                for param in dct.get("variables", [])
-                + [p for p in additional_kwargs if p not in ("kwargs", "self")]
-            ]
-            setattr(constructor, "__signature__", Signature(parameters=params))
+        # Merge constructor params with question variables
+        params = [
+            Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
+            for param in dct.get("variables", [])
+            + [p for p in additional_kwargs if p not in ("kwargs", "self")]
+        ]
+        setattr(constructor, "__signature__", Signature(parameters=params))
         setattr(new_cls, "__init__", constructor)
         setattr(new_cls, "__doc__", dct.get("docstring", ""))
         new_cls.description = dct.get("description", "")
@@ -297,7 +294,7 @@ class Questions(object):
         """
         if directory:
             _install_questions(
-                six.iteritems(_load_questions_from_dir(directory, self._session)), self
+                _load_questions_from_dir(directory, self._session).items(), self
             )
         else:
             _install_questions(_load_remote_questions_templates(self._session), self)
@@ -352,8 +349,9 @@ def list_tags():
     return _tags
 
 
-def _install_questions_in_module(questions, module_name):
-    # type: (Iterable[Tuple[str, QuestionMeta]], str) -> None
+def _install_questions_in_module(
+    questions: Iterable[Tuple[str, QuestionMeta]], module_name: str
+) -> None:
     """Install the given questions in the specified module."""
     module = sys.modules[module_name]
     for (name, question_class) in questions:
@@ -361,8 +359,7 @@ def _install_questions_in_module(questions, module_name):
         setattr(module, name, question_class)
 
 
-def _install_questions(questions, obj):
-    # type: (Iterable[Tuple[str, QuestionMeta]], object) -> None
+def _install_questions(questions: Iterable[Tuple[str, QuestionMeta]], obj: Any) -> None:
     """Install the given questions in the specified object."""
     for (name, question_class) in questions:
         setattr(obj, name, question_class)
@@ -408,7 +405,7 @@ def load_dir_questions(questionDir, session, moduleName=bfq.__name__):
     """Load question templates from a directory on disk and install them in the given module."""
     # Find all files with questions in them.
     questions = _load_questions_from_dir(questionDir, session)
-    _install_questions_in_module(six.iteritems(questions), moduleName)
+    _install_questions_in_module(questions.items(), moduleName)
     return questions.keys()
 
 
@@ -832,7 +829,7 @@ def _validateType(value, expectedType):
     elif expectedType == VariableType.INTEGER:
         INT32_MIN = -(2 ** 32)
         INT32_MAX = 2 ** 32 - 1
-        valid = isinstance(value, integer_types) and INT32_MIN <= value <= INT32_MAX
+        valid = isinstance(value, int) and INT32_MIN <= value <= INT32_MAX
         return valid, None
     elif expectedType == VariableType.FLOAT:
         return isinstance(value, float), None
@@ -878,16 +875,16 @@ def _validateType(value, expectedType):
         VariableType.VXLAN_VNI_PROPERTY_SPEC,
         VariableType.ZONE,
     ]:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         return True, None
     elif expectedType == VariableType.IP:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             return _isIp(value)
     elif expectedType == VariableType.IP_WILDCARD:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             return _isIpWildcard(value)
@@ -896,15 +893,15 @@ def _validateType(value, expectedType):
     elif expectedType == VariableType.LONG:
         INT64_MIN = -(2 ** 64)
         INT64_MAX = 2 ** 64 - 1
-        valid = isinstance(value, integer_types) and INT64_MIN <= value <= INT64_MAX
+        valid = isinstance(value, int) and INT64_MIN <= value <= INT64_MAX
         return valid, None
     elif expectedType == VariableType.PREFIX:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             return _isPrefix(value)
     elif expectedType == VariableType.PREFIX_RANGE:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             return _isPrefixRange(value)
@@ -917,11 +914,11 @@ def _validateType(value, expectedType):
             return False, "A Batfish {} must be a list of BgpRoute".format(expectedType)
         return True, None
     elif expectedType == VariableType.STRING:
-        return isinstance(value, string_types), None
+        return isinstance(value, str), None
     elif expectedType == VariableType.SUBRANGE:
         if isinstance(value, int):
             return True, None
-        elif isinstance(value, string_types):
+        elif isinstance(value, str):
             return _isSubRange(value)
         else:
             return (
@@ -931,7 +928,7 @@ def _validateType(value, expectedType):
                 ),
             )
     elif expectedType == VariableType.PROTOCOL:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             validProtocols = ["dns", "ssh", "tcp", "udp"]
@@ -944,7 +941,7 @@ def _validateType(value, expectedType):
                 )
             return True, None
     elif expectedType == VariableType.IP_PROTOCOL:
-        if not isinstance(value, string_types):
+        if not isinstance(value, str):
             return False, "A Batfish {} must be a string".format(expectedType)
         else:
             try:
@@ -989,7 +986,7 @@ def _isJsonPath(value):
         return False, "Missing 'path' element of jsonPath"
     else:
         path = value["path"]
-        if not isinstance(path, string_types):
+        if not isinstance(path, str):
             return False, "'path' element of jsonPath dictionary should be a string"
         if "suffix" in value:
             suffix = value["suffix"]
