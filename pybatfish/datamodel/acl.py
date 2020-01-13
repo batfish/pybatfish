@@ -71,3 +71,160 @@ class AclTrace(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "\n".join(str(event) for event in self.events)
+
+
+@attr.s(frozen=True)
+class VendorStructureId(DataModelElement):
+    filename = attr.ib(type=str)
+    structureType = attr.ib(type=str)
+    structureName = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return VendorStructureId(
+            filename=json_dict.get("filename", ""),
+            structureType=json_dict.get("structureType", ""),
+            structureName=json_dict.get("structureName", ""),
+        )
+
+
+class Fragment(DataModelElement):
+    @classmethod
+    def from_dict(cls, json_dict):
+        if json_dict["class"] == "TextFragment":
+            return TextFragment.from_dict(json_dict)
+        elif json_dict["class"] == "LinkFragment":
+            return LinkFragment.from_dict(json_dict)
+
+
+@attr.s(frozen=True)
+class TextFragment(Fragment):
+    text = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return TextFragment(json_dict.get("text"))
+
+    def __str__(self):
+        return self.text
+
+
+@attr.s(frozen=True)
+class LinkFragment(Fragment):
+    text = attr.ib(type=str)
+    vendorStructureId = attr.ib(type=VendorStructureId)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return LinkFragment(
+            json_dict.get("text", ""),
+            VendorStructureId.from_dict(json_dict.get("vendorStructureId", {})),
+        )
+
+    def __str__(self):
+        return self.text
+
+
+@attr.s(frozen=True)
+class TraceElement(DataModelElement):
+    fragments = attr.ib(type=List[Fragment])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return TraceElement([Fragment.from_dict(f) for f in json_dict.get("fragments", [])])
+
+    def __str__(self):
+        return " ".join(str(fragment) for fragment in self.fragments)
+
+
+@attr.s(frozen=True)
+class TraceNode(DataModelElement):
+    traceElement = attr.ib(type=TraceElement)
+    children = attr.ib(type=List["TraceNode"])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return TraceNode(
+            TraceElement.from_dict(json_dict.get("traceElement", {})),
+            [TraceNode.from_dict(child) for child in json_dict.get("children", [])],
+        )
+
+    def __str__(self):
+        lines = [str(self.traceElement)]
+        stack = [iter(self.children)]
+        while stack:
+            children_iter = stack[-1]
+            try:
+                child = next(children_iter)
+                lines.append("  " * len(stack) + "- " + str(child.traceElement))
+                stack.append(iter(child.children))
+            except StopIteration:
+                stack.pop()
+        return "\n".join(lines)
+
+    def _repr_html_(self):
+        if self.children:
+            children_section = []
+            for child in self.children:
+                children_section.append("<li>{}</li>".format(child._repr_html_()))
+            return "{} <ul>{}</ul>".format(self.traceElement, "".join(children_section))
+        return str(self.traceElement)
+
+
+if __name__ == "__main__":
+    tree = TraceNode.from_dict({
+        "traceElement": {
+            "fragments": [
+                {"class": "TextFragment", "text": "Matched rule"},
+                {
+                    "class": "LinkFragment",
+                    "text": "PERMIT-DMVPN",
+                    "vendorStructureId": {"filename": "configs/some-config", "structureType": "??", "structureName": "???"}
+                }
+            ]
+        },
+        "children": [{
+            "traceElement": {
+                "fragments": [
+                    {"class": "TextFragment", "text": "Matched"},
+                    {"class": "TextFragment", "text": "source-address"},
+                    {"class": "TextFragment", "text": "any-ipv4"}
+                ]
+            }
+        }, {
+            "traceElement": {
+                "fragments": [
+                    {"class": "TextFragment", "text": "Matched"},
+                    {"class": "TextFragment", "text": "destination-address"},
+                    {
+                        "class": "LinkFragment",
+                        "text": "GBL_SEA-PUBLIC-NETS",
+                        "vendorStructureId": {"filename": "configs/some-config", "structureType": "??", "structureName": "???"}
+                    }
+                ]
+            },
+            "children": [{
+                "traceElement": {
+                    "fragments": [
+                        {"class": "TextFragment", "text": "Matched"},
+                        {"class": "TextFragment", "text": "address"},
+                        {
+                            "class": "LinkFragment",
+                            "text": "GBL_SEA-PUBLIC-NET-101.45.24.0",
+                            "vendorStructureId": {"filename": "configs/some-config", "structureType": "??", "structureName": "???"}
+                        }
+                    ]
+                }
+            }]
+        }, {
+            "traceElement": {
+                "fragments": [
+                    {"class": "TextFragment", "text": "Matched"},
+                    {"class": "TextFragment", "text": "application"},
+                    {"class": "TextFragment", "text": "junos-ike"}
+                ]
+            }
+        }]
+    })
+    print(tree)
+    print(tree._repr_html_())
