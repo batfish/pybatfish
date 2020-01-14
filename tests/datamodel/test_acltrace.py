@@ -16,7 +16,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTrace
+from pybatfish.datamodel.acl import AclTrace, TraceNode
 
 
 # test if an acl trace is deserialized properly
@@ -29,6 +29,75 @@ def test_acl_trace_deserialization():
 
     # check stringification works
     str(acl_trace)
+
+
+def test_trace_node_no_children():
+    trace_node_dict = {
+        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+    }
+    trace_node = TraceNode.from_dict(trace_node_dict)
+    assert len(trace_node.children) == 0
+    assert str(trace_node) == "aaa"
+    assert trace_node._repr_html_() == "aaa"
+
+
+def test_trace_node_with_children():
+    trace_node_dict = {
+        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+        "children": [
+            {
+                "traceElement": {
+                    "fragments": [{"class": "TextFragment", "text": "bbb"},]
+                },
+            },
+            {
+                "traceElement": {
+                    "fragments": [{"class": "TextFragment", "text": "ccc"},]
+                },
+            },
+        ],
+    }
+    trace_node = TraceNode.from_dict(trace_node_dict)
+    assert len(trace_node.children) == 2
+    assert str(trace_node) == "\n".join(["aaa", "  - bbb", "  - ccc",])
+    html_text = trace_node._repr_html_()
+    assert "aaa" in html_text
+    assert "<li>bbb</li>" in html_text
+    assert "<li>ccc</li>" in html_text
+
+
+def test_trace_node_nested_children():
+    trace_node_dict = {
+        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+        "children": [
+            {
+                "traceElement": {
+                    "fragments": [{"class": "TextFragment", "text": "bbb"},]
+                },
+                "children": [
+                    {
+                        "traceElement": {
+                            "fragments": [{"class": "TextFragment", "text": "ccc"}]
+                        }
+                    }
+                ],
+            },
+            {
+                "traceElement": {
+                    "fragments": [{"class": "TextFragment", "text": "ddd"},]
+                },
+            },
+        ],
+    }
+    trace_node = TraceNode.from_dict(trace_node_dict)
+    assert len(trace_node.children) == 2
+    assert len(trace_node.children[0].children) == 1
+    assert str(trace_node) == "\n".join(["aaa", "  - bbb", "    - ccc", "  - ddd",])
+    html_text = trace_node._repr_html_()
+    assert "aaa" in html_text
+    assert "<li>bbb <ul>" in html_text
+    assert "<ul><li>ccc</li></ul>" in html_text
+    assert "<li>ddd</li>" in html_text
 
 
 if __name__ == "__main__":
