@@ -25,31 +25,19 @@ __all__ = ["AclTrace", "AclTraceEvent"]
 class AclTraceEvent(DataModelElement):
     """One event corresponding to a packet's life through an ACL.
 
-    :ivar class_name: The type of the event that occurred while tracing.
     :ivar description: The description of the event
-    :ivar lineDescription: ACL line that caused the event (if applicable)
     """
 
-    class_name = attr.ib(type=Optional[str], default=None)
     description = attr.ib(type=Optional[str], default=None)
-    lineDescription = attr.ib(type=Optional[str], default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> AclTraceEvent
-        return AclTraceEvent(
-            json_dict.get("class"),
-            json_dict.get("description"),
-            json_dict.get("lineDescription"),
-        )
+        return AclTraceEvent(json_dict.get("description"))
 
     def __str__(self):
         # type: () -> str
-        if self.description is not None:
-            return self.description
-        if self.lineDescription is not None:
-            return self.lineDescription
-        return repr(self)
+        return str(self.description)
 
 
 @attr.s(frozen=True)
@@ -70,4 +58,7 @@ class AclTrace(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "\n".join(str(event) for event in self.events)
+        return "\n".join(
+            str(event)
+            for event in self.events
+            if event.description is not None)
