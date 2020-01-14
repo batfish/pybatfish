@@ -16,36 +16,30 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTraceEvent
+from pybatfish.datamodel.acl import AclTrace, AclTraceEvent
 
 
 # test if a trace event with description is deserialized and string-ified properly
 def test_trace_event_with_description():
-    dict = {"description": "aa", "class": "Permitted"}
+    dict = {"description": "aa"}
 
     # check deserialization
     trace_event = AclTraceEvent.from_dict(dict)
-    assert trace_event.class_name == "Permitted"
     assert trace_event.description == "aa"
 
     # check str
     event_str = str(trace_event)
     assert "aa" in event_str
-    assert "PermittedDenied" not in event_str
 
 
-# test if a trace event without description is deserialized and string-ified properly
-def test_trace_event_without_description():
-    dict = {"class": "Permitted"}
+def test_trace_str():
+    event1 = {"description": "event1"}
+    event2 = {}
+    event3 = {"description": "event3"}
+    events = [event1, event2, event3]
+    trace = AclTrace.from_dict({"events": events})
 
-    # check deserialization
-    trace_event = AclTraceEvent.from_dict(dict)
-    assert trace_event.class_name == "Permitted"
-    assert trace_event.description is None
-
-    # check str
-    event_str = str(trace_event)
-    assert "Permitted" in event_str
+    assert str(trace) == "event1\nevent3"
 
 
 if __name__ == "__main__":
