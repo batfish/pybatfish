@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional  # noqa: F401
+from typing import Dict, List, Iterator, Optional  # noqa: F401
 
 import attr
 
@@ -77,7 +77,7 @@ class VendorStructureId(DataModelElement):
     structureName = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
+    def from_dict(cls, json_dict: Dict) -> "VendorStructureId":
         return VendorStructureId(
             filename=json_dict.get("filename", ""),
             structureType=json_dict.get("structureType", ""),
@@ -91,11 +91,12 @@ class Fragment(DataModelElement):
     """
 
     @classmethod
-    def from_dict(cls, json_dict):
+    def from_dict(cls, json_dict: Dict) -> "Fragment":
         if json_dict["class"] == "TextFragment":
             return TextFragment.from_dict(json_dict)
         elif json_dict["class"] == "LinkFragment":
             return LinkFragment.from_dict(json_dict)
+        raise ValueError("Unknown Fragment type {}".format(json_dict["class"]))
 
 
 @attr.s(frozen=True)
@@ -108,10 +109,10 @@ class TextFragment(Fragment):
     text = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        return TextFragment(json_dict.get("text"))
+    def from_dict(cls, json_dict: Dict) -> "TextFragment":
+        return TextFragment(json_dict.get("text", ""))
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
 
 
@@ -127,13 +128,13 @@ class LinkFragment(Fragment):
     vendorStructureId = attr.ib(type=VendorStructureId)
 
     @classmethod
-    def from_dict(cls, json_dict):
+    def from_dict(cls, json_dict: Dict) -> "LinkFragment":
         return LinkFragment(
             json_dict.get("text", ""),
             VendorStructureId.from_dict(json_dict.get("vendorStructureId", {})),
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.text
 
 
@@ -147,10 +148,12 @@ class TraceElement(DataModelElement):
     fragments = attr.ib(type=List[Fragment])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        return TraceElement([Fragment.from_dict(f) for f in json_dict.get("fragments", [])])
+    def from_dict(cls, json_dict: Dict) -> "TraceElement":
+        return TraceElement(
+            [Fragment.from_dict(f) for f in json_dict.get("fragments", [])]
+        )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return " ".join(str(fragment) for fragment in self.fragments)
 
 
@@ -166,13 +169,13 @@ class TraceNode(DataModelElement):
     children = attr.ib(type=List["TraceNode"])
 
     @classmethod
-    def from_dict(cls, json_dict):
+    def from_dict(cls, json_dict: Dict) -> "TraceNode":
         return TraceNode(
             TraceElement.from_dict(json_dict.get("traceElement", {})),
             [TraceNode.from_dict(child) for child in json_dict.get("children", [])],
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         lines = [str(self.traceElement)]
         stack = [iter(self.children)]
         while stack:
@@ -185,7 +188,7 @@ class TraceNode(DataModelElement):
                 stack.pop()
         return "\n".join(lines)
 
-    def _repr_html_(self):
+    def _repr_html_(self) -> str:
         if self.children:
             children_section = []
             for child in self.children:
