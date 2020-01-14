@@ -109,7 +109,7 @@ cat <<EOF
       - make html
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
-          image: "python:${version}"
+          image: "python:3.7"
           always-pull: true
           propagate-environment: true
       - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
