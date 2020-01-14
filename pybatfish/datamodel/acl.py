@@ -65,6 +65,13 @@ class AclTrace(DataModelElement):
 
 @attr.s(frozen=True)
 class VendorStructureId(DataModelElement):
+    """Identifies a vendor structure in a configuration file.
+
+    :ivar filename: Filename of the configuration file
+    :ivar structureType: Type of the vendor structure
+    :ivar structureName: Name of the vendor structure
+    """
+
     filename = attr.ib(type=str)
     structureType = attr.ib(type=str)
     structureName = attr.ib(type=str)
@@ -79,6 +86,10 @@ class VendorStructureId(DataModelElement):
 
 
 class Fragment(DataModelElement):
+    """An element in :py:attr:`TraceElement.fragments`, can be one of
+    :py:class:`TextFragment` or :py:class:`LinkFragment`.
+    """
+
     @classmethod
     def from_dict(cls, json_dict):
         if json_dict["class"] == "TextFragment":
@@ -89,6 +100,11 @@ class Fragment(DataModelElement):
 
 @attr.s(frozen=True)
 class TextFragment(Fragment):
+    """Represents a plain-text :py:class:`Fragment`.
+
+    :ivar text: Text content of the fragment
+    """
+
     text = attr.ib(type=str)
 
     @classmethod
@@ -101,6 +117,12 @@ class TextFragment(Fragment):
 
 @attr.s(frozen=True)
 class LinkFragment(Fragment):
+    """Represents a :py:class:`Fragment` that links to a vendor structure.
+
+    :ivar text: Text content of the fragment
+    :ivar vendorStructureId: Link of the fragment
+    """
+
     text = attr.ib(type=str)
     vendorStructureId = attr.ib(type=VendorStructureId)
 
@@ -117,6 +139,11 @@ class LinkFragment(Fragment):
 
 @attr.s(frozen=True)
 class TraceElement(DataModelElement):
+    """Metadata used to create human-readable traces.
+
+    :ivar fragments: A list of :py:class:`Fragment` which describes an element of a trace
+    """
+
     fragments = attr.ib(type=List[Fragment])
 
     @classmethod
@@ -129,6 +156,12 @@ class TraceElement(DataModelElement):
 
 @attr.s(frozen=True)
 class TraceNode(DataModelElement):
+    """Represents a node in a filter trace tree.
+
+    :ivar traceElement: Metadata and description of the node
+    :ivar children: A list of sub-traces, i.e. children of the node
+    """
+
     traceElement = attr.ib(type=TraceElement)
     children = attr.ib(type=List["TraceNode"])
 
