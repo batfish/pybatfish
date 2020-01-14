@@ -59,6 +59,5 @@ class AclTrace(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "\n".join(
-            str(event)
-            for event in self.events
-            if event.description is not None)
+            str(event) for event in self.events if event.description is not None
+        )
