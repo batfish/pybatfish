@@ -101,7 +101,7 @@ done
 
 ###### Test building of documentation
 cat <<EOF
-- label: "Building documentation"
+  - label: "Building documentation"
     command:
       - bash .buildkite/build_docs.sh
       - cd docs
