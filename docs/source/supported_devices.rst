@@ -7,35 +7,36 @@ from vendors including:
 * Arista
 * Amazon Web Services (AWS) constructs
 
-  * Virtual Private Clouds (VPCs),
-  * Network ACLs
-  * VPN Gateways,
-  * NAT Gateways,
   * Internet Gateways,
+  * NAT Gateways,
+  * Network ACLs
   * Security Groups
+  * Virtual Private Clouds (VPCs),
+  * VPN Gateways,
   * ...
 
 * Cisco
 
-  * NX-OS
+  * ASA
   * IOS
   * IOS-XE
   * IOS-XR
-  * ASA
+  * NX-OS
 
 * Cumulus
 * F5 BIG-IP
+* Free-Range Routing (FRR)
 * iptables (on hosts)
 * Juniper (All JunOS platforms):
 
-  * MX
   * EX
+  * MX
+  * PTX
   * QFX
   * SRX
   * T-series
-  * PTX
+
 * Palo Alto Networks
-* Free-Range Routing (FRR)
 
 Batfish has limited support for the following platforms:
 
