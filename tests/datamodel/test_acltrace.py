@@ -16,7 +16,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTrace, TraceNode
+from pybatfish.datamodel.acl import AclTrace, TraceTree
 
 
 # test if an acl trace is deserialized properly
@@ -31,18 +31,18 @@ def test_acl_trace_deserialization():
     str(acl_trace)
 
 
-def test_trace_node_no_children():
-    trace_node_dict = {
+def test_trace_tree_no_children():
+    trace_tree_dict = {
         "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
     }
-    trace_node = TraceNode.from_dict(trace_node_dict)
-    assert len(trace_node.children) == 0
-    assert str(trace_node) == "aaa"
-    assert trace_node._repr_html_() == "aaa"
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 0
+    assert str(trace_tree) == "aaa"
+    assert trace_tree._repr_html_() == "aaa"
 
 
-def test_trace_node_with_children():
-    trace_node_dict = {
+def test_trace_tree_with_children():
+    trace_tree_dict = {
         "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
         "children": [
             {
@@ -57,17 +57,17 @@ def test_trace_node_with_children():
             },
         ],
     }
-    trace_node = TraceNode.from_dict(trace_node_dict)
-    assert len(trace_node.children) == 2
-    assert str(trace_node) == "\n".join(["aaa", "  - bbb", "  - ccc",])
-    html_text = trace_node._repr_html_()
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 2
+    assert str(trace_tree) == "\n".join(["aaa", "  - bbb", "  - ccc",])
+    html_text = trace_tree._repr_html_()
     assert "aaa" in html_text
     assert "<li>bbb</li>" in html_text
     assert "<li>ccc</li>" in html_text
 
 
-def test_trace_node_nested_children():
-    trace_node_dict = {
+def test_trace_tree_nested_children():
+    trace_tree_dict = {
         "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
         "children": [
             {
@@ -89,11 +89,11 @@ def test_trace_node_nested_children():
             },
         ],
     }
-    trace_node = TraceNode.from_dict(trace_node_dict)
-    assert len(trace_node.children) == 2
-    assert len(trace_node.children[0].children) == 1
-    assert str(trace_node) == "\n".join(["aaa", "  - bbb", "    - ccc", "  - ddd",])
-    html_text = trace_node._repr_html_()
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 2
+    assert len(trace_tree.children[0].children) == 1
+    assert str(trace_tree) == "\n".join(["aaa", "  - bbb", "    - ccc", "  - ddd",])
+    html_text = trace_tree._repr_html_()
     assert "aaa" in html_text
     assert "<li>bbb <ul>" in html_text
     assert "<ul><li>ccc</li></ul>" in html_text

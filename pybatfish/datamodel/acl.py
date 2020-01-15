@@ -158,21 +158,21 @@ class TraceElement(DataModelElement):
 
 
 @attr.s(frozen=True)
-class TraceNode(DataModelElement):
-    """Represents a node in a filter trace tree.
+class TraceTree(DataModelElement):
+    """Represents a filter trace tree.
 
     :ivar traceElement: Metadata and description of the node
     :ivar children: A list of sub-traces, i.e. children of the node
     """
 
     traceElement = attr.ib(type=TraceElement)
-    children = attr.ib(type=List["TraceNode"])
+    children = attr.ib(type=List["TraceTree"])
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "TraceNode":
-        return TraceNode(
+    def from_dict(cls, json_dict: Dict) -> "TraceTree":
+        return TraceTree(
             TraceElement.from_dict(json_dict.get("traceElement", {})),
-            [TraceNode.from_dict(child) for child in json_dict.get("children", [])],
+            [TraceTree.from_dict(child) for child in json_dict.get("children", [])],
         )
 
     def __str__(self) -> str:
