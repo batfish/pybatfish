@@ -5,6 +5,8 @@ Welcome to the Batfish documentation!
    :maxdepth: 2
 
    getting_started.rst
+   batfish_commands.rst
+   datamodel.rst
    system_req.rst
    supported_devices.rst
 
