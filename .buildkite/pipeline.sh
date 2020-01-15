@@ -98,3 +98,19 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
             - workspace/questions.tgz
 EOF
 done
+
+###### Test building of documentation
+cat <<EOF
+  - label: "Building documentation"
+    command:
+      - bash .buildkite/build_docs.sh
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: "python:3.7"
+          always-pull: true
+          propagate-environment: true
+      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
+          download:
+            - workspace/allinone.jar
+            - workspace/questions.tgz
+EOF
