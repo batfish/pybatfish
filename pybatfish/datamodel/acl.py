@@ -18,7 +18,16 @@ import attr
 
 from .primitives import DataModelElement
 
-__all__ = ["AclTrace", "AclTraceEvent"]
+__all__ = [
+    "AclTrace",
+    "AclTraceEvent",
+    "Fragment",
+    "LinkFragment",
+    "TextFragment",
+    "TraceElement",
+    "TraceTree",
+    "VendorStructureId",
+]
 
 
 @attr.s(frozen=True)
