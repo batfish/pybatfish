@@ -92,9 +92,9 @@ class Fragment(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "Fragment":
-        if json_dict["class"] == "TextFragment":
+        if json_dict["class"] == "org.batfish.datamodel.TraceElement$TextFragment":
             return TextFragment.from_dict(json_dict)
-        elif json_dict["class"] == "LinkFragment":
+        elif json_dict["class"] == "org.batfish.datamodel.TraceElement$LinkFragment":
             return LinkFragment.from_dict(json_dict)
         raise ValueError("Unknown Fragment type {}".format(json_dict["class"]))
 

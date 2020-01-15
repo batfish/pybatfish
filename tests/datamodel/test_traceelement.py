@@ -23,8 +23,12 @@ from pybatfish.datamodel.acl import (
 )
 
 
+TEXT_FRAGMENT = "org.batfish.datamodel.TraceElement$TextFragment"
+LINK_FRAGMENT = "org.batfish.datamodel.TraceElement$LinkFragment"
+
+
 def test_text_fragment_deserialization():
-    fragment_dict = {"class": "TextFragment", "text": "aaa"}
+    fragment_dict = {"class": TEXT_FRAGMENT, "text": "aaa"}
     fragment = Fragment.from_dict(fragment_dict)
 
     assert isinstance(fragment, TextFragment)
@@ -33,7 +37,7 @@ def test_text_fragment_deserialization():
 
 def test_link_fragment_deserialization():
     fragment_dict = {
-        "class": "LinkFragment",
+        "class": LINK_FRAGMENT,
         "text": "aaa",
         "vendorStructureId": {
             "filename": "some-config",
@@ -53,9 +57,9 @@ def test_link_fragment_deserialization():
 def test_trace_element_deserialization():
     trace_element_dict = {
         "fragments": [
-            {"class": "TextFragment", "text": "aaa"},
+            {"class": TEXT_FRAGMENT, "text": "aaa"},
             {
-                "class": "LinkFragment",
+                "class": LINK_FRAGMENT,
                 "text": "bbb",
                 "vendorStructureId": {
                     "filename": "aa",
@@ -63,7 +67,7 @@ def test_trace_element_deserialization():
                     "structureName": "cc",
                 },
             },
-            {"class": "TextFragment", "text": "ccc"},
+            {"class": TEXT_FRAGMENT, "text": "ccc"},
         ],
     }
     trace_element = TraceElement.from_dict(trace_element_dict)

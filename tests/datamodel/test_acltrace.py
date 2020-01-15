@@ -31,9 +31,12 @@ def test_acl_trace_deserialization():
     str(acl_trace)
 
 
+TEXT_FRAGMENT = "org.batfish.datamodel.TraceElement$TextFragment"
+
+
 def test_trace_tree_no_children():
     trace_tree_dict = {
-        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}],},
     }
     trace_tree = TraceTree.from_dict(trace_tree_dict)
     assert len(trace_tree.children) == 0
@@ -43,16 +46,16 @@ def test_trace_tree_no_children():
 
 def test_trace_tree_with_children():
     trace_tree_dict = {
-        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}],},
         "children": [
             {
                 "traceElement": {
-                    "fragments": [{"class": "TextFragment", "text": "bbb"},]
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"},]
                 },
             },
             {
                 "traceElement": {
-                    "fragments": [{"class": "TextFragment", "text": "ccc"},]
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"},]
                 },
             },
         ],
@@ -68,23 +71,23 @@ def test_trace_tree_with_children():
 
 def test_trace_tree_nested_children():
     trace_tree_dict = {
-        "traceElement": {"fragments": [{"class": "TextFragment", "text": "aaa"}],},
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}],},
         "children": [
             {
                 "traceElement": {
-                    "fragments": [{"class": "TextFragment", "text": "bbb"},]
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"},]
                 },
                 "children": [
                     {
                         "traceElement": {
-                            "fragments": [{"class": "TextFragment", "text": "ccc"}]
+                            "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}]
                         }
                     }
                 ],
             },
             {
                 "traceElement": {
-                    "fragments": [{"class": "TextFragment", "text": "ddd"},]
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"},]
                 },
             },
         ],
