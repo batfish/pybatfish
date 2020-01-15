@@ -17,7 +17,7 @@ import json
 import re
 from typing import Any, Dict, Optional  # noqa: F401
 
-from pybatfish.datamodel.acl import AclTrace
+from pybatfish.datamodel.acl import AclTrace, TraceTree
 from pybatfish.datamodel.flow import Flow, FlowTrace, Trace
 from pybatfish.datamodel.primitives import FileLines, Interface, Issue, ListWrapper
 from pybatfish.datamodel.route import BgpRoute, BgpRouteDiffs
@@ -111,6 +111,8 @@ def _parse_json_with_schema(schema, json_object):
         return str(json_object)
     if schema == "Trace":
         return Trace.from_dict(json_object)
+    if schema == "TraceTree":
+        return TraceTree.from_dict(json_object)
     return json_object
 
 
