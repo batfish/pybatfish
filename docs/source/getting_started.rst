@@ -27,9 +27,11 @@ In order to upgrade to the latest Docker container, issue these commands on the 
 Installing (and upgrading) Pybatfish
 ------------------------------------
 
-We recommend that you install Pybatfish in a **Python 3** `virtual environment <https://docs.python.org/3/tutorial/venv.html>`_.
-To install Pybatfish, run the following commands (in a virtual environment if applicable):
+Pybatfish requires python 3.
+To install Pybatfish using ``pip``, run the following command:
 
 .. code-block :: bash
 
     python -m pip install --upgrade git+https://github.com/batfish/pybatfish.git
+
+We recommend that you install Pybatfish in a `virtual environment <https://docs.python.org/3/tutorial/venv.html>`_.
