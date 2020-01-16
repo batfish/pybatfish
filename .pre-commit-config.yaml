@@ -5,6 +5,7 @@ repos:
     rev: v2.0.0
     hooks:
     - id: trailing-whitespace
+      exclude: docs/source/specifiers.md
     - id: end-of-file-fixer
     - id: check-yaml
 
