@@ -39,6 +39,5 @@ def test_specifiers_up_to_date():
         hashlib.sha256(original).hexdigest()
         != hashlib.sha256(checked_in.read_bytes()).hexdigest()
     ):
-        with open(str(outfile), "wb") as f:
-            f.write(original)
+        outfile.write_bytes(original)
         raise AssertionError("Checked in specifiers.md file is outdated.")
