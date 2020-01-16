@@ -7,7 +7,7 @@ you filter your answers as desired.
 Base Types
 ----------
 .. automodule:: pybatfish.datamodel.primitives
-    :members: Edge, FileLines, Interface
+    :members: Edge, Interface
 
 
 ACL Traces
