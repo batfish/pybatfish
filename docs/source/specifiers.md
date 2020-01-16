@@ -142,7 +142,7 @@ A specification for a set of BGP session statuses.
 A BGP session status specifier follows the [enum set grammar](#set-of-enums-or-names) over the following values:
 
 * `NOT_COMPATIBLE` — the BGP session is not compatibly configured
-* `NOT_ESTABLISHED` — the BGP session configuration is compatible but the session was not established
+* `NOT_ESTABLISHED` — the BGP session configuration is compatible but the session was not established  
 * `ESTABLISHED` — the BGP session is established
 
 ### BGP Session Type Specifier
