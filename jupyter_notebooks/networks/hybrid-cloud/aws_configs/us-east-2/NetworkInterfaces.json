@@ -1,0 +1,150 @@
+{
+ "NetworkInterfaces": [
+  {
+   "Association": {
+    "IpOwnerId": "amazon",
+    "PublicDnsName": "",
+    "PublicIp": "13.59.144.125"
+   },
+   "Attachment": {
+    "AttachTime": "2019-12-18 05:08:19+00:00",
+    "AttachmentId": "eni-attach-01339896dc6a5339f",
+    "DeleteOnTermination": true,
+    "DeviceIndex": 0,
+    "InstanceId": "i-01602d9efaed4409a",
+    "InstanceOwnerId": "554773406868",
+    "Status": "attached"
+   },
+   "AvailabilityZone": "us-east-2c",
+   "Description": "Primary network interface",
+   "Groups": [
+    {
+     "GroupId": "sg-0e37fc2ef01c89369",
+     "GroupName": "launch-wizard-1"
+    }
+   ],
+   "InterfaceType": "interface",
+   "Ipv6Addresses": [],
+   "MacAddress": "0a:f1:4e:43:be:b0",
+   "NetworkInterfaceId": "eni-01997085076a9b98a",
+   "OwnerId": "554773406868",
+   "PrivateIpAddress": "10.20.1.207",
+   "PrivateIpAddresses": [
+    {
+     "Association": {
+      "IpOwnerId": "amazon",
+      "PublicDnsName": "",
+      "PublicIp": "13.59.144.125"
+     },
+     "Primary": true,
+     "PrivateIpAddress": "10.20.1.207"
+    }
+   ],
+   "RequesterManaged": false,
+   "SourceDestCheck": true,
+   "Status": "in-use",
+   "SubnetId": "subnet-06a692ed4ef84368d",
+   "TagSet": [],
+   "VpcId": "vpc-0574d08f8d05917e4"
+  },
+  {
+   "Attachment": {
+    "AttachTime": "2019-12-18 05:09:19+00:00",
+    "AttachmentId": "eni-attach-0cd39bb62343575d4",
+    "DeleteOnTermination": true,
+    "DeviceIndex": 0,
+    "InstanceId": "i-04cd3db5124a05ee6",
+    "InstanceOwnerId": "554773406868",
+    "Status": "attached"
+   },
+   "AvailabilityZone": "us-east-2b",
+   "Description": "Primary network interface",
+   "Groups": [
+    {
+     "GroupId": "sg-024243f6c203c78bf",
+     "GroupName": "launch-wizard-2"
+    }
+   ],
+   "InterfaceType": "interface",
+   "Ipv6Addresses": [],
+   "MacAddress": "06:18:b9:aa:77:e6",
+   "NetworkInterfaceId": "eni-05452497daf80ccb3",
+   "OwnerId": "554773406868",
+   "PrivateIpAddress": "10.30.1.166",
+   "PrivateIpAddresses": [
+    {
+     "Primary": true,
+     "PrivateIpAddress": "10.30.1.166"
+    }
+   ],
+   "RequesterManaged": false,
+   "SourceDestCheck": true,
+   "Status": "in-use",
+   "SubnetId": "subnet-0cb5f4c094bee5214",
+   "TagSet": [],
+   "VpcId": "vpc-0276455718806058a"
+  },
+  {
+   "Attachment": {
+    "AttachmentId": "ela-attach-41e1c514",
+    "DeleteOnTermination": false,
+    "DeviceIndex": 1,
+    "InstanceOwnerId": "amazon-aws",
+    "Status": "attached"
+   },
+   "AvailabilityZone": "us-east-2b",
+   "Description": "Network Interface for Transit Gateway Attachment tgw-attach-021f89744fac566dd",
+   "Groups": [],
+   "InterfaceType": "transit_gateway",
+   "Ipv6Addresses": [],
+   "MacAddress": "06:64:86:a5:4e:0a",
+   "NetworkInterfaceId": "eni-03ca2c3d64376a98b",
+   "OwnerId": "554773406868",
+   "PrivateIpAddress": "10.30.1.201",
+   "PrivateIpAddresses": [
+    {
+     "Primary": true,
+     "PrivateIpAddress": "10.30.1.201"
+    }
+   ],
+   "RequesterId": "522605744525",
+   "RequesterManaged": false,
+   "SourceDestCheck": false,
+   "Status": "in-use",
+   "SubnetId": "subnet-0cb5f4c094bee5214",
+   "TagSet": [],
+   "VpcId": "vpc-0276455718806058a"
+  },
+  {
+   "Attachment": {
+    "AttachmentId": "ela-attach-69d19742",
+    "DeleteOnTermination": false,
+    "DeviceIndex": 1,
+    "InstanceOwnerId": "amazon-aws",
+    "Status": "attached"
+   },
+   "AvailabilityZone": "us-east-2c",
+   "Description": "Network Interface for Transit Gateway Attachment tgw-attach-0648110513acd6de5",
+   "Groups": [],
+   "InterfaceType": "transit_gateway",
+   "Ipv6Addresses": [],
+   "MacAddress": "0a:33:ad:03:ac:10",
+   "NetworkInterfaceId": "eni-032fef1275c92b703",
+   "OwnerId": "554773406868",
+   "PrivateIpAddress": "10.20.1.155",
+   "PrivateIpAddresses": [
+    {
+     "Primary": true,
+     "PrivateIpAddress": "10.20.1.155"
+    }
+   ],
+   "RequesterId": "522605744525",
+   "RequesterManaged": false,
+   "SourceDestCheck": false,
+   "Status": "in-use",
+   "SubnetId": "subnet-06a692ed4ef84368d",
+   "TagSet": [],
+   "VpcId": "vpc-0574d08f8d05917e4"
+  }
+ ]
+}

@@ -1,0 +1,79 @@
+{
+ "TransitGatewayAttachments": [
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-049367cdac1fcd74e"
+   },
+   "CreationTime": "2019-12-18 05:40:03+00:00",
+   "ResourceId": "tgw-06b348adabd13452d",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "peering",
+   "State": "deleting",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-2"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0cc6cf6a578b754e3",
+   "TransitGatewayId": "tgw-0888a76c8a371246d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-049367cdac1fcd74e"
+   },
+   "CreationTime": "2019-12-18 04:40:19+00:00",
+   "ResourceId": "vpc-00157b5941bfd4959",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpc",
+   "State": "available",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-2-vpc-4"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0b516df8513d683b3",
+   "TransitGatewayId": "tgw-0888a76c8a371246d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-049367cdac1fcd74e"
+   },
+   "CreationTime": "2019-12-18 04:39:59+00:00",
+   "ResourceId": "vpc-00b65e98077106059",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpc",
+   "State": "available",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-2-vpc-3"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0f7545ba7090429ec",
+   "TransitGatewayId": "tgw-0888a76c8a371246d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-049367cdac1fcd74e"
+   },
+   "CreationTime": "2019-12-18 01:01:35+00:00",
+   "ResourceId": "vpn-0dc7abdb974ff8a69",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpn",
+   "State": "available",
+   "Tags": [],
+   "TransitGatewayAttachmentId": "tgw-attach-0b45e5d982f47ddda",
+   "TransitGatewayId": "tgw-0888a76c8a371246d",
+   "TransitGatewayOwnerId": "554773406868"
+  }
+ ]
+}

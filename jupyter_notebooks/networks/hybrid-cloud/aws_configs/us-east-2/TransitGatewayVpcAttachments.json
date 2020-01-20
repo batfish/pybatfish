@@ -1,0 +1,46 @@
+{
+ "TransitGatewayVpcAttachments": [
+  {
+   "CreationTime": "2019-12-18 04:38:28+00:00",
+   "Options": {
+    "DnsSupport": "enable",
+    "Ipv6Support": "disable"
+   },
+   "State": "available",
+   "SubnetIds": [
+    "subnet-0cb5f4c094bee5214"
+   ],
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-vpc-2"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-021f89744fac566dd",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "VpcId": "vpc-0276455718806058a",
+   "VpcOwnerId": "554773406868"
+  },
+  {
+   "CreationTime": "2019-12-18 01:27:57+00:00",
+   "Options": {
+    "DnsSupport": "enable",
+    "Ipv6Support": "disable"
+   },
+   "State": "available",
+   "SubnetIds": [
+    "subnet-06a692ed4ef84368d"
+   ],
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-vpc-1"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0648110513acd6de5",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "VpcId": "vpc-0574d08f8d05917e4",
+   "VpcOwnerId": "554773406868"
+  }
+ ]
+}
