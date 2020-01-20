@@ -14,7 +14,7 @@
 	"ispNodeInfo" : [
 		{
 			"asn" : 65200,
-			"name" : "orange"
+			"name" : "isp_dc"
 		}
 	]
 }

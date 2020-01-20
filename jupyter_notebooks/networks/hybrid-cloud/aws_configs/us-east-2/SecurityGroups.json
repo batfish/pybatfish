@@ -120,6 +120,19 @@
      "PrefixListIds": [],
      "ToPort": 22,
      "UserIdGroupPairs": []
+    },
+    {
+     "FromPort": -1,
+     "IpProtocol": "tcp",
+     "IpRanges": [
+      {
+       "CidrIp": "0.0.0.0/0"
+      }
+     ],
+     "Ipv6Ranges": [],
+     "PrefixListIds": [],
+     "ToPort": 80,
+     "UserIdGroupPairs": []
     }
    ],
    "IpPermissionsEgress": [
