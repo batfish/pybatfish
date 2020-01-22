@@ -5,6 +5,8 @@ Welcome to the Batfish documentation!
    :maxdepth: 2
 
    getting_started.rst
+   notebooks/interacting.ipynb
+   formats.md
    advanced.rst
    batfish_commands.rst
    datamodel.rst
