@@ -8,6 +8,8 @@ The current list of notebooks are:
     - [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)] shows how to analyze ACLs and firewalls rules using Batfish. 
     - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb) [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)] shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
     - [Safely refactoring ACLs and firewall rules](Safely%20refactoring%20ACLs%20and%20firewall%20rules.ipynb) shows how to fully understand the impact of refactoring complex ACLs and firewalls rules. 
+- **Cloud networking**
+   - [Analyzing public and hybrid cloud networks](Analyzing%20public%20and%20hybrid%20cloud%20networks%20.ipynb) shows to analyze cloud and hybrid networks using Batfish.
 - **Forwarding analysis**
     - [Introduction to Forwarding Analysis](Introduction%20to%20Forwarding%20Analysis.ipynb) [[video](https://youtu.be/yaJBH3ZZ5Dw)] shows how forwarding paths can be analyzed using traceroute and reachability queries.
     - [Introduction to Forwarding Change Validation](Introduction%20to%20Forwarding%20Change%20Validation.ipynb) [[video](https://youtu.be/Yje70Q8R79w)] shows a workflow to ensure that changes to the network do not impact packet forwarding.
