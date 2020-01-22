@@ -1318,7 +1318,7 @@ class PathConstraints(DataModelElement):
     :ivar startLocation: Location description of where a flow is allowed to start
     :ivar endLocation: Location description of where a flow is allowed to terminate
     :ivar transitLocations: Location description of where a flow must transit
-    :ivar forbiddenLocations : Location description of where a flow is *not* allowed to transit
+    :ivar forbiddenLocations: Location description of where a flow is *not* allowed to transit
     """
 
     startLocation = attr.ib(default=None, type=Optional[str])

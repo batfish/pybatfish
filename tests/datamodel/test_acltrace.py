@@ -16,7 +16,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTrace
+from pybatfish.datamodel.acl import AclTrace, TraceTree
 
 
 # test if an acl trace is deserialized properly
@@ -29,6 +29,78 @@ def test_acl_trace_deserialization():
 
     # check stringification works
     str(acl_trace)
+
+
+TEXT_FRAGMENT = "org.batfish.datamodel.TraceElement$TextFragment"
+
+
+def test_trace_tree_no_children():
+    trace_tree_dict = {
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
+    }
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 0
+    assert str(trace_tree) == "aaa"
+    assert trace_tree._repr_html_() == "aaa"
+
+
+def test_trace_tree_with_children():
+    trace_tree_dict = {
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
+        "children": [
+            {
+                "traceElement": {
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}],
+                },
+            },
+            {
+                "traceElement": {
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}],
+                },
+            },
+        ],
+    }
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 2
+    assert str(trace_tree) == "\n".join(["aaa", "  - bbb", "  - ccc"])
+    html_text = trace_tree._repr_html_()
+    assert "aaa" in html_text
+    assert "<li>bbb</li>" in html_text
+    assert "<li>ccc</li>" in html_text
+
+
+def test_trace_tree_nested_children():
+    trace_tree_dict = {
+        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
+        "children": [
+            {
+                "traceElement": {
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}],
+                },
+                "children": [
+                    {
+                        "traceElement": {
+                            "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}],
+                        },
+                    },
+                ],
+            },
+            {
+                "traceElement": {
+                    "fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"}],
+                },
+            },
+        ],
+    }
+    trace_tree = TraceTree.from_dict(trace_tree_dict)
+    assert len(trace_tree.children) == 2
+    assert len(trace_tree.children[0].children) == 1
+    assert str(trace_tree) == "\n".join(["aaa", "  - bbb", "    - ccc", "  - ddd",])
+    html_text = trace_tree._repr_html_()
+    assert "aaa" in html_text
+    assert "<li>bbb <ul>" in html_text
+    assert "<ul><li>ccc</li></ul>" in html_text
+    assert "<li>ddd</li>" in html_text
 
 
 if __name__ == "__main__":
