@@ -13,9 +13,26 @@ def test_convert_schema():
     assert convert_schema("Set<String>", "output") == "Set of str"
     assert convert_schema("List<String>", "input") == "List of str"
     assert convert_schema("List<String>", "output") == "List of str"
+    assert convert_schema("interface", "output") == "str"
+    assert (
+        convert_schema("interface", "input")
+        == "[Interface](../datamodel.rst#pybatfish.datamodel.primitives.Interface)"
+    )
     assert (
         convert_schema("InterfaceSpec", "input")
         == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    )
+    assert (
+        convert_schema("interfaceSpec", "input")
+        == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    )
+    assert (
+        convert_schema("InterfacesSpec", "input")
+        == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    )
+    assert (
+        convert_schema("ipSpaceSpec", "input")
+        == "[IpSpec](../specifiers.md#ip-specifier)"
     )
     assert (
         convert_schema("headerConstraint", "input")

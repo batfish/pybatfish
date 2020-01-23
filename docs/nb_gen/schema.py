@@ -48,8 +48,12 @@ _OUTPUT_TYPES = {
     "tracetree": "pybatfish.datamodel.acl.TraceTree",
 }
 
+# Normalizes specifier types to how they are documented in Markdown ಠ_ಠ
+# The right side of this map must be camel-cased so that link creation works correctly (by downstream code)
+_SPECIFIER_CONVERSIONS = {"interfacesspec": "interfaceSpec", "ipspacespec": "ipSpec"}
+
 # Convert self-describing schemas to a python type (question-specific)
-self_describing_map = {
+_SELF_DESCRIBING_CONVERSIONS = {
     "bgpPeerConfiguration": "str",
     "bgpSessionCompatibility": "str",
     "bgpSessionStatus": "str",
@@ -72,11 +76,14 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     elif value.lower() in _BASE_TYPES:
         return _BASE_TYPES[value.lower()]
     elif value.endswith("Spec"):
-        # specifiers follow a nice pattern, so no need for a manual map.
-        # 1. convert camel case to a dashed version
-        # 2. turn spec into specifier
+        # specifiers follow a nice pattern. Almost.
+        # 1. Handle special cases
+        # 2. convert camel case to a dashed version
+        # 3. turn "spec" into "specifier"
+        value = _SPECIFIER_CONVERSIONS.get(value.lower(), value)
         slug = re.sub(r"spec$", "specifier", dasherize(underscore(value)))
-        return f"[{value}](../specifiers.md#{slug})"
+        text = value[:1].capitalize() + value[1:]
+        return f"[{text}](../specifiers.md#{slug})"
     elif usage == "input":
         slug = _INPUT_TYPES[value.lower()]
         if slug.startswith("pybatfish.datamodel"):
@@ -95,7 +102,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
                     "Converting selfdescribing schema requires a question name"
                 )
             try:
-                return self_describing_map[question_name]
+                return _SELF_DESCRIBING_CONVERSIONS[question_name]
             except KeyError:
                 raise KeyError(
                     f"Error: unknown selfdescribing schema usage in question {question_name}"
