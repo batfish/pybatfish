@@ -4,20 +4,25 @@ from typing import Any, Tuple, List
 
 from pybatfish.datamodel.answer.table import ColumnMetadata
 from pybatfish.question.question import QuestionMeta
-from schema import convert_schema
+from .schema import convert_schema
 
 
-def gen_output_table(col_data: List[ColumnMetadata], question_name) -> str:
+def gen_output_table(col_data: List[ColumnMetadata], question_name: str) -> str:
     """
     Converts the return values from answer's column metadata into a markdown table
     """
 
+    return "\n".join(get_output_table_lines(col_data, question_name))
+
+
+def get_output_table_lines(
+    col_data: List[ColumnMetadata], question_name: str
+) -> List[str]:
     table_lines = ["Name | Description | Type", "--- | --- | ---"]
     for col in col_data:
         schema_type = convert_schema(col.schema, "output", question_name)
         table_lines.append(f"{col.name} | {col.description} | {schema_type}")
-
-    return "\n".join(table_lines)
+    return table_lines
 
 
 def gen_input_table(parameters: List[Tuple[str, Any]], question_name: str) -> str:
@@ -27,11 +32,16 @@ def gen_input_table(parameters: List[Tuple[str, Any]], question_name: str) -> st
     if not parameters:
         return ""
 
+    return "\n".join(get_input_table_lines(parameters, question_name))
+
+
+def get_input_table_lines(
+    parameters: List[Tuple[str, Any]], question_name: str
+) -> List[str]:
     table_lines = [
         "Name | Description | Type | Optional | Default Value",
         "--- | --- | --- | --- | --- ",
     ]
-
     for name, param in parameters:
         desc = param["description"]
         schema_type = convert_schema(param["type"], "input", question_name)
@@ -41,8 +51,7 @@ def gen_input_table(parameters: List[Tuple[str, Any]], question_name: str) -> st
         table_lines.append(
             f"{name} | {desc} | {schema_type} | {optional} | {default_value}"
         )
-
-    return "\n".join(table_lines)
+    return table_lines
 
 
 def get_desc_and_params(
