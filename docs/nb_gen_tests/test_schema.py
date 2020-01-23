@@ -18,10 +18,6 @@ def test_convert_schema():
         == "[InterfaceSpec](../specifiers.md#interface-specifier)"
     )
     assert (
-        convert_schema("headerConstraints", "input")
-        == "[HeaderConstraints](../datamodel.rst#pybatfish.datamodel.flow.HeaderConstraints)"
-    )
-    assert (
         convert_schema("headerConstraint", "input")
         == "[HeaderConstraints](../datamodel.rst#pybatfish.datamodel.flow.HeaderConstraints)"
     )

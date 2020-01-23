@@ -2,8 +2,9 @@
 import re
 from typing import Optional
 
-from inflection import camelize, dasherize, underscore
+from inflection import dasherize, underscore
 
+# Convert Java types to python types
 _BASE_TYPES = {
     "integer": "int",
     "long": "int",
@@ -12,60 +13,42 @@ _BASE_TYPES = {
     "double": "float",
 }
 
+# Convert input types (i.e., template variable types) to python types
 _INPUT_TYPES = {
-    "flow": "pybatfish.datamodel.flow.Flow",
-    "trace": "pybatfish.datamodel.flow.Trace",
-    "node": "str",
-    "headerconstraints": "pybatfish.datamodel.flow.HeaderConstraints",
-    "headerconstraint": "pybatfish.datamodel.flow.HeaderConstraints",
-    "pathconstraints": "pybatfish.datamodel.flow.PathConstraints",
-    "pathconstraint": "pybatfish.datamodel.flow.PathConstraints",
-    "filelines": "pybatfish.datamodel.primitives.FileLines",
-    "interface": "pybatfish.datamodel.primitives.Interface",
+    "comparator": "str",
     "bgproute": "pybatfish.datamodel.route.BgpRoute",
-    "prefix": "str",
-    "vrf": "str",
     "edge": "pybatfish.datamodel.primitives.Edge",
+    "interface": "pybatfish.datamodel.primitives.Interface",
     "ip": "str",
     "javaregex": "str",
-    "structurename": "str",
-    "comparator": "str",
-    "acltrace": "pybatfish.datamodel.acl.AclTrace",
-    "acltraceevent": "pybatfish.datamodel.acl.AclTraceEvent",
-}
-
-_OUTPUT_TYPES = {
-    "flow": "pybatfish.datamodel.flow.Flow",
-    "trace": "pybatfish.datamodel.flow.Trace",
-    "flowtrace": "pybatfish.datamodel.flow.FlowTrace",
-    "node": "str",
-    "headerconstraints": "pybatfish.datamodel.flow.HeaderConstraints",
     "headerconstraint": "pybatfish.datamodel.flow.HeaderConstraints",
-    "pathconstraints": "pybatfish.datamodel.flow.PathConstraints",
+    "node": "str",
     "pathconstraint": "pybatfish.datamodel.flow.PathConstraints",
-    "filelines": "pybatfish.datamodel.primitives.FileLines",
-    "interface": "pybatfish.datamodel.primitives.Interface",
-    "bgproute": "pybatfish.datamodel.route.BgpRoute",
     "prefix": "str",
-    "vrf": "str",
-    "edge": "pybatfish.datamodel.primitives.Edge",
-    "ip": "str",
     "structurename": "str",
-    "comparator": "str",
+    "vrf": "str",
+}
+
+# Convert output types (i.e., schema) to python types
+_OUTPUT_TYPES = {
     "acltrace": "pybatfish.datamodel.acl.AclTrace",
     "acltraceevent": "pybatfish.datamodel.acl.AclTraceEvent",
+    "bgproute": "pybatfish.datamodel.route.BgpRoute",
+    "bgproutediffs": "pybatfish.datamodel.route.BgpRouteDiffs",
+    "edge": "pybatfish.datamodel.primitives.Edge",
+    "filelines": "pybatfish.datamodel.primitives.FileLines",
+    "flow": "pybatfish.datamodel.flow.Flow",
+    "flowtrace": "pybatfish.datamodel.flow.FlowTrace",
+    "interface": "str",
+    "ip": "str",
+    "node": "str",
+    "prefix": "str",
+    "selfdescribing": "selfdescribing",
+    "trace": "pybatfish.datamodel.flow.Trace",
+    "tracetree": "pybatfish.datamodel.acl.TraceTree",
 }
 
-replacement_map = {
-    "headerConstraint": "HeaderConstraints",
-    "headerConstraints": "HeaderConstraints",
-    "pathConstraints": "PathConstraints",
-    "pathConstraint": "PathConstraints",
-    "interfacesSpec": "interfaceSpec",
-    "ipSpaceSpec": "ipSpec",
-    "ipSpacesSpec": "ipSpec",
-}
-
+# Convert self-describing schemas to a python type (question-specific)
 self_describing_map = {
     "bgpPeerConfiguration": "str",
     "bgpSessionCompatibility": "str",
@@ -74,17 +57,11 @@ self_describing_map = {
 }
 
 
-def convert_schema(
-    input_value: str, usage: str, question_name: Optional[str] = None
-) -> str:
+def convert_schema(value: str, usage: str, question_name: Optional[str] = None) -> str:
     """
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
-    # deal plurality discrepancies
-    value = replacement_map.get(
-        camelize(input_value, uppercase_first_letter=False), input_value
-    )
 
     if value.startswith("Set<"):
         inner = value[4:-1]  # strip prefix and suffix ">"
@@ -101,15 +78,17 @@ def convert_schema(
         slug = re.sub(r"spec$", "specifier", dasherize(underscore(value)))
         return f"[{value}](../specifiers.md#{slug})"
     elif usage == "input":
-        slug = _INPUT_TYPES.get(value.lower(), value)
+        slug = _INPUT_TYPES[value.lower()]
         if slug.startswith("pybatfish.datamodel"):
-            return f"[{value}](../datamodel.rst#{slug})"
+            text = slug.split(".")[-1]  # The class name
+            return f"[{text}](../datamodel.rst#{slug})"
         else:
             return slug
     elif usage == "output":
-        slug = _OUTPUT_TYPES.get(value.lower(), value)
+        slug = _OUTPUT_TYPES[value.lower()]
         if slug.startswith("pybatfish.datamodel"):
-            return f"[{value}](../datamodel.rst#{slug})"
+            text = slug.split(".")[-1]  # The class name
+            return f"[{text}](../datamodel.rst#{slug})"
         elif slug.lower() == "selfdescribing":
             if question_name is None:
                 raise ValueError(
