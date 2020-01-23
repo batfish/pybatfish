@@ -1,6 +1,16 @@
 # coding: utf-8
+from os.path import abspath, dirname, realpath
+from pathlib import Path
+
 import pytest
+import cerberus
+import yaml
+
 from nb_gen.schema import convert_schema
+
+_THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
+_DOC_DIR: Path = _THIS_DIR.parent
+_QUESTIONS_YAML: Path = _DOC_DIR / "nb_gen" / "questions.yaml"
 
 
 def test_convert_schema():
@@ -47,3 +57,57 @@ def test_convert_schema():
         assert convert_schema("SelfDescribing", "output") == "str"
     with pytest.raises(KeyError):
         assert convert_schema("SelfDescribing", "output", "fooooo") == "str"
+
+
+def test_questions_yaml_schema():
+    """Ensure that "questions.yaml" conforms to the expected schema.
+
+    Errors should be printed so that fixing the file is easier.
+    """
+    snapshot_schema = {
+        "type": "dict",
+        "schema": {
+            "name": {"type": "string", "required": True},
+            "path": {"type": "string", "required": True},
+        },
+    }
+    parameter_schema = {
+        "type": "dict",
+        "schema": {
+            "name": {"type": "string", "required": True},
+            "value": {"type": ["string", "integer"], "required": True},
+        },
+    }
+    schema = {
+        "categories": {
+            "type": "list",
+            "schema": {
+                "type": "dict",
+                "schema": {
+                    "name": {"type": "string", "required": True},
+                    "description": {"type": "string"},
+                    "questions": {
+                        "type": "list",
+                        "schema": {
+                            "type": "dict",
+                            "schema": {
+                                "name": {"type": "string", "required": True},
+                                "pybf_name": {"type": "string", "required": True},
+                                "type": {"type": "string"},
+                                "snapshot": snapshot_schema,
+                                "reference_snapshot": snapshot_schema,
+                                "parameters": {
+                                    "type": "list",
+                                    "schema": parameter_schema,
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        }
+    }
+    v = cerberus.Validator(schema)
+    doc = yaml.safe_load(_QUESTIONS_YAML.open())
+    if not v.validate(doc):
+        raise AssertionError(v.errors)
