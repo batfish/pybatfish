@@ -1,3 +1,4 @@
+inflection
 nbsphinx
 pandoc
 progressbar2
