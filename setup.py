@@ -105,10 +105,10 @@ setup(
     extras_require={
         "capirca": CAPIRCA_DEPS,
         "dev": [
-            "regex<=2019.6.8",  # https://github.com/psf/black/issues/1207
             "black; python_version >= '3.6.0'",
             "check-manifest",
             "coverage",
+            "inflection",
             "jupyter",
             "mypy",
             "nbformat<5.0.0",
@@ -116,6 +116,7 @@ setup(
             "pytest>=4.2.0",
             "pytest-cov",
             "pytz",
+            "regex<=2019.6.8",  # https://github.com/psf/black/issues/1207
             "requests_mock",
             "responses",
             "sphinx>=1.8.0",
