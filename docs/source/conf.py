@@ -20,6 +20,8 @@
 import sys
 from os.path import abspath, dirname, realpath, join, pardir
 
+from recommonmark.transform import AutoStructify
+
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 sys.path.insert(0, _root_dir)
@@ -181,3 +183,14 @@ texinfo_documents = [
 # -- Options for nbsphinx
 nbsphinx_allow_errors = False
 nbsphinx_execute = "never"
+
+# -- Options for recommonmark ---------------------------------------------
+
+
+def setup(app):
+    app.add_config_value(
+        "recommonmark_config",
+        {"enable_auto_doc_tree": True, "enable_eval_rst": True},
+        True,
+    )
+    app.add_transform(AutoStructify)
