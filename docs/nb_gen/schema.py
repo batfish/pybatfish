@@ -66,6 +66,11 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
+    allowed_usages = ["input", "output"]
+    if usage not in allowed_usages:
+        raise ValueError(
+            f"Invalid conversion type: {usage}, expected one of: {allowed_usages}"
+        )
 
     if value.startswith("Set<"):
         inner = value[4:-1]  # strip prefix and suffix ">"
