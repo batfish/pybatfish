@@ -6,6 +6,7 @@ Welcome to the Batfish documentation!
 
    getting_started.rst
    notebooks/interacting.ipynb
+   questions.rst
    formats.md
    advanced.rst
    batfish_commands.rst

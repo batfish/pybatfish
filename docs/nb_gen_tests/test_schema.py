@@ -1,29 +1,12 @@
 # coding: utf-8
-from os.path import abspath, dirname, realpath
-from pathlib import Path
 from typing import Mapping, Set
 
 import pytest
 import cerberus
-import yaml
 
 from nb_gen.schema import convert_schema
 
 from pybatfish.client.session import Session
-
-_THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
-_DOC_DIR: Path = _THIS_DIR.parent
-_QUESTIONS_YAML: Path = _DOC_DIR / "nb_gen" / "questions.yaml"
-
-
-@pytest.fixture(scope="module")
-def session():
-    return Session()
-
-
-@pytest.fixture(scope="module")
-def categories():
-    return yaml.safe_load(_QUESTIONS_YAML.open())
 
 
 def test_convert_schema():
