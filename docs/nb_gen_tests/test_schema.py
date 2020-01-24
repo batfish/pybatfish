@@ -99,7 +99,7 @@ def test_questions_yaml_schema(categories):
                 "schema": {
                     "name": {"type": "string", "required": True},
                     "description": {"type": "string"},  # human-readable category name
-                    "questions": {  #
+                    "questions": {
                         "type": "list",
                         "schema": {
                             "type": "dict",
