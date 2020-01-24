@@ -55,12 +55,10 @@ _configure_default_logging()
 bf_session = Session(load_questions=False)
 
 __all__ = [
-    "bf_add_analysis",
     "bf_add_issue_config",
     "bf_add_node_role_dimension",
     "bf_add_reference_book",
     "bf_auto_complete",
-    "bf_delete_analysis",
     "bf_delete_issue_config",
     "bf_delete_network",
     "bf_delete_node_role_dimension",
@@ -69,7 +67,6 @@ __all__ = [
     "bf_extract_answer_summary",
     "bf_fork_snapshot",
     "bf_generate_dataplane",
-    "bf_get_analysis_answers",
     "bf_get_answer",
     "bf_get_issue_config",
     "bf_get_node_role_dimension",
@@ -81,10 +78,8 @@ __all__ = [
     "bf_get_snapshot_node_role_dimension",
     "bf_get_snapshot_node_roles",
     "bf_get_work_status",
-    "bf_init_analysis",
     "bf_init_snapshot",
     "bf_kill_work",
-    "bf_list_analyses",
     "bf_list_networks",
     "bf_list_incomplete_works",
     "bf_list_snapshots",
@@ -92,17 +87,12 @@ __all__ = [
     "bf_put_node_roles",
     "bf_read_question_settings",
     "bf_put_reference_book",
-    "bf_run_analysis",
     "bf_session",
     "bf_set_network",
     "bf_set_snapshot",
     "bf_upload_diagnostics",
     "bf_write_question_settings",
 ]
-
-
-def bf_add_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory, False)
 
 
 def bf_add_issue_config(issue_config):
@@ -164,14 +154,6 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
         return suggestions
 
     raise BatfishException("Unexpected response: {}.".format(response))
-
-
-def bf_delete_analysis(analysisName):
-    jsonData = workhelper.get_data_delete_analysis(bf_session, analysisName)
-    jsonResponse = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_DEL_ANALYSIS, jsonData
-    )
-    return jsonResponse
 
 
 def bf_delete_issue_config(major, minor):
@@ -283,21 +265,6 @@ def bf_generate_dataplane(snapshot=None, extra_args=None):
     return bf_session.generate_dataplane(snapshot=snapshot, extra_args=extra_args)
 
 
-def bf_get_analysis_answers(
-    name: str, snapshot: Optional[str] = None, reference_snapshot: Optional[str] = None
-) -> Any:
-    """Get the answers for a previously asked analysis."""
-    snapshot = bf_session.get_snapshot(snapshot)
-    json_data = workhelper.get_data_get_analysis_answers(
-        bf_session, name, snapshot, reference_snapshot
-    )
-    json_response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_GET_ANALYSIS_ANSWERS, json_data
-    )
-    answers_dict = json.loads(json_response["answers"])
-    return answers_dict
-
-
 def bf_get_answer(questionName, snapshot, reference_snapshot=None):
     # type: (str, str, Optional[str]) -> Any
     """
@@ -375,33 +342,6 @@ def bf_get_work_status(wItemId):
     return bf_session.get_work_status(work_item=wItemId)
 
 
-def _bf_init_or_add_analysis(session, analysisName, questionDirectory, newAnalysis):
-    from pybatfish.question.question import _load_questions_from_dir
-
-    _check_network()
-    questions = _load_questions_from_dir(questionDirectory, session)
-    analysis = {
-        question_name: question_class(question_name=question_name)
-        for question_name, question_class in questions.items()
-    }
-    with tempfile.NamedTemporaryFile() as tempFile:
-        with open(tempFile.name, "w") as analysisFile:
-            json.dump(
-                analysis, analysisFile, indent=2, sort_keys=True, cls=BfJsonEncoder
-            )
-        json_data = workhelper.get_data_configure_analysis(
-            bf_session, newAnalysis, analysisName, tempFile.name, None
-        )
-        json_response = resthelper.get_json_response(
-            bf_session, CoordConsts.SVC_RSC_CONFIGURE_ANALYSIS, json_data
-        )
-    return json_response
-
-
-def bf_init_analysis(analysisName, questionDirectory):
-    return _bf_init_or_add_analysis(bf_session, analysisName, questionDirectory, True)
-
-
 def bf_init_snapshot(
     upload, name=None, overwrite=False, background=False, extra_args=None
 ):
@@ -433,16 +373,6 @@ def bf_init_snapshot(
 
 def bf_kill_work(wItemId):
     return kill_work(bf_session, wItemId)
-
-
-def bf_list_analyses():
-    _check_network()
-    jsonData = workhelper.get_data_list_analyses(bf_session)
-    jsonResponse = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_LIST_ANALYSES, jsonData
-    )
-    answer = jsonResponse["analysislist"]
-    return answer
 
 
 def bf_list_networks():
@@ -520,18 +450,6 @@ def bf_read_question_settings(question_class, json_path=None):
 
     """
     return restv2helper.read_question_settings(bf_session, question_class, json_path)
-
-
-def bf_run_analysis(name, snapshot, reference_snapshot=None, extra_args=None):
-    # type: (str, str, Optional[str], Optional[Dict[str, Any]]) -> Any
-    work_item = workhelper.get_workitem_run_analysis(
-        bf_session, name, snapshot, reference_snapshot
-    )
-    work_answer = workhelper.execute(work_item, bf_session, extra_args=extra_args)
-    if work_answer["status"] != WorkStatusCode.TERMINATEDNORMALLY:
-        raise BatfishException("Failed to run analysis")
-
-    return bf_get_analysis_answers(name, snapshot, reference_snapshot)
 
 
 def bf_set_network(
