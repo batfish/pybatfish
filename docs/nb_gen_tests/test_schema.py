@@ -93,7 +93,16 @@ def test_questions_yaml_schema():
                             "schema": {
                                 "name": {"type": "string", "required": True},
                                 "pybf_name": {"type": "string", "required": True},
-                                "type": {"type": "string"},
+                                "type": {
+                                    "type": "string",
+                                    "allowed": [
+                                        "basic",
+                                        "singleflow",
+                                        "dualflow",
+                                        "no-result",
+                                        "diff",
+                                    ],
+                                },
                                 "snapshot": snapshot_schema,
                                 "reference_snapshot": snapshot_schema,
                                 "parameters": {
