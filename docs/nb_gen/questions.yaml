@@ -1,5 +1,7 @@
 ---
-#### This
+## This YAML is the source of truth on how questions are grouped into
+## categories and how they are executed (on which snapshots and with which
+## parameters).
 categories:
   - name: configProperties
     description: Configuration Properties
