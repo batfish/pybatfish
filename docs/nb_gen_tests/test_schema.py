@@ -13,9 +13,8 @@ def test_convert_schema():
     assert convert_schema("Set<String>", "output") == "Set of str"
     assert convert_schema("List<String>", "input") == "List of str"
     assert convert_schema("List<String>", "output") == "List of str"
-    assert convert_schema("interface", "output") == "str"
     assert (
-        convert_schema("interface", "input")
+        convert_schema("interface", "output")
         == "[Interface](../datamodel.rst#pybatfish.datamodel.primitives.Interface)"
     )
     assert (
