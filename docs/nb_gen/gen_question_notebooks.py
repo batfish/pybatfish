@@ -62,7 +62,7 @@ def add_differential_warning(cells: List[NotebookNode]) -> None:
     `bfq.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0").frame()`
 
     In addition, Batfish has some questions that can *ONLY* be run differentially.
-    They are documented in this section"""
+    They are documented in this section."""
     )
     cells.append(nbformat.v4.new_markdown_cell(comment))
 
