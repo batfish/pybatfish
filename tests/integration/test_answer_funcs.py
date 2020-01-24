@@ -19,7 +19,6 @@ import pytest
 from pybatfish.client.commands import (
     bf_delete_network,
     bf_get_work_status,
-    bf_init_analysis,
     bf_init_snapshot,
     bf_session,
     bf_set_network,
@@ -79,11 +78,6 @@ def test_answer_fail(network):
     with pytest.raises(BatfishException) as err:
         bfq.searchFilters(filters="undefined").answer().frame()
     assert "Work terminated abnormally" in str(err.value)
-
-
-def test_init_analysis(network):
-    """Ensure bf_init_analysis does not crash."""
-    bf_init_analysis("test_analysis", _stable_question_dir)
 
 
 def test_answer_traceroute(traceroute_network):
