@@ -1,4 +1,4 @@
-cerbrerus==1.3.2
+cerberus==1.3.2
 inflection
 nbsphinx
 pandoc
