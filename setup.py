@@ -106,6 +106,7 @@ setup(
         "capirca": CAPIRCA_DEPS,
         "dev": [
             "black; python_version >= '3.6.0'",
+            "cerberus==1.3.2",
             "check-manifest",
             "coverage",
             "inflection",

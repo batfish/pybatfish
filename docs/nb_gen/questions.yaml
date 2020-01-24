@@ -1,0 +1,262 @@
+---
+## This YAML is the source of truth on how questions are grouped into
+## categories and how they are executed (on which snapshots and with which
+## parameters).
+categories:
+  - name: configProperties
+    description: Configuration Properties
+    questions:
+      - name: Node Properties
+        pybf_name: nodeProperties
+      - name: Interface Properties
+        pybf_name: interfaceProperties
+      - name: BGP Process Configuration
+        pybf_name: bgpProcessConfiguration
+      - name: BGP Peer Configuration
+        pybf_name: bgpPeerConfiguration
+      - name: OSPF Process Configuration
+        pybf_name: ospfProcessConfiguration
+      - name: OSPF Interface Configuration
+        pybf_name: ospfInterfaceConfiguration
+      - name: OSPF Area Configuration
+        pybf_name: ospfAreaConfiguration
+#      - name: Multi-chassis LAG
+#        pybf_name: mlagProperties
+#      - name: F5 BIG-IP VIP Configuration
+#        pybf_name: f5BigipVipConfiguration
+      - name: IP Owners
+        pybf_name: ipOwners
+      - name: Named Structures
+        pybf_name: namedStructures
+      - name: Defined Structures
+        pybf_name: definedStructures
+      - name: Referenced Structures
+        pybf_name: referencedStructures
+      - name: Undefined References
+        pybf_name: undefinedReferences
+      - name: Unused Structures
+        pybf_name: unusedStructures
+#      - name: VLAN Properties
+#        pybf_name: switchedVlanProperties
+      - name: Interface MTU
+        pybf_name: interfaceMtu
+        parameters:
+          - name: mtuBytes
+            value: 2000
+          - name: comparator
+            value: "'<'"
+  - name: topology
+    description: Topology
+    questions:
+#      - name: Layer 1 Topology
+#        pybf_name: layer1Edges
+      - name: Layer 3 Topology
+        pybf_name: layer3Edges
+  - name: routingProtocols
+    description: Routing Protocols
+    questions:
+    - name: BGP Session Compatibility
+      pybf_name: bgpSessionCompatibility
+    - name: BGP Session Status
+      pybf_name: bgpSessionStatus
+    - name: BGP Edges
+      pybf_name: bgpEdges
+    - name: OSPF Session Compatibility
+      pybf_name: ospfSessionCompatibility
+    - name: OSPF Edges
+      pybf_name: ospfEdges
+#    - name: ISIS Edges
+#      pybf_name: isisEdges
+#    - name: EIGRP Edges
+#      pybf_name: eigrpEdges
+  - name: routingTables
+    description: Routing and Forwarding Tables
+    questions:
+    - name: Routes
+      pybf_name: routes
+    - name: Longest Prefix Match
+      pybf_name: lpmRoutes
+      parameters:
+        - name: ip
+          value: "'2.34.201.10'"
+    - name: Prefix Tracer
+      pybf_name: prefixTracer
+      parameters:
+        - name: prefix
+          value: "'2.34.201.0/24'"
+  - name: forwarding
+    description: Packet Forwarding
+    questions:
+    - name: Traceroute
+      pybf_name: traceroute
+      parameters:
+        - name: startLocation
+          value: "'@enter(as2border1[GigabitEthernet2/0])'"
+        - name: headers
+          value: HeaderConstraints(dstIps='2.34.201.10', srcIps='8.8.8.8')
+      type: singleflow
+    - name: Bi-directional Traceroute
+      pybf_name: bidirectionalTraceroute
+      parameters:
+        - name: startLocation
+          value: "'@enter(as2border1[GigabitEthernet2/0])'"
+        - name: headers
+          value: HeaderConstraints(dstIps='2.34.201.10', srcIps='8.8.8.8')
+      type: dualflow
+    - name: Reachability
+      pybf_name: reachability
+      parameters:
+        - name: pathConstraints
+          value: PathConstraints(startLocation = '/as2/')
+        - name: headers
+          value: HeaderConstraints(dstIps='host1', srcIps='0.0.0.0/0', applications='DNS')
+        - name: actions
+          value: "'SUCCESS'"
+      type: singleflow
+    - name: Bi-directional Reachability
+      pybf_name: bidirectionalReachability
+      parameters:
+        - name: pathConstraints
+          value: PathConstraints(startLocation = '/as2dist1/')
+        - name: headers
+          value: HeaderConstraints(dstIps='host1', srcIps='0.0.0.0/0', applications='DNS')
+        - name: returnFlowType
+          value: "'SUCCESS'"
+      type: dualflow
+    - name: Loop detection
+      pybf_name: detectLoops
+      type: no-result
+    - name: Multipath Consistency for host-subnets
+      pybf_name: subnetMultipathConsistency
+      type: singleflow
+    - name: Multipath Consistency for router loopbacks
+      pybf_name: loopbackMultipathConsistency
+      type: singleflow
+  - name: filters
+    description: Access-lists and firewall rules
+    questions:
+    - name: Filter Line Reachability
+      pybf_name: filterLineReachability
+    - name: Search Filters
+      pybf_name: searchFilters
+      parameters:
+        - name: headers
+          value: HeaderConstraints(srcIps='10.10.10.0/24', dstIps='218.8.104.58', applications = ['dns'])
+        - name: action
+          value: "'deny'"
+        - name: filters
+          value: "'acl_in'"
+      snapshot:
+        name: filters
+        path: networks/example-filters/current
+      type: basic
+    - name: Test Filters
+      pybf_name: testFilters
+      parameters:
+        - name: headers
+          value: HeaderConstraints(srcIps='10.10.10.1', dstIps='218.8.104.58', applications = ['dns'])
+        - name: nodes
+          value: "'rtr-with-acl'"
+        - name: filters
+          value: "'acl_in'"
+      snapshot:
+        name: filters
+        path: networks/example-filters/current
+      type: basic
+    - name: Find Matching Filter Lines
+      pybf_name: findMatchingFilterLines
+      parameters:
+        - name: headers
+          value: HeaderConstraints(applications='DNS')
+#  - name: tunnels
+#    description: Tunnels and Overlays
+#    questions:
+#    - name: IPSec Session Status
+#      pybf_name: ipsecSessionStatus
+#    - name: IPSec Edges
+#      pybf_name: ipsecEdges
+#    - name: VXLAN VNI Properties
+#      pybf_name: vxlanVniProperties
+#    - name: VXLAN Edges
+#      pybf_name: vxlanEdges
+  - name: snapshot
+    description: Snapshot Input
+    questions:
+    - name: Snapshot Initialization Issues
+      pybf_name: initIssues
+    - name: Snapshot Input File Parse Status
+      pybf_name: fileParseStatus
+    - name: Snapshot Input File Parse Warnings
+      pybf_name: parseWarning
+      type: no-result
+  - name: resolvingSpecifiers
+    description: Resolving Specifiers
+    questions:
+      - name: Resolve Location Specifier
+        pybf_name: resolveLocationSpecifier
+        type: basic
+        parameters:
+          - name: locations
+            value: "'@enter(as2border1[GigabitEthernet2/0])'"
+      - name: Resolve Filter Specifier
+        pybf_name: resolveFilterSpecifier
+        type: basic
+        parameters:
+          - name: filters
+            value: "'@in(as2border1[GigabitEthernet0/0])'"
+      - name: Resolve Node Specifier
+        pybf_name: resolveNodeSpecifier
+        type: basic
+        parameters:
+          - name: nodes
+            value: "'/border/'"
+      - name: Resolve Interface Specifier
+        pybf_name: resolveInterfaceSpecifier
+        type: basic
+        parameters:
+          - name: interfaces
+            value: "'/border/[.*Ethernet]'"
+      - name: Resolve IPs from Location Specifier
+        pybf_name: resolveIpsOfLocationSpecifier
+        type: basic
+        parameters:
+          - name: locations
+            value: "'@enter(as2border1[GigabitEthernet2/0])'"
+      - name: Resolve IP Specifier
+        pybf_name: resolveIpSpecifier
+        type: basic
+        parameters:
+          - name: ips
+            value: "'/border/[.*Ethernet]'"
+  - name: differentialQuestions
+    description: Differential Questions
+    questions:
+      - name: Compare Filters
+        pybf_name: compareFilters
+        type: diff
+        parameters:
+          - name: nodes
+            value: "'rtr-with-acl'"
+        reference_snapshot:
+          name: filters
+          path: networks/example-filters/current
+        snapshot:
+          name: filters-change
+          path: networks/example-filters/candidate1
+      - name: Differential Reachability
+        pybf_name: differentialReachability
+        type: diff
+        reference_snapshot:
+          name: forwarding
+          path: networks/forwarding-change-validation/base
+        snapshot:
+          name: forwarding-change
+          path: networks/forwarding-change-validation/change1
+#      - name: Differential Routes
+#        pybf_name: routes
+#        reference_snapshot:
+#          name: forwarding
+#          path: networks/forwarding-change-validation/base
+#        snapshot:
+#          name: forwarding-change
+#          path: networks/forwarding-change-validation/change1
