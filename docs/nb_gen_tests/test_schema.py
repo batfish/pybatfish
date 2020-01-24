@@ -1,6 +1,7 @@
 # coding: utf-8
 from os.path import abspath, dirname, realpath
 from pathlib import Path
+from typing import Mapping, Set
 
 import pytest
 import cerberus
@@ -8,9 +9,21 @@ import yaml
 
 from nb_gen.schema import convert_schema
 
+from pybatfish.client.session import Session
+
 _THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
 _DOC_DIR: Path = _THIS_DIR.parent
 _QUESTIONS_YAML: Path = _DOC_DIR / "nb_gen" / "questions.yaml"
+
+
+@pytest.fixture(scope="module")
+def session():
+    return Session()
+
+
+@pytest.fixture(scope="module")
+def categories():
+    return yaml.safe_load(_QUESTIONS_YAML.open())
 
 
 def test_convert_schema():
@@ -59,7 +72,7 @@ def test_convert_schema():
         assert convert_schema("SelfDescribing", "output", "fooooo") == "str"
 
 
-def test_questions_yaml_schema():
+def test_questions_yaml_schema(categories):
     """Ensure that "questions.yaml" conforms to the expected schema.
 
     Errors should be printed so that fixing the file is easier.
@@ -79,22 +92,24 @@ def test_questions_yaml_schema():
         },
     }
     schema = {
-        "categories": {
+        "categories": {  # list of question categories
             "type": "list",
             "schema": {
                 "type": "dict",
                 "schema": {
                     "name": {"type": "string", "required": True},
-                    "description": {"type": "string"},
-                    "questions": {
+                    "description": {"type": "string"},  # human-readable category name
+                    "questions": {  #
                         "type": "list",
                         "schema": {
                             "type": "dict",
                             "schema": {
+                                # human-readable question name
                                 "name": {"type": "string", "required": True},
+                                # code/pybatfish question name
                                 "pybf_name": {"type": "string", "required": True},
                                 "type": {
-                                    "type": "string",
+                                    "type": "string",  # indicates what code to generate for result inspection
                                     "allowed": [
                                         "basic",
                                         "singleflow",
@@ -103,8 +118,8 @@ def test_questions_yaml_schema():
                                         "diff",
                                     ],
                                 },
-                                "snapshot": snapshot_schema,
-                                "reference_snapshot": snapshot_schema,
+                                "snapshot": snapshot_schema,  # snapshot to execute on, if not default
+                                "reference_snapshot": snapshot_schema,  # reference_snapshot for "diff" questions
                                 "parameters": {
                                     "type": "list",
                                     "schema": parameter_schema,
@@ -117,6 +132,31 @@ def test_questions_yaml_schema():
         }
     }
     v = cerberus.Validator(schema)
-    doc = yaml.safe_load(_QUESTIONS_YAML.open())
-    if not v.validate(doc):
+
+    if not v.validate(categories):
         raise AssertionError(v.errors)
+
+
+def q_names_from_categories(categories: Mapping) -> Set[str]:
+    return set(
+        [
+            question["pybf_name"]
+            for category in categories["categories"]
+            for question in category["questions"]
+        ]
+    )
+
+
+@pytest.mark.xfail
+def test_all_questions_are_in_question_yaml(session: Session, categories: Mapping):
+    session_qs = set([q["name"] for q in session.q.list()])
+    yaml_qs = q_names_from_categories(categories)
+    assert set(session_qs).issubset(yaml_qs)
+
+
+def test_all_questions_in_yaml_are_valid_questions(
+    session: Session, categories: Mapping
+):
+    session_qs = set([q["name"] for q in session.q.list()])
+    yaml_qs = q_names_from_categories(categories)
+    assert yaml_qs.issubset(session_qs)
