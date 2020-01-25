@@ -57,7 +57,7 @@ def notebook_files() -> Tuple[List[Path], List[Path]]:
     """All doc-related notebook paths (except ones linked from jupyter-notebooks)"""
     generated_nbs: List[Path] = []
     all_nbs: List[Path] = []
-    exclusions = ["interacting"]
+    exclusions = ["interacting", "references"]
     for root, dirs, files in walk(_jupyter_nb_dir, topdown=True):
         if ".ipynb_checkpoints" in dirs:
             dirs.remove(".ipynb_checkpoints")  # do not walk checkpoint dirs
