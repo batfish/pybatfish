@@ -122,16 +122,17 @@
      "UserIdGroupPairs": []
     },
     {
-     "FromPort": 80,
+     "FromPort": 3306,
      "IpProtocol": "tcp",
      "IpRanges": [
       {
-       "CidrIp": "0.0.0.0/0"
+       "CidrIp": "0.0.0.0/0",
+       "Description": "Connectivity test"
       }
      ],
      "Ipv6Ranges": [],
      "PrefixListIds": [],
-     "ToPort": 80,
+     "ToPort": 3306,
      "UserIdGroupPairs": []
     }
    ],
