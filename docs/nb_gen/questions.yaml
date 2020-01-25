@@ -8,43 +8,43 @@ categories:
     questions:
       - name: Node Properties
         pybf_name: nodeProperties
-#      - name: Interface Properties
-#        pybf_name: interfaceProperties
-#      - name: BGP Process Configuration
-#        pybf_name: bgpProcessConfiguration
-#      - name: BGP Peer Configuration
-#        pybf_name: bgpPeerConfiguration
-#      - name: OSPF Process Configuration
-#        pybf_name: ospfProcessConfiguration
-#      - name: OSPF Interface Configuration
-#        pybf_name: ospfInterfaceConfiguration
-#      - name: OSPF Area Configuration
-#        pybf_name: ospfAreaConfiguration
-##      - name: Multi-chassis LAG
-##        pybf_name: mlagProperties
-##      - name: F5 BIG-IP VIP Configuration
-##        pybf_name: f5BigipVipConfiguration
-#      - name: IP Owners
-#        pybf_name: ipOwners
-#      - name: Named Structures
-#        pybf_name: namedStructures
-#      - name: Defined Structures
-#        pybf_name: definedStructures
-#      - name: Referenced Structures
-#        pybf_name: referencedStructures
-#      - name: Undefined References
-#        pybf_name: undefinedReferences
-#      - name: Unused Structures
-#        pybf_name: unusedStructures
-##      - name: VLAN Properties
-##        pybf_name: switchedVlanProperties
-#      - name: Interface MTU
-#        pybf_name: interfaceMtu
-#        parameters:
-#          - name: mtuBytes
-#            value: 2000
-#          - name: comparator
-#            value: "'<'"
+      - name: Interface Properties
+        pybf_name: interfaceProperties
+      - name: BGP Process Configuration
+        pybf_name: bgpProcessConfiguration
+      - name: BGP Peer Configuration
+        pybf_name: bgpPeerConfiguration
+      - name: OSPF Process Configuration
+        pybf_name: ospfProcessConfiguration
+      - name: OSPF Interface Configuration
+        pybf_name: ospfInterfaceConfiguration
+      - name: OSPF Area Configuration
+        pybf_name: ospfAreaConfiguration
+#      - name: Multi-chassis LAG
+#        pybf_name: mlagProperties
+#      - name: F5 BIG-IP VIP Configuration
+#        pybf_name: f5BigipVipConfiguration
+      - name: IP Owners
+        pybf_name: ipOwners
+      - name: Named Structures
+        pybf_name: namedStructures
+      - name: Defined Structures
+        pybf_name: definedStructures
+      - name: Referenced Structures
+        pybf_name: referencedStructures
+      - name: Undefined References
+        pybf_name: undefinedReferences
+      - name: Unused Structures
+        pybf_name: unusedStructures
+#      - name: VLAN Properties
+#        pybf_name: switchedVlanProperties
+      - name: Interface MTU
+        pybf_name: interfaceMtu
+        parameters:
+          - name: mtuBytes
+            value: 2000
+          - name: comparator
+            value: "'<'"
 #  - name: topology
 #    description: Topology
 #    questions:
