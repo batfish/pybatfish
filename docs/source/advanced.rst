@@ -5,3 +5,4 @@ Advanced Concepts
    :maxdepth: 1
 
    specifiers.md
+   asserts.rst
