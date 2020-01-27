@@ -1,9 +1,6 @@
 cerberus==1.3.2
-inflection
-nbsphinx
-pandoc
-progressbar2
-pytablewriter
+inflection==0.3.1
+nbsphinx==0.5.0
+progressbar2==3.47.0
 recommonmark==0.6.0
-sphinx>=2.3.1
-sphinx-notfound-page
+sphinx==2.3.1
