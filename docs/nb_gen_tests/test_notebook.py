@@ -14,9 +14,11 @@
 #   limitations under the License.
 import io
 import logging
+import os
+import re
 import sys
 from copy import deepcopy
-from os import remove, walk
+from os import remove, walk, listdir
 from os.path import abspath, dirname, join, realpath
 from pathlib import Path
 from typing import List, Tuple, Mapping, Any
@@ -38,7 +40,10 @@ from pybatfish.client.session import Session
 logging.getLogger("pybatfish").setLevel(logging.WARN)
 
 _this_dir = Path(abspath(dirname(realpath(__file__))))
+_repo_root = _this_dir.parent.parent
 _jupyter_nb_dir = _this_dir.parent / "source" / "notebooks"
+_linked_nb_dir = _jupyter_nb_dir / "linked"
+_public_nb_dir = _repo_root / "jupyter_notebooks"
 
 
 def cleanup_testout_files(top_dirs):
@@ -219,3 +224,34 @@ def test_markdown_in_generated_notebooks(generated_notebooks):
             pytest.fail(
                 "{} failed output validation:\n{}".format(filepath, e), pytrace=False
             )
+
+
+def test_all_notebooks_linked():
+    """Ensure that all public notebooks are linked into docs."""
+    assert _public_nb_dir.is_dir()
+    assert _linked_nb_dir.is_dir()
+    linked_nbs = [f for f in listdir(_linked_nb_dir) if f.endswith(".ipynb")]
+    new_links = []
+    for f in listdir(_public_nb_dir):
+        if not f.endswith(".ipynb"):
+            continue
+        linked_name = get_symlink_name(f)
+        if linked_name not in linked_nbs:
+            cwd = os.getcwd()
+            os.chdir(str(_linked_nb_dir))
+            os.symlink(
+                f"../../../../jupyter_notebooks/{f}",
+                linked_name,
+                target_is_directory=False,
+            )
+            os.chdir(cwd)
+            new_links.append(str(_linked_nb_dir / linked_name))
+    if new_links:
+        ll = "\n".join(new_links)
+        pytest.fail(f"Please commit the following notebook symlinks:\n{ll}")
+
+
+def get_symlink_name(f: Path) -> str:
+    stripped = (_public_nb_dir / f).stem.lower().replace("(", "").replace(")", "")
+    linked_name = re.sub(r"\s+", "-", stripped) + ".ipynb"
+    return linked_name

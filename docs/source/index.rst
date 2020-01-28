@@ -13,6 +13,7 @@ Welcome to the Batfish documentation!
    datamodel.rst
    system_req.rst
    supported_devices.rst
+   public_notebooks.rst
 
 
 Indices and tables
