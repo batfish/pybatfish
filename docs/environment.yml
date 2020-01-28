@@ -4,6 +4,7 @@ channels:
 dependencies:
   - ca-certificates=2019.11.27
   - certifi=2019.11.28
+  - ipython=7.8.0
   - libedit=3.1.20181209
   - libffi=3.2.1
   - ncurses=6.1
