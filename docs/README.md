@@ -36,5 +36,5 @@ Documentation is generated from multiple sources using sphinx (and its extension
 ### Running tests, updating docs
 
 1. Run `pytest docs`
-2. Some test failures will tesll you what to do
+2. Some test failures will tell you what to do
    (e.g., what symlinks to commit or will generate `*.testout` file to update the notebooks)
