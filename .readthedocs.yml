@@ -22,3 +22,7 @@ python:
     - requirements: docs/requirements.txt
     - method: pip
       path: .
+# Conda lets us get up-to-date binaries that are not available in Ubuntu installs on RTD.
+# e.g., Pandoc.
+conda:
+  environment: docs/environment.yml

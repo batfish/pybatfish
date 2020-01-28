@@ -6,8 +6,10 @@ you filter your answers as desired.
 
 Base Types
 ----------
-.. automodule:: pybatfish.datamodel.primitives
-    :members: Edge, Interface
+.. currentmodule:: pybatfish.datamodel.primitives
+
+.. autoclass:: Edge
+.. autoclass:: Interface
 
 
 ACL Traces
@@ -32,3 +34,10 @@ Routes
 ------
 .. automodule:: pybatfish.datamodel.route
     :members:
+
+
+Misc question outputs
+---------------------
+.. currentmodule:: pybatfish.datamodel.primitives
+
+.. autoclass:: FileLines
