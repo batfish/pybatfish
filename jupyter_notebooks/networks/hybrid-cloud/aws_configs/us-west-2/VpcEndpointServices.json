@@ -1,0 +1,1622 @@
+{
+ "ServiceDetails": [
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "vpce-svc-0da0e750a81b98d62.us-west-2.vpce.amazonaws.com",
+    "notebook.us-west-2.vpce.sagemaker.aws"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "*.notebook.us-west-2.sagemaker.aws",
+   "ServiceId": "vpce-svc-0da0e750a81b98d62",
+   "ServiceName": "aws.sagemaker.us-west-2.notebook",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "access-analyzer.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "access-analyzer.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0df7f8ad818c92d25",
+   "ServiceName": "com.amazonaws.us-west-2.access-analyzer",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "application-autoscaling.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "application-autoscaling.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0b65b4ac5ac5df305",
+   "ServiceName": "com.amazonaws.us-west-2.application-autoscaling",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "appmesh-envoy-management.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "appmesh-envoy-management.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0fad6ef0912c27c57",
+   "ServiceName": "com.amazonaws.us-west-2.appmesh-envoy-management",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "api.appstream.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "appstream2.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0493af053d293a240",
+   "ServiceName": "com.amazonaws.us-west-2.appstream.api",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "streaming.appstream.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "streaming.appstream.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0b5ae61a149784d9b",
+   "ServiceName": "com.amazonaws.us-west-2.appstream.streaming",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "athena.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "athena.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-031b447b7462b6322",
+   "ServiceName": "com.amazonaws.us-west-2.athena",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "autoscaling.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "autoscaling.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-00fbaf2c04f5f8508",
+   "ServiceName": "com.amazonaws.us-west-2.autoscaling",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "autoscaling-plans.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "autoscaling-plans.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-089a9dc435601b3d6",
+   "ServiceName": "com.amazonaws.us-west-2.autoscaling-plans",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "awsconnector.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "awsconnector.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-02ce2212b60f83378",
+   "ServiceName": "com.amazonaws.us-west-2.awsconnector",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "clouddirectory.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "clouddirectory.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0da059c9e7f5a6644",
+   "ServiceName": "com.amazonaws.us-west-2.clouddirectory",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "cloudformation.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "cloudformation.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0b54451434800e7f8",
+   "ServiceName": "com.amazonaws.us-west-2.cloudformation",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "cloudtrail.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "cloudtrail.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0fecf4fc24bd52b09",
+   "ServiceName": "com.amazonaws.us-west-2.cloudtrail",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "codebuild.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "codebuild.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0cbe326bb5ce6eed4",
+   "ServiceName": "com.amazonaws.us-west-2.codebuild",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "codebuild-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "codebuild-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-059ddcef15607217c",
+   "ServiceName": "com.amazonaws.us-west-2.codebuild-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "codecommit.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "codecommit.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0cbb91594a1160783",
+   "ServiceName": "com.amazonaws.us-west-2.codecommit",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "codecommit-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "codecommit-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0e12f431fca8edfb6",
+   "ServiceName": "com.amazonaws.us-west-2.codecommit-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "codepipeline.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "codepipeline.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-09194916b1a9397a2",
+   "ServiceName": "com.amazonaws.us-west-2.codepipeline",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "config.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "config.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-09f7cebe6e24c63bf",
+   "ServiceName": "com.amazonaws.us-west-2.config",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "datasync.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "datasync.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-04794c38aa9981d0e",
+   "ServiceName": "com.amazonaws.us-west-2.datasync",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "dynamodb.us-west-2.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "ServiceId": "vpce-svc-06e332dbde3b83af2",
+   "ServiceName": "com.amazonaws.us-west-2.dynamodb",
+   "ServiceType": [
+    {
+     "ServiceType": "Gateway"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "ebs.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ebs.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-01e6e926bd7b13093",
+   "ServiceName": "com.amazonaws.us-west-2.ebs",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ec2.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ec2.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0ee6723c76642b3d8",
+   "ServiceName": "com.amazonaws.us-west-2.ec2",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ec2messages.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ec2messages.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0f70e5d200f09304f",
+   "ServiceName": "com.amazonaws.us-west-2.ec2messages",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "api.ecr.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "api.ecr.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-07d1f428f072fd172",
+   "ServiceName": "com.amazonaws.us-west-2.ecr.api",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "dkr.ecr.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "*.dkr.ecr.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-09d74a28015a69002",
+   "ServiceName": "com.amazonaws.us-west-2.ecr.dkr",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ecs.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ecs.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-00a799354e1491889",
+   "ServiceName": "com.amazonaws.us-west-2.ecs",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ecs-a.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ecs-a.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0534c7f8db6910c48",
+   "ServiceName": "com.amazonaws.us-west-2.ecs-agent",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ecs-t.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ecs-t.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-066cb1ee255d839ea",
+   "ServiceName": "com.amazonaws.us-west-2.ecs-telemetry",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "runtime.elastic-inference.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "runtime.elastic-inference.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0d1f3f99c23e3e725",
+   "ServiceName": "com.amazonaws.us-west-2.elastic-inference.runtime",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "elasticfilesystem.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "elasticfilesystem.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-00b017327dc958b46",
+   "ServiceName": "com.amazonaws.us-west-2.elasticfilesystem",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "elasticfilesystem-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "elasticfilesystem-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-02ae070cb06299d8b",
+   "ServiceName": "com.amazonaws.us-west-2.elasticfilesystem-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "elasticloadbalancing.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "elasticloadbalancing.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-061cdcc9c29aedd6d",
+   "ServiceName": "com.amazonaws.us-west-2.elasticloadbalancing",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "elasticmapreduce.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "elasticmapreduce.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0d1ba9ae0dd87c8e4",
+   "ServiceName": "com.amazonaws.us-west-2.elasticmapreduce",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "events.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "events.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-065dceaa825bc8179",
+   "ServiceName": "com.amazonaws.us-west-2.events",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "execute-api.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "*.execute-api.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-068b26634e791a27c",
+   "ServiceName": "com.amazonaws.us-west-2.execute-api",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "git-codecommit.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "git-codecommit.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0265dfa2ac45a1b87",
+   "ServiceName": "com.amazonaws.us-west-2.git-codecommit",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "git-codecommit-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "git-codecommit-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0367eb8efc7dce809",
+   "ServiceName": "com.amazonaws.us-west-2.git-codecommit-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "glue.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "glue.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-05fe205c85dc4852b",
+   "ServiceName": "com.amazonaws.us-west-2.glue",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "api.goshawk.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "goshawk.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0945e6d7f92ec0905",
+   "ServiceName": "com.amazonaws.us-west-2.goshawk.api",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "d.goshawk.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "*.d.goshawk.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0f51efa815fce37ba",
+   "ServiceName": "com.amazonaws.us-west-2.goshawk.repositories",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "firehose.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "firehose.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-051c00dfeb8003623",
+   "ServiceName": "com.amazonaws.us-west-2.kinesis-firehose",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "kinesis.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "kinesis.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-002f900dc063828a5",
+   "ServiceName": "com.amazonaws.us-west-2.kinesis-streams",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "kms.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "kms.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0596e4991e17a31c4",
+   "ServiceName": "com.amazonaws.us-west-2.kms",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "logs.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "logs.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-06f816fad0803d466",
+   "ServiceName": "com.amazonaws.us-west-2.logs",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "monitoring.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "monitoring.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-00ea5698691a6f7e1",
+   "ServiceName": "com.amazonaws.us-west-2.monitoring",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "session.qldb.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "session.qldb.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-04bec766a0b91404a",
+   "ServiceName": "com.amazonaws.us-west-2.qldb.session",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "rekognition.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "rekognition.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0af0daaef2f43e293",
+   "ServiceName": "com.amazonaws.us-west-2.rekognition",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "rekognition-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "rekognition-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-09f51b9441e8f4aea",
+   "ServiceName": "com.amazonaws.us-west-2.rekognition-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "s3.us-west-2.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "ServiceId": "vpce-svc-0001be97e1865c74e",
+   "ServiceName": "com.amazonaws.us-west-2.s3",
+   "ServiceType": [
+    {
+     "ServiceType": "Gateway"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "api.sagemaker.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "api.sagemaker.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0633c85a4b0925469",
+   "ServiceName": "com.amazonaws.us-west-2.sagemaker.api",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "runtime.sagemaker.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "runtime.sagemaker.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0f5953850984a457a",
+   "ServiceName": "com.amazonaws.us-west-2.sagemaker.runtime",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "runtime-fips.sagemaker.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "runtime-fips.sagemaker.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-082adb37da28faf5c",
+   "ServiceName": "com.amazonaws.us-west-2.sagemaker.runtime-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "secretsmanager.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "secretsmanager.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0fa4333b251b442ce",
+   "ServiceName": "com.amazonaws.us-west-2.secretsmanager",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "servicecatalog.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "servicecatalog.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0d9b18ca8f9e6fb83",
+   "ServiceName": "com.amazonaws.us-west-2.servicecatalog",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "sms.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "sms.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0a5372dcfb9196bc9",
+   "ServiceName": "com.amazonaws.us-west-2.sms",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "sms-fips.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "sms-fips.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-02cb0165fbc21fb3d",
+   "ServiceName": "com.amazonaws.us-west-2.sms-fips",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "sns.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "sns.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0393b708c7057d81a",
+   "ServiceName": "com.amazonaws.us-west-2.sns",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "sqs.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "sqs.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0f1a7c1edc0e073b0",
+   "ServiceName": "com.amazonaws.us-west-2.sqs",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ssm.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ssm.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0039038d504694533",
+   "ServiceName": "com.amazonaws.us-west-2.ssm",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "ssmmessages.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "ssmmessages.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-05531521310252ac3",
+   "ServiceName": "com.amazonaws.us-west-2.ssmmessages",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c",
+    "us-west-2d"
+   ],
+   "BaseEndpointDnsNames": [
+    "storagegateway.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "storagegateway.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-05c794b4268949c0d",
+   "ServiceName": "com.amazonaws.us-west-2.storagegateway",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "sts.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "sts.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-06681ce20e9a3e8c4",
+   "ServiceName": "com.amazonaws.us-west-2.sts",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "transfer.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "transfer.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-0bc5ca0d6d1469994",
+   "ServiceName": "com.amazonaws.us-west-2.transfer",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "server.transfer.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "*.server.transfer.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-03ea636268a59264e",
+   "ServiceName": "com.amazonaws.us-west-2.transfer.server",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": false
+  },
+  {
+   "AcceptanceRequired": false,
+   "AvailabilityZones": [
+    "us-west-2a",
+    "us-west-2b",
+    "us-west-2c"
+   ],
+   "BaseEndpointDnsNames": [
+    "workspaces.us-west-2.vpce.amazonaws.com"
+   ],
+   "ManagesVpcEndpoints": false,
+   "Owner": "amazon",
+   "PrivateDnsName": "workspaces.us-west-2.amazonaws.com",
+   "ServiceId": "vpce-svc-043a65f931bd0efed",
+   "ServiceName": "com.amazonaws.us-west-2.workspaces",
+   "ServiceType": [
+    {
+     "ServiceType": "Interface"
+    }
+   ],
+   "Tags": [],
+   "VpcEndpointPolicySupported": true
+  }
+ ],
+ "ServiceNames": [
+  "aws.sagemaker.us-west-2.notebook",
+  "com.amazonaws.us-west-2.access-analyzer",
+  "com.amazonaws.us-west-2.application-autoscaling",
+  "com.amazonaws.us-west-2.appmesh-envoy-management",
+  "com.amazonaws.us-west-2.appstream.api",
+  "com.amazonaws.us-west-2.appstream.streaming",
+  "com.amazonaws.us-west-2.athena",
+  "com.amazonaws.us-west-2.autoscaling",
+  "com.amazonaws.us-west-2.autoscaling-plans",
+  "com.amazonaws.us-west-2.awsconnector",
+  "com.amazonaws.us-west-2.clouddirectory",
+  "com.amazonaws.us-west-2.cloudformation",
+  "com.amazonaws.us-west-2.cloudtrail",
+  "com.amazonaws.us-west-2.codebuild",
+  "com.amazonaws.us-west-2.codebuild-fips",
+  "com.amazonaws.us-west-2.codecommit",
+  "com.amazonaws.us-west-2.codecommit-fips",
+  "com.amazonaws.us-west-2.codepipeline",
+  "com.amazonaws.us-west-2.config",
+  "com.amazonaws.us-west-2.datasync",
+  "com.amazonaws.us-west-2.dynamodb",
+  "com.amazonaws.us-west-2.ebs",
+  "com.amazonaws.us-west-2.ec2",
+  "com.amazonaws.us-west-2.ec2messages",
+  "com.amazonaws.us-west-2.ecr.api",
+  "com.amazonaws.us-west-2.ecr.dkr",
+  "com.amazonaws.us-west-2.ecs",
+  "com.amazonaws.us-west-2.ecs-agent",
+  "com.amazonaws.us-west-2.ecs-telemetry",
+  "com.amazonaws.us-west-2.elastic-inference.runtime",
+  "com.amazonaws.us-west-2.elasticfilesystem",
+  "com.amazonaws.us-west-2.elasticfilesystem-fips",
+  "com.amazonaws.us-west-2.elasticloadbalancing",
+  "com.amazonaws.us-west-2.elasticmapreduce",
+  "com.amazonaws.us-west-2.events",
+  "com.amazonaws.us-west-2.execute-api",
+  "com.amazonaws.us-west-2.git-codecommit",
+  "com.amazonaws.us-west-2.git-codecommit-fips",
+  "com.amazonaws.us-west-2.glue",
+  "com.amazonaws.us-west-2.goshawk.api",
+  "com.amazonaws.us-west-2.goshawk.repositories",
+  "com.amazonaws.us-west-2.kinesis-firehose",
+  "com.amazonaws.us-west-2.kinesis-streams",
+  "com.amazonaws.us-west-2.kms",
+  "com.amazonaws.us-west-2.logs",
+  "com.amazonaws.us-west-2.monitoring",
+  "com.amazonaws.us-west-2.qldb.session",
+  "com.amazonaws.us-west-2.rekognition",
+  "com.amazonaws.us-west-2.rekognition-fips",
+  "com.amazonaws.us-west-2.s3",
+  "com.amazonaws.us-west-2.sagemaker.api",
+  "com.amazonaws.us-west-2.sagemaker.runtime",
+  "com.amazonaws.us-west-2.sagemaker.runtime-fips",
+  "com.amazonaws.us-west-2.secretsmanager",
+  "com.amazonaws.us-west-2.servicecatalog",
+  "com.amazonaws.us-west-2.sms",
+  "com.amazonaws.us-west-2.sms-fips",
+  "com.amazonaws.us-west-2.sns",
+  "com.amazonaws.us-west-2.sqs",
+  "com.amazonaws.us-west-2.ssm",
+  "com.amazonaws.us-west-2.ssmmessages",
+  "com.amazonaws.us-west-2.storagegateway",
+  "com.amazonaws.us-west-2.sts",
+  "com.amazonaws.us-west-2.transfer",
+  "com.amazonaws.us-west-2.transfer.server",
+  "com.amazonaws.us-west-2.workspaces"
+ ]
+}

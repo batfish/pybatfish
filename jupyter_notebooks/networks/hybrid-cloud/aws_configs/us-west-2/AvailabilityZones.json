@@ -1,0 +1,32 @@
+{
+ "AvailabilityZones": [
+  {
+   "Messages": [],
+   "RegionName": "us-west-2",
+   "State": "available",
+   "ZoneId": "usw2-az2",
+   "ZoneName": "us-west-2a"
+  },
+  {
+   "Messages": [],
+   "RegionName": "us-west-2",
+   "State": "available",
+   "ZoneId": "usw2-az1",
+   "ZoneName": "us-west-2b"
+  },
+  {
+   "Messages": [],
+   "RegionName": "us-west-2",
+   "State": "available",
+   "ZoneId": "usw2-az3",
+   "ZoneName": "us-west-2c"
+  },
+  {
+   "Messages": [],
+   "RegionName": "us-west-2",
+   "State": "available",
+   "ZoneId": "usw2-az4",
+   "ZoneName": "us-west-2d"
+  }
+ ]
+}

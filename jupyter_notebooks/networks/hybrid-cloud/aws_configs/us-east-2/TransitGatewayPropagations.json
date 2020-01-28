@@ -1,0 +1,27 @@
+{
+ "TransitGatewayPropagations": [
+  {
+   "TransitGatewayRouteTableId": "tgw-rtb-00e37bc5142347b03",
+   "TransitGatewayRouteTablePropagations": [
+    {
+     "ResourceId": "vpc-0276455718806058a",
+     "ResourceType": "vpc",
+     "State": "enabled",
+     "TransitGatewayAttachmentId": "tgw-attach-021f89744fac566dd"
+    },
+    {
+     "ResourceId": "vpc-0574d08f8d05917e4",
+     "ResourceType": "vpc",
+     "State": "enabled",
+     "TransitGatewayAttachmentId": "tgw-attach-0648110513acd6de5"
+    },
+    {
+     "ResourceId": "vpn-01c45673532d3e33e",
+     "ResourceType": "vpn",
+     "State": "enabled",
+     "TransitGatewayAttachmentId": "tgw-attach-0881ce2eb93cd63a8"
+    }
+   ]
+  }
+ ]
+}

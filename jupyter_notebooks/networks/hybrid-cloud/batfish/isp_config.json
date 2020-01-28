@@ -1,0 +1,20 @@
+{
+	"borderInterfaces": [
+		{
+			"borderInterface": {
+				"hostname": "exitgw",
+				"interface": "GigabitEthernet3"
+			}
+		}
+	],
+	"filter": {
+			"onlyRemoteAsns": [],
+			"onlyRemoteIps": []
+	},
+	"ispNodeInfo" : [
+		{
+			"asn" : 65200,
+			"name" : "isp_dc"
+		}
+	]
+}
