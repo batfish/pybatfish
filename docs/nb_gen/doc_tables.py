@@ -47,6 +47,11 @@ def get_input_table_lines(
         schema_type = convert_schema(param["type"], "input", question_name)
         optional = param.get("optional", False)
         default_value = param.get("value", "")
+        # Optional == true in the question template means backend can receive null as input.
+        # In documentation we only care if user has to set it, so if a default value is present,
+        # we call that optional
+        if default_value:
+            optional = True
 
         table_lines.append(
             f"{name} | {desc} | {schema_type} | {optional} | {default_value}"
