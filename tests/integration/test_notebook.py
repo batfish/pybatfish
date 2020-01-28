@@ -13,6 +13,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import io
+import re
 import sys
 from copy import deepcopy
 from os import remove, walk
@@ -151,3 +152,11 @@ def test_notebook_execution_count(notebook):
         assert (
             i + 1 == cell["execution_count"]
         ), "Expected cell {} to have execution count {}".format(cell, i + 1)
+
+
+def test_absolute_links(notebook):
+    """Test that all links in markdown cells are absolute links."""
+    _, nb = notebook
+    markdown_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "markdown"]
+    for cell in markdown_cells:
+        assert not re.search(r"\[.*\]\((?!http).*", cell["source"])
