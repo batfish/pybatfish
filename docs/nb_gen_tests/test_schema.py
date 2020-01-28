@@ -131,9 +131,28 @@ def q_names_from_categories(categories: Mapping) -> Set[str]:
 
 @pytest.mark.xfail
 def test_all_questions_are_in_question_yaml(session: Session, categories: Mapping):
-    session_qs = set([q["name"] for q in session.q.list()])
+    # do not document the following questions
+    exclusions = [
+        "aaaAuthenticationLogin",
+        "edges",
+        "filterTable",
+        "viConversionStatus",
+        "viConversionWarning",
+        "viModel",
+    ]
+    session_qs = set(
+        [q["name"] for q in session.q.list() if q["name"] not in exclusions]
+    )
     yaml_qs = q_names_from_categories(categories)
-    assert set(session_qs).issubset(yaml_qs)
+    if not set(session_qs).issubset(yaml_qs):
+        pytest.fail(
+            f"These questions are not documented: {session_qs.difference(yaml_qs)}"
+        )
+    wrongly_documented = yaml_qs.intersection(exclusions)
+    if wrongly_documented:
+        pytest.fail(
+            f"The following questions are documented but shouldn't be: {wrongly_documented}"
+        )
 
 
 def test_all_questions_in_yaml_are_valid_questions(
