@@ -6,3 +6,4 @@ Advanced Concepts
 
    specifiers.md
    asserts.rst
+   notebooks/references.ipynb
