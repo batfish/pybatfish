@@ -1,0 +1,20 @@
+{
+ "InternetGateways": [
+  {
+   "Attachments": [
+    {
+     "State": "available",
+     "VpcId": "vpc-0574d08f8d05917e4"
+    }
+   ],
+   "InternetGatewayId": "igw-02fd68f94367a67c7",
+   "OwnerId": "554773406868",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "igw-1"
+    }
+   ]
+  }
+ ]
+}

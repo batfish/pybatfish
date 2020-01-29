@@ -1,0 +1,75 @@
+{
+ "TransitGatewayAttachments": [
+  {
+   "CreationTime": "2019-12-18 05:40:33+00:00",
+   "ResourceId": "tgw-0888a76c8a371246d",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "peering",
+   "State": "deleting",
+   "Tags": [],
+   "TransitGatewayAttachmentId": "tgw-attach-0cc6cf6a578b754e3",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-00e37bc5142347b03"
+   },
+   "CreationTime": "2019-12-18 04:38:28+00:00",
+   "ResourceId": "vpc-0276455718806058a",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpc",
+   "State": "available",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-vpc-2"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-021f89744fac566dd",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-00e37bc5142347b03"
+   },
+   "CreationTime": "2019-12-18 01:27:57+00:00",
+   "ResourceId": "vpc-0574d08f8d05917e4",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpc",
+   "State": "available",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-vpc-1"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0648110513acd6de5",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "TransitGatewayOwnerId": "554773406868"
+  },
+  {
+   "Association": {
+    "State": "associated",
+    "TransitGatewayRouteTableId": "tgw-rtb-00e37bc5142347b03"
+   },
+   "CreationTime": "2019-12-18 00:42:57+00:00",
+   "ResourceId": "vpn-01c45673532d3e33e",
+   "ResourceOwnerId": "554773406868",
+   "ResourceType": "vpn",
+   "State": "available",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "tgw-1-dc"
+    }
+   ],
+   "TransitGatewayAttachmentId": "tgw-attach-0881ce2eb93cd63a8",
+   "TransitGatewayId": "tgw-06b348adabd13452d",
+   "TransitGatewayOwnerId": "554773406868"
+  }
+ ]
+}

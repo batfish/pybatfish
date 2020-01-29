@@ -1,0 +1,88 @@
+{
+ "Subnets": [
+  {
+   "AssignIpv6AddressOnCreation": false,
+   "AvailabilityZone": "us-west-2b",
+   "AvailabilityZoneId": "usw2-az1",
+   "AvailableIpAddressCount": 249,
+   "CidrBlock": "10.40.2.0/24",
+   "DefaultForAz": false,
+   "Ipv6CidrBlockAssociationSet": [],
+   "MapPublicIpOnLaunch": false,
+   "OwnerId": "554773406868",
+   "State": "available",
+   "SubnetArn": "arn:aws:ec2:us-west-2:554773406868:subnet/subnet-06005943afe32f714",
+   "SubnetId": "subnet-06005943afe32f714",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "sub-3-2"
+    }
+   ],
+   "VpcId": "vpc-00b65e98077106059"
+  },
+  {
+   "AssignIpv6AddressOnCreation": false,
+   "AvailabilityZone": "us-west-2b",
+   "AvailabilityZoneId": "usw2-az1",
+   "AvailableIpAddressCount": 251,
+   "CidrBlock": "10.40.1.0/24",
+   "DefaultForAz": false,
+   "Ipv6CidrBlockAssociationSet": [],
+   "MapPublicIpOnLaunch": false,
+   "OwnerId": "554773406868",
+   "State": "available",
+   "SubnetArn": "arn:aws:ec2:us-west-2:554773406868:subnet/subnet-009d57c7f13813630",
+   "SubnetId": "subnet-009d57c7f13813630",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "sub-3-1"
+    }
+   ],
+   "VpcId": "vpc-00b65e98077106059"
+  },
+  {
+   "AssignIpv6AddressOnCreation": false,
+   "AvailabilityZone": "us-west-2b",
+   "AvailabilityZoneId": "usw2-az1",
+   "AvailableIpAddressCount": 249,
+   "CidrBlock": "10.50.2.0/24",
+   "DefaultForAz": false,
+   "Ipv6CidrBlockAssociationSet": [],
+   "MapPublicIpOnLaunch": false,
+   "OwnerId": "554773406868",
+   "State": "available",
+   "SubnetArn": "arn:aws:ec2:us-west-2:554773406868:subnet/subnet-03acae3b9a534fff9",
+   "SubnetId": "subnet-03acae3b9a534fff9",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "sub-4-2"
+    }
+   ],
+   "VpcId": "vpc-00157b5941bfd4959"
+  },
+  {
+   "AssignIpv6AddressOnCreation": false,
+   "AvailabilityZone": "us-west-2b",
+   "AvailabilityZoneId": "usw2-az1",
+   "AvailableIpAddressCount": 251,
+   "CidrBlock": "10.50.1.0/24",
+   "DefaultForAz": false,
+   "Ipv6CidrBlockAssociationSet": [],
+   "MapPublicIpOnLaunch": false,
+   "OwnerId": "554773406868",
+   "State": "available",
+   "SubnetArn": "arn:aws:ec2:us-west-2:554773406868:subnet/subnet-0f84a4be105f7aaef",
+   "SubnetId": "subnet-0f84a4be105f7aaef",
+   "Tags": [
+    {
+     "Key": "Name",
+     "Value": "sub-4-1"
+    }
+   ],
+   "VpcId": "vpc-00157b5941bfd4959"
+  }
+ ]
+}
