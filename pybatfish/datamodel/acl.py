@@ -163,7 +163,7 @@ class TraceElement(DataModelElement):
         )
 
     def __str__(self) -> str:
-        return " ".join(str(fragment) for fragment in self.fragments)
+        return "".join(str(fragment) for fragment in self.fragments)
 
 
 @attr.s(frozen=True)
