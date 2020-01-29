@@ -118,7 +118,7 @@ EOF
 
 ###### Test building of documentation
 cat <<EOF
-  - label: "Building documentation"
+  - label: "Sphinx: building documentation"
     command:
       - bash .buildkite/build_docs.sh
     plugins:
