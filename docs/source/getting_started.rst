@@ -4,7 +4,7 @@ Setup
 Installing Batfish
 ------------------
 
-Getting started with Batfish is easy. Just pull and run the latest ``allinone`` Docker container.
+Getting started with Batfish is easy. Just pull and run the latest ``allinone`` Docker container:
 
 .. code-block :: bash
 
@@ -15,7 +15,7 @@ Getting started with Batfish is easy. Just pull and run the latest ``allinone`` 
 Upgrading Batfish
 -----------------
 
-In order to upgrade to the latest Docker container, issue these commands on the Batfish server
+In order to upgrade to the latest Docker container, issue these commands on the Batfish server:
 
 .. code-block :: bash
 

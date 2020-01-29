@@ -2,21 +2,121 @@
 
 ## Vendor formats
 
-For vendors whose device configuration is not a single text file, additional preprocessing may be necessary before uploading data to Batifsh.
+For vendors whose device configuration is not a single text file,
+additional preprocessing may be necessary before uploading data to Batfish.
 
-### F5 BIG-IP
+### AWS
 
-F5 BIG-IP configuration spans multiple individual files.
-Follow the instructions [here](https://github.com/batfish/batfish/wiki/Packaging-F5-Big-IP-configuration-for-analysis) to properly package them for analysis.
+Batfish understands AWS VPC configurations and analyzes it just like physical networks.
+To use this functionality, place AWS configs in a top-level folder called `aws_configs`.
+The subfolders in this folder correspond to individual regions. If there is only one region,
+then this level of hierarchy may be skipped.
 
+The configuration files for a region should be the JSON output of the following API calls:
+  * For EC2: `describe_addresses`, `describe_availability_zones`, `describe_customer_gateways`, `describe_internet_gateways`, `describe_network_acls`, `describe_network_interfaces`, `describe_instances`, `describe_route_tables`, `describe_security_groups`, `describe_subnets`, `describe_vpc_endpoints`, `describe_vpcs`, `describe_vpn_connections`, `describe_vpn_gateways`
+  * For ES: `describe_elasticsearch_domains`
+  * For RDS: `describe_db_instances`
+
+This output can be collected using the [AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/index.html#cli-aws)
+or using the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/index.html).
+
+An example script that packages AWS data into a Batfish snapshot is [here](https://github.com/ratulm/bf-aws-snapshot).
+
+An example snapshot, which includes both physical and AWS configs, is [here](https://github.com/batfish/batfish/tree/master/networks/hybrid-cloud-aws).
+It is OK to have only AWS configs in a snapshot.
 
 ### Cumulus Linux
 
-Cumulus devices can be configured by editing individual files, such as `/etc/interfaces`, `/etc/frr.conf` or invoking the [Network Command-Line Utility (NCLU)](https://docs.cumulusnetworks.com/display/DOCS/Network+Command+Line+Utility+-+NCLU)
+Cumulus devices can be configured by editing individual files, such as `/etc/network/interfaces`, `/etc/cumulus/ports.conf`, and `/etc/frr/frr.conf`
+or invoking the [Network Command-Line Utility (NCLU)](https://docs.cumulusnetworks.com/display/DOCS/Network+Command+Line+Utility+-+NCLU)
 
-In either case, follow the instructions [here](https://github.com/batfish/batfish/wiki/Packaging-snapshots-for-analysis#cumulus)
+Batfish supports processing of either NCLU configuration output,
+or the Cumulus configuration files themselves (concatenated into one file per device).
+We recommend using the configuration files, because Batfish can extract more data from them than from the NCLU output.
 
-Note: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply a [Layer1 topology file](#layer-1-topology-file).
+```eval_rst
+.. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply a `Layer-1 topology file`_.
+```
+
+#### Cumulus configuration files (preferred)
+Batfish processes the Cumulus configuration files concatenated into a single file per device. The format is as follows:
+
+1. hostname (single line)
+2. Contents of `/etc/network/interfaces` file
+3. Contents of `/etc/cumulus/ports.conf` file
+4. Contents of `/etc/frr/frr.conf` file
+
+Batfish detects the boundary between each the concatenated files by looking
+for comments or declarations that typically occur at the start of each file.
+To ensure they are present for Batfish to find, we recommend adding them in case they are missing.
+Here's an example bash snippet:
+
+```bash
+hostname=$(cat /etc/hostname)
+(
+  # hostname
+  echo $hostname
+
+  # Signal start of /etc/network/interfaces
+  echo "# This file describes the network interfaces"
+  cat /etc/network/interfaces
+
+  # Signal start of /etc/cumulus/ports.conf
+  echo "# ports.conf --"
+  cat /etc/cumulus/ports.conf
+
+  # Signal start of /etc/frr/frr.conf
+  echo "frr version"
+  cat /etc/frr/frr.conf
+) > $hostname.cfg
+```
+
+#### Cumulus: NCLU output (not preferred)
+To retrieve the Cumulus configuration in the NCLU format, issue `net show config commands` and save the output to a file.
+
+### F5 BIG-IP
+
+F5 BIG-IP configuration spans multiple individual files, typically the following 3 configuration files:
+* Base
+* LTM
+* Routing [There are 2 formats for this routing configuration. Legacy `imish` and the newer structured format]
+
+These files are typically in a folder named "config" as:
+* Base: `bigip_base.conf`
+* LTM: `bigip.conf`
+* Routing: `bigip_routing.conf`
+
+For Batfish to correctly process the F5 configuration, the 3 files need to be combined into a single file in a specific order.
+
+As an example, let's say you have these 3 files:
+* `site1-f5-a-base.conf`
+* `site1-f5-a.conf`
+* `site1-f5-a-routing.conf`
+
+On any unix machine, simply run:
+
+`cat site1-f5-a-base.conf site1-f5-a.conf site1-f5-a-routing.conf > site1-f5-a-concat.cfg`
+
+Add `site1-f5-a-concat.cfg` to the configs folder with the rest of the devices.
+
+```eval_rst
+
+.. note:: The routing configuration MUST be the last thing copied into the file, otherwise Batfish will not be able to correctly parse the file.
+```
+
+### Palo Alto Networks
+Batfish supports Palo Alto Networks devices with or without Panorama. For each device, concatenate the following show commands into one file.
+
+```text
+set cli config-output-format set
+set cli pager off
+show config pushed-shared-policy
+show config pushed-shared-policy vsys <value> // run for each vsys
+show config merged
+```
+
+The first two commands may not be available on all PAN-OS versions;
+just make sure that the output is NOT in XML format (first command) and that definitions are not truncated (second command).
 
 
 ## Batfish data formats
@@ -89,6 +189,8 @@ An example file is:
 Here `borderInterfaces` contains the list of interfaces on border routers which are meant to peer with the ISPs.
 `onlyRemoteAsns` (list of ASNs) and `onlyRemoteIps` (list of IPs) provide a way to apply additional filter by restricting to ISPs having specific ASNs or IPs.
 
-_Batfish will not try to model any ISP routers in the absence of this configuration file._
+```eval_rst
+.. warning:: Batfish will not try to model any ISP routers in the absence of this configuration file.
+```
 
 An example network with ISP modeling configuration is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
