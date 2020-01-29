@@ -4,19 +4,21 @@ Datamodel classes
 Here we describe classes used in answers and their attributes, which may help
 you filter your answers as desired.
 
-Base types
+Base Types
 ----------
-.. automodule:: pybatfish.datamodel.primitives
-    :members:
+.. currentmodule:: pybatfish.datamodel.primitives
+
+.. autoclass:: Edge
+.. autoclass:: Interface
 
 
-ACL traces
+ACL Traces
 ----------
 .. automodule:: pybatfish.datamodel.acl
     :members:
 
 
-Flows and packets
+Flows and Packets
 -----------------
 .. automodule:: pybatfish.datamodel.flow
     :members:
@@ -34,11 +36,8 @@ Routes
     :members:
 
 
-Answers
--------
+Misc question outputs
+---------------------
+.. currentmodule:: pybatfish.datamodel.primitives
 
-.. autoclass:: pybatfish.datamodel.answer.base.Answer
-    :members:
-
-.. autoclass:: pybatfish.datamodel.answer.table.TableAnswer
-    :members:
+.. autoclass:: FileLines

@@ -1,0 +1,10 @@
+{
+	"hostname" : "host-db",
+	"hostInterfaces" : {
+		"eth0" : {
+			"name": "eth0",
+      "prefix" : "2.128.0.1/30",
+      "gateway": "2.128.0.2"
+		}
+	}
+}

@@ -9,10 +9,11 @@ version: 2
 sphinx:
   builder: html
   configuration: docs/source/conf.py
-  # fail_on_warning: true
+  fail_on_warning: true
 
 # Optionally build your docs in additional formats such as PDF and ePub
-formats: all
+formats:
+  - htmlzip
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
@@ -22,3 +23,7 @@ python:
     - requirements: docs/requirements.txt
     - method: pip
       path: .
+# Conda lets us get up-to-date binaries that are not available in Ubuntu installs on RTD.
+# e.g., Pandoc.
+conda:
+  environment: docs/environment.yml
