@@ -82,9 +82,9 @@ def test_trace_element_deserialization():
 def test_trace_element_str():
     trace_element = TraceElement(
         [
-            TextFragment("aaa"),
+            TextFragment("aaa "),
             LinkFragment("bbb", VendorStructureId("aa", "bb", "cc")),
-            TextFragment("ccc"),
+            TextFragment(" ccc"),
         ]
     )
 
