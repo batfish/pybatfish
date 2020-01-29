@@ -18,3 +18,4 @@ that show you how to use Batfish to analyze your network.
     notebooks/linked/introduction-to-forwarding-analysis.ipynb
     notebooks/linked/introduction-to-forwarding-change-validation.ipynb
     notebooks/linked/analyzing-the-impact-of-failures-and-letting-loose-a-chaos-monkey.ipynb
+    notebooks/linked/analyzing-public-and-hybrid-cloud-networks.ipynb
