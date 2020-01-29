@@ -199,7 +199,6 @@ def setup(app):
 
 
 # -- Options for not-found extension ------
-notfound_no_urls_prefix = True
 notfound_context = {
     "body": textwrap.dedent(
         """
