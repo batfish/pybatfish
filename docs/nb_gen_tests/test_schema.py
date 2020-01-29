@@ -129,7 +129,6 @@ def q_names_from_categories(categories: Mapping) -> Set[str]:
     )
 
 
-@pytest.mark.xfail
 def test_all_questions_are_in_question_yaml(session: Session, categories: Mapping):
     # do not document the following questions
     exclusions = [
@@ -140,13 +139,24 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "viConversionWarning",
         "viModel",
     ]
+    xfail = {
+        "multipathConsistency",
+        "f5BigipVipConfiguration",
+        "testRoutePolicies",
+        "eigrpEdges",
+        "layer1Edges",
+        "ipsecEdges",
+        "isisEdges",
+        "ipsecSessionStatus",
+    }
     session_qs = set(
         [q["name"] for q in session.q.list() if q["name"] not in exclusions]
     )
     yaml_qs = q_names_from_categories(categories)
-    if not set(session_qs).issubset(yaml_qs):
+    undocumented = set(session_qs).difference(yaml_qs)
+    if undocumented != set(xfail):
         pytest.fail(
-            f"These questions are not documented: {session_qs.difference(yaml_qs)}"
+            f"These questions are not documented: {undocumented}. Expected only these to be: {xfail}"
         )
     wrongly_documented = yaml_qs.intersection(exclusions)
     if wrongly_documented:
