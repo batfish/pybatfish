@@ -115,7 +115,7 @@ def generated_notebooks(
 
 
 @pytest.fixture(scope="module")
-def executed_notebook(notebook):
+def executed_notebook(notebook: Tuple[str, NotebookNode], snapshots: None):
     filepath, orig_nb = notebook
     # Make a deep copy of the original notebook.
     # - This is important or else the underlying object gets mutated!!
