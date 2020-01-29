@@ -185,6 +185,8 @@ texinfo_documents = [
 # -- Options for nbsphinx
 nbsphinx_allow_errors = False
 nbsphinx_execute = "never"
+# Get rid of prompts. Only works for HTML.
+nbsphinx_prompt_width = "0px"
 
 # -- Options for recommonmark ---------------------------------------------
 
