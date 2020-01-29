@@ -18,6 +18,7 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import sys
+import textwrap
 from os.path import abspath, dirname, realpath, join, pardir
 
 from recommonmark.transform import AutoStructify
@@ -39,6 +40,7 @@ import pybatfish  # noqa: F402
 # ones.
 extensions = [
     "nbsphinx",
+    "notfound.extension",
     "recommonmark",
     "sphinx.ext.autodoc",
     "sphinx.ext.doctest",
@@ -194,3 +196,33 @@ def setup(app):
         True,
     )
     app.add_transform(AutoStructify)
+
+
+# -- Options for not-found extension ------
+notfound_no_urls_prefix = True
+notfound_context = {
+    "body": textwrap.dedent(
+        """
+<center>
+<h2>
+Sorry, page not found.
+</h2>
+</center>
+
+<p>
+We've been making many improvements to our documentation and things have moved around a bit.
+You may have an outdated link (sorry about that)!
+</p>
+
+<p>
+These are likely the pages you want:
+<ul>
+    <li><a href="questions.html">Batfish questions</a></li>
+    <li><a href="getting_started.html">Getting started</a></li>
+</ul>
+</p>
+
+Or choose one from the sidebar on the left.
+"""
+    )
+}
