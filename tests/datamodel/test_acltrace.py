@@ -16,7 +16,8 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTrace, TraceTree
+from pybatfish.datamodel.acl import AclTrace, TraceTree, TraceElement, TextFragment
+from pybatfish.datamodel.answer.base import _parse_json_with_schema
 
 
 # test if an acl trace is deserialized properly
@@ -101,6 +102,71 @@ def test_trace_tree_nested_children():
     assert "<li>bbb <ul>" in html_text
     assert "<ul><li>ccc</li></ul>" in html_text
     assert "<li>ddd</li>" in html_text
+
+
+def test_trace_tree_list_deserialization():
+    raw_trace_tree_list = [
+        {"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]}},
+        {"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}]}},
+    ]
+    trace_tree_list = _parse_json_with_schema("List<TraceTree>", raw_trace_tree_list)
+    assert len(trace_tree_list) == 2
+    assert trace_tree_list[0] == TraceTree(TraceElement([TextFragment("aaa")]), [])
+    assert trace_tree_list[1] == TraceTree(TraceElement([TextFragment("bbb")]), [])
+
+
+def test_trace_tree_list_representation():
+    raw_trace_tree_list = [
+        {
+            "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
+            "children": [
+                {
+                    "traceElement": {
+                        "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}],
+                    },
+                    "children": [
+                        {
+                            "traceElement": {
+                                "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}],
+                            },
+                        },
+                    ],
+                },
+                {
+                    "traceElement": {
+                        "fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"}],
+                    },
+                },
+            ],
+        },
+        {
+            "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "eee"}]},
+            "children": [
+                {
+                    "traceElement": {
+                        "fragments": [{"class": TEXT_FRAGMENT, "text": "fff"}],
+                    },
+                },
+            ],
+        },
+    ]
+    trace_tree_list = _parse_json_with_schema("List<TraceTree>", raw_trace_tree_list)
+    assert str(trace_tree_list) == "\n".join(
+        ["- aaa", "  - bbb", "    - ccc", "  - ddd", "- eee", "  - fff",]
+    )
+    html_text = trace_tree_list._repr_html_().replace(" ", "").replace("\n", "")
+    assert html_text == "".join(
+        [
+            "<ul>",
+            "<li>aaa<ul>",
+            "<li>bbb<ul>",
+            "<li>ccc</li></ul></li>",
+            "<li>ddd</li></ul></li>",
+            "<li>eee<ul>",
+            "<li>fff</li></ul></li>",
+            "</ul>",
+        ]
+    )
 
 
 if __name__ == "__main__":
