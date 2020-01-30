@@ -13,6 +13,7 @@
 #   limitations under the License.
 
 from typing import Dict, List, Optional  # noqa: F401
+from pandas.core.indexes.frozen import FrozenList
 
 import attr
 
@@ -204,3 +205,14 @@ class TraceTree(DataModelElement):
                 children_section.append("<li>{}</li>".format(child._repr_html_()))
             return "{} <ul>{}</ul>".format(self.traceElement, "".join(children_section))
         return str(self.traceElement)
+
+
+class TraceTreeList(FrozenList):
+    """Custom list wrapper class for List<TraceTree> that prettifies console and HTML output"""
+
+    def __str__(self) -> str:
+        return "\n".join("- " + str(tree) for tree in self)
+
+    def _repr_html_(self) -> str:
+        list_items = ["<li>" + tree._repr_html_() + "</li>" for tree in self]
+        return "<ul>" + "".join(list_items) + "</ul>"
