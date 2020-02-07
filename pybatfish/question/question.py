@@ -632,6 +632,7 @@ def load_questions(
         s = bf_session
     else:
         s = session
+    s.q.load(directory=question_dir)
     new_names = set()  # type: Set[str]
     if not question_dir or from_server:
         remote_questions = _load_remote_questions_templates(s)

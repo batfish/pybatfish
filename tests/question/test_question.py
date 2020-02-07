@@ -16,6 +16,7 @@ import json
 
 import pytest
 
+from pybatfish.client.commands import bf_session
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
@@ -334,6 +335,14 @@ def test_list_questions(tmpdir, session):
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
     load_questions(question_dir=dir.strpath, session=session)
     names = [q["name"] for q in list_questions()]
+    assert names == [TEST_QUESTION_NAME]
+
+
+def test_list_questions_default_session(tmpdir):
+    dir = tmpdir.mkdir("questions")
+    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+    load_questions(question_dir=dir.strpath)
+    names = [q["name"] for q in bf_session.q.list()]
     assert names == [TEST_QUESTION_NAME]
 
 
