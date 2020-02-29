@@ -24,6 +24,7 @@ def test_auto_complete_suggestion_all_fields():
     suggestion = AutoCompleteSuggestion.from_dict(
         {
             "description": "desc",
+            "hint": "hint",
             "insertionIndex": 16,
             "isPartial": True,
             "rank": 42,
@@ -31,28 +32,19 @@ def test_auto_complete_suggestion_all_fields():
         }
     )
     assert suggestion.description == "desc"
+    assert suggestion.hint == "hint"
     assert suggestion.insertion_index == 16
     assert suggestion.is_partial
     assert suggestion.rank == 42
     assert suggestion.text == "suggestion"
 
 
-def test_auto_complete_suggestion_no_description():
+def test_auto_complete_suggestion_no_optionals():
     suggestion = AutoCompleteSuggestion.from_dict(
-        {"insertionIndex": 10, "isPartial": True, "rank": 42, "text": "suggestion"}
+        {"isPartial": True, "rank": 42, "text": "suggestion"}
     )
     assert suggestion.description is None
-    assert suggestion.insertion_index == 10
-    assert suggestion.is_partial
-    assert suggestion.rank == 42
-    assert suggestion.text == "suggestion"
-
-
-def test_auto_complete_suggestion_no_insertion_index():
-    suggestion = AutoCompleteSuggestion.from_dict(
-        {"description": "desc", "isPartial": True, "rank": 42, "text": "suggestion"}
-    )
-    assert suggestion.description == "desc"
+    assert suggestion.hint is None
     assert suggestion.insertion_index == 0
     assert suggestion.is_partial
     assert suggestion.rank == 42
