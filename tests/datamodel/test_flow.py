@@ -568,7 +568,9 @@ def test_SetupSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = SetupSessionStepDetail(
-        IncomingSessionScope(["reth0.6"]), Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
         "Scope: [incomingInterfaces: [reth0.6]], "
@@ -608,7 +610,9 @@ def test_MatchSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = MatchSessionStepDetail(
-        IncomingSessionScope(["reth0.6"]), Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
         "Scope: [incomingInterfaces: [reth0.6]], "
