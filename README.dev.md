@@ -5,7 +5,7 @@
 #### Setup a virtual environment
 For this purpose, you will likely want [virtualenv](https://virtualenv.pypa.io/en/stable/) or [Anaconda](https://www.anaconda.com/download/)
 
-#### Installing in development mode 
+#### Installing in development mode
 Run `pip install -e .[dev]`
 
 This installs all the development and test dependencies.
@@ -13,7 +13,7 @@ This installs all the development and test dependencies.
 ### Running tests
 
 - To run unit tests execute `python setup.py test`
-- To run end-to-end tests, start up an instance of batfish, 
+- To run end-to-end tests, start up an instance of batfish,
   make it point to `<stable_questions_dir>` (as described above).
 
   Run `py.test tests/integration`
@@ -40,6 +40,27 @@ def test_something_new(session):
     ...
 ```
 
+### Code formatting
+
+Non-ambiguous automatic formatting using [black](https://github.com/psf/black#installation).
+
+Run `./fix-format.sh` to format everything automatically.
+
+Instructions for [editor integration](https://black.readthedocs.io/en/stable/editor_integration.html)
+
+
+#### Pre-commit hooks
+
+Optionally, you can install a pre-commit hook that will help with code formatting as well.
+
+1. `pip install pre-commit`
+2. `pre-commit install`
+
+This will allow execution of formatting/validation/cleanup before committing code.
+Commit will fail if you have badly formatted files. They will be fixed automatically. Add them, commit again.
+
+[More docs on pre-commit](https://pre-commit.com/#usage)
+
 ### Building documentation
 
 1. Ensure pybatfish is installed
@@ -55,10 +76,8 @@ Read (for html format):
 
 ### Creating a distribution
 
-Run `python setup.py bdist_wheel`. This will create a wheel package inside the `dist` 
-folder. The wheel can be distributed and later installed using `pip`. 
+Run `python setup.py bdist_wheel`. This will create a wheel package inside the `dist`
+folder. The wheel can be distributed and later installed using `pip`.
 For example:
 
 `pip install ./pybatfish-<version>-py3-none-any.whl`
-
-
