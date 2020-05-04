@@ -33,6 +33,9 @@ from pybatfish.datamodel.flow import (
     InboundStepDetail,
     MatchSessionStepDetail,
     SessionMatchExpr,
+    SessionScope,
+    IncomingSessionScope,
+    OriginatingSessionScope,
     SessionAction,
     Accept,
     FibLookup,
@@ -536,7 +539,7 @@ def test_InboundStepDetail_str():
 
 def test_SetupSessionStepDetail_from_dict():
     d = {
-        "incomingInterfaces": ["reth0.6"],
+        "sessionScope": {"incomingInterfaces": ["reth0.6"]},
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
         "transformation": [
@@ -544,7 +547,7 @@ def test_SetupSessionStepDetail_from_dict():
         ],
     }
     assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail(
-        ["reth0.6"],
+        IncomingSessionScope(["reth0.6"]),
         Accept(),
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
@@ -553,7 +556,7 @@ def test_SetupSessionStepDetail_from_dict():
 
 def test_SetupSessionStepDetail_str():
     detail = SetupSessionStepDetail(
-        ["reth0.6"],
+        IncomingSessionScope(["reth0.6"]),
         Accept(),
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
@@ -565,7 +568,9 @@ def test_SetupSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = SetupSessionStepDetail(
-        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
         "Incoming Interfaces: [reth0.6], "
@@ -576,7 +581,7 @@ def test_SetupSessionStepDetail_str():
 
 def test_MatchSessionStepDetail_from_dict():
     d = {
-        "incomingInterfaces": ["reth0.6"],
+        "sessionScope": {"incomingInterfaces": ["reth0.6"]},
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
         "transformation": [
@@ -584,7 +589,7 @@ def test_MatchSessionStepDetail_from_dict():
         ],
     }
     assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
-        ["reth0.6"],
+        IncomingSessionScope(["reth0.6"]),
         Accept(),
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
@@ -593,7 +598,7 @@ def test_MatchSessionStepDetail_from_dict():
 
 def test_MatchSessionStepDetail_str():
     detail = MatchSessionStepDetail(
-        ["reth0.6"],
+        IncomingSessionScope(["reth0.6"]),
         Accept(),
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
@@ -605,7 +610,9 @@ def test_MatchSessionStepDetail_str():
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
     )
     detail = MatchSessionStepDetail(
-        ["reth0.6"], Accept(), SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3")
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
         "Incoming Interfaces: [reth0.6], "
@@ -638,6 +645,23 @@ def test_SessionMatchExpr_str():
     assert str(match) == (
         "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2, srcPort=1111, dstPort=2222]"
     )
+
+
+def test_SessionScope_from_dict():
+    d = {"incomingInterfaces": ["iface"]}
+    assert SessionScope.from_dict(d) == IncomingSessionScope(["iface"])
+    d = {"originatingVrf": "vrf"}
+    assert SessionScope.from_dict(d) == OriginatingSessionScope("vrf")
+
+
+def test_IncomingSessionScope_str():
+    scope = IncomingSessionScope(["iface1", "iface2"])
+    assert str(scope) == "Incoming Interfaces: [iface1, iface2]"
+
+
+def test_OriginatingSessionScope_str():
+    scope = OriginatingSessionScope("vrf")
+    assert str(scope) == "Originating VRF: vrf"
 
 
 def test_SessionAction_from_dict():

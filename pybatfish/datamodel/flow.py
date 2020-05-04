@@ -470,6 +470,61 @@ class SessionMatchExpr(DataModelElement):
         return "[{}]".format(", ".join(strings))
 
 
+class SessionScope(DataModelElement):
+    """
+    Represents the scope of a firewall session.
+    """
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> SessionScope
+        if "incomingInterfaces" in json_dict:
+            return IncomingSessionScope.from_dict(json_dict)
+        elif "originatingVrf" in json_dict:
+            return OriginatingSessionScope.from_dict(json_dict)
+        raise ValueError("Invalid session scope: {}".format(json_dict))
+
+
+@attr.s(frozen=True)
+class IncomingSessionScope(SessionScope):
+    """
+    Represents scope of a firewall session established by traffic leaving specific interfaces.
+
+    :ivar incomingInterfaces: Interfaces where exiting traffic can cause a session to be established
+    """
+
+    incomingInterfaces = attr.ib(type=List[str])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> IncomingSessionScope
+        return IncomingSessionScope(json_dict.get("incomingInterfaces", ""))
+
+    def __str__(self):
+        # type: () -> str
+        return "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces))
+
+
+@attr.s(frozen=True)
+class OriginatingSessionScope(SessionScope):
+    """
+    Represents scope of a firewall session established by traffic accepted into a specific VRF.
+
+    :ivar originatingVrf: VRF where accepted traffic can cause a session to be established
+    """
+
+    originatingVrf = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> OriginatingSessionScope
+        return OriginatingSessionScope(json_dict.get("originatingVrf", ""))
+
+    def __str__(self):
+        # type: () -> str
+        return "Originating VRF: {}".format(self.originatingVrf)
+
+
 @attr.s(frozen=True)
 class ArpErrorStepDetail(DataModelElement):
     """Details of a step representing the arp error of a flow when sending out of a Hop.
@@ -603,13 +658,13 @@ class InboundStepDetail(DataModelElement):
 class MatchSessionStepDetail(DataModelElement):
     """Details of a step for when a flow matches a firewall session.
 
-    :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar sessionScope: Scope of flows session can match (incoming interfaces or originating VRF)
     :ivar sessionAction: A SessionAction that the firewall takes for a matching session
     :ivar matchCriteria: A SessionMatchExpr that describes the match criteria of the session
     :ivar transformation: List of FlowDiffs that will be applied after session match
     """
 
-    incomingInterfaces = attr.ib(type=List[str])
+    sessionScope = attr.ib(type=SessionScope)
     sessionAction = attr.ib(type=SessionAction)
     matchCriteria = attr.ib(type=SessionMatchExpr)
     transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
@@ -618,7 +673,7 @@ class MatchSessionStepDetail(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> MatchSessionStepDetail
         return MatchSessionStepDetail(
-            json_dict.get("incomingInterfaces", []),
+            SessionScope.from_dict(json_dict.get("sessionScope", {})),
             SessionAction.from_dict(json_dict.get("sessionAction", {})),
             SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
@@ -627,7 +682,7 @@ class MatchSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+            "{}".format(self.sessionScope),
             "Action: {}".format(self.sessionAction),
             "Match Criteria: {}".format(self.matchCriteria),
         ]
@@ -702,13 +757,13 @@ class RoutingStepDetail(DataModelElement):
 class SetupSessionStepDetail(DataModelElement):
     """Details of a step for when a firewall session is created.
 
-    :ivar incomingInterfaces: List of incoming interfaces the session accepts
+    :ivar sessionScope: Scope of flows session can match (incoming interfaces or originating VRF)
     :ivar sessionAction: A SessionAction that the firewall takes for a return traffic matching the session
     :ivar matchCriteria: A SessionMatchExpr that describes the match criteria of the session
     :ivar transformation: List of FlowDiffs that will be applied on the return traffic matching the session
     """
 
-    incomingInterfaces = attr.ib(type=List[str])
+    sessionScope = attr.ib(type=SessionScope)
     sessionAction = attr.ib(type=SessionAction)
     matchCriteria = attr.ib(type=SessionMatchExpr)
     transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
@@ -717,7 +772,7 @@ class SetupSessionStepDetail(DataModelElement):
     def from_dict(cls, json_dict):
         # type: (Dict) -> SetupSessionStepDetail
         return SetupSessionStepDetail(
-            json_dict.get("incomingInterfaces", []),
+            SessionScope.from_dict(json_dict.get("sessionScope", {})),
             SessionAction.from_dict(json_dict.get("sessionAction", {})),
             SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
@@ -726,7 +781,7 @@ class SetupSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces)),
+            "{}".format(self.sessionScope),
             "Action: {}".format(self.sessionAction),
             "Match Criteria: {}".format(self.matchCriteria),
         ]
