@@ -502,7 +502,7 @@ class IncomingSessionScope(SessionScope):
 
     def __str__(self):
         # type: () -> str
-        return "incomingInterfaces: [{}]".format(", ".join(self.incomingInterfaces))
+        return "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces))
 
 
 @attr.s(frozen=True)
@@ -522,7 +522,7 @@ class OriginatingSessionScope(SessionScope):
 
     def __str__(self):
         # type: () -> str
-        return "originatingVrf: {}".format(self.originatingVrf)
+        return "Originating VRF: {}".format(self.originatingVrf)
 
 
 @attr.s(frozen=True)
@@ -682,7 +682,7 @@ class MatchSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "Scope: [{}]".format(self.sessionScope),
+            "{}".format(self.sessionScope),
             "Action: {}".format(self.sessionAction),
             "Match Criteria: {}".format(self.matchCriteria),
         ]
@@ -781,7 +781,7 @@ class SetupSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "Scope: [{}]".format(self.sessionScope),
+            "{}".format(self.sessionScope),
             "Action: {}".format(self.sessionAction),
             "Match Criteria: {}".format(self.matchCriteria),
         ]

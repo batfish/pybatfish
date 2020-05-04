@@ -562,7 +562,7 @@ def test_SetupSessionStepDetail_str():
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
     )
     assert str(detail) == (
-        "Scope: [incomingInterfaces: [reth0.6]], "
+        "Incoming Interfaces: [reth0.6], "
         "Action: Accept, "
         "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3], "
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
@@ -573,7 +573,7 @@ def test_SetupSessionStepDetail_str():
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
-        "Scope: [incomingInterfaces: [reth0.6]], "
+        "Incoming Interfaces: [reth0.6], "
         "Action: Accept, "
         "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3]"
     )
@@ -604,7 +604,7 @@ def test_MatchSessionStepDetail_str():
         [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
     )
     assert str(detail) == (
-        "Scope: [incomingInterfaces: [reth0.6]], "
+        "Incoming Interfaces: [reth0.6], "
         "Action: Accept, "
         "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3], "
         "Transformation: [srcIp: 2.2.2.2 -> 1.1.1.1]"
@@ -615,7 +615,7 @@ def test_MatchSessionStepDetail_str():
         SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
     )
     assert str(detail) == (
-        "Scope: [incomingInterfaces: [reth0.6]], "
+        "Incoming Interfaces: [reth0.6], "
         "Action: Accept, "
         "Match Criteria: [ipProtocol=ICMP, srcIp=2.2.2.2, dstIp=3.3.3.3]"
     )
@@ -656,12 +656,12 @@ def test_SessionScope_from_dict():
 
 def test_IncomingSessionScope_str():
     scope = IncomingSessionScope(["iface1", "iface2"])
-    assert str(scope) == "incomingInterfaces: [iface1, iface2]"
+    assert str(scope) == "Incoming Interfaces: [iface1, iface2]"
 
 
 def test_OriginatingSessionScope_str():
     scope = OriginatingSessionScope("vrf")
-    assert str(scope) == "originatingVrf: vrf"
+    assert str(scope) == "Originating VRF: vrf"
 
 
 def test_SessionAction_from_dict():
