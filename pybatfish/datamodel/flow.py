@@ -672,8 +672,16 @@ class MatchSessionStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> MatchSessionStepDetail
+
+        # backward compatibility: if sessionScope is missing, look for
+        # incomingInterfaces instead
+        try:
+            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope"))
+        except:
+            sessionScope = IncomingSessionScope.from_dict(json_dict)
+
         return MatchSessionStepDetail(
-            SessionScope.from_dict(json_dict.get("sessionScope", {})),
+            sessionScope,
             SessionAction.from_dict(json_dict.get("sessionAction", {})),
             SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
@@ -771,8 +779,16 @@ class SetupSessionStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> SetupSessionStepDetail
+
+        # backward compatibility: if sessionScope is missing, look for
+        # incomingInterfaces instead
+        try:
+            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope"))
+        except:
+            sessionScope = IncomingSessionScope.from_dict(json_dict)
+
         return SetupSessionStepDetail(
-            SessionScope.from_dict(json_dict.get("sessionScope", {})),
+            sessionScope,
             SessionAction.from_dict(json_dict.get("sessionAction", {})),
             SessionMatchExpr.from_dict(json_dict.get("matchCriteria", {})),
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
