@@ -675,9 +675,9 @@ class MatchSessionStepDetail(DataModelElement):
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
-        try:
-            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope"))
-        except:
+        if "sessionScope" in json_dict:
+            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope", {}))
+        else:
             sessionScope = IncomingSessionScope.from_dict(json_dict)
 
         return MatchSessionStepDetail(
@@ -782,9 +782,9 @@ class SetupSessionStepDetail(DataModelElement):
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
-        try:
-            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope"))
-        except:
+        if "sessionScope" in json_dict:
+            sessionScope = SessionScope.from_dict(json_dict.get("sessionScope", {}))
+        else:
             sessionScope = IncomingSessionScope.from_dict(json_dict)
 
         return SetupSessionStepDetail(
