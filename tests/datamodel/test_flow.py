@@ -554,6 +554,27 @@ def test_SetupSessionStepDetail_from_dict():
     )
 
 
+def test_SetupSessionStepDetail_from_dict_bw_compat():
+    """
+    For backward compatibility, allow "incomingInterfaces" instead of
+    "sessionScope".
+    """
+    d = {
+        "incomingInterfaces": ["reth0.6"],
+        "sessionAction": {"type": "Accept"},
+        "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
+        "transformation": [
+            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
+        ],
+    }
+    assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail(
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
+
+
 def test_SetupSessionStepDetail_str():
     detail = SetupSessionStepDetail(
         IncomingSessionScope(["reth0.6"]),
@@ -582,6 +603,27 @@ def test_SetupSessionStepDetail_str():
 def test_MatchSessionStepDetail_from_dict():
     d = {
         "sessionScope": {"incomingInterfaces": ["reth0.6"]},
+        "sessionAction": {"type": "Accept"},
+        "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
+        "transformation": [
+            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
+        ],
+    }
+    assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
+        IncomingSessionScope(["reth0.6"]),
+        Accept(),
+        SessionMatchExpr("ICMP", "2.2.2.2", "3.3.3.3"),
+        [FlowDiff("srcIp", "2.2.2.2", "1.1.1.1")],
+    )
+
+
+def test_MatchSessionStepDetail_from_dict_bw_compat():
+    """
+    For backward compatibility, allow "incomingInterfaces" instead of
+    "sessionScope".
+    """
+    d = {
+        "incomingInterfaces": ["reth0.6"],
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
         "transformation": [
