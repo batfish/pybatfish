@@ -15,7 +15,6 @@
 from unittest.mock import Mock, patch
 
 import pytest
-import responses
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
@@ -53,7 +52,6 @@ def test_check_response_status_ok():
     restv2helper._check_response_status(response)
 
 
-@responses.activate
 def test_delete():
     """Make sure calls to _delete end up using the correct session."""
     base_url = "base"
@@ -61,9 +59,6 @@ def test_delete():
     target_url = "base{url}".format(base=base_url, url=resource_url)
     session = Mock()
     session.get_base_url2.return_value = base_url
-    responses.add(
-        responses.GET, target_url,
-    )
 
     with patch.object(restv2helper._requests_session, "delete") as mock:
         # Execute the request
@@ -77,7 +72,6 @@ def test_delete():
     )
 
 
-@responses.activate
 def test_get():
     """Make sure calls to _get end up using the correct session."""
     base_url = "base"
@@ -85,9 +79,6 @@ def test_get():
     target_url = "base{url}".format(base=base_url, url=resource_url)
     session = Mock()
     session.get_base_url2.return_value = base_url
-    responses.add(
-        responses.GET, target_url,
-    )
 
     with patch.object(restv2helper._requests_session, "get") as mock:
         # Execute the request
@@ -102,7 +93,6 @@ def test_get():
     )
 
 
-@responses.activate
 def test_post():
     """Make sure calls to _post end up using the correct session."""
     base_url = "base"
@@ -110,9 +100,6 @@ def test_post():
     target_url = "base{url}".format(base=base_url, url=resource_url)
     session = Mock()
     session.get_base_url2.return_value = base_url
-    responses.add(
-        responses.POST, target_url,
-    )
     obj = "foo"
 
     with patch.object(restv2helper._requests_session, "post") as mock:
@@ -128,7 +115,6 @@ def test_post():
     )
 
 
-@responses.activate
 def test_put():
     """Make sure calls to _put end up using the correct session."""
     base_url = "base"
@@ -136,9 +122,6 @@ def test_put():
     target_url = "base{url}".format(base=base_url, url=resource_url)
     session = Mock()
     session.get_base_url2.return_value = base_url
-    responses.add(
-        responses.PUT, target_url,
-    )
 
     with patch.object(restv2helper._requests_session, "put") as mock:
         # Execute the request
