@@ -15,6 +15,7 @@
 from unittest.mock import Mock, patch
 
 import pytest
+import requests
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
@@ -26,6 +27,9 @@ from pybatfish.client.restv2helper import (
     _post,
     _put,
 )
+from pybatfish.client.session import Session
+
+BASE_URL = "base"
 
 
 class MockResponse(Response):
@@ -36,6 +40,20 @@ class MockResponse(Response):
     @property
     def text(self):
         return self._text
+
+
+@pytest.fixture(scope="module")
+def session():
+    s = Mock(spec=Session)
+    s.get_base_url2.return_value = BASE_URL
+    s.api_key = "0000"
+    s.verify_ssl_certs = True
+    return s
+
+
+@pytest.fixture(scope="module")
+def request_session():
+    return Mock(spec=requests.Session)
 
 
 def test_check_response_status_error():
@@ -52,19 +70,16 @@ def test_check_response_status_ok():
     restv2helper._check_response_status(response)
 
 
-def test_delete():
+def test_delete(session, request_session):
     """Make sure calls to _delete end up using the correct session."""
-    base_url = "base"
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=base_url, url=resource_url)
-    session = Mock()
-    session.get_base_url2.return_value = base_url
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
 
-    with patch.object(restv2helper._requests_session, "delete") as mock:
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
         _delete(session, resource_url)
     # Should pass through to the correct session
-    mock.assert_called_with(
+    request_session.delete.assert_called_with(
         target_url,
         headers=_get_headers(session),
         params=None,
@@ -72,19 +87,16 @@ def test_delete():
     )
 
 
-def test_get():
+def test_get(session, request_session):
     """Make sure calls to _get end up using the correct session."""
-    base_url = "base"
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=base_url, url=resource_url)
-    session = Mock()
-    session.get_base_url2.return_value = base_url
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
 
-    with patch.object(restv2helper._requests_session, "get") as mock:
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
         _get(session, resource_url, None)
     # Should pass through to the correct session
-    mock.assert_called_with(
+    request_session.get.assert_called_with(
         target_url,
         headers=_get_headers(session),
         params=None,
@@ -93,20 +105,17 @@ def test_get():
     )
 
 
-def test_post():
+def test_post(session, request_session):
     """Make sure calls to _post end up using the correct session."""
-    base_url = "base"
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=base_url, url=resource_url)
-    session = Mock()
-    session.get_base_url2.return_value = base_url
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
     obj = "foo"
 
-    with patch.object(restv2helper._requests_session, "post") as mock:
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
         _post(session, resource_url, obj)
     # Should pass through to the correct session
-    mock.assert_called_with(
+    request_session.post.assert_called_with(
         target_url,
         json=_encoder.default(obj),
         headers=_get_headers(session),
@@ -115,19 +124,16 @@ def test_post():
     )
 
 
-def test_put():
+def test_put(session, request_session):
     """Make sure calls to _put end up using the correct session."""
-    base_url = "base"
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=base_url, url=resource_url)
-    session = Mock()
-    session.get_base_url2.return_value = base_url
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
 
-    with patch.object(restv2helper._requests_session, "put") as mock:
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
         _put(session, resource_url)
     # Should pass through to the correct session
-    mock.assert_called_with(
+    request_session.put.assert_called_with(
         target_url,
         json=None,
         data=None,
