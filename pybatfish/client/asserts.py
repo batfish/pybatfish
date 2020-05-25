@@ -484,7 +484,7 @@ def assert_no_incompatible_bgp_sessions(
     if nodes is not None:
         kwargs.update(nodes=nodes)
     if remote_nodes is not None:
-        kwargs.update(remote_nodes=remote_nodes)
+        kwargs.update(remoteNodes=remote_nodes)
 
     df_raw = (
         _get_question_object(session, "bgpSessionCompatibility")
@@ -539,7 +539,7 @@ def assert_no_incompatible_ospf_sessions(
     if nodes is not None:
         kwargs.update(nodes=nodes)
     if remote_nodes is not None:
-        kwargs.update(remote_nodes=remote_nodes)
+        kwargs.update(remoteNodes=remote_nodes)
 
     df = (
         _get_question_object(session, "ospfSessionCompatibility")
@@ -583,7 +583,7 @@ def assert_no_unestablished_bgp_sessions(
     if nodes is not None:
         kwargs.update(nodes=nodes)
     if remote_nodes is not None:
-        kwargs.update(remote_nodes=remote_nodes)
+        kwargs.update(remoteNodes=remote_nodes)
 
     df = (
         _get_question_object(session, "bgpSessionStatus")
