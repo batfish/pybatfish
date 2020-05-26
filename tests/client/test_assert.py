@@ -498,7 +498,7 @@ def test_no_incompatible_bgp_sessions():
             nodes="nodes", remote_nodes="remote_nodes", status=".*", session=bf
         )
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -510,7 +510,7 @@ def test_no_incompatible_bgp_sessions():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
 
 
@@ -526,7 +526,7 @@ def test_no_incompatible_bgp_sessions_from_session():
             nodes="nodes", remote_nodes="remote_nodes", status=".*"
         )
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -538,7 +538,7 @@ def test_no_incompatible_bgp_sessions_from_session():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
 
 
@@ -553,7 +553,7 @@ def test_no_incompatible_bgp_sessions_no_session():
             nodes="nodes", remote_nodes="remote_nodes", status=".*"
         )
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -565,7 +565,7 @@ def test_no_incompatible_bgp_sessions_no_session():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
+            nodes="nodes", remoteNodes="remote_nodes", status=".*"
         )
 
 
@@ -582,7 +582,7 @@ def test_no_incompatible_ospf_sessions():
         )
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
         # Test failure
@@ -596,7 +596,7 @@ def test_no_incompatible_ospf_sessions():
         assert mock_df.to_string() in str(excinfo.value)
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
 
@@ -614,7 +614,7 @@ def test_no_incompatible_ospf_sessions_from_session():
         )
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
         # Test failure
@@ -628,7 +628,7 @@ def test_no_incompatible_ospf_sessions_from_session():
         assert mock_df.to_string() in str(excinfo.value)
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
 
@@ -643,7 +643,7 @@ def test_no_incompatible_ospf_sessions_no_session():
         assert_no_incompatible_ospf_sessions(nodes="nodes", remote_nodes="remote_nodes")
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
         # Test failure
@@ -657,7 +657,7 @@ def test_no_incompatible_ospf_sessions_no_session():
         assert mock_df.to_string() in str(excinfo.value)
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
-            remote_nodes="remote_nodes",
+            remoteNodes="remote_nodes",
             statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
         )
 
@@ -672,7 +672,7 @@ def test_no_unestablished_bgp_sessions():
             nodes="nodes", remote_nodes="remote_nodes", session=bf
         )
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -684,7 +684,7 @@ def test_no_unestablished_bgp_sessions():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
 
 
@@ -698,7 +698,7 @@ def test_no_unestablished_bgp_sessions_from_session():
             nodes="nodes", remote_nodes="remote_nodes"
         )
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -710,7 +710,7 @@ def test_no_unestablished_bgp_sessions_from_session():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
 
 
@@ -721,7 +721,7 @@ def test_no_unestablished_bgp_sessions_no_session():
         bgpSessionStatus.return_value = MockQuestion()
         assert_no_unestablished_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes")
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
@@ -733,7 +733,7 @@ def test_no_unestablished_bgp_sessions_no_session():
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         bgpSessionStatus.assert_called_with(
-            nodes="nodes", remote_nodes="remote_nodes", status="NOT_ESTABLISHED"
+            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
         )
 
 
