@@ -248,7 +248,6 @@ class CoordConsts(object):
     SVC_RSC_GETSTATUS = "getstatus"
     SVC_RSC_INIT_CONTAINER = "initcontainer"
     SVC_RSC_INIT_NETWORK = "initnetwork"
-    SVC_RSC_KILL_WORK = "killwork"
     SVC_RSC_LIST_ANALYSES = "listanalyses"
     SVC_RSC_LIST_INCOMPLETE_WORK = "listincompletework"
     SVC_RSC_LIST_NETWORKS = "listnetworks"
