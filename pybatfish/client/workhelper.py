@@ -112,57 +112,48 @@ def execute(work_item, session, background=False, extra_args=None):
         # After we drop 2.7 support
         return {"result": str(response["result"])}
 
-    try:
+    answer = get_work_status(work_item.id, session)
+    status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
+    task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
+
+    cur_sleep = 0.1  # seconds
+    while not WorkStatusCode.is_terminated(status):
+        _print_work_status(session, status, task_details)
+        time.sleep(cur_sleep)
+        cur_sleep = min(1.0, cur_sleep * 1.5)
         answer = get_work_status(work_item.id, session)
         status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
         task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
 
-        cur_sleep = 0.1  # seconds
-        while not WorkStatusCode.is_terminated(status):
-            _print_work_status(session, status, task_details)
-            time.sleep(cur_sleep)
-            cur_sleep = min(1.0, cur_sleep * 1.5)
-            answer = get_work_status(work_item.id, session)
-            status = WorkStatusCode(answer[CoordConsts.SVC_KEY_WORKSTATUS])
-            task_details = answer[CoordConsts.SVC_KEY_TASKSTATUS]
+    _print_work_status(session, status, task_details)
 
-        _print_work_status(session, status, task_details)
-
-        # Handle fail conditions not producing logs
-        if status in [WorkStatusCode.ASSIGNMENTERROR, WorkStatusCode.REQUEUEFAILURE]:
-            raise BatfishException(
-                "Work finished with status {}\nwork_item: {}\ntask_details: {}".format(
-                    status, work_item.to_json(), json.loads(task_details)
-                )
-            )
-
-        # Handle fail condition with logs
-        if status == WorkStatusCode.TERMINATEDABNORMALLY:
-            log = restv2helper.get_work_log(session, snapshot, work_item.id)
-            log_file_msg = ""
-            if len(log) > MAX_LOG_LENGTH:
-                log_file = tempfile.NamedTemporaryFile().name
-                with open(log_file, "w") as log_file_handle:
-                    log_file_handle.write(str(log))
-                log_file_msg = "Full log written to {}\n".format(log_file)
-            raise BatfishException(
-                "Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {prefix}{log}".format(
-                    item=work_item.to_json(),
-                    msg=log_file_msg,
-                    log=log[-MAX_LOG_LENGTH:],
-                    prefix="..." if log_file_msg else "",
-                )
-            )
-
-        return {"status": status}
-
-    except KeyboardInterrupt:
-        response = kill_work(session, work_item.id)
-        raise KeyboardInterrupt(
-            "Killed ongoing work: {}. Server response: {}".format(
-                work_item.id, json.dumps(response)
+    # Handle fail conditions not producing logs
+    if status in [WorkStatusCode.ASSIGNMENTERROR, WorkStatusCode.REQUEUEFAILURE]:
+        raise BatfishException(
+            "Work finished with status {}\nwork_item: {}\ntask_details: {}".format(
+                status, work_item.to_json(), json.loads(task_details)
             )
         )
+
+    # Handle fail condition with logs
+    if status == WorkStatusCode.TERMINATEDABNORMALLY:
+        log = restv2helper.get_work_log(session, snapshot, work_item.id)
+        log_file_msg = ""
+        if len(log) > MAX_LOG_LENGTH:
+            log_file = tempfile.NamedTemporaryFile().name
+            with open(log_file, "w") as log_file_handle:
+                log_file_handle.write(str(log))
+            log_file_msg = "Full log written to {}\n".format(log_file)
+        raise BatfishException(
+            "Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {prefix}{log}".format(
+                item=work_item.to_json(),
+                msg=log_file_msg,
+                log=log[-MAX_LOG_LENGTH:],
+                prefix="..." if log_file_msg else "",
+            )
+        )
+
+    return {"status": status}
 
 
 def _compute_batfish_answer_file_name(work_item):
@@ -308,14 +299,6 @@ def get_data_init_network(session, network_name):
     return json_data
 
 
-def get_data_kill_work(session, workId):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_WORKID: workId,
-    }
-    return json_data
-
-
 def get_data_list_analyses(session):
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
@@ -431,13 +414,6 @@ def get_work_status(w_item_id, session):
             "Expected key (%s) not found in status check response: %s"
             % (CoordConsts.SVC_KEY_WORKSTATUS, answer)
         )
-
-
-def kill_work(session, w_item_id):
-    json_data = get_data_kill_work(session, w_item_id)
-    return resthelper.get_json_response(
-        session, CoordConsts.SVC_RSC_KILL_WORK, json_data
-    )
 
 
 def _print_work_status(session, work_status, task_details):

@@ -18,12 +18,11 @@ from __future__ import absolute_import, print_function
 
 import json
 import logging
-import tempfile
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 from deprecated import deprecated
 
-from pybatfish.client.consts import CoordConsts, WorkStatusCode
+from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     Interface,
@@ -37,11 +36,9 @@ from pybatfish.datamodel.referencelibrary import (
 )
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from pybatfish.util import BfJsonEncoder
 from . import resthelper, restv2helper, workhelper
 from .options import Options
 from .session import Session
-from .workhelper import kill_work
 
 
 def _configure_default_logging():
@@ -79,7 +76,6 @@ __all__ = [
     "bf_get_snapshot_node_roles",
     "bf_get_work_status",
     "bf_init_snapshot",
-    "bf_kill_work",
     "bf_list_networks",
     "bf_list_incomplete_works",
     "bf_list_snapshots",
@@ -369,10 +365,6 @@ def bf_init_snapshot(
         background=background,
         extra_args=extra_args,
     )
-
-
-def bf_kill_work(wItemId):
-    return kill_work(bf_session, wItemId)
 
 
 def bf_list_networks():
