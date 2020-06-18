@@ -29,9 +29,9 @@ Documentation is generated from multiple sources using sphinx (and its extension
    * `pip install -r docs/requirements.txt`
    * `brew install pandoc`
 
-3. From root folder, run:
+3. From `docs` folder, run:
 
-   `python -m docs/nb_gen`
+   `python -m nb_gen`
 
 ### Running tests, updating docs
 
