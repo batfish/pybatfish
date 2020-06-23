@@ -19,8 +19,10 @@ import os
 import shutil
 import tempfile
 import uuid
-from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
+from typing import Any, BinaryIO, Dict, Iterable, Optional, \
+    TYPE_CHECKING  # noqa: F401
 
+import backoff
 import requests
 from netconan import netconan
 from requests import HTTPError
@@ -59,6 +61,8 @@ _INIT_INFO_QUESTIONS = (
 
 _S3_BUCKET = "batfish-diagnostics"
 _S3_REGION = "us-west-2"
+
+_UPLOAD_MAX_TRIES = 3
 
 
 def upload_diagnostics(
@@ -255,13 +259,26 @@ def _upload_dir_to_url(
             rel_path = os.path.relpath(path, src_dir)
             with open(path, "rb") as data:
                 resource = "{}/{}".format(base_url, rel_path)
-                r = requests.put(resource, data=data, headers=headers, proxies=proxies)
-                if r.status_code != 200:
-                    raise HTTPError(
-                        "Failed to upload resource: {} with status code {}".format(
-                            resource, r.status_code
-                        )
-                    )
+                _put_data(resource, data, headers, proxies)
+
+
+@backoff.on_exception(
+        backoff.expo, HTTPError, max_tries=_UPLOAD_MAX_TRIES
+)
+def _put_data(
+        resource: str,
+        data: BinaryIO,
+        headers: Optional[Dict],
+        proxies: Optional[Dict]
+):
+    """Put specified file data at specified resource url."""
+    r = requests.put(resource, data=data, headers=headers, proxies=proxies)
+    if r.status_code != 200:
+        raise HTTPError(
+            "Failed to upload resource: {} with status code {}".format(
+                resource, r.status_code
+            )
+        )
 
 
 def warn_on_snapshot_failure(session):

@@ -88,6 +88,7 @@ setup(
     # https://packaging.python.org/en/latest/requirements.html
     install_requires=[
         "attrs>=18.1.0",
+        "backoff",
         "deepdiff",
         "deprecated",
         "netconan>=0.11.0",

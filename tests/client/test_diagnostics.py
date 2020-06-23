@@ -19,15 +19,13 @@ import uuid
 
 import pytest
 import responses
+from requests import HTTPError
 
-from pybatfish.client._diagnostics import (
-    METADATA_FILENAME,
-    _anonymize_dir,
-    _upload_dir_to_url,
-    check_if_all_passed,
-    check_if_any_failed,
-    upload_diagnostics,
-)
+from pybatfish.client._diagnostics import (METADATA_FILENAME, _UPLOAD_MAX_TRIES,
+                                           _anonymize_dir, _upload_dir_to_url,
+                                           check_if_all_passed,
+                                           check_if_any_failed,
+                                           upload_diagnostics)
 from pybatfish.client.session import Session
 
 # Config file constants for anonymization and upload
@@ -126,3 +124,23 @@ def test_upload_to_url(config_dir):
 
     # Make sure the entry populated by the put request matches the original file contents
     assert uploads[resource_url] == _CONFIG_CONTENT
+
+
+@responses.activate
+def test_upload_to_url_retry(config_dir):
+    """Confirm we retry uploading if it fails at first."""
+    dir_name = uuid.uuid4().hex
+    base_url = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
+        bucket="bucket", region="region", resource=dir_name
+    )
+    resource_url = "{}/{}".format(base_url, _CONFIG_FILE)
+
+    # Unsuccessful mock put result
+    responses.add(responses.PUT, resource_url, json={'error': 'conn reset'}, status=104)
+
+    # Eventually we should give up and throw an HTTPError
+    with pytest.raises(HTTPError):
+        _upload_dir_to_url(base_url=base_url, src_dir=config_dir)
+
+    # Should have tried to upload a few times
+    assert len(responses.calls) == _UPLOAD_MAX_TRIES
