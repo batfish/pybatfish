@@ -8,6 +8,7 @@ dist
 .mypy_cache
 *.pyc
 .pytest_cache
+/.python-version
 
 # Batfish-related directories (and/or symlinks)
 /batfish
