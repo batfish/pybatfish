@@ -136,10 +136,10 @@ def test_upload_to_url_session(config_dir):
     base_url = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
         bucket="bucket", region="region", resource=dir_name
     )
+
     requests_session = Mock(spec=requests.Session)
     requests_session.put.return_value.status_code = 200
-
     with patch("pybatfish.client._diagnostics._requests_session", requests_session):
         _upload_dir_to_url(base_url=base_url, src_dir=config_dir)
     # Should pass through to the correct session
-    requests_session.put.assert_called_once()
+    assert requests_session.put.called
