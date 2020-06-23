@@ -16,14 +16,14 @@ import json
 import os
 import tempfile
 import uuid
+from unittest.mock import Mock, patch
 
 import pytest
+import requests
 import responses
-from requests import HTTPError
 
 from pybatfish.client._diagnostics import (
     METADATA_FILENAME,
-    _UPLOAD_MAX_TRIES,
     _anonymize_dir,
     _upload_dir_to_url,
     check_if_all_passed,
@@ -130,21 +130,16 @@ def test_upload_to_url(config_dir):
     assert uploads[resource_url] == _CONFIG_CONTENT
 
 
-@responses.activate
-def test_upload_to_url_retry(config_dir):
-    """Confirm we retry uploading if it fails at first."""
+def test_upload_to_url_session(config_dir):
+    """Confirm diagnostics uploading uses the configured session."""
     dir_name = uuid.uuid4().hex
     base_url = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
         bucket="bucket", region="region", resource=dir_name
     )
-    resource_url = "{}/{}".format(base_url, _CONFIG_FILE)
+    requests_session = Mock(spec=requests.Session)
+    requests_session.put.return_value.status_code = 200
 
-    # Unsuccessful mock put result
-    responses.add(responses.PUT, resource_url, json={"error": "conn reset"}, status=104)
-
-    # Eventually we should give up and throw an HTTPError
-    with pytest.raises(HTTPError):
+    with patch("pybatfish.client._diagnostics._requests_session", requests_session):
         _upload_dir_to_url(base_url=base_url, src_dir=config_dir)
-
-    # Should have tried to upload a few times
-    assert len(responses.calls) == _UPLOAD_MAX_TRIES
+    # Should pass through to the correct session
+    requests_session.put.assert_called_once()
