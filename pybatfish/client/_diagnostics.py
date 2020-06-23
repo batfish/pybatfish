@@ -19,8 +19,7 @@ import os
 import shutil
 import tempfile
 import uuid
-from typing import Any, BinaryIO, Dict, Iterable, Optional, \
-    TYPE_CHECKING  # noqa: F401
+from typing import Any, BinaryIO, Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
 
 import backoff
 import requests
@@ -262,14 +261,9 @@ def _upload_dir_to_url(
                 _put_data(resource, data, headers, proxies)
 
 
-@backoff.on_exception(
-        backoff.expo, HTTPError, max_tries=_UPLOAD_MAX_TRIES
-)
+@backoff.on_exception(backoff.expo, HTTPError, max_tries=_UPLOAD_MAX_TRIES)
 def _put_data(
-        resource: str,
-        data: BinaryIO,
-        headers: Optional[Dict],
-        proxies: Optional[Dict]
+    resource: str, data: BinaryIO, headers: Optional[Dict], proxies: Optional[Dict]
 ):
     """Put specified file data at specified resource url."""
     r = requests.put(resource, data=data, headers=headers, proxies=proxies)
