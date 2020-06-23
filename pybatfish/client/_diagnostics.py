@@ -264,7 +264,7 @@ def _upload_dir_to_url(
 @backoff.on_exception(backoff.expo, HTTPError, max_tries=_UPLOAD_MAX_TRIES)
 def _put_data(
     resource: str, data: BinaryIO, headers: Optional[Dict], proxies: Optional[Dict]
-):
+) -> None:
     """Put specified file data at specified resource url."""
     r = requests.put(resource, data=data, headers=headers, proxies=proxies)
     if r.status_code != 200:
