@@ -24,6 +24,8 @@ from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
 import requests
 from netconan import netconan
 from requests import HTTPError
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import BatfishException
@@ -59,6 +61,23 @@ _INIT_INFO_QUESTIONS = (
 
 _S3_BUCKET = "batfish-diagnostics"
 _S3_REGION = "us-west-2"
+
+_UPLOAD_MAX_TRIES = 3
+_UPLOAD_RETRY_BACKOFF = 0.3
+
+# Setup a session, configure retry policy
+_requests_session = requests.Session()
+# Prefix "http" will cover both "http" & "https"
+_requests_session.mount(
+    "http",
+    HTTPAdapter(
+        max_retries=Retry(
+            total=_UPLOAD_MAX_TRIES,
+            backoff_factor=_UPLOAD_RETRY_BACKOFF,
+            status_forcelist=[500, 502, 503, 504, 104],
+        )
+    ),
+)
 
 
 def upload_diagnostics(
@@ -255,7 +274,9 @@ def _upload_dir_to_url(
             rel_path = os.path.relpath(path, src_dir)
             with open(path, "rb") as data:
                 resource = "{}/{}".format(base_url, rel_path)
-                r = requests.put(resource, data=data, headers=headers, proxies=proxies)
+                r = _requests_session.put(
+                    resource, data=data, headers=headers, proxies=proxies
+                )
                 if r.status_code != 200:
                     raise HTTPError(
                         "Failed to upload resource: {} with status code {}".format(

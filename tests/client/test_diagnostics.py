@@ -16,8 +16,10 @@ import json
 import os
 import tempfile
 import uuid
+from unittest.mock import Mock, patch
 
 import pytest
+import requests
 import responses
 
 from pybatfish.client._diagnostics import (
@@ -126,3 +128,18 @@ def test_upload_to_url(config_dir):
 
     # Make sure the entry populated by the put request matches the original file contents
     assert uploads[resource_url] == _CONFIG_CONTENT
+
+
+def test_upload_to_url_session(config_dir):
+    """Confirm diagnostics uploading uses the configured session."""
+    dir_name = uuid.uuid4().hex
+    base_url = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
+        bucket="bucket", region="region", resource=dir_name
+    )
+
+    requests_session = Mock(spec=requests.Session)
+    requests_session.put.return_value.status_code = 200
+    with patch("pybatfish.client._diagnostics._requests_session", requests_session):
+        _upload_dir_to_url(base_url=base_url, src_dir=config_dir)
+    # Should pass through to the correct session
+    assert requests_session.put.called
