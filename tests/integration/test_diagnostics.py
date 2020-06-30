@@ -15,12 +15,14 @@ import uuid
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
+import requests
+from requests.adapters import HTTPAdapter
+from urllib3 import Retry
 
 from pybatfish.client._diagnostics import (
     _INIT_INFO_QUESTIONS,
     _S3_BUCKET,
     _S3_REGION,
-    _requests_session,
     upload_diagnostics,
 )
 from pybatfish.client.commands import (
@@ -35,6 +37,9 @@ from pybatfish.question.question import QuestionBase
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 
+_UPLOAD_MAX_TRIES = 3
+_UPLOAD_RETRY_BACKOFF = 0.3
+
 
 @pytest.fixture()
 def network():
@@ -42,6 +47,24 @@ def network():
     yield name
     # cleanup
     bf_delete_network(name)
+
+
+@pytest.fixture()
+def requests_session():
+    # Setup a session with a retry policy
+    session = requests.Session()
+    # Prefix "http" will cover both "http" & "https"
+    session.mount(
+        "http",
+        HTTPAdapter(
+            max_retries=Retry(
+                total=_UPLOAD_MAX_TRIES,
+                backoff_factor=_UPLOAD_RETRY_BACKOFF,
+                status_forcelist=[500, 502, 503, 504, 104],
+            )
+        ),
+    )
+    yield session
 
 
 @pytest.fixture()
@@ -61,7 +84,7 @@ def test_questions(network, example_snapshot):
         QuestionBase(template, bf_session).answer()
 
 
-def test_upload_diagnostics(network, example_snapshot):
+def test_upload_diagnostics(network, example_snapshot, requests_session):
     """Upload initialization information for example snapshot."""
     # This call raises an exception if any file upload results in HTTP status != 200
     resource = upload_diagnostics(
@@ -74,5 +97,5 @@ def test_upload_diagnostics(network, example_snapshot):
     # Confirm none of the uploaded questions are accessible
     for template in _INIT_INFO_QUESTIONS:
         q = QuestionBase(template, bf_session)
-        r = _requests_session.get("{}/{}/{}".format(base_url, resource, q.get_name()))
+        r = requests_session.get("{}/{}/{}".format(base_url, resource, q.get_name()))
         assert r.status_code == 403
