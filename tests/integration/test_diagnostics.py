@@ -15,12 +15,12 @@ import uuid
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
-import requests
 
 from pybatfish.client._diagnostics import (
     _INIT_INFO_QUESTIONS,
     _S3_BUCKET,
     _S3_REGION,
+    _requests_session,
     upload_diagnostics,
 )
 from pybatfish.client.commands import (
@@ -74,5 +74,5 @@ def test_upload_diagnostics(network, example_snapshot):
     # Confirm none of the uploaded questions are accessible
     for template in _INIT_INFO_QUESTIONS:
         q = QuestionBase(template, bf_session)
-        r = requests.get("{}/{}/{}".format(base_url, resource, q.get_name()))
+        r = _requests_session.get("{}/{}/{}".format(base_url, resource, q.get_name()))
         assert r.status_code == 403
