@@ -110,6 +110,8 @@ setup(
             "check-manifest",
             "coverage",
             "inflection",
+            # To support py3.5
+            "ipython<7.10.0",
             "jupyter",
             "mypy",
             "nbformat<5.0.0",
