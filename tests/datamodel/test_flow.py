@@ -19,20 +19,35 @@ from operator import attrgetter
 import attr
 import pytest
 
-from pybatfish.datamodel.flow import (Accept, ArpErrorStepDetail,
-                                      DeliveredStepDetail,
-                                      EnterInputIfaceStepDetail,
-                                      ExitOutputIfaceStepDetail, FibLookup,
-                                      FilterStepDetail, Flow, FlowDiff,
-                                      FlowTraceHop, ForwardOutInterface,
-                                      HeaderConstraints, Hop, InboundStepDetail,
-                                      IncomingSessionScope, LoopStepDetail,
-                                      MatchSessionStepDetail, MatchTcpFlags,
-                                      OriginatingSessionScope,
-                                      RoutingStepDetail, SessionAction,
-                                      SessionMatchExpr, SessionScope,
-                                      SetupSessionStepDetail, Step, TcpFlags,
-                                      TransformationStepDetail)
+from pybatfish.datamodel.flow import (
+    Accept,
+    ArpErrorStepDetail,
+    DeliveredStepDetail,
+    EnterInputIfaceStepDetail,
+    ExitOutputIfaceStepDetail,
+    FibLookup,
+    FilterStepDetail,
+    Flow,
+    FlowDiff,
+    FlowTraceHop,
+    ForwardOutInterface,
+    HeaderConstraints,
+    Hop,
+    InboundStepDetail,
+    IncomingSessionScope,
+    LoopStepDetail,
+    MatchSessionStepDetail,
+    MatchTcpFlags,
+    OriginatingSessionScope,
+    RoutingStepDetail,
+    SessionAction,
+    SessionMatchExpr,
+    SessionScope,
+    SetupSessionStepDetail,
+    Step,
+    TcpFlags,
+    TransformationStepDetail,
+)
 
 
 def test_arp_error_step_detail_str():
