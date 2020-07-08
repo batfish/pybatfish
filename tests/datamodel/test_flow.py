@@ -19,34 +19,20 @@ from operator import attrgetter
 import attr
 import pytest
 
-from pybatfish.datamodel.flow import (
-    ArpErrorStepDetail,
-    DeliveredStepDetail,
-    EnterInputIfaceStepDetail,
-    ExitOutputIfaceStepDetail,
-    FilterStepDetail,
-    Flow,
-    FlowDiff,
-    FlowTraceHop,
-    HeaderConstraints,
-    Hop,
-    InboundStepDetail,
-    MatchSessionStepDetail,
-    SessionMatchExpr,
-    SessionScope,
-    IncomingSessionScope,
-    OriginatingSessionScope,
-    SessionAction,
-    Accept,
-    FibLookup,
-    ForwardOutInterface,
-    MatchTcpFlags,
-    RoutingStepDetail,
-    SetupSessionStepDetail,
-    Step,
-    TcpFlags,
-    TransformationStepDetail,
-)
+from pybatfish.datamodel.flow import (Accept, ArpErrorStepDetail,
+                                      DeliveredStepDetail,
+                                      EnterInputIfaceStepDetail,
+                                      ExitOutputIfaceStepDetail, FibLookup,
+                                      FilterStepDetail, Flow, FlowDiff,
+                                      FlowTraceHop, ForwardOutInterface,
+                                      HeaderConstraints, Hop, InboundStepDetail,
+                                      IncomingSessionScope, LoopStepDetail,
+                                      MatchSessionStepDetail, MatchTcpFlags,
+                                      OriginatingSessionScope,
+                                      RoutingStepDetail, SessionAction,
+                                      SessionMatchExpr, SessionScope,
+                                      SetupSessionStepDetail, Step, TcpFlags,
+                                      TransformationStepDetail)
 
 
 def test_arp_error_step_detail_str():
@@ -535,6 +521,16 @@ def test_InboundStepDetail_from_dict():
 def test_InboundStepDetail_str():
     interface = "GigabitEthernet1/0"
     assert str(InboundStepDetail(interface)) == interface
+
+
+def test_LoopStep_from_dict():
+    step = Step.from_dict({"type": "Loop", "action": "LOOP", "detail": {}})
+    assert step.action == "LOOP"
+    assert step.detail == LoopStepDetail()
+
+
+def test_LoopStepDetail_str():
+    assert str(LoopStepDetail()) == ""
 
 
 def test_SetupSessionStepDetail_from_dict():

@@ -655,6 +655,18 @@ class InboundStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class LoopStepDetail(DataModelElement):
+    """Details of a step representing a forwarding loop being detected."""
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return LoopStepDetail()
+
+    def __str__(self):
+        return ""
+
+
+@attr.s(frozen=True)
 class MatchSessionStepDetail(DataModelElement):
     """Details of a step for when a flow matches a firewall session.
 
@@ -908,6 +920,7 @@ class Step(DataModelElement):
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
+            "Loop": LoopStepDetail.from_dict,
             "MatchSession": MatchSessionStepDetail.from_dict,
             "Originate": OriginateStepDetail.from_dict,
             "Routing": RoutingStepDetail.from_dict,
