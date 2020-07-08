@@ -68,7 +68,7 @@ def test_trace_element_deserialization():
                 },
             },
             {"class": TEXT_FRAGMENT, "text": "ccc"},
-        ],
+        ]
     }
     trace_element = TraceElement.from_dict(trace_element_dict)
     assert len(trace_element.fragments) == 3
