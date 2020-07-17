@@ -12,5 +12,6 @@ Batfish Questions
    notebooks/filters.ipynb
    notebooks/snapshot.ipynb
    notebooks/tunnels.ipynb
+   notebooks/vxlan_evpn.ipynb
    notebooks/resolvingSpecifiers.ipynb
    notebooks/differentialQuestions.ipynb

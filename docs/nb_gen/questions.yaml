@@ -174,8 +174,8 @@ categories:
       parameters:
         - name: headers
           value: HeaderConstraints(applications='DNS')
-  - name: tunnels
-    description: Tunnels and Overlays
+  - name: ipsec
+    description: IPSec Tunnels
     questions:
     - name: IPSec Session Status
       pybf_name: ipsecSessionStatus
@@ -187,6 +187,9 @@ categories:
       snapshot:
         name: hybridcloud
         path: networks/hybrid-cloud
+  - name: vxlan_evpn
+    description: VXLAN and EVPN
+    questions:
     - name: VXLAN VNI Properties
       pybf_name: vxlanVniProperties
       snapshot:
