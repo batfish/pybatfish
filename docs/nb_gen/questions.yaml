@@ -174,31 +174,37 @@ categories:
       parameters:
         - name: headers
           value: HeaderConstraints(applications='DNS')
-#  - name: tunnels
-#    description: Tunnels and Overlays
-#    questions:
-#    - name: IPSec Session Status
-#      pybf_name: ipsecSessionStatus
-#    - name: IPSec Edges
-#      pybf_name: ipsecEdges
+  - name: ipsec
+    description: IPSec Tunnels
+    questions:
+    - name: IPSec Session Status
+      pybf_name: ipsecSessionStatus
+      snapshot:
+        name: hybridcloud
+        path: networks/hybrid-cloud
+    - name: IPSec Edges
+      pybf_name: ipsecEdges
+      snapshot:
+        name: hybridcloud
+        path: networks/hybrid-cloud
   - name: vxlan_evpn
     description: VXLAN and EVPN
     questions:
-      - name: VXLAN VNI Properties
-        pybf_name: vxlanVniProperties
-        snapshot:
-          name: aristaevpn
-          path: networks/aristaevpn
-      - name: VXLAN Edges
-        pybf_name: vxlanEdges
-        snapshot:
-          name: aristaevpn
-          path: networks/aristaevpn
-      - name: L3 EVPN VNIs
-        pybf_name: evpnL3VniProperties
-        snapshot:
-          name: aristaevpn
-          path: networks/aristaevpn
+    - name: VXLAN VNI Properties
+      pybf_name: vxlanVniProperties
+      snapshot:
+        name: aristaevpn
+        path: networks/aristaevpn
+    - name: VXLAN Edges
+      pybf_name: vxlanEdges
+      snapshot:
+        name: aristaevpn
+        path: networks/aristaevpn
+    - name: L3 EVPN VNIs
+      pybf_name: evpnL3VniProperties
+      snapshot:
+        name: aristaevpn
+        path: networks/aristaevpn
   - name: snapshot
     description: Snapshot Input
     questions:

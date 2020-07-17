@@ -1,0 +1,22 @@
+{
+ "TransitGateways": [
+  {
+   "CreationTime": "2019-12-18 00:40:25+00:00",
+   "Options": {
+    "AmazonSideAsn": 64512,
+    "AssociationDefaultRouteTableId": "tgw-rtb-049367cdac1fcd74e",
+    "AutoAcceptSharedAttachments": "disable",
+    "DefaultRouteTableAssociation": "enable",
+    "DefaultRouteTablePropagation": "enable",
+    "DnsSupport": "enable",
+    "PropagationDefaultRouteTableId": "tgw-rtb-049367cdac1fcd74e",
+    "VpnEcmpSupport": "enable"
+   },
+   "OwnerId": "554773406868",
+   "State": "available",
+   "Tags": [],
+   "TransitGatewayArn": "arn:aws:ec2:us-west-2:554773406868:transit-gateway/tgw-0888a76c8a371246d",
+   "TransitGatewayId": "tgw-0888a76c8a371246d"
+  }
+ ]
+}

@@ -145,9 +145,7 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "testRoutePolicies",
         "eigrpEdges",
         "layer1Edges",
-        "ipsecEdges",
         "isisEdges",
-        "ipsecSessionStatus",
     }
     session_qs = set(
         [q["name"] for q in session.q.list() if q["name"] not in exclusions]
