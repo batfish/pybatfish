@@ -25,8 +25,11 @@ categories:
         snapshot:
           name: aristaevpn
           path: networks/aristaevpn
-#      - name: F5 BIG-IP VIP Configuration
-#        pybf_name: f5BigipVipConfiguration
+      - name: F5 BIG-IP VIP Configuration
+        pybf_name: f5BigipVipConfiguration
+        snapshot:
+          name: f5
+          path: networks/f5
       - name: IP Owners
         pybf_name: ipOwners
       - name: Named Structures
