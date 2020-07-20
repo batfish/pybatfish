@@ -67,9 +67,8 @@ _UPLOAD_RETRY_BACKOFF = 0.3
 
 # Setup a session, configure retry policy
 _requests_session = requests.Session()
-# Prefix "http" will cover both "http" & "https"
 _requests_session.mount(
-    "http",
+    "https://",
     HTTPAdapter(
         max_retries=Retry(
             total=_UPLOAD_MAX_TRIES,
