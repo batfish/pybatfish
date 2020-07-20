@@ -150,7 +150,14 @@ def test_upload_to_url_session(config_dir):
 
 def test_session_retry():
     """Confirm session is configured with correct https adapter."""
+    # HTTP status codes we need to retry on
+    codes = (500, 502, 503, 504, 104)
+
     https = _requests_session.adapters["https://"]
     assert https == _adapter
     # Also make sure retries are configured
-    assert _adapter.max_retries.total == _UPLOAD_MAX_TRIES
+    retries = _adapter.max_retries
+    assert retries.total == _UPLOAD_MAX_TRIES
+    # All request types should be retried
+    assert not retries.method_whitelist
+    assert all(code in retries.status_forcelist for code in codes)
