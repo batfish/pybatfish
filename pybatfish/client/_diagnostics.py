@@ -74,6 +74,8 @@ _requests_session.mount(
             total=_UPLOAD_MAX_TRIES,
             backoff_factor=_UPLOAD_RETRY_BACKOFF,
             status_forcelist=[500, 502, 503, 504, 104],
+            # Retry on all calls, including POST
+            method_whitelist=False,
         )
     ),
 )
