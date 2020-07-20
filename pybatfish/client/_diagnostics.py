@@ -67,18 +67,16 @@ _UPLOAD_RETRY_BACKOFF = 0.3
 
 # Setup a session, configure retry policy
 _requests_session = requests.Session()
-_requests_session.mount(
-    "https://",
-    HTTPAdapter(
-        max_retries=Retry(
-            total=_UPLOAD_MAX_TRIES,
-            backoff_factor=_UPLOAD_RETRY_BACKOFF,
-            status_forcelist=[500, 502, 503, 504, 104],
-            # Retry on all calls, including POST
-            method_whitelist=False,
-        )
-    ),
+_adapter = HTTPAdapter(
+    max_retries=Retry(
+        total=_UPLOAD_MAX_TRIES,
+        backoff_factor=_UPLOAD_RETRY_BACKOFF,
+        status_forcelist=[500, 502, 503, 504, 104],
+        # Retry on all calls, including POST
+        method_whitelist=False,
+    )
 )
+_requests_session.mount("https://", _adapter)
 
 
 def upload_diagnostics(
