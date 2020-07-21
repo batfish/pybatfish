@@ -24,7 +24,10 @@ import responses
 
 from pybatfish.client._diagnostics import (
     METADATA_FILENAME,
+    _UPLOAD_MAX_TRIES,
+    _adapter,
     _anonymize_dir,
+    _requests_session,
     _upload_dir_to_url,
     check_if_all_passed,
     check_if_any_failed,
@@ -143,3 +146,18 @@ def test_upload_to_url_session(config_dir):
         _upload_dir_to_url(base_url=base_url, src_dir=config_dir)
     # Should pass through to the correct session
     assert requests_session.put.called
+
+
+def test_session_retry():
+    """Confirm session is configured with correct https adapter."""
+    # HTTP status codes we need to retry on
+    codes = (500, 502, 503, 504, 104)
+
+    https = _requests_session.adapters["https://"]
+    assert https == _adapter
+    # Also make sure retries are configured
+    retries = _adapter.max_retries
+    assert retries.total == _UPLOAD_MAX_TRIES
+    # All request types should be retried
+    assert not retries.method_whitelist
+    assert all(code in retries.status_forcelist for code in codes)

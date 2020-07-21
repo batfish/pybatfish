@@ -19,13 +19,16 @@ import requests
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
+from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
+    _adapter,
     _delete,
     _encoder,
     _get,
     _get_headers,
     _post,
     _put,
+    _requests_session,
 )
 from pybatfish.client.session import Session
 
@@ -141,6 +144,20 @@ def test_put(session, request_session):
         verify=session.verify_ssl_certs,
         params=None,
     )
+
+
+def test_session_adapters():
+    """Confirm session is configured with correct http and https adapters."""
+    http = _requests_session.adapters["http://"]
+    https = _requests_session.adapters["https://"]
+
+    assert http == _adapter
+    assert https == _adapter
+    # Also make sure retries are configured
+    retries = _adapter.max_retries
+    assert retries.total == Options.max_tries_to_connect_to_coordinator
+    # All request types should be retried
+    assert not retries.method_whitelist
 
 
 if __name__ == "__main__":
