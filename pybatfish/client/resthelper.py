@@ -44,6 +44,7 @@ _adapter = HTTPAdapter(
         backoff_factor=Options.request_backoff_factor,
         # Retry on all calls, including POST
         method_whitelist=False,
+        status_forcelist=[429, 500, 502, 503, 504],
     )
 )
 # Configure retries for http and https requests
