@@ -12,13 +12,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, List  # noqa: F401
+from typing import Dict, List, Optional  # noqa: F401
 
 import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
 
-__all__ = ["BgpRoute", "BgpRouteDiff", "BgpRouteDiffs"]
+__all__ = ["BgpRoute", "BgpRouteConstraints", "BgpRouteDiff", "BgpRouteDiffs"]
 
 
 @attr.s(frozen=True)
@@ -93,6 +93,42 @@ class BgpRoute(DataModelElement):
         lines.append("Protocol: %s" % self.protocol)
         lines.append("Source Protocol: %s" % self.sourceProtocol)
         return lines
+
+
+@attr.s(frozen=True)
+class BgpRouteConstraints(DataModelElement):
+    """Constraints on a BGP route announcement.
+
+    Specify constraints on route announcements by specifying allowed values
+    in each field of the announcement.
+
+    :ivar prefix: Allowed prefixes as a list of prefix ranges (e.g., "0.0.0.0/0:0-32")
+    :ivar complementPrefix: A flag indicating that all prefixes except the ones in prefix are allowed
+    :ivar localPreference: List of allowed local preference integer ranges, as a string
+    :ivar med: List of allowed MED integer ranges, as a string
+    :ivar communities: List of (Java) regexes representing allowed community values.
+    :ivar complementCommunities: A flag indicating that all communities except those in communities are allowed.
+
+    TODO: Add some examples here like is done for HeaderConstraints
+    """
+
+    prefix = attr.ib(default=None, type=Optional[List[str]])
+    complementPrefix = attr.ib(default=None, type=Optional[bool])
+    localPreference = attr.ib(default=None, type=Optional[str])
+    med = attr.ib(default=None, type=Optional[str])
+    communities = attr.ib(default=None, type=Optional[List[str]])
+    complementCommunities = attr.ib(default=None, type=Optional[bool])
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return BgpRouteConstraints(
+            prefix=json_dict.get("prefix"),
+            complementPrefix=json_dict.get("complementPrefix"),
+            localPreference=json_dict.get("localPreference"),
+            med=json_dict.get("med"),
+            communities=json_dict.get("communities"),
+            complementCommunities=json_dict.get("complementCommunities"),
+        )
 
 
 @attr.s(frozen=True)

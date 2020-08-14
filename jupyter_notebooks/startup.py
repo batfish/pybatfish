@@ -7,21 +7,22 @@ from IPython.display import display
 from pandas.io.formats.style import Styler
 
 from pybatfish.client.commands import *
+
 # noinspection PyUnresolvedReferences
 from pybatfish.datamodel import Edge, Interface
 from pybatfish.datamodel.answer import TableAnswer
-from pybatfish.datamodel.flow import (HeaderConstraints,
-                                      PathConstraints)  # noqa: F401
+from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints  # noqa: F401
+from pybatfish.datamodel.route import BgpRouteConstraints
 from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
 # Configure all pybatfish loggers to use WARN level
-logging.getLogger('pybatfish').setLevel(logging.WARN)
+logging.getLogger("pybatfish").setLevel(logging.WARN)
 
-pd.set_option('display.max_colwidth', -1)
-pd.set_option('display.max_columns', None)
+pd.set_option("display.max_colwidth", -1)
+pd.set_option("display.max_columns", None)
 # Prevent rendering text between '$' as MathJax expressions
-pd.set_option('display.html.use_mathjax', False)
+pd.set_option("display.html.use_mathjax", False)
 
 # UUID for CSS styles used by pandas styler.
 # Keeps our notebook HTML deterministic when displaying dataframes
@@ -49,5 +50,9 @@ def show(df):
     if not isinstance(df, pd.DataFrame) or df.size == 0:
         display(df)
         return
-    display(MyStyler(df).set_uuid(_STYLE_UUID).format(get_html)
-            .set_properties(**{'text-align': 'left', 'vertical-align': 'top'}))
+    display(
+        MyStyler(df)
+        .set_uuid(_STYLE_UUID)
+        .format(get_html)
+        .set_properties(**{"text-align": "left", "vertical-align": "top"})
+    )
