@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, List, Optional  # noqa: F401
+from typing import Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
@@ -95,6 +95,16 @@ class BgpRoute(DataModelElement):
         return lines
 
 
+def _string_list_to_string(value):
+    # type: (Any) -> Optional[Text]
+    if value is None or isinstance(value, str):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: Text
+        return result
+    raise ValueError("Invalid value {}".format(value))
+
+
 @attr.s(frozen=True)
 class BgpRouteConstraints(DataModelElement):
     """Constraints on a BGP route announcement.
@@ -114,8 +124,10 @@ class BgpRouteConstraints(DataModelElement):
 
     prefix = attr.ib(default=None, type=Optional[List[str]])
     complementPrefix = attr.ib(default=None, type=Optional[bool])
-    localPreference = attr.ib(default=None, type=Optional[str])
-    med = attr.ib(default=None, type=Optional[str])
+    localPreference = attr.ib(
+        default=None, type=Optional[str], converter=_string_list_to_string
+    )
+    med = attr.ib(default=None, type=Optional[str], converter=_string_list_to_string)
     communities = attr.ib(default=None, type=Optional[List[str]])
     complementCommunities = attr.ib(default=None, type=Optional[bool])
 
