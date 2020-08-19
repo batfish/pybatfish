@@ -95,13 +95,24 @@ class BgpRoute(DataModelElement):
         return lines
 
 
-def _string_list_to_string(value):
+# convert a list of strings into a single comma-separated string
+def _longspace_brc_converter(value):
     # type: (Any) -> Optional[Text]
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: Text
         return result
+    raise ValueError("Invalid value {}".format(value))
+
+
+# convert a string into a singleton list
+def _string_list_brc_converter(value):
+    # type: (Any) -> Optional[List[Text]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, str):
+        return [value]
     raise ValueError("Invalid value {}".format(value))
 
 
@@ -122,13 +133,17 @@ class BgpRouteConstraints(DataModelElement):
     TODO: Add some examples here like is done for HeaderConstraints
     """
 
-    prefix = attr.ib(default=None, type=Optional[List[str]])
+    prefix = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
     complementPrefix = attr.ib(default=None, type=Optional[bool])
     localPreference = attr.ib(
-        default=None, type=Optional[str], converter=_string_list_to_string
+        default=None, type=Optional[str], converter=_longspace_brc_converter
     )
-    med = attr.ib(default=None, type=Optional[str], converter=_string_list_to_string)
-    communities = attr.ib(default=None, type=Optional[List[str]])
+    med = attr.ib(default=None, type=Optional[str], converter=_longspace_brc_converter)
+    communities = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
     complementCommunities = attr.ib(default=None, type=Optional[bool])
 
     @classmethod
