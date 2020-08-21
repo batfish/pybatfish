@@ -129,8 +129,6 @@ class BgpRouteConstraints(DataModelElement):
     :ivar med: List of allowed MED integer ranges, as a string
     :ivar communities: List of (Java) regexes representing allowed community values.
     :ivar complementCommunities: A flag indicating that all communities except those in communities are allowed.
-
-    TODO: Add some examples here like is done for HeaderConstraints
     """
 
     prefix = attr.ib(
