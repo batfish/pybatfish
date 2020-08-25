@@ -117,7 +117,7 @@ To pull these configurations through Panorama, use the [`pan-python` module](htt
 panxapi.py -t panorama_tag -h <IP_ADDR> -l <LOGIN_USERNAME> -k >> .panrc
 # Pull the XML Panorama config
 panxapi.py -t panorama_tag -sxr > panorama_config.xml
-# Conver the XML Panorama config into set-format
+# Convert the XML Panorama config into set-format
 panconf.py --config pan-panorama_config.xml  --set  > panorama_config.set.txt
 ```
 This will generate a single configuration (`panorama_config.set.txt`) representing all firewalls managed by the specified Panorama device, and this config file is what Batfish needs to model the managed firewalls.
