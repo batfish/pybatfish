@@ -105,7 +105,25 @@ Add `site1-f5-a-concat.cfg` to the configs folder with the rest of the devices.
 ```
 
 ### Palo Alto Networks
-Batfish supports Palo Alto Networks devices with or without Panorama. For each device, concatenate the following show commands into one file.
+Batfish supports Palo Alto Networks devices with or without Panorama.
+
+#### From Panorama (preferred)
+For devices managed through Panorama, with no configuration done directly on the device, you can pull configurations from Panorama without having to run any commands on the managed-devices themselves.
+
+To pull these configurations through Panorama, use the [`pan-python` module](http://api-lab.paloaltonetworks.com/pan-python.html) as follows; note: replace `<IP_ADDR>` and `<LOGIN_USERNAME>` with the IP address and username for the Panorama device:
+```
+# Generate an API key and save in .panrc so subsequent commands don't require logging in again
+# This only needs to be done once
+panxapi.py -t panorama_tag -h <IP_ADDR> -l <LOGIN_USERNAME> -k >> .panrc
+# Pull the XML Panorama config
+panxapi.py -t panorama_tag -sxr > panorama_config.xml
+# Conver the XML Panorama config into set-format
+panconf.py --config pan-panorama_config.xml  --set  > panorama_config.set.txt
+```
+This will generate a single configuration (`panorama_config.set.txt`) representing all firewalls managed by the specified Panorama device, and this config file is what Batfish needs to model the managed firewalls.
+
+#### From individual devices
+For each device, concatenate the following show commands into one file.
 
 ```text
 set cli config-output-format set
