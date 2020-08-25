@@ -108,10 +108,10 @@ Add `site1-f5-a-concat.cfg` to the configs folder with the rest of the devices.
 Batfish supports Palo Alto Networks devices with or without Panorama.
 
 #### From Panorama (preferred)
-For devices managed through Panorama, with no configuration done directly on the device, you can pull configurations from Panorama without having to run any commands on the managed-devices themselves.
+For devices managed through Panorama, with no configuration done directly on the device, you can pull configurations from Panorama without having to run any commands on the managed-devices themselves. If configuration is also done directly on the managed-device, you should follow the instructions for pulling configuration `From individual devices` instead.
 
 To pull these configurations through Panorama, use the [`pan-python` module](http://api-lab.paloaltonetworks.com/pan-python.html) as follows; note: replace `<IP_ADDR>` and `<LOGIN_USERNAME>` with the IP address and username for the Panorama device:
-```
+```text
 # Generate an API key and save in .panrc so subsequent commands don't require logging in again
 # This only needs to be done once
 panxapi.py -t panorama_tag -h <IP_ADDR> -l <LOGIN_USERNAME> -k >> .panrc
