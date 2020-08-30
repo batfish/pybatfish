@@ -127,8 +127,8 @@ class BgpRouteConstraints(DataModelElement):
     :ivar complementPrefix: A flag indicating that all prefixes except the ones in prefix are allowed
     :ivar localPreference: List of allowed local preference integer ranges, as a string
     :ivar med: List of allowed MED integer ranges, as a string
-    :ivar communities: List of (Java) regexes representing allowed community values.
-    :ivar complementCommunities: A flag indicating that all communities except those in communities are allowed.
+    :ivar communities: List of allowed and disallowed community regexes
+    :ivar asPath: List of allowed and disallowed AS-path regexes
     """
 
     prefix = attr.ib(
@@ -142,7 +142,9 @@ class BgpRouteConstraints(DataModelElement):
     communities = attr.ib(
         default=None, type=Optional[List[str]], converter=_string_list_brc_converter
     )
-    complementCommunities = attr.ib(default=None, type=Optional[bool])
+    asPath = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -152,7 +154,7 @@ class BgpRouteConstraints(DataModelElement):
             localPreference=json_dict.get("localPreference"),
             med=json_dict.get("med"),
             communities=json_dict.get("communities"),
-            complementCommunities=json_dict.get("complementCommunities"),
+            asPath=json_dict.get("asPath"),
         )
 
 

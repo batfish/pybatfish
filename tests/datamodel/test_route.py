@@ -102,8 +102,8 @@ def testBgpRouteConstraintsDeserialization():
     complementPrefix = True
     localPreference = "1-2, 3-4, !5-6"
     med = "0-255, !50-55"
-    communities = [".*", "4[0-9]:2.+"]
-    complementCommunities = False
+    communities = ["/.*/", "!/4[0-9]:2.+/"]
+    asPath = ["/.*/", "40"]
 
     dct = {
         "prefix": prefix,
@@ -111,7 +111,7 @@ def testBgpRouteConstraintsDeserialization():
         "localPreference": localPreference,
         "med": med,
         "communities": communities,
-        "complementCommunities": complementCommunities,
+        "asPath": asPath,
     }
     bgpRouteConstraints = BgpRouteConstraints.from_dict(dct)
     assert bgpRouteConstraints.prefix == prefix
@@ -119,7 +119,7 @@ def testBgpRouteConstraintsDeserialization():
     assert bgpRouteConstraints.localPreference == localPreference
     assert bgpRouteConstraints.med == med
     assert bgpRouteConstraints.communities == communities
-    assert bgpRouteConstraints.complementCommunities == complementCommunities
+    assert bgpRouteConstraints.asPath == asPath
 
 
 def testBgpRouteConstraintsConversions():
