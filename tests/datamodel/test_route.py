@@ -125,10 +125,12 @@ def testBgpRouteConstraintsDeserialization():
 def testBgpRouteConstraintsConversions():
 
     prefix = "1.2.3.4/5:6-7"
+    communities = ["20:30"]
     med = ["1-2", "3-4", "!5-6"]
     localPreference = []
 
     assert _string_list_brc_converter(prefix) == [prefix]
+    assert _string_list_brc_converter(communities) == communities
     assert _longspace_brc_converter(med) == "1-2,3-4,!5-6"
     assert _longspace_brc_converter(localPreference) == ""
 
