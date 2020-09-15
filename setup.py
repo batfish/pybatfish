@@ -105,7 +105,7 @@ setup(
     extras_require={
         "capirca": CAPIRCA_DEPS,
         "dev": [
-            "black; python_version >= '3.6.0'",
+            "black==19.10b0; python_version >= '3.6.0'",
             "cerberus==1.3.2",
             "check-manifest",
             "coverage",
