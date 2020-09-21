@@ -87,6 +87,8 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
   - label: "Python ${version} integration tests"
     command:
       - bash .buildkite/integration_tests.sh ${version}
+    artifact_paths:
+      - workspace/batfish.log
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: "python:${version}"
