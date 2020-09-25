@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, Iterable, List, Optional, Text  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
