@@ -155,7 +155,8 @@ def test_session_adapters():
     assert https == _adapter
     # Also make sure retries are configured
     retries = _adapter.max_retries
-    assert retries.total == Options.max_tries_to_connect_to_coordinator
+    assert retries.connect == Options.max_tries_to_connect_to_coordinator
+    assert retries.read == Options.max_tries_to_connect_to_coordinator
     # All request types should be retried
     assert not retries.method_whitelist
 
