@@ -33,7 +33,7 @@ class Options(object):
     default_snapshot_prefix = "ss_"  # type: str
 
     # Parameters for urllib3.Retry, see docs there for more info. Max total
-    # sleep time is about 5m, ramping up from 0.8s
+    # sleep time is a few seconds, ramping up from 0.8s
     #
     # Read as "try" "time to sleep if this fails" "total sleep so far"
     #
@@ -47,12 +47,6 @@ class Options(object):
     # 1 1.6 0.8
     # 2 3.2 2.4000000000000004
     # 3 6.4 5.6000000000000005
-    # 4 12.8 12.0
-    # 5 25.6 24.8
-    # 6 51.2 50.400000000000006
-    # 7 102.4 101.60000000000001
-    # 8 120 204.0
-    # 9 120 324.0   # This sleep of 120s will never happen, would fail instead
     #
     request_backoff_factor = 0.8  # type: float
-    max_tries_to_connect_to_coordinator = 10  # type: int
+    max_tries_to_connect_to_coordinator = 3  # type: int
