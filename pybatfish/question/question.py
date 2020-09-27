@@ -869,6 +869,7 @@ def _validateType(value, expectedType):
         VariableType.OSPF_PROCESS_PROPERTY_SPEC,
         VariableType.OSPF_SESSION_STATUS_SPEC,
         VariableType.REFERENCE_BOOK_NAME,
+        VariableType.ROUTING_POLICY_SPEC,
         VariableType.ROUTING_PROTOCOL_SPEC,
         VariableType.STRUCTURE_NAME,
         VariableType.VRF,
