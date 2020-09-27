@@ -149,6 +149,7 @@ class VariableType(str, Enum):
     PROTOCOL = "protocol"  #: application-level protocols
     REFERENCE_BOOK_NAME = "referenceBookName"  #: reference book name
     QUESTION = "question"  #: questions
+    ROUTING_POLICY_SPEC = "routingPolicySpec"  #: routing policies
     ROUTING_PROTOCOL_SPEC = "routingProtocolSpec"  #: routing protocols
     STRING = "string"  #: string values
     STRUCTURE_NAME = "structureName"  #: names of structures
