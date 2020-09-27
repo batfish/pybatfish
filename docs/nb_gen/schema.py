@@ -16,7 +16,8 @@ _BASE_TYPES = {
 # Convert input types (i.e., template variable types) to python types
 _INPUT_TYPES = {
     "comparator": "str",
-    "bgproute": "pybatfish.datamodel.route.BgpRoute",
+    "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
+    "bgproutes": "[pybatfish.datamodel.route.BgpRoute]",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
     "ip": "str",
