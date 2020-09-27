@@ -141,8 +141,6 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
     ]
     xfail = {
         "multipathConsistency",
-        "searchRoutePolicies",
-        "testRoutePolicies",
         "eigrpEdges",
         "layer1Edges",
         "isisEdges",
