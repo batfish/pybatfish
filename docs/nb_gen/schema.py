@@ -10,6 +10,7 @@ _BASE_TYPES = {
     "long": "int",
     "boolean": "bool",
     "string": "str",
+    "str": "str",
     "double": "float",
 }
 
@@ -17,7 +18,7 @@ _BASE_TYPES = {
 _INPUT_TYPES = {
     "comparator": "str",
     "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
-    "bgproutes": "[pybatfish.datamodel.route.BgpRoute]",
+    "bgproutes": "List<pybatfish.datamodel.route.BgpRoute>",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
     "ip": "str",
@@ -67,7 +68,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
-    allowed_usages = ["input", "output"]
+    allowed_usages = ["input", "output", "any"]
     if usage not in allowed_usages:
         raise ValueError(
             f"Invalid conversion type: {usage}, expected one of: {allowed_usages}"
@@ -90,31 +91,26 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
         slug = re.sub(r"spec$", "specifier", dasherize(underscore(value)))
         text = value[:1].capitalize() + value[1:]
         return f"[{text}](../specifiers.md#{slug})"
+    elif value.startswith("pybatfish.datamodel"):
+            text = value.split(".")[-1]  # The class name
+            return f"[{text}](../datamodel.rst#{value})"
+    elif value.lower() == "selfdescribing":
+        if question_name is None:
+            raise ValueError(
+                "Converting selfdescribing schema requires a question name"
+            )
+        try:
+            return _SELF_DESCRIBING_CONVERSIONS[question_name]
+        except KeyError:
+            raise KeyError(
+                f"Error: unknown selfdescribing schema usage in question {question_name}"
+            )
     elif usage == "input":
         slug = _INPUT_TYPES[value.lower()]
-        if slug.startswith("pybatfish.datamodel"):
-            text = slug.split(".")[-1]  # The class name
-            return f"[{text}](../datamodel.rst#{slug})"
-        else:
-            return slug
+        return convert_schema(slug, "any", question_name)
     elif usage == "output":
         slug = _OUTPUT_TYPES[value.lower()]
-        if slug.startswith("pybatfish.datamodel"):
-            text = slug.split(".")[-1]  # The class name
-            return f"[{text}](../datamodel.rst#{slug})"
-        elif slug.lower() == "selfdescribing":
-            if question_name is None:
-                raise ValueError(
-                    "Converting selfdescribing schema requires a question name"
-                )
-            try:
-                return _SELF_DESCRIBING_CONVERSIONS[question_name]
-            except KeyError:
-                raise KeyError(
-                    f"Error: unknown selfdescribing schema usage in question {question_name}"
-                )
-        else:
-            return slug
+        return convert_schema(slug, "any", question_name)
     else:
         raise ValueError(
             f"Error: Unable to convert based on parameters - value: {value}, type {usage}, question {question_name}"

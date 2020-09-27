@@ -47,6 +47,10 @@ def test_convert_schema():
         convert_schema("HeaderConstraint", "input")
         == "[HeaderConstraints](../datamodel.rst#pybatfish.datamodel.flow.HeaderConstraints)"
     )
+    assert (
+        convert_schema("bgproutes", "input")
+        == "List of [BgpRoute](../datamodel.rst#pybatfish.datamodel.route.BgpRoute)"
+    )
     assert convert_schema("SelfDescribing", "output", "bgpPeerConfiguration") == "str"
     with pytest.raises(ValueError):
         assert convert_schema("SelfDescribing", "output") == "str"
@@ -167,3 +171,4 @@ def test_all_questions_in_yaml_are_valid_questions(
     session_qs = set([q["name"] for q in session.q.list()])
     yaml_qs = q_names_from_categories(categories)
     assert yaml_qs.issubset(session_qs)
+
