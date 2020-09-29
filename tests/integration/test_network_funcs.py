@@ -215,7 +215,7 @@ def test_put_reference_book():
         bf_delete_network(network_name)
 
 
-def auto_complete_tester(completion_types):
+def auto_complete_tester(session, completion_types):
     try:
         name = bf_set_network()
         bf_init_snapshot(join(_this_dir, "snapshot"))
@@ -229,13 +229,13 @@ def auto_complete_tester(completion_types):
         bf_delete_network(name)
 
 
-def test_auto_complete():
-    auto_complete_tester(COMPLETION_TYPES)
+def test_auto_complete(session):
+    auto_complete_tester(session, COMPLETION_TYPES)
 
 
 @requires_bf("2020.09.28")
-def test_auto_complete_routing_policy_spec():
+def test_auto_complete_routing_policy_spec(session):
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
-    auto_complete_tester([VariableType.ROUTING_POLICY_SPEC])
+    auto_complete_tester(session, [VariableType.ROUTING_POLICY_SPEC])
