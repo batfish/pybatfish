@@ -39,7 +39,7 @@ from pybatfish.client.extended import (
 )
 from pybatfish.client.options import Options
 from pybatfish.client.session import Session
-from pybatfish.datamodel.primitives import AutoCompleteSuggestion
+from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
 from pybatfish.datamodel.referencelibrary import (
     NodeRoleDimension,
     NodeRolesData,
@@ -215,11 +215,11 @@ def test_put_reference_book():
         bf_delete_network(network_name)
 
 
-def test_auto_complete():
+def __auto_complete_tester(completion_types):
     try:
         name = bf_set_network()
         bf_init_snapshot(join(_this_dir, "snapshot"))
-        for completion_type in COMPLETION_TYPES:
+        for completion_type in completion_types:
             suggestions = bf_auto_complete(completion_type, ".*")
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
@@ -227,3 +227,16 @@ def test_auto_complete():
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
         bf_delete_network(name)
+
+
+def test_auto_complete():
+    __auto_complete_tester(COMPLETION_TYPES)
+
+
+@requires_bf('2020.09.28')
+def test_auto_complete_routing_policy_spec():
+    """
+    This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
+    :return:
+    """
+    __auto_complete_tester([VariableType.ROUTING_POLICY_SPEC])
