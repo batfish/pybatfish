@@ -16,13 +16,11 @@
 
 from __future__ import absolute_import, print_function
 
-import json
 import logging
 from typing import Any, Dict, List, Optional, Union  # noqa: F401
 
 from deprecated import deprecated
 
-from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel.primitives import (  # noqa: F401
     AutoCompleteSuggestion,
     Interface,
@@ -36,7 +34,7 @@ from pybatfish.datamodel.referencelibrary import (
 )
 from pybatfish.exception import BatfishException
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
-from . import resthelper, restv2helper, workhelper
+from . import restv2helper
 from .options import Options
 from .session import Session
 
@@ -136,20 +134,9 @@ def bf_auto_complete(completion_type, query, max_suggestions=None):
     :param max_suggestions: Optional max number of suggestions to be returned
     :type max_suggestions: int
     """
-    jsonData = workhelper.get_data_auto_complete(
-        bf_session, completion_type, query, max_suggestions
+    return bf_session.auto_complete(
+        completion_type=completion_type, query=query, max_suggestions=max_suggestions
     )
-    response = resthelper.get_json_response(
-        bf_session, CoordConsts.SVC_RSC_AUTO_COMPLETE, jsonData
-    )
-    if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-        suggestions = [
-            AutoCompleteSuggestion.from_dict(json.loads(suggestion))
-            for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
-        ]
-        return suggestions
-
-    raise BatfishException("Unexpected response: {}.".format(response))
 
 
 def bf_delete_issue_config(major, minor):

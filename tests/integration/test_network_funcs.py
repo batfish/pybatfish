@@ -19,13 +19,11 @@ from requests.exceptions import HTTPError
 
 from pybatfish.client.commands import (
     bf_add_node_role_dimension,
-    bf_auto_complete,
     bf_delete_network,
     bf_delete_node_role_dimension,
     bf_get_node_role_dimension,
     bf_get_node_roles,
     bf_get_reference_book,
-    bf_init_snapshot,
     bf_list_networks,
     bf_put_node_role_dimension,
     bf_put_node_roles,
@@ -217,16 +215,16 @@ def test_put_reference_book():
 
 def auto_complete_tester(session, completion_types):
     try:
-        name = bf_set_network()
-        bf_init_snapshot(join(_this_dir, "snapshot"))
+        name = session.set_network()
+        session.init_snapshot(join(_this_dir, "snapshot"))
         for completion_type in completion_types:
-            suggestions = bf_auto_complete(completion_type, ".*")
+            suggestions = session.auto_complete(completion_type, ".*")
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
             if len(suggestions) > 0:
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
-        bf_delete_network(name)
+        session.delete_network(name)
 
 
 def test_auto_complete(session):
