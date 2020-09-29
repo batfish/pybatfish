@@ -55,7 +55,7 @@ class Options(object):
     #
     request_backoff_factor = 0.8  # type: float
     # Number of tries to connect to coordinator initially
-    # We should fail fast initially
+    # We should fail fast initially in case connection is misconfigured
     max_initial_tries_to_connect_to_coordinator = 3  # type: int
     # Number of tries to communicate with coordinator after session setup
     # We should be forgiving if coordinator is unresponsive after setting up
