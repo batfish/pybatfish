@@ -16,6 +16,7 @@
 from __future__ import absolute_import, print_function
 
 import base64
+import json
 import logging
 import os
 import tempfile
@@ -46,12 +47,14 @@ from pybatfish.client.consts import CoordConsts, WorkStatusCode
 from pybatfish.client.restv2helper import get_component_versions
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (
+    AutoCompleteSuggestion,
     HeaderConstraints,
     Interface,
     NodeRoleDimension,
     NodeRolesData,
     ReferenceBook,
     ReferenceLibrary,
+    VariableType,
 )
 from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
 from pybatfish.datamodel.answer.table import is_table_ans
@@ -1228,6 +1231,46 @@ class Session(object):
                 warn_on_snapshot_failure(self)
 
             return self.snapshot
+
+    def auto_complete(self, completion_type, query, max_suggestions=None):
+        # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+        """
+        Get a list of autocomplete suggestions that match the provided query based on the variable type.
+
+        If completion is not supported for the provided variable type a BatfishException will be raised.
+
+        Usage Example::
+
+            >>> from pybatfish.client.session import Session
+            >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
+            >>> bf = Session.get('bf')
+            >>> name = bf.set_network()
+            >>> bf.auto_complete(VariableType.ROUTING_PROTOCOL_SPEC, "b") # doctest: +SKIP
+            [AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='bgp'),
+                AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ebgp'),
+                AutoCompleteSuggestion(description=None, insertion_index=0, is_partial=False, rank=2147483647, text='ibgp')]
+
+        :param completion_type: The type of parameter to suggest autocompletions for
+        :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
+        :param query: The partial string to match suggestions on
+        :type query: str
+        :param max_suggestions: Optional max number of suggestions to be returned
+        :type max_suggestions: int
+        """
+        json_data = workhelper.get_data_auto_complete(
+            self, completion_type, query, max_suggestions
+        )
+        response = resthelper.get_json_response(
+            self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
+        )
+        if CoordConsts.SVC_KEY_SUGGESTIONS in response:
+            suggestions = [
+                AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
+            ]
+            return suggestions
+
+        raise BatfishException("Unexpected response: {}.".format(response))
 
 
 def _text_with_platform(text, platform):
