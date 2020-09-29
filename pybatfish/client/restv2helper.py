@@ -14,7 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, Union  # noqa: F401
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, \
+    Union  # noqa: F401
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -39,21 +40,40 @@ if TYPE_CHECKING:
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-# Setup a session, configure retry policy
+# List of HTTP statuses to retry
+_STATUS_FORCELIST = [429, 500, 502, 503, 504]
+
+# Create session for existing connection to backend
 _requests_session = requests.Session()
 _adapter = HTTPAdapter(
     max_retries=Retry(
-        connect=Options.max_tries_to_connect_to_coordinator,
-        read=Options.max_tries_to_connect_to_coordinator,
+        connect=Options.max_retries_to_connect_to_coordinator,
+        read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
         # Retry on all calls, including POST
         method_whitelist=False,
-        status_forcelist=[429, 500, 502, 503, 504],
+        status_forcelist=_STATUS_FORCELIST,
     )
 )
-# Configure retries for http and https requests
+# Configure retries for both http and https requests
 _requests_session.mount("http://", _adapter)
 _requests_session.mount("https://", _adapter)
+
+# Create request session for that fails fast in case connection is misconfigured
+_requests_session_fail_fast = requests.Session()
+_adapter_fail_fast = HTTPAdapter(
+    max_retries=Retry(
+        connect=Options.max_initial_tries_to_connect_to_coordinator,
+        read=Options.max_initial_tries_to_connect_to_coordinator,
+        backoff_factor=Options.request_backoff_factor,
+        # Retry on all calls, including POST
+        method_whitelist=False,
+        status_forcelist=_STATUS_FORCELIST,
+    )
+)
+# Configure retries for both http and https requests
+_requests_session_fail_fast.mount("http://", _adapter_fail_fast)
+_requests_session_fail_fast.mount("https://", _adapter_fail_fast)
 
 _encoder = BfJsonEncoder()
 
@@ -429,10 +449,10 @@ def get_work_log(session, snapshot, work_id):
     return _get(session, url_tail, dict()).text
 
 
-def get_component_versions(session):
-    # type: (Session) -> Dict[str, Any]
+def get_component_versions(session, fail_fast=False):
+    # type: (Session, bool) -> Dict[str, Any]
     """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
-    return _get_dict(session, "/version")
+    return _get_dict(session, "/version", fail_fast=fail_fast)
 
 
 def get_question_templates(session: "Session", verbose: bool) -> Dict:
@@ -569,15 +589,16 @@ def _delete(
     _check_response_status(response)
 
 
-def _get(session, url_tail, params, stream=False):
-    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Response
+def _get(session, url_tail, params, stream=False, fail_fast=False):
+    # type: (Session, str, Optional[Dict[str, Any]], bool, bool) -> Response
     """Make an HTTP(s) GET request to Batfish coordinator.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
     url = session.get_base_url2() + url_tail
-    response = _requests_session.get(
+    requests_session = _requests_session_fail_fast if fail_fast else _requests_session
+    response = requests_session.get(
         url,
         headers=_get_headers(session),
         params=params,
@@ -588,14 +609,14 @@ def _get(session, url_tail, params, stream=False):
     return response
 
 
-def _get_dict(session, url_tail, params=None):
+def _get_dict(session, url_tail, params=None, fail_fast=False):
     # type: (Session, str, Optional[Dict[str, Any]]) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
     """
-    response = _get(session, url_tail, params)
+    response = _get(session, url_tail, params, fail_fast=fail_fast)
     return dict(response.json())
 
 

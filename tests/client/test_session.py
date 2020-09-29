@@ -50,7 +50,9 @@ def test_get_session_types():
 def test_get_session():
     """Confirm Session object is built for a specified session type."""
     session_host = "foobar"
-    session = Session.get(type_="bf", load_questions=False, host=session_host)
+    session = Session.get(
+        type_="bf", load_questions=False, verify_connection=False, host=session_host
+    )
     # Confirm the session is the correct type
     assert isinstance(session, Session)
     # Confirm params were passed through
@@ -60,7 +62,9 @@ def test_get_session():
 def test_get_session_default():
     """Confirm default Session object is built when no type is specified."""
     session_host = "foobar"
-    session = Session.get(load_questions=False, host=session_host)
+    session = Session.get(
+        load_questions=False, verify_connection=False, host=session_host
+    )
     # Confirm the session is the correct type
     assert isinstance(session, Session)
     # Confirm params were passed through
@@ -77,7 +81,16 @@ def test_get_session_bad():
     assert "type '{}' does not match".format(bogus_type) in e_msg
 
 
+def test_session_connection_fail():
+    """Confirm creating a session fails as expected when get version fails."""
+    with patch(
+        "pybatfish.client.session.get_component_versions"
+    ) as get_ver, pytest.raises(ConnectionError):
+        get_ver.side_effect = ConnectionError
+        Session.get(type_="bf")
+
+
 def test_session_api_key():
     """Ensure we use api key from constructor."""
-    s = Session(api_key="foo", load_questions=False)
+    s = Session(api_key="foo", load_questions=False, verify_connection=False)
     assert s.api_key == "foo"

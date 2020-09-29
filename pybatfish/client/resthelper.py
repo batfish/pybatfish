@@ -35,12 +35,12 @@ if TYPE_CHECKING:
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-# Setup a session, configure retry policy
-_requests_session = requests.Session()
+# Create session for existing connection to backend
+_requests_session_established = requests.Session()
 _adapter = HTTPAdapter(
     max_retries=Retry(
-        connect=Options.max_tries_to_connect_to_coordinator,
-        read=Options.max_tries_to_connect_to_coordinator,
+        connect=Options.max_retries_to_connect_to_coordinator,
+        read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
         # Retry on all calls, including POST
         method_whitelist=False,
@@ -48,8 +48,8 @@ _adapter = HTTPAdapter(
     )
 )
 # Configure retries for http and https requests
-_requests_session.mount("http://", _adapter)
-_requests_session.mount("https://", _adapter)
+_requests_session_established.mount("http://", _adapter)
+_requests_session_established.mount("https://", _adapter)
 
 
 # uncomment line below if you want http capture by fiddler
@@ -101,7 +101,7 @@ def _make_request(session, resource, json_data=None, stream=False, use_http_get=
     """
     url = session.get_url(resource)
     if use_http_get:
-        response = _requests_session.get(
+        response = _requests_session_established.get(
             url, verify=session.verify_ssl_certs, stream=stream
         )
     else:
@@ -110,7 +110,7 @@ def _make_request(session, resource, json_data=None, stream=False, use_http_get=
         json_data[CoordConsts.SVC_KEY_VERSION] = pybatfish.__version__
         multipart_data = MultipartEncoder(json_data)
         headers = {"Content-Type": multipart_data.content_type}
-        response = _requests_session.post(
+        response = _requests_session_established.post(
             url,
             data=multipart_data,
             verify=session.verify_ssl_certs,

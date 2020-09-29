@@ -13,19 +13,19 @@
 #   limitations under the License.
 
 from pybatfish.client.options import Options
-from pybatfish.client.resthelper import _adapter, _requests_session
+from pybatfish.client.resthelper import _adapter, _requests_session_established
 
 
 def test_session_adapters():
     """Confirm session is configured with correct http and https adapters."""
-    http = _requests_session.adapters["http://"]
-    https = _requests_session.adapters["https://"]
+    http = _requests_session_established.adapters["http://"]
+    https = _requests_session_established.adapters["https://"]
 
     assert http == _adapter
     assert https == _adapter
     # Also make sure retries are configured
     retries = _adapter.max_retries
-    assert retries.connect == Options.max_tries_to_connect_to_coordinator
-    assert retries.read == Options.max_tries_to_connect_to_coordinator
+    assert retries.connect == Options.max_retries_to_connect_to_coordinator
+    assert retries.read == Options.max_retries_to_connect_to_coordinator
     # All request types should be retried
     assert not retries.method_whitelist

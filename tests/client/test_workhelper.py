@@ -14,6 +14,7 @@
 
 import datetime
 import json
+from unittest.mock import patch
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -32,7 +33,11 @@ from pybatfish.client.workhelper import (
 )
 from pybatfish.client.workitem import WorkItem
 
-from unittest.mock import patch
+
+@pytest.fixture(scope="function")
+def session():
+    s = Session(load_questions=False, verify_connection=False)
+    yield s
 
 
 def __execute_and_return_request_params(work_item, session, extra_args=None):
@@ -44,9 +49,7 @@ def __execute_and_return_request_params(work_item, session, extra_args=None):
     return witem["requestParams"]
 
 
-def test_execute_request_params():
-    session = Session(load_questions=False)
-
+def test_execute_request_params(session):
     # Unmodified work item
     work_item = WorkItem(session)
     witem = __execute_and_return_request_params(work_item, session)
@@ -119,8 +122,7 @@ def test_print_timestamp():
     assert _print_timestamp(ref) == ref.astimezone(tzlocal()).isoformat(" ")
 
 
-def test_print_workstatus_fresh_task(caplog):
-    session = Session(load_questions=False)
+def test_print_workstatus_fresh_task(caplog, session):
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(
         2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
@@ -151,8 +153,7 @@ def test_print_workstatus_fresh_task(caplog):
     )
 
 
-def test_print_workstatus_fresh_task_subtasks(caplog):
-    session = Session(load_questions=False)
+def test_print_workstatus_fresh_task_subtasks(caplog, session):
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(
         2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
@@ -183,8 +184,7 @@ def test_print_workstatus_fresh_task_subtasks(caplog):
     )
 
 
-def test_print_workstatus_old_task(caplog):
-    session = Session(load_questions=False)
+def test_print_workstatus_old_task(caplog, session):
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(
         2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
@@ -215,8 +215,7 @@ def test_print_workstatus_old_task(caplog):
     )
 
 
-def test_print_workstatus_old_task_subtasks(caplog):
-    session = Session(load_questions=False)
+def test_print_workstatus_old_task_subtasks(caplog, session):
     session.stale_timeout = 5
     nowFunction = lambda tzinfo: datetime.datetime(
         2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo

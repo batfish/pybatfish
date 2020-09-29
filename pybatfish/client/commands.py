@@ -49,7 +49,7 @@ def _configure_default_logging():
 
 # TODO: normally libraries don't configure logging in code
 _configure_default_logging()
-bf_session = Session(load_questions=False)
+bf_session = Session(load_questions=False, verify_connection=False)
 
 __all__ = [
     "bf_add_issue_config",

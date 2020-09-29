@@ -319,6 +319,7 @@ class Session(object):
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        verify_connection: bool = True,
     ):
         # Coordinator args
         self.host = host  # type: str
@@ -344,6 +345,11 @@ class Session(object):
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int
         self.enable_diagnostics = True  # type: bool
+
+        if verify_connection:
+            # Use get version just to try to connect to backend
+            # Make sure to fail fast in case session is misconfigured
+            get_component_versions(self, fail_fast=True)
 
         # Auto-load question templates
         if load_questions:

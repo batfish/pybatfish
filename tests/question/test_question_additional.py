@@ -152,8 +152,10 @@ def testInvalidPrefixRangeInput():
 def testInvalidPrefixInput():
     prefixRange = "192.168.1.s/100:100"
     actualResult = question._isPrefixRange(prefixRange)
-    expectMessage = "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
-        prefixRange
+    expectMessage = (
+        "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
+            prefixRange
+        )
     )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
