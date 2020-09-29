@@ -31,7 +31,6 @@ COMPLETION_TYPES = [
     VariableType.PREFIX,
     VariableType.PROTOCOL,
     VariableType.REFERENCE_BOOK_NAME,
-    VariableType.ROUTING_POLICY_SPEC,
     VariableType.ROUTING_PROTOCOL_SPEC,
     VariableType.STRUCTURE_NAME,
     VariableType.VRF,
