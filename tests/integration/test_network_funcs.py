@@ -233,7 +233,7 @@ def test_auto_complete():
     auto_complete_tester(COMPLETION_TYPES)
 
 
-@requires_bf('2020.09.28')
+@requires_bf("2020.09.28")
 def test_auto_complete_routing_policy_spec():
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.

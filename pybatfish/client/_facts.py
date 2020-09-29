@@ -65,37 +65,25 @@ def get_facts(session, nodes_specifier="/.*/", snapshot=None):
     if snapshot is not None:
         ans_args["snapshot"] = snapshot
 
-    node_properties = session.q.nodeProperties(  # type: ignore
-        **args
-    ).answer(
+    node_properties = session.q.nodeProperties(**args).answer(  # type: ignore
         **ans_args
     )
-    interface_properties = session.q.interfaceProperties(  # type: ignore
-        **args
-    ).answer(
+    interface_properties = session.q.interfaceProperties(**args).answer(  # type: ignore
         **ans_args
     )
     bgp_process_properties = session.q.bgpProcessConfiguration(  # type: ignore
         **args
     ).answer(**ans_args)
-    bgp_peer_properties = session.q.bgpPeerConfiguration(  # type: ignore
-        **args
-    ).answer(
+    bgp_peer_properties = session.q.bgpPeerConfiguration(**args).answer(  # type: ignore
         **ans_args
     )
-    ospf_proc = session.q.ospfProcessConfiguration(  # type: ignore
-        **args
-    ).answer(
+    ospf_proc = session.q.ospfProcessConfiguration(**args).answer(  # type: ignore
         **ans_args
     )
-    ospf_area = session.q.ospfAreaConfiguration(  # type: ignore
-        **args
-    ).answer(
+    ospf_area = session.q.ospfAreaConfiguration(**args).answer(  # type: ignore
         **ans_args
     )
-    ospf_iface = session.q.ospfInterfaceConfiguration(  # type: ignore
-        **args
-    ).answer(
+    ospf_iface = session.q.ospfInterfaceConfiguration(**args).answer(  # type: ignore
         **ans_args
     )
 
