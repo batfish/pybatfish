@@ -237,6 +237,5 @@ def test_auto_complete():
 def test_auto_complete_routing_policy_spec():
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
-    :return:
     """
     __auto_complete_tester([VariableType.ROUTING_POLICY_SPEC])
