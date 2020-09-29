@@ -610,7 +610,7 @@ def _get(session, url_tail, params, stream=False, fail_fast=False):
 
 
 def _get_dict(session, url_tail, params=None, fail_fast=False):
-    # type: (Session, str, Optional[Dict[str, Any]]) -> Dict[str, Any]
+    # type: (Session, str, Optional[Dict[str, Any]], bool) -> Dict[str, Any]
     """Make an HTTP(s) GET request to Batfish coordinator that should return a JSON dict.
 
     :raises SSLError if SSL connection failed
