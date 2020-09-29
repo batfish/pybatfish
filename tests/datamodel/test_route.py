@@ -148,4 +148,4 @@ def testBgpRouteDiffDeserialization():
 
 def testBgpRouteDiffStr():
     diff = BgpRouteDiff(fieldName="nm", oldValue="old", newValue="new")
-    assert diff._repr_html_() == "nm: old -> new"
+    assert diff._repr_html_() == "Nm: old --> new"
