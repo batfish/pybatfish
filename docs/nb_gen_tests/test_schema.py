@@ -135,6 +135,7 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "aaaAuthenticationLogin",
         "edges",
         "filterTable",
+        "prefixTracer",
         "viConversionStatus",
         "viConversionWarning",
         "viModel",
