@@ -85,6 +85,7 @@ class BgpRoute(DataModelElement):
         lines = []
         lines.append("Network: {node}".format(node=self.network))
         lines.append("AS Path: {asPath}".format(asPath=self.asPath))
+        # using a join on strings removes quotes around individual communities
         lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
