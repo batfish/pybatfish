@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, Iterable, List, Optional, Text  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
@@ -84,8 +84,9 @@ class BgpRoute(DataModelElement):
         # type: () -> List[str]
         lines = []
         lines.append("Network: {node}".format(node=self.network))
-        lines.append("AS Path: %s" % self.asPath)
-        lines.append("Communities: %s" % self.communities)
+        lines.append("AS Path: {asPath}".format(asPath=self.asPath))
+        # using a join on strings removes quotes around individual communities
+        lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
         lines.append("Originator IP: %s" % self.originatorIp)
@@ -180,8 +181,22 @@ class BgpRouteDiff(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "{fieldName}: {oldValue} -> {newValue}".format(
-            fieldName=self.fieldName, oldValue=self.oldValue, newValue=self.newValue
+        # special pretty printing for certain field names
+        prettyNames = {
+            "asPath": "AS Path",
+            "localPreference": "Local Preference",
+            "metric": "Metric",
+            "originatorIp": "Originator IP",
+            "originType": "Origin Type",
+            "sourceProtocol": "Source Protocol",
+        }
+        if self.fieldName in prettyNames:
+            prettyFieldName = prettyNames[self.fieldName]
+        else:
+            # by default, just capitalize the field name
+            prettyFieldName = self.fieldName.capitalize()
+        return "{fieldName}: {oldValue} --> {newValue}".format(
+            fieldName=prettyFieldName, oldValue=self.oldValue, newValue=self.newValue
         )
 
 

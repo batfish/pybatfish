@@ -32,8 +32,7 @@ class Options(object):
     default_question_prefix = "q"  # type: str
     default_snapshot_prefix = "ss_"  # type: str
 
-    # Parameters for urllib3.Retry, see docs there for more info. Max total
-    # sleep time is about 5m, ramping up from 0.8s
+    # Parameters for urllib3.Retry, see docs there for more info
     #
     # Read as "try" "time to sleep if this fails" "total sleep so far"
     #
@@ -55,4 +54,10 @@ class Options(object):
     # 9 120 324.0   # This sleep of 120s will never happen, would fail instead
     #
     request_backoff_factor = 0.8  # type: float
-    max_tries_to_connect_to_coordinator = 10  # type: int
+    # Number of tries to connect to coordinator initially
+    # We should fail fast initially in case connection is misconfigured
+    max_initial_tries_to_connect_to_coordinator = 3  # type: int
+    # Number of tries to communicate with coordinator after session setup
+    # We should be forgiving if coordinator is unresponsive after setting up
+    # a connection (e.g. GC)
+    max_retries_to_connect_to_coordinator = 10  # type: int

@@ -147,5 +147,7 @@ def testBgpRouteDiffDeserialization():
 
 
 def testBgpRouteDiffStr():
-    diff = BgpRouteDiff(fieldName="nm", oldValue="old", newValue="new")
-    assert diff._repr_html_() == "nm: old -> new"
+    diff1 = BgpRouteDiff(fieldName="nm", oldValue="old", newValue="new")
+    diff2 = BgpRouteDiff(fieldName="localPreference", oldValue="old", newValue="new")
+    assert diff1._repr_html_() == "Nm: old --> new"
+    assert diff2._repr_html_() == "Local Preference: old --> new"
