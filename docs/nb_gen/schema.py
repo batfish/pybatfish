@@ -10,7 +10,6 @@ _BASE_TYPES = {
     "long": "int",
     "boolean": "bool",
     "string": "str",
-    "str": "str",
     "double": "float",
 }
 
@@ -18,7 +17,7 @@ _BASE_TYPES = {
 _INPUT_TYPES = {
     "comparator": "str",
     "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
-    "bgproutes": "List<pybatfish.datamodel.route.BgpRoute>",
+    "bgproutes": "List[pybatfish.datamodel.route.BgpRoute]",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
     "ip": "str",
@@ -68,7 +67,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
-    allowed_usages = ["input", "output", "any"]
+    allowed_usages = ["input", "output", "python"]
     if usage not in allowed_usages:
         raise ValueError(
             f"Invalid conversion type: {usage}, expected one of: {allowed_usages}"
@@ -77,7 +76,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     if value.startswith("Set<"):
         inner = value[4:-1]  # strip prefix and suffix ">"
         return "Set of {}".format(convert_schema(inner, usage, question_name))
-    elif value.startswith("List<"):
+    elif value.startswith("List<") or value.startswith("List["):
         inner = value[5:-1]  # strip prefix and suffix ">"
         return "List of {}".format(convert_schema(inner, usage, question_name))
     elif value.lower() in _BASE_TYPES:
@@ -107,10 +106,10 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
             )
     elif usage == "input":
         slug = _INPUT_TYPES[value.lower()]
-        return convert_schema(slug, "any", question_name)
+        return convert_schema(slug, "python", question_name)
     elif usage == "output":
         slug = _OUTPUT_TYPES[value.lower()]
-        return convert_schema(slug, "any", question_name)
+        return convert_schema(slug, "python", question_name)
     else:
         raise ValueError(
             f"Error: Unable to convert based on parameters - value: {value}, type {usage}, question {question_name}"
