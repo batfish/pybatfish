@@ -958,6 +958,7 @@ def _validateType(value, expectedType):
                 return True, None
     elif expectedType in [
         VariableType.ANSWER_ELEMENT,
+        VariableType.BGP_ROUTE_CONSTRAINTS,
         VariableType.HEADER_CONSTRAINT,
         VariableType.PATH_CONSTRAINT,
     ]:

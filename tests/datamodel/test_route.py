@@ -1,4 +1,10 @@
-from pybatfish.datamodel.route import BgpRoute, BgpRouteDiff
+from pybatfish.datamodel.route import (
+    BgpRoute,
+    BgpRouteConstraints,
+    BgpRouteDiff,
+    _longspace_brc_converter,
+    _string_list_brc_converter,
+)
 
 
 def testBgpRouteDeserialization():
@@ -91,6 +97,44 @@ def test_bgp_route_str():
     ]
 
 
+def testBgpRouteConstraintsDeserialization():
+    prefix = ["1.2.3.4/5:6-7", "8.8.8.8:8/8-8"]
+    complementPrefix = True
+    localPreference = "1-2, 3-4, !5-6"
+    med = "0-255, !50-55"
+    communities = ["/.*/", "!/4[0-9]:2.+/"]
+    asPath = ["/.*/", "40"]
+
+    dct = {
+        "prefix": prefix,
+        "complementPrefix": complementPrefix,
+        "localPreference": localPreference,
+        "med": med,
+        "communities": communities,
+        "asPath": asPath,
+    }
+    bgpRouteConstraints = BgpRouteConstraints.from_dict(dct)
+    assert bgpRouteConstraints.prefix == prefix
+    assert bgpRouteConstraints.complementPrefix == complementPrefix
+    assert bgpRouteConstraints.localPreference == localPreference
+    assert bgpRouteConstraints.med == med
+    assert bgpRouteConstraints.communities == communities
+    assert bgpRouteConstraints.asPath == asPath
+
+
+def testBgpRouteConstraintsConversions():
+
+    prefix = "1.2.3.4/5:6-7"
+    communities = ["20:30"]
+    med = ["1-2", "3-4", "!5-6"]
+    localPreference = []
+
+    assert _string_list_brc_converter(prefix) == [prefix]
+    assert _string_list_brc_converter(communities) == communities
+    assert _longspace_brc_converter(med) == "1-2,3-4,!5-6"
+    assert _longspace_brc_converter(localPreference) == ""
+
+
 def testBgpRouteDiffDeserialization():
     name = "communities"
     oldValue = "old"
@@ -103,5 +147,7 @@ def testBgpRouteDiffDeserialization():
 
 
 def testBgpRouteDiffStr():
-    diff = BgpRouteDiff(fieldName="nm", oldValue="old", newValue="new")
-    assert diff._repr_html_() == "nm: old -> new"
+    diff1 = BgpRouteDiff(fieldName="nm", oldValue="old", newValue="new")
+    diff2 = BgpRouteDiff(fieldName="localPreference", oldValue="old", newValue="new")
+    assert diff1._repr_html_() == "Nm: old --> new"
+    assert diff2._repr_html_() == "Local Preference: old --> new"

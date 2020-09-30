@@ -12,13 +12,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from typing import Dict, List  # noqa: F401
+from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
 
-__all__ = ["BgpRoute", "BgpRouteDiff", "BgpRouteDiffs"]
+__all__ = ["BgpRoute", "BgpRouteConstraints", "BgpRouteDiff", "BgpRouteDiffs"]
 
 
 @attr.s(frozen=True)
@@ -84,8 +84,9 @@ class BgpRoute(DataModelElement):
         # type: () -> List[str]
         lines = []
         lines.append("Network: {node}".format(node=self.network))
-        lines.append("AS Path: %s" % self.asPath)
-        lines.append("Communities: %s" % self.communities)
+        lines.append("AS Path: {asPath}".format(asPath=self.asPath))
+        # using a join on strings removes quotes around individual communities
+        lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
         lines.append("Originator IP: %s" % self.originatorIp)
@@ -93,6 +94,69 @@ class BgpRoute(DataModelElement):
         lines.append("Protocol: %s" % self.protocol)
         lines.append("Source Protocol: %s" % self.sourceProtocol)
         return lines
+
+
+# convert a list of strings into a single comma-separated string
+def _longspace_brc_converter(value):
+    # type: (Any) -> Optional[Text]
+    if value is None or isinstance(value, str):
+        return value
+    if isinstance(value, Iterable):
+        result = ",".join(value)  # type: Text
+        return result
+    raise ValueError("Invalid value {}".format(value))
+
+
+# convert a string into a singleton list
+def _string_list_brc_converter(value):
+    # type: (Any) -> Optional[List[Text]]
+    if value is None or isinstance(value, list):
+        return value
+    elif isinstance(value, str):
+        return [value]
+    raise ValueError("Invalid value {}".format(value))
+
+
+@attr.s(frozen=True)
+class BgpRouteConstraints(DataModelElement):
+    """Constraints on a BGP route announcement.
+
+    Specify constraints on route announcements by specifying allowed values
+    in each field of the announcement.
+
+    :ivar prefix: Allowed prefixes as a list of prefix ranges (e.g., "0.0.0.0/0:0-32")
+    :ivar complementPrefix: A flag indicating that all prefixes except the ones in prefix are allowed
+    :ivar localPreference: List of allowed local preference integer ranges, as a string
+    :ivar med: List of allowed MED integer ranges, as a string
+    :ivar communities: List of allowed and disallowed community regexes
+    :ivar asPath: List of allowed and disallowed AS-path regexes
+    """
+
+    prefix = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
+    complementPrefix = attr.ib(default=None, type=Optional[bool])
+    localPreference = attr.ib(
+        default=None, type=Optional[str], converter=_longspace_brc_converter
+    )
+    med = attr.ib(default=None, type=Optional[str], converter=_longspace_brc_converter)
+    communities = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
+    asPath = attr.ib(
+        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
+    )
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        return BgpRouteConstraints(
+            prefix=json_dict.get("prefix"),
+            complementPrefix=json_dict.get("complementPrefix"),
+            localPreference=json_dict.get("localPreference"),
+            med=json_dict.get("med"),
+            communities=json_dict.get("communities"),
+            asPath=json_dict.get("asPath"),
+        )
 
 
 @attr.s(frozen=True)
@@ -117,8 +181,22 @@ class BgpRouteDiff(DataModelElement):
 
     def _repr_html_(self):
         # type: () -> str
-        return "{fieldName}: {oldValue} -> {newValue}".format(
-            fieldName=self.fieldName, oldValue=self.oldValue, newValue=self.newValue
+        # special pretty printing for certain field names
+        prettyNames = {
+            "asPath": "AS Path",
+            "localPreference": "Local Preference",
+            "metric": "Metric",
+            "originatorIp": "Originator IP",
+            "originType": "Origin Type",
+            "sourceProtocol": "Source Protocol",
+        }
+        if self.fieldName in prettyNames:
+            prettyFieldName = prettyNames[self.fieldName]
+        else:
+            # by default, just capitalize the field name
+            prettyFieldName = self.fieldName.capitalize()
+        return "{fieldName}: {oldValue} --> {newValue}".format(
+            fieldName=prettyFieldName, oldValue=self.oldValue, newValue=self.newValue
         )
 
 

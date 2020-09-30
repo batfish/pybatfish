@@ -3,11 +3,11 @@ This folder contains Jupyter notebooks that show how to use Batfish for differen
 The current list of notebooks are:
 - **Basics**
     - [Getting Started with Batfish](Getting%20started%20with%20Batfish.ipynb) [[video](https://www.youtube.com/watch?v=Ca7kPAtfFqo)] shows how to get started and provides an overview of the capabilities of Batfish.
-    - [Validating Configuration Settings](Validating%20Configuration%20Settings.ipynb) [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)] shows how to validate different types of configuration settings (NTP server, TACACS server, AAA, SNMP, etc...) using Batfish. 
+    - [Validating Configuration Settings](Validating%20Configuration%20Settings.ipynb) [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)] shows how to validate different types of configuration settings (NTP server, TACACS server, AAA, SNMP, etc...) using Batfish.
 - **ACLs and firewalls**
-    - [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)] shows how to analyze ACLs and firewalls rules using Batfish. 
+    - [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)] shows how to analyze ACLs and firewalls rules using Batfish.
     - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb) [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)] shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
-    - [Safely refactoring ACLs and firewall rules](Safely%20refactoring%20ACLs%20and%20firewall%20rules.ipynb) shows how to fully understand the impact of refactoring complex ACLs and firewalls rules. 
+    - [Safely refactoring ACLs and firewall rules](Safely%20refactoring%20ACLs%20and%20firewall%20rules.ipynb) shows how to fully understand the impact of refactoring complex ACLs and firewalls rules.
 - **Cloud networking**
    - [Analyzing public and hybrid cloud networks](Analyzing%20public%20and%20hybrid%20cloud%20networks%20.ipynb) shows to analyze cloud and hybrid networks using Batfish.
 - **Forwarding analysis**
@@ -18,12 +18,12 @@ The current list of notebooks are:
 - **Routing analysis**
     - [Introduction to Route Analysis](Introduction%20to%20Route%20Analysis.ipynb) [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)] shows how to analyze routing tables computed by Batfish.
     - [Introduction to BGP Analysis](Introduction%20to%20BGP%20Analysis.ipynb) shows how to analyze BGP session configuration.
+    - [Analyzing Routing Policies](Analyzing%20Routing%20Policies.ipynb) shows how to analyze routing policies using Batfish.
 
-We will continue adding notebooks that demonstrating additional use cases of Batfish. 
+We will continue adding notebooks that demonstrating additional use cases of Batfish.
 
 ------
 
- - You can reach us via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) for any questions or suggestions for additional use cases. 
+ - You can reach us via [Slack](https://join.slack.com/t/batfish-org/shared_invite/enQtMzA0Nzg2OTAzNzQ1LTUxOTJlY2YyNTVlNGQ3MTJkOTIwZTU2YjY3YzRjZWFiYzE4ODE5ODZiNjA4NGI5NTJhZmU2ZTllOTMwZDhjMzA) for any questions or suggestions for additional use cases.
 
  - You can subscribe to the [Batfish YouTube channel](https://www.youtube.com/channel/UCA-OUW_3IOt9U_s60KvmJYA) to be notified of new videos.
-
