@@ -106,11 +106,11 @@ categories:
       parameters:
         - name: ip
           value: "'2.34.201.10'"
-    - name: Prefix Tracer
-      pybf_name: prefixTracer
-      parameters:
-        - name: prefix
-          value: "'2.34.201.0/24'"
+#    - name: Prefix Tracer
+#      pybf_name: prefixTracer
+#      parameters:
+#        - name: prefix
+#          value: "'2.34.201.0/24'"
   - name: forwarding
     description: Packet Forwarding
     questions:
