@@ -19,6 +19,11 @@ Documentation is generated from multiple sources using sphinx (and its extension
 
 2. If you are adding a new question category, make sure to include it in `docs/source/questions.rst`
 
+### Documenting public notebooks (in jupyter_notebooks/)
+
+1. Add a symlink to the notebook in `docs/sources/notebooks/linked`
+2. Add the symlink to the list in `docs/sources/public_notebooks.rst`
+
 ### Generating documentation
 
 1. Start batfish service
