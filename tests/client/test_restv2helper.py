@@ -22,6 +22,7 @@ from pybatfish.client import restv2helper
 from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
     _adapter,
+    _adapter_fail_fast,
     _delete,
     _encoder,
     _get,
@@ -29,6 +30,7 @@ from pybatfish.client.restv2helper import (
     _post,
     _put,
     _requests_session,
+    _requests_session_fail_fast,
 )
 from pybatfish.client.session import Session
 
@@ -95,9 +97,25 @@ def test_get(session, request_session):
     resource_url = "/test/url"
     target_url = "base{url}".format(base=BASE_URL, url=resource_url)
 
+    # Regular session
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
         _get(session, resource_url, None)
+    # Should pass through to the correct session
+    request_session.get.assert_called_with(
+        target_url,
+        headers=_get_headers(session),
+        params=None,
+        stream=False,
+        verify=session.verify_ssl_certs,
+    )
+
+    # Fast-failing session
+    with patch(
+        "pybatfish.client.restv2helper._requests_session_fail_fast", request_session
+    ):
+        # Execute the request, specifying fast-failing behavior
+        _get(session, resource_url, None, fail_fast=True)
     # Should pass through to the correct session
     request_session.get.assert_called_with(
         target_url,
@@ -155,7 +173,22 @@ def test_session_adapters():
     assert https == _adapter
     # Also make sure retries are configured
     retries = _adapter.max_retries
-    assert retries.total == Options.max_tries_to_connect_to_coordinator
+    assert retries.connect == Options.max_retries_to_connect_to_coordinator
+    assert retries.read == Options.max_retries_to_connect_to_coordinator
+    # All request types should be retried
+    assert not retries.method_whitelist
+
+
+def test_fail_fast_session_adapters():
+    """Confirm fast-failing session is configured with correct http and https adapters."""
+    http = _requests_session_fail_fast.adapters["http://"]
+    https = _requests_session_fail_fast.adapters["https://"]
+    assert http == _adapter_fail_fast
+    assert https == _adapter_fail_fast
+    # Also make sure retries are configured correctly
+    retries = _adapter_fail_fast.max_retries
+    assert retries.connect == Options.max_initial_tries_to_connect_to_coordinator
+    assert retries.read == Options.max_initial_tries_to_connect_to_coordinator
     # All request types should be retried
     assert not retries.method_whitelist
 
