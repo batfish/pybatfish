@@ -49,29 +49,22 @@ class MockQuestion(QuestionBase):
         return self._answer(*args, **kwargs)
 
 
-@pytest.fixture(scope="function")
-def session():
-    s = Session(load_questions=False, verify_connection=False)
-    yield s
-
-
-def test_get_facts_questions(session):
+def test_get_facts_questions():
     """Test that get facts calls the right questions, passing through the right args."""
+    bf = Session(load_questions=False)
     nodes = "foo"
-    with patch.object(
-        session.q, "nodeProperties", create=True
-    ) as mock_node, patch.object(
-        session.q, "interfaceProperties", create=True
+    with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
+        bf.q, "interfaceProperties", create=True
     ) as mock_iface, patch.object(
-        session.q, "bgpPeerConfiguration", create=True
+        bf.q, "bgpPeerConfiguration", create=True
     ) as mock_peers, patch.object(
-        session.q, "bgpProcessConfiguration", create=True
+        bf.q, "bgpProcessConfiguration", create=True
     ) as mock_proc, patch.object(
-        session.q, "ospfProcessConfiguration", create=True
+        bf.q, "ospfProcessConfiguration", create=True
     ) as mock_ospf_proc, patch.object(
-        session.q, "ospfAreaConfiguration", create=True
+        bf.q, "ospfAreaConfiguration", create=True
     ) as mock_ospf_area, patch.object(
-        session.q, "ospfInterfaceConfiguration", create=True
+        bf.q, "ospfInterfaceConfiguration", create=True
     ) as mock_ospf_iface:
         mock_node.return_value = MockQuestion(MockTableAnswer)
         mock_iface.return_value = MockQuestion(MockTableAnswer)
@@ -80,7 +73,7 @@ def test_get_facts_questions(session):
         mock_ospf_proc.return_value = MockQuestion(MockTableAnswer)
         mock_ospf_area.return_value = MockQuestion(MockTableAnswer)
         mock_ospf_iface.return_value = MockQuestion(MockTableAnswer)
-        get_facts(session, nodes)
+        get_facts(bf, nodes)
 
         mock_node.assert_called_with(nodes=nodes)
         mock_iface.assert_called_with(nodes=nodes)
@@ -91,23 +84,22 @@ def test_get_facts_questions(session):
         mock_ospf_iface.assert_called_with(nodes=nodes)
 
 
-def test_get_facts_questions_specific_snapshot(session):
+def test_get_facts_questions_specific_snapshot():
     """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
+    bf = Session(load_questions=False)
     nodes = "foo"
-    with patch.object(
-        session.q, "nodeProperties", create=True
-    ) as mock_node, patch.object(
-        session.q, "interfaceProperties", create=True
+    with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
+        bf.q, "interfaceProperties", create=True
     ) as mock_iface, patch.object(
-        session.q, "bgpPeerConfiguration", create=True
+        bf.q, "bgpPeerConfiguration", create=True
     ) as mock_peers, patch.object(
-        session.q, "bgpProcessConfiguration", create=True
+        bf.q, "bgpProcessConfiguration", create=True
     ) as mock_proc, patch.object(
-        session.q, "ospfProcessConfiguration", create=True
+        bf.q, "ospfProcessConfiguration", create=True
     ) as mock_ospf_proc, patch.object(
-        session.q, "ospfAreaConfiguration", create=True
+        bf.q, "ospfAreaConfiguration", create=True
     ) as mock_ospf_area, patch.object(
-        session.q, "ospfInterfaceConfiguration", create=True
+        bf.q, "ospfInterfaceConfiguration", create=True
     ) as mock_ospf_iface:
         # Setup mock answers for each underlying question
         mock_node_a = Mock(return_value=MockTableAnswer())
@@ -127,7 +119,7 @@ def test_get_facts_questions_specific_snapshot(session):
         mock_ospf_area.return_value = MockQuestion(mock_ospf_area_a)
         mock_ospf_iface.return_value = MockQuestion(mock_ospf_iface_a)
 
-        get_facts(session, nodes, snapshot="snapshot")
+        get_facts(bf, nodes, snapshot="snapshot")
 
         # Make sure questions were all called with expected params
         mock_node.assert_called_with(nodes=nodes)

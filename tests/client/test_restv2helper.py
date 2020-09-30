@@ -165,7 +165,7 @@ def test_put(session, request_session):
 
 
 def test_session_adapters():
-    """Confirm base session is configured with correct http and https adapters."""
+    """Confirm session is configured with correct http and https adapters."""
     http = _requests_session.adapters["http://"]
     https = _requests_session.adapters["https://"]
 
@@ -183,7 +183,6 @@ def test_fail_fast_session_adapters():
     """Confirm fast-failing session is configured with correct http and https adapters."""
     http = _requests_session_fail_fast.adapters["http://"]
     https = _requests_session_fail_fast.adapters["https://"]
-
     assert http == _adapter_fail_fast
     assert https == _adapter_fail_fast
     # Also make sure retries are configured correctly

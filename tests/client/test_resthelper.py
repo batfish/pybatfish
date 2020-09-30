@@ -13,13 +13,13 @@
 #   limitations under the License.
 
 from pybatfish.client.options import Options
-from pybatfish.client.resthelper import _adapter, _requests_session_established
+from pybatfish.client.resthelper import _adapter, _requests_session
 
 
 def test_session_adapters():
     """Confirm session is configured with correct http and https adapters."""
-    http = _requests_session_established.adapters["http://"]
-    https = _requests_session_established.adapters["https://"]
+    http = _requests_session.adapters["http://"]
+    https = _requests_session.adapters["https://"]
 
     assert http == _adapter
     assert https == _adapter

@@ -20,15 +20,18 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
+from typing import Any, Callable, Dict, IO, List, Optional, Text, \
+    Union  # noqa: F401
 
 import pkg_resources
 from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
-from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
-from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
+from pybatfish.client._diagnostics import upload_diagnostics, \
+    warn_on_snapshot_failure
+from pybatfish.client._facts import get_facts, load_facts, validate_facts, \
+    write_facts
 from pybatfish.client.asserts import (
     assert_filter_denies,
     assert_filter_has_no_unreachable_lines,
@@ -319,7 +322,6 @@ class Session(object):
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
-        verify_connection: bool = True,
     ):
         # Coordinator args
         self.host = host  # type: str
@@ -345,11 +347,6 @@ class Session(object):
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int
         self.enable_diagnostics = True  # type: bool
-
-        if verify_connection:
-            # Use get version just to try to connect to backend
-            # Make sure to fail fast in case session is misconfigured
-            get_component_versions(self, fail_fast=True)
 
         # Auto-load question templates
         if load_questions:

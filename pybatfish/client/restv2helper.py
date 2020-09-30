@@ -14,7 +14,8 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, Union  # noqa: F401
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, \
+    Union  # noqa: F401
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -448,10 +449,10 @@ def get_work_log(session, snapshot, work_id):
     return _get(session, url_tail, dict()).text
 
 
-def get_component_versions(session, fail_fast=False):
-    # type: (Session, bool) -> Dict[str, Any]
+def get_component_versions(session):
+    # type: (Session) -> Dict[str, Any]
     """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
-    return _get_dict(session, "/version", fail_fast=fail_fast)
+    return _get_dict(session, "/version")
 
 
 def get_question_templates(session: "Session", verbose: bool) -> Dict:
@@ -463,6 +464,7 @@ def get_question_templates(session: "Session", verbose: bool) -> Dict:
         session,
         url_tail="/{}".format(CoordConstsV2.RSC_QUESTION_TEMPLATES),
         params={CoordConstsV2.QP_VERBOSE: verbose},
+        fail_fast=True,
     )
 
 

@@ -36,7 +36,7 @@ if TYPE_CHECKING:
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Create session for existing connection to backend
-_requests_session_established = requests.Session()
+_requests_session = requests.Session()
 _adapter = HTTPAdapter(
     max_retries=Retry(
         connect=Options.max_retries_to_connect_to_coordinator,
@@ -48,8 +48,8 @@ _adapter = HTTPAdapter(
     )
 )
 # Configure retries for http and https requests
-_requests_session_established.mount("http://", _adapter)
-_requests_session_established.mount("https://", _adapter)
+_requests_session.mount("http://", _adapter)
+_requests_session.mount("https://", _adapter)
 
 
 # uncomment line below if you want http capture by fiddler
@@ -101,7 +101,7 @@ def _make_request(session, resource, json_data=None, stream=False, use_http_get=
     """
     url = session.get_url(resource)
     if use_http_get:
-        response = _requests_session_established.get(
+        response = _requests_session.get(
             url, verify=session.verify_ssl_certs, stream=stream
         )
     else:
@@ -110,7 +110,7 @@ def _make_request(session, resource, json_data=None, stream=False, use_http_get=
         json_data[CoordConsts.SVC_KEY_VERSION] = pybatfish.__version__
         multipart_data = MultipartEncoder(json_data)
         headers = {"Content-Type": multipart_data.content_type}
-        response = _requests_session_established.post(
+        response = _requests_session.post(
             url,
             data=multipart_data,
             verify=session.verify_ssl_certs,

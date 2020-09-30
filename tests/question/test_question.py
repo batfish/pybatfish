@@ -52,7 +52,7 @@ TEST_QUESTION_DICT = {
 @pytest.fixture()
 def session():
     """Session associated with questions created in tests."""
-    yield Session(load_questions=False, verify_connection=False)
+    yield Session(load_questions=False)
 
 
 def test_min_length():
