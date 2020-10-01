@@ -16,7 +16,8 @@ _BASE_TYPES = {
 # Convert input types (i.e., template variable types) to python types
 _INPUT_TYPES = {
     "comparator": "str",
-    "bgproute": "pybatfish.datamodel.route.BgpRoute",
+    "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
+    "bgproutes": "List[pybatfish.datamodel.route.BgpRoute]",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
     "ip": "str",
@@ -43,7 +44,7 @@ _OUTPUT_TYPES = {
     "ip": "str",
     "node": "str",
     "prefix": "str",
-    "selfdescribing": "selfdescribing",
+    "selfdescribing": "selfdescribing",  # not a real python type; handled separately in code
     "trace": "pybatfish.datamodel.flow.Trace",
     "tracetree": "pybatfish.datamodel.acl.TraceTree",
 }
@@ -66,7 +67,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
-    allowed_usages = ["input", "output"]
+    allowed_usages = ["input", "output", "python"]
     if usage not in allowed_usages:
         raise ValueError(
             f"Invalid conversion type: {usage}, expected one of: {allowed_usages}"
@@ -75,7 +76,7 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
     if value.startswith("Set<"):
         inner = value[4:-1]  # strip prefix and suffix ">"
         return "Set of {}".format(convert_schema(inner, usage, question_name))
-    elif value.startswith("List<"):
+    elif value.startswith("List<") or value.startswith("List["):
         inner = value[5:-1]  # strip prefix and suffix ">"
         return "List of {}".format(convert_schema(inner, usage, question_name))
     elif value.lower() in _BASE_TYPES:
@@ -89,31 +90,28 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
         slug = re.sub(r"spec$", "specifier", dasherize(underscore(value)))
         text = value[:1].capitalize() + value[1:]
         return f"[{text}](../specifiers.md#{slug})"
+    elif value.startswith("pybatfish.datamodel"):
+            text = value.split(".")[-1]  # The class name
+            return f"[{text}](../datamodel.rst#{value})"
+    elif value.lower() == "selfdescribing":
+        if question_name is None:
+            raise ValueError(
+                "Converting selfdescribing schema requires a question name"
+            )
+        try:
+            return _SELF_DESCRIBING_CONVERSIONS[question_name]
+        except KeyError:
+            raise KeyError(
+                f"Error: unknown selfdescribing schema usage in question {question_name}"
+            )
+    elif usage == "python":  # simple python type
+        return value
     elif usage == "input":
         slug = _INPUT_TYPES[value.lower()]
-        if slug.startswith("pybatfish.datamodel"):
-            text = slug.split(".")[-1]  # The class name
-            return f"[{text}](../datamodel.rst#{slug})"
-        else:
-            return slug
+        return convert_schema(slug, "python", question_name)
     elif usage == "output":
         slug = _OUTPUT_TYPES[value.lower()]
-        if slug.startswith("pybatfish.datamodel"):
-            text = slug.split(".")[-1]  # The class name
-            return f"[{text}](../datamodel.rst#{slug})"
-        elif slug.lower() == "selfdescribing":
-            if question_name is None:
-                raise ValueError(
-                    "Converting selfdescribing schema requires a question name"
-                )
-            try:
-                return _SELF_DESCRIBING_CONVERSIONS[question_name]
-            except KeyError:
-                raise KeyError(
-                    f"Error: unknown selfdescribing schema usage in question {question_name}"
-                )
-        else:
-            return slug
+        return convert_schema(slug, "python", question_name)
     else:
         raise ValueError(
             f"Error: Unable to convert based on parameters - value: {value}, type {usage}, question {question_name}"
