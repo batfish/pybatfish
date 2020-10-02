@@ -46,6 +46,7 @@ _STATUS_FORCELIST = [429, 500, 502, 503, 504]
 _requests_session = requests.Session()
 _adapter = HTTPAdapter(
     max_retries=Retry(
+        total=Options.max_retries_to_connect_to_coordinator,
         connect=Options.max_retries_to_connect_to_coordinator,
         read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
@@ -62,6 +63,7 @@ _requests_session.mount("https://", _adapter)
 _requests_session_fail_fast = requests.Session()
 _adapter_fail_fast = HTTPAdapter(
     max_retries=Retry(
+        total=Options.max_initial_tries_to_connect_to_coordinator,
         connect=Options.max_initial_tries_to_connect_to_coordinator,
         read=Options.max_initial_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,

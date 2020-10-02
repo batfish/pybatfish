@@ -39,6 +39,7 @@ requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 _requests_session = requests.Session()
 _adapter = HTTPAdapter(
     max_retries=Retry(
+        total=Options.max_retries_to_connect_to_coordinator,
         connect=Options.max_retries_to_connect_to_coordinator,
         read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
