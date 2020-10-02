@@ -53,9 +53,9 @@ _check_cell_types = ["execute_result", "display_data"]
 
 
 @pytest.fixture(scope="module")
-def session():
+def bf_version():
     s = Session()
-    return s
+    return get_bf_version(s)
 
 
 @pytest.fixture(scope="module", params=notebook_files)
@@ -64,11 +64,11 @@ def notebook(request):
     return filepath, nbformat.read(filepath, as_version=4)
 
 
-def skip_new_notebook_vs_old_code(session, notebook_name):
+def skip_new_notebook_vs_old_code(bf_version, notebook_name):
     """Skip this pytest test if version of Pybf and Bf are too old to run it."""
     for key in notebook_min_versions:
         if key in notebook_name:
-            skip_old_version(get_bf_version(session), notebook_min_versions.get(key))
+            skip_old_version(bf_version, notebook_min_versions.get(key))
 
 
 def _is_warning_output(o):
@@ -130,17 +130,17 @@ def _compare_data(original_data, executed_data):
         _compare_data_str(original_data["text/html"], executed_data["text/html"])
 
 
-def test_notebook_no_errors(session, notebook, executed_notebook):
+def test_notebook_no_errors(bf_version, notebook, executed_notebook):
     """Asserts that the given notebook has no cells with error outputs."""
     filepath, _ = notebook
-    skip_new_notebook_vs_old_code(session, filepath)
+    skip_new_notebook_vs_old_code(bf_version, filepath)
     for c in executed_notebook["cells"]:
         _assert_cell_no_errors(c)
 
 
-def test_notebook_output(session, notebook, executed_notebook):
+def test_notebook_output(bf_version, notebook, executed_notebook):
     filepath, nb = notebook
-    skip_new_notebook_vs_old_code(session, filepath)
+    skip_new_notebook_vs_old_code(bf_version, filepath)
     try:
         for cell, executed_cell in zip(nb["cells"], executed_notebook["cells"]):
             assert cell["cell_type"] == executed_cell["cell_type"]

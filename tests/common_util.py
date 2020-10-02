@@ -54,13 +54,10 @@ def _version_less_than(version, min_version):
 def skip_old_version(bf_version, min_version):
     """Skip this pytest test if specified (or inferred) Pybf/Bf version is below supplied, minimum required version."""
     min_version_tuple = _version_to_tuple(min_version)
-    print("min_version, bf_version: {}, {}".format(min_version, bf_version))
     if _version_less_than(_version_to_tuple(bf_version), min_version_tuple):
-        print("BF version too low")
         pytest.skip("Batfish version too low ({} < {})".format(bf_version, min_version))
     pybf_version = _get_pybf_version()
     if _version_less_than(_version_to_tuple(pybf_version), min_version_tuple):
-        print("PYBF version too low")
         pytest.skip(
             "Pybatfish version too low ({} < {})".format(pybf_version, min_version)
         )
@@ -68,7 +65,7 @@ def skip_old_version(bf_version, min_version):
 
 def get_bf_version(session):
     """Get BF version."""
-    # Use env var as version number if specified (get around some backends having dev version number)
+    # Use env var as version number if specified (get around some backends incorrectly having dev version number)
     return os.environ.get("bf_version", session._get_bf_version())
 
 
