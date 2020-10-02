@@ -15,7 +15,6 @@ that show you how to use Batfish to analyze your network.
     notebooks/linked/safely-refactoring-acls-and-firewall-rules.ipynb
     notebooks/linked/introduction-to-route-analysis.ipynb
     notebooks/linked/introduction-to-bgp-analysis.ipynb
-    notebooks/linked/analyzing-routing-policies.ipynb
     notebooks/linked/introduction-to-forwarding-analysis.ipynb
     notebooks/linked/introduction-to-forwarding-change-validation.ipynb
     notebooks/linked/analyzing-the-impact-of-failures-and-letting-loose-a-chaos-monkey.ipynb
