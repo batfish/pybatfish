@@ -23,6 +23,10 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
+from pybatfish.client.session import Session
+
+from tests.common_util import requires_bf
+
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, "jupyter_notebooks")
@@ -33,6 +37,9 @@ notebook_files = [
     for filename in files
     if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
 ]
+
+notebook_files_new = [notebook_file for notebook_file in notebook_files if
+                      "Routing Policies" in notebook_file]
 
 for root, dirs, files in walk(_jupyter_nb_dir):
     for filename in files:
@@ -50,6 +57,12 @@ def notebook(request):
     return filepath, nbformat.read(filepath, as_version=4)
 
 
+@pytest.fixture(scope="module")
+def session():
+    s = Session()
+    return s
+
+
 def _is_warning_output(o):
     WARN_STRING = "UserWarning: Pybatfish public API is being updated"
     return o.get("name", "") == "stderr" and WARN_STRING in o.get("text", "")
@@ -63,12 +76,14 @@ def executed_notebook(notebook):
     nb = deepcopy(orig_nb)
     exec_path = dirname(filepath)
     # Run all cells in the notebook, with a time bound, continuing on errors
-    ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
+    ep = ExecutePreprocessor(timeout=60, allow_errors=True,
+                             kernel_name="python3")
     ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
 
     # Filter out the deprecation warning, if it exists
     for cell in nb["cells"]:
-        outputs = [o for o in cell.get("outputs", []) if not _is_warning_output(o)]
+        outputs = [o for o in cell.get("outputs", []) if
+                   not _is_warning_output(o)]
         if len(outputs) != len(cell.get("outputs", [])):
             cell["outputs"] = outputs
 
@@ -104,18 +119,34 @@ def _compare_data(original_data, executed_data):
         # (We still test the notebook runs without errors on all versions)
         return
     if "text/plain" in original_data:
-        _compare_data_str(original_data["text/plain"], executed_data["text/plain"])
+        _compare_data_str(original_data["text/plain"],
+                          executed_data["text/plain"])
     if "text/html" in original_data and "text/html" in executed_data:
-        _compare_data_str(original_data["text/html"], executed_data["text/html"])
+        _compare_data_str(original_data["text/html"],
+                          executed_data["text/html"])
 
 
-def test_notebook_no_errors(executed_notebook):
-    """Asserts that the given notebook has no cells with error outputs."""
+def _assert_no_errors(executed_notebook):
     for c in executed_notebook["cells"]:
         _assert_cell_no_errors(c)
 
 
-def test_notebook_output(notebook, executed_notebook):
+def test_notebook_no_errors(session, notebook, executed_notebook):
+    """Asserts that the given notebook has no cells with error outputs."""
+    filepath, _ = notebook
+    if filepath not in notebook_files_new:
+        _assert_no_errors(executed_notebook)
+
+
+@requires_bf("2020.09.30")
+def test_notebook_no_errors_new(session, notebook, executed_notebook):
+    """Asserts that the given notebook has no cells with error outputs."""
+    filepath, _ = notebook
+    if filepath in notebook_files_new:
+        _assert_no_errors(executed_notebook)
+
+
+def _assert_notebook_output(notebook, executed_notebook):
     filepath, nb = notebook
     try:
         for cell, executed_cell in zip(nb["cells"], executed_notebook["cells"]):
@@ -134,15 +165,29 @@ def test_notebook_output(notebook, executed_notebook):
                 ]
                 assert len(original_outputs) == len(executed_outputs)
                 for original_data, executed_data in zip(
-                    original_outputs, executed_outputs
+                        original_outputs, executed_outputs
                 ):
                     _compare_data(original_data, executed_data)
     except AssertionError as e:
         with io.open("{}.testout".format(filepath), "w", encoding="utf-8") as f:
             nbformat.write(executed_notebook, f)
             pytest.fail(
-                "{} failed output validation:\n{}".format(filepath, e), pytrace=False
+                "{} failed output validation:\n{}".format(filepath, e),
+                pytrace=False
             )
+
+
+def test_notebook_output(session, notebook, executed_notebook):
+    filepath, _ = notebook
+    if filepath not in notebook_files_new:
+        _assert_notebook_output(notebook, executed_notebook)
+
+
+@requires_bf("2020.09.30")
+def test_notebook_output_new(session, notebook, executed_notebook):
+    filepath, _ = notebook
+    if filepath in notebook_files_new:
+        _assert_notebook_output(notebook, executed_notebook)
 
 
 def test_notebook_execution_count(notebook):
@@ -150,13 +195,14 @@ def test_notebook_execution_count(notebook):
     code_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "code"]
     for (i, cell) in enumerate(code_cells):
         assert (
-            i + 1 == cell["execution_count"]
+                i + 1 == cell["execution_count"]
         ), "Expected cell {} to have execution count {}".format(cell, i + 1)
 
 
 def test_absolute_links(notebook):
     """Test that all links in markdown cells are absolute links."""
     _, nb = notebook
-    markdown_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "markdown"]
+    markdown_cells = [cell for cell in nb["cells"] if
+                      cell["cell_type"] == "markdown"]
     for cell in markdown_cells:
         assert not re.search(r"\[.*\]\((?!http).*", cell["source"])

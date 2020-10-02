@@ -12,10 +12,16 @@ from pybatfish.client.commands import *
 from pybatfish.datamodel import Edge, Interface
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints  # noqa: F401
-from pybatfish.datamodel.route import BgpRoute, BgpRouteConstraints
+from pybatfish.datamodel.route import BgpRoute
 from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
+# Remove this special case when BgpRouteConstraints makes it to release 
+try:
+    from pybatfish.datamodel.route import BgpRouteConstraints
+except ImportError:
+    pass
+    
 # Configure all pybatfish loggers to use WARN level
 logging.getLogger("pybatfish").setLevel(logging.WARN)
 
