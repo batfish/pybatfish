@@ -18,7 +18,6 @@ The current list of notebooks are:
 - **Routing analysis**
     - [Introduction to Route Analysis](Introduction%20to%20Route%20Analysis.ipynb) [[video](https://www.youtube.com/watch?v=AutkFa0xUxg)] shows how to analyze routing tables computed by Batfish.
     - [Introduction to BGP Analysis](Introduction%20to%20BGP%20Analysis.ipynb) shows how to analyze BGP session configuration.
-    - [Analyzing Routing Policies](Analyzing%20Routing%20Policies.ipynb) shows how to analyze routing policies using Batfish.
 
 We will continue adding notebooks that demonstrating additional use cases of Batfish.
 
