@@ -12,7 +12,7 @@ from pybatfish.client.commands import *
 from pybatfish.datamodel import Edge, Interface
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints  # noqa: F401
-from pybatfish.datamodel.route import BgpRoute
+from pybatfish.datamodel.route import BgpRoute, BgpRouteConstraints
 from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
