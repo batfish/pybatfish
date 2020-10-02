@@ -57,9 +57,7 @@ def skip_old_version(bf_version, min_version):
     print("min_version, bf_version: {}, {}".format(min_version, bf_version))
     if _version_less_than(_version_to_tuple(bf_version), min_version_tuple):
         print("BF version too low")
-        pytest.skip(
-            "Batfish version too low ({} < {})".format(bf_version, min_version)
-        )
+        pytest.skip("Batfish version too low ({} < {})".format(bf_version, min_version))
     pybf_version = _get_pybf_version()
     if _version_less_than(_version_to_tuple(pybf_version), min_version_tuple):
         print("PYBF version too low")
