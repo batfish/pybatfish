@@ -51,6 +51,24 @@ def _version_less_than(version, min_version):
     return False
 
 
+def skip_old_version(bf_version, min_version):
+    """Skip this pytest test if specified (or inferred) Pybf/Bf version is below supplied, minimum required version."""
+    min_version_tuple = _version_to_tuple(min_version)
+    if _version_less_than(_version_to_tuple(bf_version), min_version_tuple):
+        pytest.skip("Batfish version too low ({} < {})".format(bf_version, min_version))
+    pybf_version = _get_pybf_version()
+    if _version_less_than(_version_to_tuple(pybf_version), min_version_tuple):
+        pytest.skip(
+            "Pybatfish version too low ({} < {})".format(pybf_version, min_version)
+        )
+
+
+def get_bf_version(session):
+    """Get BF version."""
+    # Use env var as version number if specified (get around some backends incorrectly having dev version number)
+    return os.environ.get("bf_version", session._get_bf_version())
+
+
 def requires_bf(version):
     """
     Decorator that will skip a test if the Batfish or Pybatfish version is older than the specified version.
@@ -62,8 +80,6 @@ def requires_bf(version):
     # This outer decorator only accepts version string, not the actual
     # target function
 
-    min_version = _version_to_tuple(version)
-
     def function_decorator(func):
         # Inner 'decorator' accepts the target function
 
@@ -73,26 +89,18 @@ def requires_bf(version):
             if not bf_version:
                 for a in args:
                     if isinstance(a, Session):
-                        bf_version = a._get_bf_version()
+                        bf_version = get_bf_version(a)
                         break
                 for k in kwargs:
                     arg = kwargs[k]
                     if isinstance(arg, Session):
-                        bf_version = arg._get_bf_version()
+                        bf_version = get_bf_version(arg)
                         break
             if not bf_version:
                 raise ValueError(
                     "Bad Batfish version.  Make sure either the bf_version env var is set or the decorated test accepts a session fixture."
                 )
-            if _version_less_than(_version_to_tuple(bf_version), min_version):
-                pytest.skip(
-                    "Batfish version too low ({} < {})".format(bf_version, version)
-                )
-            pybf_version = _get_pybf_version()
-            if _version_less_than(_version_to_tuple(pybf_version), min_version):
-                pytest.skip(
-                    "Pybatfish version too low ({} < {})".format(pybf_version, version)
-                )
+            skip_old_version(bf_version=bf_version, min_version=version)
             return func(*args, **kwargs)
 
         return decorator(wrapper, func)
