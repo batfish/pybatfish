@@ -130,6 +130,15 @@ def _compare_data(original_data, executed_data):
         _compare_data_str(original_data["text/html"], executed_data["text/html"])
 
 
+def test_notebook_version_matrix():
+    """Meta test to confirm notebook version matrix is valid."""
+    # Make sure each version matrix entry corresponds to a notebook filename
+    for k in notebook_min_versions:
+        assert any(
+            k in name for name in notebook_files
+        ), "'{}' does not refer to any notebook filename".format(k)
+
+
 def test_notebook_no_errors(bf_version, notebook, executed_notebook):
     """Asserts that the given notebook has no cells with error outputs."""
     filepath, _ = notebook
