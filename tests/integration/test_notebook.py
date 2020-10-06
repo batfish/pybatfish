@@ -23,6 +23,9 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
+from pybatfish.client.session import Session
+from tests.common_util import get_bf_version, skip_old_version
+
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
 _jupyter_nb_dir = join(_root_dir, "jupyter_notebooks")
@@ -33,6 +36,11 @@ notebook_files = [
     for filename in files
     if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
 ]
+# Map of notebook name (substring) to minimum Pybf/Bf version required to run it
+notebook_min_versions = {
+    # e.g. don't run Analyzing Routing Policies on Pybf or Bf version before 2020.10.02
+    # "Analyzing Routing Policies": "2020.10.02",
+}
 
 for root, dirs, files in walk(_jupyter_nb_dir):
     for filename in files:
@@ -44,10 +52,23 @@ assert len(notebook_files) > 0
 _check_cell_types = ["execute_result", "display_data"]
 
 
+@pytest.fixture(scope="module")
+def bf_version():
+    s = Session()
+    return get_bf_version(s)
+
+
 @pytest.fixture(scope="module", params=notebook_files)
 def notebook(request):
     filepath = request.param
     return filepath, nbformat.read(filepath, as_version=4)
+
+
+def skip_new_notebook_vs_old_code(bf_version, notebook_name):
+    """Skip this pytest test if version of Pybf and Bf are too old to run it."""
+    for key in notebook_min_versions:
+        if key in notebook_name:
+            skip_old_version(bf_version, notebook_min_versions.get(key))
 
 
 def _is_warning_output(o):
@@ -109,14 +130,17 @@ def _compare_data(original_data, executed_data):
         _compare_data_str(original_data["text/html"], executed_data["text/html"])
 
 
-def test_notebook_no_errors(executed_notebook):
+def test_notebook_no_errors(bf_version, notebook, executed_notebook):
     """Asserts that the given notebook has no cells with error outputs."""
+    filepath, _ = notebook
+    skip_new_notebook_vs_old_code(bf_version, filepath)
     for c in executed_notebook["cells"]:
         _assert_cell_no_errors(c)
 
 
-def test_notebook_output(notebook, executed_notebook):
+def test_notebook_output(bf_version, notebook, executed_notebook):
     filepath, nb = notebook
+    skip_new_notebook_vs_old_code(bf_version, filepath)
     try:
         for cell, executed_cell in zip(nb["cells"], executed_notebook["cells"]):
             assert cell["cell_type"] == executed_cell["cell_type"]
