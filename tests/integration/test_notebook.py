@@ -37,9 +37,7 @@ notebook_files = [
     if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
 ]
 # Map of notebook name (substring) to minimum Pybf/Bf version required to run it
-notebook_min_versions = {
-    "Analyzing Routing Policies": "2020.10.02"
-}
+notebook_min_versions = {"Analyzing Routing Policies": "2020.10.02"}
 
 for root, dirs, files in walk(_jupyter_nb_dir):
     for filename in files:
