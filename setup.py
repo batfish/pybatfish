@@ -78,7 +78,7 @@ setup(
     # You can just specify the packages manually here if your project is
     # simple. Or you can use find_packages().
     packages=find_packages(exclude=["contrib", "docs", "tests"]),
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
     #   py_modules=["my_module"],
@@ -91,7 +91,7 @@ setup(
         "deepdiff",
         "deprecated",
         "netconan>=0.11.0",
-        "pandas>=0.25.2,<1",
+        "pandas<1.2",
         "python-dateutil",
         "PyYAML",
         "requests",
@@ -110,11 +110,9 @@ setup(
             "check-manifest",
             "coverage",
             "inflection",
-            # To support py3.5
-            "ipython<7.10.0",
             "jupyter",
             "mypy",
-            "nbformat<5.0.0",
+            "nbformat<6.0.0",
             "nbconvert",
             "pytest>=4.2.0",
             "pytest-cov",
