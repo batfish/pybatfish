@@ -37,7 +37,9 @@ notebook_files = [
     if ".ipynb_checkpoints" not in root and filename.endswith(".ipynb")
 ]
 # Map of notebook name (substring) to minimum Pybf/Bf version required to run it
-notebook_min_versions = {"Analyzing Routing Policies": "2020.10.02"}
+# A special key of "*" means version requirement applies to all notebooks
+ANY_NOTEBOOK = "*"
+notebook_min_versions = {ANY_NOTEBOOK: "2020.11.12"}
 
 for root, dirs, files in walk(_jupyter_nb_dir):
     for filename in files:
@@ -64,7 +66,7 @@ def notebook(request):
 def skip_new_notebook_vs_old_code(bf_version, notebook_name):
     """Skip this pytest test if version of Pybf and Bf are too old to run it."""
     for key in notebook_min_versions:
-        if key in notebook_name:
+        if key == ANY_NOTEBOOK or key in notebook_name:
             skip_old_version(bf_version, notebook_min_versions.get(key))
 
 
@@ -131,7 +133,7 @@ def test_notebook_version_matrix():
     """Meta test to confirm notebook version matrix is valid."""
     # Make sure each version matrix entry corresponds to a notebook filename
     for k in notebook_min_versions:
-        assert any(
+        assert k == ANY_NOTEBOOK or any(
             k in name for name in notebook_files
         ), "'{}' does not refer to any notebook filename".format(k)
 
