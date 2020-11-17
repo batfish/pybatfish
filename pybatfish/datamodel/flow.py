@@ -1269,13 +1269,11 @@ class HeaderConstraints(DataModelElement):
     Specify constraints on packet headers by specifying lists of allowed values
     in each field of IP packet.
 
-    :ivar srcIps: Source location/IP
-    :vartype srcIps: str
-    :ivar dstIps: Destination location/IP
-    :vartype dstIps: str
+    :ivar srcIps: Source IPs as `IpSpec <specifiers.html#ip-specifier>`_ string (e.g., ``"10.1.2.3"``, ``"10.1.2.0/24"``, ``"node1[iface1]"``)
+    :ivar dstIps: Destination IPs as `IpSpec <specifiers.html#ip-specifier>`_ string (e.g., ``"10.1.2.3"``, ``"10.1.2.0/24"``, ``"node1[iface1]"``)
     :ivar srcPorts: Source ports as list of ranges (e.g., ``"22,53-99"``)
     :ivar dstPorts: Destination ports as list of ranges, (e.g., ``"22,53-99"``)
-    :ivar applications: Shorthands for application protocols (e.g., ``SSH``, ``DNS``, ``SNMP``)
+    :ivar applications: Application protocols as `ApplicationSpec <specifiers.html#application-specifier>`_ string (e.g., ``"HTTP"``, ``"tcp/80"``, ``"tcp/80-90"``)
     :ivar ipProtocols: List of well-known IP protocols (e.g., ``TCP``, ``UDP``, ``ICMP``)
     :ivar icmpCodes: List of integer ICMP codes
     :ivar icmpTypes: List of integer ICMP types
@@ -1399,10 +1397,10 @@ class PathConstraints(DataModelElement):
     """
     Constraints on the path of a flow.
 
-    :ivar startLocation: Location description of where a flow is allowed to start
-    :ivar endLocation: Location description of where a flow is allowed to terminate
-    :ivar transitLocations: Location description of where a flow must transit
-    :ivar forbiddenLocations: Location description of where a flow is *not* allowed to transit
+    :ivar startLocation: Locations where a flow can start, as `LocationSpec <specifiers.html#location-specifier>`_ string (e.g., ``"node1[iface1]"``)
+    :ivar endLocation: Nodes where a flow can terminate, as `NodeSpec <specifiers.html#node-specifier>`_ string (e.g., ``"node1"``)
+    :ivar transitLocations: Nodes which a flow must transit, as `NodeSpec <specifiers.html#node-specifier>`_ string (e.g., ``"node1"``)
+    :ivar forbiddenLocations: Nodes which a flow is *not* allowed to transit, as `NodeSpec <specifiers.html#node-specifier>`_ string (e.g., ``"node1"``)
     """
 
     startLocation = attr.ib(default=None, type=Optional[str])
