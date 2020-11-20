@@ -30,16 +30,13 @@ from pybatfish.question.question import load_questions
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
-_stable_question_dir = abspath(join(_root_dir, "questions", "stable"))
-_experimental_question_dir = abspath(join(_root_dir, "questions", "experimental"))
 TEST_NETWORK = "ref_network"
 TEST_NETWORK_TR = "ref_network_tr"
 
 
 @pytest.fixture(scope="module")
 def network():
-    load_questions(_stable_question_dir)
-    load_questions(_experimental_question_dir)
+    load_questions()
     try:
         bf_delete_network(TEST_NETWORK)
     except Exception:
@@ -51,8 +48,7 @@ def network():
 
 @pytest.fixture(scope="module")
 def traceroute_network():
-    load_questions(_stable_question_dir)
-    load_questions(_experimental_question_dir)
+    load_questions()
     try:
         bf_delete_network(TEST_NETWORK_TR)
     except Exception:
