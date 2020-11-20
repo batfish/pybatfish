@@ -18,6 +18,7 @@ import pytest
 
 from pybatfish.client._facts import load_facts, validate_facts
 from pybatfish.client.session import Session
+from tests.common_util import requires_bf
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -42,6 +43,7 @@ def session():
     s.delete_snapshot(other_name)
 
 
+@requires_bf("2020.11.20")
 def test_extract_facts(tmpdir, session):
     """Test extraction of facts for the current snapshot with a basic config."""
     out_dir = tmpdir.join("output")
@@ -78,6 +80,7 @@ def test_extract_facts_specific_snapshot(tmpdir, session):
     ), "Written facts match expected facts"
 
 
+@requires_bf("2020.11.20")
 def test_validate_facts_matching(session):
     """Test validation of facts for the current snapshot against matching facts."""
     validation_results = session.validate_facts(
