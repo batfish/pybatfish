@@ -53,17 +53,16 @@ def network():
 def requests_session():
     # Setup a session with a retry policy
     session = requests.Session()
-    # Prefix "http" will cover both "http" & "https"
-    session.mount(
-        "http",
-        HTTPAdapter(
-            max_retries=Retry(
-                total=_UPLOAD_MAX_TRIES,
-                backoff_factor=_UPLOAD_RETRY_BACKOFF,
-                status_forcelist=[500, 502, 503, 504, 104],
-            )
-        ),
+    adapter = HTTPAdapter(
+        max_retries=Retry(
+            total=_UPLOAD_MAX_TRIES,
+            backoff_factor=_UPLOAD_RETRY_BACKOFF,
+            status_forcelist=[500, 502, 503, 504, 104],
+        )
     )
+    # Override longest-match adapter for http and https
+    session.mount("http://", adapter,)
+    session.mount("https://", adapter,)
     yield session
 
 
