@@ -114,7 +114,7 @@ setup(
             "coverage",
             "inflection",
             "jupyter",
-            "mypy",
+            "mypy<0.800",
             "nbformat<6.0.0",
             "nbconvert",
             "pytest>=4.2.0",
