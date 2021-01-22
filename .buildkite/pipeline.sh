@@ -33,7 +33,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install mypy"
+      - "python3 -m pip install 'mypy<0.800'"
       - "mypy pybatfish tests"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
