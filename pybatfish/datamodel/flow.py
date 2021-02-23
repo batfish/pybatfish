@@ -372,8 +372,11 @@ class SessionAction(DataModelElement):
         action = json_dict.get("type")
         if action == "Accept":
             return Accept()
-        if action == "FibLookup":
-            return FibLookup()
+        if action == "PreNatFibLookup":
+            return PreNatFibLookup()
+        if action == "PostNatFibLookup" or action == "FibLookup":
+            # action == "FibLookup" supported for backwards compatibility
+            return PostNatFibLookup()
         if action == "ForwardOutInterface":
             return ForwardOutInterface.from_dict(json_dict)
         raise ValueError("Invalid session action type: {}".format(action))
@@ -391,14 +394,25 @@ class Accept(SessionAction):
 
 
 @attr.s(frozen=True)
-class FibLookup(SessionAction):
+class PreNatFibLookup(SessionAction):
     """A SessionAction whereby return traffic is forwarded according to the result of a lookup
-    on the FIB of the interface on which the return traffic is received.
+    on the FIB of the interface on which the return traffic is received before NAT is applied.
     """
 
     def __str__(self):
         # type: () -> str
-        return "FibLookup"
+        return "PreNatFibLookup"
+
+
+@attr.s(frozen=True)
+class PostNatFibLookup(SessionAction):
+    """A SessionAction whereby return traffic is forwarded according to the result of a lookup
+    on the FIB of the interface on which the return traffic is received after NAT is applied.
+    """
+
+    def __str__(self):
+        # type: () -> str
+        return "PostNatFibLookup"
 
 
 @attr.s(frozen=True)

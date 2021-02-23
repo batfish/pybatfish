@@ -25,7 +25,6 @@ from pybatfish.datamodel.flow import (
     DeliveredStepDetail,
     EnterInputIfaceStepDetail,
     ExitOutputIfaceStepDetail,
-    FibLookup,
     FilterStepDetail,
     Flow,
     FlowDiff,
@@ -39,6 +38,8 @@ from pybatfish.datamodel.flow import (
     MatchSessionStepDetail,
     MatchTcpFlags,
     OriginatingSessionScope,
+    PostNatFibLookup,
+    PreNatFibLookup,
     RoutingStepDetail,
     SessionAction,
     SessionMatchExpr,
@@ -719,7 +720,9 @@ def test_OriginatingSessionScope_str():
 
 def test_SessionAction_from_dict():
     assert SessionAction.from_dict({"type": "Accept"}) == Accept()
-    assert SessionAction.from_dict({"type": "FibLookup"}) == FibLookup()
+    assert SessionAction.from_dict({"type": "FibLookup"}) == PostNatFibLookup()
+    assert SessionAction.from_dict({"type": "PostNatFibLookup"}) == PostNatFibLookup()
+    assert SessionAction.from_dict({"type": "PreNatFibLookup"}) == PreNatFibLookup()
     d = {
         "type": "ForwardOutInterface",
         "nextHop": {"hostname": "1.1.1.1", "interface": "iface1"},
@@ -734,7 +737,8 @@ def test_SessionAction_from_dict():
 
 def test_SessionAction_str():
     assert str(Accept()) == "Accept"
-    assert str(FibLookup()) == "FibLookup"
+    assert str(PostNatFibLookup()) == "PostNatFibLookup"
+    assert str(PreNatFibLookup()) == "PreNatFibLookup"
     assert str(ForwardOutInterface("1.1.1.1", "iface1", "iface2")) == (
         "ForwardOutInterface(Next Hop: 1.1.1.1, Next Hop Interface: iface1, Outgoing Interface: iface2)"
     )
