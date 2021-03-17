@@ -87,15 +87,15 @@ categories:
           value: "'in'"
         - name: inputRoutes
           value: list([BgpRoute(network='10.0.0.0/24', originatorIp='4.4.4.4', originType='egp', protocol='bgp')])
-    - name: Search Route Policies
-      pybf_name: searchRoutePolicies
-      parameters:
-        - name: policies
-          value: "'/as1_to_/'"
-        - name: inputConstraints
-          value: BgpRouteConstraints(prefix=["10.0.0.0/8:8-32", "172.16.0.0/28:28-32", "192.168.0.0/16:16-32"])
-        - name: action
-          value: "'permit'"
+#    - name: Search Route Policies
+#      pybf_name: searchRoutePolicies
+#      parameters:
+#        - name: policies
+#          value: "'/as1_to_/'"
+#        - name: inputConstraints
+#          value: BgpRouteConstraints(prefix=["10.0.0.0/8:8-32", "172.16.0.0/28:28-32", "192.168.0.0/16:16-32"])
+#        - name: action
+#          value: "'permit'"
   - name: routingTables
     description: Routing and Forwarding Tables
     questions:

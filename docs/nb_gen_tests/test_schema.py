@@ -149,6 +149,7 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "eigrpEdges",
         "layer1Edges",
         "isisEdges",
+        "searchRoutePolicies",
     }
     session_qs = set(
         [q["name"] for q in session.q.list() if q["name"] not in exclusions]
@@ -172,4 +173,3 @@ def test_all_questions_in_yaml_are_valid_questions(
     session_qs = set([q["name"] for q in session.q.list()])
     yaml_qs = q_names_from_categories(categories)
     assert yaml_qs.issubset(session_qs)
-
