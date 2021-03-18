@@ -328,6 +328,12 @@ def execute_notebook(nb: NotebookNode, name: str) -> NotebookNode:
     # Execute the notebook and write to file
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": _DOC_DIR}})
+
+    # Clear undesirable metadata from cells
+    keep_metadata = {'nbsphinx'}
+    for cell in nb.cells:
+        meta = cell.get('metadata', {})
+        cell['metadata'] = {k: v for k, v in meta.items() if k in keep_metadata}
     return nb
 
 
