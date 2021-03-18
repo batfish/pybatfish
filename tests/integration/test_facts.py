@@ -43,7 +43,7 @@ def session():
     s.delete_snapshot(other_name)
 
 
-@requires_bf("2020.11.20")
+@requires_bf("2021.03.18")
 def test_extract_facts(tmpdir, session):
     """Test extraction of facts for the current snapshot with a basic config."""
     out_dir = tmpdir.join("output")
