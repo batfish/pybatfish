@@ -330,10 +330,10 @@ def execute_notebook(nb: NotebookNode, name: str) -> NotebookNode:
     ep.preprocess(nb, {"metadata": {"path": _DOC_DIR}})
 
     # Clear undesirable metadata from cells
-    keep_metadata = {'nbsphinx'}
+    keep_metadata = {"nbsphinx"}
     for cell in nb.cells:
-        meta = cell.get('metadata', {})
-        cell['metadata'] = {k: v for k, v in meta.items() if k in keep_metadata}
+        meta = cell.get("metadata", {})
+        cell["metadata"] = {k: v for k, v in meta.items() if k in keep_metadata}
     return nb
 
 

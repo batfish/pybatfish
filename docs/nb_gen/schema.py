@@ -91,8 +91,8 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
         text = value[:1].capitalize() + value[1:]
         return f"[{text}](../specifiers.md#{slug})"
     elif value.startswith("pybatfish.datamodel"):
-            text = value.split(".")[-1]  # The class name
-            return f"[{text}](../datamodel.rst#{value})"
+        text = value.split(".")[-1]  # The class name
+        return f"[{text}](../datamodel.rst#{value})"
     elif value.lower() == "selfdescribing":
         if question_name is None:
             raise ValueError(
