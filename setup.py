@@ -115,12 +115,10 @@ setup(
             "inflection",
             "jupyter",
             "mypy<0.800",
-            "nbformat<6.0.0",
             "nbconvert",
             "pytest>=4.2.0",
             "pytest-cov",
             "pytz",
-            "regex<=2019.6.8",  # https://github.com/psf/black/issues/1207
             "requests_mock",
             "responses",
             "sphinx>=1.8.0",
