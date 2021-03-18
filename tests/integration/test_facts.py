@@ -80,7 +80,7 @@ def test_extract_facts_specific_snapshot(tmpdir, session):
     ), "Written facts match expected facts"
 
 
-@requires_bf("2020.11.20")
+@requires_bf("2021.03.18")
 def test_validate_facts_matching(session):
     """Test validation of facts for the current snapshot against matching facts."""
     validation_results = session.validate_facts(
