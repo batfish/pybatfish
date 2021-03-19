@@ -86,11 +86,15 @@ def executed_notebook(notebook):
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
     ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
 
-    # Filter out the deprecation warning, if it exists
     for cell in nb["cells"]:
+        # Filter out the deprecation warning, if it exists
         outputs = [o for o in cell.get("outputs", []) if not _is_warning_output(o)]
         if len(outputs) != len(cell.get("outputs", [])):
             cell["outputs"] = outputs
+
+        # Clear metadata like execution timestamp
+        for cell in nb.cells:
+            cell["metadata"] = {}
 
     return nb
 

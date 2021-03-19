@@ -125,6 +125,12 @@ def executed_notebook(notebook: Tuple[str, NotebookNode], snapshots: None):
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
     ep.preprocess(nb, resources={"metadata": {"path": exec_path}})
 
+    # Clear undesirable metadata from cells
+    keep_metadata = {"nbsphinx"}
+    for cell in nb.cells:
+        meta = cell.get("metadata", {})
+        cell["metadata"] = {k: v for k, v in meta.items() if k in keep_metadata}
+
     return nb
 
 
