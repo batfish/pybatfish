@@ -47,13 +47,13 @@ categories:
         snapshot:
           name: aristaevpn
           path: networks/aristaevpn
-      - name: Interface MTU
-        pybf_name: interfaceMtu
-        parameters:
-          - name: mtuBytes
-            value: 2000
-          - name: comparator
-            value: "'<'"
+#      - name: Interface MTU
+#        pybf_name: interfaceMtu
+#        parameters:
+#          - name: mtuBytes
+#            value: 2000
+#          - name: comparator
+#            value: "'<'"
   - name: topology
     description: Topology
     questions:
