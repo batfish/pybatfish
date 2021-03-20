@@ -43,3 +43,7 @@ Documentation is generated from multiple sources using sphinx (and its extension
 1. Run `pytest docs`
 2. Some test failures will tell you what to do
    (e.g., what symlinks to commit or will generate `*.testout` file to update the notebooks)
+
+### Viewing locally
+
+Use the `sphinx-build` command to generate and view documentation locally.
