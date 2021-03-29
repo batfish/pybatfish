@@ -103,6 +103,13 @@ categories:
     questions:
     - name: Routes
       pybf_name: routes
+    - name: bgpRib
+      pybf_name: bgpRib
+    - name: evpnRib
+      pybf_name: evpnRib
+      snapshot:
+        name: aristaevpn
+        path: networks/aristaevpn
     - name: Longest Prefix Match
       pybf_name: lpmRoutes
       parameters:
