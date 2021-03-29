@@ -103,9 +103,9 @@ categories:
     questions:
     - name: Routes
       pybf_name: routes
-    - name: bgpRib
+    - name: BGP RIB
       pybf_name: bgpRib
-    - name: evpnRib
+    - name: EVPN RIB
       pybf_name: evpnRib
       snapshot:
         name: aristaevpn
