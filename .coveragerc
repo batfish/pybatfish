@@ -1,7 +1,0 @@
-# .coveragerc to control coverage.py
-[run]
-branch = True
-source = pybatfish
-
-[report]
-precision = 1

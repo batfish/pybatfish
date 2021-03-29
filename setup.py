@@ -113,6 +113,7 @@ setup(
             "check-manifest",
             "coverage",
             "inflection",
+            "ipykernel<=5.5.0",
             "jupyter",
             "mypy<0.800",
             "nbconvert",
