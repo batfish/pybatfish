@@ -6,3 +6,4 @@ progressbar2==3.47.0
 recommonmark==0.6.0
 sphinx==2.3.1
 sphinx-notfound-page==0.4
+docutils==0.16  # https://github.com/spatialaudio/nbsphinx/issues/549
