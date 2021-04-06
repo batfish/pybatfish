@@ -69,7 +69,6 @@ nodes:
       Router_ID: 1.1.1.1
       Tie_Breaker: ARRIVAL_ORDER
       VRF: default
-    Community_Lists: []
     Community_Match_Exprs:
     - as1_community
     - as2_community
