@@ -86,8 +86,7 @@ categories:
         - name: direction
           value: "'in'"
         - name: inputRoutes
-          value: list([BgpRoute(network='10.0.0.0/24', originatorIp='4.4.4.4', originType='egp', protocol='bgp', asPath=[[64512, 64513], [64514]],
-            communities=['64512:42', '64513:21'])])
+          value: list([BgpRoute(network='10.0.0.0/24', originatorIp='4.4.4.4', originType='egp', protocol='bgp', asPath=[[64512, 64513], [64514]], communities=['64512:42', '64513:21'])])
     - name: Search Route Policies
       pybf_name: searchRoutePolicies
       parameters:
