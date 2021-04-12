@@ -57,7 +57,6 @@ dependencies:
     - pyrsistent==0.15.7
     - python-utils==2.3.0
     - pytz==2019.3
-    - recommonmark==0.6.0
     - regex==2019.6.8
     - requests==2.22.0
     - six==1.14.0
