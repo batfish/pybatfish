@@ -31,7 +31,6 @@ dependencies:
     - decorator==4.4.1
     - deepdiff==4.0.9
     - defusedxml==0.6.0
-    - docutils==0.16
     - entrypoints==0.3
     - idna==2.8
     - imagesize==1.2.0
@@ -58,7 +57,6 @@ dependencies:
     - pyrsistent==0.15.7
     - python-utils==2.3.0
     - pytz==2019.3
-    - recommonmark==0.6.0
     - regex==2019.6.8
     - requests==2.22.0
     - six==1.14.0

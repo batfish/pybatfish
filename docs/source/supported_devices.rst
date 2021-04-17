@@ -25,6 +25,7 @@ from vendors including:
 
 * Cumulus
 * F5 BIG-IP
+* Fortinet
 * Free-Range Routing (FRR)
 * iptables (on hosts)
 * Juniper (All JunOS platforms)
