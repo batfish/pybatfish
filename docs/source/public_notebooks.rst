@@ -12,6 +12,7 @@ Basics
 
     notebooks/linked/getting-started-with-batfish.ipynb
     notebooks/linked/validating-configuration-settings.ipynb
+    notebooks/linked/analyzing-configuration-and-behavior-drift.ipynb
 
 ACLs and firewalls
 ++++++++++++++++++
