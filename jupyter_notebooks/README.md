@@ -4,7 +4,7 @@ The current list of notebooks are:
 - **Basics**
     - [Getting Started with Batfish](Getting%20started%20with%20Batfish.ipynb) [[video](https://www.youtube.com/watch?v=Ca7kPAtfFqo)] shows how to get started and provides an overview of the capabilities of Batfish.
     - [Validating Configuration Settings](Validating%20Configuration%20Settings.ipynb) [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)] shows how to validate different types of configuration settings (NTP server, TACACS server, AAA, SNMP, etc...) using Batfish.
-    - [Analyzing Configuration and Behavior Drift](Analyzing%20Configuration%20and%20Behavior%20Drift.ipynb) shows how to analyze conffiguration settings and network behavior differences between two network snapshots.
+    - [Uncovering Configuration and Behavior Drift](Uncovering%20Configuration%20and%20Behavior%20Drift.ipynb) shows how to analyze conffiguration settings and network behavior differences between two network snapshots.
 - **ACLs and firewalls**
     - [Analyzing ACLs and Firewall Rules](Analyzing%20ACLs%20and%20Firewall%20Rules.ipynb) [[video](https://youtu.be/KixQYEDh33s)] shows how to analyze ACLs and firewalls rules using Batfish.
     - [Provably Safe ACL and Firewall Changes](Provably%20Safe%20ACL%20and%20Firewall%20Changes.ipynb) [[video](https://www.youtube.com/watch?v=MJYLVL9UOWk)] shows a workflow to ensure changes to ACLs and firewall rules are correct and safe.
