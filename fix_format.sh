@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# Black will crash if we use ASCII:
+# https://click.palletsprojects.com/en/8.0.x/unicode-support/
+# TODO: is there a better place to do this?
+export LC_ALL=C.UTF-8
+export LANG=C.UTF-8
+
 args=""
 if [[ ${1-} == '-c' ]] || [[ ${1-} == '--check' ]]; then
   args="${args} --check"
