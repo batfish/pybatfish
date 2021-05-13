@@ -45,7 +45,7 @@ dependencies:
     - mistune==0.8.4
     - nbconvert==5.6.1
     - nbformat==5.0.4
-    - nbsphinx==0.5.0
+    - nbsphinx==0.8.5
     - netconan==0.11.0
     - ordered-set==3.1.1
     - packaging==20.1
