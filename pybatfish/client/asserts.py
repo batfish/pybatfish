@@ -568,6 +568,11 @@ def assert_no_unestablished_bgp_sessions(
     # type: (Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
     """Assert that there are no BGP sessions that are compatible but not established.
 
+    This assertion is run (only) for sessions that are compatible based on
+    configuration settings and it will fail if any such session is not
+    established because of routing or forwarding problems. To find sessions that
+    are (in)compatible you may run the assert_no_incompatible_bgp_sessions assertion.
+
     :param nodes: search sessions with specified nodes on one side of the sessions.
     :param remote_nodes: search sessions with specified remote_nodes on other side of the sessions.
     :param snapshot: the snapshot on which to check the assertion
