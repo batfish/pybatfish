@@ -18,8 +18,8 @@ from pybatfish.util import get_html
 # Configure all pybatfish loggers to use WARN level
 logging.getLogger("pybatfish").setLevel(logging.WARN)
 
-pd.set_option("display.max_colwidth", None)
-pd.set_option("display.max_columns", None)
+pd.set_option("display.max_colwidth", 99999999999)
+pd.set_option("display.max_columns", 999)
 # Prevent rendering text between '$' as MathJax expressions
 pd.set_option("display.html.use_mathjax", False)
 
