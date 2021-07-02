@@ -841,6 +841,7 @@ def _validateType(value, expectedType):
         VariableType.APPLICATION_SPEC,
         VariableType.BGP_PEER_PROPERTY_SPEC,
         VariableType.BGP_PROCESS_PROPERTY_SPEC,
+        VariableType.BGP_ROUTE_STATUS_SPEC,
         VariableType.BGP_SESSION_COMPAT_STATUS_SPEC,
         VariableType.BGP_SESSION_STATUS_SPEC,
         VariableType.BGP_SESSION_TYPE_SPEC,
