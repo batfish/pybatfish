@@ -159,7 +159,7 @@ A specification for a set of BGP route statuses.
 A BGP route status specifier follows the [enum set grammar](#set-of-enums-or-names) over the following values:
 
 * `BEST` - a route that is the unique best route for an NLRI (e.g. an IP prefix for IPv4 unicast) in the BGP RIB, or a route that is equivalent to the unique best route for the purpose of ECMP routing. A `BEST` route may be installed in the main RIB.
-* `BACKUP` - a route that is inferior to all `BEST` routes in the BGP RIB for the same NLRI. Such a route will not be installed in the main RIB. However, it may be advertised on a BGP ADD-PATH-enabled sessoin and the route matches the add-path policy.
+* `BACKUP` - a route that is inferior to all `BEST` routes in the BGP RIB for the same NLRI. Such a route will not be installed in the main RIB. However, it may be advertised on a BGP ADD-PATH-enabled session and the route matches the add-path policy.
 
 ### BGP Session Compat Status Specifier
 
