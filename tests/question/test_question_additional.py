@@ -420,7 +420,8 @@ def testValidIntegerIpProtocolValidateType():
 
 
 def testInvalidCompletionTypes():
-    for completion_type in COMPLETION_TYPES:
+    # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
+    for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
         result = question._validateType(5, completion_type)
         expectMessage = "A Batfish " + completion_type + " must be a string"
         assert not result[0]
@@ -433,7 +434,8 @@ def testValidCompletionTypes():
         VariableType.PREFIX: "1.2.3.4/24",
         VariableType.PROTOCOL: "ssh",
     }
-    for completion_type in COMPLETION_TYPES:
+    # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
+    for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
         result = question._validateType(
             values.get(completion_type, ".*"), completion_type
         )
