@@ -247,9 +247,9 @@ def test_auto_complete():
     auto_complete_tester(COMPLETION_TYPES)
 
 
-@requires_bf("2020.09.28")
-def test_auto_complete_routing_policy_spec(session):
+@requires_bf("2021.07.09")
+def test_auto_complete_bgp_route_status_spec(session):
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
-    auto_complete_tester_session(session, [VariableType.ROUTING_POLICY_SPEC])
+    auto_complete_tester_session(session, [VariableType.BGP_ROUTE_STATUS_SPEC])
