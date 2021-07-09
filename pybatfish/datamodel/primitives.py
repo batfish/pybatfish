@@ -99,6 +99,7 @@ class VariableType(str, Enum):
     BGP_PROCESS_PROPERTY_SPEC = "bgpProcessPropertySpec"  #: bgp process properties
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_ROUTE_CONSTRAINTS = "bgpRouteConstraints"  # bgp route constraints
+    BGP_ROUTE_STATUS_SPEC = "bgpRouteStatusSpec"  # bgp route status
     BGP_SESSION_COMPAT_STATUS_SPEC = (
         "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
     )
