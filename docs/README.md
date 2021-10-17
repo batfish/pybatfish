@@ -46,4 +46,8 @@ Documentation is generated from multiple sources using sphinx (and its extension
 
 ### Viewing locally
 
-Use the `sphinx-build` command to generate and view documentation locally.
+From the `docs` folder, run
+
+`sphinx-build sources output` 
+
+You can then view the HTML files in the output folder. 
