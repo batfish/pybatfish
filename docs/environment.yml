@@ -31,6 +31,7 @@ dependencies:
     - decorator==4.4.1
     - deepdiff==4.0.9
     - defusedxml==0.6.0
+    - docutils==0.16 # don't upgrade: https://stackoverflow.com/questions/67542699/readthedocs-sphinx-not-rendering-bullet-list-from-rst-file
     - entrypoints==0.3
     - idna==2.8
     - imagesize==1.2.0
