@@ -205,7 +205,7 @@ There should be one such file per host that you want to model and these files sh
 
 See [this example snapshot](https://github.com/batfish/batfish/tree/master/networks/example/live) with host files.
 
-### Layer-1 topology file
+### Layer-1 topology
 
 Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24` respectively,
 Batfish will infer that these interfaces are adjacent.
