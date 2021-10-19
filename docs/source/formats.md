@@ -1,6 +1,6 @@
 # Format of vendor and supplemental data
 
-You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page documents the format in these data should be provided.
+You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page describes the format in these data.
 
 ## Vendor configuration formats
 
@@ -17,7 +17,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 
 Except for AWS, all vendor configs files are placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs` and Batfish will recursively read all files. It is also OK to mix files from different vendors in the same folder.
 
-#### Vendor recognition
+#### Note about vendor recognition
 
 Batfish recognizes the vendor of a configuration file by looking for tell-tale signs of the vendor. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". If such lines are missing, Batfish may mis-detect the vendor. 
 
@@ -180,7 +180,7 @@ just make sure that the output is NOT in XML format (first command) and that def
 
 ## Supplemental data format
 
-You can provide additional data to Batfish to enhance the model of your network or model devices whose configuration is not available. 
+You can provide additional data to Batfish to enhance the model of your network or model parts of the network whose configuration is not available. 
 
 ### Modeling hosts
 
