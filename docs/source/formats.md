@@ -17,15 +17,16 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 
 Except for AWS, all vendor configs files are placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs` and Batfish will recursively read all files. It is also OK to mix files from different vendors in the same folder.
 
-#### Note about vendor recognition
+#### Note about vendor detection
 
-Batfish recognizes the vendor of a configuration file by looking for tell-tale signs of the vendor. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". If such lines are missing, Batfish may mis-detect the vendor. 
+Batfish can automatically detect the vendor of a configuration file based on certain tell-tale signs in vendor files. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". Such lines are almost always present if config files are pulled from devices, but may not be present in automatically generated files. 
 
-To explicitly specify the vendor of a configuration file, include the RANCID content type header at the top of the file. So, for Arista devices, you'd include the following line
+To explicitly specify the vendor of a configuration file, include the RANCID content type header. So, for Arista devices, you'd include the following line at the top of the file:
 
 `!RANCID-CONTENT-TYPE: arista`
 
-See the checkRancid() method of [this file](https://github.com/batfish/batfish/blob/master/projects/batfish/src/main/java/org/batfish/grammar/VendorConfigurationFormatDetector.java) for the list of all vendor type strings recognized by Batfish.
+The supported vendor type strings are `arista`, `bigip` (F5), `cisco-nx` (NX-OS), `cisco-xr` (IOS-XR), `force10` (Dell), `foundry`, `juniper` (all JunOS), `mrv`, and `paloalto`.
+
 
 ### Arista 
 
