@@ -19,9 +19,9 @@ Except for AWS, all vendor configs files are placed in the `configs` folder righ
 
 #### Note about vendor detection
 
-Batfish can automatically detect the vendor of a configuration file based on certain tell-tale signs in vendor files. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". Such lines are almost always present if config files are pulled from devices, but may not be present in automatically generated files. 
+Batfish can automatically detect the vendor of a configuration file based on certain tell-tale signs in vendor files. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". Such lines are almost always present in config files pulled from devices but may not be present in auto-generated files. 
 
-To explicitly specify the vendor of a configuration file, include the RANCID content type header. So, for Arista devices, you'd include the following line at the top of the file:
+If you need to explicitly specify the vendor of your configuration file, include the RANCID content type header. So, for Arista devices, you'd include the following line at the top of the file:
 
 `!RANCID-CONTENT-TYPE: arista`
 
