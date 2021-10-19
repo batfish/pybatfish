@@ -64,7 +64,7 @@ or invoking the [Network Command-Line Utility (NCLU)](https://docs.cumulusnetwor
 Batfish supports both the NCLU format and individual Cumulus configuration files. We recommend using the configuration files because Batfish can extract more data from them than from the NCLU output.
 
 ```eval_rst
-.. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply a `Layer-1 topology file`_.
+.. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply `Layer-1 topology`_.
 ```
 
 #### Cumulus configuration files (preferred)
@@ -205,7 +205,7 @@ There should be one such file per host that you want to model and these files sh
 
 See [this example snapshot](https://github.com/batfish/batfish/tree/master/networks/example/live) with host files.
 
-### Layer-1 topology 
+### Layer-1 topology file
 
 Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24` respectively,
 Batfish will infer that these interfaces are adjacent.
