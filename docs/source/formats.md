@@ -1,10 +1,10 @@
 # Format of vendor and supplemental data
 
-You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page describes the format in these data.
+You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page describes the format of these data.
 
 ## Vendor configuration formats
 
-Batfish supports the following vendors. Click on the corresponding link to learn how to provide configuration for the vendor.
+Batfish supports the following vendors. Click on the corresponding link to learn how to provide configuration for a specific vendor.
 
 * [Arista](#arista)
 * [AWS](#aws)
@@ -15,7 +15,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 * [Juniper](#juniper)
 * [Palo Alto Networks](#palo-alto-networks)
 
-Except for AWS, all vendor configs files are placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs` and Batfish will recursively read all files. It is also OK to mix files from different vendors in the same folder.
+Except for AWS, all vendor configs files must be placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs`; Batfish will recursively read all files. It is also OK to mix files from multiple vendors in the same folder.
 
 #### Note about vendor detection
 
@@ -68,7 +68,7 @@ Batfish supports both the NCLU format and individual Cumulus configuration files
 .. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply `Layer-1 topology`_.
 ```
 
-#### Cumulus configuration files (preferred)
+#### Cumulus configuration files (recommended)
 Batfish processes the Cumulus configuration files concatenated into a single file per device. The format is as follows:
 
 1. hostname (single line)
@@ -101,9 +101,9 @@ hostname=$(cat /etc/hostname)
 ) > $hostname.cfg
 ```
 
-Create one file per device in your network and place the files in the `configs` folder.
+Create one concatenated file per device in your network and place the files in the `configs` folder.
 
-#### NCLU output (not preferred)
+#### NCLU output (not recommended)
 To retrieve the Cumulus configuration in the NCLU format, issue `net show config commands` and save the output to a file in the `configs` folder.
 
 ### F5 BIG-IP
@@ -138,7 +138,7 @@ Add `site1-f5-a-concat.cfg` to the configs folder with the rest of the devices.
 
 ### Fortinet 
 
-For each FortiOS firewall in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show` command on the device.
+For each FortiOS firewall, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show` command on the device.
 
 ### Juniper
 
@@ -181,11 +181,11 @@ just make sure that the output is NOT in XML format (first command) and that def
 
 ## Supplemental data format
 
-You can provide additional data to Batfish to enhance the model of your network or model parts of the network whose configuration is not available. 
+You can provide additional data to Batfish to enhance the model of your network and to model parts of the network whose configuration is not available. 
 
 ### Modeling hosts
 
-The host files enable you to model end hosts in the network by providing information about their names, a pointer to their iptables configuration file, and their interfaces. An example host file is:
+You can model end hosts in the network by adding host files with information about their names, a pointer to their iptables configuration file, and their interfaces. An example host file is:
 
 ```json
 {
@@ -208,10 +208,10 @@ See [this example snapshot](https://github.com/batfish/batfish/tree/master/netwo
 
 ### Layer-1 topology
 
-Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24` respectively,
+Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24`,
 Batfish will infer that these interfaces are adjacent.
 
-However, such inference does not work if you have IP address re-use or are link-local addresses. You can override the inferred connectivity by supplying a Layer-1 topology file that has the cabling information for your network. 
+Such inference does not work if the network re-uses IP address space or has link-local addresses. In those situations, you must provide a Layer-1 topology file that has cabling information. 
 Then, Layer-3 adjacencies will be computed by combining the supplied Layer-1 adjacencies with Layer-2 and Layer-3 configuration to get a more accurate model.
 
 The expected Layer-1 topology file is a JSON file that has a list of edge records, where each edge record has node and interface names of the two ends.
@@ -222,7 +222,7 @@ The name of your Layer-1 topology file must be `layer1_topology.json` and it mus
 ### Modeling ISPs
 
 Batfish can model routers representing ISPs (and Internet) for a given network.
-The modeling is based on a json configuration file (`isp_config.json`),
+The modeling is based on a JSON configuration file (`isp_config.json`),
 which tells Batfish about the interfaces on border routers which peer with the ISPs.
 An example file is:
 
@@ -255,7 +255,7 @@ The name of your ISP modeling file must be `isp_config.json` and it must be plac
 
 ### Runtime interface information
 
-Batfish infers interface state and speed from static configuration files. All relevant information, however, may not be present in the configuration files, including whether an interface is line down and speed/bandwidth for some vendors. You can override Batfish's inference of these properties by providing runtime data. 
+Batfish infers interface attributes from static configuration files. All relevant information, however, may not be present in the configuration files, including whether an interface is line down and speed/bandwidth for some vendors. You can enhance Batfish's inference of such properties by providing runtime data. 
 
 The format of this data is
 
