@@ -1,14 +1,41 @@
 # Format of vendor and supplemental data
 
-## Vendor formats
+You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page describes the format of these data.
 
-For vendors whose device configuration is not a single text file,
-additional preprocessing may be necessary before uploading data to Batfish.
+## Vendor configuration formats
+
+Batfish supports the following vendors. Click on the corresponding link to learn how to provide configuration for a specific vendor.
+
+* [Arista](#arista)
+* [AWS](#aws)
+* [Cisco](#cisco)
+* [Cumulus Linux](#cumulus-linux)
+* [F5 Big IP](#f5-big-ip)
+* [Fortinet](#fortinet)
+* [Juniper](#juniper)
+* [Palo Alto Networks](#palo-alto-networks)
+
+Except for AWS, all vendor configs files must be placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs`; Batfish will recursively read all files. It is also OK to mix files from multiple vendors in the same folder.
+
+#### Note about vendor detection
+
+Batfish can automatically detect the vendor of a configuration file based on certain tell-tale signs in vendor files. For instance, Arista config files tend to contain lines with "! device: ... EOS-4.24" or "boot system flash ... swi". Such lines are almost always present in config files pulled from devices but may not be present in auto-generated files. 
+
+If you need to explicitly specify the vendor of your configuration file, include the RANCID content type header. So, for Arista devices, you'd include the following line at the top of the file:
+
+`!RANCID-CONTENT-TYPE: arista`
+
+The supported vendor type strings are `arista`, `bigip` (F5), `cisco-nx` (NX-OS), `cisco-xr` (IOS-XR), `force10` (Dell), `foundry`, `juniper` (all JunOS), `mrv`, and `paloalto`.
+
+
+### Arista 
+
+For each Arista device in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show running-config` command on the device.
 
 ### AWS
 
 Batfish understands AWS VPC configurations and analyzes it just like physical networks.
-To use this functionality, place AWS configs in a top-level folder called `aws_configs`.
+To use this functionality, place AWS configs in a folder named `aws_configs` right below the top-level snapshot folder.
 The subfolders in this folder correspond to individual regions. If there is only one region,
 then this level of hierarchy may be skipped.
 
@@ -18,27 +45,30 @@ The configuration files for a region should be the JSON output of the following 
   * For RDS: `describe_db_instances`
 
 This output can be collected using the [AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/index.html#cli-aws)
-or using the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/index.html).
-
+or the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/index.html).
 An example script that packages AWS data into a Batfish snapshot is [here](https://github.com/ratulm/bf-aws-snapshot).
 
 An example snapshot, which includes both physical and AWS configs, is [here](https://github.com/batfish/batfish/tree/master/networks/hybrid-cloud-aws).
-It is OK to have only AWS configs in a snapshot.
+It is OK to have only AWS configs in a snapshot (without any physical device configs).
+
+### Cisco
+
+Batfish supports Cisco IOS, IOS-XE, IOS-XR, NX-OS, and ASA platforms. For each such device in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show running-config` command on the device.
+
+For NX-OS, we recommend using `show run all` where possible. This output has additional detail that helps with modeling accuracy. 
 
 ### Cumulus Linux
 
 Cumulus devices can be configured by editing individual files, such as `/etc/network/interfaces`, `/etc/cumulus/ports.conf`, and `/etc/frr/frr.conf`
 or invoking the [Network Command-Line Utility (NCLU)](https://docs.cumulusnetworks.com/display/DOCS/Network+Command+Line+Utility+-+NCLU)
 
-Batfish supports processing of either NCLU configuration output,
-or the Cumulus configuration files themselves (concatenated into one file per device).
-We recommend using the configuration files, because Batfish can extract more data from them than from the NCLU output.
+Batfish supports both the NCLU format and individual Cumulus configuration files. We recommend using the configuration files because Batfish can extract more data from them than from the NCLU output.
 
 ```eval_rst
-.. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply a `Layer-1 topology file`_.
+.. note:: If you are using the `BGP Unnumbered` feature on Cumulus devices, you will need to supply `Layer-1 topology`_.
 ```
 
-#### Cumulus configuration files (preferred)
+#### Cumulus configuration files (recommended)
 Batfish processes the Cumulus configuration files concatenated into a single file per device. The format is as follows:
 
 1. hostname (single line)
@@ -71,8 +101,10 @@ hostname=$(cat /etc/hostname)
 ) > $hostname.cfg
 ```
 
-#### Cumulus: NCLU output (not preferred)
-To retrieve the Cumulus configuration in the NCLU format, issue `net show config commands` and save the output to a file.
+Create one concatenated file per device in your network and place the files in the `configs` folder.
+
+#### NCLU output (not recommended)
+To retrieve the Cumulus configuration in the NCLU format, issue `net show config commands` and save the output to a file in the `configs` folder.
 
 ### F5 BIG-IP
 
@@ -104,6 +136,16 @@ Add `site1-f5-a-concat.cfg` to the configs folder with the rest of the devices.
 .. note:: The routing configuration MUST be the last thing copied into the file, otherwise Batfish will not be able to correctly parse the file.
 ```
 
+### Fortinet 
+
+For each FortiOS firewall, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show` command on the device.
+
+### Juniper
+
+Batfish supports all JunOS-based platforms, including EX, MX, PTX, QFX, SRX, and the T-series. For each such device in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show configuration | display set` command on the device. 
+
+Batfish will also accept JunOS configuration in the hierarchical format and will internally pre-process files in this format to the "set" format.
+
 ### Palo Alto Networks
 Batfish supports Palo Alto Networks devices with or without Panorama.
 
@@ -120,10 +162,10 @@ panxapi.py -t panorama_tag -sxr > panorama_config.xml
 # Convert the XML Panorama config into set-format
 panconf.py --config pan-panorama_config.xml  --set  > panorama_config.set.txt
 ```
-This will generate a single configuration (`panorama_config.set.txt`) representing all firewalls managed by the specified Panorama device, and this config file is what Batfish needs to model the managed firewalls.
+This will generate a single configuration (`panorama_config.set.txt`) representing all firewalls managed by the specified Panorama device, and this config file is what Batfish needs to model the managed firewalls. Place this file in the `configs` folder.
 
 #### From individual devices
-For each device, concatenate the following show commands into one file.
+For each device, concatenate the following show commands into one file and put the file in the `configs` folder.
 
 ```text
 set cli config-output-format set
@@ -137,11 +179,13 @@ The first two commands may not be available on all PAN-OS versions;
 just make sure that the output is NOT in XML format (first command) and that definitions are not truncated (second command).
 
 
-## Batfish data formats
+## Supplemental data format
 
-### Host JSON files
+You can provide additional data to Batfish to enhance the model of your network and to model parts of the network whose configuration is not available. 
 
-The host JSON files contain basic information about the hosts attached to the network, including their names, a pointer to their iptables configuration file, and their interfaces. An example file is:
+### Modeling hosts
+
+You can model end hosts in the network by adding host files with information about their names, a pointer to their iptables configuration file, and their interfaces. An example host file is:
 
 ```json
 {
@@ -158,27 +202,27 @@ The host JSON files contain basic information about the hosts attached to the ne
 
 `iptables/host1.iptables` is the path relative to the snapshot where this host's iptables configuration can be found. iptables configuration files should be in the format that is generated by `iptables-save`.
 
+There should be one such file per host that you want to model and these files should be placed in a folder called `hosts` right below the top-level snapshot folder. 
 
-### Layer-1 topology file
+See [this example snapshot](https://github.com/batfish/batfish/tree/master/networks/example/live) with host files.
 
-Normally Batfish infers Layer-3 interface adjacencies based on IP address configuration on interfaces.
+### Layer-1 topology
 
-For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24` respectively,
+Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24`,
 Batfish will infer that these interfaces are adjacent.
 
-However, you may override this behavior by supplying a Layer-1 topology file.
-In this case, Layer-3 adjacencies are computed by combining the supplied Layer-1 adjacencies with Layer-2 and Layer-3 configuration to get a more accurate model.
-This is especially useful if IP addresses are reused across the network on interfaces that are not actually adjacent in practice.
+Such inference does not work if the network re-uses IP address space or has link-local addresses. In those situations, you must provide a Layer-1 topology file that has cabling information. 
+Then, Layer-3 adjacencies will be computed by combining the supplied Layer-1 adjacencies with Layer-2 and Layer-3 configuration to get a more accurate model.
 
 The expected Layer-1 topology file is a JSON file that has a list of edge records, where each edge record has node and interface names of the two ends.
 See [this file](https://github.com/batfish/batfish/tree/master/networks/example/example_layer1_topology.json) for an example.
-Your file name should be `layer1_topology.json` for it to be considered by Batfish.
 
+The name of your Layer-1 topology file must be `layer1_topology.json` and it must be placed in a folder called `batfish` right below the top-level snapshot folder.
 
-### ISP configuration
+### Modeling ISPs
 
 Batfish can model routers representing ISPs (and Internet) for a given network.
-The modeling is based on a json configuration file (`isp_config.json`),
+The modeling is based on a JSON configuration file (`isp_config.json`),
 which tells Batfish about the interfaces on border routers which peer with the ISPs.
 An example file is:
 
@@ -207,8 +251,33 @@ An example file is:
 Here `borderInterfaces` contains the list of interfaces on border routers which are meant to peer with the ISPs.
 `onlyRemoteAsns` (list of ASNs) and `onlyRemoteIps` (list of IPs) provide a way to apply additional filter by restricting to ISPs having specific ASNs or IPs.
 
-```eval_rst
-.. warning:: Batfish will not try to model any ISP routers in the absence of this configuration file.
+The name of your ISP modeling file must be `isp_config.json` and it must be placed in a folder called `batfish` right below the top-level snapshot folder. An example network with ISP modeling configuration is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
+
+### Runtime interface information
+
+Batfish infers interface attributes from static configuration files. All relevant information, however, may not be present in the configuration files, including whether an interface is line down and speed/bandwidth for some vendors. You can enhance Batfish's inference of such properties by providing runtime data. 
+
+The format of this data is
+
+```json
+{
+  "runtimeData": {
+    "router1": {
+      "Ethernet1/1": {
+         "bandwidth": 100000000000,
+         "lineUp": false,
+         "speed": 100000000000
+      }
+    },
+    "router2": {
+      "Ethernet21/1": {
+         "lineUp": true
+      }
+    }    
+  }
+}
 ```
 
-An example network with ISP modeling configuration is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
+The name of this must be `runtime_data.json` and it must be placed in a folder called `batfish` right below the top-level snapshot folder. The same file should contain information for all devices and interfaces, and only a subset of the properties may be specified for an interface. 
+ 
+
