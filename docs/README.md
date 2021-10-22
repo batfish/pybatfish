@@ -48,6 +48,6 @@ Documentation is generated from multiple sources using sphinx (and its extension
 
 From the `docs` folder, run
 
-`sphinx-build sources output` 
+`sphinx-build source output` 
 
 You can then view the HTML files in the output folder. 

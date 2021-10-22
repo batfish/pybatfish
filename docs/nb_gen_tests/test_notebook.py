@@ -109,7 +109,7 @@ def generated_notebooks(
     Used to compare markdown equivalence."""
     filepath = request.param
     category = [c for c in categories["categories"] if c["name"] == filepath.stem][0]
-    fresh = generate_notebook(category, get_name_to_qclass(session))
+    fresh = generate_notebook(category, get_name_to_qclass(session), session)
     with filepath.open() as f:
         return filepath, fresh, nbformat.read(f, as_version=4)
 

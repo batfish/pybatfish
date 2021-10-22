@@ -3,37 +3,37 @@ Batfish Commands
 
 Here we describe the non-question related Batfish functions
 
-.. currentmodule:: pybatfish.client.commands
+.. currentmodule:: pybatfish.client.session.Session
 
 Networks
 --------
-.. autofunction:: bf_set_network
-.. autofunction:: bf_list_networks
-.. autofunction:: bf_delete_network
+.. autofunction:: set_network
+.. autofunction:: list_networks
+.. autofunction:: delete_network
 
 Snapshots
 ---------
-.. autofunction:: bf_init_snapshot
-.. autofunction:: bf_set_snapshot
-.. autofunction:: bf_list_snapshots
-.. autofunction:: bf_delete_snapshot
-.. autofunction:: bf_fork_snapshot
+.. autofunction:: init_snapshot
+.. autofunction:: set_snapshot
+.. autofunction:: list_snapshots
+.. autofunction:: delete_snapshot
+.. autofunction:: fork_snapshot
 
 Reference Library
 -----------------
-.. autofunction:: bf_get_reference_library
-.. autofunction:: bf_get_reference_book
-.. autofunction:: bf_put_reference_book
-.. autofunction:: bf_delete_reference_book
+.. autofunction:: get_reference_library
+.. autofunction:: get_reference_book
+.. autofunction:: put_reference_book
+.. autofunction:: delete_reference_book
 
 .. Excluding any role-related commands (for now)
-.. .. autofunction:: bf_get_node_roles
-.. .. autofunction:: bf_put_node_roles
-.. .. autofunction:: bf_add_node_role_dimension
-.. .. autofunction:: bf_put_node_role_dimension
-.. .. autofunction:: bf_get_node_role_dimension
-.. .. autofunction:: bf_delete_node_role_dimension
+.. .. autofunction:: get_node_roles
+.. .. autofunction:: put_node_roles
+.. .. autofunction:: add_node_role_dimension
+.. .. autofunction:: put_node_role_dimension
+.. .. autofunction:: get_node_role_dimension
+.. .. autofunction:: delete_node_role_dimension
 
 Diagnostics
 -----------
-.. autofunction:: bf_upload_diagnostics
+.. autofunction:: upload_diagnostics
