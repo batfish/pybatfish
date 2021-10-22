@@ -15,7 +15,7 @@ from vendors including:
   * VPN Gateways
   * ...
 
-* Checkpoint
+* Check Point
 
 * Cisco
 
