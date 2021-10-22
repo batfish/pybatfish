@@ -15,10 +15,8 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 from yaml import safe_load
 
-from pybatfish.client.commands import bf_set_network, bf_set_snapshot
 from pybatfish.client.session import Session
 from pybatfish.question.question import QuestionMeta, load_questions
-from pybatfish.question import bfq  # noqa: F401
 from pybatfish.datamodel import *  # noqa: F401
 from .doc_tables import get_desc_and_params, gen_input_table, gen_output_table
 
@@ -59,7 +57,7 @@ def add_differential_warning(cells: List[NotebookNode]) -> None:
     `.answer()`
 
     For example, to view the difference in routing tables between `snapshot1` and `snapshot0`, run
-    `bfq.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0").frame()`
+    `bf.q.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0").frame()`
 
     In addition, Batfish has some questions that can *ONLY* be run differentially.
     They are documented in this section."""
@@ -80,7 +78,8 @@ def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNod
     return nbformat.v4.new_markdown_cell("\n".join(toc_lines))
 
 
-def generate_result_examination(cells: List[NotebookNode], question_type: str) -> None:
+def generate_result_examination(cells: List[NotebookNode], 
+                                question_type: str) -> None:
     """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type).
     """
     if question_type == "basic":
@@ -213,7 +212,9 @@ def generate_result_examination(cells: List[NotebookNode], question_type: str) -
 
 
 def generate_code_for_question(
-    question_data: Mapping[str, Any], question_class_map: Mapping[str, QuestionMeta]
+    question_data: Mapping[str, Any],
+    question_class_map: Mapping[str, QuestionMeta],
+    session: Session
 ) -> List[NotebookNode]:
     """Generate notebook cells for a single question."""
     question_type = question_data.get("type", "basic")
@@ -228,18 +229,18 @@ def generate_code_for_question(
     snapshot_config = question_data.get("snapshot", _example_snapshot_config)
 
     # setting the network & snapshot here since we have to execute the query to get retrieve column meta-data
-    bf_set_network(NETWORK_NAME)
+    session.set_network(NETWORK_NAME)
     snapshot_name = snapshot_config["name"]
-    bf_set_snapshot(snapshot_name)
+    session.set_snapshot(snapshot_name)
 
     cells.append(
         nbformat.v4.new_code_cell(
-            f"bf_set_network('{NETWORK_NAME}')", metadata=metadata_hide
+            f"bf.set_network('{NETWORK_NAME}')", metadata=metadata_hide
         )
     )
     cells.append(
         nbformat.v4.new_code_cell(
-            f"bf_set_snapshot('{snapshot_name}')", metadata=metadata_hide
+            f"bf.set_snapshot('{snapshot_name}')", metadata=metadata_hide
         )
     )
     description, long_description, params = get_desc_and_params(q_class)
@@ -257,9 +258,9 @@ def generate_code_for_question(
     if question_type == "diff":
         reference_snapshot = question_data["reference_snapshot"]["name"]
         # TODO: line wrapping?
-        expression = f"bfq.{pybf_name}({param_str}).answer(snapshot='{snapshot_name}',reference_snapshot='{reference_snapshot}')"
+        expression = f"bf.q.{pybf_name}({param_str}).answer(snapshot='{snapshot_name}',reference_snapshot='{reference_snapshot}')"
     else:
-        expression = f"bfq.{pybf_name}({param_str}).answer()"
+        expression = f"bf.q.{pybf_name}({param_str}).answer()"
     # execute the question and get the column metadata. Hack.
     column_metadata = eval(expression).metadata.column_metadata
 
@@ -280,17 +281,19 @@ def generate_code_for_question(
 def generate_code_for_questions(
     question_list: List[Mapping[str, Any]],
     question_class_map: Mapping[str, QuestionMeta],
+    session: Session
 ) -> List[NotebookNode]:
     """Generate notebook cells for all questions in a single question category."""
-    load_questions()
     cells: List[NotebookNode] = []
     for question_data in question_list:
-        cells.extend(generate_code_for_question(question_data, question_class_map))
+        cells.extend(generate_code_for_question(question_data,
+                                                question_class_map, session))
     return cells
 
 
 def generate_notebook(
-    category: Mapping[str, Any], question_class_map: Mapping[str, QuestionMeta]
+    category: Mapping[str, Any], question_class_map: Mapping[str, QuestionMeta],
+        session: Session
 ) -> NotebookNode:
     """Generate a notebook for a given question category."""
     # Create notebook object
@@ -311,7 +314,8 @@ def generate_notebook(
     cells.append(generate_category_toc(question_list))
 
     # Creates the documentation for each question
-    cells.extend(generate_code_for_questions(question_list, question_class_map))
+    cells.extend(generate_code_for_questions(question_list,
+                                             question_class_map, session))
 
     # overwrite the cells with the fully populated list
     nb["cells"] = cells
@@ -344,11 +348,12 @@ def write_notebook(nb: NotebookNode, path: Path) -> None:
 
 
 def generate_all_notebooks(
-    question_categories: Mapping, question_class_map: Mapping[str, QuestionMeta]
+    question_categories: Mapping, question_class_map: Mapping[str, QuestionMeta],
+        session:Session
 ) -> None:
     """Generate (and write to disk) all question notebooks."""
     for category in progressbar.progressbar(question_categories["categories"]):
-        nb = generate_notebook(category, question_class_map)
+        nb = generate_notebook(category, question_class_map, session)
         name = category["name"]
         nb = execute_notebook(nb, name)
         write_notebook(nb, _EXEC_NOTEBOOK_DIR / f"{name}.ipynb")
@@ -419,4 +424,4 @@ def main() -> None:
     session.set_network(NETWORK_NAME)
 
     init_snapshots(questions_by_category, session)
-    generate_all_notebooks(questions_by_category, question_class_map)
+    generate_all_notebooks(questions_by_category, question_class_map,session)
