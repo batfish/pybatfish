@@ -9,6 +9,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 * [Arista](#arista)
 * [AWS](#aws)
 * [Cisco](#cisco)
+* [Check Point](#check-point)
 * [Cumulus Linux](#cumulus-linux)
 * [F5 Big IP](#f5-big-ip)
 * [Fortinet](#fortinet)
@@ -56,6 +57,36 @@ It is OK to have only AWS configs in a snapshot (without any physical device con
 Batfish supports Cisco IOS, IOS-XE, IOS-XR, NX-OS, and ASA platforms. For each such device in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show running-config` command on the device.
 
 For NX-OS, we recommend using `show run all` where possible. This output has additional detail that helps with modeling accuracy. 
+
+### Check Point 
+
+Check Point data is provided in two parts.
+
+1. Place the output of `show configuration` from gateway devices into the `configs` folder. This data contains information about interfaces and routing but not firewall policies, which must be fetched from the Check Point Manager as described next.
+
+2. Data from Check Point Manager must be placed in a folder called `checkpoint_management` right under the top-level snapshot folder (parallel to `configs` folder). The expected hierarchy under this folder is as follows:
+
+  * `checkpoint_management`
+    * Manager1  [Data from Manager1--you may have multiple managers] 
+      * DomainA [Data from DomainA--the manager may have multiple] 
+        * show-gateways-and-servers.json
+        * show-groups.json
+        * show-hosts.json
+        * show-networks.json
+        * show-package.json
+        * show-service-groups.json
+        * show-services-icmp.json
+        * show-services-other.json
+        * show-services-tcp.json
+        * show-services-udp.json
+        * Package1 [Data for Package1--the domain may have multiple packages] 
+          * show-access-rulebase.json  
+          * show-nat-rulebase.json     
+          * show-package.json 
+
+The json files contain the output of corresponding [Check Point Management API](https://sc1.checkpoint.com/documents/latest/APIs/) calls. 
+
+An example script that fetches this data and organizes it as above is [here](https://github.com/saparikh/bf-checkpoint-manager-snapshot).
 
 ### Cumulus Linux
 
