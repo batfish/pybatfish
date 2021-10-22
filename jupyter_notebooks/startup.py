@@ -5,6 +5,7 @@ import random  # noqa: F401
 from IPython.display import display
 from pandas.io.formats.style import Styler
 
+from pybatfish.client.session import Session
 from pybatfish.client.commands import *  # noqa: F401
 
 # noinspection PyUnresolvedReferences

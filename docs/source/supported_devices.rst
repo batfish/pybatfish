@@ -15,6 +15,8 @@ from vendors including:
   * VPN Gateways
   * ...
 
+* Checkpoint
+
 * Cisco
 
   * ASA
