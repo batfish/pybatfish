@@ -6,14 +6,12 @@ from IPython.display import display
 from pandas.io.formats.style import Styler
 
 from pybatfish.client.session import Session
-from pybatfish.client.commands import *  # noqa: F401
 
 # noinspection PyUnresolvedReferences
 from pybatfish.datamodel import Edge, Interface
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints  # noqa: F401
 from pybatfish.datamodel.route import BgpRoute  # noqa: F401
-from pybatfish.question import bfq, list_questions, load_questions  # noqa: F401
 from pybatfish.util import get_html
 
 # Configure all pybatfish loggers to use WARN level

@@ -233,6 +233,11 @@ def generate_code_for_question(
     snapshot_name = snapshot_config["name"]
     session.set_snapshot(snapshot_name)
 
+    # creating the var bf as the BF session object so that the notebooks
+    # can use bf. calls, but the notebook generation code will use
+    # session. calls
+    bf = session
+
     cells.append(
         nbformat.v4.new_code_cell(
             f"bf.set_network('{NETWORK_NAME}')", metadata=metadata_hide
