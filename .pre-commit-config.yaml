@@ -17,7 +17,7 @@ repos:
     - id: isort
       args: ["--profile", "black", "--filter-files"]
  
-  - repo: git@github.com:humitos/mirrors-autoflake.git
+  - repo: https://github.com/humitos/mirrors-autoflake
     rev: v1.3
     hooks:
       - id: autoflake

@@ -29,7 +29,6 @@ cat <<EOF
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
           always-pull: true
-          mount-ssh-agent: true
   - label: "Type checking with mypy"
     command:
       - "python3 -m virtualenv .venv"
