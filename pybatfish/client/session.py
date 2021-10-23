@@ -21,7 +21,7 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import Any, Callable, Dict, IO, List, Optional, Text, Union  # noqa: F401
+from typing import IO, Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
 
 import pkg_resources
 from deprecated import deprecated
@@ -61,6 +61,7 @@ from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import Questions
 from pybatfish.util import get_uuid, validate_name, zip_dir
+
 from .options import Options
 
 

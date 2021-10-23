@@ -16,7 +16,7 @@
 from __future__ import absolute_import, print_function
 
 import json
-from typing import Dict, Optional, TYPE_CHECKING  # noqa: F401
+from typing import TYPE_CHECKING, Dict, Optional  # noqa: F401
 
 import pybatfish.util as batfishutils
 

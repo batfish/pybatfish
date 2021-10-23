@@ -15,7 +15,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, Optional, TYPE_CHECKING  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
 
 import requests
 from requests import Response  # noqa: F401
@@ -27,6 +27,7 @@ from urllib3.exceptions import InsecureRequestWarning
 import pybatfish
 from pybatfish.client.consts import CoordConsts
 from pybatfish.exception import BatfishException
+
 from .options import Options
 
 if TYPE_CHECKING:

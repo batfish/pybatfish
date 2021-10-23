@@ -16,12 +16,11 @@ import pytest
 
 from pybatfish.datamodel.acl import (
     Fragment,
-    TextFragment,
     LinkFragment,
+    TextFragment,
     TraceElement,
     VendorStructureId,
 )
-
 
 TEXT_FRAGMENT = "org.batfish.datamodel.TraceElement$TextFragment"
 LINK_FRAGMENT = "org.batfish.datamodel.TraceElement$LinkFragment"

@@ -1,9 +1,10 @@
 # coding: utf-8
 import inspect
-from typing import Any, Tuple, List
+from typing import Any, List, Tuple
 
 from pybatfish.datamodel.answer.table import ColumnMetadata
 from pybatfish.question.question import QuestionMeta
+
 from .schema import convert_schema
 
 

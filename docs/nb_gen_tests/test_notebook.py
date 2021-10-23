@@ -18,21 +18,20 @@ import os
 import re
 import sys
 from copy import deepcopy
-from os import remove, walk, listdir
+from os import listdir, remove, walk
 from os.path import abspath, dirname, join, realpath
 from pathlib import Path
-from typing import List, Tuple, Mapping, Any
+from typing import Any, List, Mapping, Tuple
 
 import nbformat
 import pytest
-from nbconvert.preprocessors import ExecutePreprocessor
-
 from nb_gen.gen_question_notebooks import (
-    init_snapshots,
+    NETWORK_NAME,
     generate_notebook,
     get_name_to_qclass,
-    NETWORK_NAME,
+    init_snapshots,
 )
+from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 
 from pybatfish.client.session import Session

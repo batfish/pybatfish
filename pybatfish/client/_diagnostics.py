@@ -19,7 +19,7 @@ import os
 import shutil
 import tempfile
 import uuid
-from typing import Any, Dict, Iterable, Optional, TYPE_CHECKING  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Iterable, Optional  # noqa: F401
 
 import requests
 from netconan import netconan

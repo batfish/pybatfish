@@ -19,7 +19,7 @@
 #
 import sys
 import textwrap
-from os.path import abspath, dirname, realpath, join, pardir
+from os.path import abspath, dirname, join, pardir, realpath
 
 from recommonmark.transform import AutoStructify
 

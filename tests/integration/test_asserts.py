@@ -148,7 +148,7 @@ def test_asserts_fail(session_fail, assert_func, params):
 
 @requires_bf("2019.11.05")
 def test_assert_no_duplicate_router_ids_pass(session_pass):
-    """Test that there are no duplicate router IDs. """
+    """Test that there are no duplicate router IDs."""
     # Assertion should run without errors and return True (passing assert)
     assert session_pass.asserts.assert_no_duplicate_router_ids()
 

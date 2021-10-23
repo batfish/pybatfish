@@ -16,7 +16,7 @@ from __future__ import absolute_import, print_function
 
 import pytest
 
-from pybatfish.datamodel.acl import AclTrace, TraceTree, TraceElement, TextFragment
+from pybatfish.datamodel.acl import AclTrace, TextFragment, TraceElement, TraceTree
 from pybatfish.datamodel.answer.base import _parse_json_with_schema
 
 

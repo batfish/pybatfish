@@ -22,7 +22,7 @@ import tempfile
 import uuid
 import zipfile
 from collections.abc import Iterable, Mapping
-from typing import Any, IO, Sized, Union  # noqa: F401
+from typing import IO, Any, Sized, Union  # noqa: F401
 
 import simplejson
 

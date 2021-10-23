@@ -23,27 +23,27 @@ import re
 import sys
 from copy import deepcopy
 from inspect import getmembers
-from typing import (
+from typing import (  # noqa: F401
+    TYPE_CHECKING,
     Any,
     Dict,
     Iterable,
     List,
     Optional,
     Set,
-    TYPE_CHECKING,
     Tuple,
     Union,
-)  # noqa: F401
+)
 
 import attr
 
 from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
-from pybatfish.datamodel import (
+from pybatfish.datamodel import (  # noqa: F401
     Assertion,
     AssertionType,
     BgpRoute,
     VariableType,
-)  # noqa: F401
+)
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
@@ -121,7 +121,7 @@ class QuestionMeta(type):
                     instance_vars[var_name]["value"] = var_value
 
         # Define signature. Helps with tab completion. Python3 centric
-        from inspect import Signature, Parameter
+        from inspect import Parameter, Signature
 
         # Merge constructor params with question variables
         params = [

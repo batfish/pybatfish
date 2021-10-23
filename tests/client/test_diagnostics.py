@@ -23,8 +23,8 @@ import requests
 import responses
 
 from pybatfish.client._diagnostics import (
-    METADATA_FILENAME,
     _UPLOAD_MAX_TRIES,
+    METADATA_FILENAME,
     _adapter,
     _anonymize_dir,
     _requests_session,

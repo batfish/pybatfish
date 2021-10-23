@@ -13,9 +13,9 @@
 #   limitations under the License.
 
 from typing import Dict, List, Optional  # noqa: F401
-from pandas.core.indexes.frozen import FrozenList
 
 import attr
+from pandas.core.indexes.frozen import FrozenList
 
 from .primitives import DataModelElement
 
