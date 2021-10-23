@@ -231,7 +231,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 
 * **BorderInterfaces:** Specify the interfaces in the snapshot that connect to the ISP you want to model. Each interface must be a layer-3 interface connected directly to the ISP and establish an eBGP single-hop session to the ISP. 
 
-```json
+```
 {
   "borderInterfaces": [
     {
@@ -247,7 +247,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 
 * **BgpPeers:** Specify the BGP peers defined on border routers in the snapshot. You can also optionally specify how the ISP attaches to the snapshot, by specifying the interface in the snapshot where it establishes physical connectivity. In the absence of this attachment specification, Batfish will assume that the ISP is attached at the interface of the specified peering.
 
-```json
+```
 {
   "bgpPeers": [
     {
@@ -279,7 +279,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 
 * **IspNodeInfos**: This section lets you configure certain aspects of the modeled ISP nodes. One aspect of this configuration is specifying the role of the ISP---whether it is a transit provider ("TRANSIT") or a private backbone ("PRIVATE_BACKBONE") such as a carrier MPLS or your own WAN that connects multiple sites. Transit ISPs connects to the modeled Internet node, do not propagate any communities and block reserved address space traffic. Private backbones do not connect to the Internet, propagate (standard and extended) communities and do not filter any traffic.
 
-```json
+```
 {
   "ispNodeInfo": [
     {
@@ -294,7 +294,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 
 * **IspPeerings**: This section lets you configure eBGP peering between modeled ISP nodes. When not present, none of the ISPs connect to each other. The specification is:
 
-```json
+```
 {
    "ispPeerings": [
      {
@@ -349,9 +349,9 @@ The runtime data specification also allows you to analyze the impact of failing 
 
 To help analyze connectivity to specific external prefixes or analyze the treatment of external routes by your network, you can specify the external routes coming into the network, as follows.
 
-```json
+```
 {
-	"Announcements": [
+  "Announcements": [
       {
           "type" : "ebgp_sent", // whether the attributes of this route are what was sent by the external peer, 
                                 // or they represent attributes after processing by import routing policy ('ebgp_received')
