@@ -255,7 +255,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
       "peerAddress": "10.10.10.10",
       "vrf": "internet",   // Optional; default VRF is assumed if left unspecified
       "ispAttachment": {   // This section is optional. 
-          "hostname": "borderSwitch", // Optiional; the host of the peering ('as2border1') is assumed if left unspecified
+          "hostname": "borderSwitch", // Optional; the host of the peering ('as2border1') is assumed if left unspecified
           "interface": "GigabitEthernet3/0",  // mandatory
           "vlanTag": 86 // Specifies the Dot1q encapsulation that the modeled ISP should use for the peering. 
                         // Optional; no tagging is assumed if left unspecified
@@ -277,7 +277,7 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 }
 ```
 
-* **IspNodeInfos**: This section lets you configure certain aspects of the modeled ISP nodes. One aspect of this configuration is specifying the role of the ISP---whether it is a transit provider ("TRANSIT") or a private backbone ("PRIVATE_BACKBONE") such as a carrier MPLS or your own WAN that connects multiple sites. Transit ISPs connects to the modeled Internet node, do not propagate any communities and block reserved address space traffic. Private backbones do not connect to the Internet, propagate (standard and extended) communities and do not filter any traffic.
+* **IspNodeInfos**: This section lets you configure certain aspects of the modeled ISP nodes. One aspect of this configuration is specifying the role of the ISP---whether it is a transit provider (`TRANSIT`) or a private backbone (`PRIVATE_BACKBONE`) such as a carrier MPLS or your own wide-area network that connects multiple sites. Transit ISPs connects to the modeled Internet node, do not propagate any communities and block reserved address space traffic. Private backbones do not connect to the Internet, propagate (standard and extended) communities and do not filter any traffic.
 
 ```
 {
@@ -312,9 +312,9 @@ Batfish can model ISPs (and Internet connectivity) for a network based on a file
 
 All sections that you need must be included in a file called `isp_config.json`, placed in a folder called `batfish` right below the top-level snapshot folder. An example snapshot with ISP modeling file is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
 
-The hostname of the modeled ISP nodes will be 'isp_\<ASN>' (e.g., 'isp_65432'). These nodes can be queried and analyzed just like any other node in the snapshot. Only one node per ASN is generated even if you have multiple peerings to the same ASN.
+The hostname of the modeled ISP nodes will be of the form `isp_<ASN>` (e.g., 'isp_65432'). These nodes can be queried and analyzed just like any other node in the snapshot. Only one node per ASN is generated even if you have multiple peerings to the same ASN.
 
-A node representing the Internet is also created if any of the ISPs is "TRANSIT". This node announces the default route (0.0.0.0/0) to connected ISPs. It's hostname is 'internet' and it too can be queried and analyzed like any other node in the snapshot. 
+A node representing the Internet is also created if any of the ISPs is "TRANSIT". This node announces the default route (0.0.0.0/0) to connected ISPs. Its hostname is 'internet' and it too can be queried and analyzed like any other node in the snapshot. 
 
 ### Runtime interface information
 
