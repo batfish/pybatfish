@@ -6,7 +6,10 @@ import pandas as pd
 from IPython.display import display
 from pandas.io.formats.style import Styler
 
+from pybatfish.client.session import Session  # noqa: F401
+
 # noinspection PyUnresolvedReferences
+from pybatfish.datamodel import Edge, Interface  # noqa: F401
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.datamodel.flow import HeaderConstraints, PathConstraints  # noqa: F401
 from pybatfish.datamodel.route import BgpRoute  # noqa: F401
