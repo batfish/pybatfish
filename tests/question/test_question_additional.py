@@ -20,7 +20,6 @@ from pybatfish.datamodel.primitives import VariableType
 from pybatfish.question import question
 from tests.conftest import COMPLETION_TYPES
 
-
 # Tests for isSubRange
 
 # These two tests will fail with original code due to typo in the code
@@ -152,8 +151,10 @@ def testInvalidPrefixRangeInput():
 def testInvalidPrefixInput():
     prefixRange = "192.168.1.s/100:100"
     actualResult = question._isPrefixRange(prefixRange)
-    expectMessage = "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
-        prefixRange
+    expectMessage = (
+        "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
+            prefixRange
+        )
     )
     assert not actualResult[0]
     assert expectMessage == actualResult[1]

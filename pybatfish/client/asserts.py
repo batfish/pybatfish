@@ -21,15 +21,15 @@ fails.
 
 import operator
 import warnings
-from typing import (
+from typing import (  # noqa: F401
+    TYPE_CHECKING,
     Any,
     Dict,
     Iterable,
     List,
     Optional,
-    TYPE_CHECKING,
     Union,
-)  # noqa: F401
+)
 
 from deepdiff import DeepDiff
 from pandas import DataFrame

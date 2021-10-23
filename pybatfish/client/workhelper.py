@@ -21,7 +21,7 @@ import logging
 import string
 import tempfile
 import time
-from typing import Any, Dict, IO, Optional, TYPE_CHECKING  # noqa: F401
+from typing import IO, TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -29,6 +29,7 @@ from dateutil.tz import tzlocal
 
 from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
 from pybatfish.exception import BatfishException
+
 from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
 

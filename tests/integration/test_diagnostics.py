@@ -61,12 +61,8 @@ def requests_session():
         )
     )
     # Override longest-match adapter for http and https
-    session.mount(
-        "http://", adapter,
-    )
-    session.mount(
-        "https://", adapter,
-    )
+    session.mount("http://", adapter)
+    session.mount("https://", adapter)
     yield session
 
 

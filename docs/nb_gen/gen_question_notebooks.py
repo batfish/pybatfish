@@ -17,10 +17,11 @@ from yaml import safe_load
 
 from pybatfish.client.commands import bf_set_network, bf_set_snapshot
 from pybatfish.client.session import Session
-from pybatfish.question.question import QuestionMeta, load_questions
-from pybatfish.question import bfq  # noqa: F401
 from pybatfish.datamodel import *  # noqa: F401
-from .doc_tables import get_desc_and_params, gen_input_table, gen_output_table
+from pybatfish.question import bfq  # noqa: F401
+from pybatfish.question.question import QuestionMeta, load_questions
+
+from .doc_tables import gen_input_table, gen_output_table, get_desc_and_params
 
 _THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
 _DOC_DIR: Path = _THIS_DIR.parent
@@ -81,8 +82,7 @@ def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNod
 
 
 def generate_result_examination(cells: List[NotebookNode], question_type: str) -> None:
-    """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type).
-    """
+    """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type)."""
     if question_type == "basic":
         cells.append(
             nbformat.v4.new_markdown_cell(

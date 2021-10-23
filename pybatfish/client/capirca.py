@@ -19,7 +19,7 @@ from __future__ import absolute_import, print_function
 import ipaddress
 import logging
 import os
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # noqa: F401
 
 try:
     from capirca.lib import naming, policy

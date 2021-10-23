@@ -1,9 +1,8 @@
 # coding: utf-8
 from typing import Mapping, Set
 
-import pytest
 import cerberus
-
+import pytest
 from nb_gen.schema import convert_schema
 
 from pybatfish.client.session import Session
@@ -144,14 +143,9 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "viConversionStatus",
         "viConversionWarning",
         "viModel",
-        "vrrpProperties"
+        "vrrpProperties",
     ]
-    xfail = {
-        "multipathConsistency",
-        "eigrpEdges",
-        "layer1Edges",
-        "isisEdges",
-    }
+    xfail = {"multipathConsistency", "eigrpEdges", "layer1Edges", "isisEdges"}
     session_qs = set(
         [q["name"] for q in session.q.list() if q["name"] not in exclusions]
     )
