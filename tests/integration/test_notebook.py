@@ -23,7 +23,7 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 from tests.common_util import get_bf_version, skip_old_version
 
 _this_dir = abspath(dirname(realpath(__file__)))

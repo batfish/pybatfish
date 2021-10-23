@@ -9,7 +9,7 @@ from nb_gen.doc_tables import (
     get_output_table_lines,
 )
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 from pybatfish.datamodel.answer.table import ColumnMetadata
 
 

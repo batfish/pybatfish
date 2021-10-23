@@ -16,7 +16,7 @@ from os.path import abspath, dirname, join, realpath
 
 import pytest
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 from pybatfish.datamodel import HeaderConstraints
 from pybatfish.exception import BatfishAssertException
 from tests.common_util import requires_bf

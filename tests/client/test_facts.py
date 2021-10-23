@@ -19,6 +19,7 @@ import pytest
 import yaml
 from pandas import DataFrame
 
+from pybatfish import Session
 from pybatfish.client._facts import (
     _assert_dict_subset,
     _encapsulate_nodes_facts,
@@ -28,7 +29,6 @@ from pybatfish.client._facts import (
     validate_facts,
     write_facts,
 )
-from pybatfish.client.session import Session
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.question.question import QuestionBase
 

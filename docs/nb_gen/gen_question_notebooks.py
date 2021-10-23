@@ -15,7 +15,7 @@ from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 from yaml import safe_load
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 from pybatfish.datamodel import *  # noqa: F401
 from pybatfish.question.question import QuestionMeta
 

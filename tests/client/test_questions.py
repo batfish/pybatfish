@@ -17,7 +17,7 @@ import os
 import pytest
 import responses
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 from pybatfish.question.question import QuestionBase, QuestionMeta, _install_questions
 
 

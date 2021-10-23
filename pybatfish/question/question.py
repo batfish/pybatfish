@@ -50,7 +50,7 @@ from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 # A set of tags across all questions
 _tags = set()  # type: Set[str]

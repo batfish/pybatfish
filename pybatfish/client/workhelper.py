@@ -34,7 +34,7 @@ from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
 MAX_LOG_LENGTH = 64 * 1024

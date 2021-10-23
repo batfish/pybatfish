@@ -18,7 +18,7 @@ from unittest.mock import patch
 import pkg_resources
 import pytest
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 
 class MockEntryPoint(object):

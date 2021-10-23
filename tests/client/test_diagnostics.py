@@ -22,6 +22,7 @@ import pytest
 import requests
 import responses
 
+from pybatfish import Session
 from pybatfish.client._diagnostics import (
     _UPLOAD_MAX_TRIES,
     METADATA_FILENAME,
@@ -33,7 +34,6 @@ from pybatfish.client._diagnostics import (
     check_if_any_failed,
     upload_diagnostics,
 )
-from pybatfish.client.session import Session
 
 # Config file constants for anonymization and upload
 _CONFIG_IP_ADDR = "1.2.3.4"

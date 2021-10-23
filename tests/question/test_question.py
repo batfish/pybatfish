@@ -16,8 +16,8 @@ import json
 
 import pytest
 
+from pybatfish import Session
 from pybatfish.client.commands import bf_session
-from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (

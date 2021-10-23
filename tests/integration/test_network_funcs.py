@@ -17,6 +17,7 @@ from os.path import abspath, dirname, join, realpath
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
+from pybatfish import Session
 from pybatfish.client.commands import (
     bf_add_node_role_dimension,
     bf_auto_complete,
@@ -38,7 +39,6 @@ from pybatfish.client.extended import (
     bf_put_network_object,
 )
 from pybatfish.client.options import Options
-from pybatfish.client.session import Session
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
 from pybatfish.datamodel.referencelibrary import (
     NodeRoleDimension,

@@ -31,7 +31,7 @@ from pybatfish.exception import BatfishException
 from .options import Options
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 # suppress the urllib3 warnings due to old version of urllib3 (inside requests)
 requests.packages.urllib3.disable_warnings(InsecureRequestWarning)

@@ -34,7 +34,7 @@ from nb_gen.gen_question_notebooks import (
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbformat import NotebookNode
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 logging.getLogger("pybatfish").setLevel(logging.WARN)
 

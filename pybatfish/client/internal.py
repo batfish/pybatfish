@@ -26,7 +26,7 @@ from . import resthelper, workhelper
 from .options import Options
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 
 def _bf_answer_obj(

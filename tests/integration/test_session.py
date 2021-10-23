@@ -14,7 +14,7 @@
 #   limitations under the License.
 import pytest
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 
 @pytest.fixture()

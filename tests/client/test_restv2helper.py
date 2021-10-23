@@ -18,6 +18,7 @@ import pytest
 import requests
 from requests import HTTPError, Response
 
+from pybatfish import Session
 from pybatfish.client import restv2helper
 from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
@@ -32,7 +33,6 @@ from pybatfish.client.restv2helper import (
     _requests_session,
     _requests_session_fail_fast,
 )
-from pybatfish.client.session import Session
 
 BASE_URL = "base"
 

@@ -16,8 +16,8 @@ from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
 
+from pybatfish import Session
 from pybatfish.client._facts import load_facts, validate_facts
-from pybatfish.client.session import Session
 from tests.common_util import requires_bf
 
 _this_dir = abspath(dirname(realpath(__file__)))

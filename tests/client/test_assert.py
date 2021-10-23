@@ -17,6 +17,7 @@ import pandas as pd
 import pytest
 from pandas import DataFrame
 
+from pybatfish import Session
 from pybatfish.client.asserts import (
     UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
     _format_df,
@@ -34,7 +35,6 @@ from pybatfish.client.asserts import (
     assert_no_undefined_references,
     assert_no_unestablished_bgp_sessions,
 )
-from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
 from pybatfish.exception import (

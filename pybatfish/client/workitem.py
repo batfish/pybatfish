@@ -21,7 +21,7 @@ from typing import TYPE_CHECKING, Dict, Optional  # noqa: F401
 import pybatfish.util as batfishutils
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 
 class WorkItem(object):

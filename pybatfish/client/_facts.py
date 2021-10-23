@@ -22,7 +22,7 @@ import yaml
 from pybatfish.datamodel import ListWrapper
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
     from pybatfish.datamodel.answer import TableAnswer  # noqa: F401
 
 BATFISH_FACT_VERSION = "batfish_v0"

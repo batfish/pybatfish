@@ -1242,7 +1242,7 @@ class Session(object):
 
         Usage Example::
 
-            >>> from pybatfish.client.session import Session
+            >>> from pybatfish import Session
             >>> from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
             >>> bf = Session.get('bf')
             >>> name = bf.set_network()

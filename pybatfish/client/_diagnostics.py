@@ -32,7 +32,7 @@ from pybatfish.exception import BatfishException
 from pybatfish.question.question import QuestionBase
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 METADATA_FILENAME = "metadata"
 

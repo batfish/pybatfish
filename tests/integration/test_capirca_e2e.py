@@ -17,6 +17,7 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
+from pybatfish import Session
 from pybatfish.client.asserts import assert_filter_denies, assert_filter_permits
 from pybatfish.client.capirca import create_reference_book, init_snapshot_from_acl
 from pybatfish.client.commands import (
@@ -25,7 +26,6 @@ from pybatfish.client.commands import (
     bf_put_reference_book,
     bf_set_network,
 )
-from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 
 _this_dir = abspath(dirname(realpath(__file__)))

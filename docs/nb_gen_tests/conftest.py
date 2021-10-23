@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 import yaml
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 _THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
 _DOC_DIR: Path = _THIS_DIR.parent

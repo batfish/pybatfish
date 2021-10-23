@@ -18,7 +18,7 @@ import pytest
 from decorator import decorator
 
 import pybatfish
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 
 def _version_to_tuple(version):

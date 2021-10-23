@@ -44,7 +44,7 @@ from pybatfish.exception import (
 from pybatfish.question import bfq
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish import Session  # noqa: F401
 
 __all__ = [
     "assert_filter_has_no_unreachable_lines",

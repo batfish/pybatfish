@@ -5,7 +5,7 @@ import cerberus
 import pytest
 from nb_gen.schema import convert_schema
 
-from pybatfish.client.session import Session
+from pybatfish import Session
 
 
 def test_convert_schema():
