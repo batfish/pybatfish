@@ -16,9 +16,10 @@ from nbformat import NotebookNode
 from yaml import safe_load
 
 from pybatfish.client.session import Session
-from pybatfish.question.question import QuestionMeta, load_questions
 from pybatfish.datamodel import *  # noqa: F401
-from .doc_tables import get_desc_and_params, gen_input_table, gen_output_table
+from pybatfish.question.question import QuestionMeta
+
+from .doc_tables import gen_input_table, gen_output_table, get_desc_and_params
 
 _THIS_DIR: Path = Path(abspath(dirname(realpath(__file__))))
 _DOC_DIR: Path = _THIS_DIR.parent
@@ -78,10 +79,8 @@ def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNod
     return nbformat.v4.new_markdown_cell("\n".join(toc_lines))
 
 
-def generate_result_examination(cells: List[NotebookNode], 
-                                question_type: str) -> None:
-    """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type).
-    """
+def generate_result_examination(cells: List[NotebookNode], question_type: str) -> None:
+    """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type)."""
     if question_type == "basic":
         cells.append(
             nbformat.v4.new_markdown_cell(
@@ -214,7 +213,7 @@ def generate_result_examination(cells: List[NotebookNode],
 def generate_code_for_question(
     question_data: Mapping[str, Any],
     question_class_map: Mapping[str, QuestionMeta],
-    session: Session
+    session: Session,
 ) -> List[NotebookNode]:
     """Generate notebook cells for a single question."""
     question_type = question_data.get("type", "basic")
@@ -236,7 +235,6 @@ def generate_code_for_question(
     # creating the var bf as the BF session object so that the notebooks
     # can use bf. calls, but the notebook generation code will use
     # session. calls
-    bf = session
 
     cells.append(
         nbformat.v4.new_code_cell(
@@ -286,19 +284,21 @@ def generate_code_for_question(
 def generate_code_for_questions(
     question_list: List[Mapping[str, Any]],
     question_class_map: Mapping[str, QuestionMeta],
-    session: Session
+    session: Session,
 ) -> List[NotebookNode]:
     """Generate notebook cells for all questions in a single question category."""
     cells: List[NotebookNode] = []
     for question_data in question_list:
-        cells.extend(generate_code_for_question(question_data,
-                                                question_class_map, session))
+        cells.extend(
+            generate_code_for_question(question_data, question_class_map, session)
+        )
     return cells
 
 
 def generate_notebook(
-    category: Mapping[str, Any], question_class_map: Mapping[str, QuestionMeta],
-        session: Session
+    category: Mapping[str, Any],
+    question_class_map: Mapping[str, QuestionMeta],
+    session: Session,
 ) -> NotebookNode:
     """Generate a notebook for a given question category."""
     # Create notebook object
@@ -319,8 +319,9 @@ def generate_notebook(
     cells.append(generate_category_toc(question_list))
 
     # Creates the documentation for each question
-    cells.extend(generate_code_for_questions(question_list,
-                                             question_class_map, session))
+    cells.extend(
+        generate_code_for_questions(question_list, question_class_map, session)
+    )
 
     # overwrite the cells with the fully populated list
     nb["cells"] = cells
@@ -353,8 +354,9 @@ def write_notebook(nb: NotebookNode, path: Path) -> None:
 
 
 def generate_all_notebooks(
-    question_categories: Mapping, question_class_map: Mapping[str, QuestionMeta],
-        session:Session
+    question_categories: Mapping,
+    question_class_map: Mapping[str, QuestionMeta],
+    session: Session,
 ) -> None:
     """Generate (and write to disk) all question notebooks."""
     for category in progressbar.progressbar(question_categories["categories"]):
@@ -429,4 +431,4 @@ def main() -> None:
     session.set_network(NETWORK_NAME)
 
     init_snapshots(questions_by_category, session)
-    generate_all_notebooks(questions_by_category, question_class_map,session)
+    generate_all_notebooks(questions_by_category, question_class_map, session)

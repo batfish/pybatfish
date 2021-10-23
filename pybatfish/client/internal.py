@@ -15,12 +15,13 @@
 """Contains internal functions for interacting with the Batfish service."""
 
 import json
-from typing import Any, Dict, Optional, TYPE_CHECKING, Union  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # noqa: F401
 
 from pybatfish.client import restv2helper
 from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.util import get_uuid
+
 from . import resthelper, workhelper
 from .options import Options
 

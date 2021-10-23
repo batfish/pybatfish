@@ -1,6 +1,6 @@
 import hashlib
 import os
-from os.path import realpath, dirname, abspath
+from os.path import abspath, dirname, realpath
 from pathlib import Path
 
 import requests

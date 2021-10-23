@@ -14,6 +14,7 @@
 
 import datetime
 import json
+from unittest.mock import patch
 
 import pytest
 from dateutil.relativedelta import relativedelta
@@ -31,8 +32,6 @@ from pybatfish.client.workhelper import (
     execute,
 )
 from pybatfish.client.workitem import WorkItem
-
-from unittest.mock import patch
 
 
 def __execute_and_return_request_params(work_item, session, extra_args=None):

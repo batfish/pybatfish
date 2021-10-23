@@ -3,10 +3,12 @@ import re
 from operator import itemgetter
 
 import pytest
-from nb_gen.doc_tables import get_desc_and_params
-from nb_gen.doc_tables import get_input_table_lines
+from nb_gen.doc_tables import (
+    get_desc_and_params,
+    get_input_table_lines,
+    get_output_table_lines,
+)
 
-from nb_gen.doc_tables import get_output_table_lines
 from pybatfish.client.session import Session
 from pybatfish.datamodel.answer.table import ColumnMetadata
 

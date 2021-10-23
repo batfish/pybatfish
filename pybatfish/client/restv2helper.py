@@ -14,7 +14,7 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Text, Union  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Text, Union  # noqa: F401
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -31,6 +31,7 @@ from pybatfish.datamodel.referencelibrary import (  # noqa: F401
 )
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
+
 from .options import Options
 
 if TYPE_CHECKING:

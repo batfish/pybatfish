@@ -1,9 +1,8 @@
 # coding: utf-8
 from typing import Mapping, Set
 
-import pytest
 import cerberus
-
+import pytest
 from nb_gen.schema import convert_schema
 
 from pybatfish.client.session import Session
@@ -144,7 +143,7 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "viConversionStatus",
         "viConversionWarning",
         "viModel",
-        "vrrpProperties"
+        "vrrpProperties",
     ]
     xfail = {
         "multipathConsistency",

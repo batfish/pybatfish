@@ -18,6 +18,7 @@ from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: 
 import attr
 
 from pybatfish.util import escape_html
+
 from .primitives import DataModelElement, Edge
 
 __all__ = [
