@@ -1,8 +1,8 @@
 # Format of vendor and supplemental data
 
-You can provide two types of data to Batfish: 1) configurations of devices in your network, and 2) supplemental data to enhance the model of your network. This page describes the format of these data.
+You can provide two types of data to Batfish: 1) [configurations of devices](#device-configuration-formats) in your network, and 2) [supplemental data](#supplemental-data-formats) to enhance the model of your network. This page describes the format of these data.
 
-## Vendor configuration formats
+## Device configuration formats
 
 Batfish supports the following vendors. Click on the corresponding link to learn how to provide configuration for a specific vendor.
 
@@ -179,9 +179,15 @@ The first two commands may not be available on all PAN-OS versions;
 just make sure that the output is NOT in XML format (first command) and that definitions are not truncated (second command).
 
 
-## Supplemental data format
+## Supplemental data formats
 
-You can provide additional data to Batfish to enhance the model of your network and to model parts of the network whose configuration is not available. 
+You can provide additional data to Batfish to enhance the model of your network and to model parts of the network whose configuration is not available. The following types of data is supported.
+
+* [Modeling hosts](#modeling-hosts)
+* [Layer-1 topology](#layer-1-topology)
+* [Modeling ISPs](#modeling-isps)
+* [Runtime interface information](#runtime-interface-information)
+* [External BGP announcements](#external-bgp-announcements)
 
 ### Modeling hosts
 
@@ -221,10 +227,9 @@ The name of your Layer-1 topology file must be `layer1_topology.json` and it mus
 
 ### Modeling ISPs
 
-Batfish can model routers representing ISPs (and Internet) for a given network.
-The modeling is based on a JSON configuration file (`isp_config.json`),
-which tells Batfish about the interfaces on border routers which peer with the ISPs.
-An example file is:
+Batfish can model ISPs (and Internet connectivity) for a network based on a file that specifies which ISPs to model and how to configure them. The ISP modeling file has a few different sections that control different aspects of the modeling. 
+
+* **BorderInterfaces:** Specify the interfaces in the snapshot that connect to the ISP you want to model. Each interface must be a layer-3 interface connected directly to the ISP and establish an eBGP single-hop session to the ISP. 
 
 ```json
 {
@@ -234,24 +239,82 @@ An example file is:
         "hostname": "as2border1",
         "interface": "GigabitEthernet3/0"
       }
-    }, {
-      "borderInterface": {
-        "hostname": "as2border2",
-        "interface": "GigabitEthernet3/0"
+    }, 
+    ....
+  ]
+}
+```
+
+* **BgpPeers:** Specify the BGP peers defined on border routers in the snapshot. You can also optionally specify how the ISP attaches to the snapshot, by specifying the interface in the snapshot where it establishes physical connectivity. In the absence of this attachment specification, Batfish will assume that the ISP is attached at the interface of the specified peering.
+
+```json
+{
+  "bgpPeers": [
+    {
+      "hostname": "as2border1",
+      "peerAddress": "10.10.10.10",
+      "vrf": "internet",   // Optional; default VRF is assumed if left unspecified
+      "ispAttachment": {   // This section is optional. 
+          "hostname": "borderSwitch", // Optiional; the host of the peering ('as2border1') is assumed if left unspecified
+          "interface": "GigabitEthernet3/0",  // mandatory
+          "vlanTag": 86 // Specifies the Dot1q encapsulation that the modeled ISP should use for the peering. 
+                        // Optional; no tagging is assumed if left unspecified
       }
-    }
-  ],
+    }, 
+    ....
+  ]
+}
+```
+
+* **Filter:** This section allows you restrict ISPs that are modeled, by specifying the ASNs (`onlyRemoteAsns`) and IPs (`onlyRemoteIps`) of the ISPs. Without this section, all ISPs specified by BorderInterfaces and BgpPeers sections.
+
+```json
+{
   "filter": {
-    "onlyRemoteAsns": [],
-    "onlyRemoteIps": []
+    "onlyRemoteAsns": [65432],
+    "onlyRemoteIps": ["10.10.10.10"]
   }
 }
 ```
 
-Here `borderInterfaces` contains the list of interfaces on border routers which are meant to peer with the ISPs.
-`onlyRemoteAsns` (list of ASNs) and `onlyRemoteIps` (list of IPs) provide a way to apply additional filter by restricting to ISPs having specific ASNs or IPs.
+* **IspNodeInfos**: This section lets you configure certain aspects of the modeled ISP nodes. One aspect of this configuration is specifying the role of the ISP---whether it is a transit provider ("TRANSIT") or a private backbone ("PRIVATE_BACKBONE") such as a carrier MPLS or your own WAN that connects multiple sites. Transit ISPs connects to the modeled Internet node, do not propagate any communities and block reserved address space traffic. Private backbones do not connect to the Internet, propagate (standard and extended) communities and do not filter any traffic.
 
-The name of your ISP modeling file must be `isp_config.json` and it must be placed in a folder called `batfish` right below the top-level snapshot folder. An example network with ISP modeling configuration is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
+```json
+{
+  "ispNodeInfo": [
+    {
+      "asn": 65432,
+      "name": "ATT", // Specifies the friendly name (not hostname) to use for the ISP
+      "role": "PRIVATE_BACKBONE"  // Optional; default is "TRANSIT"
+    },
+    ...
+   ]
+}
+```
+
+* **IspPeerings**: This section lets you configure eBGP peering between modeled ISP nodes. When not present, none of the ISPs connect to each other. The specification is:
+
+```json
+{
+   "ispPeerings": [
+     {
+        "peer1": {
+           "asn": 65432,
+        },
+        "peer2": {
+           "asn": 64325,
+        }
+     },
+     ...
+   ]
+}
+```
+
+All sections that you need must be included in a file called `isp_config.json`, placed in a folder called `batfish` right below the top-level snapshot folder. An example snapshot with ISP modeling file is [here](https://github.com/batfish/batfish/tree/master/networks/example/live-with-isp).
+
+The hostname of the modeled ISP nodes will be 'isp_\<ASN>' (e.g., 'isp_65432'). These nodes can be queried and analyzed just like any other node in the snapshot. Only one node per ASN is generated even if you have multiple peerings to the same ASN.
+
+A node representing the Internet is also created if any of the ISPs is "TRANSIT". This node announces the default route (0.0.0.0/0) to connected ISPs. It's hostname is 'internet' and it too can be queried and analyzed like any other node in the snapshot. 
 
 ### Runtime interface information
 
@@ -280,4 +343,36 @@ The format of this data is
 
 The name of this must be `runtime_data.json` and it must be placed in a folder called `batfish` right below the top-level snapshot folder. The same file should contain information for all devices and interfaces, and only a subset of the properties may be specified for an interface. 
  
+The runtime data specification also allows you to analyze the impact of failing certain interfaces in the network---just mark them as line down in the data.
 
+### External BGP announcements
+
+To help analyze connectivity to specific external prefixes or analyze the treatment of external routes by your network, you can specify the external routes coming into the network, as follows.
+
+```json
+{
+	"Announcements": [
+      {
+          "type" : "ebgp_sent", // whether the attributes of this route are what was sent by the external peer, 
+                                // or they represent attributes after processing by import routing policy ('ebgp_received')
+          "network" : "4.0.0.0/8",
+          "nextHopIp" : "10.14.22.4",
+          "srcIp" : "10.14.22.4",
+          "dstNode" : "as1border2",
+          "dstIp" : "10.14.22.1",
+          "srcProtocol" : "AGGREGATE",
+          "originType" : "egp",
+          "localPreference" : 0,
+          "med" : 20,
+          "originatorIp" : "0.0.0.0",
+          "asPath" : [ [ 1239 ], [7018, 7019]],
+          "communities" : [ 262145 ],
+          "dstVrf":"default",
+          "clusterList":[]
+      },
+      ...
+   ]
+}
+``` 
+
+These announcements must be placed in the file called `external_bgp_announcements.json` and placed inside the top-level snapshot folder. 
