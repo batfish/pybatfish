@@ -23,12 +23,13 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install regex==2019.11.1 black==19.10b0"
-      - "./fix_format.sh --check"
+      - "python3 -m pip install pre-commit"
+      - "pre-commit run --all-files"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
           image: ${BATFISH_DOCKER_CI_BASE_IMAGE}
           always-pull: true
+          mount-ssh-agent: true
   - label: "Type checking with mypy"
     command:
       - "python3 -m virtualenv .venv"
