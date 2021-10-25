@@ -53,15 +53,17 @@ def load_questions_yaml(fpath: Path) -> Mapping[str, Any]:
 def add_differential_warning(cells: List[NotebookNode]) -> None:
     comment = textwrap.dedent(
         """
-    Most of the Batfish questions can be run differentially by simply adding
-    `snapshot=<name of current snapshot>, reference_snapshot=<name of reference snapshot>` in
-    `.answer()`
+    Differential questions enable you to discover configuration and 
+    behavior differences between two snapshot of the network.
 
-    For example, to view the difference in routing tables between `snapshot1` and `snapshot0`, run
-    `bf.q.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0").frame()`
+    Most of the Batfish questions can be run differentially by using
+    `snapshot=<current snapshot>` and `reference_snapshot=<reference snapshot>` 
+    parameters in `.answer()`. For example, to view routing 
+    table differences between `snapshot1` and `snapshot0`, run
+    `bf.q.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0")`.
 
-    In addition, Batfish has some questions that can *ONLY* be run differentially.
-    They are documented in this section."""
+    Batfish also has two questions that are exclusively differential.
+    """
     )
     cells.append(nbformat.v4.new_markdown_cell(comment))
 
@@ -252,11 +254,11 @@ def generate_code_for_question(
     cells.append(nbformat.v4.new_markdown_cell(f"##### {question_data.get('name')}"))
     cells.append(nbformat.v4.new_markdown_cell(f"{description}"))
     cells.append(nbformat.v4.new_markdown_cell(f"{long_description}"))
-    cells.append(nbformat.v4.new_markdown_cell("###### Inputs"))
+    cells.append(nbformat.v4.new_markdown_cell("###### **Inputs**"))
     # generate table describing the input to the query
     cells.append(nbformat.v4.new_markdown_cell(gen_input_table(params, pybf_name)))
 
-    cells.append(nbformat.v4.new_markdown_cell("###### Invocation"))
+    cells.append(nbformat.v4.new_markdown_cell("###### **Invocation**"))
     parameters = question_data.get("parameters", [])
     param_str = ", ".join([f"{p['name']}={p['value']}" for p in parameters])
     if question_type == "diff":
@@ -270,7 +272,7 @@ def generate_code_for_question(
 
     # Code cell to execute question
     cells.append(nbformat.v4.new_code_cell("result = {}.frame()".format(expression)))
-    cells.append(nbformat.v4.new_markdown_cell("###### Return Value"))
+    cells.append(nbformat.v4.new_markdown_cell("###### **Return Value**"))
 
     # generate table describing the output of the query
     cells.append(

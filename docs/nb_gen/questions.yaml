@@ -62,7 +62,7 @@ categories:
       - name: Layer 3 Topology
         pybf_name: layer3Edges
   - name: routingProtocols
-    description: Routing Protocols
+    description: Routing Protocol Sessions and Policies
     questions:
     - name: BGP Session Compatibility
       pybf_name: bgpSessionCompatibility
