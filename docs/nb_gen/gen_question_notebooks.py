@@ -1,7 +1,6 @@
 # coding: utf-8
 import inspect
 import logging
-import textwrap
 from collections import namedtuple
 from copy import deepcopy
 from os.path import abspath, dirname, realpath
@@ -48,24 +47,6 @@ def set_pandas_settings() -> None:
 def load_questions_yaml(fpath: Path) -> Mapping[str, Any]:
     """Loads the YAML describing question categories and how to execute questions."""
     return safe_load(fpath.read_bytes())
-
-
-def add_differential_warning(cells: List[NotebookNode]) -> None:
-    comment = textwrap.dedent(
-        """
-    Differential questions enable you to discover configuration and 
-    behavior differences between two snapshot of the network.
-
-    Most of the Batfish questions can be run differentially by using
-    `snapshot=<current snapshot>` and `reference_snapshot=<reference snapshot>` 
-    parameters in `.answer()`. For example, to view routing 
-    table differences between `snapshot1` and `snapshot0`, run
-    `bf.q.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0")`.
-
-    Batfish also has two questions that are exclusively differential.
-    """
-    )
-    cells.append(nbformat.v4.new_markdown_cell(comment))
 
 
 def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNode:
@@ -312,10 +293,7 @@ def generate_notebook(
     cells: List[NotebookNode] = deepcopy(nb["cells"])
     description = "#### {}".format(category["description"])
     cells.append(nbformat.v4.new_markdown_cell(description))
-
-    category_name = category["name"]
-    if category_name == "differentialQuestions":
-        add_differential_warning(cells)
+    cells.append(nbformat.v4.new_markdown_cell(category["introduction"]))
 
     # Creates the list at the top of the page with hyperlinks to each question
     question_list = category["questions"]

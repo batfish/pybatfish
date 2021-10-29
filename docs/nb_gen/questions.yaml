@@ -5,6 +5,11 @@
 categories:
   - name: configProperties
     description: Configuration Properties
+    introduction: |
+      This category of questions enables you to retrieve and process the
+      contents of device configurations in a vendor-agnostic manner
+      (except where the question itself is vendor-specific). Batfish organizes
+      configuration content into several sub-categories.
     questions:
       - name: Node Properties
         pybf_name: nodeProperties
@@ -56,6 +61,11 @@ categories:
 #            value: "'<'"
   - name: topology
     description: Topology
+    introduction: |
+      This caterogy of questions is intended to retrieve the network topology
+      used by Batfish. This topology is a combination of information in the
+      snapshot and inference logic (e.g., which interfaces are layer3 neighbors).
+      Currently, Layer 3 topology can be retrieved.
     questions:
 #      - name: Layer 1 Topology
 #        pybf_name: layer1Edges
@@ -63,6 +73,10 @@ categories:
         pybf_name: layer3Edges
   - name: routingProtocols
     description: Routing Protocol Sessions and Policies
+    introduction: |
+      This category of questions reveals information regarding which routing
+      protocol sessions  are compatibly configured and which ones are
+      established. It also allows to you analyze BGP routing policies.
     questions:
     - name: BGP Session Compatibility
       pybf_name: bgpSessionCompatibility
@@ -100,6 +114,9 @@ categories:
           value: "'permit'"
   - name: routingTables
     description: Routing and Forwarding Tables
+    introduction: |
+      This category of questions allows you to query the RIBs and FIBs computed
+      by Batfish.
     questions:
     - name: Routes
       pybf_name: routes
@@ -122,6 +139,10 @@ categories:
 #          value: "'2.34.201.0/24'"
   - name: forwarding
     description: Packet Forwarding
+    introduction: |
+      This category of questions allows you to query how different types of
+      traffic is forwarded by the network and if endpoints are able to
+      communicate. You can analyze these aspects in a few different ways.
     questions:
     - name: Traceroute
       pybf_name: traceroute
@@ -170,6 +191,10 @@ categories:
       type: singleflow
   - name: filters
     description: Access-lists and firewall rules
+    introduction: |
+      This category of questions allows you to analyze the behavior of access
+      control lists and firewall rules. It also allows you to comprehensively
+      validate (aka verification) that some traffic is or is not allowed.
     questions:
     - name: Filter Line Reachability
       pybf_name: filterLineReachability
@@ -206,6 +231,8 @@ categories:
           value: HeaderConstraints(applications='DNS')
   - name: ipsec
     description: IPSec Tunnels
+    introduction: |
+      This category of questions allows you to query IPSec sessions and tunnels.
     questions:
     - name: IPSec Session Status
       pybf_name: ipsecSessionStatus
@@ -219,6 +246,9 @@ categories:
         path: networks/hybrid-cloud
   - name: vxlan_evpn
     description: VXLAN and EVPN
+    introduction: |
+      This category of questions allows you to query aspects of VXLAN and EVPN
+      configuration and behavior.
     questions:
     - name: VXLAN VNI Properties
       pybf_name: vxlanVniProperties
@@ -237,6 +267,9 @@ categories:
         path: networks/aristaevpn
   - name: snapshot
     description: Snapshot Input
+    introduction: |
+      This category of questions allows you to learn how well Batfish
+      understands your network snapshot.
     questions:
     - name: Snapshot Initialization Issues
       pybf_name: initIssues
@@ -247,6 +280,10 @@ categories:
       type: no-result
   - name: resolvingSpecifiers
     description: Resolving Specifiers
+    introduction: |
+      [Specifier grammars](../specifiers.html) allow to specify complex inputs.
+      This category of questions reveals how specifier inputs are resolved
+      by Batfish.
     questions:
       - name: Resolve Location Specifier
         pybf_name: resolveLocationSpecifier
@@ -286,6 +323,17 @@ categories:
             value: "'/border/[.*Ethernet]'"
   - name: differentialQuestions
     description: Differential Questions
+    introduction: |
+      Differential questions enable you to discover configuration and
+      behavior differences between two snapshot of the network.
+
+      Most of the Batfish questions can be run differentially by using
+      `snapshot=<current snapshot>` and `reference_snapshot=<reference snapshot>`
+      parameters in `.answer()`. For example, to view routing
+      table differences between `snapshot1` and `snapshot0`, run
+      `bf.q.routes().answer(snapshot="snapshot1", reference_snapshot="snapshot0")`.
+
+      Batfish also has two questions that are exclusively differential.
     questions:
       - name: Compare Filters
         pybf_name: compareFilters
