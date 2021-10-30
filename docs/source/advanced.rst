@@ -7,3 +7,4 @@ Advanced Concepts
    specifiers.md
    asserts.rst
    notebooks/references.ipynb
+   config_annotation.md
