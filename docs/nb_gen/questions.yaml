@@ -281,7 +281,7 @@ categories:
   - name: resolvingSpecifiers
     description: Resolving Specifiers
     introduction: |
-      [Specifier grammars](../specifiers.html) allow to specify complex inputs.
+      Specifier grammars allow you to specify complex inputs for Batfish questions.
       This category of questions reveals how specifier inputs are resolved
       by Batfish.
     questions:
