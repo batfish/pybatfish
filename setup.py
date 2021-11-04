@@ -93,7 +93,7 @@ setup(
         "attrs>=18.1.0",
         "deepdiff",
         "deprecated",
-        "netconan>=0.11.0",
+        "netconan>=0.12.0",
         "pandas<1.2",
         "python-dateutil",
         "PyYAML",
