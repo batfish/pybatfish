@@ -52,6 +52,11 @@ categories:
         snapshot:
           name: aristaevpn
           path: networks/aristaevpn
+      - name: VRRP Properties
+        pybf_name: vrrpProperties
+        snapshot:
+          name: ios_basic_vrrp
+          path: networks/ios_basic_vrrp
 #      - name: Interface MTU
 #        pybf_name: interfaceMtu
 #        parameters:
