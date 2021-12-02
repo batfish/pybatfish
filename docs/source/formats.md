@@ -121,14 +121,17 @@ hostname=$(cat /etc/hostname)
   # Signal start of /etc/network/interfaces
   echo "# This file describes the network interfaces"
   cat /etc/network/interfaces
+  echo 
 
   # Signal start of /etc/cumulus/ports.conf
   echo "# ports.conf --"
   cat /etc/cumulus/ports.conf
+  echo 
 
   # Signal start of /etc/frr/frr.conf
   echo "frr version"
   cat /etc/frr/frr.conf
+  echo
 ) > $hostname.cfg
 ```
 
