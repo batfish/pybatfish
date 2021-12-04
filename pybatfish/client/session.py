@@ -575,7 +575,7 @@ class Session(object):
         :type add_files: str
         :param extra_args: extra arguments to control snapshot processing:
            1) "ignoremanagementinterfaces" (bool) -- whether to shut management interfaces (default is True);
-           2) "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
+           2) "parsereuse" (bool) -- whether to reuse parsing work from prior snapshots when file content is identical (default is True)
         :type extra_args: dict
 
         :return: name of initialized snapshot or None if the call fails
@@ -818,7 +818,7 @@ class Session(object):
         :type overwrite: bool
         :param extra_args: extra arguments to control snapshot processing:
            1) "ignoremanagementinterfaces" (bool) -- whether to shut management interfaces (default is True);
-           2) "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
+           2) "parsereuse" (bool) -- whether to reuse parsing work from prior snapshots when file content is identical (default is True)
         :type extra_args: dict
 
         :return: name of initialized snapshot
