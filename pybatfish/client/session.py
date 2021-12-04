@@ -573,7 +573,9 @@ class Session(object):
         :type restore_nodes: list[str]
         :param add_files: path to zip file or directory containing files to add
         :type add_files: str
-        :param extra_args: extra arguments to be passed to the parse command.
+        :param extra_args: extra arguments to control snapshot processing:
+           1) "ignoremanagementinterfaces" (bool) -- whether to shut management interfaces (default is True);
+           2) "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
         :type extra_args: dict
 
         :return: name of initialized snapshot or None if the call fails
@@ -814,9 +816,9 @@ class Session(object):
         :param overwrite: whether or not to overwrite an existing snapshot with the
            same name
         :type overwrite: bool
-        :param extra_args: extra arguments to control snapshot processing
-           - "ignoremanagementinterfaces" (bool): whether to shut management interfaces (default is True)
-           - "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
+        :param extra_args: extra arguments to control snapshot processing:
+           1) "ignoremanagementinterfaces" (bool) -- whether to shut management interfaces (default is True);
+           2) "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
         :type extra_args: dict
 
         :return: name of initialized snapshot
