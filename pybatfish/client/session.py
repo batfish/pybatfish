@@ -814,7 +814,9 @@ class Session(object):
         :param overwrite: whether or not to overwrite an existing snapshot with the
            same name
         :type overwrite: bool
-        :param extra_args: extra arguments to be passed to the parse command
+        :param extra_args: extra arguments to control snapshot processing
+           "ignoremanagementinterfaces" (bool): whether to shut management interfaces (default is True)
+           "parsereuse" (bool): whether to reuse parsing work from prior snapshots when file content is identical (default is True)
         :type extra_args: dict
 
         :return: name of initialized snapshot
