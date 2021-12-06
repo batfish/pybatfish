@@ -652,6 +652,68 @@ class ExitOutputIfaceStepDetail(DataModelElement):
 
 
 @attr.s(frozen=True)
+class EnterFromVxlanTunnelStepDetail(DataModelElement):
+    """Details of a step representing a flow entering a device from a VXLAN tunnel.
+
+    :ivar inputVrf: VRF associated with the layer-3 VNI
+    :ivar vni: The layer-3 VNI of the VXLAN tunnel
+    :ivar srcVtepIp: The underlay VTEP tunnel IP from which the flow was sent
+    :ivar dstVtepIp: The underlay VTEP tunnel IP on which the flow was received
+    """
+
+    inputVrf = attr.ib(type=str)
+    vni = attr.ib(type=int)
+    srcVtepIp = attr.ib(type=str)
+    dstVtepIp = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> EnterFromVxlanTunnelStepDetail
+        return EnterFromVxlanTunnelStepDetail(
+            json_dict.get("inputVrf"),
+            json_dict.get("vni"),
+            json_dict.get("srcVtepIp"),
+            json_dict.get("dstVtepIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.inputVrf)
+        return str_output
+
+
+@attr.s(frozen=True)
+class ExitIntoVxlanTunnelStepDetail(DataModelElement):
+    """Details of a step representing a flow exiting a device into a VXLAN tunnel.
+
+    :ivar outputVrf: VRF associated with the layer-3 VNI
+    :ivar vni: The layer-3 VNI of the VXLAN tunnel
+    :ivar srcVtepIp: The underlay VTEP tunnel IP from which the flow was sent
+    :ivar dstVtepIp: The underlay VTEP tunnel IP on which the flow was received
+    """
+
+    outputVrf = attr.ib(type=str)
+    vni = attr.ib(type=int)
+    srcVtepIp = attr.ib(type=str)
+    dstVtepIp = attr.ib(type=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> ExitIntoVxlanTunnelStepDetail
+        return ExitIntoVxlanTunnelStepDetail(
+            json_dict.get("outputVrf"),
+            json_dict.get("vni"),
+            json_dict.get("srcVtepIp"),
+            json_dict.get("dstVtepIp"),
+        )
+
+    def __str__(self):
+        # type: () -> str
+        str_output = str(self.outputVrf)
+        return str_output
+
+
+@attr.s(frozen=True)
 class InboundStepDetail(DataModelElement):
     """Details of a step representing the receiving (acceptance) of a flow into a Hop.
 
