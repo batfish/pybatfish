@@ -663,10 +663,10 @@ class EnterFromVxlanTunnelStepDetail(DataModelElement):
     :ivar dstVtepIp: The underlay VTEP tunnel IP on which the flow was received
     """
 
-    inputVrf = attr.ib(type=str)
-    vni = attr.ib(type=int)
-    srcVtepIp = attr.ib(type=str)
-    dstVtepIp = attr.ib(type=str)
+    inputVrf = attr.ib(type=Optional[str])
+    vni = attr.ib(type=Optional[int])
+    srcVtepIp = attr.ib(type=Optional[str])
+    dstVtepIp = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -695,10 +695,10 @@ class ExitIntoVxlanTunnelStepDetail(DataModelElement):
     :ivar dstVtepIp: The underlay VTEP tunnel IP on which the flow was received
     """
 
-    outputVrf = attr.ib(type=str)
-    vni = attr.ib(type=int)
-    srcVtepIp = attr.ib(type=str)
-    dstVtepIp = attr.ib(type=str)
+    outputVrf = attr.ib(type=Optional[str])
+    vni = attr.ib(type=Optional[int])
+    srcVtepIp = attr.ib(type=Optional[str])
+    dstVtepIp = attr.ib(type=Optional[str])
 
     @classmethod
     def from_dict(cls, json_dict):
