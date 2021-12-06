@@ -103,7 +103,10 @@ def test_enter_from_vxlan_tunnel_step_detail_str():
     detail = EnterFromVxlanTunnelStepDetail("tenantA", 5000, "10.0.0.1", "10.0.0.2")
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(tenantA)"
+    assert (
+        str(step)
+        == "ACTION(Input VRF: tenantA, VNI: 5000, Source VTEP: 10.0.0.1, Destination VTEP: 10.0.0.2)"
+    )
 
 
 def test_exit_into_vxlan_tunnel_step_detail_deserialization():
@@ -123,7 +126,10 @@ def test_exit_into_vxlan_tunnel_step_detail_str():
     detail = ExitIntoVxlanTunnelStepDetail("tenantA", 5000, "10.0.0.1", "10.0.0.2")
 
     step = Step(detail, "ACTION")
-    assert str(step) == "ACTION(tenantA)"
+    assert (
+        str(step)
+        == "ACTION(Output VRF: tenantA, VNI: 5000, Source VTEP: 10.0.0.1, Destination VTEP: 10.0.0.2)"
+    )
 
 
 def test_transformation_step_detail_str():

@@ -26,6 +26,8 @@ __all__ = [
     "DeliveredStepDetail",
     "EnterInputIfaceStepDetail",
     "ExitOutputIfaceStepDetail",
+    "EnterFromVxlanTunnelStepDetail",
+    "ExitIntoVxlanTunnelStepDetail",
     "FilterStepDetail",
     "Flow",
     "HeaderConstraints",
@@ -678,8 +680,9 @@ class EnterFromVxlanTunnelStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.inputVrf)
-        return str_output
+        return "Input VRF: {}, VNI: {}, Source VTEP: {}, Destination VTEP: {}".format(
+            self.inputVrf, self.vni, self.srcVtepIp, self.dstVtepIp
+        )
 
 
 @attr.s(frozen=True)
@@ -709,8 +712,9 @@ class ExitIntoVxlanTunnelStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        str_output = str(self.outputVrf)
-        return str_output
+        return "Output VRF: {}, VNI: {}, Source VTEP: {}, Destination VTEP: {}".format(
+            self.outputVrf, self.vni, self.srcVtepIp, self.dstVtepIp
+        )
 
 
 @attr.s(frozen=True)
@@ -996,6 +1000,8 @@ class Step(DataModelElement):
             "Delivered": DeliveredStepDetail.from_dict,
             "EnterInputInterface": EnterInputIfaceStepDetail.from_dict,
             "ExitOutputInterface": ExitOutputIfaceStepDetail.from_dict,
+            "EnterFromVxlanTunnel": EnterFromVxlanTunnelStepDetail.from_dict,
+            "ExitIntoVxlanTunnel": ExitIntoVxlanTunnelStepDetail.from_dict,
             "Inbound": InboundStepDetail.from_dict,
             "Loop": LoopStepDetail.from_dict,
             "MatchSession": MatchSessionStepDetail.from_dict,
