@@ -23,7 +23,9 @@ from pybatfish.datamodel.flow import (
     Accept,
     ArpErrorStepDetail,
     DeliveredStepDetail,
+    EnterFromVxlanTunnelStepDetail,
     EnterInputIfaceStepDetail,
+    ExitIntoVxlanTunnelStepDetail,
     ExitOutputIfaceStepDetail,
     FilterStepDetail,
     Flow,
@@ -82,6 +84,52 @@ def test_exit_output_iface_step_detail_str():
 
     step = Step(detail, "ACTION")
     assert str(step) == "ACTION(iface)"
+
+
+def test_enter_from_vxlan_tunnel_step_detail_deserialization():
+    json = {
+        "inputVrf": "tenantA",
+        "vni": 5000,
+        "srcVtepIp": "10.0.0.1",
+        "dstVtepIp": "10.0.0.2",
+    }
+    detail = EnterFromVxlanTunnelStepDetail.from_dict(json)
+    assert detail == EnterFromVxlanTunnelStepDetail(
+        "tenantA", 5000, "10.0.0.1", "10.0.0.2"
+    )
+
+
+def test_enter_from_vxlan_tunnel_step_detail_str():
+    detail = EnterFromVxlanTunnelStepDetail("tenantA", 5000, "10.0.0.1", "10.0.0.2")
+
+    step = Step(detail, "ACTION")
+    assert (
+        str(step)
+        == "ACTION(Input VRF: tenantA, VNI: 5000, Source VTEP: 10.0.0.1, Destination VTEP: 10.0.0.2)"
+    )
+
+
+def test_exit_into_vxlan_tunnel_step_detail_deserialization():
+    json = {
+        "outputVrf": "tenantA",
+        "vni": 5000,
+        "srcVtepIp": "10.0.0.1",
+        "dstVtepIp": "10.0.0.2",
+    }
+    detail = ExitIntoVxlanTunnelStepDetail.from_dict(json)
+    assert detail == ExitIntoVxlanTunnelStepDetail(
+        "tenantA", 5000, "10.0.0.1", "10.0.0.2"
+    )
+
+
+def test_exit_into_vxlan_tunnel_step_detail_str():
+    detail = ExitIntoVxlanTunnelStepDetail("tenantA", 5000, "10.0.0.1", "10.0.0.2")
+
+    step = Step(detail, "ACTION")
+    assert (
+        str(step)
+        == "ACTION(Output VRF: tenantA, VNI: 5000, Source VTEP: 10.0.0.1, Destination VTEP: 10.0.0.2)"
+    )
 
 
 def test_transformation_step_detail_str():
