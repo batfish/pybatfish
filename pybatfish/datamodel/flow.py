@@ -671,11 +671,19 @@ class EnterFromVxlanTunnelStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> EnterFromVxlanTunnelStepDetail
+        input_vrf = json_dict.get("inputVrf")
+        vni = json_dict.get("vni")
+        src_vtep_ip = json_dict.get("srcVtepIp")
+        dst_vtep_ip = json_dict.get("dstVtepIp")
+        assert type(input_vrf) == str
+        assert type(vni) == int
+        assert type(src_vtep_ip) == str
+        assert type(dst_vtep_ip) == str
         return EnterFromVxlanTunnelStepDetail(
-            str(json_dict.get("inputVrf")),
-            int(json_dict.get("vni")),
-            str(json_dict.get("srcVtepIp")),
-            str(json_dict.get("dstVtepIp")),
+            input_vrf,
+            vni,
+            src_vtep_ip,
+            dst_vtep_ip,
         )
 
     def __str__(self):
@@ -703,11 +711,19 @@ class ExitIntoVxlanTunnelStepDetail(DataModelElement):
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> ExitIntoVxlanTunnelStepDetail
+        output_vrf = json_dict.get("outputVrf")
+        vni = json_dict.get("vni")
+        src_vtep_ip = json_dict.get("srcVtepIp")
+        dst_vtep_ip = json_dict.get("dstVtepIp")
+        assert type(output_vrf) == str
+        assert type(vni) == int
+        assert type(src_vtep_ip) == str
+        assert type(dst_vtep_ip) == str
         return ExitIntoVxlanTunnelStepDetail(
-            str(json_dict.get("outputVrf")),
-            int(json_dict.get("vni")),
-            str(json_dict.get("srcVtepIp")),
-            str(json_dict.get("dstVtepIp")),
+            output_vrf,
+            vni,
+            src_vtep_ip,
+            dst_vtep_ip,
         )
 
     def __str__(self):
