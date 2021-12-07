@@ -675,10 +675,10 @@ class EnterFromVxlanTunnelStepDetail(DataModelElement):
         vni = json_dict.get("vni")
         src_vtep_ip = json_dict.get("srcVtepIp")
         dst_vtep_ip = json_dict.get("dstVtepIp")
-        assert type(input_vrf) == str
-        assert type(vni) == int
-        assert type(src_vtep_ip) == str
-        assert type(dst_vtep_ip) == str
+        assert isinstance(input_vrf, str)
+        assert isinstance(vni, int)
+        assert isinstance(src_vtep_ip, str)
+        assert isinstance(dst_vtep_ip, str)
         return EnterFromVxlanTunnelStepDetail(
             input_vrf,
             vni,
@@ -715,10 +715,10 @@ class ExitIntoVxlanTunnelStepDetail(DataModelElement):
         vni = json_dict.get("vni")
         src_vtep_ip = json_dict.get("srcVtepIp")
         dst_vtep_ip = json_dict.get("dstVtepIp")
-        assert type(output_vrf) == str
-        assert type(vni) == int
-        assert type(src_vtep_ip) == str
-        assert type(dst_vtep_ip) == str
+        assert isinstance(output_vrf, str)
+        assert isinstance(vni, int)
+        assert isinstance(src_vtep_ip, str)
+        assert isinstance(dst_vtep_ip, str)
         return ExitIntoVxlanTunnelStepDetail(
             output_vrf,
             vni,
