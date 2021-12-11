@@ -51,6 +51,10 @@ def test_convert_schema():
         == "List of [BgpRoute](../datamodel.rst#pybatfish.datamodel.route.BgpRoute)"
     )
     assert convert_schema("SelfDescribing", "output", "bgpPeerConfiguration") == "str"
+    assert (
+        convert_schema("NextHop", "output")
+        == "[NextHop](../datamodel.rst#pybatfish.datamodel.route.NextHop)"
+    )
     with pytest.raises(ValueError):
         assert convert_schema("SelfDescribing", "output") == "str"
     with pytest.raises(KeyError):
