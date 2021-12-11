@@ -161,6 +161,11 @@ def testBgpRouteDiffStr():
     assert diff2._repr_html_() == "Local Preference: old --> new"
 
 
+def testNextHopCannotInstantiate():
+    with pytest.raises(NotImplementedError):
+        NextHop()
+
+
 def testNextHopDeserializationInvalid():
     with pytest.raises(ValueError):
         NextHop.from_dict({"type": "foo"})

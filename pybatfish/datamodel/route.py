@@ -18,7 +18,18 @@ import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
 
-__all__ = ["BgpRoute", "BgpRouteConstraints", "BgpRouteDiff", "BgpRouteDiffs"]
+__all__ = [
+    "BgpRoute",
+    "BgpRouteConstraints",
+    "BgpRouteDiff",
+    "BgpRouteDiffs",
+    "NextHop",
+    "NextHopDiscard",
+    "NextHopInterface",
+    "NextHopIp",
+    "NextHopVrf",
+    "NextHopVtep",
+]
 
 
 @attr.s(frozen=True)
@@ -224,9 +235,13 @@ class BgpRouteDiffs(DataModelElement):
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
 
 
-@attr.s(frozen=True)
 class NextHop(DataModelElement):
     """A next-hop of a route"""
+
+    def __init__(self):
+        raise NotImplementedError(
+            "Cannot directly instantiate NextHop. Use NextHop.from_dict instead."
+        )
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHop":
