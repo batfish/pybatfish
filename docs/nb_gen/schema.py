@@ -42,6 +42,7 @@ _OUTPUT_TYPES = {
     "flowtrace": "pybatfish.datamodel.flow.FlowTrace",
     "interface": "pybatfish.datamodel.primitives.Interface",
     "ip": "str",
+    "nexthop": "pybatfish.datamodel.route.NextHop",
     "node": "str",
     "prefix": "str",
     "selfdescribing": "selfdescribing",  # not a real python type; handled separately in code
