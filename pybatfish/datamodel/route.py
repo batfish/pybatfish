@@ -246,6 +246,8 @@ class NextHop(DataModelElement):
 
 @attr.s(frozen=True)
 class NextHopDiscard(NextHop):
+    """Indicates the packet should be dropped"""
+
     def dict(self) -> Dict:
         d = NextHop.dict(self)
         d.update({"type": "discard"})
