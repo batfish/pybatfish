@@ -1,3 +1,5 @@
+import pytest
+
 from pybatfish.datamodel.route import (
     BgpRoute,
     BgpRouteConstraints,
@@ -157,6 +159,13 @@ def testBgpRouteDiffStr():
     diff2 = BgpRouteDiff(fieldName="localPreference", oldValue="old", newValue="new")
     assert diff1._repr_html_() == "Nm: old --> new"
     assert diff2._repr_html_() == "Local Preference: old --> new"
+
+
+def testNextHopDeserializationInvalid():
+    with pytest.raises(ValueError):
+        NextHop.from_dict({"type": "foo"})
+    with pytest.raises(ValueError):
+        NextHop.from_dict({})
 
 
 def testNextHopDiscardSerialization():
