@@ -230,7 +230,8 @@ class NextHop(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHop":
-        assert "type" in json_dict
+        if "type" not in json_dict:
+            raise ValueError("Missing type")
         nh_type = json_dict["type"]
         if nh_type == "discard":
             return NextHopDiscard.from_dict(json_dict)
@@ -242,6 +243,8 @@ class NextHop(DataModelElement):
             return NextHopVrf.from_dict(json_dict)
         elif nh_type == "vtep":
             return NextHopVtep.from_dict(json_dict)
+        else:
+            raise ValueError("Invalid type")
 
 
 @attr.s(frozen=True)
