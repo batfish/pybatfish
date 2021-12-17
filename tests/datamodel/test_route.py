@@ -162,7 +162,7 @@ def testBgpRouteDiffStr():
 
 
 def testNextHopCannotInstantiate():
-    with pytest.raises(NotImplementedError):
+    with pytest.raises(TypeError):
         NextHop()
 
 
@@ -180,6 +180,10 @@ def testNextHopDiscardSerialization():
 def testNextHopDiscardDeserialization():
     assert NextHop.from_dict({"type": "discard"}) == NextHopDiscard()
     assert NextHopDiscard.from_dict({"type": "discard"}) == NextHopDiscard()
+
+
+def testNextHopDiscardStr():
+    assert str(NextHopDiscard()) == "discard"
 
 
 def testNextHopInterfaceSerialization():
@@ -206,6 +210,14 @@ def testNextHopInterfaceDeserialization():
     ) == NextHopInterface("foo", "1.1.1.1")
 
 
+def testNextHopInterfaceStr():
+    assert str(NextHopInterface("foo")) == "interface foo"
+    assert str(NextHopInterface("foo bar")) == 'interface "foo bar"'
+    assert (
+        str(NextHopInterface("foo bar", "1.1.1.1")) == 'interface "foo bar" ip 1.1.1.1'
+    )
+
+
 def testNextHopIpSerialization():
     assert NextHopIp("1.1.1.1").dict() == {"type": "ip", "ip": "1.1.1.1"}
 
@@ -215,6 +227,10 @@ def testNextHopIpDeserialization():
     assert NextHopIp.from_dict({"type": "ip", "ip": "1.1.1.1"}) == NextHopIp("1.1.1.1")
 
 
+def testNextHopIpStr():
+    assert str(NextHopIp("1.1.1.1")) == "ip 1.1.1.1"
+
+
 def testNextHopVrfSerialization():
     assert NextHopVrf("foo").dict() == {"type": "vrf", "vrf": "foo"}
 
@@ -222,6 +238,11 @@ def testNextHopVrfSerialization():
 def testNextHopVrfDeserialization():
     assert NextHop.from_dict({"type": "vrf", "vrf": "foo"}) == NextHopVrf("foo")
     assert NextHopVrf.from_dict({"type": "vrf", "vrf": "foo"}) == NextHopVrf("foo")
+
+
+def testNextHopVrfStr():
+    assert str(NextHopVrf("foo")) == "vrf foo"
+    assert str(NextHopVrf("foo bar")) == 'vrf "foo bar"'
 
 
 def testNextHopVtepSerialization():
@@ -239,3 +260,7 @@ def testNextHopVtepDeserialization():
     assert NextHopVtep.from_dict(
         {"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}
     ) == NextHopVtep(5, "1.1.1.1")
+
+
+def testNextHopVtepStr():
+    assert str(NextHopVtep(5, "1.1.1.1")) == "vni 5 vtep 1.1.1.1"

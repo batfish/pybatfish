@@ -12,11 +12,13 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
+from pybatfish.util import escape_html, escape_name
 
 __all__ = [
     "BgpRoute",
@@ -235,13 +237,15 @@ class BgpRouteDiffs(DataModelElement):
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
 
 
-class NextHop(DataModelElement):
+class NextHop(DataModelElement, metaclass=ABCMeta):
     """A next-hop of a route"""
 
-    def __init__(self):
-        raise NotImplementedError(
-            "Cannot directly instantiate NextHop. Use NextHop.from_dict instead."
-        )
+    def _repr_html_(self) -> str:
+        return escape_html(self.__str__())
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError("NextHop elements must implement __str__")
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHop":
@@ -271,6 +275,9 @@ class NextHopDiscard(NextHop):
         d.update({"type": "discard"})
         return d
 
+    def __str__(self) -> str:
+        return "discard"
+
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopDiscard":
         assert json_dict == {"type": "discard"}
@@ -292,6 +299,13 @@ class NextHopInterface(NextHop):
         if d["ip"] is None:
             del d["ip"]
         return d
+
+    def __str__(self) -> str:
+        return (
+            f"interface {escape_name(self.interface)} ip {self.ip}"
+            if self.ip
+            else f"interface {escape_name(self.interface)}"
+        )
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopInterface":
@@ -319,6 +333,9 @@ class NextHopIp(NextHop):
         d.update({"type": "ip"})
         return d
 
+    def __str__(self) -> str:
+        return f"ip {self.ip}"
+
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopIp":
         assert set(json_dict.keys()) == {"type", "ip"}
@@ -338,6 +355,9 @@ class NextHopVrf(NextHop):
         d = NextHop.dict(self)
         d.update({"type": "vrf"})
         return d
+
+    def __str__(self) -> str:
+        return f"vrf {escape_name(self.vrf)}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopVrf":
@@ -359,6 +379,9 @@ class NextHopVtep(NextHop):
         d = NextHop.dict(self)
         d.update({"type": "vtep"})
         return d
+
+    def __str__(self) -> str:
+        return f"vni {self.vni} vtep {self.vtep}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopVtep":
