@@ -242,7 +242,7 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
     """A next-hop of a route"""
 
     def _repr_html_(self) -> str:
-        return escape_html(self.__str__())
+        return escape_html(str(self))
 
     @abstractmethod
     def __str__(self) -> str:
@@ -313,7 +313,7 @@ class NextHopInterface(NextHop):
         return (
             "interface {} ip {}".format(escape_name(self.interface), self.ip)
             if self.ip
-            else f"interface {escape_name(self.interface)}"
+            else "interface {}".format(escape_name(self.interface))
         )
 
     @classmethod
