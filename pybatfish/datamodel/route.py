@@ -252,7 +252,9 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
     def from_dict(cls, json_dict: Dict) -> "NextHop":
         if "type" not in json_dict:
             raise ValueError(
-                f"Unknown type of NextHop, missing the type property in: {json.dumps(json_dict)}"
+                "Unknown type of NextHop, missing the type property in: {}".format(
+                    json.dumps(json_dict)
+                )
             )
         nh_type = json_dict["type"]
         if nh_type == "discard":
@@ -267,7 +269,9 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
             return NextHopVtep.from_dict(json_dict)
         else:
             raise ValueError(
-                f"Unhandled NextHop type: {json.dumps(nh_type)} in: {json.dumps(json_dict)}"
+                "Unhandled NextHop type: {} in: {}".format(
+                    json.dumps(nh_type), json.dumps(json_dict)
+                )
             )
 
 
@@ -307,7 +311,7 @@ class NextHopInterface(NextHop):
 
     def __str__(self) -> str:
         return (
-            f"interface {escape_name(self.interface)} ip {self.ip}"
+            "interface {} ip {}".format(escape_name(self.interface), self.ip)
             if self.ip
             else f"interface {escape_name(self.interface)}"
         )
@@ -339,7 +343,7 @@ class NextHopIp(NextHop):
         return d
 
     def __str__(self) -> str:
-        return f"ip {self.ip}"
+        return "ip {}".format(self.ip)
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopIp":
@@ -362,7 +366,7 @@ class NextHopVrf(NextHop):
         return d
 
     def __str__(self) -> str:
-        return f"vrf {escape_name(self.vrf)}"
+        return "vrf {}".format(escape_name(self.vrf))
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopVrf":
@@ -386,7 +390,7 @@ class NextHopVtep(NextHop):
         return d
 
     def __str__(self) -> str:
-        return f"vni {self.vni} vtep {self.vtep}"
+        return "vni {} vtep {}".format(self.vni, self.vtep)
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHopVtep":
