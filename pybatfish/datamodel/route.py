@@ -12,6 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import json
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
@@ -250,7 +251,9 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "NextHop":
         if "type" not in json_dict:
-            raise ValueError("Missing type")
+            raise ValueError(
+                f"Unknown type of NextHop, missing the type property in: {json.dumps(json_dict)}"
+            )
         nh_type = json_dict["type"]
         if nh_type == "discard":
             return NextHopDiscard.from_dict(json_dict)
@@ -263,7 +266,9 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
         elif nh_type == "vtep":
             return NextHopVtep.from_dict(json_dict)
         else:
-            raise ValueError("Invalid type")
+            raise ValueError(
+                f"Unhandled NextHop type: {json.dumps(nh_type)} in: {json.dumps(json_dict)}"
+            )
 
 
 @attr.s(frozen=True)
