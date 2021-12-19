@@ -12,13 +12,27 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import json
+from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
 
 import attr
 
 from pybatfish.datamodel.primitives import DataModelElement
+from pybatfish.util import escape_html, escape_name
 
-__all__ = ["BgpRoute", "BgpRouteConstraints", "BgpRouteDiff", "BgpRouteDiffs"]
+__all__ = [
+    "BgpRoute",
+    "BgpRouteConstraints",
+    "BgpRouteDiff",
+    "BgpRouteDiffs",
+    "NextHop",
+    "NextHopDiscard",
+    "NextHopInterface",
+    "NextHopIp",
+    "NextHopVrf",
+    "NextHopVtep",
+]
 
 
 @attr.s(frozen=True)
@@ -222,3 +236,168 @@ class BgpRouteDiffs(DataModelElement):
     def _repr_html_(self):
         # type: () -> str
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
+
+
+class NextHop(DataModelElement, metaclass=ABCMeta):
+    """A next-hop of a route"""
+
+    def _repr_html_(self) -> str:
+        return escape_html(str(self))
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError("NextHop elements must implement __str__")
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHop":
+        if "type" not in json_dict:
+            raise ValueError(
+                "Unknown type of NextHop, missing the type property in: {}".format(
+                    json.dumps(json_dict)
+                )
+            )
+        nh_type = json_dict["type"]
+        if nh_type == "discard":
+            return NextHopDiscard.from_dict(json_dict)
+        elif nh_type == "interface":
+            return NextHopInterface.from_dict(json_dict)
+        elif nh_type == "ip":
+            return NextHopIp.from_dict(json_dict)
+        elif nh_type == "vrf":
+            return NextHopVrf.from_dict(json_dict)
+        elif nh_type == "vtep":
+            return NextHopVtep.from_dict(json_dict)
+        else:
+            raise ValueError(
+                "Unhandled NextHop type: {} in: {}".format(
+                    json.dumps(nh_type), json.dumps(json_dict)
+                )
+            )
+
+
+@attr.s(frozen=True)
+class NextHopDiscard(NextHop):
+    """Indicates the packet should be dropped"""
+
+    def dict(self) -> Dict:
+        d = NextHop.dict(self)
+        d.update({"type": "discard"})
+        return d
+
+    def __str__(self) -> str:
+        return "discard"
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHopDiscard":
+        assert json_dict == {"type": "discard"}
+        return NextHopDiscard()
+
+
+@attr.s(frozen=True)
+class NextHopInterface(NextHop):
+    """A next-hop of a route with a fixed output interface and optional next gateway IP.
+
+    If there is no IP, the destination IP of the packet will be used as the next gateway IP."""
+
+    interface = attr.ib(type=str)
+    ip = attr.ib(type=Optional[str], default=None)
+
+    def dict(self) -> Dict:
+        d = NextHop.dict(self)
+        d.update({"type": "interface"})
+        if d["ip"] is None:
+            del d["ip"]
+        return d
+
+    def __str__(self) -> str:
+        return (
+            "interface {} ip {}".format(escape_name(self.interface), self.ip)
+            if self.ip
+            else "interface {}".format(escape_name(self.interface))
+        )
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHopInterface":
+        assert set(json_dict.keys()) == {"type", "interface", "ip"} or set(
+            json_dict.keys()
+        ) == {"type", "interface"}
+        assert json_dict["type"] == "interface"
+        interface = json_dict["interface"]
+        ip = None
+        assert isinstance(interface, str)
+        if "ip" in json_dict:
+            ip = json_dict["ip"]
+            assert ip is None or isinstance(ip, str)
+        return NextHopInterface(interface, ip)
+
+
+@attr.s(frozen=True)
+class NextHopIp(NextHop):
+    """A next-hop of a route including the next gateway IP"""
+
+    ip = attr.ib(type=str)
+
+    def dict(self) -> Dict:
+        d = NextHop.dict(self)
+        d.update({"type": "ip"})
+        return d
+
+    def __str__(self) -> str:
+        return "ip {}".format(self.ip)
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHopIp":
+        assert set(json_dict.keys()) == {"type", "ip"}
+        assert json_dict["type"] == "ip"
+        ip = json_dict["ip"]
+        assert isinstance(ip, str)
+        return NextHopIp(ip)
+
+
+@attr.s(frozen=True)
+class NextHopVrf(NextHop):
+    """A next-hop of a route indicating the destination IP should be resolved in another VRF"""
+
+    vrf = attr.ib(type=str)
+
+    def dict(self) -> Dict:
+        d = NextHop.dict(self)
+        d.update({"type": "vrf"})
+        return d
+
+    def __str__(self) -> str:
+        return "vrf {}".format(escape_name(self.vrf))
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHopVrf":
+        assert set(json_dict.keys()) == {"type", "vrf"}
+        assert json_dict["type"] == "vrf"
+        vrf = json_dict["vrf"]
+        assert isinstance(vrf, str)
+        return NextHopVrf(vrf)
+
+
+@attr.s(frozen=True)
+class NextHopVtep(NextHop):
+    """A next-hop of a route indicating the packet should be routed through a VXLAN tunnel"""
+
+    vni = attr.ib(type=int)
+    vtep = attr.ib(type=str)
+
+    def dict(self) -> Dict:
+        d = NextHop.dict(self)
+        d.update({"type": "vtep"})
+        return d
+
+    def __str__(self) -> str:
+        return "vni {} vtep {}".format(self.vni, self.vtep)
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "NextHopVtep":
+        assert set(json_dict.keys()) == {"type", "vni", "vtep"}
+        assert json_dict["type"] == "vtep"
+        vni = json_dict["vni"]
+        vtep = json_dict["vtep"]
+        assert isinstance(vni, int)
+        assert isinstance(vtep, str)
+        return NextHopVtep(vni, vtep)

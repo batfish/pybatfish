@@ -1,7 +1,15 @@
+import pytest
+
 from pybatfish.datamodel.route import (
     BgpRoute,
     BgpRouteConstraints,
     BgpRouteDiff,
+    NextHop,
+    NextHopDiscard,
+    NextHopInterface,
+    NextHopIp,
+    NextHopVrf,
+    NextHopVtep,
     _longspace_brc_converter,
     _string_list_brc_converter,
 )
@@ -151,3 +159,108 @@ def testBgpRouteDiffStr():
     diff2 = BgpRouteDiff(fieldName="localPreference", oldValue="old", newValue="new")
     assert diff1._repr_html_() == "Nm: old --> new"
     assert diff2._repr_html_() == "Local Preference: old --> new"
+
+
+def testNextHopCannotInstantiate():
+    with pytest.raises(TypeError):
+        NextHop()
+
+
+def testNextHopDeserializationInvalid():
+    with pytest.raises(ValueError):
+        NextHop.from_dict({"type": "foo"})
+    with pytest.raises(ValueError):
+        NextHop.from_dict({})
+
+
+def testNextHopDiscardSerialization():
+    assert NextHopDiscard().dict() == {"type": "discard"}
+
+
+def testNextHopDiscardDeserialization():
+    assert NextHop.from_dict({"type": "discard"}) == NextHopDiscard()
+    assert NextHopDiscard.from_dict({"type": "discard"}) == NextHopDiscard()
+
+
+def testNextHopDiscardStr():
+    assert str(NextHopDiscard()) == "discard"
+
+
+def testNextHopInterfaceSerialization():
+    assert NextHopInterface("foo").dict() == {"type": "interface", "interface": "foo"}
+    assert NextHopInterface("foo", "1.1.1.1").dict() == {
+        "type": "interface",
+        "interface": "foo",
+        "ip": "1.1.1.1",
+    }
+
+
+def testNextHopInterfaceDeserialization():
+    assert NextHop.from_dict(
+        {"type": "interface", "interface": "foo"}
+    ) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict(
+        {"type": "interface", "interface": "foo"}
+    ) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict(
+        {"type": "interface", "interface": "foo", "ip": None}
+    ) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict(
+        {"type": "interface", "interface": "foo", "ip": "1.1.1.1"}
+    ) == NextHopInterface("foo", "1.1.1.1")
+
+
+def testNextHopInterfaceStr():
+    assert str(NextHopInterface("foo")) == "interface foo"
+    assert str(NextHopInterface("foo bar")) == 'interface "foo bar"'
+    assert (
+        str(NextHopInterface("foo bar", "1.1.1.1")) == 'interface "foo bar" ip 1.1.1.1'
+    )
+
+
+def testNextHopIpSerialization():
+    assert NextHopIp("1.1.1.1").dict() == {"type": "ip", "ip": "1.1.1.1"}
+
+
+def testNextHopIpDeserialization():
+    assert NextHop.from_dict({"type": "ip", "ip": "1.1.1.1"}) == NextHopIp("1.1.1.1")
+    assert NextHopIp.from_dict({"type": "ip", "ip": "1.1.1.1"}) == NextHopIp("1.1.1.1")
+
+
+def testNextHopIpStr():
+    assert str(NextHopIp("1.1.1.1")) == "ip 1.1.1.1"
+
+
+def testNextHopVrfSerialization():
+    assert NextHopVrf("foo").dict() == {"type": "vrf", "vrf": "foo"}
+
+
+def testNextHopVrfDeserialization():
+    assert NextHop.from_dict({"type": "vrf", "vrf": "foo"}) == NextHopVrf("foo")
+    assert NextHopVrf.from_dict({"type": "vrf", "vrf": "foo"}) == NextHopVrf("foo")
+
+
+def testNextHopVrfStr():
+    assert str(NextHopVrf("foo")) == "vrf foo"
+    assert str(NextHopVrf("foo bar")) == 'vrf "foo bar"'
+
+
+def testNextHopVtepSerialization():
+    assert NextHopVtep(5, "1.1.1.1").dict() == {
+        "type": "vtep",
+        "vni": 5,
+        "vtep": "1.1.1.1",
+    }
+
+
+def testNextHopVtepDeserialization():
+    assert NextHop.from_dict(
+        {"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}
+    ) == NextHopVtep(5, "1.1.1.1")
+    assert NextHopVtep.from_dict(
+        {"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}
+    ) == NextHopVtep(5, "1.1.1.1")
+
+
+def testNextHopVtepStr():
+    assert str(NextHopVtep(5, "1.1.1.1")) == "vni 5 vtep 1.1.1.1"

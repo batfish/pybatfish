@@ -20,7 +20,7 @@ from typing import Any, Dict, Optional  # noqa: F401
 from pybatfish.datamodel.acl import AclTrace, TraceTree, TraceTreeList
 from pybatfish.datamodel.flow import Flow, FlowTrace, Trace
 from pybatfish.datamodel.primitives import FileLines, Interface, Issue, ListWrapper
-from pybatfish.datamodel.route import BgpRoute, BgpRouteDiffs
+from pybatfish.datamodel.route import BgpRoute, BgpRouteDiffs, NextHop
 
 __all__ = ["Answer"]
 
@@ -104,6 +104,8 @@ def _parse_json_with_schema(schema, json_object):
         return str(json_object)
     if schema == "Issue":
         return Issue.from_dict(json_object)
+    if schema == "NextHop":
+        return NextHop.from_dict(json_object)
     if schema == "Node":
         return json_object["name"]
     if schema == "BgpRoute":
