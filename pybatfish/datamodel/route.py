@@ -44,10 +44,16 @@ class BgpRoute(DataModelElement):
     :ivar communities: The communities of the route.
     :ivar localPreference: The local preference of the route.
     :ivar metric: The metric of the route.
+    :ivar nextHopIp: The next hop IP of the route.
+    :ivar protocol: The protocol of the route.
     :ivar originatorIp: The IP address of the originator of the route.
     :ivar originType: The origin type of the route.
     :ivar sourceProtocol: The source protocol of the route.
+    :ivar tag: The tag of the route.
+    :ivar weight: The weight of the route.
     """
+
+    # originMechanism is not included
 
     network = attr.ib(type=str)
     originatorIp = attr.ib(type=str)
@@ -57,7 +63,10 @@ class BgpRoute(DataModelElement):
     communities = attr.ib(type=list, default=[])
     localPreference = attr.ib(type=int, default=0)
     metric = attr.ib(type=int, default=0)
+    nextHopIp = attr.ib(type=str, default=None)
     sourceProtocol = attr.ib(type=str, default=None)
+    tag = attr.ib(type=int, default=0)
+    weight = attr.ib(type=int, default=0)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -71,23 +80,29 @@ class BgpRoute(DataModelElement):
             json_dict.get("communities", []),
             json_dict.get("localPreference", 0),
             json_dict.get("metric", 0),
+            json_dict.get("nextHopIp", None),
             json_dict.get("srcProtocol", None),
+            json_dict.get("tag", 0),
+            json_dict.get("weight", 0),
         )
 
     def dict(self):
         # type: () -> Dict
         return {
-            # needed for batfish jackson deserialization
-            "class": "org.batfish.datamodel.BgpRoute",
+            # used to be needed for batfish jackson deserialization
+            "class": "org.batfish.datamodel.questions.BgpRoute",
             "network": self.network,
             "asPath": self.asPath,
             "communities": self.communities,
             "localPreference": self.localPreference,
             "metric": self.metric,
+            "nextHopIp": self.nextHopIp,
             "originatorIp": self.originatorIp,
             "originType": self.originType,
             "protocol": self.protocol,
             "srcProtocol": self.sourceProtocol,
+            "tag": self.tag,
+            "weight": self.weight,
         }
 
     def _repr_html_(self):
@@ -103,10 +118,13 @@ class BgpRoute(DataModelElement):
         lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
+        lines.append("Next Hop IP: %s" % self.nextHopIp)
         lines.append("Originator IP: %s" % self.originatorIp)
         lines.append("Origin Type: %s" % self.originType)
         lines.append("Protocol: %s" % self.protocol)
         lines.append("Source Protocol: %s" % self.sourceProtocol)
+        lines.append("Tag: %s" % self.tag)
+        lines.append("Weight: %s" % self.weight)
         return lines
 
 
@@ -200,9 +218,12 @@ class BgpRouteDiff(DataModelElement):
             "asPath": "AS Path",
             "localPreference": "Local Preference",
             "metric": "Metric",
+            "nextHopIp": "Next Hop IP",
             "originatorIp": "Originator IP",
             "originType": "Origin Type",
             "sourceProtocol": "Source Protocol",
+            "tag": "Tag",
+            "weight": "Weight",
         }
         if self.fieldName in prettyNames:
             prettyFieldName = prettyNames[self.fieldName]
