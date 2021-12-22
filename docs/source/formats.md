@@ -215,7 +215,7 @@ just make sure that the output is NOT in XML format (first command) and that def
 
 ### SONiC
 
-Configuration files for SONiC devices should be placed under a folder called `sonic_configs` right under the top-level snapshot folder. For each SONiC device in the network, create a folder under the `sonic_configs` folder, and put its configdb.json and frr.conf files in that folder. The two files that belong to the device must appear together and by themselves in the device's folder.
+Configuration files for SONiC devices should be placed under a folder called `sonic_configs` right under the top-level snapshot folder. For each SONiC device in the network, create a folder under the `sonic_configs` folder, and put its configdb.json and frr.conf files in that folder. The names of the device's folder and the two files is not important, but the device's files must appear together and by themselves in the folder.
 
 ## Supplemental data formats
 
