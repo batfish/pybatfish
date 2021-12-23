@@ -1046,11 +1046,26 @@ class RoutingStepDetail(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict: Dict) -> "RoutingStepDetail":
+        routes = []
+        routes_json_list = json_dict.get("routes", [])
+        assert isinstance(routes_json_list, List)
+        for route_json in routes_json_list:
+            assert isinstance(route_json, Dict)
+            routes.append(RouteInfo.from_dict(route_json))
+        forwarding_detail_json = json_dict.get("forwardingDetail")
+        assert isinstance(forwarding_detail_json, Dict)
+        forwarding_detail = ForwardingDetail.from_dict(forwarding_detail_json)
+        arp_ip = json_dict.get("arpIp")
+        if arp_ip is not None:
+            assert isinstance(arp_ip, str)
+        output_interface = json_dict.get("outputInterface")
+        if output_interface is not None:
+            assert isinstance(output_interface, str)
         return RoutingStepDetail(
-            [route for route in json_dict.get("routes", [])],
-            ForwardingDetail.from_dict(json_dict.get("forwardingDetail")),
-            json_dict.get("arpIp"),
-            json_dict.get("outputInterface"),
+            routes,
+            forwarding_detail,
+            arp_ip,
+            output_interface,
         )
 
     def __str__(self) -> str:
