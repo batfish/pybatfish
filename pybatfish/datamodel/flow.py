@@ -12,23 +12,31 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import json
 import re
+from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: F401
 
 import attr
 
-from pybatfish.util import escape_html
+from pybatfish.util import escape_html, escape_name
 
 from .primitives import DataModelElement, Edge
+from .route import NextHop
 
 __all__ = [
     "ArpErrorStepDetail",
+    "DelegatedToNextVrf",
     "DeliveredStepDetail",
+    "Discarded",
     "EnterInputIfaceStepDetail",
     "ExitOutputIfaceStepDetail",
     "EnterFromVxlanTunnelStepDetail",
     "ExitIntoVxlanTunnelStepDetail",
     "FilterStepDetail",
+    "ForwardedIntoVxlanTunnel",
+    "ForwardedOutInterface",
+    "ForwardingDetail",
     "Flow",
     "HeaderConstraints",
     "Hop",
@@ -810,6 +818,159 @@ class MatchSessionStepDetail(DataModelElement):
         return ", ".join(strings)
 
 
+class ForwardingDetail(DataModelElement, metaclass=ABCMeta):
+    def _repr_html_(self) -> str:
+        return escape_html(str(self))
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError("ForwardingDetail elements must implement __str__")
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict) -> "ForwardingDetail":
+        if "type" not in json_dict:
+            raise ValueError(
+                "Unknown type of ForwardingDetail, missing the type property in: {}".format(
+                    json.dumps(json_dict)
+                )
+            )
+        fd_type = json_dict["type"]
+        if fd_type == "DelegatedToNextVrf":
+            return DelegatedToNextVrf.from_dict(json_dict)
+        elif fd_type == "ForwardedIntoVxlanTunnel":
+            return ForwardedIntoVxlanTunnel.from_dict(json_dict)
+        elif fd_type == "ForwardedOutInterface":
+            return ForwardedOutInterface.from_dict(json_dict)
+        elif fd_type == "Discarded":
+            return Discarded.from_dict(json_dict)
+        else:
+            raise ValueError(
+                "Unhandled ForwardingDetail type: {} in: {}".format(
+                    json.dumps(fd_type), json.dumps(json_dict)
+                )
+            )
+
+
+@attr.s(frozen=True, auto_attribs=True)
+class DelegatedToNextVrf(ForwardingDetail):
+    """A flow being delegated to a different VRF for further processing."""
+
+    nextVrf: str
+    type: str = attr.ib(default="DelegatedToNextVrf")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "DelegatedToNextVrf":
+            raise ValueError('type must be "DelegatedToNextVrf"')
+
+    def __str__(self) -> str:
+        return "Delegated to next VRF: {}".format(escape_name(self.nextVrf))
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "DelegatedToNextVrf":
+        assert set(json_dict.keys()) == {"type", "nextVrf"}
+        assert json_dict["type"] == "DelegatedToNextVrf"
+        next_vrf = json_dict["nextVrf"]
+        assert isinstance(next_vrf, str)
+        return DelegatedToNextVrf(next_vrf)
+
+
+@attr.s(frozen=True, auto_attribs=True)
+class ForwardedIntoVxlanTunnel(ForwardingDetail):
+    """A flow being forwarded into a VXLAN tunnel."""
+
+    vni: int
+    vtep: str
+    type: str = attr.ib(default="ForwardedIntoVxlanTunnel")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "ForwardedIntoVxlanTunnel":
+            raise ValueError('type must be "ForwardedIntoVxlanTunnel"')
+
+    def __str__(self) -> str:
+        return "Forwarded into VXLAN tunnel with VNI: {vni} and VTEP: {vtep}".format(
+            vni=self.vni, vtep=self.vtep
+        )
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "ForwardedIntoVxlanTunnel":
+        assert set(json_dict.keys()) == {"type", "vni", "vtep"}
+        assert json_dict["type"] == "ForwardedIntoVxlanTunnel"
+        vni = json_dict["vni"]
+        vtep = json_dict["vtep"]
+        assert isinstance(vni, int)
+        assert isinstance(vtep, str)
+        return ForwardedIntoVxlanTunnel(vni, vtep)
+
+
+@attr.s(frozen=True, auto_attribs=True)
+class ForwardedOutInterface(ForwardingDetail):
+    """A flow being forwarded out an interface.
+
+    If there is no resolved next-hop IP and this is the final step on this node, the destination IP of the flow will be used as the next gateway IP."""
+
+    outputInterface: str
+    resolvedNextHopIp: Optional[str] = None
+    type: str = attr.ib(default="ForwardedOutInterface")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "ForwardedOutInterface":
+            raise ValueError('type must be "ForwardedOutInterface"')
+
+    def __str__(self) -> str:
+        return (
+            "Forwarded out interface: {iface} with resolved next-hop IP: {nhip}".format(
+                iface=escape_name(self.outputInterface), nhip=self.resolvedNextHopIp
+            )
+            if self.resolvedNextHopIp
+            else "Forwarded out interface: {iface}".format(
+                iface=escape_name(self.outputInterface)
+            )
+        )
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "ForwardedOutInterface":
+        assert (
+            set(json_dict.keys())
+            == {
+                "type",
+                "outputInterface",
+                "resolvedNextHopIp",
+            }
+            or set(json_dict.keys()) == {"type", "outputInterface"}
+        )
+        assert json_dict["type"] == "ForwardedOutInterface"
+        output_interface = json_dict["outputInterface"]
+        resolved_next_hop_ip = None
+        assert isinstance(output_interface, str)
+        if "resolvedNextHopIp" in json_dict:
+            resolved_next_hop_ip = json_dict["resolvedNextHopIp"]
+            assert resolved_next_hop_ip is None or isinstance(resolved_next_hop_ip, str)
+        return ForwardedOutInterface(output_interface, resolved_next_hop_ip)
+
+
+@attr.s(frozen=True, auto_attribs=True)
+class Discarded(ForwardingDetail):
+    """A flow being discarded."""
+
+    type: str = attr.ib(default="Discarded")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "Discarded":
+            raise ValueError('type must be "Discarded"')
+
+    def __str__(self) -> str:
+        return "Discarded"
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "Discarded":
+        assert json_dict == {"type": "Discarded"}
+        return Discarded()
+
+
 @attr.s(frozen=True)
 class OriginateStepDetail(DataModelElement):
     """Details of a step representing the originating of a flow in a Hop.
@@ -829,44 +990,76 @@ class OriginateStepDetail(DataModelElement):
         return str(self.originatingVrf)
 
 
+@attr.s(frozen=True, auto_attribs=True)
+class RouteInfo(DataModelElement):
+    """Contains information about the routes which led to the selection of the forwarding action for the ExitOutputIfaceStep"""
+
+    protocol: str
+    network: str
+    nextHop: NextHop
+    admin: int
+    metric: int
+
+    def __str__(self) -> str:
+        return "{protocol} (Network: {network}, Next Hop: {next_hop})".format(
+            protocol=self.protocol,
+            network=self.network,
+            next_hop=str(self.nextHop),
+        )
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "RouteInfo":
+        assert set(json_dict.keys()) - {"nextHopIp", "nextVrf"} == {
+            "protocol",
+            "network",
+            "nextHop",
+            "admin",
+            "metric",
+        }
+        protocol = json_dict.get("protocol")
+        assert isinstance(protocol, str)
+        network = json_dict.get("network")
+        assert isinstance(network, str)
+        next_hop_dict = json_dict.get("nextHop")
+        assert isinstance(next_hop_dict, Dict)
+        next_hop = NextHop.from_dict(next_hop_dict)
+        admin = json_dict.get("admin")
+        assert isinstance(admin, int)
+        metric = json_dict.get("metric")
+        assert isinstance(metric, int)
+        return RouteInfo(protocol, network, next_hop, admin, metric)
+
+
 @attr.s(frozen=True)
 class RoutingStepDetail(DataModelElement):
     """Details of a step representing the routing from input interface to output interface.
 
-    :ivar routes: List of routes which were considered to select the output interface
+    :ivar routes: List of routes which were considered to select the forwarding action
     """
 
-    routes = attr.ib(type=List[Any])
+    routes = attr.ib(type=List[RouteInfo])
+    forwardingDetail = attr.ib(type=ForwardingDetail)
+    # TODO: remove arpIp
     arpIp = attr.ib(type=Optional[str])
+    # TODO: remove outputInteface
     outputInterface = attr.ib(type=Optional[str])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> RoutingStepDetail
+    def from_dict(cls, json_dict: Dict) -> "RoutingStepDetail":
         return RoutingStepDetail(
             [route for route in json_dict.get("routes", [])],
+            ForwardingDetail.from_dict(json_dict.get("forwardingDetail")),
             json_dict.get("arpIp"),
             json_dict.get("outputInterface"),
         )
 
-    def __str__(self):
-        # type: () -> str
-        output = []
-        if self.arpIp is not None:
-            output.append("ARP IP: " + self.arpIp)
-        if self.outputInterface is not None:
-            output.append("Output Interface: " + self.outputInterface)
+    def __str__(self) -> str:
+        output = [str(self.forwardingDetail)]
         if self.routes:
             routes_str = []  # type: List[str]
-            for route in self.routes:
-                routes_str.append(
-                    "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
-                        protocol=route.get("protocol"),
-                        network=route.get("network"),
-                        next_hop_ip=route.get("nextHopIp"),
-                    )
-                )
-            output.append("Routes: " + "[" + ",".join(routes_str) + "]")
+            output.append(
+                "Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]"
+            )
         return ", ".join(output)
 
 

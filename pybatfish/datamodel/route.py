@@ -270,7 +270,7 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
         raise NotImplementedError("NextHop elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHop":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHop":
         if "type" not in json_dict:
             raise ValueError(
                 "Unknown type of NextHop, missing the type property in: {}".format(
@@ -296,39 +296,43 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
             )
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True)
 class NextHopDiscard(NextHop):
     """Indicates the packet should be dropped"""
 
-    def dict(self) -> Dict:
-        d = NextHop.dict(self)
-        d.update({"type": "discard"})
-        return d
+    type: str = attr.ib(default="discard")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "discard":
+            raise ValueError('type must be "discard"')
+
+    def dict(self) -> Dict[str, Any]:
+        return {"type": "discard"}
 
     def __str__(self) -> str:
         return "discard"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHopDiscard":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopDiscard":
         assert json_dict == {"type": "discard"}
         return NextHopDiscard()
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True)
 class NextHopInterface(NextHop):
     """A next-hop of a route with a fixed output interface and optional next gateway IP.
 
     If there is no IP, the destination IP of the packet will be used as the next gateway IP."""
 
-    interface = attr.ib(type=str)
-    ip = attr.ib(type=Optional[str], default=None)
+    interface: str
+    ip: Optional[str] = None
+    type: str = attr.ib(default="interface")
 
-    def dict(self) -> Dict:
-        d = NextHop.dict(self)
-        d.update({"type": "interface"})
-        if d["ip"] is None:
-            del d["ip"]
-        return d
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "interface":
+            raise ValueError('type must be "interface"')
 
     def __str__(self) -> str:
         return (
@@ -338,7 +342,7 @@ class NextHopInterface(NextHop):
         )
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHopInterface":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopInterface":
         assert set(json_dict.keys()) == {"type", "interface", "ip"} or set(
             json_dict.keys()
         ) == {"type", "interface"}
@@ -352,22 +356,23 @@ class NextHopInterface(NextHop):
         return NextHopInterface(interface, ip)
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True)
 class NextHopIp(NextHop):
     """A next-hop of a route including the next gateway IP"""
 
-    ip = attr.ib(type=str)
+    ip: str
+    type: str = attr.ib(default="ip")
 
-    def dict(self) -> Dict:
-        d = NextHop.dict(self)
-        d.update({"type": "ip"})
-        return d
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "ip":
+            raise ValueError('type must be "ip"')
 
     def __str__(self) -> str:
         return "ip {}".format(self.ip)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHopIp":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopIp":
         assert set(json_dict.keys()) == {"type", "ip"}
         assert json_dict["type"] == "ip"
         ip = json_dict["ip"]
@@ -375,22 +380,23 @@ class NextHopIp(NextHop):
         return NextHopIp(ip)
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True)
 class NextHopVrf(NextHop):
     """A next-hop of a route indicating the destination IP should be resolved in another VRF"""
 
-    vrf = attr.ib(type=str)
+    vrf: str
+    type: str = attr.ib(default="vrf")
 
-    def dict(self) -> Dict:
-        d = NextHop.dict(self)
-        d.update({"type": "vrf"})
-        return d
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "vrf":
+            raise ValueError('type must be "vrf"')
 
     def __str__(self) -> str:
         return "vrf {}".format(escape_name(self.vrf))
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHopVrf":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVrf":
         assert set(json_dict.keys()) == {"type", "vrf"}
         assert json_dict["type"] == "vrf"
         vrf = json_dict["vrf"]
@@ -398,23 +404,24 @@ class NextHopVrf(NextHop):
         return NextHopVrf(vrf)
 
 
-@attr.s(frozen=True)
+@attr.s(frozen=True, auto_attribs=True)
 class NextHopVtep(NextHop):
     """A next-hop of a route indicating the packet should be routed through a VXLAN tunnel"""
 
-    vni = attr.ib(type=int)
-    vtep = attr.ib(type=str)
+    vni: int
+    vtep: str
+    type: str = attr.ib(default="vtep")
 
-    def dict(self) -> Dict:
-        d = NextHop.dict(self)
-        d.update({"type": "vtep"})
-        return d
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "vtep":
+            raise ValueError('type must be "vtep"')
 
     def __str__(self) -> str:
         return "vni {} vtep {}".format(self.vni, self.vtep)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "NextHopVtep":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVtep":
         assert set(json_dict.keys()) == {"type", "vni", "vtep"}
         assert json_dict["type"] == "vtep"
         vni = json_dict["vni"]
