@@ -296,11 +296,11 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
             )
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class NextHopDiscard(NextHop):
     """Indicates the packet should be dropped"""
 
-    type: str = attr.ib(default="discard")
+    type = attr.ib(type=str, default="discard")
 
     @type.validator
     def check(self, _attribute, value):
@@ -319,15 +319,15 @@ class NextHopDiscard(NextHop):
         return NextHopDiscard()
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class NextHopInterface(NextHop):
     """A next-hop of a route with a fixed output interface and optional next gateway IP.
 
     If there is no IP, the destination IP of the packet will be used as the next gateway IP."""
 
-    interface: str
-    ip: Optional[str] = None
-    type: str = attr.ib(default="interface")
+    interface = attr.ib(type=str)
+    ip = attr.ib(type=Optional[str], default=None)
+    type = attr.ib(type=str, default="interface")
 
     @type.validator
     def check(self, _attribute, value):
@@ -356,12 +356,12 @@ class NextHopInterface(NextHop):
         return NextHopInterface(interface, ip)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class NextHopIp(NextHop):
     """A next-hop of a route including the next gateway IP"""
 
-    ip: str
-    type: str = attr.ib(default="ip")
+    ip = attr.ib(type=str)
+    type = attr.ib(type=str, default="ip")
 
     @type.validator
     def check(self, _attribute, value):
@@ -380,12 +380,12 @@ class NextHopIp(NextHop):
         return NextHopIp(ip)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class NextHopVrf(NextHop):
     """A next-hop of a route indicating the destination IP should be resolved in another VRF"""
 
-    vrf: str
-    type: str = attr.ib(default="vrf")
+    vrf = attr.ib(type=str)
+    type = attr.ib(type=str, default="vrf")
 
     @type.validator
     def check(self, _attribute, value):
@@ -404,13 +404,13 @@ class NextHopVrf(NextHop):
         return NextHopVrf(vrf)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class NextHopVtep(NextHop):
     """A next-hop of a route indicating the packet should be routed through a VXLAN tunnel"""
 
-    vni: int
-    vtep: str
-    type: str = attr.ib(default="vtep")
+    vni = attr.ib(type=int)
+    vtep = attr.ib(type=str)
+    type = attr.ib(type=str, default="vtep")
 
     @type.validator
     def check(self, _attribute, value):

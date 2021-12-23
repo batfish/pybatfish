@@ -851,12 +851,12 @@ class ForwardingDetail(DataModelElement, metaclass=ABCMeta):
             )
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class DelegatedToNextVrf(ForwardingDetail):
     """A flow being delegated to a different VRF for further processing."""
 
-    nextVrf: str
-    type: str = attr.ib(default="DelegatedToNextVrf")
+    nextVrf = attr.ib(type=str)
+    type = attr.ib(type=str, default="DelegatedToNextVrf")
 
     @type.validator
     def check(self, _attribute, value):
@@ -875,13 +875,13 @@ class DelegatedToNextVrf(ForwardingDetail):
         return DelegatedToNextVrf(next_vrf)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class ForwardedIntoVxlanTunnel(ForwardingDetail):
     """A flow being forwarded into a VXLAN tunnel."""
 
-    vni: int
-    vtep: str
-    type: str = attr.ib(default="ForwardedIntoVxlanTunnel")
+    vni = attr.ib(type=int)
+    vtep = attr.ib(type=str)
+    type = attr.ib(type=str, default="ForwardedIntoVxlanTunnel")
 
     @type.validator
     def check(self, _attribute, value):
@@ -904,15 +904,15 @@ class ForwardedIntoVxlanTunnel(ForwardingDetail):
         return ForwardedIntoVxlanTunnel(vni, vtep)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class ForwardedOutInterface(ForwardingDetail):
     """A flow being forwarded out an interface.
 
     If there is no resolved next-hop IP and this is the final step on this node, the destination IP of the flow will be used as the next gateway IP."""
 
-    outputInterface: str
-    resolvedNextHopIp: Optional[str] = None
-    type: str = attr.ib(default="ForwardedOutInterface")
+    outputInterface = attr.ib(type=str)
+    resolvedNextHopIp = attr.ib(type=Optional[str], default=None)
+    type = attr.ib(type=str, default="ForwardedOutInterface")
 
     @type.validator
     def check(self, _attribute, value):
@@ -951,11 +951,11 @@ class ForwardedOutInterface(ForwardingDetail):
         return ForwardedOutInterface(output_interface, resolved_next_hop_ip)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class Discarded(ForwardingDetail):
     """A flow being discarded."""
 
-    type: str = attr.ib(default="Discarded")
+    type = attr.ib(type=str, default="Discarded")
 
     @type.validator
     def check(self, _attribute, value):
@@ -990,15 +990,15 @@ class OriginateStepDetail(DataModelElement):
         return str(self.originatingVrf)
 
 
-@attr.s(frozen=True, auto_attribs=True)
+@attr.s(frozen=True)
 class RouteInfo(DataModelElement):
     """Contains information about the routes which led to the selection of the forwarding action for the ExitOutputIfaceStep"""
 
-    protocol: str
-    network: str
-    nextHop: NextHop
-    admin: int
-    metric: int
+    protocol = attr.ib(type=str)
+    network = attr.ib(type=str)
+    nextHop = attr.ib(type=NextHop)
+    admin = attr.ib(type=int)
+    metric = attr.ib(type=int)
 
     def __str__(self) -> str:
         return "{protocol} (Network: {network}, Next Hop: {next_hop})".format(
