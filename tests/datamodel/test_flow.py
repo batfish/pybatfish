@@ -19,10 +19,13 @@ from operator import attrgetter
 import attr
 import pytest
 
+from pybatfish.datamodel import NextHopDiscard, NextHopIp
 from pybatfish.datamodel.flow import (
     Accept,
     ArpErrorStepDetail,
+    DelegatedToNextVrf,
     DeliveredStepDetail,
+    Discarded,
     EnterFromVxlanTunnelStepDetail,
     EnterInputIfaceStepDetail,
     ExitIntoVxlanTunnelStepDetail,
@@ -31,6 +34,9 @@ from pybatfish.datamodel.flow import (
     Flow,
     FlowDiff,
     FlowTraceHop,
+    ForwardedIntoVxlanTunnel,
+    ForwardedOutInterface,
+    ForwardingDetail,
     ForwardOutInterface,
     HeaderConstraints,
     Hop,
@@ -42,6 +48,7 @@ from pybatfish.datamodel.flow import (
     OriginatingSessionScope,
     PostNatFibLookup,
     PreNatFibLookup,
+    RouteInfo,
     RoutingStepDetail,
     SessionAction,
     SessionMatchExpr,
@@ -378,17 +385,10 @@ def test_hop_repr_str():
             Step(
                 RoutingStepDetail(
                     [
-                        {
-                            "network": "1.1.1.1/24",
-                            "protocol": "bgp",
-                            "nextHopIp": "1.2.3.4",
-                        },
-                        {
-                            "network": "1.1.1.2/24",
-                            "protocol": "static",
-                            "nextHopIp": "1.2.3.5",
-                        },
+                        RouteInfo("bgp", "1.1.1.1/24", NextHopIp("1.2.3.4"), 1, 1),
+                        RouteInfo("static", "1.1.1.2/24", NextHopIp("1.2.3.5"), 1, 1),
                     ],
+                    ForwardedOutInterface("iface1", "12.123.1.2"),
                     "12.123.1.2",
                     "iface1",
                 ),
@@ -403,51 +403,14 @@ def test_hop_repr_str():
 
     assert (
         str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
-        "  FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)])\n  "
+        "  FORWARDED(Forwarded out interface: iface1 with resolved next-hop IP: 12.123.1.2, Routes: [bgp (Network: 1.1.1.1/24, Next Hop: ip 1.2.3.4),static (Network: 1.1.1.2/24, Next Hop: ip 1.2.3.5)])\n  "
         "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
     )
 
 
-def test_only_routes_str():
-    routingStepDetail = RoutingStepDetail(
-        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
-        None,
-        None,
-    )
-
-    assert (
-        str(routingStepDetail)
-        == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
-    )
-
-
-def test_no_output_iface_str():
-    routingStepDetail = RoutingStepDetail(
-        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
-        "1.2.3.4",
-        None,
-    )
-    assert (
-        str(routingStepDetail)
-        == "ARP IP: 1.2.3.4, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
-    )
-
-
-def test_no_arp_ip_str():
-    routingStepDetail = RoutingStepDetail(
-        [{"network": "1.1.1.1/24", "protocol": "bgp", "nextHopIp": "1.2.3.4"}],
-        None,
-        "iface1",
-    )
-    assert (
-        str(routingStepDetail)
-        == "Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
-    )
-
-
 def test_no_route():
-    step = Step(RoutingStepDetail([], None, None), "NO_ROUTE")
-    assert str(step) == "NO_ROUTE"
+    step = Step(RoutingStepDetail([], Discarded(), None, None), "NO_ROUTE")
+    assert str(step) == "NO_ROUTE(Discarded)"
 
 
 def test_match_tcp_generators():
@@ -873,6 +836,159 @@ def test_header_constraints_of():
             useUrg=True,
         )
     ]
+
+
+def testForwardingDetailCannotInstantiate():
+    with pytest.raises(TypeError):
+        ForwardingDetail()
+
+
+def testForwardingDetailDeserializationInvalid():
+    with pytest.raises(ValueError):
+        ForwardingDetail.from_dict({"type": "foo"})
+    with pytest.raises(ValueError):
+        ForwardingDetail.from_dict({})
+
+
+def testDelegatedToNextVrfSerialization():
+    assert DelegatedToNextVrf("foo").dict() == {
+        "type": "DelegatedToNextVrf",
+        "nextVrf": "foo",
+    }
+
+
+def testDelegatedToNextVrfDeserialization():
+    assert ForwardingDetail.from_dict(
+        {"type": "DelegatedToNextVrf", "nextVrf": "foo"}
+    ) == DelegatedToNextVrf("foo")
+    assert DelegatedToNextVrf.from_dict(
+        {"type": "DelegatedToNextVrf", "nextVrf": "foo"}
+    ) == DelegatedToNextVrf("foo")
+
+
+def testDelegatedToNextVrfStr():
+    assert str(DelegatedToNextVrf("foo")) == "Delegated to next VRF: foo"
+    assert str(DelegatedToNextVrf("foo bar")) == 'Delegated to next VRF: "foo bar"'
+
+
+def testForwardedOutInterfaceSerialization():
+    assert ForwardedOutInterface("foo").dict() == {
+        "type": "ForwardedOutInterface",
+        "outputInterface": "foo",
+        "resolvedNextHopIp": None,
+    }
+    assert ForwardedOutInterface("foo", "1.1.1.1").dict() == {
+        "type": "ForwardedOutInterface",
+        "outputInterface": "foo",
+        "resolvedNextHopIp": "1.1.1.1",
+    }
+
+
+def testForwardedOutInterfaceDeserialization():
+    assert ForwardingDetail.from_dict(
+        {"type": "ForwardedOutInterface", "outputInterface": "foo"}
+    ) == ForwardedOutInterface("foo")
+    assert ForwardedOutInterface.from_dict(
+        {"type": "ForwardedOutInterface", "outputInterface": "foo"}
+    ) == ForwardedOutInterface("foo")
+    assert (
+        ForwardedOutInterface.from_dict(
+            {
+                "type": "ForwardedOutInterface",
+                "outputInterface": "foo",
+                "resolvedNextHopIp": None,
+            }
+        )
+        == ForwardedOutInterface("foo")
+    )
+    assert (
+        ForwardedOutInterface.from_dict(
+            {
+                "type": "ForwardedOutInterface",
+                "outputInterface": "foo",
+                "resolvedNextHopIp": "1.1.1.1",
+            }
+        )
+        == ForwardedOutInterface("foo", "1.1.1.1")
+    )
+
+
+def testForwardedOutInterfaceStr():
+    assert str(ForwardedOutInterface("foo")) == "Forwarded out interface: foo"
+    assert str(ForwardedOutInterface("foo bar")) == 'Forwarded out interface: "foo bar"'
+    assert (
+        str(ForwardedOutInterface("foo bar", "1.1.1.1"))
+        == 'Forwarded out interface: "foo bar" with resolved next-hop IP: 1.1.1.1'
+    )
+
+
+def testForwardedIntoVxlanTunnelVtepSerialization():
+    assert ForwardedIntoVxlanTunnel(5, "1.1.1.1").dict() == {
+        "type": "ForwardedIntoVxlanTunnel",
+        "vni": 5,
+        "vtep": "1.1.1.1",
+    }
+
+
+def testForwardedIntoVxlanTunnelDeserialization():
+    assert ForwardingDetail.from_dict(
+        {"type": "ForwardedIntoVxlanTunnel", "vni": 5, "vtep": "1.1.1.1"}
+    ) == ForwardedIntoVxlanTunnel(5, "1.1.1.1")
+    assert ForwardedIntoVxlanTunnel.from_dict(
+        {"type": "ForwardedIntoVxlanTunnel", "vni": 5, "vtep": "1.1.1.1"}
+    ) == ForwardedIntoVxlanTunnel(5, "1.1.1.1")
+
+
+def testForwardedIntoVxlanTunnelStr():
+    assert (
+        str(ForwardedIntoVxlanTunnel(5, "1.1.1.1"))
+        == "Forwarded into VXLAN tunnel with VNI: 5 and VTEP: 1.1.1.1"
+    )
+
+
+def testDiscardedSerialization():
+    assert Discarded().dict() == {"type": "Discarded"}
+
+
+def testDiscardedDeserialization():
+    assert ForwardingDetail.from_dict({"type": "Discarded"}) == Discarded()
+    assert Discarded.from_dict({"type": "Discarded"}) == Discarded()
+
+
+def testDiscardedStr():
+    assert str(Discarded()) == "Discarded"
+
+
+def testRouteInfoSerialization():
+    assert RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2).dict() == {
+        "protocol": "tcp",
+        "network": "1.1.1.1/32",
+        "nextHop": {"type": "discard"},
+        "admin": 1,
+        "metric": 2,
+    }
+
+
+def testRouteInfoDeserialization():
+    assert (
+        RouteInfo.from_dict(
+            {
+                "protocol": "tcp",
+                "network": "1.1.1.1/32",
+                "nextHop": {"type": "discard"},
+                "admin": 1,
+                "metric": 2,
+            }
+        )
+        == RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2)
+    )
+
+
+def testRouteInfoStr():
+    assert (
+        str(RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2))
+        == "tcp (Network: 1.1.1.1/32, Next Hop: discard)"
+    )
 
 
 if __name__ == "__main__":

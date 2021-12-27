@@ -38,8 +38,7 @@ __all__ = [
 class DataModelElement(object):
     __metaclass__ = ABCMeta
 
-    def dict(self):
-        # type: () -> Dict[str, Any]
+    def dict(self) -> Dict[str, Any]:
         return attr.asdict(self, recurse=True)
 
     @classmethod
@@ -47,8 +46,7 @@ class DataModelElement(object):
     def from_dict(cls, json_dict):
         raise NotImplementedError("Datamodel elements must implement from_dict")
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         """Override this method to enable custom HTML formatting of the dataclass."""
         return escape_html(repr(self))
 

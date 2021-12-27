@@ -218,7 +218,11 @@ def testNextHopDiscardStr():
 
 
 def testNextHopInterfaceSerialization():
-    assert NextHopInterface("foo").dict() == {"type": "interface", "interface": "foo"}
+    assert NextHopInterface("foo").dict() == {
+        "type": "interface",
+        "interface": "foo",
+        "ip": None,
+    }
     assert NextHopInterface("foo", "1.1.1.1").dict() == {
         "type": "interface",
         "interface": "foo",
