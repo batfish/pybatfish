@@ -12,7 +12,8 @@ repos:
     - id: black
 
   - repo: https://github.com/pycqa/isort
-    rev: 5.8.0
+    # Switch to release from PR when https://github.com/PyCQA/isort/pull/1875 is merged
+    rev: 5e1a36521f834769b2b6dfd6466e792abd435dec
     hooks:
     - id: isort
       args: ["--profile", "black", "--filter-files"]
