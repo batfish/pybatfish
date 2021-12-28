@@ -21,8 +21,10 @@ EOF
 cat <<EOF
   - label: ":python-black: Format checking"
     command:
+      - "rm -rf ~/.cache"
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
+      - "python3 -m pip install --upgrade pip setuptools"
       - "python3 -m pip install pre-commit"
       - "pre-commit run --all-files"
     plugins:
