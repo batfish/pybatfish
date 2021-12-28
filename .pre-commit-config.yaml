@@ -11,11 +11,11 @@ repos:
     hooks:
     - id: black
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.8.0
-    hooks:
-    - id: isort
-      args: ["--profile", "black", "--filter-files"]
+  #- repo: https://github.com/pycqa/isort
+  #  rev: 5.8.0
+  #  hooks:
+  #  - id: isort
+  #    args: ["--profile", "black", "--filter-files"]
  
   - repo: https://github.com/humitos/mirrors-autoflake
     rev: v1.3
