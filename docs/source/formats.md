@@ -15,6 +15,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 * [Fortinet](#fortinet)
 * [Juniper](#juniper)
 * [Palo Alto Networks](#palo-alto-networks)
+* [SONiC](#sonic)
 
 Except for AWS, all vendor configs files must be placed in the `configs` folder right below the top-level snapshot folder. It is OK to create sub-folders inside `configs`; Batfish will recursively read all files. It is also OK to mix files from multiple vendors in the same folder.
 
@@ -212,6 +213,9 @@ show config merged
 The first two commands may not be available on all PAN-OS versions;
 just make sure that the output is NOT in XML format (first command) and that definitions are not truncated (second command).
 
+### SONiC
+
+Configuration files for SONiC devices should be placed under a folder called `sonic_configs` right under the top-level snapshot folder. For each SONiC device in the network, create a folder under the `sonic_configs` folder, and put its configdb.json and frr.conf files in that folder. The names of the device's folder and the two files is not important, but the device's files must appear together and by themselves in the folder.
 
 ## Supplemental data formats
 
