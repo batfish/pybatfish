@@ -3,7 +3,7 @@ set -euo pipefail
 
 BATFISH_ARTIFACTS_PLUGIN_VERSION="${BATFISH_ARTIFACTS_PLUGIN_VERSION:-v1.4.0}"
 BATFISH_DOCKER_PLUGIN_VERSION="${BATFISH_DOCKER_PLUGIN_VERSION:-v3.9.0}"
-BATFISH_DOCKER_CI_BASE_IMAGE="${BATFISH_DOCKER_CI_BASE_IMAGE:-batfish/ci-base:1a171db-7eeaf7f00b}"
+BATFISH_DOCKER_CI_BASE_IMAGE="${BATFISH_DOCKER_CI_BASE_IMAGE:-batfish/ci-base:5f0e2fe-56664b198d}"
 BATFISH_GITHUB_BATFISH_REF="${BATFISH_GITHUB_BATFISH_REF:-master}"
 BATFISH_GITHUB_BATFISH_REPO="${BATFISH_GITHUB_BATFISH_REPO:-https://github.com/batfish/batfish}"
 PYBATFISH_PYTHON_TEST_VERSIONS=(3.7 3.8 3.9)
@@ -23,7 +23,9 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
+      - "python3 -m pip install --upgrade pip setuptools wheel"
       - "python3 -m pip install pre-commit"
+      - "pre-commit install"
       - "pre-commit run --all-files"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
