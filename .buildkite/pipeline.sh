@@ -23,7 +23,7 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install pre-commit"
+      - "python3 -m pip install pre-commit setuptools"
       - "pre-commit run --all-files"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
