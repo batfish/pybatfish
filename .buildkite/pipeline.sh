@@ -23,7 +23,8 @@ cat <<EOF
     command:
       - "python3 -m virtualenv .venv"
       - ". .venv/bin/activate"
-      - "python3 -m pip install pre-commit"
+      # https://github.com/pypa/virtualenv/issues/2257
+      - "python3 -m pip install pre-commit 'virtualenv<20.11.0'"
       - "pre-commit run --all-files"
     plugins:
       - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
