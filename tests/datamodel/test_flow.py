@@ -385,8 +385,12 @@ def test_hop_repr_str():
             Step(
                 RoutingStepDetail(
                     [
-                        RouteInfo("bgp", "1.1.1.1/24", NextHopIp("1.2.3.4"), 1, 1),
-                        RouteInfo("static", "1.1.1.2/24", NextHopIp("1.2.3.5"), 1, 1),
+                        RouteInfo(
+                            "bgp", "1.1.1.1/24", NextHopIp("1.2.3.4"), None, 1, 1
+                        ),
+                        RouteInfo(
+                            "static", "1.1.1.2/24", NextHopIp("1.2.3.5"), None, 1, 1
+                        ),
                     ],
                     ForwardedOutInterface("iface1", "12.123.1.2"),
                     "12.123.1.2",
@@ -408,9 +412,90 @@ def test_hop_repr_str():
     )
 
 
+# TODO: remove after sufficient period
+def test_hop_repr_str_legacy():
+    hop = Hop(
+        "node1",
+        [
+            Step(EnterInputIfaceStepDetail("in_iface1", "in_vrf1"), "SENT_IN"),
+            Step(
+                RoutingStepDetail(
+                    [
+                        RouteInfo("bgp", "1.1.1.1/24", None, "1.2.3.4", 1, 1),
+                        RouteInfo("static", "1.1.1.2/24", None, "1.2.3.5", 1, 1),
+                    ],
+                    None,
+                    "12.123.1.2",
+                    "iface1",
+                ),
+                "FORWARDED",
+            ),
+            Step(
+                FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"
+            ),
+            Step(ExitOutputIfaceStepDetail("out_iface1", None), "SENT_OUT"),
+        ],
+    )
+
+    assert (
+        str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
+        "  FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)])\n  "
+        "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+    )
+
+
+# TOOD: remove after sufficient period
+def test_only_routes_str_legacy():
+    routingStepDetail = RoutingStepDetail(
+        [RouteInfo("bgp", "1.1.1.1/24", None, "1.2.3.4", 1, 1)],
+        None,
+        None,
+        None,
+    )
+
+    assert (
+        str(routingStepDetail)
+        == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
+# TOOD: remove after sufficient period
+def test_no_output_iface_str_legacy():
+    routingStepDetail = RoutingStepDetail(
+        [RouteInfo("bgp", "1.1.1.1/24", None, "1.2.3.4", 1, 1)],
+        None,
+        "1.2.3.4",
+        None,
+    )
+    assert (
+        str(routingStepDetail)
+        == "ARP IP: 1.2.3.4, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
+# TOOD: remove after sufficient period
+def test_no_arp_ip_str_legacy():
+    routingStepDetail = RoutingStepDetail(
+        [RouteInfo("bgp", "1.1.1.1/24", None, "1.2.3.4", 1, 1)],
+        None,
+        None,
+        "iface1",
+    )
+    assert (
+        str(routingStepDetail)
+        == "Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+    )
+
+
 def test_no_route():
     step = Step(RoutingStepDetail([], Discarded(), None, None), "NO_ROUTE")
     assert str(step) == "NO_ROUTE(Discarded)"
+
+
+# TODO: remove after sufficient period
+def test_no_route_legacy():
+    step = Step(RoutingStepDetail([], None, None, None), "NO_ROUTE")
+    assert str(step) == "NO_ROUTE"
 
 
 def test_match_tcp_generators():
@@ -960,10 +1045,23 @@ def testDiscardedStr():
 
 
 def testRouteInfoSerialization():
-    assert RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2).dict() == {
+    assert RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), None, 1, 2).dict() == {
         "protocol": "tcp",
         "network": "1.1.1.1/32",
         "nextHop": {"type": "discard"},
+        "nextHopIp": None,
+        "admin": 1,
+        "metric": 2,
+    }
+
+
+# TODO: remove after sufficient period
+def testRouteInfoSerialization_legacy():
+    assert RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2).dict() == {
+        "protocol": "tcp",
+        "network": "1.1.1.1/32",
+        "nextHop": None,
+        "nextHopIp": "2.2.2.2",
         "admin": 1,
         "metric": 2,
     }
@@ -980,14 +1078,38 @@ def testRouteInfoDeserialization():
                 "metric": 2,
             }
         )
-        == RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2)
+        == RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), None, 1, 2)
+    )
+
+
+# TODO: remove after sufficient period
+def testRouteInfoDeserialization_legacy():
+    assert (
+        RouteInfo.from_dict(
+            {
+                "protocol": "tcp",
+                "network": "1.1.1.1/32",
+                "nextHopIp": "2.2.2.2",
+                "admin": 1,
+                "metric": 2,
+            }
+        )
+        == RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2)
     )
 
 
 def testRouteInfoStr():
     assert (
-        str(RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), 1, 2))
+        str(RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), None, 1, 2))
         == "tcp (Network: 1.1.1.1/32, Next Hop: discard)"
+    )
+
+
+# TODO: remove after sufficient period
+def testRouteInfoStr_legacy():
+    assert (
+        str(RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2))
+        == "tcp (Network: 1.1.1.1/32, Next Hop IP:2.2.2.2)"
     )
 
 

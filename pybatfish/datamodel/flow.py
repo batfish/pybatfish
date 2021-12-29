@@ -996,11 +996,24 @@ class RouteInfo(DataModelElement):
 
     protocol = attr.ib(type=str)
     network = attr.ib(type=str)
-    nextHop = attr.ib(type=NextHop)
+    # TODO: make nextHop mandatory after sufficient period
+    nextHop = attr.ib(type=Optional[NextHop])
+    # nextHopIp populated only in absence of nextHop
+    # TODO: remove nextHopIp after sufficient period
+    nextHopIp = attr.ib(type=Optional[str])
     admin = attr.ib(type=int)
     metric = attr.ib(type=int)
 
+    def _old_str(self) -> str:
+        return "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
+            protocol=self.protocol,
+            network=self.network,
+            next_hop_ip=self.nextHopIp,
+        )
+
     def __str__(self) -> str:
+        if not self.nextHop:
+            return self._old_str()
         return "{protocol} (Network: {network}, Next Hop: {next_hop})".format(
             protocol=self.protocol,
             network=self.network,
@@ -1009,10 +1022,9 @@ class RouteInfo(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "RouteInfo":
-        assert set(json_dict.keys()) - {"nextHopIp", "nextVrf"} == {
+        assert set(json_dict.keys()) - {"nextHop", "nextHopIp", "nextVrf"} == {
             "protocol",
             "network",
-            "nextHop",
             "admin",
             "metric",
         }
@@ -1020,14 +1032,22 @@ class RouteInfo(DataModelElement):
         assert isinstance(protocol, str)
         network = json_dict.get("network")
         assert isinstance(network, str)
-        next_hop_dict = json_dict.get("nextHop")
-        assert isinstance(next_hop_dict, Dict)
-        next_hop = NextHop.from_dict(next_hop_dict)
+        next_hop = None
+        next_hop_ip = None
+        if "nextHop" in json_dict:
+            next_hop_dict = json_dict.get("nextHop")
+            assert isinstance(next_hop_dict, Dict)
+            next_hop = NextHop.from_dict(next_hop_dict)
+        else:
+            # legacy
+            assert "nextHopIp" in json_dict
+            next_hop_ip = json_dict.get("nextHopIp")
+            assert isinstance(next_hop_ip, str)
         admin = json_dict.get("admin")
         assert isinstance(admin, int)
         metric = json_dict.get("metric")
         assert isinstance(metric, int)
-        return RouteInfo(protocol, network, next_hop, admin, metric)
+        return RouteInfo(protocol, network, next_hop, next_hop_ip, admin, metric)
 
 
 @attr.s(frozen=True)
@@ -1038,10 +1058,11 @@ class RoutingStepDetail(DataModelElement):
     """
 
     routes = attr.ib(type=List[RouteInfo])
-    forwardingDetail = attr.ib(type=ForwardingDetail)
-    # TODO: remove arpIp
+    # TODO: make forwardingDetail mandatory after sufficient period
+    forwardingDetail = attr.ib(type=Optional[ForwardingDetail])
+    # TODO: remove arpIp after sufficient period
     arpIp = attr.ib(type=Optional[str])
-    # TODO: remove outputInteface
+    # TODO: remove outputInteface after sufficient period
     outputInterface = attr.ib(type=Optional[str])
 
     @classmethod
@@ -1052,9 +1073,11 @@ class RoutingStepDetail(DataModelElement):
         for route_json in routes_json_list:
             assert isinstance(route_json, Dict)
             routes.append(RouteInfo.from_dict(route_json))
-        forwarding_detail_json = json_dict.get("forwardingDetail")
-        assert isinstance(forwarding_detail_json, Dict)
-        forwarding_detail = ForwardingDetail.from_dict(forwarding_detail_json)
+        forwarding_detail = None
+        if "forwardingDetail" in json_dict:
+            forwarding_detail_json = json_dict.get("forwardingDetail")
+            assert isinstance(forwarding_detail_json, Dict)
+            forwarding_detail = ForwardingDetail.from_dict(forwarding_detail_json)
         arp_ip = json_dict.get("arpIp")
         if arp_ip is not None:
             assert isinstance(arp_ip, str)
@@ -1068,10 +1091,23 @@ class RoutingStepDetail(DataModelElement):
             output_interface,
         )
 
+    def _old_str(self) -> str:
+        output = []
+        if self.arpIp is not None:
+            output.append("ARP IP: " + self.arpIp)
+        if self.outputInterface is not None:
+            output.append("Output Interface: " + self.outputInterface)
+        if self.routes:
+            output.append(
+                "Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]"
+            )
+        return ", ".join(output)
+
     def __str__(self) -> str:
+        if not self.forwardingDetail:
+            return self._old_str()
         output = [str(self.forwardingDetail)]
         if self.routes:
-            routes_str = []  # type: List[str]
             output.append(
                 "Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]"
             )
