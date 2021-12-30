@@ -231,7 +231,7 @@ You can provide additional data to Batfish to enhance the model of your network 
 
 You can model end hosts in the network by adding host files with information about their names, a pointer to their iptables configuration file, and their interfaces. An example host file is:
 
-```json
+```
 {
   "hostname" : "host1",
   "iptablesFile" : "iptables/host1.iptables",
