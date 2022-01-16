@@ -107,7 +107,7 @@ nodes:
         Allowed_VLANs: ''
         Auto_State_VLAN: true
         Bandwidth: 10000000.0
-        Blacklisted: false
+        Blacklisted: true
         Channel_Group: null
         Channel_Group_Members: []
         DHCP_Relay_Addresses: []
