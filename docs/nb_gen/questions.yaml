@@ -19,6 +19,11 @@ categories:
         pybf_name: bgpProcessConfiguration
       - name: BGP Peer Configuration
         pybf_name: bgpPeerConfiguration
+      - name: HSRP Properties
+        pybf_name: hsrpProperties
+        snapshot:
+          name: ios_basic_hsrp
+          path: networks/ios_basic_hsrp
       - name: OSPF Process Configuration
         pybf_name: ospfProcessConfiguration
       - name: OSPF Interface Configuration
