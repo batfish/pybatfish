@@ -68,8 +68,7 @@ class Flow(DataModelElement):
     :ivar dstIP: Destination IP of the flow
     :ivar srcPort: Source port of the flow
     :ivar dstPort: Destination port of the flow
-    :ivar ipProtocol: the IP protocol of the flow
-        (as integer, e.g., 1=ICMP, 6=TCP, 17=UDP)
+    :ivar ipProtocol: the IP protocol of the flow either as its name (e.g., TCP) for well-known protocols or a string like UNNAMED_168
     :ivar ingressNode: the node where the flow started (or entered the network)
     :ivar ingressInterface: the interface name where the flow started (or entered the network)
     :ivar ingressVrf: the VRF name where the flow started (or entered the network)
@@ -133,7 +132,7 @@ class Flow(DataModelElement):
         vrf_str = self._vrf_str()
         return (
             "start={node}{iface}{vrf} [{src}->{dst}"
-            " {ip_proto}{dscp}{ecn}{offset}{length}{flags}]".format(
+            " {ip_proto}{dscp}{ecn}{offset}{length}]".format(
                 node=self.ingressNode,
                 iface=iface_str,
                 vrf=vrf_str,
@@ -149,12 +148,7 @@ class Flow(DataModelElement):
                 ),
                 length=(
                     " length={}".format(self.packetLength)
-                    if self.packetLength != 0
-                    else ""
-                ),
-                flags=(
-                    " tcpFlags={}".format(self.get_flag_str())
-                    if self.ipProtocol == 6 and self.get_flag_str() != "00000000"
+                    if self.packetLength != 512  # Batfish default
                     else ""
                 ),
             )
@@ -178,24 +172,41 @@ class Flow(DataModelElement):
 
     def get_flag_str(self):
         # type: () -> str
-        return "{}{}{}{}{}{}{}{}".format(
-            self.tcpFlagsAck,
-            self.tcpFlagsCwr,
-            self.tcpFlagsEce,
-            self.tcpFlagsFin,
-            self.tcpFlagsPsh,
-            self.tcpFlagsRst,
-            self.tcpFlagsSyn,
-            self.tcpFlagsUrg,
-        )
+        """
+        Returns a print friendly version of all set TCP flags.
+        """
+        flags = []
+        # ordering heuristics: common flags first, common combinations (SYN-ACK, FIN-ACK) print nicely
+        if self.tcpFlagsSyn:
+            flags.append("SYN")
+        if self.tcpFlagsFin:
+            flags.append("FIN")
+        if self.tcpFlagsAck:
+            flags.append("ACK")
+        if self.tcpFlagsRst:
+            flags.append("RST")
+        if self.tcpFlagsCwr:
+            flags.append("CWR")
+        if self.tcpFlagsEce:
+            flags.append("ECE")
+        if self.tcpFlagsPsh:
+            flags.append("PSH")
+        if self.tcpFlagsUrg:
+            flags.append("URG")
+
+        return "-".join(flags) if len(flags) > 0 else "no flags set"
 
     def get_ip_protocol_str(self):
         # type: () -> str
+        """Returns a print-friendly version of IP protocol and any protocol-specific information (e.g., flags for TCP, type/code for ICMP."""
         match = self.IP_PROTOCOL_PATTERN.match(self.ipProtocol)
         if match:
             return "ipProtocol=" + match.group(1)
-        else:
-            return self.ipProtocol
+        if self.ipProtocol.lower() == "tcp":
+            return "TCP ({})".format(self.get_flag_str())
+        if self.ipProtocol.lower() == "icmp":
+            return "ICMP (type={}, code={})".format(self.icmpVar, self.icmpCode)
+        return self.ipProtocol
 
     def _has_ports(self):
         # type: () -> bool
@@ -226,6 +237,14 @@ class Flow(DataModelElement):
             assert self.dstPort is not None
             lines.append("Dst Port: %d" % self.dstPort)
         lines.append("IP Protocol: %s" % self.get_ip_protocol_str())
+        if self.dscp != 0:
+            lines.append("DSCP: %s" % self.dscp)
+        if self.ecn != 0:
+            lines.append("ECN: %s" % self.ecn)
+        if self.fragmentOffset != 0:
+            lines.append("Fragment Offset: %d" % self.fragmentOffset)
+        if self.packetLength != 512:
+            lines.append("Packet Length: %s" % self.packetLength)
         return lines
 
     def _ip_port(self, ip, port):

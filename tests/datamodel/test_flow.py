@@ -164,7 +164,7 @@ def test_flow_deserialization():
         "ingressInterface": "intface",
         "ingressNode": "ingress",
         "ingressVrf": "vrfAbc",
-        "ipProtocol": "IP",
+        "ipProtocol": "TCP",
         "packetLength": 0,
         "srcIp": "5.5.1.1",
         "srcPort": 0,
@@ -202,7 +202,7 @@ def test_flow_deserialization_optional_missing():
         "icmpCode": 255,
         "icmpVar": 255,
         "ingressNode": "ingress",
-        "ipProtocol": "IP",
+        "ipProtocol": "TCP",
         "packetLength": 0,
         "srcIp": "5.5.1.1",
         "srcPort": 0,
@@ -259,7 +259,7 @@ def test_flow_trace_hop_no_transformed_flow():
     )
 
 
-def test_get_ip_protocol_str():
+def test_get_ip_protocol_str_nodetail():
     flow_dict = {
         "dscp": 0,
         "dstIp": "2.1.1.1",
@@ -284,8 +284,281 @@ def test_get_ip_protocol_str():
     }
     assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "ipProtocol=243"
 
+    # named
+    flow_dict["ipProtocol"] = "UDP"
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "UDP"
+
+
+def test_get_ip_protocol_str_tcp():
+    flow_dict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 80,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 255,
+        "icmpVar": 255,
+        "ingressNode": "ingress",
+        "ipProtocol": "TCP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 80,
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0,
+    }
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP (no flags set)"
+
+    # with flags
+    flow_dict["tcpFlagsAck"] = 1
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP (ACK)"
+
+
+def test_get_ip_protocol_str_icmp():
+    flow_dict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 0,
+        "icmpVar": 8,
+        "ingressNode": "ingress",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0,
+    }
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "ICMP (type=8, code=0)"
+
+
+def test_get_flag_str():
+    flow_dict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 0,
+        "icmpVar": 8,
+        "ingressNode": "ingress",
+        "ipProtocol": "ICMP",
+        "packetLength": 0,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0,
+    }
+    assert Flow.from_dict(flow_dict).get_flag_str() == "no flags set"
+
+    flow_dict["tcpFlagsAck"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "ACK"
+
+    flow_dict["tcpFlagsSyn"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-ACK"
+
+    flow_dict["tcpFlagsCwr"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-ACK-CWR"
+
+    flow_dict["tcpFlagsEce"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-ACK-CWR-ECE"
+
+    flow_dict["tcpFlagsFin"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-FIN-ACK-CWR-ECE"
+
+    flow_dict["tcpFlagsPsh"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-FIN-ACK-CWR-ECE-PSH"
+
+    flow_dict["tcpFlagsRst"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-FIN-ACK-RST-CWR-ECE-PSH"
+
+    flow_dict["tcpFlagsUrg"] = 1
+    assert Flow.from_dict(flow_dict).get_flag_str() == "SYN-FIN-ACK-RST-CWR-ECE-PSH-URG"
+
+
+def test_str():
+    flow_dict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 0,
+        "icmpVar": 0,
+        "ingressNode": "ingress",
+        "ipProtocol": "UNNAMED_168",
+        "packetLength": 512,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0,
+    }
+    # no ports
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1->2.1.1.1 ipProtocol=168]"
+    )
+
+    # with ports
     flow_dict["ipProtocol"] = "TCP"
-    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP"
+    flow_dict["dstPort"] = "80"
+    flow_dict["srcPort"] = "800"
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set)]"
+    )
+
+    # uncommon dscp
+    flow_dict["dscp"] = "1"
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1]"
+    )
+
+    # uncommon ecn
+    flow_dict["ecn"] = "1"
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1]"
+    )
+
+    # uncommon fragment offset
+    flow_dict["fragmentOffset"] = "1501"
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1 fragmentOffset=1501]"
+    )
+
+    # uncommon packet length
+    flow_dict["packetLength"] = "100"
+    assert (
+        str(Flow.from_dict(flow_dict))
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1 fragmentOffset=1501 length=100]"
+    )
+
+
+def test_repr_html_lines():
+    flow_dict = {
+        "dscp": 0,
+        "dstIp": "2.1.1.1",
+        "dstPort": 0,
+        "ecn": 0,
+        "fragmentOffset": 0,
+        "icmpCode": 0,
+        "icmpVar": 0,
+        "ingressNode": "ingress",
+        "ipProtocol": "UNNAMED_168",
+        "packetLength": 512,
+        "srcIp": "5.5.1.1",
+        "srcPort": 0,
+        "tcpFlagsAck": 0,
+        "tcpFlagsCwr": 0,
+        "tcpFlagsEce": 0,
+        "tcpFlagsFin": 0,
+        "tcpFlagsPsh": 0,
+        "tcpFlagsRst": 0,
+        "tcpFlagsSyn": 0,
+        "tcpFlagsUrg": 0,
+    }
+    # no ports
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Dst IP: 2.1.1.1",
+        "IP Protocol: ipProtocol=168",
+    ]
+
+    # with ports
+    flow_dict["ipProtocol"] = "TCP"
+    flow_dict["dstPort"] = "80"
+    flow_dict["srcPort"] = "800"
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Src Port: 800",
+        "Dst IP: 2.1.1.1",
+        "Dst Port: 80",
+        "IP Protocol: TCP (no flags set)",
+    ]
+
+    # uncommon dscp
+    flow_dict["dscp"] = "1"
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Src Port: 800",
+        "Dst IP: 2.1.1.1",
+        "Dst Port: 80",
+        "IP Protocol: TCP (no flags set)",
+        "DSCP: 1",
+    ]
+
+    # uncommon ecn
+    flow_dict["ecn"] = "1"
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Src Port: 800",
+        "Dst IP: 2.1.1.1",
+        "Dst Port: 80",
+        "IP Protocol: TCP (no flags set)",
+        "DSCP: 1",
+        "ECN: 1",
+    ]
+
+    # uncommon fragment offset
+    flow_dict["fragmentOffset"] = "1501"
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Src Port: 800",
+        "Dst IP: 2.1.1.1",
+        "Dst Port: 80",
+        "IP Protocol: TCP (no flags set)",
+        "DSCP: 1",
+        "ECN: 1",
+        "Fragment Offset: 1501",
+    ]
+
+    # uncommon packet length
+    flow_dict["packetLength"] = "100"
+    assert Flow.from_dict(flow_dict)._repr_html_lines() == [
+        "Start Location: ingress",
+        "Src IP: 5.5.1.1",
+        "Src Port: 800",
+        "Dst IP: 2.1.1.1",
+        "Dst Port: 80",
+        "IP Protocol: TCP (no flags set)",
+        "DSCP: 1",
+        "ECN: 1",
+        "Fragment Offset: 1501",
+        "Packet Length: 100",
+    ]
 
 
 def test_header_constraints_serialization():
