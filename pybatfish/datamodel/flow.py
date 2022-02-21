@@ -176,13 +176,13 @@ class Flow(DataModelElement):
         Returns a print friendly version of all set TCP flags.
         """
         flags = []
-        # consider common flags first
+        # ordering heuristics: common flags first, common combinations (SYN-ACK, FIN-ACK) print nicely
         if self.tcpFlagsSyn:
             flags.append("SYN")
-        if self.tcpFlagsAck:
-            flags.append("ACK")
         if self.tcpFlagsFin:
             flags.append("FIN")
+        if self.tcpFlagsAck:
+            flags.append("ACK")
         if self.tcpFlagsRst:
             flags.append("RST")
         if self.tcpFlagsCwr:
@@ -194,7 +194,7 @@ class Flow(DataModelElement):
         if self.tcpFlagsUrg:
             flags.append("URG")
 
-        return ",".join(flags)
+        return "-".join(flags) if len(flags) > 0 else "No flags set"
 
     def get_ip_protocol_str(self):
         # type: () -> str
@@ -203,8 +203,7 @@ class Flow(DataModelElement):
         if match:
             return "ipProtocol=" + match.group(1)
         if self.ipProtocol.lower() == "tcp":
-            flags = self.get_flag_str()
-            return "TCP" if flags == "" else "TCP ({})".format(flags)
+            return "TCP ({})".format(self.get_flag_str())
         if self.ipProtocol.lower() == "icmp":
             return "ICMP (type={}, code={})".format(self.icmpVar, self.icmpCode)
         return self.ipProtocol
