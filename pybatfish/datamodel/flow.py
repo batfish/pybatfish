@@ -194,7 +194,7 @@ class Flow(DataModelElement):
         if self.tcpFlagsUrg:
             flags.append("URG")
 
-        return "-".join(flags) if len(flags) > 0 else "No flags set"
+        return "-".join(flags) if len(flags) > 0 else "no flags set"
 
     def get_ip_protocol_str(self):
         # type: () -> str

@@ -312,7 +312,7 @@ def test_get_ip_protocol_str_tcp():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0,
     }
-    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP (No flags set)"
+    assert Flow.from_dict(flow_dict).get_ip_protocol_str() == "TCP (no flags set)"
 
     # with flags
     flow_dict["tcpFlagsAck"] = 1
@@ -368,7 +368,7 @@ def test_get_flag_str():
         "tcpFlagsSyn": 0,
         "tcpFlagsUrg": 0,
     }
-    assert Flow.from_dict(flow_dict).get_flag_str() == "No flags set"
+    assert Flow.from_dict(flow_dict).get_flag_str() == "no flags set"
 
     flow_dict["tcpFlagsAck"] = 1
     assert Flow.from_dict(flow_dict).get_flag_str() == "ACK"
@@ -430,35 +430,35 @@ def test_str():
     flow_dict["srcPort"] = "800"
     assert (
         str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (No flags set)]"
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set)]"
     )
 
     # uncommon dscp
     flow_dict["dscp"] = "1"
     assert (
         str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (No flags set) dscp=1]"
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1]"
     )
 
     # uncommon ecn
     flow_dict["ecn"] = "1"
     assert (
         str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (No flags set) dscp=1 ecn=1]"
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1]"
     )
 
     # uncommon fragment offset
     flow_dict["fragmentOffset"] = "1501"
     assert (
         str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (No flags set) dscp=1 ecn=1 fragmentOffset=1501]"
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1 fragmentOffset=1501]"
     )
 
     # uncommon packet length
     flow_dict["packetLength"] = "100"
     assert (
         str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (No flags set) dscp=1 ecn=1 fragmentOffset=1501 length=100]"
+        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1 fragmentOffset=1501 length=100]"
     )
 
 
@@ -503,7 +503,7 @@ def test_repr_html_lines():
         "Src Port: 800",
         "Dst IP: 2.1.1.1",
         "Dst Port: 80",
-        "IP Protocol: TCP (No flags set)",
+        "IP Protocol: TCP (no flags set)",
     ]
 
     # uncommon dscp
@@ -514,7 +514,7 @@ def test_repr_html_lines():
         "Src Port: 800",
         "Dst IP: 2.1.1.1",
         "Dst Port: 80",
-        "IP Protocol: TCP (No flags set)",
+        "IP Protocol: TCP (no flags set)",
         "DSCP: 1",
     ]
 
@@ -526,7 +526,7 @@ def test_repr_html_lines():
         "Src Port: 800",
         "Dst IP: 2.1.1.1",
         "Dst Port: 80",
-        "IP Protocol: TCP (No flags set)",
+        "IP Protocol: TCP (no flags set)",
         "DSCP: 1",
         "ECN: 1",
     ]
@@ -539,7 +539,7 @@ def test_repr_html_lines():
         "Src Port: 800",
         "Dst IP: 2.1.1.1",
         "Dst Port: 80",
-        "IP Protocol: TCP (No flags set)",
+        "IP Protocol: TCP (no flags set)",
         "DSCP: 1",
         "ECN: 1",
         "Fragment Offset: 1501",
@@ -553,7 +553,7 @@ def test_repr_html_lines():
         "Src Port: 800",
         "Dst IP: 2.1.1.1",
         "Dst Port: 80",
-        "IP Protocol: TCP (No flags set)",
+        "IP Protocol: TCP (no flags set)",
         "DSCP: 1",
         "ECN: 1",
         "Fragment Offset: 1501",
