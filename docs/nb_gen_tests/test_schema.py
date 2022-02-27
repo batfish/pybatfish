@@ -142,7 +142,6 @@ def q_names_from_categories(categories: Mapping) -> Set[str]:
 def test_all_questions_are_in_question_yaml(session: Session, categories: Mapping):
     # do not document the following questions
     exclusions = [
-        "a10VirtualServerConfiguration",
         "aaaAuthenticationLogin",
         "edges",
         "filterTable",
