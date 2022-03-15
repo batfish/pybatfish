@@ -6,6 +6,7 @@ You can provide two types of data to Batfish: 1) [configurations of devices](#de
 
 Batfish supports the following vendors. Click on the corresponding link to learn how to provide configuration for a specific vendor.
 
+* [A10](#a10)
 * [Arista](#arista)
 * [AWS](#aws)
 * [Cisco](#cisco)
@@ -29,6 +30,10 @@ If you need to explicitly specify the vendor of your configuration file, include
 
 The supported vendor type strings are `arista`, `bigip` (F5), `cisco-nx` (NX-OS), `cisco-xr` (IOS-XR), `force10` (Dell), `foundry`, `juniper` (all JunOS), `mrv`, and `paloalto`.
 
+
+### A10 
+
+For each A10 device in the network, create a file in the `configs` folder. For v4 and higher versions, the content of the file should be the equivalent of the output of `show running-config partition-config all` command on the device. For v2, use `show running-config all-partitions` command.
 
 ### Arista 
 
