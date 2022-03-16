@@ -7,6 +7,7 @@ from vendors including:
 * A10 Networks
 * Arista
 * Amazon Web Services (AWS) constructs
+
   * Internet Gateways
   * NAT Gateways
   * Network ACLs
@@ -14,25 +15,30 @@ from vendors including:
   * Virtual Private Clouds (VPCs)
   * VPN Gateways
   * ...
+
 * Check Point
 * Cisco
+
   * ASA
   * IOS
   * IOS-XE
   * IOS-XR
   * NX-OS
+
 * Cumulus
 * F5 BIG-IP
 * Fortinet
 * Free-Range Routing (FRR)
 * iptables (on hosts)
 * Juniper (All JunOS platforms)
+
   * EX
   * MX
   * PTX
   * QFX
   * SRX
   * T-series
+
 * Palo Alto Networks
 * SONiC
 
