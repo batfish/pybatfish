@@ -82,8 +82,11 @@ categories:
       snapshot and inference logic (e.g., which interfaces are layer3 neighbors).
       Currently, Layer 3 topology can be retrieved.
     questions:
-#      - name: Layer 1 Topology
-#        pybf_name: layer1Edges
+      - name: User Provided Layer 1 Topology
+        pybf_name: userProvidedLayer1Edges
+        snapshot:
+          name: aristaevpn
+          path: networks/aristaevpn
       - name: Layer 3 Topology
         pybf_name: layer3Edges
   - name: routingProtocols
