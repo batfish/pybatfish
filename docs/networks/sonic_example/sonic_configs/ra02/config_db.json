@@ -1,0 +1,329 @@
+{
+    "INTERFACE": {
+        "Ethernet0|10.1.24.2/30": {},
+        "Ethernet2|192.168.2.2/30": {},
+        "Ethernet0": {
+            "ipv6_use_link_local_only": "enable"
+        },
+        "Ethernet2": {
+            "ipv6_use_link_local_only": "enable"
+        },
+        "Ethernet0|2022:cafe:24::2/96": {},
+        "Ethernet2|2022:cafe:192:2::2/96": {}
+    },
+    "DEVICE_METADATA": {
+        "localhost": {
+            "type": "LeafRouter",
+            "mac": "0c:49:00:b3:5f:00",
+            "hwsku": "DellEMC-S5248f-P-25G-DPB",
+            "default_config_profile": "l3",
+            "default_pfcwd_status": "disable",
+            "default_bgp_status": "up",
+            "docker_routing_config_mode": "split",
+            "platform": "x86_64-kvm_x86_64-r0",
+            "hostname": "ra02"
+        }
+    },
+    "LOOPBACK": {
+        "Loopback0": {}
+    },
+    "VRF": {
+        "default": {
+            "enabled": "true"
+        }
+    },
+    "ECMP_LOADSHARE_TABLE_IPV4": {
+        "ipv4": {
+            "ipv4_protocol": "true",
+            "ipv4_l4_dst_port": "true",
+            "ipv4_l4_src_port": "true",
+            "ipv4_src_ip": "true",
+            "ipv4_dst_ip": "true"
+        }
+    },
+    "ECMP_LOADSHARE_TABLE_IPV6": {
+        "ipv6": {
+            "ipv6_dst_ip": "true",
+            "ipv6_l4_dst_port": "true",
+            "ipv6_src_ip": "true",
+            "ipv6_l4_src_port": "true",
+            "ipv6_next_hdr": "true"
+        }
+    },
+    "POLICY_SECTIONS_TABLE": {
+        "oob-qos-policy|class-oob-arp": {
+            "PRIORITY": "1010",
+            "DESCRIPTION": "",
+            "SET_POLICER_CIR": "256000"
+        },
+        "oob-qos-policy|class-oob-ipv6-multicast": {
+            "PRIORITY": "1005",
+            "DESCRIPTION": "",
+            "SET_POLICER_CIR": "256000"
+        },
+        "oob-qos-policy|class-oob-ip-multicast": {
+            "PRIORITY": "1000",
+            "DESCRIPTION": "",
+            "SET_POLICER_CIR": "256000"
+        },
+        "oob-qos-policy|class-oob-dhcp-client": {
+            "PRIORITY": "1020",
+            "DESCRIPTION": "",
+            "SET_POLICER_CIR": "512000"
+        },
+        "oob-qos-policy|class-oob-dhcp-server": {
+            "PRIORITY": "1015",
+            "DESCRIPTION": "",
+            "SET_POLICER_CIR": "512000"
+        }
+    },
+    "HARDWARE": {
+        "ACCESS_LIST": {
+            "LOOKUP_MODE": "optimized",
+            "COUNTER_MODE": "per-rule"
+        }
+    },
+    "TELEMETRY": {
+        "gnmi": {
+            "port": "8080"
+        }
+    },
+    "SWITCH": {
+        "switch": {
+            "fdb_aging_time": "600"
+        }
+    },
+    "PORT": {
+        "Ethernet2": {
+            "index": "3",
+            "speed": "25000",
+            "mtu": "9100",
+            "admin_status": "up",
+            "lanes": "51",
+            "override_unreliable_los": "off",
+            "fec": "none",
+            "alias": "Eth1/3",
+            "description": "TO-->ED01"
+        },
+        "Ethernet0": {
+            "index": "1",
+            "speed": "25000",
+            "mtu": "9100",
+            "admin_status": "up",
+            "lanes": "49",
+            "override_unreliable_los": "off",
+            "fec": "none",
+            "alias": "Eth1/1",
+            "description": "TO-->ED02"
+        }
+    },
+    "FLEX_COUNTER_TABLE": {
+        "PG_WATERMARK": {
+            "FLEX_COUNTER_STATUS": "enable"
+        },
+        "QUEUE_WATERMARK": {
+            "FLEX_COUNTER_STATUS": "enable"
+        },
+        "PFCWD": {
+            "FLEX_COUNTER_STATUS": "enable"
+        },
+        "PORT": {
+            "FLEX_COUNTER_STATUS": "enable"
+        },
+        "QUEUE": {
+            "FLEX_COUNTER_STATUS": "enable"
+        }
+    },
+    "VERSIONS": {
+        "DATABASE": {
+            "VERSION": "version_3_1_2"
+        }
+    },
+    "KDUMP": {
+        "config": {
+            "enabled": "true",
+            "num_dumps": "3",
+            "memory": "0M-2G:256M,2G-4G:320M,4G-8G:384M,8G-:448M"
+        }
+    },
+    "MGMT_PORT": {
+        "eth0": {
+            "description": "MGMT",
+            "autoneg": "true",
+            "mtu": "1500",
+            "admin_status": "up",
+            "speed": "1000"
+        }
+    },
+    "VLAN_MEMBER": {
+        "Vlan172|Ethernet5": {
+            "tagging_mode": "untagged"
+        },
+        "Vlan192|Ethernet6": {
+            "tagging_mode": "untagged"
+        },
+        "Vlan10|Ethernet3": {
+            "tagging_mode": "untagged"
+        },
+        "Vlan100|Ethernet4": {
+            "tagging_mode": "untagged"
+        }
+    },
+    "CLASSIFIER_TABLE": {
+        "class-oob-arp": {
+            "ETHER_TYPE": "0x806",
+            "MATCH_TYPE": "FIELDS",
+            "DESCRIPTION": ""
+        },
+        "class-oob-dhcp-client": {
+            "IP_PROTOCOL": "17",
+            "ETHER_TYPE": "0x800",
+            "MATCH_TYPE": "FIELDS",
+            "DESCRIPTION": "",
+            "L4_DST_PORT": "68"
+        },
+        "class-oob-ip-multicast": {
+            "DST_IP": "224.0.0.0/4",
+            "ETHER_TYPE": "0x800",
+            "MATCH_TYPE": "FIELDS",
+            "DESCRIPTION": ""
+        },
+        "class-oob-dhcp-server": {
+            "IP_PROTOCOL": "17",
+            "ETHER_TYPE": "0x800",
+            "MATCH_TYPE": "FIELDS",
+            "DESCRIPTION": "",
+            "L4_DST_PORT": "67"
+        },
+        "class-oob-ipv6-multicast": {
+            "MATCH_TYPE": "FIELDS",
+            "ETHER_TYPE": "0x86DD",
+            "DST_IPV6": "ff00::/8",
+            "DESCRIPTION": ""
+        }
+    },
+    "POLICY_BINDING_TABLE": {
+        "CtrlPlane": {
+            "INGRESS_QOS_POLICY": "oob-qos-policy"
+        }
+    },
+    "MGMT_INTERFACE": {
+        "eth0": {},
+        "eth0|10.150.0.154/16": {}
+    },
+    "LOOPBACK_INTERFACE": {
+        "Loopback0|6.6.6.6/32": {},
+        "Loopback0": {}
+    },
+    "CRM": {
+        "Config": {
+            "acl_table_threshold_type": "percentage",
+            "ipv4_neighbor_low_threshold": "70",
+            "ipv4_route_threshold_type": "percentage",
+            "acl_entry_high_threshold": "85",
+            "acl_counter_low_threshold": "70",
+            "acl_table_low_threshold": "70",
+            "acl_counter_high_threshold": "85",
+            "ipv6_route_low_threshold": "70",
+            "fdb_entry_high_threshold": "85",
+            "ipv6_neighbor_high_threshold": "85",
+            "ipv4_nexthop_threshold_type": "percentage",
+            "acl_table_high_threshold": "85",
+            "acl_entry_low_threshold": "70",
+            "ipv6_neighbor_threshold_type": "percentage",
+            "ipv6_nexthop_low_threshold": "70",
+            "ipv4_nexthop_high_threshold": "85",
+            "ipv6_nexthop_threshold_type": "percentage",
+            "acl_group_high_threshold": "85",
+            "fdb_entry_low_threshold": "70",
+            "nexthop_group_member_threshold_type": "percentage",
+            "acl_entry_threshold_type": "percentage",
+            "ipv6_route_high_threshold": "85",
+            "ipv4_neighbor_high_threshold": "85",
+            "ipv6_neighbor_low_threshold": "70",
+            "acl_group_threshold_type": "percentage",
+            "acl_group_low_threshold": "70",
+            "nexthop_group_threshold_type": "percentage",
+            "ipv6_route_threshold_type": "percentage",
+            "ipv4_neighbor_threshold_type": "percentage",
+            "fdb_entry_threshold_type": "percentage",
+            "ipv4_route_high_threshold": "85",
+            "nexthop_group_member_low_threshold": "70",
+            "nexthop_group_high_threshold": "85",
+            "ipv4_route_low_threshold": "70",
+            "nexthop_group_member_high_threshold": "85",
+            "acl_counter_threshold_type": "percentage",
+            "polling_interval": "300",
+            "nexthop_group_low_threshold": "70",
+            "ipv4_nexthop_low_threshold": "70",
+            "ipv6_nexthop_high_threshold": "85"
+        }
+    },
+    "POLICY_TABLE": {
+        "oob-qos-policy": {
+            "DESCRIPTION": "QoS Ratelimiting policy for OOB port",
+            "TYPE": "QOS"
+        }
+    },
+    "COREDUMP": {
+        "config": {
+            "enabled": "true"
+        }
+    },
+    "VLAN_INTERFACE": {
+        "Vlan10|10.11.1.1/16": {},
+        "Vlan10|2022:beef:10:11::1/64": {},
+        "Vlan172": {},
+        "Vlan172|172.32.1.1/12": {},
+        "Vlan192|192.168.11.1/24": {},
+        "Vlan192": {},
+        "Vlan100|100.128.1.1/10": {},
+        "Vlan172|2022:beef:172:32::1/64": {},
+        "Vlan100": {},
+        "Vlan192|2022:beef:192:168:11::1/112": {},
+        "Vlan10": {},
+        "Vlan100|2022:beef:100:128::1/64": {}
+    },
+    "NAT_GLOBAL": {
+        "Values": {
+            "admin_mode": "disabled",
+            "nat_timeout": "600",
+            "nat_tcp_timeout": "86400",
+            "nat_udp_timeout": "300"
+        }
+    },
+    "FEATURE": {
+        "sflow": {
+            "status": "disabled"
+        },
+        "ptp": {
+            "status": "disabled"
+        }
+    },
+    "VLAN": {
+        "Vlan192": {
+            "members": [
+                "Ethernet6"
+            ],
+            "vlanid": "192"
+        },
+        "Vlan172": {
+            "members": [
+                "Ethernet5"
+            ],
+            "vlanid": "172"
+        },
+        "Vlan100": {
+            "members": [
+                "Ethernet4"
+            ],
+            "vlanid": "100"
+        },
+        "Vlan10": {
+            "members": [
+                "Ethernet3"
+            ],
+            "vlanid": "10"
+        }
+    }
+}
