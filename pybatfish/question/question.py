@@ -828,8 +828,8 @@ def _validateType(value, expectedType):
             )
         return True, None
     elif expectedType == VariableType.INTEGER:
-        INT32_MIN = -(2 ** 32)
-        INT32_MAX = 2 ** 32 - 1
+        INT32_MIN = -(2**32)
+        INT32_MAX = 2**32 - 1
         valid = isinstance(value, int) and INT32_MIN <= value <= INT32_MAX
         return valid, None
     elif expectedType == VariableType.FLOAT:
@@ -893,8 +893,8 @@ def _validateType(value, expectedType):
     elif expectedType == VariableType.JSON_PATH:
         return _isJsonPath(value)
     elif expectedType == VariableType.LONG:
-        INT64_MIN = -(2 ** 64)
-        INT64_MAX = 2 ** 64 - 1
+        INT64_MIN = -(2**64)
+        INT64_MAX = 2**64 - 1
         valid = isinstance(value, int) and INT64_MIN <= value <= INT64_MAX
         return valid, None
     elif expectedType == VariableType.PREFIX:
