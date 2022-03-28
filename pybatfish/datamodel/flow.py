@@ -869,15 +869,11 @@ class ForwardedOutInterface(ForwardingDetail):
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "ForwardedOutInterface":
-        assert (
-            set(json_dict.keys())
-            == {
-                "type",
-                "outputInterface",
-                "resolvedNextHopIp",
-            }
-            or set(json_dict.keys()) == {"type", "outputInterface"}
-        )
+        assert set(json_dict.keys()) == {
+            "type",
+            "outputInterface",
+            "resolvedNextHopIp",
+        } or set(json_dict.keys()) == {"type", "outputInterface"}
         assert json_dict["type"] == "ForwardedOutInterface"
         output_interface = json_dict["outputInterface"]
         resolved_next_hop_ip = None

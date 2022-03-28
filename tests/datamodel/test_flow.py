@@ -1201,26 +1201,20 @@ def testForwardedOutInterfaceDeserialization():
     assert ForwardedOutInterface.from_dict(
         {"type": "ForwardedOutInterface", "outputInterface": "foo"}
     ) == ForwardedOutInterface("foo")
-    assert (
-        ForwardedOutInterface.from_dict(
-            {
-                "type": "ForwardedOutInterface",
-                "outputInterface": "foo",
-                "resolvedNextHopIp": None,
-            }
-        )
-        == ForwardedOutInterface("foo")
-    )
-    assert (
-        ForwardedOutInterface.from_dict(
-            {
-                "type": "ForwardedOutInterface",
-                "outputInterface": "foo",
-                "resolvedNextHopIp": "1.1.1.1",
-            }
-        )
-        == ForwardedOutInterface("foo", "1.1.1.1")
-    )
+    assert ForwardedOutInterface.from_dict(
+        {
+            "type": "ForwardedOutInterface",
+            "outputInterface": "foo",
+            "resolvedNextHopIp": None,
+        }
+    ) == ForwardedOutInterface("foo")
+    assert ForwardedOutInterface.from_dict(
+        {
+            "type": "ForwardedOutInterface",
+            "outputInterface": "foo",
+            "resolvedNextHopIp": "1.1.1.1",
+        }
+    ) == ForwardedOutInterface("foo", "1.1.1.1")
 
 
 def testForwardedOutInterfaceStr():
@@ -1293,34 +1287,28 @@ def testRouteInfoSerialization_legacy():
 
 
 def testRouteInfoDeserialization():
-    assert (
-        RouteInfo.from_dict(
-            {
-                "protocol": "tcp",
-                "network": "1.1.1.1/32",
-                "nextHop": {"type": "discard"},
-                "admin": 1,
-                "metric": 2,
-            }
-        )
-        == RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), None, 1, 2)
-    )
+    assert RouteInfo.from_dict(
+        {
+            "protocol": "tcp",
+            "network": "1.1.1.1/32",
+            "nextHop": {"type": "discard"},
+            "admin": 1,
+            "metric": 2,
+        }
+    ) == RouteInfo("tcp", "1.1.1.1/32", NextHopDiscard(), None, 1, 2)
 
 
 # TODO: remove after sufficient period
 def testRouteInfoDeserialization_legacy():
-    assert (
-        RouteInfo.from_dict(
-            {
-                "protocol": "tcp",
-                "network": "1.1.1.1/32",
-                "nextHopIp": "2.2.2.2",
-                "admin": 1,
-                "metric": 2,
-            }
-        )
-        == RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2)
-    )
+    assert RouteInfo.from_dict(
+        {
+            "protocol": "tcp",
+            "network": "1.1.1.1/32",
+            "nextHopIp": "2.2.2.2",
+            "admin": 1,
+            "metric": 2,
+        }
+    ) == RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2)
 
 
 def testRouteInfoStr():

@@ -313,14 +313,14 @@ def testValidDoubleValidateType():
 def testInvalidLongValidateType():
     result = question._validateType(5.3, "long")
     assert not result[0]
-    result = question._validateType(2 ** 64, "long")
+    result = question._validateType(2**64, "long")
     assert not result[0]
 
 
 def testValidLongValidateType():
     result = question._validateType(10, "long")
     assert result[0]
-    result = question._validateType(2 ** 40, "long")
+    result = question._validateType(2**40, "long")
     assert result[0]
 
 
