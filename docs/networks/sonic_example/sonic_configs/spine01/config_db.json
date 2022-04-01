@@ -92,7 +92,7 @@
             "default_pfcwd_status": "disable",
             "platform": "x86_64-kvm_x86_64-r0",
             "type": "LeafRouter",
-            "hostname": "ed01",
+            "hostname": "spine01",
             "default_config_profile": "l3",
             "mac": "0c:49:00:d5:f8:00",
             "docker_routing_config_mode": "split",
@@ -191,7 +191,7 @@
         "Ethernet1": {
             "override_unreliable_los": "off",
             "speed": "25000",
-            "description": "TO-->fr01",
+            "description": "TO-->border01",
             "mtu": "9100",
             "alias": "Eth1/2",
             "index": "2",
@@ -202,7 +202,7 @@
         "Ethernet0": {
             "override_unreliable_los": "off",
             "speed": "25000",
-            "description": "TO-->ra01",
+            "description": "TO-->leaf01",
             "mtu": "9100",
             "alias": "Eth1/1",
             "index": "1",
@@ -213,7 +213,7 @@
         "Ethernet2": {
             "override_unreliable_los": "off",
             "speed": "25000",
-            "description": "TO-->ra02",
+            "description": "TO-->leaf02",
             "mtu": "9100",
             "alias": "Eth1/3",
             "index": "3",

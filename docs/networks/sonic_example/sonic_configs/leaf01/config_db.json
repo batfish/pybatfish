@@ -211,7 +211,7 @@
     "DEVICE_METADATA": {
         "localhost": {
             "default_config_profile": "l3",
-            "hostname": "ra01",
+            "hostname": "leaf01",
             "platform": "x86_64-kvm_x86_64-r0",
             "type": "LeafRouter",
             "mac": "0c:49:00:3c:86:00",

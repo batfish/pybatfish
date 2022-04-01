@@ -154,7 +154,7 @@
         "localhost": {
             "default_config_profile": "l3",
             "type": "LeafRouter",
-            "hostname": "ed02",
+            "hostname": "spine02",
 	    "docker_routing_config_mode": "split",
             "mac": "0c:49:00:27:1e:00",
             "default_bgp_status": "up",

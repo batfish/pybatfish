@@ -21,7 +21,7 @@
             "default_bgp_status": "up",
             "docker_routing_config_mode": "split",
             "platform": "x86_64-kvm_x86_64-r0",
-            "hostname": "ra02"
+            "hostname": "leaf02"
         }
     },
     "LOOPBACK": {

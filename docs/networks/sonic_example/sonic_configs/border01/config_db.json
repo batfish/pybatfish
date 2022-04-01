@@ -87,7 +87,7 @@
             "default_config_profile": "l3", 
             "default_pfcwd_status": "disable", 
             "docker_routing_config_mode": "split", 
-            "hostname": "fr01", 
+            "hostname": "border01", 
             "hwsku": "DellEMC-S5248f-P-25G-DPB", 
             "mac": "0c:49:00:59:83:00", 
             "platform": "x86_64-kvm_x86_64-r0", 

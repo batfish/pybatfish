@@ -88,7 +88,7 @@
             "hwsku": "DellEMC-S5248f-P-25G-DPB",
             "platform": "x86_64-kvm_x86_64-r0",
             "docker_routing_config_mode": "split",
-            "hostname": "fr02",
+            "hostname": "border02",
             "default_bgp_status": "up",
             "mac": "0c:49:00:0c:58:00",
             "default_pfcwd_status": "disable",
@@ -209,7 +209,7 @@
             "lanes": "50",
             "fec": "none",
             "index": "2",
-            "description": "TO-->ed02"
+            "description": "TO-->spine02"
         },
         "Ethernet0": {
             "alias": "Eth1/1",
