@@ -222,6 +222,8 @@ just make sure that the output is NOT in XML format (first command) and that def
 
 Configuration files for SONiC devices must be placed under a folder called `sonic_configs` right under the top-level snapshot folder. For each SONiC device in the network, create a folder under the `sonic_configs` folder, and put its files in this folder. Currently, `config_db.json`, `frr.conf`, `resolv.conf`, and `snmp.yml` files are supported. The last two files are optional. File names must end with these respective strings. So, "config_db.json" and "rt123_config_db.json" are valid names for config DB configuration, but "config_db_rt123.json" is not. The device folder must have only these files.
 
+See [this example snapshot](https://github.com/batfish/pybatfish/tree/master/docs/networks/sonic_example) with SONiC configs.
+
 ## Supplemental data formats
 
 You can provide additional data to Batfish to enhance the model of your network and to model parts of the network whose configuration is not available. The following types of data is supported.

@@ -1,0 +1,64 @@
+{
+    "edges": [
+        {
+            "node1": {
+                "hostname": "leaf01",
+                "interfaceName": "Ethernet2"
+            },
+            "node2": {
+                "hostname": "spine02",
+                "interfaceName": "Ethernet2"
+            }
+        },
+        {
+            "node1": {
+                "hostname": "spine01",
+                "interfaceName": "Ethernet0"
+            },
+            "node2": {
+                "hostname": "leaf01",
+                "interfaceName": "Ethernet0"
+            }
+        },
+        {
+            "node1": {
+                "hostname": "spine01",
+                "interfaceName": "Ethernet1"
+            },
+            "node2": {
+                "hostname": "border01",
+                "interfaceName": "Ethernet1"
+            }
+        },
+        {
+            "node1": {
+                "hostname": "border02",
+                "interfaceName": "Ethernet1"
+            },
+            "node2": {
+                "hostname": "spine02",
+                "interfaceName": "Ethernet1"
+            }
+        },
+        {
+            "node1": {
+                "hostname": "leaf02",
+                "interfaceName": "Ethernet0"
+            },
+            "node2": {
+                "hostname": "spine02",
+                "interfaceName": "Ethernet0"
+            }
+        },
+        {
+            "node1": {
+                "hostname": "leaf02",
+                "interfaceName": "Ethernet2"
+            },
+            "node2": {
+                "hostname": "spine01",
+                "interfaceName": "Ethernet2"
+            }
+        }
+    ]
+}
