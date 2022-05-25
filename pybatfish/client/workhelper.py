@@ -200,27 +200,6 @@ def get_data_auto_complete(session, completion_type, query, max_suggestions):
     return json_data
 
 
-def get_data_configure_analysis(
-    session, new_analysis, analysis_name, add_questions_filename, del_questions_str
-):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-    }
-    if new_analysis:
-        json_data[CoordConsts.SVC_KEY_NEW_ANALYSIS] = "new"
-    json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
-    if add_questions_filename:
-        json_data[CoordConsts.SVC_KEY_FILE] = (
-            "filename",
-            open(add_questions_filename, "rb"),
-            "application/octet-stream",
-        )
-    if del_questions_str:
-        json_data[CoordConsts.SVC_KEY_DEL_ANALYSIS_QUESTIONS] = del_questions_str
-    return json_data
-
-
 def get_data_configure_question_template(session, in_question, exceptions, assertion):
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
@@ -230,15 +209,6 @@ def get_data_configure_question_template(session, in_question, exceptions, asser
         json_data[CoordConsts.SVC_KEY_EXCEPTIONS] = json.dumps(exceptions)
     if assertion:
         json_data[CoordConsts.SVC_KEY_ASSERTION] = json.dumps(assertion.__dict__)
-    return json_data
-
-
-def get_data_delete_analysis(session, analysis_name):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-        CoordConsts.SVC_KEY_ANALYSIS_NAME: analysis_name,
-    }
     return json_data
 
 
@@ -256,21 +226,6 @@ def get_data_delete_snapshot(session, name):
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
         CoordConsts.SVC_KEY_SNAPSHOT_NAME: name,
     }
-    return json_data
-
-
-def get_data_get_analysis_answers(
-    session, analysis_name, snapshot, reference_snapshot=None
-):
-    # type: (Session, str, str, Optional[str]) -> Dict
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
-        CoordConsts.SVC_KEY_SNAPSHOT_NAME: snapshot,
-    }
-    if reference_snapshot is not None:
-        json_data[CoordConsts.SVC_KEY_REFERENCE_SNAPSHOT_NAME] = reference_snapshot
-    json_data[CoordConsts.SVC_KEY_ANALYSIS_NAME] = analysis_name
     return json_data
 
 
@@ -296,14 +251,6 @@ def get_data_init_network(session, network_name):
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: network_name,
-    }
-    return json_data
-
-
-def get_data_list_analyses(session):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
     }
     return json_data
 
@@ -381,20 +328,6 @@ def get_workitem_parse(session, snapshot):
     w_item.requestParams[BfConsts.COMMAND_PARSE_VENDOR_INDEPENDENT] = ""
     w_item.requestParams[BfConsts.COMMAND_PARSE_VENDOR_SPECIFIC] = ""
     w_item.requestParams[BfConsts.COMMAND_INIT_INFO] = ""
-    return w_item
-
-
-def get_workitem_run_analysis(
-    session, analysis_name, snapshot, reference_snapshot=None
-):
-    # type: (Session, str, str, Optional[str]) -> WorkItem
-    w_item = WorkItem(session)
-    w_item.requestParams[BfConsts.COMMAND_ANALYZE] = ""
-    w_item.requestParams[BfConsts.ARG_ANALYSIS_NAME] = analysis_name
-    w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
-    if reference_snapshot is not None:
-        w_item.requestParams[BfConsts.ARG_DELTA_TESTRIG] = reference_snapshot
-        w_item.requestParams[BfConsts.ARG_DIFFERENTIAL] = ""
     return w_item
 
 
