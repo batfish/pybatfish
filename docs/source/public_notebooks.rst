@@ -11,6 +11,7 @@ Basics
     :maxdepth: 1
 
     notebooks/linked/getting-started-with-batfish.ipynb
+    notebooks/linked/pandas-examples.ipynb
     notebooks/linked/validating-configuration-settings.ipynb
     notebooks/linked/uncovering-configuration-and-behavior-drift.ipynb
 
