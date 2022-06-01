@@ -1,6 +1,7 @@
 # Importing required libraries, setting up logging, and loading questions
 import logging
 import random  # noqa: F401
+from typing import List, Optional  # noqa: F401
 
 import pandas as pd
 from IPython.display import display
