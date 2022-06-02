@@ -3,6 +3,7 @@ This folder contains Jupyter notebooks that show how to use Batfish for differen
 The current list of notebooks are:
 - **Basics**
     - [Getting Started with Batfish](Getting%20started%20with%20Batfish.ipynb) [[video](https://www.youtube.com/watch?v=Ca7kPAtfFqo)] shows how to get started and provides an overview of the capabilities of Batfish.
+    - [Pandas Examples](Pandas%20Examples.ipynb) shows common examples of using Pandas to manipulate Batfish answers.
     - [Validating Configuration Settings](Validating%20Configuration%20Settings.ipynb) [[video](https://www.youtube.com/watch?v=qOXRaVs1Uz4)] shows how to validate different types of configuration settings (NTP server, TACACS server, AAA, SNMP, etc...) using Batfish.
     - [Uncovering Configuration and Behavior Drift](Uncovering%20Configuration%20and%20Behavior%20Drift.ipynb) shows how to analyze conffiguration settings and network behavior differences between two network snapshots.
 - **ACLs and firewalls**
