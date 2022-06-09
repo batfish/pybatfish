@@ -60,7 +60,7 @@ def bf_version():
 @pytest.fixture(scope="module", params=notebook_files)
 def notebook(request):
     filepath = request.param
-    return filepath, nbformat.read(filepath, as_version=4)
+    return filepath, nbformat.read(filepath, as_version=nbformat.NO_CONVERT)
 
 
 def skip_new_notebook_vs_old_code(bf_version, notebook_name):

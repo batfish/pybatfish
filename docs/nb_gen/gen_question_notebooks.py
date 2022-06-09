@@ -286,7 +286,7 @@ def generate_notebook(
 ) -> NotebookNode:
     """Generate a notebook for a given question category."""
     # Create notebook object
-    nb = nbformat.read(_BASE_Q_NOTEBOOK_FILE.open("r"), as_version=4)
+    nb = nbformat.read(_BASE_Q_NOTEBOOK_FILE.open("r"), as_version=nbformat.NO_CONVERT)
 
     # Initialize list for cells that will be added.
     # Copying the cells from base notebook, so can just replace the value in the end
