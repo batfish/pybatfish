@@ -39,7 +39,7 @@ metadata_hide = {"nbsphinx": "hidden"}
 def set_pandas_settings() -> None:
     """Set preferred pandas output settings."""
     pd.set_option("display.width", 300)
-    pd.set_option("display.max_columns", 20)
+    pd.set_option("display.max_columns", 30)
     pd.set_option("display.max_rows", 1000)
     pd.set_option("display.max_colwidth", None)
 
