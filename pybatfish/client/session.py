@@ -1337,6 +1337,9 @@ class Session(object):
             return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
+        # removeme
+        if self._use_deprecated_workmgr_v1:
+            raise Exception("test")
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:

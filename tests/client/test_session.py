@@ -86,7 +86,7 @@ def test_session_api_key():
         assert s.api_key == "foo"
 
 
-def test_session_bf_version():
+def test_session_bf_version_called():
     """Ensure we query bf_version when intializing a Session without version override"""
     with patch(
         "pybatfish.client.restv2helper.get_component_versions"
@@ -94,3 +94,24 @@ def test_session_bf_version():
         mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
         s = Session(load_questions=False)
         mock_get_component_versions.assert_called_with(s)
+
+
+def test_session_bf_version_use_v1():
+    """Ensure a session with old Batfish uses WorkMgrV1"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions:
+        mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
+        s = Session(load_questions=False)
+        assert s.use_deprecated_workmgr_v1()
+
+
+def test_session_bf_version_use_only_v2():
+    """Ensure a session with new or dev Batfish uses WorkMgrV2 only"""
+    for bf_version in ["0.36.0", "2022.08.11"]:
+        with patch(
+            "pybatfish.client.restv2helper.get_component_versions"
+        ) as mock_get_component_versions:
+            mock_get_component_versions.return_value = {"Batfish": bf_version}
+            s = Session(load_questions=False)
+            assert not s.use_deprecated_workmgr_v1()
