@@ -472,10 +472,12 @@ class Session(object):
         session = session_module(**params)  # type: Session
         return session
 
-    def _get_bf_version(self):
-        # type: () -> Optional[Text]
+    def _get_bf_version(self) -> str:
         """Get the Batfish backend version."""
-        return get_component_versions(self).get("Batfish")
+        bf_version = get_component_versions(self).get("Batfish")
+        if not bf_version:
+            raise BatfishException("backend did not return a version for 'Batfish'")
+        return str(bf_version)
 
     def delete_network(self, name):
         # type: (str) -> None
@@ -1328,7 +1330,10 @@ class Session(object):
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        bf_version = os.environ.get("bf_version", self._get_bf_version())
+        bf_version = os.environ.get("bf_version")
+        if not bf_version:
+            # Only query if not forced in environment
+            bf_version = self._get_bf_version()
         return not bf_version or _version_less_than(
             _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
         )
