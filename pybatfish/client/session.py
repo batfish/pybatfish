@@ -474,7 +474,7 @@ class Session(object):
 
     def _get_bf_version(self) -> str:
         """Get the Batfish backend version."""
-        bf_version = restv2helper.get_component_versions(self).get("Batfish")
+        bf_version = self.get_component_versions().get("Batfish")
         if not bf_version:
             raise BatfishException("backend did not return a version for 'Batfish'")
         return str(bf_version)
