@@ -21,6 +21,7 @@ import logging
 import os
 import tempfile
 import zipfile
+from io import SEEK_CUR, SEEK_SET
 from typing import (  # noqa: F401
     IO,
     Any,
@@ -818,7 +819,7 @@ class Session(object):
     def get_component_versions(self):
         # type: () -> Dict[str, Any]
         """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
-        return get_component_versions(self)
+        return restv2helper.get_component_versions(self)
 
     def init_snapshot(self, upload, name=None, overwrite=False, extra_args=None):
         # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> str
@@ -968,8 +969,18 @@ class Session(object):
         if isinstance(upload, str):
             self.__init_snapshot_from_file(name, upload)
         else:
-            if not zipfile.is_zipfile(upload):
-                raise ValueError("The provided data is not a valid zip file")
+            seekable = (
+                hasattr(upload, "seek")
+                and hasattr(upload, "seekable")
+                and upload.seekable()
+            )
+            if (
+                seekable
+            ):  # else assume it's a zipfile, and rely on backend to say otherwise
+                old_pos = upload.seek(0, SEEK_CUR)
+                if not zipfile.is_zipfile(upload):
+                    raise ValueError("The provided data is not a valid zip file")
+                upload.seek(old_pos, SEEK_SET)
             # upload is an IO-like object already
             self.__init_snapshot_from_io(name, upload)
 
@@ -1356,6 +1367,8 @@ def _create_in_memory_zip(text, filename, platform):
     with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
         zipfilename = os.path.join("snapshot", "configs", filename)
         zf.writestr(zipfilename, _text_with_platform(text, platform))
+    # rewind after writing
+    data.seek(0, SEEK_SET)
     return data
 
 
