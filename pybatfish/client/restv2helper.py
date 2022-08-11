@@ -631,7 +631,7 @@ def auto_complete(
         CoordConstsV2.RSC_AUTOCOMPLETE,
         completion_type,
     )
-    params = {}
+    params = {}  # type: Dict[str, Any]
     if query:
         params[CoordConstsV2.QP_QUERY] = query
     if max_suggestions:
@@ -639,7 +639,7 @@ def auto_complete(
     return _get_dict(session, url_tail, params=params)
 
 
-def upload_question(session: "Session", question_name: str, question_str: str):
+def upload_question(session: "Session", question_name: str, question_str: str) -> None:
     url_tail = "/{}/{}/{}/{}".format(
         CoordConstsV2.RSC_NETWORKS,
         session.network,
