@@ -18,7 +18,7 @@ from unittest.mock import patch
 import pkg_resources
 import pytest
 
-from pybatfish.client.session import Session
+from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
 
 
 class MockEntryPoint(object):
@@ -50,23 +50,28 @@ def test_get_session_types():
 def test_get_session():
     """Confirm Session object is built for a specified session type."""
     session_host = "foobar"
-    with patch.dict(os.environ, {"bf_version": "0"}):
-        session = Session.get(type_="bf", load_questions=False, host=session_host)
-        # Confirm the session is the correct type
-        assert isinstance(session, Session)
-        # Confirm params were passed through
-        assert session.host == session_host
+    session = Session.get(
+        type_="bf",
+        load_questions=False,
+        host=session_host,
+        use_deprecated_workmgr_v1=False,
+    )
+    # Confirm the session is the correct type
+    assert isinstance(session, Session)
+    # Confirm params were passed through
+    assert session.host == session_host
 
 
 def test_get_session_default():
     """Confirm default Session object is built when no type is specified."""
-    with patch.dict(os.environ, {"bf_version": "0"}):
-        session_host = "foobar"
-        session = Session.get(load_questions=False, host=session_host)
-        # Confirm the session is the correct type
-        assert isinstance(session, Session)
-        # Confirm params were passed through
-        assert session.host == session_host
+    session_host = "foobar"
+    session = Session.get(
+        load_questions=False, host=session_host, use_deprecated_workmgr_v1=False
+    )
+    # Confirm the session is the correct type
+    assert isinstance(session, Session)
+    # Confirm params were passed through
+    assert session.host == session_host
 
 
 def test_get_session_bad():
@@ -81,9 +86,8 @@ def test_get_session_bad():
 
 def test_session_api_key():
     """Ensure we use api key from constructor."""
-    with patch.dict(os.environ, {"bf_version": "0"}):
-        s = Session(api_key="foo", load_questions=False)
-        assert s.api_key == "foo"
+    s = Session(api_key="foo", load_questions=False, use_deprecated_workmgr_v1=False)
+    assert s.api_key == "foo"
 
 
 def test_session_bf_version_called():
@@ -96,7 +100,7 @@ def test_session_bf_version_called():
         mock_get_component_versions.assert_called_with(s)
 
 
-def test_session_bf_version_use_v1():
+def test_session_bf_version_use_v1_response():
     """Ensure a session with old Batfish uses WorkMgrV1"""
     with patch(
         "pybatfish.client.restv2helper.get_component_versions"
@@ -106,7 +110,7 @@ def test_session_bf_version_use_v1():
         assert s.use_deprecated_workmgr_v1()
 
 
-def test_session_bf_version_use_only_v2():
+def test_session_bf_version_use_only_v2_response():
     """Ensure a session with new or dev Batfish uses WorkMgrV2 only"""
     for bf_version in ["0.36.0", "2022.08.11"]:
         with patch(
@@ -115,3 +119,51 @@ def test_session_bf_version_use_only_v2():
             mock_get_component_versions.return_value = {"Batfish": bf_version}
             s = Session(load_questions=False)
             assert not s.use_deprecated_workmgr_v1()
+
+
+def test_session_bf_version_use_v1_arg():
+    """Ensure a session with new Batfish uses WorkMgrV1 if forced in Session.__init__"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}
+    ):
+        mock_get_component_versions.return_value = {"Batfish": "2022.08.11"}
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=True)
+        assert s.use_deprecated_workmgr_v1()
+
+
+def test_session_bf_version_use_only_v2_arg():
+    """Ensure a session with new Batfish uses WorkMgrV2 only if forced in Session.__init__"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "1"}
+    ):
+        mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+        assert not s.use_deprecated_workmgr_v1()
+
+
+def test_session_bf_version_use_v1_environ():
+    """Ensure a session with new Batfish uses WorkMgrV1 if forced in environment"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "1"}
+    ):
+        mock_get_component_versions.return_value = {"Batfish": "2022.08.11"}
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=True)
+        assert s.use_deprecated_workmgr_v1()
+
+
+def test_session_bf_version_use_only_v2_environ():
+    """Ensure a session with new Batfish uses WorkMgrV2 only if forced in environment"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}
+    ):
+        mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+        assert not s.use_deprecated_workmgr_v1()

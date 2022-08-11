@@ -50,7 +50,7 @@ def questions():
 
 @pytest.fixture(scope="function")
 def session():
-    s = Session(load_questions=False)
+    s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
     yield s
 
 

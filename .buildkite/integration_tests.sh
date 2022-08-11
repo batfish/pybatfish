@@ -2,6 +2,13 @@
 
 set -euo pipefail
 
+# REMOVEME
+if [ -z "${pybf_use_deprecated_workmgr_v1:-}" ]; then
+  echo "not working"
+  exit 1
+fi
+
+
 version=$1
 
 apt update -qq && apt -qq install -y openjdk-11-jre-headless

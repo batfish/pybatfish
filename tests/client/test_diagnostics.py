@@ -101,7 +101,10 @@ def test_upload_diagnostics_metadata():
     """Confirm metadata file is generated with correct content."""
     metadata = {"test_key1": "test_value", "test_key2": 1234}
     out_dir = upload_diagnostics(
-        Session(load_questions=False), metadata, dry_run=True, questions=[]
+        Session(load_questions=False, use_deprecated_workmgr_v1=False),
+        metadata,
+        dry_run=True,
+        questions=[],
     )
 
     with open(os.path.join(out_dir, METADATA_FILENAME)) as f:

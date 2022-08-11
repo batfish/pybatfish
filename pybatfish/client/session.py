@@ -333,6 +333,7 @@ class Session(object):
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        use_deprecated_workmgr_v1: Optional[bool] = None,
     ):
         # Coordinator args
         self.host = host  # type: str
@@ -363,9 +364,16 @@ class Session(object):
         if load_questions:
             self.q.load()
 
-        self._use_deprecated_workmgr_v1 = (
-            self._should_use_deprecated_workmgr_v1()
-        )  # type: bool
+        if use_deprecated_workmgr_v1 is not None:
+            self._use_deprecated_workmgr_v1 = use_deprecated_workmgr_v1  # type: bool
+        else:
+            use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
+            if use_v1_env:
+                self._use_deprecated_workmgr_v1 = bool(int(use_v1_env))
+            else:
+                self._use_deprecated_workmgr_v1 = (
+                    self._should_use_deprecated_workmgr_v1()
+                )
 
     # Support old property names
     @property  # type: ignore
@@ -1337,16 +1345,10 @@ class Session(object):
             return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
-        # removeme
-        if self._use_deprecated_workmgr_v1:
-            raise Exception("test")
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        bf_version = os.environ.get("bf_version")
-        if not bf_version:
-            # Only query if not forced in environment
-            bf_version = self._get_bf_version()
+        bf_version = self._get_bf_version()
         return _version_less_than(
             _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
         )
@@ -1391,3 +1393,6 @@ def _version_less_than(version: Tuple[int, ...], min_version: Tuple[int, ...]) -
         return version < min_version
     # Dev version is considered newer than any version
     return False
+
+
+_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV = "pybf_use_deprecated_workmgr_v1"

@@ -104,7 +104,7 @@ done
 cat <<EOF
   - label: "Python ${PYBATFISH_PYTHON_TEST_VERSIONS[0]} integration tests using WorkMgrV1"
     command:
-      - export bf_version=2022.08.01
+      - export pybf_use_deprecated_workmgr_v1=1
       - bash .buildkite/integration_tests.sh ${version}
     artifact_paths:
       - workspace/batfish.log
