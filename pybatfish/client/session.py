@@ -21,7 +21,17 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import IO, Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+from typing import (  # noqa: F401
+    IO,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Text,
+    Tuple,
+    Union,
+)
 
 import pkg_resources
 from deprecated import deprecated
@@ -352,6 +362,10 @@ class Session(object):
         # Auto-load question templates
         if load_questions:
             self.q.load()
+
+        self._use_deprecated_workmgr_v1 = (
+            self._should_use_deprecated_workmgr_v1()
+        )  # type: bool
 
     # Support old property names
     @property  # type: ignore
@@ -797,6 +811,7 @@ class Session(object):
 
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
+        self._check_network()
         return get_work_status(work_item, self)
 
     def get_component_versions(self):
@@ -892,10 +907,13 @@ class Session(object):
 
     def __init_snapshot_from_io(self, name, fd):
         # type: (str, IO) -> None
-        json_data = workhelper.get_data_upload_snapshot(self, name, fd)
-        resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
-        )
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+            resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
+            )
+        else:
+            restv2helper.upload_snapshot(self, name, fd)
 
     def __init_snapshot_from_file(self, name, file_to_send):
         # type: (str, str) -> None
@@ -966,19 +984,24 @@ class Session(object):
         """
         return [d["name"] for d in restv2helper.list_networks(self)]
 
-    def list_incomplete_works(self):
-        # type: () -> Dict[str, Any]
+    def list_incomplete_works(self) -> Dict[str, Any]:
         """
         Get pending work that is incomplete.
 
         :return: JSON dictionary of question name to question object
         :rtype: dict
         """
-        json_data = workhelper.get_data_list_incomplete_work(self)
-        response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
-        )
-        return response
+        self._check_network()
+
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_list_incomplete_work(self)
+            response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
+            )
+            return response
+        else:
+            statuses = restv2helper.list_incomplete_work(self)
+            return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
 
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
@@ -1058,18 +1081,22 @@ class Session(object):
             if e.response.status_code != 404:
                 raise BatfishException("Unknown error accessing network", e)
 
-        json_data = workhelper.get_data_init_network(self, name)
-        json_response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
-        )
-
-        network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
-        if network_name is None:
-            raise BatfishException(
-                "Network initialization failed. Server response: {}".format(
-                    json_response
-                )
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_init_network(self, name)
+            json_response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
             )
+
+            network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+            if network_name is None:
+                raise BatfishException(
+                    "Network initialization failed. Server response: {}".format(
+                        json_response
+                    )
+                )
+        else:
+            restv2helper.init_network(self, name)
+            network_name = name
 
         self.network = str(network_name)
         return self.network
@@ -1237,8 +1264,12 @@ class Session(object):
 
             return self.snapshot
 
-    def auto_complete(self, completion_type, query, max_suggestions=None):
-        # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+    def auto_complete(
+        self,
+        completion_type: VariableType,
+        query: str,
+        max_suggestions: Optional[int] = None,
+    ) -> List[AutoCompleteSuggestion]:
         """
         Get a list of autocomplete suggestions that match the provided query based on the variable type.
 
@@ -1262,20 +1293,45 @@ class Session(object):
         :param max_suggestions: Optional max number of suggestions to be returned
         :type max_suggestions: int
         """
-        json_data = workhelper.get_data_auto_complete(
-            self, completion_type, query, max_suggestions
-        )
-        response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
-        )
-        if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-            suggestions = [
-                AutoCompleteSuggestion.from_dict(json.loads(suggestion))
-                for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
-            ]
-            return suggestions
+        self._check_network()
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_auto_complete(
+                self, completion_type, query, max_suggestions
+            )
+            response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
+            )
+            if CoordConsts.SVC_KEY_SUGGESTIONS in response:
+                suggestions = [
+                    AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                    for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
+                ]
+                return suggestions
 
-        raise BatfishException("Unexpected response: {}.".format(response))
+            raise BatfishException("Unexpected response: {}.".format(response))
+        else:
+            response = restv2helper.auto_complete(
+                self, completion_type, query, max_suggestions
+            )
+            results = [
+                AutoCompleteSuggestion.from_dict(suggestion)
+                for suggestion in response.get(CoordConsts.SVC_KEY_SUGGESTIONS, [])
+            ]
+            # TODO: Should instead reject if snapshot is not set but variable type requires a snapshot
+            if not results and not self.snapshot:
+                logging.getLogger(__name__).warning(
+                    "No results, but snapshot is not set. You might get results if you first call <session>.set_snapshot"
+                )
+            return results
+
+    def use_deprecated_workmgr_v1(self) -> bool:
+        return self._use_deprecated_workmgr_v1
+
+    def _should_use_deprecated_workmgr_v1(self) -> bool:
+        bf_version = os.environ.get("bf_version", self._get_bf_version())
+        return not bf_version or _version_less_than(
+            _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
+        )
 
 
 def _text_with_platform(text, platform):
@@ -1297,3 +1353,21 @@ def _create_in_memory_zip(text, filename, platform):
         zipfilename = os.path.join("snapshot", "configs", filename)
         zf.writestr(zipfilename, _text_with_platform(text, platform))
     return data
+
+
+def _version_to_tuple(version: str) -> Tuple[int, ...]:
+    """Convert version string N(.N)* to a tuple of ints."""
+    return tuple((int(i) for i in version.split(".")))
+
+
+def _version_less_than(version: Tuple[int, ...], min_version: Tuple[int, ...]) -> bool:
+    """
+    Check if specified version is less than the specified min version.
+
+    Assumed dev versions start with a 0.
+    """
+    # Assume the dev version starts with a 0
+    if version[0] != 0:
+        return version < min_version
+    # Dev version is considered newer than any version
+    return False

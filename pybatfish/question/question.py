@@ -192,7 +192,6 @@ class QuestionBase(object):
         return _bf_answer_obj(
             session=session,
             question_str=self.json(),
-            parameters_str="{}",
             question_name=self.get_name(),
             background=background,
             snapshot=real_snapshot,

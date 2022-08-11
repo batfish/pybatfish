@@ -16,7 +16,7 @@
 from __future__ import absolute_import, print_function
 
 import json
-from typing import TYPE_CHECKING, Dict, Optional  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
 
 import pybatfish.util as batfishutils
 
@@ -31,20 +31,21 @@ class WorkItem(object):
     This file mirrors WorkItem.java in the batfish-common-protocol module.
     """
 
-    def __init__(self, session):
-        # type: (Session) -> None
+    def __init__(self, session: "Session") -> None:
         self.id = batfishutils.get_uuid()  # type: str
         self.network = session.network  # type: Optional[str]
         self.requestParams = dict(session.additional_args)  # type: Dict
 
-    def to_json(self):
-        # type: () -> str
+    def to_dict(self) -> Dict[str, Any]:
         params = {
             "containerName": self.network,
             "id": self.id,
             "requestParams": self.requestParams,
         }
-        trName = self.requestParams.get("testrig")
-        if trName is not None:
-            params["testrigName"] = trName
-        return json.dumps(params)
+        tr_name = self.requestParams.get("testrig")
+        if tr_name is not None:
+            params["testrigName"] = tr_name
+        return params
+
+    def to_json(self) -> str:
+        return json.dumps(self.to_dict())

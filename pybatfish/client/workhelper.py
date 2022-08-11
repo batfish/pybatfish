@@ -27,7 +27,7 @@ from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 
-from pybatfish.client.consts import BfConsts, CoordConsts, WorkStatusCode
+from pybatfish.client.consts import BfConsts, CoordConsts, CoordConstsV2, WorkStatusCode
 from pybatfish.exception import BatfishException
 
 from . import resthelper, restv2helper
@@ -98,15 +98,7 @@ def execute(work_item, session, background=False, extra_args=None):
             "Work item {} does not include a snapshot name".format(work_item.to_json())
         )
 
-    json_data = {
-        CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-    }
-
-    # Submit the work item
-    response = resthelper.get_json_response(
-        session, CoordConsts.SVC_RSC_QUEUE_WORK, json_data
-    )
+    response = queue_work(session, work_item)
 
     if background:
         # TODO: this is ugly and messes with return types: design and write async replacement
@@ -157,6 +149,23 @@ def execute(work_item, session, background=False, extra_args=None):
     return {"status": status}
 
 
+def queue_work(session, work_item):
+    # type: (Session, WorkItem) -> Dict[str, Any]
+    if session.use_deprecated_workmgr_v1():
+        json_data = {
+            CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
+            CoordConsts.SVC_KEY_API_KEY: session.api_key,
+        }
+        # Submit the work item
+        response = resthelper.get_json_response(
+            session, CoordConsts.SVC_RSC_QUEUE_WORK, json_data
+        )
+        return response
+    else:
+        restv2helper.queue_work(session, work_item)
+        return {"result": True}
+
+
 def _compute_batfish_answer_file_name(work_item):
     # type: (WorkItem) -> str
     """Return the answer filename as Batfish computes it."""
@@ -174,15 +183,14 @@ def _format_elapsed_time(delta):
     )
 
 
-def get_data_upload_question(session, question_name, question_json, parameters_json):
-    # type: (Session, str, str, str) -> Dict
+def get_data_upload_question(session, question_name, question_json):
+    # type: (Session, str, str) -> Dict
     """Create the form parameters needed to upload the given question."""
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
         CoordConsts.SVC_KEY_QUESTION_NAME: question_name,
         CoordConsts.SVC_KEY_FILE: ("question", question_json),
-        CoordConsts.SVC_KEY_FILE2: ("parameters", parameters_json),
     }
     return json_data
 
@@ -332,22 +340,29 @@ def get_workitem_parse(session, snapshot):
 
 
 def get_work_status(w_item_id, session):
-    json_data = {
-        CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        CoordConsts.SVC_KEY_WORKID: w_item_id,
-    }
-
-    answer = resthelper.get_json_response(
-        session, CoordConsts.SVC_RSC_GET_WORKSTATUS, json_data
-    )
-
-    if CoordConsts.SVC_KEY_WORKSTATUS in answer:
-        return answer
-    else:
-        raise BatfishException(
-            "Expected key (%s) not found in status check response: %s"
-            % (CoordConsts.SVC_KEY_WORKSTATUS, answer)
+    # type: (str, Session) -> Dict[str, Any]
+    if session.use_deprecated_workmgr_v1():
+        json_data = {
+            CoordConsts.SVC_KEY_API_KEY: session.api_key,
+            CoordConsts.SVC_KEY_WORKID: w_item_id,
+        }
+        answer = resthelper.get_json_response(
+            session, CoordConsts.SVC_RSC_GET_WORKSTATUS, json_data
         )
+
+        if CoordConsts.SVC_KEY_WORKSTATUS in answer:
+            return answer
+        else:
+            raise BatfishException(
+                "Expected key (%s) not found in status check response: %s"
+                % (CoordConsts.SVC_KEY_WORKSTATUS, answer)
+            )
+    else:
+        answer = restv2helper.get_work_status(session, w_item_id)
+        return {
+            CoordConsts.SVC_KEY_WORKSTATUS: answer[CoordConstsV2.PROP_WORK_STATUS_CODE],
+            CoordConsts.SVC_KEY_TASKSTATUS: json.dumps(answer[CoordConstsV2.PROP_TASK]),
+        }
 
 
 def _print_work_status(session, work_status, task_details):
