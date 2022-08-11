@@ -11,7 +11,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import io
 from unittest.mock import Mock, patch
 
 import pytest
@@ -126,8 +126,8 @@ def test_get(session, request_session):
     )
 
 
-def test_post(session, request_session):
-    """Make sure calls to _post end up using the correct session."""
+def test_post_json(session, request_session):
+    """Make sure calls to _post of json end up using the correct session."""
     resource_url = "/test/url"
     target_url = "base{url}".format(base=BASE_URL, url=resource_url)
     obj = "foo"
@@ -138,11 +138,33 @@ def test_post(session, request_session):
     # Should pass through to the correct session
     request_session.post.assert_called_with(
         target_url,
+        data=None,
         json=_encoder.default(obj),
         headers=_get_headers(session),
         params=None,
         verify=session.verify_ssl_certs,
     )
+
+
+def test_post_stream(session, request_session):
+    """Make sure calls to _post of stream end up using the correct session."""
+    resource_url = "/test/url"
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    with io.StringIO() as stream_data:
+        with patch("pybatfish.client.restv2helper._requests_session", request_session):
+            # Execute the request
+            _post(session, resource_url, None, stream=stream_data)
+        # Should pass through to the correct session
+        expected_headers = _get_headers(session)
+        expected_headers["Content-Type"] = "application/octet-stream"
+        request_session.post.assert_called_with(
+            target_url,
+            data=stream_data,
+            json=None,
+            headers=expected_headers,
+            params=None,
+            verify=session.verify_ssl_certs,
+        )
 
 
 def test_put(session, request_session):

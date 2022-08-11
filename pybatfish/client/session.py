@@ -54,7 +54,6 @@ from pybatfish.client.asserts import (
     assert_no_unestablished_bgp_sessions,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.restv2helper import get_component_versions
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (
     AutoCompleteSuggestion,
@@ -474,7 +473,7 @@ class Session(object):
 
     def _get_bf_version(self) -> str:
         """Get the Batfish backend version."""
-        bf_version = get_component_versions(self).get("Batfish")
+        bf_version = restv2helper.get_component_versions(self).get("Batfish")
         if not bf_version:
             raise BatfishException("backend did not return a version for 'Batfish'")
         return str(bf_version)
@@ -1334,7 +1333,7 @@ class Session(object):
         if not bf_version:
             # Only query if not forced in environment
             bf_version = self._get_bf_version()
-        return not bf_version or _version_less_than(
+        return _version_less_than(
             _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
         )
 

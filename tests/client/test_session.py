@@ -12,7 +12,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import os
 from unittest.mock import patch
 
 import pkg_resources
@@ -50,21 +50,23 @@ def test_get_session_types():
 def test_get_session():
     """Confirm Session object is built for a specified session type."""
     session_host = "foobar"
-    session = Session.get(type_="bf", load_questions=False, host=session_host)
-    # Confirm the session is the correct type
-    assert isinstance(session, Session)
-    # Confirm params were passed through
-    assert session.host == session_host
+    with patch.dict(os.environ, {"bf_version": "0"}):
+        session = Session.get(type_="bf", load_questions=False, host=session_host)
+        # Confirm the session is the correct type
+        assert isinstance(session, Session)
+        # Confirm params were passed through
+        assert session.host == session_host
 
 
 def test_get_session_default():
     """Confirm default Session object is built when no type is specified."""
-    session_host = "foobar"
-    session = Session.get(load_questions=False, host=session_host)
-    # Confirm the session is the correct type
-    assert isinstance(session, Session)
-    # Confirm params were passed through
-    assert session.host == session_host
+    with patch.dict(os.environ, {"bf_version": "0"}):
+        session_host = "foobar"
+        session = Session.get(load_questions=False, host=session_host)
+        # Confirm the session is the correct type
+        assert isinstance(session, Session)
+        # Confirm params were passed through
+        assert session.host == session_host
 
 
 def test_get_session_bad():
@@ -79,5 +81,16 @@ def test_get_session_bad():
 
 def test_session_api_key():
     """Ensure we use api key from constructor."""
-    s = Session(api_key="foo", load_questions=False)
-    assert s.api_key == "foo"
+    with patch.dict(os.environ, {"bf_version": "0"}):
+        s = Session(api_key="foo", load_questions=False)
+        assert s.api_key == "foo"
+
+
+def test_session_bf_version():
+    """Ensure we query bf_version when intializing a Session without version override"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions:
+        mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
+        s = Session(load_questions=False)
+        mock_get_component_versions.assert_called_with(s)

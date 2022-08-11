@@ -21,7 +21,7 @@ from dateutil.relativedelta import relativedelta
 from dateutil.tz import tzlocal
 from pytz import UTC
 
-from pybatfish.client import resthelper
+from pybatfish.client import resthelper, restv2helper
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
 from pybatfish.client.workhelper import (
@@ -36,10 +36,16 @@ from pybatfish.client.workitem import WorkItem
 
 def __execute_and_return_request_params(work_item, session, extra_args=None):
     work_item.requestParams[BfConsts.ARG_TESTRIG] = "snapshot"
-    with patch.object(resthelper, "get_json_response") as mock_get_json_response:
-        execute(work_item, session, True, extra_args)
-    args, kwargs = mock_get_json_response.call_args
-    witem = json.loads(args[2]["workitem"])
+    if session.use_deprecated_workmgr_v1():
+        with patch.object(resthelper, "get_json_response") as mock_get_json_response:
+            execute(work_item, session, True, extra_args)
+        args, kwargs = mock_get_json_response.call_args
+        witem = json.loads(args[2]["workitem"])
+    else:
+        with patch.object(restv2helper, "_post") as mock_post:
+            execute(work_item, session, True, extra_args)
+        args, kwargs = mock_post.call_args
+        witem = args[2]
     return witem["requestParams"]
 
 
