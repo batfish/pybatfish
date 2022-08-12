@@ -367,6 +367,11 @@ class Session(object):
         self._use_deprecated_workmgr_v1 = (
             use_deprecated_workmgr_v1
         )  # type: Optional[bool]
+        if self._use_deprecated_workmgr_v1 is None:
+            use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
+            if use_v1_env:
+                self._use_deprecated_workmgr_v1 = bool(int(use_v1_env))
+        # if still None, will be set upon first query
 
     # Support old property names
     @property  # type: ignore
@@ -1343,9 +1348,6 @@ class Session(object):
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
-        if use_v1_env:
-            return bool(int(use_v1_env))
         bf_version = self._get_bf_version()
         return _version_less_than(
             _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
