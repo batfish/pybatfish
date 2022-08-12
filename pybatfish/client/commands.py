@@ -48,7 +48,7 @@ def _configure_default_logging():
 
 # TODO: normally libraries don't configure logging in code
 _configure_default_logging()
-bf_session = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+bf_session = Session(load_questions=False)
 
 __all__ = [
     "bf_add_issue_config",

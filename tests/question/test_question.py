@@ -13,11 +13,12 @@
 #   limitations under the License.
 import inspect
 import json
+import os
+from unittest.mock import patch
 
 import pytest
 
-from pybatfish.client.commands import bf_session
-from pybatfish.client.session import Session
+from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (
@@ -339,11 +340,14 @@ def test_list_questions(tmpdir, session):
 
 
 def test_list_questions_default_session(tmpdir):
-    dir = tmpdir.mkdir("questions")
-    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    load_questions(question_dir=dir.strpath)
-    names = [q["name"] for q in bf_session.q.list()]
-    assert names == [TEST_QUESTION_NAME]
+    with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
+        from pybatfish.client.commands import bf_session
+
+        dir = tmpdir.mkdir("questions")
+        dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+        load_questions(question_dir=dir.strpath)
+        names = [q["name"] for q in bf_session.q.list()]
+        assert names == [TEST_QUESTION_NAME]
 
 
 def test_make_check(session):
