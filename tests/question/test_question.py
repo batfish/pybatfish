@@ -33,6 +33,10 @@ from pybatfish.question.question import (
     load_questions,
 )
 
+with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
+    from pybatfish.client.commands import bf_session
+
+
 TEST_QUESTION_NAME = "testQuestionName"
 TEST_QUESTION_DICT = {
     "instance": {
@@ -340,14 +344,11 @@ def test_list_questions(tmpdir, session):
 
 
 def test_list_questions_default_session(tmpdir):
-    with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
-        from pybatfish.client.commands import bf_session
-
-        dir = tmpdir.mkdir("questions")
-        dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-        load_questions(question_dir=dir.strpath)
-        names = [q["name"] for q in bf_session.q.list()]
-        assert names == [TEST_QUESTION_NAME]
+    dir = tmpdir.mkdir("questions")
+    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
+    load_questions(question_dir=dir.strpath)
+    names = [q["name"] for q in bf_session.q.list()]
+    assert names == [TEST_QUESTION_NAME]
 
 
 def test_make_check(session):
