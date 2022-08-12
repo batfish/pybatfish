@@ -90,13 +90,24 @@ def test_session_api_key():
     assert s.api_key == "foo"
 
 
-def test_session_bf_version_called():
-    """Ensure we query bf_version when intializing a Session without version override"""
+def test_session_bf_version_not_called_before_checking_v1():
+    """Ensure we do not query bf_version when intializing a Session without v1 override before checking v1"""
     with patch(
         "pybatfish.client.restv2helper.get_component_versions"
     ) as mock_get_component_versions:
         mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
         s = Session(load_questions=False)
+        mock_get_component_versions.assert_not_called()
+
+
+def test_session_bf_version_called():
+    """Ensure we query bf_version when intializing a Session without v1 override and check v1"""
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions:
+        mock_get_component_versions.return_value = {"Batfish": "1969.07.16"}
+        s = Session(load_questions=False)
+        s.use_deprecated_workmgr_v1()
         mock_get_component_versions.assert_called_with(s)
 
 

@@ -364,16 +364,9 @@ class Session(object):
         if load_questions:
             self.q.load()
 
-        if use_deprecated_workmgr_v1 is not None:
-            self._use_deprecated_workmgr_v1 = use_deprecated_workmgr_v1  # type: bool
-        else:
-            use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
-            if use_v1_env:
-                self._use_deprecated_workmgr_v1 = bool(int(use_v1_env))
-            else:
-                self._use_deprecated_workmgr_v1 = (
-                    self._should_use_deprecated_workmgr_v1()
-                )
+        self._use_deprecated_workmgr_v1 = (
+            use_deprecated_workmgr_v1
+        )  # type: Optional[bool]
 
     # Support old property names
     @property  # type: ignore
@@ -1345,9 +1338,14 @@ class Session(object):
             return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
+        if self._use_deprecated_workmgr_v1 is None:
+            self._use_deprecated_workmgr_v1 = self._should_use_deprecated_workmgr_v1()
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
+        use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
+        if use_v1_env:
+            return bool(int(use_v1_env))
         bf_version = self._get_bf_version()
         return _version_less_than(
             _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
