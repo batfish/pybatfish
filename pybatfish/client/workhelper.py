@@ -149,8 +149,7 @@ def execute(work_item, session, background=False, extra_args=None):
     return {"status": status}
 
 
-def queue_work(session, work_item):
-    # type: (Session, WorkItem) -> Dict[str, Any]
+def queue_work(session: "Session", work_item: WorkItem) -> Dict[str, Any]:
     if session.use_deprecated_workmgr_v1():
         json_data = {
             CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
@@ -183,8 +182,9 @@ def _format_elapsed_time(delta):
     )
 
 
-def get_data_upload_question(session, question_name, question_json):
-    # type: (Session, str, str) -> Dict
+def get_data_upload_question(
+    session: "Session", question_name: str, question_json: str
+) -> Dict[str, Any]:
     """Create the form parameters needed to upload the given question."""
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
@@ -339,8 +339,7 @@ def get_workitem_parse(session, snapshot):
     return w_item
 
 
-def get_work_status(w_item_id, session):
-    # type: (str, Session) -> Dict[str, Any]
+def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
     if session.use_deprecated_workmgr_v1():
         json_data = {
             CoordConsts.SVC_KEY_API_KEY: session.api_key,
