@@ -100,9 +100,10 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
             - workspace/questions.tgz
 EOF
 done
-# test a single python version using WorkMgrV1
+# test oldest python version using WorkMgrV1
+version="${PYBATFISH_PYTHON_TEST_VERSIONS[0]}"
 cat <<EOF
-  - label: "Python ${PYBATFISH_PYTHON_TEST_VERSIONS[0]} integration tests using WorkMgrV1"
+  - label: "Python ${version} integration tests using WorkMgrV1"
     command:
       - export pybf_use_deprecated_workmgr_v1=1
       - bash .buildkite/integration_tests.sh ${version}
