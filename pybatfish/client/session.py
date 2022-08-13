@@ -1026,9 +1026,8 @@ class Session(object):
                 self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
             )
             return response
-        else:
-            statuses = restv2helper.list_incomplete_work(self)
-            return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
+        statuses = restv2helper.list_incomplete_work(self)
+        return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
 
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
@@ -1338,20 +1337,19 @@ class Session(object):
                 return suggestions
 
             raise BatfishException("Unexpected response: {}.".format(response))
-        else:
-            response = restv2helper.auto_complete(
-                self, completion_type, query, max_suggestions
+        response = restv2helper.auto_complete(
+            self, completion_type, query, max_suggestions
+        )
+        results = [
+            AutoCompleteSuggestion.from_dict(suggestion)
+            for suggestion in response.get(CoordConsts.SVC_KEY_SUGGESTIONS, [])
+        ]
+        # TODO: Should instead reject if snapshot is not set but variable type requires a snapshot
+        if not results and not self.snapshot:
+            logging.getLogger(__name__).warning(
+                "No results, but snapshot is not set. You might get results if you first call <session>.set_snapshot"
             )
-            results = [
-                AutoCompleteSuggestion.from_dict(suggestion)
-                for suggestion in response.get(CoordConsts.SVC_KEY_SUGGESTIONS, [])
-            ]
-            # TODO: Should instead reject if snapshot is not set but variable type requires a snapshot
-            if not results and not self.snapshot:
-                logging.getLogger(__name__).warning(
-                    "No results, but snapshot is not set. You might get results if you first call <session>.set_snapshot"
-                )
-            return results
+        return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
         """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0"""

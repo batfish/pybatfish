@@ -160,9 +160,8 @@ def queue_work(session: "Session", work_item: WorkItem) -> Dict[str, Any]:
             session, CoordConsts.SVC_RSC_QUEUE_WORK, json_data
         )
         return response
-    else:
-        restv2helper.queue_work(session, work_item)
-        return {"result": True}
+    restv2helper.queue_work(session, work_item)
+    return {"result": True}
 
 
 def _compute_batfish_answer_file_name(work_item):
@@ -356,16 +355,11 @@ def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
                 "Expected key (%s) not found in status check response: %s"
                 % (CoordConsts.SVC_KEY_WORKSTATUS, answer)
             )
-    else:
-        answer = restv2helper.get_work_status(session, w_item_id)
-        return {
-            CoordConsts.SVC_KEY_WORKSTATUS: answer.get(
-                CoordConstsV2.PROP_WORK_STATUS_CODE
-            ),
-            CoordConsts.SVC_KEY_TASKSTATUS: json.dumps(
-                answer.get(CoordConstsV2.PROP_TASK)
-            ),
-        }
+    answer = restv2helper.get_work_status(session, w_item_id)
+    return {
+        CoordConsts.SVC_KEY_WORKSTATUS: answer.get(CoordConstsV2.PROP_WORK_STATUS_CODE),
+        CoordConsts.SVC_KEY_TASKSTATUS: json.dumps(answer.get(CoordConstsV2.PROP_TASK)),
+    }
 
 
 def _print_work_status(session, work_status, task_details):
