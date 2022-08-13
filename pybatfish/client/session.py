@@ -38,7 +38,7 @@ import pkg_resources
 from deprecated import deprecated
 from requests import HTTPError
 
-from pybatfish.client import resthelper, restv2helper, workhelper
+from pybatfish.client import apiversion, resthelper, restv2helper, workhelper
 from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
 from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
 from pybatfish.client.asserts import (
@@ -341,6 +341,7 @@ class Session(object):
         self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
         self.port_v2 = port_v2  # type: int
         self._base_uri_v2 = CoordConsts.SVC_CFG_WORK_MGR2  # type: str
+        self._base_uri_api_version = CoordConsts.SVC_CFG_API_VERSION  # type: str
         self.ssl = ssl  # type: bool
         self.verify_ssl_certs = verify_ssl_certs  # type: bool
 
@@ -727,6 +728,14 @@ class Session(object):
         protocol = "https" if self.ssl else "http"
         return "{0}://{1}:{2}{3}".format(
             protocol, self.host, self.port_v2, self._base_uri_v2
+        )
+
+    def get_base_url_api_version_service(self):
+        # type: () -> str
+        """Generate the base URL for the coordinator API version service."""
+        protocol = "https" if self.ssl else "http"
+        return "{0}://{1}:{2}{3}".format(
+            protocol, self.host, self.port_v2, self._base_uri_api_version
         )
 
     def get_node_role_dimension(self, dimension, inferred=False):
@@ -1308,9 +1317,11 @@ class Session(object):
         :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
         :param query: The partial string to match suggestions on
         :type query: str
-        :param max_suggestions: Optional max number of suggestions to be returned
+        :param max_suggestions: Optional max number of suggestions to be returned. 0 is treated as no limit.
         :type max_suggestions: int
         """
+        if max_suggestions and max_suggestions < 0:
+            raise ValueError("max_suggestions cannot be negative")
         self._check_network()
         if self.use_deprecated_workmgr_v1():
             json_data = workhelper.get_data_auto_complete(
@@ -1343,15 +1354,22 @@ class Session(object):
             return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
+        """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0"""
         if self._use_deprecated_workmgr_v1 is None:
             self._use_deprecated_workmgr_v1 = self._should_use_deprecated_workmgr_v1()
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        bf_version = self._get_bf_version()
+        api_versions = self._get_api_versions()
         return _version_less_than(
-            _version_to_tuple(bf_version), _version_to_tuple("2022.08.11")
+            _version_to_tuple(str(api_versions.get("2"))), _version_to_tuple("2.1.0")
         )
+
+    def _get_api_versions(self) -> Dict[str, Any]:
+        versions = apiversion.get_api_versions(self)
+        if not versions:
+            return {"1": "1.0.0", "2": "2.0.0"}
+        return versions
 
 
 def _text_with_platform(text, platform):

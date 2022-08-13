@@ -359,8 +359,12 @@ def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
     else:
         answer = restv2helper.get_work_status(session, w_item_id)
         return {
-            CoordConsts.SVC_KEY_WORKSTATUS: answer[CoordConstsV2.PROP_WORK_STATUS_CODE],
-            CoordConsts.SVC_KEY_TASKSTATUS: json.dumps(answer[CoordConstsV2.PROP_TASK]),
+            CoordConsts.SVC_KEY_WORKSTATUS: answer.get(
+                CoordConstsV2.PROP_WORK_STATUS_CODE
+            ),
+            CoordConsts.SVC_KEY_TASKSTATUS: json.dumps(
+                answer.get(CoordConstsV2.PROP_TASK)
+            ),
         }
 
 

@@ -68,13 +68,18 @@ def session():
     return s
 
 
-def test_list_incomplete_works(session, network):
+def test_list_incomplete_works(session):
     """Test that list_incomplete_works succeeds"""
-    # Cannot reliably leave incomplete work, so just check the call succeeds
-    ans = session.list_incomplete_works()
-    assert isinstance(ans, dict)
-    assert CoordConsts.SVC_KEY_WORK_LIST in ans
-    assert isinstance(ans[CoordConsts.SVC_KEY_WORK_LIST], str)
+    network = "test_list_incomplete_works"
+    session.set_network(network)
+    try:
+        # Cannot reliably leave incomplete work, so just check the call succeeds
+        ans = session.list_incomplete_works()
+        assert isinstance(ans, dict)
+        assert CoordConsts.SVC_KEY_WORK_LIST in ans
+        assert isinstance(ans[CoordConsts.SVC_KEY_WORK_LIST], str)
+    finally:
+        session.delete_network(network)
 
 
 def test_delete_network_object(network):

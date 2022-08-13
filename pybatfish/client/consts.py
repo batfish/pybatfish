@@ -165,6 +165,7 @@ class CoordConsts(object):
     # Constants for the v2 coordinator APIs
     SVC_CFG_WORK_MGR2 = "/v2"
     SVC_CFG_WORK_V2_PORT = 9996
+    SVC_CFG_API_VERSION = "/api_version"
     HTTP_HEADER_BATFISH_APIKEY = "X-Batfish-Apikey"
     HTTP_HEADER_BATFISH_VERSION = "X-Batfish-Version"
 

@@ -12,20 +12,15 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-import os
-from unittest.mock import patch
 
 import pytest
 
-from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV
-
-with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
-    from pybatfish.client.commands import (
-        bf_fork_snapshot,
-        bf_init_snapshot,
-        bf_session,
-        bf_set_network,
-    )
+from pybatfish.client.commands import (
+    bf_fork_snapshot,
+    bf_init_snapshot,
+    bf_session,
+    bf_set_network,
+)
 
 
 def test_network_validation():
