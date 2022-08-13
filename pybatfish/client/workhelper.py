@@ -203,7 +203,7 @@ def get_data_auto_complete(session, completion_type, query, max_suggestions):
         CoordConsts.SVC_KEY_QUERY: query,
     }
     if max_suggestions:
-        json_data[CoordConsts.SVC_KEY_MAX_SUGGESTIONS] = max_suggestions
+        json_data[CoordConsts.SVC_KEY_MAX_SUGGESTIONS] = str(max_suggestions)
     return json_data
 
 
