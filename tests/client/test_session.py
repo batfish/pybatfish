@@ -19,6 +19,7 @@ import pkg_resources
 import pytest
 
 from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
+from pybatfish.datamodel import VariableType
 
 _OLD_RESPONSES = [None, {"1": "1.0.0", "2": "2.0.0"}]
 _NEW_RESPONSE = {"1": "1.0.0", "2": "2.1.0"}
@@ -176,3 +177,10 @@ def test_session_bf_version_use_only_v2_environ():
             mock_get_api_versions.return_value = response
             s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
             assert not s.use_deprecated_workmgr_v1()
+
+
+def test_auto_complete_invalid_max_suggestions():
+    """Ensure auto_complete raises with invalid max suggestions"""
+    s = Session(load_questions=False)
+    with pytest.raises(ValueError):
+        s.auto_complete(VariableType.BGP_ROUTE_STATUS_SPEC, "foo", -1)
