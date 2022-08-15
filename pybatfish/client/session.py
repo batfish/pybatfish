@@ -341,7 +341,6 @@ class Session(object):
         self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
         self.port_v2 = port_v2  # type: int
         self._base_uri_v2 = CoordConsts.SVC_CFG_WORK_MGR2  # type: str
-        self._base_uri_api_version = CoordConsts.SVC_CFG_API_VERSION  # type: str
         self.ssl = ssl  # type: bool
         self.verify_ssl_certs = verify_ssl_certs  # type: bool
 
@@ -728,14 +727,6 @@ class Session(object):
         protocol = "https" if self.ssl else "http"
         return "{0}://{1}:{2}{3}".format(
             protocol, self.host, self.port_v2, self._base_uri_v2
-        )
-
-    def get_base_url_api_version_service(self):
-        # type: () -> str
-        """Generate the base URL for the coordinator API version service."""
-        protocol = "https" if self.ssl else "http"
-        return "{0}://{1}:{2}{3}".format(
-            protocol, self.host, self.port_v2, self._base_uri_api_version
         )
 
     def get_node_role_dimension(self, dimension, inferred=False):
