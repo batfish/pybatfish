@@ -484,6 +484,12 @@ def get_component_versions(session):
     return _get_dict(session, "/version")
 
 
+def get_workmgr_v2_api_version(session: "Session") -> str:
+    """Gets the WorkMgrV2 API version if present, else returns '2.0.0'"""
+    component_versions = get_component_versions(session)
+    return str(component_versions.get(CoordConstsV2.KEY_V2_API_VERSION, "2.0.0"))
+
+
 def get_question_templates(session: "Session", verbose: bool) -> Dict:
     """Get question templates from the backend.
 

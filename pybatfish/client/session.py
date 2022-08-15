@@ -38,7 +38,7 @@ import pkg_resources
 from deprecated import deprecated
 from requests import HTTPError
 
-from pybatfish.client import apiversion, resthelper, restv2helper, workhelper
+from pybatfish.client import resthelper, restv2helper, workhelper
 from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
 from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
 from pybatfish.client.asserts import (
@@ -1358,16 +1358,10 @@ class Session(object):
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        api_versions = self._get_api_versions()
+        v2_api_version = restv2helper.get_workmgr_v2_api_version(self)
         return _version_less_than(
-            _version_to_tuple(str(api_versions.get("2"))), _version_to_tuple("2.1.0")
+            _version_to_tuple(str(v2_api_version)), _version_to_tuple("2.1.0")
         )
-
-    def _get_api_versions(self) -> Dict[str, Any]:
-        versions = apiversion.get_api_versions(self)
-        if not versions:
-            return {"1": "1.0.0", "2": "2.0.0"}
-        return versions
 
 
 def _text_with_platform(text, platform):

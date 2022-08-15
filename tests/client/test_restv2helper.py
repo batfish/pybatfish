@@ -19,6 +19,7 @@ import requests
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
+from pybatfish.client.consts import CoordConstsV2
 from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
     _adapter,
@@ -31,6 +32,7 @@ from pybatfish.client.restv2helper import (
     _put,
     _requests_session,
     _requests_session_fail_fast,
+    get_workmgr_v2_api_version,
 )
 from pybatfish.client.session import Session
 
@@ -215,6 +217,24 @@ def test_fail_fast_session_adapters():
     assert retries.read == Options.max_initial_tries_to_connect_to_coordinator
     # All request types should be retried
     assert not retries.method_whitelist
+
+
+def test_get_workmgr_v2_api_version_old(session) -> None:
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions:
+        mock_get_component_versions.return_value = {}
+        assert get_workmgr_v2_api_version(session) == "2.0.0"
+
+
+def test_get_workmgr_v2_api_version_new(session) -> None:
+    with patch(
+        "pybatfish.client.restv2helper.get_component_versions"
+    ) as mock_get_component_versions:
+        mock_get_component_versions.return_value = {
+            CoordConstsV2.KEY_V2_API_VERSION: "2.1.0"
+        }
+        assert get_workmgr_v2_api_version(session) == "2.1.0"
 
 
 if __name__ == "__main__":

@@ -21,9 +21,6 @@ import pytest
 from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
 from pybatfish.datamodel import VariableType
 
-_OLD_RESPONSES = [None, {"1": "1.0.0", "2": "2.0.0"}]
-_NEW_RESPONSE = {"1": "1.0.0", "2": "2.1.0"}
-
 
 class MockEntryPoint(object):
     def __init__(self, name, module_):
@@ -96,35 +93,40 @@ def test_session_api_key():
 
 def test_session_bf_version_not_called_before_checking_v1():
     """Ensure we do not query api_versions when intializing a Session without v1 override before checking v1"""
-    with patch("pybatfish.client.apiversion.get_api_versions") as mock_get_api_versions:
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version:
         Session(load_questions=False)
-        mock_get_api_versions.assert_not_called()
+        mock_get_workmgr_v2_api_version.assert_not_called()
 
 
 def test_session_bf_version_called():
     """Ensure we query api_versions when intializing a Session without v1 override and check v1"""
-    with patch("pybatfish.client.apiversion.get_api_versions") as mock_get_api_versions:
-        mock_get_api_versions.return_value = None
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version:
+        mock_get_workmgr_v2_api_version.return_value = "2.1.0"
         s = Session(load_questions=False)
         s.use_deprecated_workmgr_v1()
-        mock_get_api_versions.assert_called_with(s)
+        mock_get_workmgr_v2_api_version.assert_called_with(s)
 
 
 def test_session_bf_version_use_v1_response():
     """Ensure a session with old Batfish uses WorkMgrV1"""
-    for response in _OLD_RESPONSES:
-        with patch(
-            "pybatfish.client.apiversion.get_api_versions"
-        ) as mock_get_api_versions:
-            mock_get_api_versions.return_value = response
-            s = Session(load_questions=False)
-            assert s.use_deprecated_workmgr_v1()
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version:
+        mock_get_workmgr_v2_api_version.return_value = "2.0.0"
+        s = Session(load_questions=False)
+        assert s.use_deprecated_workmgr_v1()
 
 
 def test_session_bf_version_use_only_v2_response():
     """Ensure a session with new or dev Batfish uses WorkMgrV2 only"""
-    with patch("pybatfish.client.apiversion.get_api_versions") as mock_get_api_versions:
-        mock_get_api_versions.return_value = _NEW_RESPONSE
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version:
+        mock_get_workmgr_v2_api_version.return_value = "2.1.0"
         s = Session(load_questions=False)
         assert not s.use_deprecated_workmgr_v1()
 
@@ -132,51 +134,49 @@ def test_session_bf_version_use_only_v2_response():
 def test_session_bf_version_use_v1_arg():
     """Ensure a session with new Batfish uses WorkMgrV1 if forced in Session.__init__"""
     with patch(
-        "pybatfish.client.apiversion.get_api_versions"
-    ) as mock_get_api_versions, patch.dict(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version, patch.dict(
         os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}
     ):
-        mock_get_api_versions.return_value = _NEW_RESPONSE
+        mock_get_workmgr_v2_api_version.return_value = "2.1.0"
         s = Session(load_questions=False, use_deprecated_workmgr_v1=True)
         assert s.use_deprecated_workmgr_v1()
 
 
 def test_session_bf_version_use_only_v2_arg():
     """Ensure a session with new Batfish uses only WorkMgrV2 if forced in Session.__init__"""
-    for response in _OLD_RESPONSES:
-        with patch(
-            "pybatfish.client.apiversion.get_api_versions"
-        ) as mock_get_api_versions, patch.dict(
-            os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "1"}
-        ):
-            mock_get_api_versions.return_value = response
-            s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
-            assert not s.use_deprecated_workmgr_v1()
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "1"}
+    ):
+        mock_get_workmgr_v2_api_version.return_value = "2.0.0"
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+        assert not s.use_deprecated_workmgr_v1()
 
 
 def test_session_bf_version_use_v1_environ():
     """Ensure a session with new Batfish uses WorkMgrV1 if forced in environment"""
     with patch(
-        "pybatfish.client.apiversion.get_api_versions"
-    ) as mock_get_api_versions, patch.dict(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version, patch.dict(
         os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "1"}
     ):
-        mock_get_api_versions.return_value = _NEW_RESPONSE
+        mock_get_workmgr_v2_api_version.return_value = "2.1.0"
         s = Session(load_questions=False, use_deprecated_workmgr_v1=True)
         assert s.use_deprecated_workmgr_v1()
 
 
 def test_session_bf_version_use_only_v2_environ():
     """Ensure a session with new Batfish uses WorkMgrV2 only if forced in environment"""
-    for response in _OLD_RESPONSES:
-        with patch(
-            "pybatfish.client.apiversion.get_api_versions"
-        ) as mock_get_api_versions, patch.dict(
-            os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}
-        ):
-            mock_get_api_versions.return_value = response
-            s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
-            assert not s.use_deprecated_workmgr_v1()
+    with patch(
+        "pybatfish.client.restv2helper.get_workmgr_v2_api_version"
+    ) as mock_get_workmgr_v2_api_version, patch.dict(
+        os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}
+    ):
+        mock_get_workmgr_v2_api_version.return_value = "2.0.0"
+        s = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+        assert not s.use_deprecated_workmgr_v1()
 
 
 def test_auto_complete_invalid_max_suggestions():
