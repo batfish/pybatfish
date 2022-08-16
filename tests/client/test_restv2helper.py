@@ -11,7 +11,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import io
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,6 +20,7 @@ import requests
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
     _adapter,
@@ -31,6 +33,7 @@ from pybatfish.client.restv2helper import (
     _put,
     _requests_session,
     _requests_session_fail_fast,
+    get_api_version,
 )
 from pybatfish.client.session import Session
 
@@ -126,8 +129,8 @@ def test_get(session, request_session):
     )
 
 
-def test_post(session, request_session):
-    """Make sure calls to _post end up using the correct session."""
+def test_post_json(session, request_session):
+    """Make sure calls to _post of json end up using the correct session."""
     resource_url = "/test/url"
     target_url = "base{url}".format(base=BASE_URL, url=resource_url)
     obj = "foo"
@@ -138,11 +141,33 @@ def test_post(session, request_session):
     # Should pass through to the correct session
     request_session.post.assert_called_with(
         target_url,
+        data=None,
         json=_encoder.default(obj),
         headers=_get_headers(session),
         params=None,
         verify=session.verify_ssl_certs,
     )
+
+
+def test_post_stream(session, request_session):
+    """Make sure calls to _post of stream end up using the correct session."""
+    resource_url = "/test/url"
+    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    with io.StringIO() as stream_data:
+        with patch("pybatfish.client.restv2helper._requests_session", request_session):
+            # Execute the request
+            _post(session, resource_url, None, stream=stream_data)
+        # Should pass through to the correct session
+        expected_headers = _get_headers(session)
+        expected_headers["Content-Type"] = "application/octet-stream"
+        request_session.post.assert_called_with(
+            target_url,
+            data=stream_data,
+            json=None,
+            headers=expected_headers,
+            params=None,
+            verify=session.verify_ssl_certs,
+        )
 
 
 def test_put(session, request_session):
@@ -193,6 +218,22 @@ def test_fail_fast_session_adapters():
     assert retries.read == Options.max_initial_tries_to_connect_to_coordinator
     # All request types should be retried
     assert not retries.method_whitelist
+
+
+def test_get_api_version_old(session, request_session) -> None:
+    mock_response = MockResponse(json.dumps({}))
+    mock_response.status_code = 200
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        request_session.get.return_value = mock_response
+        assert get_api_version(session) == "2.0.0"
+
+
+def test_get_api_version_new(session, request_session) -> None:
+    mock_response = MockResponse(json.dumps({CoordConsts.KEY_API_VERSION: "2.1.0"}))
+    mock_response.status_code = 200
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        request_session.get.return_value = mock_response
+        assert get_api_version(session) == "2.1.0"
 
 
 if __name__ == "__main__":

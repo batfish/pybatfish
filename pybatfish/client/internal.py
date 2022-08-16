@@ -14,7 +14,6 @@
 #   limitations under the License.
 """Contains internal functions for interacting with the Batfish service."""
 
-import json
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # noqa: F401
 
 from pybatfish.client import restv2helper
@@ -30,27 +29,29 @@ if TYPE_CHECKING:
 
 
 def _bf_answer_obj(
-    session,
-    question_str,
-    parameters_str,
-    question_name,
-    background,
-    snapshot,
-    reference_snapshot,
-    extra_args,
-):
-    # type: (Session, str, str, str, bool, str, Optional[str], Optional[Dict[str, Any]]) -> Union[Answer, str]
-    json.loads(parameters_str)  # a syntactic check for parametersStr
+    session: "Session",
+    question_str: str,
+    question_name: str,
+    background: bool,
+    snapshot: str,
+    reference_snapshot: Optional[str],
+    extra_args: Optional[Dict[str, Any]],
+) -> Union[Answer, str]:
     if not question_name:
         question_name = Options.default_question_prefix + "_" + get_uuid()
 
     # Upload the question
-    json_data = workhelper.get_data_upload_question(
-        session, question_name, question_str, parameters_str
-    )
-    resthelper.get_json_response(
-        session, CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data
-    )
+    if session.use_deprecated_workmgr_v1():
+        json_data = workhelper.get_data_upload_question(
+            session,
+            question_name,
+            question_str,
+        )
+        resthelper.get_json_response(
+            session, CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data
+        )
+    else:
+        restv2helper.upload_question(session, question_name, question_str)
 
     # Answer the question
     work_item = workhelper.get_workitem_answer(

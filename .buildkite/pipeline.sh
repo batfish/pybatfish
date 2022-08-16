@@ -100,6 +100,25 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
             - workspace/questions.tgz
 EOF
 done
+# test oldest python version using WorkMgrV1
+version="${PYBATFISH_PYTHON_TEST_VERSIONS[0]}"
+cat <<EOF
+  - label: "Python ${version} integration tests using WorkMgrV1"
+    command:
+      - export pybf_use_deprecated_workmgr_v1=1
+      - bash .buildkite/integration_tests.sh ${version}
+    artifact_paths:
+      - workspace/batfish.log
+    plugins:
+      - docker#${BATFISH_DOCKER_PLUGIN_VERSION}:
+          image: "python:${version}"
+          always-pull: true
+          propagate-environment: true
+      - artifacts#${BATFISH_ARTIFACTS_PLUGIN_VERSION}:
+          download:
+            - workspace/allinone.jar
+            - workspace/questions.tgz
+EOF
 
 ###### Doc tests
 cat <<EOF

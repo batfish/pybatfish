@@ -32,6 +32,7 @@ from pybatfish.client.commands import (
     bf_put_reference_book,
     bf_set_network,
 )
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.extended import (
     bf_delete_network_object,
     bf_get_network_object_text,
@@ -65,6 +66,20 @@ def network():
 def session():
     s = Session()
     return s
+
+
+def test_list_incomplete_works(session):
+    """Test that list_incomplete_works succeeds"""
+    network = "test_list_incomplete_works"
+    session.set_network(network)
+    try:
+        # Cannot reliably leave incomplete work, so just check the call succeeds
+        ans = session.list_incomplete_works()
+        assert isinstance(ans, dict)
+        assert CoordConsts.SVC_KEY_WORK_LIST in ans
+        assert isinstance(ans[CoordConsts.SVC_KEY_WORK_LIST], str)
+    finally:
+        session.delete_network(network)
 
 
 def test_delete_network_object(network):
@@ -239,6 +254,13 @@ def auto_complete_tester_session(session, completion_types):
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
             if len(suggestions) > 0:
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
+
+            suggestions_limited = session.auto_complete(
+                completion_type, ".*", max_suggestions=1
+            )
+            assert len(suggestions_limited) <= 1
+            if len(suggestions_limited) > 0:
+                assert isinstance(suggestions_limited[0], AutoCompleteSuggestion)
     finally:
         session.delete_network(name)
 

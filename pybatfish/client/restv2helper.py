@@ -14,7 +14,16 @@
 
 from __future__ import absolute_import, print_function
 
-from typing import TYPE_CHECKING, Any, Dict, List, Optional, Text, Union  # noqa: F401
+from typing import (  # noqa: F401
+    IO,
+    TYPE_CHECKING,
+    Any,
+    Dict,
+    List,
+    Optional,
+    Text,
+    Union,
+)
 
 import requests
 from requests import HTTPError, Response  # noqa: F401
@@ -23,7 +32,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConstsV2
+from pybatfish.client.consts import CoordConsts, CoordConstsV2
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     NodeRolesData,
@@ -32,7 +41,9 @@ from pybatfish.datamodel.referencelibrary import (  # noqa: F401
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
 
+from ..datamodel import VariableType
 from .options import Options
+from .workitem import WorkItem
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
@@ -282,6 +293,22 @@ def get_network(session, network):
     return _get_dict(session, url_tail)
 
 
+def init_network(session: "Session", new_network_name: str) -> None:
+    """Attemps to create a new network with the given name."""
+    url_tail = "/{}".format(CoordConstsV2.RSC_NETWORKS)
+    _post(session, url_tail, None, params={CoordConstsV2.QP_NAME: new_network_name})
+
+
+def upload_snapshot(session: "Session", snapshot_name: str, fd: IO) -> None:
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_SNAPSHOTS,
+        snapshot_name,
+    )
+    _post(session, url_tail, None, stream=fd)
+
+
 def get_network_object(session, key):
     # type: (Session, Text) -> Any
     """Gets extended object with given key for the current network."""
@@ -457,6 +484,12 @@ def get_component_versions(session):
     return _get_dict(session, "/version")
 
 
+def get_api_version(session: "Session") -> str:
+    """Gets the API version if present, else returns '2.0.0'"""
+    component_versions = get_component_versions(session)
+    return str(component_versions.get(CoordConsts.KEY_API_VERSION, "2.0.0"))
+
+
 def get_question_templates(session: "Session", verbose: bool) -> Dict:
     """Get question templates from the backend.
 
@@ -565,6 +598,63 @@ def write_question_settings(session, settings, question_class, json_path):
     _put_json(session, url_tail, settings)
 
 
+def queue_work(session: "Session", work_item: WorkItem) -> None:
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_WORK
+    )
+    _post(session, url_tail, work_item.to_dict())
+
+
+def get_work_status(session: "Session", work_item_id: str) -> Dict[str, Any]:
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_WORK,
+        work_item_id,
+    )
+    return _get_dict(session, url_tail)
+
+
+def list_incomplete_work(session: "Session") -> List[Dict[str, Any]]:
+    url_tail = "/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS, session.network, CoordConstsV2.RSC_WORK
+    )
+    return _get_list(session, url_tail)
+
+
+def auto_complete(
+    session: "Session",
+    completion_type: VariableType,
+    query: Optional[str] = None,
+    max_suggestions: Optional[int] = None,
+) -> Dict[str, Any]:
+    url_tail = "/{}/{}{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        "/{}/{}".format(CoordConstsV2.RSC_SNAPSHOTS, session.snapshot)
+        if session.snapshot
+        else "",
+        CoordConstsV2.RSC_AUTOCOMPLETE,
+        completion_type,
+    )
+    params = {}  # type: Dict[str, Any]
+    if query:
+        params[CoordConstsV2.QP_QUERY] = query
+    if max_suggestions:
+        params[CoordConstsV2.QP_MAX_SUGGESTIONS] = max_suggestions
+    return _get_dict(session, url_tail, params=params)
+
+
+def upload_question(session: "Session", question_name: str, question_str: str) -> None:
+    url_tail = "/{}/{}/{}/{}".format(
+        CoordConstsV2.RSC_NETWORKS,
+        session.network,
+        CoordConstsV2.RSC_QUESTIONS,
+        question_name,
+    )
+    _put(session, url_tail, stream=question_str)
+
+
 def _check_response_status(response):
     # type: (Response) -> None
     """Rethrows the error thrown by Response.raise_for_status() after including the detailed error message inside Response.text."""
@@ -649,7 +739,11 @@ def _get_stream(
 
 
 def _post(
-    session: "Session", url_tail: str, obj: Any, params: Optional[Dict[str, Any]] = None
+    session: "Session",
+    url_tail: str,
+    obj: Any,
+    params: Optional[Dict[str, Any]] = None,
+    stream: Optional[IO] = None,
 ) -> None:
     """Make an HTTP(s) POST request to Batfish coordinator.
 
@@ -657,10 +751,14 @@ def _post(
     :raises ConnectionError if the coordinator is not available
     """
     url = session.get_base_url2() + url_tail
+    headers = _get_headers(session)
+    if stream:
+        headers["Content-Type"] = "application/octet-stream"
     response = _requests_session.post(
         url,
-        json=_encoder.default(obj),
-        headers=_get_headers(session),
+        json=_encoder.default(obj) if obj is not None else None,
+        data=stream,
+        headers=headers,
         params=params,
         verify=session.verify_ssl_certs,
     )

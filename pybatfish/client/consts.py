@@ -251,6 +251,8 @@ class CoordConsts(object):
     SVC_RSC_UPLOAD_QUESTION = "uploadquestion"
     SVC_RSC_UPLOAD_SNAPSHOT = "uploadsnapshot"
 
+    KEY_API_VERSION = "api_version"
+
 
 class CoordConstsV2(object):
     """
@@ -267,8 +269,12 @@ class CoordConstsV2(object):
 
     QP_KEY = "key"
     QP_VERBOSE = "verbose"
+    QP_MAX_SUGGESTIONS = "maxsuggestions"
+    QP_NAME = "name"
+    QP_QUERY = "query"
 
     RSC_ANSWER = "answer"
+    RSC_AUTOCOMPLETE = "autocomplete"
     RSC_FORK = "fork"
     RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
     RSC_INPUT = "input"
@@ -282,4 +288,8 @@ class CoordConstsV2(object):
     RSC_REFERENCE_LIBRARY = "referencelibrary"
     RSC_SETTINGS = "settings"
     RSC_SNAPSHOTS = "snapshots"
+    RSC_WORK = "work"
     RSC_WORK_LOG = "worklog"
+
+    PROP_TASK = "task"
+    PROP_WORK_STATUS_CODE = "workstatuscode"

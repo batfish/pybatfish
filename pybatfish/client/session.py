@@ -21,7 +21,18 @@ import logging
 import os
 import tempfile
 import zipfile
-from typing import IO, Any, Callable, Dict, List, Optional, Text, Union  # noqa: F401
+from io import SEEK_CUR, SEEK_SET
+from typing import (  # noqa: F401
+    IO,
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Text,
+    Tuple,
+    Union,
+)
 
 import pkg_resources
 from deprecated import deprecated
@@ -44,7 +55,6 @@ from pybatfish.client.asserts import (
     assert_no_unestablished_bgp_sessions,
 )
 from pybatfish.client.consts import CoordConsts, WorkStatusCode
-from pybatfish.client.restv2helper import get_component_versions
 from pybatfish.client.workhelper import get_work_status
 from pybatfish.datamodel import (
     AutoCompleteSuggestion,
@@ -312,6 +322,8 @@ class Session(object):
     :ivar port_v2: The additional port of batfish service (9996 by default)
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
+    :ivar use_deprecated_workmgr_v1: Whether to use WorkMgrV1 instead of V2 for calls added in API
+                                     version 2.1.0. See help(Session.use_deprecated_workmgr_v1).
     """
 
     def __init__(
@@ -323,6 +335,7 @@ class Session(object):
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        use_deprecated_workmgr_v1: Optional[bool] = None,
     ):
         # Coordinator args
         self.host = host  # type: str
@@ -352,6 +365,15 @@ class Session(object):
         # Auto-load question templates
         if load_questions:
             self.q.load()
+
+        self._use_deprecated_workmgr_v1 = (
+            use_deprecated_workmgr_v1
+        )  # type: Optional[bool]
+        if self._use_deprecated_workmgr_v1 is None:
+            use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
+            if use_v1_env:
+                self._use_deprecated_workmgr_v1 = bool(int(use_v1_env))
+        # if still None, will be set upon first query
 
     # Support old property names
     @property  # type: ignore
@@ -458,10 +480,12 @@ class Session(object):
         session = session_module(**params)  # type: Session
         return session
 
-    def _get_bf_version(self):
-        # type: () -> Optional[Text]
+    def _get_bf_version(self) -> str:
         """Get the Batfish backend version."""
-        return get_component_versions(self).get("Batfish")
+        bf_version = self.get_component_versions().get("Batfish")
+        if not bf_version:
+            raise BatfishException("backend did not return a version for 'Batfish'")
+        return str(bf_version)
 
     def delete_network(self, name):
         # type: (str) -> None
@@ -797,12 +821,13 @@ class Session(object):
 
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
+        self._check_network()
         return get_work_status(work_item, self)
 
     def get_component_versions(self):
         # type: () -> Dict[str, Any]
         """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
-        return get_component_versions(self)
+        return restv2helper.get_component_versions(self)
 
     def init_snapshot(self, upload, name=None, overwrite=False, extra_args=None):
         # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> str
@@ -892,10 +917,13 @@ class Session(object):
 
     def __init_snapshot_from_io(self, name, fd):
         # type: (str, IO) -> None
-        json_data = workhelper.get_data_upload_snapshot(self, name, fd)
-        resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
-        )
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
+            resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
+            )
+        else:
+            restv2helper.upload_snapshot(self, name, fd)
 
     def __init_snapshot_from_file(self, name, file_to_send):
         # type: (str, str) -> None
@@ -949,8 +977,18 @@ class Session(object):
         if isinstance(upload, str):
             self.__init_snapshot_from_file(name, upload)
         else:
-            if not zipfile.is_zipfile(upload):
-                raise ValueError("The provided data is not a valid zip file")
+            seekable = (
+                hasattr(upload, "seek")
+                and hasattr(upload, "seekable")
+                and upload.seekable()
+            )
+            if (
+                seekable
+            ):  # else assume it's a zipfile, and rely on backend to say otherwise
+                old_pos = upload.seek(0, SEEK_CUR)
+                if not zipfile.is_zipfile(upload):
+                    raise ValueError("The provided data is not a valid zip file")
+                upload.seek(old_pos, SEEK_SET)
             # upload is an IO-like object already
             self.__init_snapshot_from_io(name, upload)
 
@@ -966,19 +1004,23 @@ class Session(object):
         """
         return [d["name"] for d in restv2helper.list_networks(self)]
 
-    def list_incomplete_works(self):
-        # type: () -> Dict[str, Any]
+    def list_incomplete_works(self) -> Dict[str, Any]:
         """
         Get pending work that is incomplete.
 
         :return: JSON dictionary of question name to question object
         :rtype: dict
         """
-        json_data = workhelper.get_data_list_incomplete_work(self)
-        response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
-        )
-        return response
+        self._check_network()
+
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_list_incomplete_work(self)
+            response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
+            )
+            return response
+        statuses = restv2helper.list_incomplete_work(self)
+        return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
 
     def list_snapshots(self, verbose=False):
         # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
@@ -1058,18 +1100,22 @@ class Session(object):
             if e.response.status_code != 404:
                 raise BatfishException("Unknown error accessing network", e)
 
-        json_data = workhelper.get_data_init_network(self, name)
-        json_response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
-        )
-
-        network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
-        if network_name is None:
-            raise BatfishException(
-                "Network initialization failed. Server response: {}".format(
-                    json_response
-                )
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_init_network(self, name)
+            json_response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
             )
+
+            network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
+            if network_name is None:
+                raise BatfishException(
+                    "Network initialization failed. Server response: {}".format(
+                        json_response
+                    )
+                )
+        else:
+            restv2helper.init_network(self, name)
+            network_name = name
 
         self.network = str(network_name)
         return self.network
@@ -1237,8 +1283,12 @@ class Session(object):
 
             return self.snapshot
 
-    def auto_complete(self, completion_type, query, max_suggestions=None):
-        # type: (VariableType, str, Optional[int]) -> List[AutoCompleteSuggestion]
+    def auto_complete(
+        self,
+        completion_type: VariableType,
+        query: str,
+        max_suggestions: Optional[int] = None,
+    ) -> List[AutoCompleteSuggestion]:
         """
         Get a list of autocomplete suggestions that match the provided query based on the variable type.
 
@@ -1259,23 +1309,67 @@ class Session(object):
         :type completion_type: :class:`~pybatfish.datamodel.primitives.VariableType`
         :param query: The partial string to match suggestions on
         :type query: str
-        :param max_suggestions: Optional max number of suggestions to be returned
+        :param max_suggestions: Optional max number of suggestions to be returned. 0 is treated as no limit.
         :type max_suggestions: int
         """
-        json_data = workhelper.get_data_auto_complete(
+        if max_suggestions and max_suggestions < 0:
+            raise ValueError("max_suggestions cannot be negative")
+        self._check_network()
+        if self.use_deprecated_workmgr_v1():
+            json_data = workhelper.get_data_auto_complete(
+                self, completion_type, query, max_suggestions
+            )
+            response = resthelper.get_json_response(
+                self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
+            )
+            if CoordConsts.SVC_KEY_SUGGESTIONS in response:
+                suggestions = [
+                    AutoCompleteSuggestion.from_dict(json.loads(suggestion))
+                    for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
+                ]
+                return suggestions
+
+            raise BatfishException("Unexpected response: {}.".format(response))
+        response = restv2helper.auto_complete(
             self, completion_type, query, max_suggestions
         )
-        response = resthelper.get_json_response(
-            self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
-        )
-        if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-            suggestions = [
-                AutoCompleteSuggestion.from_dict(json.loads(suggestion))
-                for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
-            ]
-            return suggestions
+        results = [
+            AutoCompleteSuggestion.from_dict(suggestion)
+            for suggestion in response.get(CoordConsts.SVC_KEY_SUGGESTIONS, [])
+        ]
+        # TODO: Should instead reject if snapshot is not set but variable type requires a snapshot
+        if not results and not self.snapshot:
+            logging.getLogger(__name__).warning(
+                "No results, but snapshot is not set. You might get results if you first call <session>.set_snapshot"
+            )
+        return results
 
-        raise BatfishException("Unexpected response: {}.".format(response))
+    def use_deprecated_workmgr_v1(self) -> bool:
+        """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0
+
+        WorkMgrV1 is deprecated, and will be removed from backend Batfish in the near future.
+
+        The decision to use old WorkMgrV1 calls instead of their ported versions in API version
+        2.1.0 is made as follows:
+
+        If use_deprecated_workmgr_v1=True is passed to Session(): use V1
+        Else if use_deprecated_workmgr_v1=False is passed to Session(): use V2
+        Else:
+          If pybf_use_deprecated_workmgr_v1=1 is set in the environment: use V1
+          Else if pybf_use_deprecated_workmgr_v1=0 is set in the environment: use V2
+          Else:
+            If result of backend version query for API version is >= 2.1.0: use V2
+            Else (no api version returned or api version < 2.1.0): use V1
+        """
+        if self._use_deprecated_workmgr_v1 is None:
+            self._use_deprecated_workmgr_v1 = not self._backend_supports_exclusive_v2()
+        return self._use_deprecated_workmgr_v1
+
+    def _backend_supports_exclusive_v2(self) -> bool:
+        v2_api_version = restv2helper.get_api_version(self)
+        return not _version_less_than(
+            _version_to_tuple(str(v2_api_version)), _version_to_tuple("2.1.0")
+        )
 
 
 def _text_with_platform(text, platform):
@@ -1296,4 +1390,27 @@ def _create_in_memory_zip(text, filename, platform):
     with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
         zipfilename = os.path.join("snapshot", "configs", filename)
         zf.writestr(zipfilename, _text_with_platform(text, platform))
+    # rewind after writing
+    data.seek(0, SEEK_SET)
     return data
+
+
+def _version_to_tuple(version: str) -> Tuple[int, ...]:
+    """Convert version string N(.N)* to a tuple of ints."""
+    return tuple((int(i) for i in version.split(".")))
+
+
+def _version_less_than(version: Tuple[int, ...], min_version: Tuple[int, ...]) -> bool:
+    """
+    Check if specified version is less than the specified min version.
+
+    Assumed dev versions start with a 0.
+    """
+    # Assume the dev version starts with a 0
+    if version[0] != 0:
+        return version < min_version
+    # Dev version is considered newer than any version
+    return False
+
+
+_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV = "pybf_use_deprecated_workmgr_v1"

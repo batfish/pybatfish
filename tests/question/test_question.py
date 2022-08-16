@@ -13,11 +13,12 @@
 #   limitations under the License.
 import inspect
 import json
+import os
+from unittest.mock import patch
 
 import pytest
 
-from pybatfish.client.commands import bf_session
-from pybatfish.client.session import Session
+from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (
@@ -31,6 +32,10 @@ from pybatfish.question.question import (
     list_questions,
     load_questions,
 )
+
+with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
+    from pybatfish.client.commands import bf_session
+
 
 TEST_QUESTION_NAME = "testQuestionName"
 TEST_QUESTION_DICT = {
@@ -52,7 +57,7 @@ TEST_QUESTION_DICT = {
 @pytest.fixture()
 def session():
     """Session associated with questions created in tests."""
-    yield Session(load_questions=False)
+    yield Session(load_questions=False, use_deprecated_workmgr_v1=False)
 
 
 def test_min_length():

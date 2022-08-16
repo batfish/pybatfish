@@ -68,6 +68,7 @@ def get_json_response(session, resource, jsonData=None, useHttpGet=False):
     :param jsonData: any HTTP POST data to send, as a dictionary
     :param useHttpGet: boolean, whether HTTP GET request should be sent
     """
+    assert session.use_deprecated_workmgr_v1()
     if useHttpGet:
         response = _get_data(session, resource)
     else:
