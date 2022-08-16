@@ -1362,10 +1362,10 @@ class Session(object):
             Else (no api version returned or api version < 2.1.0): use V1
         """
         if self._use_deprecated_workmgr_v1 is None:
-            self._use_deprecated_workmgr_v1 = self._should_use_deprecated_workmgr_v1()
+            self._use_deprecated_workmgr_v1 = self._backend_supports_exclusive_v2()
         return self._use_deprecated_workmgr_v1
 
-    def _should_use_deprecated_workmgr_v1(self) -> bool:
+    def _backend_supports_exclusive_v2(self) -> bool:
         v2_api_version = restv2helper.get_api_version(self)
         return _version_less_than(
             _version_to_tuple(str(v2_api_version)), _version_to_tuple("2.1.0")
