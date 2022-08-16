@@ -32,7 +32,7 @@ from urllib3 import Retry
 from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
-from pybatfish.client.consts import CoordConstsV2
+from pybatfish.client.consts import CoordConsts, CoordConstsV2
 from pybatfish.datamodel.referencelibrary import (  # noqa: F401
     NodeRoleDimension,
     NodeRolesData,
@@ -487,7 +487,7 @@ def get_component_versions(session):
 def get_workmgr_v2_api_version(session: "Session") -> str:
     """Gets the WorkMgrV2 API version if present, else returns '2.0.0'"""
     component_versions = get_component_versions(session)
-    return str(component_versions.get(CoordConstsV2.KEY_V2_API_VERSION, "2.0.0"))
+    return str(component_versions.get(CoordConsts.KEY_API_VERSION, "2.0.0"))
 
 
 def get_question_templates(session: "Session", verbose: bool) -> Dict:

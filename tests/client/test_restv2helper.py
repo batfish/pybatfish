@@ -12,6 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import io
+import json
 from unittest.mock import Mock, patch
 
 import pytest
@@ -19,7 +20,7 @@ import requests
 from requests import HTTPError, Response
 
 from pybatfish.client import restv2helper
-from pybatfish.client.consts import CoordConstsV2
+from pybatfish.client.consts import CoordConsts
 from pybatfish.client.options import Options
 from pybatfish.client.restv2helper import (
     _adapter,
@@ -219,21 +220,19 @@ def test_fail_fast_session_adapters():
     assert not retries.method_whitelist
 
 
-def test_get_workmgr_v2_api_version_old(session) -> None:
-    with patch(
-        "pybatfish.client.restv2helper.get_component_versions"
-    ) as mock_get_component_versions:
-        mock_get_component_versions.return_value = {}
+def test_get_workmgr_v2_api_version_old(session, request_session) -> None:
+    mock_response = MockResponse(json.dumps({}))
+    mock_response.status_code = 200
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        request_session.get.return_value = mock_response
         assert get_workmgr_v2_api_version(session) == "2.0.0"
 
 
-def test_get_workmgr_v2_api_version_new(session) -> None:
-    with patch(
-        "pybatfish.client.restv2helper.get_component_versions"
-    ) as mock_get_component_versions:
-        mock_get_component_versions.return_value = {
-            CoordConstsV2.KEY_V2_API_VERSION: "2.1.0"
-        }
+def test_get_workmgr_v2_api_version_new(session, request_session) -> None:
+    mock_response = MockResponse(json.dumps({CoordConsts.KEY_API_VERSION: "2.1.0"}))
+    mock_response.status_code = 200
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        request_session.get.return_value = mock_response
         assert get_workmgr_v2_api_version(session) == "2.1.0"
 
 

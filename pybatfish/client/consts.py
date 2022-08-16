@@ -251,6 +251,8 @@ class CoordConsts(object):
     SVC_RSC_UPLOAD_QUESTION = "uploadquestion"
     SVC_RSC_UPLOAD_SNAPSHOT = "uploadsnapshot"
 
+    KEY_API_VERSION = "api_version"
+
 
 class CoordConstsV2(object):
     """
@@ -291,5 +293,3 @@ class CoordConstsV2(object):
 
     PROP_TASK = "task"
     PROP_WORK_STATUS_CODE = "workstatuscode"
-
-    KEY_V2_API_VERSION = "workmgrv2_api_version"
