@@ -1356,7 +1356,7 @@ class Session(object):
         Else if use_deprecated_workmgr_v1=False is passed to Session(): use V2
         Else:
           If pybf_use_deprecated_workmgr_v1=1 is set in the environment: use V1
-          Else if use_deprecated_workmgr_v1=0 is set in the environment: use V2
+          Else if pybf_use_deprecated_workmgr_v1=0 is set in the environment: use V2
           Else:
             If result of backend version query for API version is >= 2.1.0: use V2
             Else (no api version returned or api version < 2.1.0): use V1
