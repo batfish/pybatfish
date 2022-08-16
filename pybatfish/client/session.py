@@ -322,6 +322,8 @@ class Session(object):
     :ivar port_v2: The additional port of batfish service (9996 by default)
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
+    :ivar use_deprecated_workmgr_v1: Whether to use WorkMgrV1 instead of V2 for calls added in API
+                                     version 2.1.0. See help(Session.use_deprecated_workmgr_v1).
     """
 
     def __init__(
@@ -1343,7 +1345,22 @@ class Session(object):
         return results
 
     def use_deprecated_workmgr_v1(self) -> bool:
-        """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0"""
+        """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0
+
+        WorkMgrV1 is deprecated, and will be removed from backend Batfish in the near future.
+
+        The decision to use old WorkMgrV1 calls instead of their ported versions in API version
+        2.1.0 is made as follows:
+
+        If use_deprecated_workmgr_v1=True is passed to Session(): use V1
+        Else if use_deprecated_workmgr_v1=False is passed to Session(): use V2
+        Else:
+          If pybf_use_deprecated_workmgr_v1=1 is set in the environment: use V1
+          Else if use_deprecated_workmgr_v1=0 is set in the environment: use V2
+          Else:
+            If result of backend version query for API version is >= 2.1.0: use V2
+            Else (no api version returned or api version < 2.1.0): use V1
+        """
         if self._use_deprecated_workmgr_v1 is None:
             self._use_deprecated_workmgr_v1 = self._should_use_deprecated_workmgr_v1()
         return self._use_deprecated_workmgr_v1
