@@ -484,8 +484,8 @@ def get_component_versions(session):
     return _get_dict(session, "/version")
 
 
-def get_workmgr_v2_api_version(session: "Session") -> str:
-    """Gets the WorkMgrV2 API version if present, else returns '2.0.0'"""
+def get_api_version(session: "Session") -> str:
+    """Gets the API version if present, else returns '2.0.0'"""
     component_versions = get_component_versions(session)
     return str(component_versions.get(CoordConsts.KEY_API_VERSION, "2.0.0"))
 

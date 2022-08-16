@@ -1349,7 +1349,7 @@ class Session(object):
         return self._use_deprecated_workmgr_v1
 
     def _should_use_deprecated_workmgr_v1(self) -> bool:
-        v2_api_version = restv2helper.get_workmgr_v2_api_version(self)
+        v2_api_version = restv2helper.get_api_version(self)
         return _version_less_than(
             _version_to_tuple(str(v2_api_version)), _version_to_tuple("2.1.0")
         )

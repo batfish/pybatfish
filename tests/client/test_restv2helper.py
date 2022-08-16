@@ -33,7 +33,7 @@ from pybatfish.client.restv2helper import (
     _put,
     _requests_session,
     _requests_session_fail_fast,
-    get_workmgr_v2_api_version,
+    get_api_version,
 )
 from pybatfish.client.session import Session
 
@@ -220,20 +220,20 @@ def test_fail_fast_session_adapters():
     assert not retries.method_whitelist
 
 
-def test_get_workmgr_v2_api_version_old(session, request_session) -> None:
+def test_get_api_version_old(session, request_session) -> None:
     mock_response = MockResponse(json.dumps({}))
     mock_response.status_code = 200
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         request_session.get.return_value = mock_response
-        assert get_workmgr_v2_api_version(session) == "2.0.0"
+        assert get_api_version(session) == "2.0.0"
 
 
-def test_get_workmgr_v2_api_version_new(session, request_session) -> None:
+def test_get_api_version_new(session, request_session) -> None:
     mock_response = MockResponse(json.dumps({CoordConsts.KEY_API_VERSION: "2.1.0"}))
     mock_response.status_code = 200
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         request_session.get.return_value = mock_response
-        assert get_workmgr_v2_api_version(session) == "2.1.0"
+        assert get_api_version(session) == "2.1.0"
 
 
 if __name__ == "__main__":
