@@ -254,11 +254,21 @@ def auto_complete_tester_session(session, completion_types):
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
             if len(suggestions) > 0:
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
+    finally:
+        session.delete_network(name)
 
+
+def auto_complete_limited_tester_session(session, completion_types):
+    try:
+        name = session.set_network()
+        session.init_snapshot(join(_this_dir, "snapshot"))
+        for completion_type in completion_types:
             suggestions_limited = session.auto_complete(
                 completion_type, ".*", max_suggestions=1
             )
             assert len(suggestions_limited) <= 1
+            # Not all completion types will have suggestions since this test snapshot only contains one empty config.
+            # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
             if len(suggestions_limited) > 0:
                 assert isinstance(suggestions_limited[0], AutoCompleteSuggestion)
     finally:
@@ -269,9 +279,26 @@ def test_auto_complete():
     auto_complete_tester(COMPLETION_TYPES)
 
 
+def test_auto_complete_session(session):
+    auto_complete_tester_session(session, COMPLETION_TYPES)
+
+
+@requires_bf("2022.08.17")
+def test_auto_complete_limited_session(session):
+    auto_complete_limited_tester_session(session, COMPLETION_TYPES)
+
+
 @requires_bf("2021.07.09")
 def test_auto_complete_bgp_route_status_spec(session):
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
     auto_complete_tester_session(session, [VariableType.BGP_ROUTE_STATUS_SPEC])
+
+
+@requires_bf("2022.08.17")
+def test_auto_complete_limited_bgp_route_status_spec(session):
+    """
+    This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
+    """
+    auto_complete_limited_tester_session(session, [VariableType.BGP_ROUTE_STATUS_SPEC])
