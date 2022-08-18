@@ -6,7 +6,6 @@ version=$1
 
 shift
 # remaining args are extra coordinator args
-extra_coordinator_args=("$@")
 
 apt update -qq && apt -qq install -y openjdk-11-jre-headless
 tar -xzf workspace/questions.tgz
