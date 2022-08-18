@@ -4,12 +4,11 @@ set -euo pipefail
 
 version=$1
 
-shift
-# remaining args are extra coordinator args
-
 apt update -qq && apt -qq install -y openjdk-11-jre-headless
 tar -xzf workspace/questions.tgz
 
+shift
+# remaining args are extra coordinator args
 coordinator_args=(\
   -templatedirs=questions \
   -periodassignworkms=5 \
