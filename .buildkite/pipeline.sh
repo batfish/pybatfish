@@ -86,7 +86,7 @@ for version in ${PYBATFISH_PYTHON_TEST_VERSIONS[@]}; do
   cat <<EOF
   - label: "Python ${version} integration tests"
     command:
-      - bash .buildkite/integration_tests.sh ${version}
+      - bash .buildkite/integration_tests.sh ${version} -uselegacyworkmgrv1=false
     artifact_paths:
       - workspace/batfish.log
     plugins:

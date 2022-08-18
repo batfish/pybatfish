@@ -4,9 +4,25 @@ set -euo pipefail
 
 version=$1
 
+shift
+# remaining args are extra coordinator args
+extra_coordinator_args=("$@")
+
 apt update -qq && apt -qq install -y openjdk-11-jre-headless
 tar -xzf workspace/questions.tgz
-java -cp workspace/allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > workspace/batfish.log &
+
+coordinator_args=(\
+  -templatedirs=questions \
+  -periodassignworkms=5 \
+  "$@" \
+)
+
+allinone_args=(\
+  -runclient=false
+  -coordinatorargs="$(echo -n "${coordinator_args[@]}")" \
+)
+
+java -cp workspace/allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > workspace/batfish.log &
 pip install -e .[dev] -q
 pytest tests/integration
 
