@@ -1,0 +1,19 @@
+name: Pre-commit
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - spencer-precommit-workflow
+  schedule:
+    - cron: '0 0,19 * * *'  # 12PM and 5PM Pacific; daily
+
+
+jobs:
+  precommit:
+    uses: ./.github/workflows/reusable-precommit.yml
+    with:
+      batfish_repo: 'batfish/batfish'
+      batfish_ref: 'master'
+    secrets:
+      PYBATFISH_CODECOV_TOKEN: ${{ secrets.PYBATFISH_CODECOV_TOKEN }}
