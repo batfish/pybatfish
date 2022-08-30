@@ -92,7 +92,6 @@ jobs:
         continue-on-error: true
         run: |
           version=$(echo ${{ matrix.python_version }} | sed s/\\.//)
-          # Let codecov upload fail - codecov goes down not infrequently.
           bash <(curl -s https://codecov.io/bash) -t ${{ secrets.PYBATFISH_CODECOV_TOKEN }} -F unit${version}
     strategy:
       matrix:
@@ -194,6 +193,7 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - uses: actions/setup-python@v4
+        # Newer python doesn't work with current doc building
         with:
           python-version: 3.7
       - name: Download bf JAR
@@ -210,7 +210,6 @@ jobs:
           sudo apt -qq install -y pandoc
           pip install -e .[dev] -q
           pushd docs
-          ls -la
           pip install -r requirements.txt
           make html
           popd
