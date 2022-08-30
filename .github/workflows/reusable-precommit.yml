@@ -127,14 +127,22 @@ jobs:
           coordinator_args=(\
             -templatedirs=questions \
             -periodassignworkms=5 \
-            ${{ matrix.coordinator_args }} \
           )
+          if [[ ${{ matrix.force_deprecated_workmgr_v1 }} -eq "0" ]]; then
+            coordinator_args=(\
+              "${coordinator_args[@]}" \
+              -uselegacyworkmgrv1=false \
+            )
+          fi
           allinone_args=(\
             -runclient=false
             -coordinatorargs="$(echo -n "${coordinator_args[@]}")" \
           )
           java -cp allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > batfish.log &
           pip install -e .[dev] -q
+          if [[ ${{ matrix.force_deprecated_workmgr_v1 }} -eq "1" ]]; then
+            export pybf_use_deprecated_workmgr_v1=1
+          fi
           pytest tests/integration
       - name: codecov
         # Let codecov upload fail - codecov goes down not infrequently.
@@ -148,9 +156,9 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-        coordinator_args:
-          - ""
-          - "-uselegacyworkmgrv1=false"
+        force_deprecated_workmgr_v1:
+          - "0"
+          - "1"
   doc_tests:
     runs-on: ubuntu-latest
     needs:
