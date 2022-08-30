@@ -141,7 +141,7 @@ jobs:
         continue-on-error: true
         run: |
           version=$(echo ${{ matrix.python_version }} | sed s/\\.//)
-          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.PYBATFISH_CODECOV_TOKEN }} -F unit${version}
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.PYBATFISH_CODECOV_TOKEN }} -F integration${version}
     strategy:
       matrix:
         python_version:
