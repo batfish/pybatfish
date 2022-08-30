@@ -183,9 +183,6 @@ jobs:
           pytest pybatfish --doctest-modules
   build_docs:
     runs-on: ubuntu-latest
-    needs:
-      - bf_build
-      - unit_tests
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-java@v3
@@ -196,14 +193,6 @@ jobs:
         # Newer python doesn't work with current doc building
         with:
           python-version: 3.7
-      - name: Download bf JAR
-        uses: actions/download-artifact@v3
-        with:
-          name: bf_jar
-      - name: Download questions
-        uses: actions/download-artifact@v3
-        with:
-          name: bf_questions
       - name: Build docs
         run: |
           sudo apt update -qq
