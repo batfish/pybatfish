@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - spencer-precommit-workflow
   schedule:
     - cron: '0 0,19 * * *'  # 12PM and 5PM Pacific; daily
 
