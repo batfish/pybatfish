@@ -1,0 +1,212 @@
+name: Pre-commit (reusable)
+on:
+  workflow_call:
+    inputs:
+      batfish_repo:
+        description: 'Git repo containing Batfish'
+        required: false
+        default: 'batfish/batfish'
+        type: string
+      batfish_ref:
+        description: 'Git ref for Batfish version to release'
+        required: false
+        default: 'master'
+        type: string
+    secrets:
+      PYBATFISH_CODECOV_TOKEN:
+        required: true
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Run checks
+        run: |
+          pip install pre-commit
+          pre-commit run --all-files
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Run checks
+        run: |
+          pip install 'mypy<0.800'
+          mypy pybatfish tests
+  bf_build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Batfish repo
+        uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.batfish_repo }}
+          ref: ${{ inputs.batfish_ref }}
+      - name: Bazel cache
+        uses: actions/cache@v3
+        with:
+          path: "~/.cache/bazel"
+          key: ${{runner.os}}-bazel-${{ hashFiles('WORKSPACE', 'maven_install.json') }}-${{ needs.get_date.outputs.ymd }}
+          restore-keys: |
+            ${{runner.os}}-bazel-${{ hashFiles('WORKSPACE', 'maven_install.json') }}-
+            ${{runner.os}}-bazel-
+      - name: Build JAR
+        run: |
+          bazel build //projects/allinone:allinone_main_deploy.jar
+          cp bazel-bin/projects/allinone/allinone_main_deploy.jar allinone.jar
+      - name: Questions tar
+        run: |
+          TMP_DIR=$(mktemp -d)
+          QUESTION_DIR=${TMP_DIR}/questions
+          mkdir -p ${QUESTION_DIR}
+          cp -r questions/{stable,experimental} ${QUESTION_DIR}
+          tar -czf questions.tgz -C ${TMP_DIR} questions
+      - name: Upload JAR
+        uses: actions/upload-artifact@v3
+        with:
+          name: bf_jar
+          path: allinone.jar
+      - name: Upload questions
+        uses: actions/upload-artifact@v3
+        with:
+          name: bf_questions
+          path: questions.tgz
+  unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Run tests
+        run: |
+          pip install -e .[dev]
+          pytest tests
+      - name: codecov
+        # Let codecov upload fail - codecov goes down not infrequently.
+        continue-on-error: true
+        run: |
+          version=$(echo ${{ matrix.python_version }} | sed s/\\.//)
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.PYBATFISH_CODECOV_TOKEN }} -F unit${version}
+    strategy:
+      matrix:
+        python_version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+  integration_tests:
+    runs-on: ubuntu-latest
+    needs:
+      - bf_build
+      - unit_tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python_version }}
+      - name: Download bf JAR
+        uses: actions/download-artifact@v3
+        with:
+          name: bf_jar
+      - name: Download questions
+        uses: actions/download-artifact@v3
+        with:
+          name: bf_questions
+      - name: Run tests
+        run: |
+          tar -xzf questions.tgz
+          coordinator_args=(\
+            -templatedirs=questions \
+            -periodassignworkms=5 \
+          )
+          if [[ ${{ matrix.force_deprecated_workmgr_v1 }} -eq "0" ]]; then
+            coordinator_args=(\
+              "${coordinator_args[@]}" \
+              -uselegacyworkmgrv1=false \
+            )
+          fi
+          allinone_args=(\
+            -runclient=false
+            -coordinatorargs="$(echo -n "${coordinator_args[@]}")" \
+          )
+          java -cp allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > batfish.log &
+          pip install -e .[dev] -q
+          if [[ ${{ matrix.force_deprecated_workmgr_v1 }} -eq "1" ]]; then
+            export pybf_use_deprecated_workmgr_v1=1
+          fi
+          pytest tests/integration
+      - name: codecov
+        # Let codecov upload fail - codecov goes down not infrequently.
+        continue-on-error: true
+        run: |
+          version=$(echo ${{ matrix.python_version }} | sed s/\\.//)
+          bash <(curl -s https://codecov.io/bash) -t ${{ secrets.PYBATFISH_CODECOV_TOKEN }} -F integration${version}
+    strategy:
+      matrix:
+        python_version:
+          - "3.7"
+          - "3.8"
+          - "3.9"
+        force_deprecated_workmgr_v1:
+          - "0"
+          - "1"
+  doc_tests:
+    runs-on: ubuntu-latest
+    needs:
+      - bf_build
+      - unit_tests
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+      - name: Download bf JAR
+        uses: actions/download-artifact@v3
+        with:
+          name: bf_jar
+      - name: Download questions
+        uses: actions/download-artifact@v3
+        with:
+          name: bf_questions
+      - name: Run tests
+        run: |
+          tar -xzf questions.tgz
+          java -cp allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > batfish.log &
+          pip install -r docs/requirements.txt
+          pip install -e .[dev] -q
+          pytest docs
+          pytest pybatfish --doctest-modules
+  build_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+      - uses: actions/setup-python@v4
+        # Newer python doesn't work with current doc building
+        with:
+          python-version: 3.7
+      - name: Build docs
+        run: |
+          sudo apt update -qq
+          sudo apt -qq install -y pandoc
+          pip install -e .[dev] -q
+          pushd docs
+          pip install -r requirements.txt
+          make html
+          popd

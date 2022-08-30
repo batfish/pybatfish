@@ -23,7 +23,3 @@ allinone_args=(\
 java -cp workspace/allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > workspace/batfish.log &
 pip install -e .[dev] -q
 pytest tests/integration
-
-# Let codecov upload fail - codecov goes down not infrequently.
-set +o pipefail
-bash <(curl -s https://codecov.io/bash) -t 91216eec-ae5e-4836-8ee5-1d5a71d1b5bc -F integration${version//.}
