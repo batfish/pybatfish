@@ -31,6 +31,7 @@ from typing import (  # noqa: F401
     Union,
 )
 
+from collections import defaultdict
 from deepdiff import DeepDiff
 from pandas import DataFrame
 
@@ -185,17 +186,22 @@ def assert_has_route(routes, expected_route, node, vrf="default", soft=False):
     :type soft: bool
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
-    try:
-        d = routes[node]
-    except KeyError:
+    data = defaultdict(list)
+
+    for row in routes.rows:
+        data[row["Node"]["name"]].append(row)
+
+    if not any(node in d for d in data):
         raise BatfishAssertException("No node: {}".format(node))
 
-    try:
-        d = d[vrf]
-    except KeyError:
+    node_info = data[node]
+
+    if not any(d["VRF"] == vrf for d in node_info):
         raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
 
-    if not any(_is_dict_match(actual_route, expected_route) for actual_route in d):
+    networks = []
+
+    if not any(net["Network"] == expected_route for net in networks):
         err_text = "No route matches for {} on node {}, VRF {}".format(
             expected_route, node, vrf
         )
@@ -218,24 +224,28 @@ def assert_has_no_route(routes, expected_route, node, vrf="default", soft=False)
     :type soft: bool
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
-    try:
-        d = routes[node]
-    except KeyError:
-        warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
-        return True
+    data = defaultdict(list)
 
-    try:
-        d = d[vrf]
-    except KeyError:
-        warnings.warn(
-            "No VRF: {} on node {}".format(vrf, node), category=BatfishAssertWarning
-        )
-        return True
+    for row in routes.rows:
+        data[row["Node"]["name"]].append(row)
 
-    all_matches = [route for route in d if _is_dict_match(route, expected_route)]
-    if all_matches:
+    if not any(node in d for d in data):
+        raise BatfishAssertException("No node: {}".format(node))
+
+    node_info = data[node]
+
+    if not any(d["VRF"] == vrf for d in node_info):
+        raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
+
+    networks = []
+
+    for network in data[node]:
+        if network["VRF"] == vrf:
+            networks.append(network)
+
+    if any(net["Network"] == expected_route for net in networks):
         err_text = "Found route(s) that match, "
-        "when none were expected:\n{}".format(all_matches)
+        "when none were expected:\n{}".format(expected_route)
         return _raise_common(err_text, soft)
     return True
 
