@@ -141,7 +141,7 @@ def _is_dict_match(actual, expected):
         _subdict(actual, expected.keys()),
         expected,
         ignore_order=True,
-        verbose_level=0,
+        verbose_level=1,
         view="text",
     )
     return not diff

@@ -21,6 +21,7 @@ from pybatfish.client.asserts import (
     UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
     _format_df,
     _get_question_object,
+    _is_dict_match,
     _raise_common,
     assert_filter_denies,
     assert_filter_has_no_unreachable_lines,
@@ -985,6 +986,20 @@ def test_get_question_object():
             with pytest.raises(BatfishException) as err:
                 _get_question_object(bf, "qName")
             assert "qName question was not found" in str(err.value)
+
+
+def test_is_dict_match():
+    # equal
+    assert _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v1", "k2": "v2"})
+
+    # strict subset
+    assert _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v1"})
+
+    # extra key
+    assert not _is_dict_match({"k1": "v1", "k2": "v2"}, {"k3": "v3"})
+
+    # wrong value
+    assert not _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v3"})
 
 
 def test_has_route():
