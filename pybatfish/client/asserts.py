@@ -171,31 +171,38 @@ def _format_df(df, df_format):
         )
 
 
-# TODO: converge on representation of routes. (Blocked on backend batfish).
-# TODO: allow this to be role-based. (Again, backend support).
 def assert_has_route(routes, expected_route, node, vrf="default", soft=False):
     """Assert that a particular route is present.
 
-    :param routes: All routes returned by the Batfish routes question.
+    :param routes: Pandas DataFrame in format of routes returned by the Batfish routes or ribs questions.
+    :type routes: DataFrame
     :param expected_route: A dictionary describing route to match.
+    :type expected_route: Dict
     :param node: node hostname on which to look for a route.
+    :type node: str
     :param vrf: VRF name where the route should be present. Default is `default`.
+    :type node: str
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :type soft: bool
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
-    try:
-        d = routes[node]
-    except KeyError:
+
+    if not isinstance(routes, DataFrame):
+        raise TypeError("'routes' is not a Pandas DataFrame")
+
+    node_routes = routes[routes["Node"] == node]
+    if len(node_routes) == 0:
         raise BatfishAssertException("No node: {}".format(node))
 
-    try:
-        d = d[vrf]
-    except KeyError:
+    vrf_routes = node_routes[node_routes["VRF"] == vrf]
+    if len(vrf_routes) == 0:
         raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
 
-    if not any(_is_dict_match(actual_route, expected_route) for actual_route in d):
+    if not any(
+        _is_dict_match(actual_route, expected_route)
+        for actual_route in vrf_routes.to_dict(orient="records")
+    ):
         err_text = "No route matches for {} on node {}, VRF {}".format(
             expected_route, node, vrf
         )
@@ -209,30 +216,39 @@ def assert_has_no_route(routes, expected_route, node, vrf="default", soft=False)
     .. note:: If a node or VRF is missing in the route answer the assertion
         will NOT fail, but a warning will be generated.
 
-    :param routes: All routes returned by the Batfish routes question.
+    :param routes: Pandas DataFrame in format of routes returned by the Batfish routes or ribs questions.
+    :type routes: DataFrame
     :param expected_route: A dictionary describing route to match.
-    :param node: node hostname on which to look for expected route.
-    :param vrf: VRF name to check. Default is `default`.
+    :type expected_route: Dict
+    :param node: node hostname on which to look for a route.
+    :type node: str
+    :param vrf: VRF name where the route should be present. Default is `default`.
+    :type node: str
     :param soft: whether this assertion is soft (i.e., generates a warning but
         not a failure)
     :type soft: bool
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
-    try:
-        d = routes[node]
-    except KeyError:
+    if not isinstance(routes, DataFrame):
+        raise TypeError("'routes' is not a Pandas DataFrame")
+
+    node_routes = routes[routes["Node"] == node]
+    if len(node_routes) == 0:
         warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
         return True
 
-    try:
-        d = d[vrf]
-    except KeyError:
+    vrf_routes = node_routes[node_routes["VRF"] == vrf]
+    if len(vrf_routes) == 0:
         warnings.warn(
             "No VRF: {} on node {}".format(vrf, node), category=BatfishAssertWarning
         )
         return True
 
-    all_matches = [route for route in d if _is_dict_match(route, expected_route)]
+    all_matches = [
+        route
+        for route in vrf_routes.to_dict(orient="records")
+        if _is_dict_match(route, expected_route)
+    ]
     if all_matches:
         err_text = "Found route(s) that match, "
         "when none were expected:\n{}".format(all_matches)
