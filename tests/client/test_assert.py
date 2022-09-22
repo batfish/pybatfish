@@ -21,12 +21,15 @@ from pybatfish.client.asserts import (
     UNESTABLISHED_OSPF_SESSION_STATUS_SPEC,
     _format_df,
     _get_question_object,
+    _is_dict_match,
     _raise_common,
     assert_filter_denies,
     assert_filter_has_no_unreachable_lines,
     assert_filter_permits,
     assert_flows_fail,
     assert_flows_succeed,
+    assert_has_no_route,
+    assert_has_route,
     assert_no_duplicate_router_ids,
     assert_no_forwarding_loops,
     assert_no_incompatible_bgp_sessions,
@@ -983,6 +986,160 @@ def test_get_question_object():
             with pytest.raises(BatfishException) as err:
                 _get_question_object(bf, "qName")
             assert "qName question was not found" in str(err.value)
+
+
+def test_is_dict_match():
+    # equal
+    assert _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v1", "k2": "v2"})
+
+    # strict subset
+    assert _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v1"})
+
+    # extra key
+    assert not _is_dict_match({"k1": "v1", "k2": "v2"}, {"k3": "v3"})
+
+    # wrong value
+    assert not _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v3"})
+
+
+def test_has_route_unsupported_type_routes():
+    with pytest.raises(TypeError) as excinfo:
+        # noinspection PyTypeChecker
+        assert_has_route("bad type", {}, "n1")
+    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(
+        excinfo.value
+    )
+
+
+def test_has_route_dataframe_routes():
+    routes = DataFrame(
+        {
+            "Node": ["n1", "n1"],
+            "VRF": ["vrf1", "vrf2"],
+            "Network": ["10.10.10.0/24", "20.20.20.0/24"],
+        }
+    )
+
+    # missing node
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {}, "missing_node")
+    assert "No node" in str(excinfo.value)
+
+    # missing VRF
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {}, "n1", "missing_vrf")
+    assert "No VRF" in str(excinfo.value)
+
+    # missing route case 1: network does not exist at all
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {"Network": "30.30.30.30/32"}, "n1", "vrf1")
+    assert "No route" in str(excinfo.value)
+
+    # missing route case 2: network exists in the wrong vrf
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf2")
+    assert "No route" in str(excinfo.value)
+
+    # valid route
+    assert_has_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf1")
+
+
+def test_has_route_dict_routes():
+    routes = {
+        "n1": {
+            "vrf1": [{"Network": "10.10.10.0/24"}],
+            "vrf2": [{"Network": "20.20.20.0/24"}],
+        }
+    }
+
+    # missing node
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {}, "missing_node")
+    assert "No node" in str(excinfo.value)
+
+    # missing VRF
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {}, "n1", "missing_vrf")
+    assert "No VRF" in str(excinfo.value)
+
+    # missing route case 1: network does not exist at all
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {"Network": "30.30.30.30/32"}, "n1", "vrf1")
+    assert "No route" in str(excinfo.value)
+
+    # missing route case 2: network exists in the wrong vrf
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf2")
+    assert "No route" in str(excinfo.value)
+
+    # valid route
+    assert_has_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf1")
+
+
+def test_has_no_route_unsupported_type_routes():
+    with pytest.raises(TypeError) as excinfo:
+        # noinspection PyTypeChecker
+        assert_has_no_route("bad type", {}, "n1")
+    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(
+        excinfo.value
+    )
+
+
+def test_has_no_route_dataframe_routes():
+    routes = DataFrame(
+        {
+            "Node": ["n1", "n1"],
+            "VRF": ["vrf1", "vrf2"],
+            "Network": ["10.10.10.0/24", "20.20.20.0/24"],
+        }
+    )
+
+    # missing node
+    with pytest.warns(BatfishAssertWarning):
+        assert_has_no_route(routes, {}, "missing_node")
+
+    # missing VRF
+    with pytest.warns(BatfishAssertWarning):
+        assert_has_no_route(routes, {}, "n1", "missing_vrf")
+
+    # missing route case 1: network does not exist at all
+    assert_has_no_route(routes, {"Network": "30.30.30.30/32"}, "n1", "vrf1")
+
+    # missing route case 2: network exists in the wrong vrf
+    assert_has_no_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf2")
+
+    # present route
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_no_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf1")
+    assert "Found route(s)" in str(excinfo.value)
+
+
+def test_has_no_route_dict_routes():
+    routes = {
+        "n1": {
+            "vrf1": [{"Network": "10.10.10.0/24"}],
+            "vrf2": [{"Network": "20.20.20.0/24"}],
+        }
+    }
+
+    # missing node
+    with pytest.warns(BatfishAssertWarning):
+        assert_has_no_route(routes, {}, "missing_node")
+
+    # missing VRF
+    with pytest.warns(BatfishAssertWarning):
+        assert_has_no_route(routes, {}, "n1", "missing_vrf")
+
+    # missing route case 1: network does not exist at all
+    assert_has_no_route(routes, {"Network": "30.30.30.30/32"}, "n1", "vrf1")
+
+    # missing route case 2: network exists in the wrong vrf
+    assert_has_no_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf2")
+
+    # present route
+    with pytest.raises(BatfishAssertException) as excinfo:
+        assert_has_no_route(routes, {"Network": "10.10.10.0/24"}, "n1", "vrf1")
+    assert "Found route(s)" in str(excinfo.value)
 
 
 if __name__ == "__main__":
