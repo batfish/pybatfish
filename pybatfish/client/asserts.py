@@ -134,8 +134,7 @@ def _get_duplicate_router_ids(question_name, session=None, snapshot=None):
     return df_duplicate
 
 
-def _is_dict_match(actual, expected):
-    # type: (Dict, Dict) -> bool
+def _is_dict_match(actual: Dict[str, Any], expected: Dict[str, Any]) -> bool:
     """Matches two dictionaries. `expected` can be a subset of `actual`."""
     diff = DeepDiff(
         _subdict(actual, expected.keys()),
@@ -172,11 +171,11 @@ def _format_df(df, df_format):
 
 
 def assert_has_route(
-    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, any]]]]],
-    expected_route: Dict[str, any],
+    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, Any]]]]],
+    expected_route: Dict[str, Any],
     node: str,
-    vrf="default",
-    soft=False,
+    vrf: str = "default",
+    soft: bool = False,
 ) -> bool:
     """Assert that a particular route is present.
 
@@ -205,7 +204,7 @@ def assert_has_route(
 
 
 def _assert_has_route_dataframe_routes(
-    routes: DataFrame, expected_route: Dict[str, any], node: str, vrf: str, soft: bool
+    routes: DataFrame, expected_route: Dict[str, Any], node: str, vrf: str, soft: bool
 ) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
@@ -227,23 +226,25 @@ def _assert_has_route_dataframe_routes(
 
 
 def _assert_has_route_dict_routes(
-    routes: Dict[str, Dict[str, List[Dict[str, any]]]],
-    expected_route: Dict[str, any],
+    routes: Dict[str, Dict[str, List[Dict[str, Any]]]],
+    expected_route: Dict[str, Any],
     node: str,
     vrf: str,
     soft: bool,
 ) -> bool:
     try:
-        d = routes[node]
+        node_routes = routes[node]
     except KeyError:
         raise BatfishAssertException("No node: {}".format(node))
 
     try:
-        d = d[vrf]
+        vrf_routes = node_routes[vrf]
     except KeyError:
         raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
 
-    if not any(_is_dict_match(actual_route, expected_route) for actual_route in d):
+    if not any(
+        _is_dict_match(actual_route, expected_route) for actual_route in vrf_routes
+    ):
         err_text = "No route matches for {} on node {}, VRF {}".format(
             expected_route, node, vrf
         )
@@ -252,11 +253,11 @@ def _assert_has_route_dict_routes(
 
 
 def assert_has_no_route(
-    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, any]]]]],
-    expected_route: Dict[str, any],
+    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, Any]]]]],
+    expected_route: Dict[str, Any],
     node: str,
-    vrf="default",
-    soft=False,
+    vrf: str = "default",
+    soft: bool = False,
 ) -> bool:
     """Assert that a particular route is **NOT** present.
 
@@ -287,8 +288,8 @@ def assert_has_no_route(
 
 
 def _assert_has_no_route_dataframe_routes(
-    routes: DataFrame, expected_route: Dict, node: str, vrf: str, soft: bool
-):
+    routes: DataFrame, expected_route: Dict[str, Any], node: str, vrf: str, soft: bool
+) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
         warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
@@ -314,27 +315,29 @@ def _assert_has_no_route_dataframe_routes(
 
 
 def _assert_has_no_route_dict_routes(
-    routes: Dict[str, Dict[str, List[Dict[str, any]]]],
-    expected_route: Dict[str, any],
+    routes: Dict[str, Dict[str, List[Dict[str, Any]]]],
+    expected_route: Dict[str, Any],
     node: str,
     vrf: str,
     soft: bool,
 ) -> bool:
     try:
-        d = routes[node]
+        node_routes = routes[node]
     except KeyError:
         warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
         return True
 
     try:
-        d = d[vrf]
+        vrf_routes = node_routes[vrf]
     except KeyError:
         warnings.warn(
             "No VRF: {} on node {}".format(vrf, node), category=BatfishAssertWarning
         )
         return True
 
-    all_matches = [route for route in d if _is_dict_match(route, expected_route)]
+    all_matches = [
+        route for route in vrf_routes if _is_dict_match(route, expected_route)
+    ]
     if all_matches:
         err_text = "Found route(s) that match, "
         "when none were expected:\n{}".format(all_matches)
