@@ -43,7 +43,7 @@ For each Arista device in the network, create a file in the `configs` folder. Th
 
 Batfish understands AWS VPC configurations and analyzes it just like physical networks.
 To use this functionality, place AWS configs in a folder named `aws_configs` right below the top-level snapshot folder.
-The subfolders in this folder correspond to individual regions. If there is only one region,
+Each subfolder in this folder should correspond to an AWS account. If you want to analyze only one account, you may skip this level of hierarchy. The subfolders of the account-level folder (or of `aws_configs` if there is only account) correspond to individual regions. If there is only one region,
 then this level of hierarchy may be skipped.
 
 The configuration files for a region should be the JSON output of the following API calls:
