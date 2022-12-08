@@ -76,8 +76,9 @@ Read (for html format):
 
 ### Creating a distribution
 
-Run `python setup.py bdist_wheel`. This will create a wheel package inside the `dist`
-folder. The wheel can be distributed and later installed using `pip`.
+Run `python -m build`. This will create both a wheel package and a source
+distribution inside the `dist` folder. These artifacts can be used for releases
+or the wheel can be distributed and then installed later using `pip`.
 For example:
 
-`pip install ./pybatfish-<version>-py3-none-any.whl`
+`pip install ./dist/pybatfish-<version>-py3-none-any.whl`
