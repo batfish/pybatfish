@@ -154,9 +154,9 @@ jupyter-client==7.1.1 \
     --hash=sha256:540ca35e57e83c5ece81abd9b781a57cba39a37c60a2a30c8c1b2f6663544343 \
     --hash=sha256:f0c576cce235c727e30b0a0da88c2755d0947d0070fa1bc45f195079ffd64e66
     # via nbclient
-jupyter-core==4.9.1 \
-    --hash=sha256:1c091f3bbefd6f2a8782f2c1db662ca8478ac240e962ae2c66f0b87c818154ea \
-    --hash=sha256:dce8a7499da5a53ae3afd5a9f4b02e5df1d57250cf48f3ad79da23b4778cd6fa
+jupyter-core==4.11.2 \
+    --hash=sha256:3815e80ec5272c0c19aad087a0d2775df2852cfca8f5a17069e99c9350cecff8 \
+    --hash=sha256:c2909b9bc7dca75560a6c5ae78c34fd305ede31cd864da3c0d0bb2ed89aa9337
     # via
     #   jupyter-client
     #   nbconvert
