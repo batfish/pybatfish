@@ -113,8 +113,9 @@ setup(
             "coverage",
             "inflection",
             "jupyter",
-            "mypy<0.800",
+            "mypy<=0.991",
             "nbconvert",
+            "pandas==1.5.2"
             "pytest>=4.2.0",
             "pytest-cov",
             "pytz",
