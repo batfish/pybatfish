@@ -115,7 +115,7 @@ setup(
             "jupyter",
             "mypy<=0.991",
             "nbconvert",
-            "pandas"
+            "pandas",
             "pytest>=4.2.0",
             "pytest-cov",
             "pytz",
