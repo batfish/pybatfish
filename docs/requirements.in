@@ -3,7 +3,7 @@ inflection==0.3.1
 ipython
 nbsphinx==0.8.5
 progressbar2==3.47.0
-pytest==6.1.0
+pytest
 pytest-cov==2.10.1
 recommonmark==0.6.0
 sphinx==2.3.1
