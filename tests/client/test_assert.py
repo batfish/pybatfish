@@ -918,6 +918,40 @@ def test_no_duplicate_router_ids_no_session():
         assert mock_df_duplicate.to_string() in str(excinfo.value)
 
 
+def test_no_duplicate_router_ids_no_session_ignore_same_node():
+    """Test assert_no_duplicate_router_ids with ignore_same_node=True."""
+    with patch.object(
+        bfq, "bgpProcessConfiguration", create=True
+    ) as bgpProcessConfiguration:
+        # Test success
+        mock_df_unique = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "Node": "n1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "Node": "n1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.2", "Node": "n2", "VRF": "vrf1"},
+            ]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_unique)
+        )
+        assert_no_duplicate_router_ids(protocols=["bgp"], ignore_same_node=True)
+        # Test failure
+        mock_df_duplicate = DataFrame.from_records(
+            [
+                {"Router_ID": "1.1.1.1", "Node": "n1", "VRF": "vrf1"},
+                {"Router_ID": "1.1.1.1", "Node": "n1", "VRF": "vrf2"},
+                {"Router_ID": "1.1.1.1", "Node": "n2", "VRF": "vrf1"},
+            ]
+        )
+        bgpProcessConfiguration.return_value = MockQuestion(
+            MockTableAnswer(mock_df_duplicate)
+        )
+        with pytest.raises(BatfishAssertException) as excinfo:
+            assert_no_duplicate_router_ids(protocols=["bgp"], ignore_same_node=True)
+        # Ensure found answer is printed
+        assert mock_df_duplicate.to_string() in str(excinfo.value)
+
+
 def test_no_forwarding_loops():
     """Confirm no-forwarding-loops assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
