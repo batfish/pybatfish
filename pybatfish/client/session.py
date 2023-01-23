@@ -199,9 +199,14 @@ class Asserts(object):
         )
 
     def assert_no_duplicate_router_ids(
-        self, snapshot=None, nodes=None, protocols=None, soft=False, df_format="table"
-    ):
-        # type: (Optional[str], Optional[str], Optional[List[str]], bool, str) -> bool
+        self,
+        snapshot: Optional[str] = None,
+        nodes: Optional[str] = None,
+        protocols: Optional[List[str]] = None,
+        soft: bool = False,
+        df_format: str = "table",
+        ignore_same_node: bool = False,
+    ) -> bool:
         """Assert that there are no duplicate router IDs present in the snapshot.
 
         :param snapshot: the snapshot on which to check the assertion
@@ -211,9 +216,16 @@ class Asserts(object):
             not a failure)
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
+        :param ignore_same_node whether to ignore duplicate router-ids on the same node
         """
         return assert_no_duplicate_router_ids(
-            snapshot, nodes, protocols, soft, self.session, df_format
+            snapshot,
+            nodes,
+            protocols,
+            soft,
+            self.session,
+            df_format,
+            ignore_same_node,
         )
 
     def assert_no_forwarding_loops(self, snapshot=None, soft=False, df_format="table"):

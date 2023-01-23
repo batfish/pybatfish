@@ -114,23 +114,38 @@ def _subdict(d, keys):
     return {k: d.get(k) for k in keys}
 
 
-def _get_duplicate_router_ids(question_name, session=None, snapshot=None):
-    # type: (str, Optional[Session], Optional[str]) -> DataFrame
+def _get_duplicate_router_ids(
+    question_name: str,
+    session: Optional["Session"] = None,
+    snapshot: Optional[str] = None,
+    ignore_same_node: bool = False,
+) -> DataFrame:
     """Helper function to get rows with duplicate router IDs for a given protocol.
 
     :param question_name: The question name to be used to fetch the protocol process configuration
     :param session: Batfish session to use for asking the question
     :param snapshot: Snapshot on which to ask the question
+    :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
     df = (
         getattr(_get_question_object(session, question_name), question_name)()
         .answer(snapshot)
         .frame()
     )
-    df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
-        ["Router_ID"]
-    )
-
+    if ignore_same_node:
+        # Maps Router_ID to whether multiple nodes have that Router_ID
+        router_id_on_duplicate_nodes = (
+            df.drop_duplicates(["Node", "Router_ID"])
+            .value_counts(["Router_ID"])
+            .map(lambda x: x > 1)
+        )
+        df_duplicate = df[
+            df.apply(lambda x: router_id_on_duplicate_nodes[x["Router_ID"]][0], axis=1)
+        ].sort_values(["Router_ID"])
+    else:
+        df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
+            ["Router_ID"]
+        )
     return df_duplicate
 
 
@@ -743,14 +758,14 @@ def assert_no_undefined_references(
 
 
 def assert_no_duplicate_router_ids(
-    snapshot=None,
-    nodes=None,
-    protocols=None,
-    soft=False,
-    session=None,
-    df_format="table",
-):
-    # type: (Optional[str], Optional[str], Optional[List[str]], bool, Optional[Session], str) -> bool
+    snapshot: Optional[str] = None,
+    nodes: Optional[str] = None,
+    protocols: Optional[List[str]] = None,
+    soft: bool = False,
+    session: Optional["Session"] = None,
+    df_format: str = "table",
+    ignore_same_node: bool = False,
+) -> bool:
     """Assert that there are no duplicate router IDs present in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
@@ -760,6 +775,7 @@ def assert_no_duplicate_router_ids(
     :param session: Batfish session to use for the assertion
     :param df_format: How to format the Dataframe content in the output message.
         Valid options are 'table' and 'records' (each row is a key-value pairs).
+    :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
 
@@ -782,7 +798,7 @@ def assert_no_duplicate_router_ids(
 
     for protocol in protocols_to_fetch:
         df_duplicate = _get_duplicate_router_ids(
-            protocol + "ProcessConfiguration", session, snapshot
+            protocol + "ProcessConfiguration", session, snapshot, ignore_same_node
         )
         if not df_duplicate.empty:
             found_duplicates = True
