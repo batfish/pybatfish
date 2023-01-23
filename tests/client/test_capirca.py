@@ -188,8 +188,14 @@ def test_get_acl_text():
     assert cisco_wrong == cisco
 
     juniper = capirca._get_acl_text(pol, "juniper")
-    assert re.search(r"from {\s*protocol tcp;\s*destination-port 22;\s*}", juniper)
-    assert re.search(r"from {\s*protocol udp;\s*destination-port 53;\s*}", juniper)
+    assert re.search(
+        r"from {\s*(protocol tcp;\s*destination-port 22;|destination-port 22;\s*protocol tcp;)\s*}",
+        juniper,
+    )
+    assert re.search(
+        r"from {\s*(protocol udp;\s*destination-port 53;|destination-port 53;\s*protocol udp;)\s*}",
+        juniper,
+    )
     assert re.search(r"term deny_all {\s*then {\s*reject;\s*}\s*}", juniper)
 
     arista = capirca._get_acl_text(pol, "arista")
