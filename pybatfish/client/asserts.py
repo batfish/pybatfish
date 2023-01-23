@@ -125,7 +125,7 @@ def _get_duplicate_router_ids(
     :param question_name: The question name to be used to fetch the protocol process configuration
     :param session: Batfish session to use for asking the question
     :param snapshot: Snapshot on which to ask the question
-    :param ignore_same_node whether to ignore duplicate router-ids on the same node
+    :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
     df = (
         getattr(_get_question_object(session, question_name), question_name)()
@@ -775,7 +775,7 @@ def assert_no_duplicate_router_ids(
     :param session: Batfish session to use for the assertion
     :param df_format: How to format the Dataframe content in the output message.
         Valid options are 'table' and 'records' (each row is a key-value pairs).
-    :param ignore_same_node whether to ignore duplicate router-ids on the same node
+    :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
 
