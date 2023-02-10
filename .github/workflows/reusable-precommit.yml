@@ -85,6 +85,7 @@ jobs:
           python-version: ${{ matrix.python_version }}
       - name: Run tests
         run: |
+          pip install --upgrade pip wheel
           pip install -e .[dev]
           pytest tests
       - name: codecov
@@ -99,6 +100,7 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
+          - "3.10"
   integration_tests:
     runs-on: ubuntu-latest
     needs:
@@ -147,6 +149,7 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
+          - "3.10"
   doc_tests:
     runs-on: ubuntu-latest
     needs:
