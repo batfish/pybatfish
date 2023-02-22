@@ -372,7 +372,7 @@ class Session(object):
 
         self.elapsed_delay = 5  # type: int
         self.stale_timeout = 5  # type: int
-        self.enable_diagnostics = True  # type: bool
+        self.enable_diagnostics = False  # type: bool
 
         # Auto-load question templates
         if load_questions:
