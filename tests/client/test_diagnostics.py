@@ -162,5 +162,5 @@ def test_session_retry():
     retries = _adapter.max_retries
     assert retries.total == _UPLOAD_MAX_TRIES
     # All request types should be retried
-    assert not retries.method_whitelist
+    assert not retries.allowed_methods
     assert all(code in retries.status_forcelist for code in codes)
