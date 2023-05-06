@@ -73,7 +73,7 @@ _adapter = HTTPAdapter(
         backoff_factor=_UPLOAD_RETRY_BACKOFF,
         status_forcelist=[500, 502, 503, 504, 104],
         # Retry on all calls, including POST
-        method_whitelist=False,
+        allowed_methods=None,
     )
 )
 _requests_session.mount("https://", _adapter)

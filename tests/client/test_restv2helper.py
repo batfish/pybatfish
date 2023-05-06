@@ -202,7 +202,7 @@ def test_session_adapters():
     assert retries.connect == Options.max_retries_to_connect_to_coordinator
     assert retries.read == Options.max_retries_to_connect_to_coordinator
     # All request types should be retried
-    assert not retries.method_whitelist
+    assert not retries.allowed_methods
 
 
 def test_fail_fast_session_adapters():
@@ -217,7 +217,7 @@ def test_fail_fast_session_adapters():
     assert retries.connect == Options.max_initial_tries_to_connect_to_coordinator
     assert retries.read == Options.max_initial_tries_to_connect_to_coordinator
     # All request types should be retried
-    assert not retries.method_whitelist
+    assert not retries.allowed_methods
 
 
 def test_get_api_version_old(session, request_session) -> None:

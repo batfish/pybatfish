@@ -45,7 +45,7 @@ _adapter = HTTPAdapter(
         read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
         # Retry on all calls, including POST
-        method_whitelist=False,
+        allowed_methods=None,
         status_forcelist=[429, 500, 502, 503, 504],
     )
 )
