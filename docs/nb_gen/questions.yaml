@@ -247,6 +247,16 @@ categories:
       parameters:
         - name: headers
           value: HeaderConstraints(applications='DNS')
+    - name: Check SNMP Community Clients
+      pybf_name: snmpCommunityClients
+      parameters:
+        - name: community
+          value: "'COMM'"
+        - name: clients
+          value: "'1.2.3.4/32'"
+      snapshot:
+        name: snmp
+        path: networks/snmp_communities_clients
   - name: ipsec
     description: IPSec Tunnels
     introduction: |
