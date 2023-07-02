@@ -21,7 +21,7 @@ def testBgpRouteDeserialization():
     communities = [4, 5, 6]
     localPreference = 1
     metric = 2
-    nextHopIp = "2.2.2.2"
+    nextHop = "2.2.2.2"
     originType = "egp"
     originatorIp = "1.1.1.1"
     protocol = "bgp"
@@ -35,7 +35,7 @@ def testBgpRouteDeserialization():
         "communities": communities,
         "localPreference": localPreference,
         "metric": metric,
-        "nextHopIp": nextHopIp,
+        "nextHop": nextHop,
         "originatorIp": originatorIp,
         "originType": originType,
         "protocol": protocol,
@@ -49,7 +49,7 @@ def testBgpRouteDeserialization():
     assert bgpRoute.communities == communities
     assert bgpRoute.localPreference == localPreference
     assert bgpRoute.metric == metric
-    assert bgpRoute.nextHopIp == nextHopIp
+    assert bgpRoute.nextHop == NextHopIp(nextHop)
     assert bgpRoute.originType == originType
     assert bgpRoute.originatorIp == originatorIp
     assert bgpRoute.protocol == protocol
@@ -64,7 +64,7 @@ def testBgpRouteSerialization():
     communities = [4, 5, 6]
     localPreference = 1
     metric = 2
-    nextHopIp = "2.2.2.2"
+    nextHop = "2.2.2.2"
     originType = "egp"
     originatorIp = "1.1.1.1"
     protocol = "bgp"
@@ -78,7 +78,7 @@ def testBgpRouteSerialization():
         communities=communities,
         localPreference=localPreference,
         metric=metric,
-        nextHopIp=nextHopIp,
+        nextHop=nextHop,
         originatorIp=originatorIp,
         originType=originType,
         protocol=protocol,
@@ -95,7 +95,7 @@ def testBgpRouteSerialization():
     assert dct["communities"] == communities
     assert dct["localPreference"] == localPreference
     assert dct["metric"] == metric
-    assert dct["nextHopIp"] == nextHopIp
+    assert dct["nextHop"] == NextHopIp(nextHop)
     assert dct["originatorIp"] == originatorIp
     assert dct["originType"] == originType
     assert dct["protocol"] == protocol
@@ -111,7 +111,7 @@ def test_bgp_route_str():
         communities=[1, 2, 3],
         localPreference=4,
         metric=5,
-        nextHopIp="2.2.2.2",
+        nextHop={'type': 'ip', 'ip': '2.2.2.2'},
         originatorIp="1.1.1.1",
         originType="egp",
         protocol="bgp",
@@ -126,7 +126,7 @@ def test_bgp_route_str():
         "Communities: [1, 2, 3]",
         "Local Preference: 4",
         "Metric: 5",
-        "Next Hop IP: 2.2.2.2",
+        "Next Hop: ip {'type': 'ip', 'ip': '2.2.2.2'}",
         "Originator IP: 1.1.1.1",
         "Origin Type: egp",
         "Protocol: bgp",

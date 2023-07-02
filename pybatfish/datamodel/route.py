@@ -34,6 +34,12 @@ __all__ = [
     "NextHopVtep",
 ]
 
+# convert a string IP into a next-hop object
+def _nextHop_br_converter(value):
+    # type: (str) -> NextHop
+    if value is None:
+        return value
+    return NextHopIp(value)
 
 @attr.s(frozen=True)
 class BgpRoute(DataModelElement):
@@ -44,7 +50,7 @@ class BgpRoute(DataModelElement):
     :ivar communities: The communities of the route.
     :ivar localPreference: The local preference of the route.
     :ivar metric: The metric of the route.
-    :ivar nextHopIp: The next hop IP of the route.
+    :ivar nextHop: The next hop of the route.
     :ivar protocol: The protocol of the route.
     :ivar originatorIp: The IP address of the originator of the route.
     :ivar originType: The origin type of the route.
@@ -63,7 +69,7 @@ class BgpRoute(DataModelElement):
     communities = attr.ib(type=list, default=[])
     localPreference = attr.ib(type=int, default=0)
     metric = attr.ib(type=int, default=0)
-    nextHopIp = attr.ib(type=str, default=None)
+    nextHop = attr.ib(type=str, default=None, converter=_nextHop_br_converter)
     sourceProtocol = attr.ib(type=str, default=None)
     tag = attr.ib(type=int, default=0)
     weight = attr.ib(type=int, default=0)
@@ -80,7 +86,7 @@ class BgpRoute(DataModelElement):
             json_dict.get("communities", []),
             json_dict.get("localPreference", 0),
             json_dict.get("metric", 0),
-            json_dict.get("nextHopIp", None),
+            json_dict.get("nextHop", None),
             json_dict.get("srcProtocol", None),
             json_dict.get("tag", 0),
             json_dict.get("weight", 0),
@@ -96,7 +102,7 @@ class BgpRoute(DataModelElement):
             "communities": self.communities,
             "localPreference": self.localPreference,
             "metric": self.metric,
-            "nextHopIp": self.nextHopIp,
+            "nextHop": self.nextHop,
             "originatorIp": self.originatorIp,
             "originType": self.originType,
             "protocol": self.protocol,
@@ -118,7 +124,7 @@ class BgpRoute(DataModelElement):
         lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
-        lines.append("Next Hop IP: %s" % self.nextHopIp)
+        lines.append("Next Hop: %s" % self.nextHop)
         lines.append("Originator IP: %s" % self.originatorIp)
         lines.append("Origin Type: %s" % self.originType)
         lines.append("Protocol: %s" % self.protocol)
@@ -137,7 +143,6 @@ def _longspace_brc_converter(value):
         result = ",".join(value)  # type: Text
         return result
     raise ValueError("Invalid value {}".format(value))
-
 
 # convert a string into a singleton list
 def _string_list_brc_converter(value):
@@ -218,7 +223,7 @@ class BgpRouteDiff(DataModelElement):
             "asPath": "AS Path",
             "localPreference": "Local Preference",
             "metric": "Metric",
-            "nextHopIp": "Next Hop IP",
+            "nextHop": "Next Hop",
             "originatorIp": "Originator IP",
             "originType": "Origin Type",
             "sourceProtocol": "Source Protocol",
