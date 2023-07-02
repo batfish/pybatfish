@@ -36,10 +36,11 @@ __all__ = [
 
 # convert a string IP into a next-hop object
 def _nextHop_br_converter(value):
-    # type: (str) -> NextHop
+    # type: (Any) -> NextHop
     if value is None:
         return value
     return NextHopIp(value)
+
 
 @attr.s(frozen=True)
 class BgpRoute(DataModelElement):
@@ -143,6 +144,7 @@ def _longspace_brc_converter(value):
         result = ",".join(value)  # type: Text
         return result
     raise ValueError("Invalid value {}".format(value))
+
 
 # convert a string into a singleton list
 def _string_list_brc_converter(value):

@@ -111,7 +111,7 @@ def test_bgp_route_str():
         communities=[1, 2, 3],
         localPreference=4,
         metric=5,
-        nextHop={'type': 'ip', 'ip': '2.2.2.2'},
+        nextHop={"type": "ip", "ip": "2.2.2.2"},
         originatorIp="1.1.1.1",
         originType="egp",
         protocol="bgp",
