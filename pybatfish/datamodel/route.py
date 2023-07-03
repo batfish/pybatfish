@@ -36,10 +36,10 @@ __all__ = [
 
 # convert a string IP into a next-hop object
 def _nextHop_br_converter(value):
-    # type: (Any) -> NextHop
-    if value is None:
-        return value
-    return NextHopIp(value)
+    # type: (Any) -> Any
+    if isinstance(value, str):
+        return NextHopIp(value)
+    return value
 
 
 @attr.s(frozen=True)

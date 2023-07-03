@@ -126,7 +126,7 @@ def test_bgp_route_str():
         "Communities: [1, 2, 3]",
         "Local Preference: 4",
         "Metric: 5",
-        "Next Hop: ip {'type': 'ip', 'ip': '2.2.2.2'}",
+        "Next Hop: {'type': 'ip', 'ip': '2.2.2.2'}",
         "Originator IP: 1.1.1.1",
         "Origin Type: egp",
         "Protocol: bgp",
