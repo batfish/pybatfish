@@ -27,9 +27,13 @@ __all__ = [
     "BgpRouteDiff",
     "BgpRouteDiffs",
     "NextHop",
+    "NextHopBgpPeerAddress",
+    "NextHopConcrete",
     "NextHopDiscard",
     "NextHopInterface",
     "NextHopIp",
+    "NextHopResult",
+    "NextHopSelf",
     "NextHopVrf",
     "NextHopVtep",
 ]
@@ -38,7 +42,15 @@ __all__ = [
 def _nextHop_br_converter(value):
     # type: (Any) -> Any
     if isinstance(value, str):
-        return NextHopIp(value)
+        return NextHopConcrete(NextHopIp(value))
+    elif isinstance(value, NextHop):
+        return NextHopConcrete(value)
+    return value
+
+
+def _nextHop_display_value(value):
+    if value["type"] == "concrete":
+        return value["nextHop"]
     return value
 
 
@@ -125,7 +137,7 @@ class BgpRoute(DataModelElement):
         lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
         lines.append("Metric: %s" % self.metric)
-        lines.append("Next Hop: %s" % self.nextHop)
+        lines.append("Next Hop: %s" % _nextHop_display_value(self.nextHop))
         lines.append("Originator IP: %s" % self.originatorIp)
         lines.append("Origin Type: %s" % self.originType)
         lines.append("Protocol: %s" % self.protocol)
@@ -264,6 +276,110 @@ class BgpRouteDiffs(DataModelElement):
     def _repr_html_(self):
         # type: () -> str
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
+
+
+@attr.s(frozen=True)
+class NextHopResult(DataModelElement):
+    """The representation of a route's next-hop for output from questions"""
+
+    def _repr_html_(self) -> str:
+        return escape_html(str(self))
+
+    @abstractmethod
+    def __str__(self) -> str:
+        raise NotImplementedError("NextHopResult elements must implement __str__")
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHop":
+        if "type" not in json_dict:
+            raise ValueError(
+                "Unknown type of NextHopResult, missing the type property in: {}".format(
+                    json.dumps(json_dict)
+                )
+            )
+        nh_type = json_dict["type"]
+        if nh_type == "concrete":
+            return NextHopConcrete.from_dict(json_dict)
+        elif nh_type == "peer":
+            return NextHopBgpPeerAddress.from_dict(json_dict)
+        elif nh_type == "self":
+            return NextHopSelf.from_dict(json_dict)
+        else:
+            raise ValueError(
+                "Unhandled NextHopResult type: {} in: {}".format(
+                    json.dumps(nh_type), json.dumps(json_dict)
+                )
+            )
+
+
+@attr.s(frozen=True)
+class NextHopBgpPeerAddress(NextHopResult):
+    """Indicates the next-hop should be set to the address of the BGP peer"""
+
+    type = attr.ib(type=str, default="peer")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "peer":
+            raise ValueError('type must be "peer"')
+
+    def dict(self) -> Dict[str, Any]:
+        return {"type": "peer"}
+
+    def __str__(self) -> str:
+        return "peer"
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopBgpPeerAddress":
+        assert json_dict == {"type": "peer"}
+        return NextHopBgpPeerAddress()
+
+
+@attr.s(frozen=True)
+class NextHopSelf(NextHopResult):
+    """Indicates the next-hop should be set to the local IP address"""
+
+    type = attr.ib(type=str, default="self")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "self":
+            raise ValueError('type must be "self"')
+
+    def dict(self) -> Dict[str, Any]:
+        return {"type": "self"}
+
+    def __str__(self) -> str:
+        return "self"
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopSelf":
+        assert json_dict == {"type": "self"}
+        return NextHopSelf()
+
+
+@attr.s(frozen=True)
+class NextHopConcrete(NextHopResult):
+    """A wrapper for the various concrete kinds of next-hops that a route may have"""
+
+    nextHop = attr.ib()
+    type = attr.ib(type=str, default="concrete")
+
+    @type.validator
+    def check(self, _attribute, value):
+        if value != "concrete":
+            raise ValueError('type must be "concrete"')
+
+    def __str__(self) -> str:
+        return "nextHop {}".format(self.nextHop)
+
+    @classmethod
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopConcrete":
+        assert set(json_dict.keys()) == {"type", "nextHop"}
+        assert json_dict["type"] == "concrete"
+        nextHop = json_dict["nextHop"]
+        assert isinstance(ip, NextHop)
+        return NextHopConcrete(nextHop)
 
 
 class NextHop(DataModelElement, metaclass=ABCMeta):

@@ -5,9 +5,11 @@ from pybatfish.datamodel.route import (
     BgpRouteConstraints,
     BgpRouteDiff,
     NextHop,
+    NextHopConcrete,
     NextHopDiscard,
     NextHopInterface,
     NextHopIp,
+    NextHopResult,
     NextHopVrf,
     NextHopVtep,
     _longspace_brc_converter,
@@ -49,7 +51,7 @@ def testBgpRouteDeserialization():
     assert bgpRoute.communities == communities
     assert bgpRoute.localPreference == localPreference
     assert bgpRoute.metric == metric
-    assert bgpRoute.nextHop == NextHopIp(nextHop)
+    assert bgpRoute.nextHop == NextHopConcrete(NextHopIp(nextHop))
     assert bgpRoute.originType == originType
     assert bgpRoute.originatorIp == originatorIp
     assert bgpRoute.protocol == protocol
@@ -95,7 +97,7 @@ def testBgpRouteSerialization():
     assert dct["communities"] == communities
     assert dct["localPreference"] == localPreference
     assert dct["metric"] == metric
-    assert dct["nextHop"] == NextHopIp(nextHop)
+    assert dct["nextHop"] == NextHopConcrete(NextHopIp(nextHop))
     assert dct["originatorIp"] == originatorIp
     assert dct["originType"] == originType
     assert dct["protocol"] == protocol
