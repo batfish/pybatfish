@@ -290,7 +290,7 @@ class NextHopResult(DataModelElement):
         raise NotImplementedError("NextHopResult elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHop":
+    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopResult":
         if "type" not in json_dict:
             raise ValueError(
                 "Unknown type of NextHopResult, missing the type property in: {}".format(
@@ -362,7 +362,7 @@ class NextHopSelf(NextHopResult):
 class NextHopConcrete(NextHopResult):
     """A wrapper for the various concrete kinds of next-hops that a route may have"""
 
-    nextHop = attr.ib()
+    nextHop = attr.ib(type="NextHop")
     type = attr.ib(type=str, default="concrete")
 
     @type.validator
@@ -378,7 +378,6 @@ class NextHopConcrete(NextHopResult):
         assert set(json_dict.keys()) == {"type", "nextHop"}
         assert json_dict["type"] == "concrete"
         nextHop = json_dict["nextHop"]
-        assert isinstance(ip, NextHop)
         return NextHopConcrete(nextHop)
 
 
