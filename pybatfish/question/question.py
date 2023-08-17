@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,6 @@
 #   limitations under the License.
 """Defines Batfish questions and logic for loading them from disk or Batfish."""
 
-from __future__ import absolute_import, print_function
 
 import json
 import logging
@@ -38,12 +36,7 @@ from typing import (  # noqa: F401
 import attr
 
 from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
-from pybatfish.datamodel import (  # noqa: F401
-    Assertion,
-    AssertionType,
-    BgpRoute,
-    VariableType,
-)
+from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, VariableType
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question import bfq
@@ -60,7 +53,7 @@ __all__ = ["list_questions", "list_tags", "load_dir_questions", "load_questions"
 
 
 @attr.s(frozen=True)
-class AllowedValue(object):
+class AllowedValue:
     """Describes a whitelisted value for a question parameter."""
 
     name = attr.ib(type=str)
@@ -73,7 +66,7 @@ class AllowedValue(object):
 
     def __str__(self):
         if self.description is not None:
-            return "{}: {}".format(self.name, self.description)
+            return f"{self.name}: {self.description}"
         return self.name
 
 
@@ -82,7 +75,7 @@ class QuestionMeta(type):
 
     def __new__(cls, name, base, dct):
         """Creates a new class for a specific question."""
-        new_cls = super(QuestionMeta, cls).__new__(cls, name, base, dct)
+        new_cls = super().__new__(cls, name, base, dct)
         additional_kwargs = {"question_name"}
 
         def constructor(self, *args, **kwargs):
@@ -143,7 +136,7 @@ class QuestionMeta(type):
         return ["description", "tags", "template"] + list(reversed(dir(QuestionBase)))
 
 
-class QuestionBase(object):
+class QuestionBase:
     """All questions inherit functionality from this class."""
 
     def __init__(self, dictionary, session):
@@ -255,7 +248,7 @@ class QuestionBase(object):
         return self
 
 
-class Questions(object):
+class Questions:
     """Class to hold and manage (e.g. load, list) Batfish questions."""
 
     def __init__(self, session):
@@ -353,14 +346,14 @@ def _install_questions_in_module(
 ) -> None:
     """Install the given questions in the specified module."""
     module = sys.modules[module_name]
-    for (name, question_class) in questions:
+    for name, question_class in questions:
         setattr(question_class, "__module__", module_name)
         setattr(module, name, question_class)
 
 
 def _install_questions(questions: Iterable[Tuple[str, QuestionMeta]], obj: Any) -> None:
     """Install the given questions in the specified object."""
-    for (name, question_class) in questions:
+    for name, question_class in questions:
         setattr(obj, name, question_class)
 
 
@@ -411,13 +404,13 @@ def load_dir_questions(questionDir, session, moduleName=bfq.__name__):
 def _load_question_disk(question_path, session):
     # type: (str, Session) -> Tuple[str, QuestionMeta]
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
-    with open(question_path, "r") as question_file:
+    with open(question_path) as question_file:
         question_dict = json.load(question_file)
     try:
         return _load_question_dict(question_dict, session)
     except QuestionValidationException as e:
         raise QuestionValidationException(
-            "Error loading question from {}".format(question_path), e
+            f"Error loading question from {question_path}", e
         )
 
 
@@ -439,7 +432,7 @@ def _load_question_dict(question, session):
     given_question_name = instance_data.get("instanceName")
     if not given_question_name or not validate_question_name(given_question_name):
         raise QuestionValidationException(
-            "Invalid question name: {}".format(given_question_name)
+            f"Invalid question name: {given_question_name}"
         )
     question_name = str(given_question_name)  # type: str
 
@@ -447,7 +440,7 @@ def _load_question_dict(question, session):
     question_description = instance_data.get("description", "").strip()  # type: str
     if not question_description:
         raise QuestionValidationException(
-            "Missing description for question '{}'".format(question_name)
+            f"Missing description for question '{question_name}'"
         )
     if not question_description.endswith("."):
         question_description += "."
@@ -591,7 +584,7 @@ def _compute_var_help(var_name, var_data):
 
     default_value = var_data.get("value")
     if default_value is not None:
-        param_line += "\n    Default value: ``{}``\n".format(default_value)
+        param_line += f"\n    Default value: ``{default_value}``\n"
 
     type_line = ":type {name}: {type}".format(name=var_name, type=var_data["type"])
 
@@ -636,7 +629,7 @@ def load_questions(
     if not question_dir or from_server:
         remote_questions = _load_remote_questions_templates(s)
         _install_questions_in_module(remote_questions, module_name)
-        new_names |= set(name for name, q in remote_questions)
+        new_names |= {name for name, q in remote_questions}
     if question_dir:
         local_questions = load_dir_questions(
             question_dir, session=s, moduleName=module_name
@@ -656,14 +649,12 @@ def _load_remote_questions_templates(session):
     num_questions = 0
     remote_questions = set()
     questions_dict = _bf_get_question_templates(session)
-    for (key, value) in questions_dict.items():
+    for key, value in questions_dict.items():
         try:
             remote_questions.add(_load_question_dict(json.loads(value), session))
             num_questions += 1
         except Exception as err:
-            logger.error(
-                "Could not load question {name} : {err}".format(name=key, err=err)
-            )
+            logger.error(f"Could not load question {key} : {err}")
     logger.info(
         "Successfully loaded {numQuestions} questions from remote".format(
             numQuestions=num_questions
@@ -877,16 +868,16 @@ def _validateType(value, expectedType):
         VariableType.ZONE,
     ]:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         return True, None
     elif expectedType == VariableType.IP:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             return _isIp(value)
     elif expectedType == VariableType.IP_WILDCARD:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             return _isIpWildcard(value)
     elif expectedType == VariableType.JSON_PATH:
@@ -898,12 +889,12 @@ def _validateType(value, expectedType):
         return valid, None
     elif expectedType == VariableType.PREFIX:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             return _isPrefix(value)
     elif expectedType == VariableType.PREFIX_RANGE:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             return _isPrefixRange(value)
     elif expectedType == VariableType.QUESTION:
@@ -912,7 +903,7 @@ def _validateType(value, expectedType):
         if not isinstance(value, list) or not all(
             isinstance(r, BgpRoute) for r in value
         ):
-            return False, "A Batfish {} must be a list of BgpRoute".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a list of BgpRoute"
         return True, None
     elif expectedType == VariableType.STRING:
         return isinstance(value, str), None
@@ -930,7 +921,7 @@ def _validateType(value, expectedType):
             )
     elif expectedType == VariableType.PROTOCOL:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             validProtocols = ["dns", "ssh", "tcp", "udp"]
             if not value.lower() in validProtocols:
@@ -943,14 +934,14 @@ def _validateType(value, expectedType):
             return True, None
     elif expectedType == VariableType.IP_PROTOCOL:
         if not isinstance(value, str):
-            return False, "A Batfish {} must be a string".format(expectedType)
+            return False, f"A Batfish {expectedType} must be a string"
         else:
             try:
                 intValue = int(value)
                 if not 0 <= intValue < 256:
                     return (
                         False,
-                        "'{}' is not in valid ipProtocol range: 0-255".format(intValue),
+                        f"'{intValue}' is not in valid ipProtocol range: 0-255",
                     )
                 return True, None
             except ValueError:
@@ -1026,8 +1017,8 @@ def _isIp(value):
                         int(longStrParts[0])
                         return True, None
                     except ValueError:
-                        return False, "Invalid ip string: '{}'".format(value)
-        return False, "Invalid ip string: '{}'".format(value)
+                        return False, f"Invalid ip string: '{value}'"
+        return False, f"Invalid ip string: '{value}'"
     else:
         for segments in addrArray:
             try:
@@ -1058,15 +1049,15 @@ def _isSubRange(value):
     """
     contents = value.split("-")
     if len(contents) != 2:
-        return False, "Invalid subRange: {}".format(value)
+        return False, f"Invalid subRange: {value}"
     try:
         int(contents[0])
     except ValueError:
-        return False, "Invalid subRange start: {}".format(contents[0])
+        return False, f"Invalid subRange start: {contents[0]}"
     try:
         int(contents[1])
     except ValueError:
-        return False, "Invalid subRange end: {}".format(contents[1])
+        return False, f"Invalid subRange end: {contents[1]}"
     return True, None
 
 
@@ -1082,7 +1073,7 @@ def _isPrefix(value):
     """
     contents = value.split("/")
     if not len(contents) == 2:
-        return False, "Invalid prefix string: '{}'".format(value)
+        return False, f"Invalid prefix string: '{value}'"
     try:
         int(contents[1])
     except ValueError:
@@ -1101,7 +1092,7 @@ def _isPrefixRange(value):
     """
     contents = value.split(":")
     if len(contents) < 1 or len(contents) > 2:
-        return False, "Invalid PrefixRange string: '{}'".format(value)
+        return False, f"Invalid PrefixRange string: '{value}'"
     if not _isPrefix(contents[0])[0]:
         return (
             False,
@@ -1133,17 +1124,17 @@ def _isIpWildcard(value):
     if ":" in value:
         contents = value.split(":")
         if not len(contents) == 2:
-            return False, "Invalid IpWildcard string: '{}'".format(value)
+            return False, f"Invalid IpWildcard string: '{value}'"
         if not _isIp(contents[0])[0]:
-            return False, "Invalid ip string: '{}'".format(contents[0])
+            return False, f"Invalid ip string: '{contents[0]}'"
         else:
             return _isIp(contents[1])
     elif "/" in value:
         contents = value.split("/")
         if not len(contents) == 2:
-            return False, "Invalid IpWildcard string: '{}'".format(value)
+            return False, f"Invalid IpWildcard string: '{value}'"
         if not _isIp(contents[0])[0]:
-            return False, "Invalid ip string: '{}'".format(contents[0])
+            return False, f"Invalid ip string: '{contents[0]}'"
         else:
             try:
                 int(contents[1])

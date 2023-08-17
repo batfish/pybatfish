@@ -35,7 +35,7 @@ __all__ = [
 
 
 @attr.s
-class DataModelElement(object):
+class DataModelElement:
     __metaclass__ = ABCMeta
 
     def dict(self) -> Dict[str, Any]:
@@ -223,11 +223,11 @@ class Interface(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{}[{}]".format(escape_name(self.hostname), escape_name(self.interface))
+        return f"{escape_name(self.hostname)}[{escape_name(self.interface)}]"
 
     def _repr_html_(self):
         # type: () -> str
-        return "{}".format(escape_html(self.__str__()))
+        return f"{escape_html(self.__str__())}"
 
 
 def _interface_converter(val):
@@ -289,7 +289,7 @@ class FileLines(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{filename}:{lines}".format(filename=self.filename, lines=self.lines)
+        return f"{self.filename}:{self.lines}"
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -352,7 +352,7 @@ class Issue(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "[{}] {}".format(self.severity, self.explanation)
+        return f"[{self.severity}] {self.explanation}"
 
 
 class ListWrapper(FrozenList):

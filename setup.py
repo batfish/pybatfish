@@ -71,11 +71,11 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
     ],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
     # What does your project relate to?
     keywords="network configuration verification",
     # You can just specify the packages manually here if your project is
@@ -93,35 +93,45 @@ setup(
         "deepdiff",
         "deprecated",
         "netconan>=0.12.0",
-        "pandas<1.2",
+        "pandas",
         "python-dateutil",
         "PyYAML",
         "requests",
         "requests-toolbelt",
         "simplejson",
     ],
-    # List additional groups of dependencies here (e.g. development
-    # dependencies). You can install these using the following syntax,
-    # for example:
-    # $ pip install -e .[dev]
+    # List additional groups of dependencies here (e.g. Capirca
+    # dependencies). For example:
+    # $ pip install -e .[capirca]
     extras_require={
         "capirca": CAPIRCA_DEPS,
         "dev": [
-            "black==19.10b0",
-            "cerberus==1.3.2",
+            "black<23.8",
+            "cerberus",
             "check-manifest",
             "coverage",
             "inflection",
             "jupyter",
-            "mypy<0.800",
+            "mypy<=1.6",
             "nbconvert",
+            "nbsphinx",
+            "progressbar2",
             "pytest>=4.2.0",
             "pytest-cov",
             "pytz",
+            "recommonmark",
             "requests_mock",
             "responses",
             "sphinx>=1.8.0",
+            "sphinx-notfound-page",
             "sphinx_rtd_theme",
+            "types-decorator",
+            "types-Deprecated",
+            "types-python-dateutil",
+            "types-pytz",
+            "types-requests",
+            "types-setuptools",
+            "types-simplejson",
         ]
         + CAPIRCA_DEPS,
     },

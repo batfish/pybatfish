@@ -184,7 +184,7 @@ def test_notebook_output(bf_version, notebook, executed_notebook):
 def test_notebook_execution_count(notebook):
     _, nb = notebook
     code_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "code"]
-    for (i, cell) in enumerate(code_cells):
+    for i, cell in enumerate(code_cells):
         assert (
             i + 1 == cell["execution_count"]
         ), "Expected cell {} to have execution count {}".format(cell, i + 1)

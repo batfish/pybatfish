@@ -44,7 +44,8 @@ from pybatfish.exception import (
 from pybatfish.question import bfq
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish.client.session import Session
+
 
 __all__ = [
     "assert_filter_has_no_unreachable_lines",
@@ -140,7 +141,7 @@ def _get_duplicate_router_ids(
             .map(lambda x: x > 1)
         )
         df_duplicate = df[
-            df.apply(lambda x: router_id_on_duplicate_nodes[x["Router_ID"]][0], axis=1)
+            df.apply(lambda x: router_id_on_duplicate_nodes[x["Router_ID"]], axis=1)
         ].sort_values(["Router_ID"])
     else:
         df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
@@ -181,7 +182,7 @@ def _format_df(df, df_format):
         return str(df.to_dict(orient="records"))
     else:
         raise ValueError(
-            "Unknown df_format {}. Should be 'table' or 'records'".format(df_format)
+            f"Unknown df_format {df_format}. Should be 'table' or 'records'"
         )
 
 
@@ -223,11 +224,11 @@ def _assert_has_route_dataframe_routes(
 ) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
-        raise BatfishAssertException("No node: {}".format(node))
+        raise BatfishAssertException(f"No node: {node}")
 
     vrf_routes = node_routes[node_routes["VRF"] == vrf]
     if len(vrf_routes) == 0:
-        raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
+        raise BatfishAssertException(f"No VRF: {vrf} on node {node}")
 
     if not any(
         _is_dict_match(actual_route, expected_route)
@@ -250,12 +251,12 @@ def _assert_has_route_dict_routes(
     try:
         node_routes = routes[node]
     except KeyError:
-        raise BatfishAssertException("No node: {}".format(node))
+        raise BatfishAssertException(f"No node: {node}")
 
     try:
         vrf_routes = node_routes[vrf]
     except KeyError:
-        raise BatfishAssertException("No VRF: {} on node {}".format(vrf, node))
+        raise BatfishAssertException(f"No VRF: {vrf} on node {node}")
 
     if not any(
         _is_dict_match(actual_route, expected_route) for actual_route in vrf_routes
@@ -307,14 +308,12 @@ def _assert_has_no_route_dataframe_routes(
 ) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
-        warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
+        warnings.warn(f"No node: {node}", category=BatfishAssertWarning)
         return True
 
     vrf_routes = node_routes[node_routes["VRF"] == vrf]
     if len(vrf_routes) == 0:
-        warnings.warn(
-            "No VRF: {} on node {}".format(vrf, node), category=BatfishAssertWarning
-        )
+        warnings.warn(f"No VRF: {vrf} on node {node}", category=BatfishAssertWarning)
         return True
 
     all_matches = [
@@ -324,7 +323,7 @@ def _assert_has_no_route_dataframe_routes(
     ]
     if all_matches:
         err_text = "Found route(s) that match, "
-        "when none were expected:\n{}".format(all_matches)
+        f"when none were expected:\n{all_matches}"
         return _raise_common(err_text, soft)
     return True
 
@@ -339,15 +338,13 @@ def _assert_has_no_route_dict_routes(
     try:
         node_routes = routes[node]
     except KeyError:
-        warnings.warn("No node: {}".format(node), category=BatfishAssertWarning)
+        warnings.warn(f"No node: {node}", category=BatfishAssertWarning)
         return True
 
     try:
         vrf_routes = node_routes[vrf]
     except KeyError:
-        warnings.warn(
-            "No VRF: {} on node {}".format(vrf, node), category=BatfishAssertWarning
-        )
+        warnings.warn(f"No VRF: {vrf} on node {node}", category=BatfishAssertWarning)
         return True
 
     all_matches = [
@@ -355,7 +352,7 @@ def _assert_has_no_route_dict_routes(
     ]
     if all_matches:
         err_text = "Found route(s) that match, "
-        "when none were expected:\n{}".format(all_matches)
+        f"when none were expected:\n{all_matches}"
         return _raise_common(err_text, soft)
     return True
 
@@ -863,4 +860,4 @@ def _get_question_object(session, name):
     elif hasattr(bfq, name):
         return bfq
     else:
-        raise BatfishException("{} question was not found".format(name))
+        raise BatfishException(f"{name} question was not found")

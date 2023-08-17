@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,6 @@
 #   limitations under the License.
 """Contains Batfish client commands that query the Batfish service."""
 
-from __future__ import absolute_import, print_function
 
 import logging
 from typing import Any, Dict, List, Optional, Union  # noqa: F401

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,7 +20,7 @@ __all__ = ["IssueConfig"]
 
 
 @attr.s(frozen=True)
-class IssueConfig(object):
+class IssueConfig:
     """Configuration for an Issue.
 
     The issue is identified using its major and minor types. Its configuration

@@ -13,7 +13,6 @@
 #   limitations under the License.
 """A collection of functions that execute RPCs against a Batfish server."""
 
-from __future__ import absolute_import, print_function
 
 import datetime
 import json
@@ -33,11 +32,11 @@ from pybatfish.exception import BatfishException
 from . import resthelper, restv2helper
 from .workitem import WorkItem  # noqa: F401
 
-if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
-
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
 MAX_LOG_LENGTH = 64 * 1024
+
+if TYPE_CHECKING:
+    from pybatfish.client.session import Session  # noqa: F401
 
 
 def _batch_desc(json_batch):
@@ -95,7 +94,7 @@ def execute(work_item, session, background=False, extra_args=None):
     snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
     if snapshot is None:
         raise ValueError(
-            "Work item {} does not include a snapshot name".format(work_item.to_json())
+            f"Work item {work_item.to_json()} does not include a snapshot name"
         )
 
     response = queue_work(session, work_item)
@@ -136,7 +135,7 @@ def execute(work_item, session, background=False, extra_args=None):
             log_file = tempfile.NamedTemporaryFile().name
             with open(log_file, "w") as log_file_handle:
                 log_file_handle.write(str(log))
-            log_file_msg = "Full log written to {}\n".format(log_file)
+            log_file_msg = f"Full log written to {log_file}\n"
         raise BatfishException(
             "Work terminated abnormally\nwork_item: {item}\n\n{msg}log: {prefix}{log}".format(
                 item=work_item.to_json(),
@@ -375,7 +374,7 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
         logger.getEffectiveLevel() == logging.INFO
         or logger.getEffectiveLevel() == logging.DEBUG
     ):
-        logger.info("status: {}".format(work_status))
+        logger.info(f"status: {work_status}")
 
         json_task = json.loads(task_details)
         if not json_task:

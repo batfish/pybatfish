@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
+from __future__ import annotations
 
 import base64
 import json
@@ -75,7 +74,7 @@ from pybatfish.util import get_uuid, validate_name, zip_dir
 from .options import Options
 
 
-class Asserts(object):
+class Asserts:
     """Class containing assertions for a given Session."""
 
     def __init__(self, session):
@@ -83,14 +82,13 @@ class Asserts(object):
 
     def assert_filter_denies(
         self,
-        filters,
-        headers,
-        startLocation=None,
-        soft=False,
-        snapshot=None,
-        df_format="table",
-    ):
-        # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], str) -> bool
+        filters: str,
+        headers: HeaderConstraints,
+        startLocation: str | None = None,
+        soft: bool = False,
+        snapshot: str | None = None,
+        df_format: str = "table",
+    ) -> bool:
         """
         Check if a filter (e.g., ACL) denies a specified set of flows.
 
@@ -109,9 +107,12 @@ class Asserts(object):
         )
 
     def assert_filter_has_no_unreachable_lines(
-        self, filters, soft=False, snapshot=None, df_format="table"
-    ):
-        # type: (str, bool, Optional[str], str) -> bool
+        self,
+        filters: str,
+        soft: bool = False,
+        snapshot: str | None = None,
+        df_format: str = "table",
+    ) -> bool:
         """
         Check that a filter (e.g. an ACL) has no unreachable lines.
 
@@ -133,14 +134,13 @@ class Asserts(object):
 
     def assert_filter_permits(
         self,
-        filters,
-        headers,
-        startLocation=None,
-        soft=False,
-        snapshot=None,
-        df_format="table",
-    ):
-        # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], str) -> bool
+        filters: str,
+        headers: HeaderConstraints,
+        startLocation: str | None = None,
+        soft: bool = False,
+        snapshot: str | None = None,
+        df_format: str = "table",
+    ) -> bool:
         """
         Check if a filter (e.g., ACL) permits a specified set of flows.
 
@@ -159,9 +159,13 @@ class Asserts(object):
         )
 
     def assert_flows_fail(
-        self, startLocation, headers, soft=False, snapshot=None, df_format="table"
-    ):
-        # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
+        self,
+        startLocation: str,
+        headers: HeaderConstraints,
+        soft: bool = False,
+        snapshot: str | None = None,
+        df_format: str = "table",
+    ) -> bool:
         """
         Check if the specified set of flows, denoted by starting locations and headers, fail.
 
@@ -179,9 +183,13 @@ class Asserts(object):
         )
 
     def assert_flows_succeed(
-        self, startLocation, headers, soft=False, snapshot=None, df_format="table"
-    ):
-        # type: (str, HeaderConstraints, bool, Optional[str], str) -> bool
+        self,
+        startLocation: str,
+        headers: HeaderConstraints,
+        soft: bool = False,
+        snapshot: str | None = None,
+        df_format: str = "table",
+    ) -> bool:
         """
         Check if the specified set of flows, denoted by starting locations and headers, succeed.
 
@@ -200,9 +208,9 @@ class Asserts(object):
 
     def assert_no_duplicate_router_ids(
         self,
-        snapshot: Optional[str] = None,
-        nodes: Optional[str] = None,
-        protocols: Optional[List[str]] = None,
+        snapshot: str | None = None,
+        nodes: str | None = None,
+        protocols: list[str] | None = None,
         soft: bool = False,
         df_format: str = "table",
         ignore_same_node: bool = False,
@@ -228,8 +236,12 @@ class Asserts(object):
             ignore_same_node,
         )
 
-    def assert_no_forwarding_loops(self, snapshot=None, soft=False, df_format="table"):
-        # type: (Optional[str], bool, str) -> bool
+    def assert_no_forwarding_loops(
+        self,
+        snapshot: str | None = None,
+        soft: bool = False,
+        df_format: str = "table",
+    ) -> bool:
         """Assert that there are no forwarding loops in the snapshot.
 
         :param snapshot: the snapshot on which to check the assertion
@@ -242,14 +254,13 @@ class Asserts(object):
 
     def assert_no_incompatible_bgp_sessions(
         self,
-        nodes=None,
-        remote_nodes=None,
-        status=None,
-        snapshot=None,
-        soft=False,
-        df_format="table",
-    ):
-        # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        nodes: str | None = None,
+        remote_nodes: str | None = None,
+        status: str | None = None,
+        snapshot: str | None = None,
+        soft: bool = False,
+        df_format: str = "table",
+    ) -> bool:
         """Assert that there are no incompatible BGP sessions present in the snapshot.
 
         :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -267,13 +278,12 @@ class Asserts(object):
 
     def assert_no_incompatible_ospf_sessions(
         self,
-        nodes=None,
-        remote_nodes=None,
-        snapshot=None,
-        soft=False,
-        df_format="table",
-    ):
-        # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        nodes: str | None = None,
+        remote_nodes: str | None = None,
+        snapshot: str | None = None,
+        soft: bool = False,
+        df_format: str = "table",
+    ) -> bool:
         """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
 
         :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -290,13 +300,12 @@ class Asserts(object):
 
     def assert_no_unestablished_bgp_sessions(
         self,
-        nodes=None,
-        remote_nodes=None,
-        snapshot=None,
-        soft=False,
-        df_format="table",
-    ):
-        # type: (Optional[str], Optional[str], Optional[str], bool, str) -> bool
+        nodes: str | None = None,
+        remote_nodes: str | None = None,
+        snapshot: str | None = None,
+        soft: bool = False,
+        df_format: str = "table",
+    ) -> bool:
         """Assert that there are no BGP sessions that are compatible but not established.
 
         :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -312,9 +321,11 @@ class Asserts(object):
         )
 
     def assert_no_undefined_references(
-        self, snapshot=None, soft=False, df_format="table"
-    ):
-        # type: (Optional[str], bool, str) -> bool
+        self,
+        snapshot: str | None = None,
+        soft: bool = False,
+        df_format: str = "table",
+    ) -> bool:
         """Assert that there are no undefined references present in the snapshot.
 
         :param snapshot: the snapshot on which to check the assertion
@@ -326,7 +337,7 @@ class Asserts(object):
         return assert_no_undefined_references(snapshot, soft, self.session, df_format)
 
 
-class Session(object):
+class Session:
     """Keeps session configuration needed to connect to a Batfish server.
 
     :ivar host: The host of the batfish service
@@ -347,40 +358,38 @@ class Session(object):
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
-        use_deprecated_workmgr_v1: Optional[bool] = None,
+        use_deprecated_workmgr_v1: bool | None = None,
     ):
         # Coordinator args
-        self.host = host  # type: str
-        self.port_v1 = port_v1  # type: int
-        self._base_uri_v1 = CoordConsts.SVC_CFG_WORK_MGR  # type: str
-        self.port_v2 = port_v2  # type: int
-        self._base_uri_v2 = CoordConsts.SVC_CFG_WORK_MGR2  # type: str
-        self.ssl = ssl  # type: bool
-        self.verify_ssl_certs = verify_ssl_certs  # type: bool
+        self.host: str = host
+        self.port_v1: int = port_v1
+        self._base_uri_v1: str = CoordConsts.SVC_CFG_WORK_MGR
+        self.port_v2: int = port_v2
+        self._base_uri_v2: str = CoordConsts.SVC_CFG_WORK_MGR2
+        self.ssl: bool = ssl
+        self.verify_ssl_certs: bool = verify_ssl_certs
 
         # Session args
-        self.api_key = api_key  # type: str
-        self.network = None  # type: Optional[str]
-        self.snapshot = None  # type: Optional[str]
+        self.api_key: str = api_key
+        self.network: str | None = None
+        self.snapshot: str | None = None
 
         # Objects to hold and manage questions and asserts
         self.q = Questions(self)
         self.asserts = Asserts(self)
 
         # Additional worker args
-        self.additional_args = {}  # type: Dict
+        self.additional_args: dict = {}
 
-        self.elapsed_delay = 5  # type: int
-        self.stale_timeout = 5  # type: int
-        self.enable_diagnostics = False  # type: bool
+        self.elapsed_delay: int = 5
+        self.stale_timeout: int = 5
+        self.enable_diagnostics: bool = False
 
         # Auto-load question templates
         if load_questions:
             self.q.load()
 
-        self._use_deprecated_workmgr_v1 = (
-            use_deprecated_workmgr_v1
-        )  # type: Optional[bool]
+        self._use_deprecated_workmgr_v1: bool | None = use_deprecated_workmgr_v1
         if self._use_deprecated_workmgr_v1 is None:
             use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
             if use_v1_env:
@@ -388,89 +397,88 @@ class Session(object):
         # if still None, will be set upon first query
 
     # Support old property names
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new additional_args field instead")
     def additionalArgs(self):
         return self.additional_args
 
-    @additionalArgs.setter  # type: ignore
+    @additionalArgs.setter
     @deprecated(reason="Use the new additional_args field instead")
     def additionalArgs(self, val):
         self.additional_args = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new api_key field instead")
     def apiKey(self):
         return self.api_key
 
-    @apiKey.setter  # type: ignore
+    @apiKey.setter
     @deprecated(reason="Use the new api_key field instead")
     def apiKey(self, val):
         self.api_key = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new snapshot field instead")
     def baseSnapshot(self):
         return self.snapshot
 
-    @baseSnapshot.setter  # type: ignore
+    @baseSnapshot.setter
     @deprecated(reason="Use the new snapshot field instead")
     def baseSnapshot(self, val):
         self.snapshot = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new host field instead")
     def coordinatorHost(self):
         return self.host
 
-    @coordinatorHost.setter  # type: ignore
+    @coordinatorHost.setter
     @deprecated(reason="Use the new host field instead")
     def coordinatorHost(self, val):
         self.host = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new port_v1 field instead")
     def coordinatorPort(self):
         return self.port_v1
 
-    @coordinatorPort.setter  # type: ignore
+    @coordinatorPort.setter
     @deprecated(reason="Use the new port_v1 field instead")
     def coordinatorPort(self, val):
         self.port_v1 = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new port_v2 field instead")
     def coordinatorPort2(self):
         return self.port_v2
 
-    @coordinatorPort2.setter  # type: ignore
+    @coordinatorPort2.setter
     @deprecated(reason="Use the new port_v2 field instead")
     def coordinatorPort2(self, val):
         self.port_v2 = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new ssl field instead")
     def useSsl(self):
         return self.ssl
 
-    @useSsl.setter  # type: ignore
+    @useSsl.setter
     @deprecated(reason="Use the new ssl field instead")
     def useSsl(self, val):
         self.ssl = val
 
-    @property  # type: ignore
+    @property
     @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self):
         return self.verify_ssl_certs
 
-    @verifySslCerts.setter  # type: ignore
+    @verifySslCerts.setter
     @deprecated(reason="Use the new verify_ssl_certs field instead")
     def verifySslCerts(self, val):
         self.verify_ssl_certs = val
 
     @classmethod
-    def get_session_types(cls):
-        # type: () -> Dict[str, Callable]
+    def get_session_types(cls) -> dict[str, Callable]:
         """Get a dict of possible session types mapping their names to session classes."""
         return {
             entry_point.name: entry_point.load()
@@ -478,8 +486,7 @@ class Session(object):
         }
 
     @classmethod
-    def get(cls, type_="bf", **params):
-        # type: (str, **Any) -> Session
+    def get(cls, type_: str = "bf", **params: Any) -> Session:
         """Instantiate and return a Session object of the specified type with the specified params."""
         sessions = cls.get_session_types()
         session_module = sessions.get(type_)
@@ -489,7 +496,7 @@ class Session(object):
                     type_, set(sessions.keys())
                 )
             )
-        session = session_module(**params)  # type: Session
+        session: Session = session_module(**params)
         return session
 
     def _get_bf_version(self) -> str:
@@ -499,8 +506,7 @@ class Session(object):
             raise BatfishException("backend did not return a version for 'Batfish'")
         return str(bf_version)
 
-    def delete_network(self, name):
-        # type: (str) -> None
+    def delete_network(self, name: str) -> None:
         """
         Delete network by name.
 
@@ -511,8 +517,7 @@ class Session(object):
             raise ValueError("Network to be deleted must be supplied")
         restv2helper.delete_network(self, name)
 
-    def delete_node_role_dimension(self, dimension):
-        # type: (str) -> None
+    def delete_node_role_dimension(self, dimension: str) -> None:
         """
         Deletes the definition of the given role dimension for the active network.
 
@@ -521,8 +526,7 @@ class Session(object):
         """
         restv2helper.delete_node_role_dimension(self, dimension)
 
-    def delete_reference_book(self, name):
-        # type: (str) -> None
+    def delete_reference_book(self, name: str) -> None:
         """
         Deletes the reference book with the specified name for the active network.
 
@@ -531,8 +535,7 @@ class Session(object):
         """
         restv2helper.delete_reference_book(self, name)
 
-    def delete_snapshot(self, name):
-        # type: (str) -> None
+    def delete_snapshot(self, name: str) -> None:
         """
         Delete specified snapshot from current network.
 
@@ -545,8 +548,12 @@ class Session(object):
             raise ValueError("Snapshot to be deleted must be supplied")
         restv2helper.delete_snapshot(self, name, self.network)
 
-    def extract_facts(self, nodes="/.*/", output_directory=None, snapshot=None):
-        # type: (Text, Optional[Text], Optional[Text]) -> Dict[Text, Any]
+    def extract_facts(
+        self,
+        nodes: str = "/.*/",
+        output_directory: str | None = None,
+        snapshot: str | None = None,
+    ) -> dict[str, Any]:
         """
         Extract and return a dictionary of facts about the specified nodes on a network snapshot.
 
@@ -578,17 +585,16 @@ class Session(object):
 
     def fork_snapshot(
         self,
-        base_name,
-        name=None,
-        overwrite=False,
-        deactivate_interfaces=None,
-        deactivate_nodes=None,
-        restore_interfaces=None,
-        restore_nodes=None,
-        add_files=None,
-        extra_args=None,
-    ):
-        # type: (str, Optional[str], bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Optional[str]
+        base_name: str,
+        name: str | None = None,
+        overwrite: bool = False,
+        deactivate_interfaces: list[Interface] | None = None,
+        deactivate_nodes: list[str] | None = None,
+        restore_interfaces: list[Interface] | None = None,
+        restore_nodes: list[str] | None = None,
+        add_files: str | None = None,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str | None:
         """
         Copy an existing snapshot and deactivate or reactivate specified interfaces, nodes, and links on the copy.
 
@@ -633,18 +639,17 @@ class Session(object):
 
     def _fork_snapshot(
         self,
-        base_name,
-        name=None,
-        overwrite=False,
-        background=False,
-        deactivate_interfaces=None,
-        deactivate_nodes=None,
-        restore_interfaces=None,
-        restore_nodes=None,
-        add_files=None,
-        extra_args=None,
-    ):
-        # type: (str, Optional[str], bool, bool, Optional[List[Interface]], Optional[List[str]], Optional[List[Interface]], Optional[List[str]], Optional[str], Optional[Dict[str, Any]]) -> Union[str, Dict, None]
+        base_name: str,
+        name: str | None = None,
+        overwrite: bool = False,
+        background: bool = False,
+        deactivate_interfaces: list[Interface] | None = None,
+        deactivate_nodes: list[str] | None = None,
+        restore_interfaces: list[Interface] | None = None,
+        restore_nodes: list[str] | None = None,
+        add_files: str | None = None,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str | dict | None:
         self._check_network()
 
         if name is None:
@@ -690,8 +695,11 @@ class Session(object):
 
         return self._parse_snapshot(name, background, extra_args)
 
-    def generate_dataplane(self, snapshot=None, extra_args=None):
-        # type: (Optional[str], Optional[Dict[str, Any]]) -> str
+    def generate_dataplane(
+        self,
+        snapshot: str | None = None,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str:
         """
         Generates the data plane for the supplied snapshot. If no snapshot is specified, uses the last snapshot initialized.
 
@@ -706,8 +714,9 @@ class Session(object):
         answer_dict = workhelper.execute(work_item, self, extra_args=extra_args)
         return str(answer_dict["status"].value)
 
-    def get_answer(self, question, snapshot, reference_snapshot=None):
-        # type: (str, str, Optional[str]) -> Answer
+    def get_answer(
+        self, question: str, snapshot: str, reference_snapshot: str | None = None
+    ) -> Answer:
         """
         Get the answer for a previously asked question.
 
@@ -727,24 +736,23 @@ class Session(object):
         else:
             return Answer(ans)
 
-    def get_base_url(self):
-        # type: () -> str
+    def get_base_url(self) -> str:
         """Generate the base URL for connecting to Batfish coordinator."""
         protocol = "https" if self.ssl else "http"
-        return "{0}://{1}:{2}{3}".format(
+        return "{}://{}:{}{}".format(
             protocol, self.host, self.port_v1, self._base_uri_v1
         )
 
-    def get_base_url2(self):
-        # type: () -> str
+    def get_base_url2(self) -> str:
         """Generate the base URL for V2 of the coordinator APIs."""
         protocol = "https" if self.ssl else "http"
-        return "{0}://{1}:{2}{3}".format(
+        return "{}://{}:{}{}".format(
             protocol, self.host, self.port_v2, self._base_uri_v2
         )
 
-    def get_node_role_dimension(self, dimension, inferred=False):
-        # type: (str, bool) -> NodeRoleDimension
+    def get_node_role_dimension(
+        self, dimension: str, inferred: bool = False
+    ) -> NodeRoleDimension:
         """
         Returns the definition of the given node role dimension for the active network or inferred definition for the active snapshot.
 
@@ -765,8 +773,7 @@ class Session(object):
             restv2helper.get_node_role_dimension(self, dimension)
         )
 
-    def get_node_roles(self, inferred=False):
-        # type: (bool) -> NodeRolesData
+    def get_node_roles(self, inferred: bool = False) -> NodeRolesData:
         """
         Returns the definitions of node roles for the active network or inferred roles for the active snapshot.
 
@@ -783,8 +790,7 @@ class Session(object):
             )
         return NodeRolesData.from_dict(restv2helper.get_node_roles(self))
 
-    def get_reference_book(self, name):
-        # type: (str) -> ReferenceBook
+    def get_reference_book(self, name: str) -> ReferenceBook:
         """
         Returns the specified reference book for the active network.
 
@@ -793,13 +799,11 @@ class Session(object):
         """
         return ReferenceBook.from_dict(restv2helper.get_reference_book(self, name))
 
-    def get_reference_library(self):
-        # type: () -> ReferenceLibrary
+    def get_reference_library(self) -> ReferenceLibrary:
         """Returns the reference library for the active network."""
         return ReferenceLibrary.from_dict(restv2helper.get_reference_library(self))
 
-    def get_snapshot(self, snapshot=None):
-        # type: (Optional[Union[str, Text]]) -> str
+    def get_snapshot(self, snapshot: str | str | None = None) -> str:
         """
         Get the specified or active snapshot name.
 
@@ -821,28 +825,31 @@ class Session(object):
                 "set_snapshot (e.g. bf_session.set_snapshot('NAME')"
             )
 
-    def get_url(self, resource):
-        # type: (str) -> str
+    def get_url(self, resource: str) -> str:
         """
         Get URL for the specified resource.
 
         :param resource: URI of the requested resource
         :type resource: str
         """
-        return "{0}/{1}".format(self.get_base_url(), resource)
+        return f"{self.get_base_url()}/{resource}"
 
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
         self._check_network()
         return get_work_status(work_item, self)
 
-    def get_component_versions(self):
-        # type: () -> Dict[str, Any]
+    def get_component_versions(self) -> dict[str, Any]:
         """Get a dictionary of backend components (e.g. Batfish, Z3) and their versions."""
         return restv2helper.get_component_versions(self)
 
-    def init_snapshot(self, upload, name=None, overwrite=False, extra_args=None):
-        # type: (str, Optional[str], bool, Optional[Dict[str, Any]]) -> str
+    def init_snapshot(
+        self,
+        upload: str,
+        name: str | None = None,
+        overwrite: bool = False,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str:
         """
         Initialize a new snapshot.
 
@@ -869,14 +876,13 @@ class Session(object):
 
     def init_snapshot_from_text(
         self,
-        text,
-        filename=None,
-        snapshot_name=None,
-        platform=None,
-        overwrite=False,
-        extra_args=None,
-    ):
-        # type: (str, Optional[str], Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
+        text: str,
+        filename: str | None = None,
+        snapshot_name: str | None = None,
+        platform: str | None = None,
+        overwrite: bool = False,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str:
         """
         Initialize a snapshot of a single configuration file with given text.
 
@@ -927,8 +933,7 @@ class Session(object):
         assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
-    def __init_snapshot_from_io(self, name, fd):
-        # type: (str, IO) -> None
+    def __init_snapshot_from_io(self, name: str, fd: IO) -> None:
         if self.use_deprecated_workmgr_v1():
             json_data = workhelper.get_data_upload_snapshot(self, name, fd)
             resthelper.get_json_response(
@@ -937,9 +942,8 @@ class Session(object):
         else:
             restv2helper.upload_snapshot(self, name, fd)
 
-    def __init_snapshot_from_file(self, name, file_to_send):
-        # type: (str, str) -> None
-        tmp_file_name = None  # type: Optional[Text]
+    def __init_snapshot_from_file(self, name: str, file_to_send: str) -> None:
+        tmp_file_name: str | None = None
         if os.path.isdir(file_to_send):
             # delete=False because we re-open for reading
             with tempfile.NamedTemporaryFile(delete=False) as temp_zip_file:
@@ -947,7 +951,7 @@ class Session(object):
                 tmp_file_name = file_to_send = temp_zip_file.name
         elif os.path.isfile(file_to_send):
             if not zipfile.is_zipfile(file_to_send):
-                raise ValueError("{} is not a valid zip file".format(file_to_send))
+                raise ValueError(f"{file_to_send} is not a valid zip file")
 
         with open(file_to_send, "rb") as fd:
             self.__init_snapshot_from_io(name, fd)
@@ -956,15 +960,19 @@ class Session(object):
         if tmp_file_name is not None:
             try:
                 os.remove(tmp_file_name)
-            except (OSError, IOError):
+            except OSError:
                 # If we can't delete the file for some reason, let it be,
                 # no need to crash initialization
                 pass
 
     def _init_snapshot(
-        self, upload, name=None, overwrite=False, background=False, extra_args=None
-    ):
-        # type: (Union[str, IO], Optional[str], bool, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+        self,
+        upload: str | IO,
+        name: str | None = None,
+        overwrite: bool = False,
+        background: bool = False,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str | dict[str, str]:
         if self.network is None:
             self.set_network()
 
@@ -1006,8 +1014,7 @@ class Session(object):
 
         return self._parse_snapshot(name, background, extra_args)
 
-    def list_networks(self):
-        # type: () -> List[str]
+    def list_networks(self) -> list[str]:
         """
         List networks the session's API key can access.
 
@@ -1016,7 +1023,7 @@ class Session(object):
         """
         return [d["name"] for d in restv2helper.list_networks(self)]
 
-    def list_incomplete_works(self) -> Dict[str, Any]:
+    def list_incomplete_works(self) -> dict[str, Any]:
         """
         Get pending work that is incomplete.
 
@@ -1034,8 +1041,7 @@ class Session(object):
         statuses = restv2helper.list_incomplete_work(self)
         return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
 
-    def list_snapshots(self, verbose=False):
-        # type: (bool) -> Union[List[str], List[Dict[str,Any]]]
+    def list_snapshots(self, verbose: bool = False) -> list[str] | list[dict[str, Any]]:
         """
         List snapshots for the current network.
 
@@ -1049,8 +1055,7 @@ class Session(object):
         """
         return restv2helper.list_snapshots(self, verbose)
 
-    def put_reference_book(self, book):
-        # type: (ReferenceBook) -> None
+    def put_reference_book(self, book: ReferenceBook) -> None:
         """
         Put a reference book in the active network.
 
@@ -1061,8 +1066,7 @@ class Session(object):
         """
         restv2helper.put_reference_book(self, book)
 
-    def put_node_role_dimension(self, dimension):
-        # type: (NodeRoleDimension) -> None
+    def put_node_role_dimension(self, dimension: NodeRoleDimension) -> None:
         """
         Put a role dimension in the active network.
 
@@ -1075,8 +1079,7 @@ class Session(object):
         """
         restv2helper.put_node_role_dimension(self, dimension)
 
-    def put_node_roles(self, node_roles_data):
-        # type: (NodeRolesData) -> None
+    def put_node_roles(self, node_roles_data: NodeRolesData) -> None:
         """
         Writes the definitions of node roles for the active network. Completely replaces any existing definitions.
 
@@ -1086,7 +1089,7 @@ class Session(object):
         restv2helper.put_node_roles(self, node_roles_data)
 
     def set_network(
-        self, name: Optional[str] = None, prefix: str = Options.default_network_prefix
+        self, name: str | None = None, prefix: str = Options.default_network_prefix
     ) -> str:
         """
         Configure the network used for analysis.
@@ -1132,8 +1135,7 @@ class Session(object):
         self.network = str(network_name)
         return self.network
 
-    def set_snapshot(self, name=None, index=None):
-        # type: (Optional[str], Optional[int]) -> str
+    def set_snapshot(self, name: str | None = None, index: int | None = None) -> str:
         """
         Set the current snapshot by name or index.
 
@@ -1156,7 +1158,7 @@ class Session(object):
         if index is not None:
             if not (-len(snapshots) <= index < len(snapshots)):
                 raise IndexError(
-                    "Server has only {} snapshots: {}".format(len(snapshots), snapshots)
+                    f"Server has only {len(snapshots)} snapshots: {snapshots}"
                 )
             self.snapshot = str(snapshots[index])
 
@@ -1181,9 +1183,9 @@ class Session(object):
     def upload_diagnostics(
         self,
         dry_run: bool = True,
-        netconan_config: Optional[str] = None,
-        contact_info: Optional[str] = None,
-        proxy: Optional[str] = None,
+        netconan_config: str | None = None,
+        contact_info: str | None = None,
+        proxy: str | None = None,
     ) -> str:
         """
         Fetch, anonymize, and optionally upload snapshot diagnostics information.
@@ -1226,8 +1228,9 @@ class Session(object):
             proxy=proxy,
         )
 
-    def validate_facts(self, expected_facts, snapshot=None):
-        # type: (Text, Optional[Text]) -> Dict[Text, Any]
+    def validate_facts(
+        self, expected_facts: str, snapshot: str | None = None
+    ) -> dict[str, Any]:
         """
         Return a dictionary of mismatched facts between the loaded expected facts and the actual facts.
 
@@ -1253,8 +1256,9 @@ class Session(object):
         if self.snapshot is None:
             raise ValueError("Snapshot is not set")
 
-    def _parse_snapshot(self, name, background, extra_args):
-        # type: (str, bool, Optional[Dict[str, Any]]) -> Union[str, Dict[str, str]]
+    def _parse_snapshot(
+        self, name: str, background: bool, extra_args: dict[str, Any] | None
+    ) -> str | dict[str, str]:
         """
         Parse specified snapshot.
 
@@ -1299,8 +1303,8 @@ class Session(object):
         self,
         completion_type: VariableType,
         query: str,
-        max_suggestions: Optional[int] = None,
-    ) -> List[AutoCompleteSuggestion]:
+        max_suggestions: int | None = None,
+    ) -> list[AutoCompleteSuggestion]:
         """
         Get a list of autocomplete suggestions that match the provided query based on the variable type.
 
@@ -1341,7 +1345,7 @@ class Session(object):
                 ]
                 return suggestions
 
-            raise BatfishException("Unexpected response: {}.".format(response))
+            raise BatfishException(f"Unexpected response: {response}.")
         response = restv2helper.auto_complete(
             self, completion_type, query, max_suggestions
         )
@@ -1384,17 +1388,15 @@ class Session(object):
         )
 
 
-def _text_with_platform(text, platform):
-    # type: (str, Optional[str]) -> str
+def _text_with_platform(text: str, platform: str | None) -> str:
     """Returns the text with platform prepended if needed."""
     if platform is None:
         return text
     p = platform.strip().lower()
-    return "!RANCID-CONTENT-TYPE: {}\n{}".format(p, text)
+    return f"!RANCID-CONTENT-TYPE: {p}\n{text}"
 
 
-def _create_in_memory_zip(text, filename, platform):
-    # type: (str, str, Optional[str]) -> IO
+def _create_in_memory_zip(text: str, filename: str, platform: str | None) -> IO:
     """Creates an in-memory zip file for a single file snapshot."""
     from io import BytesIO
 
@@ -1407,12 +1409,12 @@ def _create_in_memory_zip(text, filename, platform):
     return data
 
 
-def _version_to_tuple(version: str) -> Tuple[int, ...]:
+def _version_to_tuple(version: str) -> tuple[int, ...]:
     """Convert version string N(.N)* to a tuple of ints."""
-    return tuple((int(i) for i in version.split(".")))
+    return tuple(int(i) for i in version.split("."))
 
 
-def _version_less_than(version: Tuple[int, ...], min_version: Tuple[int, ...]) -> bool:
+def _version_less_than(version: tuple[int, ...], min_version: tuple[int, ...]) -> bool:
     """
     Check if specified version is less than the specified min version.
 

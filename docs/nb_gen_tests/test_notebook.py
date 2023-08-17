@@ -226,7 +226,7 @@ def test_notebook_execution_count(rendered_nb: RenderedNotebook):
     """Test the notebook has been executed in order"""
     nb = rendered_nb.rendered
     code_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "code"]
-    for (i, cell) in enumerate(code_cells):
+    for i, cell in enumerate(code_cells):
         assert (
             i + 1 == cell["execution_count"]
         ), "Expected cell {} to have execution count {}".format(cell, i + 1)

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -123,11 +122,11 @@ def upload_diagnostics(
                 ans = q.answer()
                 if not isinstance(ans, Answer):
                     raise BatfishException(
-                        "question.answer() did not return an Answer: {}".format(ans)
+                        f"question.answer() did not return an Answer: {ans}"
                     )
                 content = json.dumps(ans.dict(), indent=4, sort_keys=True)
             except BatfishException as e:
-                content = "Failed to answer {}: {}".format(instance_name, e)
+                content = f"Failed to answer {instance_name}: {e}"
                 logger.warning(content)
 
             with open(os.path.join(tmp_dir, instance_name), "w") as f:
@@ -143,9 +142,7 @@ def upload_diagnostics(
         f.write(json.dumps(metadata))
 
     if dry_run:
-        logger.info(
-            "See anonymized files produced by dry-run here: {}".format(tmp_dir_anon)
-        )
+        logger.info(f"See anonymized files produced by dry-run here: {tmp_dir_anon}")
         return tmp_dir_anon
 
     try:
@@ -155,7 +152,7 @@ def upload_diagnostics(
             raise ValueError("Region must be set to upload init info.")
 
         # Generate anonymous S3 subdirectory name
-        anon_dir = "{}{}".format(resource_prefix, uuid.uuid4().hex)
+        anon_dir = f"{resource_prefix}{uuid.uuid4().hex}"
         upload_dest = "https://{bucket}.s3-{region}.amazonaws.com/{resource}".format(
             bucket=bucket, region=region, resource=anon_dir
         )
@@ -166,7 +163,7 @@ def upload_diagnostics(
             headers={"x-amz-acl": "bucket-owner-full-control"},
             proxies={"https": proxy} if proxy is not None else None,
         )
-        logger.debug("Uploaded files to: {}".format(upload_dest))
+        logger.debug(f"Uploaded files to: {upload_dest}")
     finally:
         shutil.rmtree(tmp_dir_anon)
 
@@ -211,7 +208,7 @@ def get_snapshot_parse_status(session):
         answer = QuestionBase(_INIT_INFO_QUESTION, session).answer()
         if not isinstance(answer, Answer):
             raise BatfishException(
-                "question.answer() did not return an Answer: {}".format(answer)
+                f"question.answer() did not return an Answer: {answer}"
             )
 
         if "answerElements" not in answer:
@@ -272,7 +269,7 @@ def _upload_dir_to_url(
             path = os.path.join(root, name)
             rel_path = os.path.relpath(path, src_dir)
             with open(path, "rb") as data:
-                resource = "{}/{}".format(base_url, rel_path)
+                resource = f"{base_url}/{rel_path}"
                 r = _requests_session.put(
                     resource, data=data, headers=headers, proxies=proxies
                 )

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
 
@@ -22,7 +20,6 @@ from requests import Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from requests_toolbelt.multipart.encoder import MultipartEncoder
 from urllib3 import Retry
-from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
 from pybatfish.client.consts import CoordConsts
@@ -32,9 +29,6 @@ from .options import Options
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
-
-# suppress the urllib3 warnings due to old version of urllib3 (inside requests)
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
 # Create session for existing connection to backend
 _requests_session = requests.Session()
@@ -76,9 +70,7 @@ def get_json_response(session, resource, jsonData=None, useHttpGet=False):
 
     json_response = response.json()
     if json_response[0] != CoordConsts.SVC_KEY_SUCCESS:
-        raise BatfishException(
-            "Coordinator returned failure: {}".format(json_response[1])
-        )
+        raise BatfishException(f"Coordinator returned failure: {json_response[1]}")
 
     return dict(json_response[1])
 
