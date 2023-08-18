@@ -202,7 +202,7 @@ class TraceTree(DataModelElement):
         if self.children:
             children_section = []
             for child in self.children:
-                children_section.append("<li>{}</li>".format(child._repr_html_()))
+                children_section.append(f"<li>{child._repr_html_()}</li>")
             return "{} <ul>{}</ul>".format(self.traceElement, "".join(children_section))
         return str(self.traceElement)
 

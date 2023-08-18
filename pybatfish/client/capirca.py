@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2019 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +13,11 @@
 #   limitations under the License.
 """Contains Batfish commands that integrate with the Google Capirca library (https://github.com/google/capirca)."""
 
-from __future__ import absolute_import, print_function
 
 import ipaddress
 import logging
 import os
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # noqa: F401
+from typing import Any, Dict, Optional, Union  # noqa: F401
 
 try:
     from capirca.lib import naming, policy
@@ -29,10 +27,8 @@ except ImportError:
     )
     raise
 
+from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel import AddressGroup, ReferenceBook
-
-if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
 
 __all__ = ["create_reference_book", "init_snapshot_from_acl"]
 
@@ -66,7 +62,7 @@ def _item_to_python_repr(item, definitions):
     except ValueError:
         pass
 
-    raise ValueError("Unknown how to convert {s}".format(s=s))
+    raise ValueError(f"Unknown how to convert {s}")
 
 
 def _entry_to_group(name, items, definitions):
@@ -92,14 +88,13 @@ def _entry_to_group(name, items, definitions):
     converted_group = [c for c in converted if isinstance(c, str)]
 
     return AddressGroup(
-        "{name}".format(name=name),
+        f"{name}",
         addresses=converted_v4,
         childGroupNames=converted_group,
     )
 
 
-def _get_acl_text(pol, platform):
-    # type: (policy.Policy, str) -> str
+def _get_acl_text(pol: policy.Policy, platform: str) -> str:
     # Capirca policy terms can have expiration dates, and Capirca warns if any
     # of the terms expire before this future date. Just set to a large number to
     # prevent warning - Capirca already warns itself if terms are expired.
@@ -144,8 +139,7 @@ def _get_acl_text(pol, platform):
         )
 
 
-def _init_definitions(definitions_or_path):
-    # type: (Union[str, naming.Naming]) -> naming.Naming
+def _init_definitions(definitions_or_path: Union[str, naming.Naming]) -> naming.Naming:
     if isinstance(definitions_or_path, naming.Naming):
         return definitions_or_path
 
@@ -195,7 +189,7 @@ def init_snapshot_from_acl(
     definitions = _init_definitions(definitions)
 
     if not isinstance(pol, policy.Policy):
-        with open(pol, "r") as pol_file:
+        with open(pol) as pol_file:
             pol_text = pol_file.read()
         pol_dir = os.path.dirname(pol)
 

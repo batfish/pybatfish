@@ -37,7 +37,8 @@ jobs:
           python-version: 3.9
       - name: Run checks
         run: |
-          pip install 'mypy<0.800'
+          pip install --upgrade pip wheel
+          pip install -e .[dev]
           mypy pybatfish tests
   bf_build:
     runs-on: ubuntu-latest
@@ -97,7 +98,6 @@ jobs:
     strategy:
       matrix:
         python_version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
@@ -145,7 +145,6 @@ jobs:
     strategy:
       matrix:
         python_version:
-          - "3.7"
           - "3.8"
           - "3.9"
           - "3.10"
@@ -174,7 +173,7 @@ jobs:
         run: |
           tar -xzf questions.tgz
           java -cp allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > batfish.log &
-          pip install -r docs/requirements.txt
+          pip install --upgrade pip setuptools wheel -q
           pip install -e .[dev] -q
           pytest docs
           pytest pybatfish --doctest-modules
@@ -187,15 +186,14 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
       - uses: actions/setup-python@v4
-        # Newer python doesn't work with current doc building
         with:
-          python-version: 3.7
+          python-version: 3.9
       - name: Build docs
         run: |
           sudo apt update -qq
           sudo apt -qq install -y pandoc
+          pip install --upgrade pip setuptools wheel -q
           pip install -e .[dev] -q
           pushd docs
-          pip install -r requirements.txt
           make html
           popd

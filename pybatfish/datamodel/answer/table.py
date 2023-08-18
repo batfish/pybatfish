@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import pandas
 
@@ -22,21 +21,19 @@ from pybatfish.datamodel.answer.base import Answer, _parse_json_with_schema
 __all__ = ["ColumnMetadata", "TableAnswer", "Row", "TableMetadata"]
 
 
-class ColumnMetadata(object):
+class ColumnMetadata:
     """Metadata for a single column."""
 
-    def __init__(self, dictionary):
+    def __init__(self, dictionary: Dict[str, Any]) -> None:
         if "name" not in dictionary:
             raise ValueError("Bad column metadata: 'name' not found")
         if "schema" not in dictionary:
             raise ValueError("Bad column metadata: 'schema' not found")
-        self.name = dictionary["name"]  # type: str
-        self.schema = dictionary["schema"]  # type: str
-        self.description = dictionary.get(
-            "description", "No description provided"
-        )  # type: str
-        self.isKey = dictionary.get("isKey", True)  # type: bool
-        self.isValue = dictionary.get("isValue", True)  # type: bool
+        self.name: str = dictionary["name"]
+        self.schema: str = dictionary["schema"]
+        self.description: str = dictionary.get("description", "No description provided")
+        self.isKey: bool = dictionary.get("isKey", True)
+        self.isValue: bool = dictionary.get("isValue", True)
 
 
 class TableAnswer(Answer):
@@ -49,7 +46,7 @@ class TableAnswer(Answer):
             raise ValueError("Empty answer elements list in dictionary")
         if "metadata" not in dictionary["answerElements"][0]:
             raise ValueError("TableMetadata not found in dictionary")
-        super(TableAnswer, self).__init__(dictionary)
+        super().__init__(dictionary)
         answer_element = dictionary["answerElements"][0]
         self.metadata = TableMetadata(answer_element["metadata"])
         self.rows = [Row(row) for row in answer_element.get("rows", [])]
@@ -66,7 +63,7 @@ class TableAnswer(Answer):
         # type: (str) -> pandas.DataFrame
         """Return the excluded data for exclusion_name as a :py:class:`pandas.DataFrame`."""
         if exclusion_name not in self.excluded_rows:
-            raise ValueError("Exclusion name {} does not exist".format(exclusion_name))
+            raise ValueError(f"Exclusion name {exclusion_name} does not exist")
         return _rows_to_frame(self.metadata, self.excluded_rows[exclusion_name])
 
     def frame(self):
@@ -97,11 +94,11 @@ class TableMetadata:
     (See :py:class:`~pybatfish.datamodel.answers.table.TableAnswer`)
     """
 
-    def __init__(self, dictionary):
+    def __init__(self, dictionary: Dict[str, Any]):
         self.column_metadata = [
             ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])
         ]
-        self.hints = dictionary.get("displayHints")  # type: Optional[Dict]
+        self.hints: Optional[Dict] = dictionary.get("displayHints")
 
     def get_column_names(self):
         # type: () -> List[str]

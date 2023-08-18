@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -112,8 +111,8 @@ class BgpRoute(DataModelElement):
     def _repr_html_lines(self):
         # type: () -> List[str]
         lines = []
-        lines.append("Network: {node}".format(node=self.network))
-        lines.append("AS Path: {asPath}".format(asPath=self.asPath))
+        lines.append(f"Network: {self.network}")
+        lines.append(f"AS Path: {self.asPath}")
         # using a join on strings removes quotes around individual communities
         lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
         lines.append("Local Preference: %s" % self.localPreference)
@@ -136,7 +135,7 @@ def _longspace_brc_converter(value):
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: Text
         return result
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 # convert a string into a singleton list
@@ -146,7 +145,7 @@ def _string_list_brc_converter(value):
         return value
     elif isinstance(value, str):
         return [value]
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 @attr.s(frozen=True)
@@ -323,7 +322,8 @@ class NextHopDiscard(NextHop):
 class NextHopInterface(NextHop):
     """A next-hop of a route with a fixed output interface and optional next gateway IP.
 
-    If there is no IP, the destination IP of the packet will be used as the next gateway IP."""
+    If there is no IP, the destination IP of the packet will be used as the next gateway IP.
+    """
 
     interface = attr.ib(type=str)
     ip = attr.ib(type=Optional[str], default=None)
@@ -336,9 +336,9 @@ class NextHopInterface(NextHop):
 
     def __str__(self) -> str:
         return (
-            "interface {} ip {}".format(escape_name(self.interface), self.ip)
+            f"interface {escape_name(self.interface)} ip {self.ip}"
             if self.ip
-            else "interface {}".format(escape_name(self.interface))
+            else f"interface {escape_name(self.interface)}"
         )
 
     @classmethod
@@ -369,7 +369,7 @@ class NextHopIp(NextHop):
             raise ValueError('type must be "ip"')
 
     def __str__(self) -> str:
-        return "ip {}".format(self.ip)
+        return f"ip {self.ip}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopIp":
@@ -393,7 +393,7 @@ class NextHopVrf(NextHop):
             raise ValueError('type must be "vrf"')
 
     def __str__(self) -> str:
-        return "vrf {}".format(escape_name(self.vrf))
+        return f"vrf {escape_name(self.vrf)}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVrf":
@@ -418,7 +418,7 @@ class NextHopVtep(NextHop):
             raise ValueError('type must be "vtep"')
 
     def __str__(self) -> str:
-        return "vni {} vtep {}".format(self.vni, self.vtep)
+        return f"vni {self.vni} vtep {self.vtep}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVtep":

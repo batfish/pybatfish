@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,7 +13,6 @@
 #   limitations under the License.
 """Generic utility functions for pybatfish."""
 
-from __future__ import absolute_import
 
 import os
 import string
@@ -70,7 +68,7 @@ class BfJsonEncoder(simplejson.JSONEncoder):
                 return self.default(obj.dict())
             except AttributeError:
                 # Raise
-                super(BfJsonEncoder, self).default(obj)
+                super().default(obj)
 
 
 def conditional_str(prefix, obj, suffix):
@@ -108,7 +106,7 @@ def validate_name(name, entity_type="snapshot"):
     try:
         if "/" in name:
             raise ValueError(
-                "{} name cannot contain slashes ('/')".format(entity_type.capitalize())
+                f"{entity_type.capitalize()} name cannot contain slashes ('/')"
             )
         if len(name) > _MAX_FILENAME_LEN:
             raise ValueError(
@@ -124,7 +122,7 @@ def validate_name(name, entity_type="snapshot"):
             )
         # Catch all:
         if set(str(name)).difference(_valid_chars):
-            raise ValueError("{} is not a valid name for {}".format(name, entity_type))
+            raise ValueError(f"{name} is not a valid name for {entity_type}")
     except (TypeError, AttributeError):
         raise ValueError(
             "{} name has the wrong type ({}), a string is expected".format(
@@ -209,7 +207,7 @@ def escape_name(s: str) -> str:
     contains a special character (_NAME_SPECIAL_CHARS_).
     """
     return (
-        '"{}"'.format(s)
+        f'"{s}"'
         if len(s) != 0
         and (
             s.startswith('"')

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +15,7 @@
 from enum import Enum
 
 
-class BfConsts(object):
+class BfConsts:
     """
     Contains constants derived from BfConsts.java in batfish-common.
 
@@ -145,7 +144,7 @@ class WorkStatusCode(str, Enum):
         ]
 
 
-class CoordConsts(object):
+class CoordConsts:
     """
     Contains constants derived from CoordConsts.java in batfish-common.
 
@@ -254,7 +253,7 @@ class CoordConsts(object):
     KEY_API_VERSION = "api_version"
 
 
-class CoordConstsV2(object):
+class CoordConstsV2:
     """
     Contains constants derived from CoordConstsV2.java in batfish-common.
 

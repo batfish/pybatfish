@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 from typing import (  # noqa: F401
     IO,
@@ -29,11 +28,10 @@ import requests
 from requests import HTTPError, Response  # noqa: F401
 from requests.adapters import HTTPAdapter
 from urllib3 import Retry
-from urllib3.exceptions import InsecureRequestWarning
 
 import pybatfish
 from pybatfish.client.consts import CoordConsts, CoordConstsV2
-from pybatfish.datamodel.referencelibrary import (  # noqa: F401
+from pybatfish.datamodel.referencelibrary import (
     NodeRoleDimension,
     NodeRolesData,
     ReferenceBook,
@@ -46,10 +44,7 @@ from .options import Options
 from .workitem import WorkItem
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
-
-# suppress the urllib3 warnings due to old version of urllib3 (inside requests)
-requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+    from pybatfish.client.session import Session
 
 # List of HTTP statuses to retry
 _STATUS_FORCELIST = [429, 500, 502, 503, 504]
@@ -156,7 +151,7 @@ def delete_issue_config(session, major, minor):
 def list_networks(session):
     # type: (Session) -> List[Dict[str, Any]]
     """List the networks in the current session."""
-    url_tail = "/{}".format(CoordConstsV2.RSC_NETWORKS)
+    url_tail = f"/{CoordConstsV2.RSC_NETWORKS}"
     return _get_list(session, url_tail)
 
 
@@ -187,7 +182,7 @@ def fork_snapshot(session, obj):
 def delete_network(session, name):
     # type: (Session, Text) -> None
     """Deletes the network with the given name."""
-    url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, name)
+    url_tail = f"/{CoordConstsV2.RSC_NETWORKS}/{name}"
     return _delete(session, url_tail)
 
 
@@ -289,13 +284,13 @@ def get_issue_config(session, major, minor):
 def get_network(session, network):
     # type: (Session, str) -> Dict[str, Any]
     """Gets information about the specified network."""
-    url_tail = "/{}/{}".format(CoordConstsV2.RSC_NETWORKS, network)
+    url_tail = f"/{CoordConstsV2.RSC_NETWORKS}/{network}"
     return _get_dict(session, url_tail)
 
 
 def init_network(session: "Session", new_network_name: str) -> None:
     """Attemps to create a new network with the given name."""
-    url_tail = "/{}".format(CoordConstsV2.RSC_NETWORKS)
+    url_tail = f"/{CoordConstsV2.RSC_NETWORKS}"
     _post(session, url_tail, None, params={CoordConstsV2.QP_NAME: new_network_name})
 
 
@@ -497,7 +492,7 @@ def get_question_templates(session: "Session", verbose: bool) -> Dict:
     """
     return _get_dict(
         session,
-        url_tail="/{}".format(CoordConstsV2.RSC_QUESTION_TEMPLATES),
+        url_tail=f"/{CoordConstsV2.RSC_QUESTION_TEMPLATES}",
         params={CoordConstsV2.QP_VERBOSE: verbose},
         fail_fast=True,
     )
@@ -631,7 +626,7 @@ def auto_complete(
     url_tail = "/{}/{}{}/{}/{}".format(
         CoordConstsV2.RSC_NETWORKS,
         session.network,
-        "/{}/{}".format(CoordConstsV2.RSC_SNAPSHOTS, session.snapshot)
+        f"/{CoordConstsV2.RSC_SNAPSHOTS}/{session.snapshot}"
         if session.snapshot
         else "",
         CoordConstsV2.RSC_AUTOCOMPLETE,
@@ -661,7 +656,7 @@ def _check_response_status(response):
     try:
         response.raise_for_status()
     except HTTPError as e:
-        raise HTTPError("{}. {}".format(e, response.text), response=response)
+        raise HTTPError(f"{e}. {response.text}", response=response)
 
 
 def _delete(

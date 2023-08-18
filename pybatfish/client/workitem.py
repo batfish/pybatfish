@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 import json
 from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
@@ -21,10 +19,10 @@ from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
 import pybatfish.util as batfishutils
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish.client.session import Session
 
 
-class WorkItem(object):
+class WorkItem:
     """
     A class representing a Batfish task.
 

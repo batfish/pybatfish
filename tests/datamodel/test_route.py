@@ -162,7 +162,6 @@ def testBgpRouteConstraintsDeserialization():
 
 
 def testBgpRouteConstraintsConversions():
-
     prefix = "1.2.3.4/5:6-7"
     communities = ["20:30"]
     med = ["1-2", "3-4", "!5-6"]

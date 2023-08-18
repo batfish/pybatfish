@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,18 +13,18 @@
 #   limitations under the License.
 """Contains internal functions for interacting with the Batfish service."""
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union  # noqa: F401
+from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from pybatfish.client import restv2helper
 from pybatfish.client.consts import CoordConsts
-from pybatfish.datamodel.answer import Answer  # noqa: F401
+from pybatfish.datamodel.answer import Answer
 from pybatfish.util import get_uuid
 
 from . import resthelper, workhelper
 from .options import Options
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish.client.session import Session
 
 
 def _bf_answer_obj(

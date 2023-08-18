@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -112,7 +111,7 @@ def load_facts(input_directory):
         raise ValueError("No files present in specified directory")
 
     for filename in files:
-        with open(os.path.join(input_directory, filename), "r") as f:
+        with open(os.path.join(input_directory, filename)) as f:
             dict_ = yaml.safe_load(f.read())
             nodes, version = _unencapsulate_facts(dict_)
 
@@ -312,7 +311,7 @@ def _process_interfaces(node_dict, iface_props):
             _add_interface(node_dict[node], i)
         else:
             # Should be impossible for ifaceProps to have node not in nodeProps
-            raise ValueError("Interface belongs to non-existent node {}".format(node))
+            raise ValueError(f"Interface belongs to non-existent node {node}")
 
 
 def _process_nodes(node_props):
@@ -388,7 +387,7 @@ def write_facts(output_directory, facts):
 
     # Write facts for each node in its own file
     for node in nodes:
-        filepath = os.path.join(output_directory, "{}.yml".format(node))
+        filepath = os.path.join(output_directory, f"{node}.yml")
         node_facts = _encapsulate_nodes_facts(
             {node: facts["nodes"][node]}, version_text
         )
@@ -421,7 +420,7 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
     else:
         diffs_out = diffs
     for k in expected:
-        key_name = "{}{}".format(prefix, k)
+        key_name = f"{prefix}{k}"
         if k not in actual:
             diffs_out[key_name] = {"key_present": False, "expected": expected[k]}
         else:

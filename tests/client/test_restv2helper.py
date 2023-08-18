@@ -51,7 +51,7 @@ class MockResponse(Response):
 
 
 @pytest.fixture(scope="module")
-def session():
+def session() -> Session:
     s = Mock(spec=Session)
     s.get_base_url2.return_value = BASE_URL
     s.api_key = "0000"
@@ -60,7 +60,7 @@ def session():
 
 
 @pytest.fixture(scope="module")
-def request_session():
+def request_session() -> requests.Session:
     return Mock(spec=requests.Session)
 
 
@@ -78,10 +78,10 @@ def test_check_response_status_ok():
     restv2helper._check_response_status(response)
 
 
-def test_delete(session, request_session):
+def test_delete(session: Session, request_session: Mock) -> None:
     """Make sure calls to _delete end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
@@ -95,10 +95,10 @@ def test_delete(session, request_session):
     )
 
 
-def test_get(session, request_session):
+def test_get(session: Session, request_session: Mock) -> None:
     """Make sure calls to _get end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
 
     # Regular session
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
@@ -132,7 +132,7 @@ def test_get(session, request_session):
 def test_post_json(session, request_session):
     """Make sure calls to _post of json end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
     obj = "foo"
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
@@ -152,7 +152,7 @@ def test_post_json(session, request_session):
 def test_post_stream(session, request_session):
     """Make sure calls to _post of stream end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
     with io.StringIO() as stream_data:
         with patch("pybatfish.client.restv2helper._requests_session", request_session):
             # Execute the request
@@ -173,7 +173,7 @@ def test_post_stream(session, request_session):
 def test_put(session, request_session):
     """Make sure calls to _put end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "base{url}".format(base=BASE_URL, url=resource_url)
+    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
@@ -220,7 +220,7 @@ def test_fail_fast_session_adapters():
     assert not retries.allowed_methods
 
 
-def test_get_api_version_old(session, request_session) -> None:
+def test_get_api_version_old(session: Session, request_session: Mock) -> None:
     mock_response = MockResponse(json.dumps({}))
     mock_response.status_code = 200
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
@@ -228,7 +228,7 @@ def test_get_api_version_old(session, request_session) -> None:
         assert get_api_version(session) == "2.0.0"
 
 
-def test_get_api_version_new(session, request_session) -> None:
+def test_get_api_version_new(session: Session, request_session: Mock) -> None:
     mock_response = MockResponse(json.dumps({CoordConsts.KEY_API_VERSION: "2.1.0"}))
     mock_response.status_code = 200
     with patch("pybatfish.client.restv2helper._requests_session", request_session):

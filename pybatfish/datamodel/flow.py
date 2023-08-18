@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -139,15 +138,15 @@ class Flow(DataModelElement):
                 src=self._ip_port(self.srcIp, self.srcPort),
                 dst=self._ip_port(self.dstIp, self.dstPort),
                 ip_proto=self.get_ip_protocol_str(),
-                dscp=(" dscp={}".format(self.dscp) if self.dscp != 0 else ""),
-                ecn=(" ecn={}".format(self.ecn) if self.ecn != 0 else ""),
+                dscp=(f" dscp={self.dscp}" if self.dscp != 0 else ""),
+                ecn=(f" ecn={self.ecn}" if self.ecn != 0 else ""),
                 offset=(
-                    " fragmentOffset={}".format(self.fragmentOffset)
+                    f" fragmentOffset={self.fragmentOffset}"
                     if self.fragmentOffset != 0
                     else ""
                 ),
                 length=(
-                    " length={}".format(self.packetLength)
+                    f" length={self.packetLength}"
                     if self.packetLength != 512  # Batfish default
                     else ""
                 ),
@@ -156,7 +155,7 @@ class Flow(DataModelElement):
 
     def _vrf_str(self):
         vrf_str = (
-            " vrf={}".format(self.ingressVrf)
+            f" vrf={self.ingressVrf}"
             if self.ingressVrf not in ["default", None]
             else ""
         )
@@ -164,7 +163,7 @@ class Flow(DataModelElement):
 
     def _iface_str(self):
         iface_str = (
-            " interface={}".format(self.ingressInterface)
+            f" interface={self.ingressInterface}"
             if self.ingressInterface is not None
             else ""
         )
@@ -203,9 +202,9 @@ class Flow(DataModelElement):
         if match:
             return "ipProtocol=" + match.group(1)
         if self.ipProtocol.lower() == "tcp":
-            return "TCP ({})".format(self.get_flag_str())
+            return f"TCP ({self.get_flag_str()})"
         if self.ipProtocol.lower() == "icmp":
-            return "ICMP (type={}, code={})".format(self.icmpVar, self.icmpCode)
+            return f"ICMP (type={self.icmpVar}, code={self.icmpCode})"
         return self.ipProtocol
 
     def _has_ports(self):
@@ -251,7 +250,7 @@ class Flow(DataModelElement):
         # type: (str, Optional[int]) -> str
         if self._has_ports():
             assert port is not None
-            return "{ip}:{port}".format(ip=ip, port=port)
+            return f"{ip}:{port}"
         else:
             return ip
 
@@ -311,7 +310,7 @@ class FlowTrace(DataModelElement):
         # type: () -> str
         return "{hops}\n{notes}".format(
             hops="\n".join(
-                ["{} {}".format(num, hop) for num, hop in enumerate(self.hops, start=1)]
+                [f"{num} {hop}" for num, hop in enumerate(self.hops, start=1)]
             ),
             notes=self.notes,
         )
@@ -373,7 +372,7 @@ class FlowTraceHop(DataModelElement):
             self.edge, "\n    ".join(self.routes)
         )
         if self.transformedFlow:
-            ret_str += "\n    Transformed flow: {}".format(self.transformedFlow)
+            ret_str += f"\n    Transformed flow: {self.transformedFlow}"
         return ret_str
 
     def _repr_html_(self):
@@ -407,7 +406,7 @@ class SessionAction(DataModelElement):
             return PostNatFibLookup()
         if action == "ForwardOutInterface":
             return ForwardOutInterface.from_dict(json_dict)
-        raise ValueError("Invalid session action type: {}".format(action))
+        raise ValueError(f"Invalid session action type: {action}")
 
 
 @attr.s(frozen=True)
@@ -508,7 +507,7 @@ class SessionMatchExpr(DataModelElement):
         matchers = ["ipProtocol", "srcIp", "dstIp"]
         if self.srcPort is not None and self.dstPort is not None:
             matchers.extend(["srcPort", "dstPort"])
-        strings = ["{}={}".format(field, getattr(self, field)) for field in matchers]
+        strings = [f"{field}={getattr(self, field)}" for field in matchers]
         return "[{}]".format(", ".join(strings))
 
 
@@ -524,7 +523,7 @@ class SessionScope(DataModelElement):
             return IncomingSessionScope.from_dict(json_dict)
         elif "originatingVrf" in json_dict:
             return OriginatingSessionScope.from_dict(json_dict)
-        raise ValueError("Invalid session scope: {}".format(json_dict))
+        raise ValueError(f"Invalid session scope: {json_dict}")
 
 
 @attr.s(frozen=True)
@@ -564,7 +563,7 @@ class OriginatingSessionScope(SessionScope):
 
     def __str__(self):
         # type: () -> str
-        return "Originating VRF: {}".format(self.originatingVrf)
+        return f"Originating VRF: {self.originatingVrf}"
 
 
 @attr.s(frozen=True)
@@ -590,11 +589,9 @@ class ArpErrorStepDetail(DataModelElement):
         # type: () -> str
         detail_info = []
         if self.outputInterface:
-            detail_info.append("Output Interface: {}".format(self.outputInterface))
+            detail_info.append(f"Output Interface: {self.outputInterface}")
         if self.resolvedNexthopIp:
-            detail_info.append(
-                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
-            )
+            detail_info.append(f"Resolved Next Hop IP: {self.resolvedNexthopIp}")
         return ", ".join(detail_info)
 
 
@@ -621,11 +618,9 @@ class DeliveredStepDetail(DataModelElement):
         # type: () -> str
         detail_info = []
         if self.outputInterface:
-            detail_info.append("Output Interface: {}".format(self.outputInterface))
+            detail_info.append(f"Output Interface: {self.outputInterface}")
         if self.resolvedNexthopIp:
-            detail_info.append(
-                "Resolved Next Hop IP: {}".format(self.resolvedNexthopIp)
-            )
+            detail_info.append(f"Resolved Next Hop IP: {self.resolvedNexthopIp}")
         return ", ".join(detail_info)
 
 
@@ -744,9 +739,9 @@ class MatchSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "{}".format(self.sessionScope),
-            "Action: {}".format(self.sessionAction),
-            "Match Criteria: {}".format(self.matchCriteria),
+            f"{self.sessionScope}",
+            f"Action: {self.sessionAction}",
+            f"Match Criteria: {self.matchCriteria}",
         ]
         if self.transformation:
             strings.append(
@@ -801,7 +796,7 @@ class DelegatedToNextVrf(ForwardingDetail):
             raise ValueError('type must be "DelegatedToNextVrf"')
 
     def __str__(self) -> str:
-        return "Delegated to next VRF: {}".format(escape_name(self.nextVrf))
+        return f"Delegated to next VRF: {escape_name(self.nextVrf)}"
 
     @classmethod
     def from_dict(cls, json_dict: Dict[str, Any]) -> "DelegatedToNextVrf":
@@ -845,7 +840,8 @@ class ForwardedIntoVxlanTunnel(ForwardingDetail):
 class ForwardedOutInterface(ForwardingDetail):
     """A flow being forwarded out an interface.
 
-    If there is no resolved next-hop IP and this is the final step on this node, the destination IP of the flow will be used as the next gateway IP."""
+    If there is no resolved next-hop IP and this is the final step on this node, the destination IP of the flow will be used as the next gateway IP.
+    """
 
     outputInterface = attr.ib(type=str)
     resolvedNextHopIp = attr.ib(type=Optional[str], default=None)
@@ -1083,9 +1079,9 @@ class SetupSessionStepDetail(DataModelElement):
     def __str__(self):
         # type: () -> str
         strings = [
-            "{}".format(self.sessionScope),
-            "Action: {}".format(self.sessionAction),
-            "Match Criteria: {}".format(self.matchCriteria),
+            f"{self.sessionScope}",
+            f"Action: {self.sessionAction}",
+            f"Match Criteria: {self.matchCriteria}",
         ]
         if self.transformation:
             strings.append(
@@ -1122,7 +1118,7 @@ class FilterStepDetail(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{} ({})".format(self.filter, self.filterType)
+        return f"{self.filter} ({self.filterType})"
 
 
 @attr.s(frozen=True)
@@ -1141,7 +1137,7 @@ class PolicyStepDetail(DataModelElement):
         return PolicyStepDetail(json_dict.get("policy", ""))
 
     def __str__(self) -> str:
-        return "{}".format(self.policy)
+        return f"{self.policy}"
 
 
 @attr.s(frozen=True)
@@ -1219,7 +1215,7 @@ class Step(DataModelElement):
         action_str = str(self.action)
         detail_str = str(self.detail) if self.detail else None
         if detail_str:
-            return "{}({})".format(action_str, detail_str)
+            return f"{action_str}({detail_str})"
         else:
             return action_str
 
@@ -1315,10 +1311,7 @@ class Trace(DataModelElement):
         return "{disposition}\n{hops}".format(
             disposition=self.disposition,
             hops="\n".join(
-                [
-                    "{num}. {hop}".format(num=num, hop=hop)
-                    for num, hop in enumerate(self.hops, start=1)
-                ]
+                [f"{num}. {hop}" for num, hop in enumerate(self.hops, start=1)]
             ),
         )
 
@@ -1500,7 +1493,7 @@ def _normalize_phc_intspace(value):
     if isinstance(value, Iterable):
         result = ",".join(str(v) for v in value)
         return result
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 def _normalize_phc_list(value):
@@ -1512,9 +1505,9 @@ def _normalize_phc_list(value):
         alist = [v for v in [v.strip() for v in value.split(",")] if v]
         if not alist:
             # reject empty list values
-            raise ValueError("Invalid value {}".format(value))
+            raise ValueError(f"Invalid value {value}")
         return alist
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 def _normalize_phc_tcpflags(value):
@@ -1523,7 +1516,7 @@ def _normalize_phc_tcpflags(value):
         return value
     elif isinstance(value, MatchTcpFlags):
         return [value]
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 def _normalize_phc_strings(value):
@@ -1533,7 +1526,7 @@ def _normalize_phc_strings(value):
     if isinstance(value, Iterable):
         result = ",".join(value)  # type: Text
         return result
-    raise ValueError("Invalid value {}".format(value))
+    raise ValueError(f"Invalid value {value}")
 
 
 @attr.s(frozen=True)
