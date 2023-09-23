@@ -99,6 +99,7 @@ setup(
         "requests",
         "requests-toolbelt",
         "simplejson",
+        "urllib3>=1.26.0",
     ],
     # List additional groups of dependencies here (e.g. Capirca
     # dependencies). For example:
