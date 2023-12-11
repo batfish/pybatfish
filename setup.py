@@ -130,6 +130,7 @@ setup(
             "types-Deprecated",
             "types-python-dateutil",
             "types-pytz",
+            "types-PyYAML",
             "types-requests",
             "types-setuptools",
             "types-simplejson",
