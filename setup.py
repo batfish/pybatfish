@@ -107,7 +107,7 @@ setup(
     extras_require={
         "capirca": CAPIRCA_DEPS,
         "dev": [
-            "black<23.8",
+            "black<23.11",
             "cerberus",
             "check-manifest",
             "coverage",
