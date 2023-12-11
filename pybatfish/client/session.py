@@ -1112,7 +1112,7 @@ class Session:
             self.network = str(net["name"])
             return self.network
         except HTTPError as e:
-            if e.response.status_code != 404:
+            if e.response is None or e.response.status_code != 404:
                 raise BatfishException("Unknown error accessing network", e)
 
         if self.use_deprecated_workmgr_v1():
