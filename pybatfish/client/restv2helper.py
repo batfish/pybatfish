@@ -630,7 +630,7 @@ def auto_complete(
         if session.snapshot
         else "",
         CoordConstsV2.RSC_AUTOCOMPLETE,
-        completion_type,
+        completion_type.value,
     )
     params = {}  # type: Dict[str, Any]
     if query:

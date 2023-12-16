@@ -712,7 +712,7 @@ def _validate(questionJson):
                         else:
                             for i in range(0, len(value)):
                                 valueElement = value[i]
-                                typeValid = _validateType(valueElement, variableType)
+                                typeValid = _validate_type(valueElement, variableType)
                                 if not typeValid:
                                     valid = False
                                     errorMessage += (
@@ -750,7 +750,7 @@ def _validate(questionJson):
                                     )
 
                 else:
-                    typeValid, typeValidErrorMessage = _validateType(
+                    typeValid, typeValidErrorMessage = _validate_type(
                         value, variableType
                     )
                     if not typeValid:
@@ -796,7 +796,9 @@ def _validate(questionJson):
     return True
 
 
-def _validateType(value, expectedType):
+def _validate_type(
+    value: Any, expected_type: Union[str, VariableType]
+) -> Tuple[bool, Optional[str]]:
     """
     Check if the input `value` have contents that matches the requirements specified by `expectedType`.
 
@@ -805,28 +807,31 @@ def _validateType(value, expectedType):
 
     :raises QuestionValidationException
     """
-    if expectedType == VariableType.BOOLEAN:
+    if not isinstance(expected_type, VariableType):
+        expected_type = VariableType(expected_type)
+
+    if expected_type == VariableType.BOOLEAN:
         return isinstance(value, bool), None
-    elif expectedType == VariableType.COMPARATOR:
-        validComparators = ["<", "<=", "==", ">=", ">", "!="]
-        if value not in validComparators:
+    elif expected_type == VariableType.COMPARATOR:
+        valid_comparators = ["<", "<=", "==", ">=", ">", "!="]
+        if value not in valid_comparators:
             return (
                 False,
                 "'{}' is not a known comparator. Valid options are: '{}'".format(
-                    value, ", ".join(validComparators)
+                    value, ", ".join(valid_comparators)
                 ),
             )
         return True, None
-    elif expectedType == VariableType.INTEGER:
+    elif expected_type == VariableType.INTEGER:
         INT32_MIN = -(2**32)
         INT32_MAX = 2**32 - 1
         valid = isinstance(value, int) and INT32_MIN <= value <= INT32_MAX
         return valid, None
-    elif expectedType == VariableType.FLOAT:
+    elif expected_type == VariableType.FLOAT:
         return isinstance(value, float), None
-    elif expectedType == VariableType.DOUBLE:
+    elif expected_type == VariableType.DOUBLE:
         return isinstance(value, float), None
-    elif expectedType in [
+    elif expected_type in [
         VariableType.ADDRESS_GROUP_NAME,
         VariableType.APPLICATION_SPEC,
         VariableType.BGP_PEER_PROPERTY_SPEC,
@@ -868,46 +873,46 @@ def _validateType(value, expectedType):
         VariableType.ZONE,
     ]:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         return True, None
-    elif expectedType == VariableType.IP:
+    elif expected_type == VariableType.IP:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             return _isIp(value)
-    elif expectedType == VariableType.IP_WILDCARD:
+    elif expected_type == VariableType.IP_WILDCARD:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             return _isIpWildcard(value)
-    elif expectedType == VariableType.JSON_PATH:
+    elif expected_type == VariableType.JSON_PATH:
         return _isJsonPath(value)
-    elif expectedType == VariableType.LONG:
+    elif expected_type == VariableType.LONG:
         INT64_MIN = -(2**64)
         INT64_MAX = 2**64 - 1
         valid = isinstance(value, int) and INT64_MIN <= value <= INT64_MAX
         return valid, None
-    elif expectedType == VariableType.PREFIX:
+    elif expected_type == VariableType.PREFIX:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             return _isPrefix(value)
-    elif expectedType == VariableType.PREFIX_RANGE:
+    elif expected_type == VariableType.PREFIX_RANGE:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             return _isPrefixRange(value)
-    elif expectedType == VariableType.QUESTION:
+    elif expected_type == VariableType.QUESTION:
         return isinstance(value, QuestionBase), None
-    elif expectedType == VariableType.BGP_ROUTES:
+    elif expected_type == VariableType.BGP_ROUTES:
         if not isinstance(value, list) or not all(
             isinstance(r, BgpRoute) for r in value
         ):
-            return False, f"A Batfish {expectedType} must be a list of BgpRoute"
+            return False, f"A Batfish {expected_type.value} must be a list of BgpRoute"
         return True, None
-    elif expectedType == VariableType.STRING:
+    elif expected_type == VariableType.STRING:
         return isinstance(value, str), None
-    elif expectedType == VariableType.SUBRANGE:
+    elif expected_type == VariableType.SUBRANGE:
         if isinstance(value, int):
             return True, None
         elif isinstance(value, str):
@@ -916,12 +921,12 @@ def _validateType(value, expectedType):
             return (
                 False,
                 "A Batfish {} must either be a string or an integer".format(
-                    expectedType
+                    expected_type.value
                 ),
             )
-    elif expectedType == VariableType.PROTOCOL:
+    elif expected_type == VariableType.PROTOCOL:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             validProtocols = ["dns", "ssh", "tcp", "udp"]
             if not value.lower() in validProtocols:
@@ -932,9 +937,9 @@ def _validateType(value, expectedType):
                     ),
                 )
             return True, None
-    elif expectedType == VariableType.IP_PROTOCOL:
+    elif expected_type == VariableType.IP_PROTOCOL:
         if not isinstance(value, str):
-            return False, f"A Batfish {expectedType} must be a string"
+            return False, f"A Batfish {expected_type.value} must be a string"
         else:
             try:
                 intValue = int(value)
@@ -947,7 +952,7 @@ def _validateType(value, expectedType):
             except ValueError:
                 # TODO: Should be validated at server side
                 return True, None
-    elif expectedType in [
+    elif expected_type in [
         VariableType.ANSWER_ELEMENT,
         VariableType.BGP_ROUTE_CONSTRAINTS,
         VariableType.HEADER_CONSTRAINT,
@@ -957,13 +962,13 @@ def _validateType(value, expectedType):
     else:
         logging.getLogger(__name__).warning(
             "WARNING: skipping validation for unknown argument type {}".format(
-                expectedType
+                expected_type.value
             )
         )
         return True, None
 
 
-def _isJsonPath(value):
+def _isJsonPath(value: Any) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid jsonPath.
 
@@ -991,7 +996,7 @@ def _isJsonPath(value):
         return True, None
 
 
-def _isIp(value):
+def _isIp(value: str) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid IP address.
 
@@ -1040,7 +1045,7 @@ def _isIp(value):
         return True, None
 
 
-def _isSubRange(value):
+def _isSubRange(value: str) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid subRange.
 
@@ -1061,7 +1066,7 @@ def _isSubRange(value):
     return True, None
 
 
-def _isPrefix(value):
+def _isPrefix(value: str) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid prefix.
 
@@ -1081,7 +1086,7 @@ def _isPrefix(value):
     return _isIp(contents[0])
 
 
-def _isPrefixRange(value):
+def _isPrefixRange(value: str) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid prefix range.
 
@@ -1105,7 +1110,7 @@ def _isPrefixRange(value):
     return True, None
 
 
-def _isIpWildcard(value):
+def _isIpWildcard(value: str) -> Tuple[bool, Optional[str]]:
     """
     Check if the input string represents a valid ipWildCard.
 

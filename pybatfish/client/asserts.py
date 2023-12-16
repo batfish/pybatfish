@@ -134,20 +134,11 @@ def _get_duplicate_router_ids(
         .frame()
     )
     if ignore_same_node:
-        # Maps Router_ID to whether multiple nodes have that Router_ID
-        router_id_on_duplicate_nodes = (
-            df.drop_duplicates(["Node", "Router_ID"])
-            .value_counts(["Router_ID"])
-            .map(lambda x: x > 1)
+        return df.groupby("Router_ID").filter(
+            lambda x: x["Node"].nunique() > 1 and x["Node"].nunique() != len(x)
         )
-        df_duplicate = df[
-            df.apply(lambda x: router_id_on_duplicate_nodes[x["Router_ID"]], axis=1)
-        ].sort_values(["Router_ID"])
     else:
-        df_duplicate = df[df.duplicated(["Router_ID"], keep=False)].sort_values(
-            ["Router_ID"]
-        )
-    return df_duplicate
+        return df[df.duplicated(["Router_ID"], keep=False)].sort_values(["Router_ID"])
 
 
 def _is_dict_match(actual: Dict[str, Any], expected: Dict[str, Any]) -> bool:
@@ -782,7 +773,7 @@ def assert_no_duplicate_router_ids(
 
     supported_protocols = {"bgp", "ospf"}
     protocols_to_fetch = (
-        supported_protocols if protocols is None else set(map(str.lower, protocols))
+        supported_protocols if protocols is None else set(p.lower() for p in protocols)
     )
     if not protocols_to_fetch.issubset(supported_protocols):
         raise ValueError(
