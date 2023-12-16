@@ -257,27 +257,27 @@ def testValidIpAddressIpWildcard():
 
 # Tests for validateType
 def testInvalidBooleanValidateType():
-    result = question._validateType(1.5, "boolean")
+    result = question._validate_type(1.5, "boolean")
     assert not result[0]
 
 
 def testValidBooleanValidateType():
-    result = question._validateType(True, "boolean")
+    result = question._validate_type(True, "boolean")
     assert result[0]
 
 
 def testInvalidIntegerValidateType():
-    result = question._validateType(1.5, "integer")
+    result = question._validate_type(1.5, "integer")
     assert not result[0]
 
 
 def testValidIntegerValidateType():
-    result = question._validateType(10, "integer")
+    result = question._validate_type(10, "integer")
     assert result[0]
 
 
 def testInvalidComparatorValidateType():
-    result = question._validateType("<==", "comparator")
+    result = question._validate_type("<==", "comparator")
     expectMessage = (
         "'<==' is not a known comparator. Valid options are: '<, <=, ==, >=, >, !='"
     )
@@ -286,107 +286,107 @@ def testInvalidComparatorValidateType():
 
 
 def testValidComparatorValidateType():
-    result = question._validateType("<=", "comparator")
+    result = question._validate_type("<=", "comparator")
     assert result[0]
 
 
 def testInvalidFloatValidateType():
-    result = question._validateType(10, "float")
+    result = question._validate_type(10, "float")
     assert not result[0]
 
 
 def testValidFloatValidateType():
-    result = question._validateType(10.0, "float")
+    result = question._validate_type(10.0, "float")
     assert result[0]
 
 
 def testInvalidDoubleValidateType():
-    result = question._validateType(10, "double")
+    result = question._validate_type(10, "double")
     assert not result[0]
 
 
 def testValidDoubleValidateType():
-    result = question._validateType(10.0, "double")
+    result = question._validate_type(10.0, "double")
     assert result[0]
 
 
 def testInvalidLongValidateType():
-    result = question._validateType(5.3, "long")
+    result = question._validate_type(5.3, "long")
     assert not result[0]
-    result = question._validateType(2**64, "long")
+    result = question._validate_type(2**64, "long")
     assert not result[0]
 
 
 def testValidLongValidateType():
-    result = question._validateType(10, "long")
+    result = question._validate_type(10, "long")
     assert result[0]
-    result = question._validateType(2**40, "long")
+    result = question._validate_type(2**40, "long")
     assert result[0]
 
 
 def testInvalidJavaRegexValidateType():
-    result = question._validateType(10, "javaRegex")
+    result = question._validate_type(10, "javaRegex")
     expectMessage = "A Batfish javaRegex must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidNonDictionaryJsonPathValidateType():
-    result = question._validateType(10, "jsonPath")
+    result = question._validate_type(10, "jsonPath")
     expectMessage = "Expected a jsonPath dictionary with elements 'path' (string) and optional 'suffix' (boolean)"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidDictionaryJsonPathValidateType():
-    result = question._validateType({"value": 10}, "jsonPath")
+    result = question._validate_type({"value": 10}, "jsonPath")
     expectMessage = "Missing 'path' element of jsonPath"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testPathNonStringJsonPathValidateType():
-    result = question._validateType({"path": 10}, "jsonPath")
+    result = question._validate_type({"path": 10}, "jsonPath")
     expectMessage = "'path' element of jsonPath dictionary should be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testSuffixNonBooleanJsonPathValidateType():
-    result = question._validateType({"path": "I am path", "suffix": "hi"}, "jsonPath")
+    result = question._validate_type({"path": "I am path", "suffix": "hi"}, "jsonPath")
     expectMessage = "'suffix' element of jsonPath dictionary should be a boolean"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidJsonPathValidateType():
-    result = question._validateType({"path": "I am path", "suffix": True}, "jsonPath")
+    result = question._validate_type({"path": "I am path", "suffix": True}, "jsonPath")
     assert result[0]
     assert result[1] is None
 
 
 def testInvalidTypeSubRangeValidateType():
-    result = question._validateType(10.0, "subrange")
+    result = question._validate_type(10.0, "subrange")
     expectMessage = "A Batfish subrange must either be a string or an integer"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidIntegerSubRangeValidateType():
-    result = question._validateType(10, "subrange")
+    result = question._validate_type(10, "subrange")
     assert result[0]
     assert result[1] is None
 
 
 def testNonStringProtocolValidateType():
-    result = question._validateType(10.0, "protocol")
+    result = question._validate_type(10.0, "protocol")
     expectMessage = "A Batfish protocol must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidProtocolValidateType():
-    result = question._validateType("TCPP", "protocol")
+    result = question._validate_type("TCPP", "protocol")
     expectMessage = (
         "'TCPP' is not a valid protocols. Valid options are: 'dns, ssh, tcp, udp'"
     )
@@ -395,27 +395,27 @@ def testInvalidProtocolValidateType():
 
 
 def testValidProtocolValidateType():
-    result = question._validateType("TCP", "protocol")
+    result = question._validate_type("TCP", "protocol")
     assert result[0]
     assert result[1] is None
 
 
 def testNonStringIpProtocolValidateType():
-    result = question._validateType(10.0, "ipProtocol")
+    result = question._validate_type(10.0, "ipProtocol")
     expectMessage = "A Batfish ipProtocol must be a string"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testInvalidIntegerIpProtocolValidateType():
-    result = question._validateType("1000", "ipProtocol")
+    result = question._validate_type("1000", "ipProtocol")
     expectMessage = "'1000' is not in valid ipProtocol range: 0-255"
     assert not result[0]
     assert expectMessage == result[1]
 
 
 def testValidIntegerIpProtocolValidateType():
-    result = question._validateType("10", "ipProtocol")
+    result = question._validate_type("10", "ipProtocol")
     assert result[0]
     assert result[1] is None
 
@@ -423,8 +423,8 @@ def testValidIntegerIpProtocolValidateType():
 def testInvalidCompletionTypes():
     # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
     for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
-        result = question._validateType(5, completion_type)
-        expectMessage = "A Batfish " + completion_type + " must be a string"
+        result = question._validate_type(5, completion_type)
+        expectMessage = f"A Batfish {completion_type.value} must be a string"
         assert not result[0]
         assert result[1] == expectMessage
 
@@ -437,7 +437,7 @@ def testValidCompletionTypes():
     }
     # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
     for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
-        result = question._validateType(
+        result = question._validate_type(
             values.get(completion_type, ".*"), completion_type
         )
         assert result[0]
