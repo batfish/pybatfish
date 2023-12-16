@@ -424,7 +424,7 @@ def testInvalidCompletionTypes():
     # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
     for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
         result = question._validateType(5, completion_type)
-        expectMessage = "A Batfish " + completion_type + " must be a string"
+        expectMessage = f"A Batfish {completion_type} must be a string"
         assert not result[0]
         assert result[1] == expectMessage
 
