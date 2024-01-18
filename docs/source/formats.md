@@ -259,7 +259,7 @@ See [this example snapshot](https://github.com/batfish/batfish/tree/master/netwo
 
 ### Layer-1 topology
 
-Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.128.1.2/24`,
+Batfish can infer Layer-3 interface adjacencies based on IP address configuration on interfaces. For instance, if there are two interfaces in the network with IP assignments `192.168.1.1/24` and `192.168.1.2/24`,
 Batfish will infer that these interfaces are adjacent.
 
 Such inference does not work if the network re-uses IP address space or has link-local addresses. In those situations, you must provide a Layer-1 topology file that has cabling information. 
