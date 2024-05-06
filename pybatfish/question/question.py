@@ -955,6 +955,7 @@ def _validate_type(
     elif expected_type in [
         VariableType.ANSWER_ELEMENT,
         VariableType.BGP_ROUTE_CONSTRAINTS,
+        VariableType.BGP_SESSION_PROPERTIES,
         VariableType.HEADER_CONSTRAINT,
         VariableType.PATH_CONSTRAINT,
     ]:
