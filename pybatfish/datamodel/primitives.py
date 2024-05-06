@@ -101,6 +101,7 @@ class VariableType(str, Enum):
     BGP_SESSION_COMPAT_STATUS_SPEC = (
         "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
     )
+    BGP_SESSION_PROPERTIES = "bgpSessionProperties"  #: bgp session properties
     BGP_SESSION_STATUS_SPEC = "bgpSessionStatusSpec"  #: bgp session statuses
     BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
     BOOLEAN = "boolean"  #: boolean values
