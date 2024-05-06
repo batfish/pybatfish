@@ -271,19 +271,27 @@ class BgpSessionProperties(DataModelElement):
     :ivar remoteIp: The IP address of the session's remote peer
     """
 
-    localAs = attr.ib(type=int)
-    remoteAs = attr.ib(type=int)
+    localAs = attr.ib(type=int, converter=int)
+    remoteAs = attr.ib(type=int, converter=int)
     localIp = attr.ib(type=str)
     remoteIp = attr.ib(type=str)
 
     @classmethod
     def from_dict(cls, json_dict):
         # type: (Dict) -> BgpSessionProperties
+        localAs = json_dict.get("localAs")
+        remoteAs = json_dict.get("remoteAs")
+        localIp = json_dict.get("localIp")
+        remoteIp = json_dict.get("remoteIp")
+        assert isinstance(localAs, int)
+        assert isinstance(remoteAs, int)
+        assert isinstance(localIp, str)
+        assert isinstance(remoteIp, str)
         return BgpSessionProperties(
-            localAs=json_dict.get("localAs"),
-            remoteAs=json_dict.get("remoteAs"),
-            localIp=json_dict.get("localIp"),
-            remoteIp=json_dict.get("remoteIp"),
+            localAs=localAs,
+            remoteAs=remoteAs,
+            localIp=localIp,
+            remoteIp=remoteIp,
         )
 
 
