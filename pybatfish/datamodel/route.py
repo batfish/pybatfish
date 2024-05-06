@@ -25,6 +25,7 @@ __all__ = [
     "BgpRouteConstraints",
     "BgpRouteDiff",
     "BgpRouteDiffs",
+    "BgpSessionProperties",
     "NextHop",
     "NextHopDiscard",
     "NextHopInterface",
@@ -256,6 +257,34 @@ class BgpRouteDiffs(DataModelElement):
     def _repr_html_(self):
         # type: () -> str
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
+
+
+@attr.s(frozen=True)
+class BgpSessionProperties(DataModelElement):
+    """Properties of a BGP session.
+
+    Properties that may be needed in order to simulate a route map that is used in a particular BGP session.
+
+    :ivar localAs: The AS number of the session's local peer
+    :ivar remoteAs: The AS number of the session's remote peer
+    :ivar localIp: The IP address of the session's local peer
+    :ivar remoteIp: The IP address of the session's remote peer
+    """
+
+    localAs = attr.ib(type=int, converter=int)
+    remoteAs = attr.ib(type=int, converter=int)
+    localIp = attr.ib(type=str, converter=str)
+    remoteIp = attr.ib(type=str, converter=str)
+
+    @classmethod
+    def from_dict(cls, json_dict):
+        # type: (Dict) -> BgpSessionProperties
+        return BgpSessionProperties(
+            localAs=json_dict.get("localAs"),
+            remoteAs=json_dict.get("remoteAs"),
+            localIp=json_dict.get("localIp"),
+            remoteIp=json_dict.get("remoteIp"),
+        )
 
 
 class NextHop(DataModelElement, metaclass=ABCMeta):

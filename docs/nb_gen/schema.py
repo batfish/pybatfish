@@ -18,6 +18,7 @@ _INPUT_TYPES = {
     "comparator": "str",
     "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
     "bgproutes": "List[pybatfish.datamodel.route.BgpRoute]",
+    "bgpsessionproperties": "pybatfish.datamodel.route.BgpSessionProperties",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
     "ip": "str",

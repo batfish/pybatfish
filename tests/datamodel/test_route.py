@@ -4,6 +4,7 @@ from pybatfish.datamodel.route import (
     BgpRoute,
     BgpRouteConstraints,
     BgpRouteDiff,
+    BgpSessionProperties,
     NextHop,
     NextHopDiscard,
     NextHopInterface,
@@ -189,6 +190,24 @@ def testBgpRouteDiffStr():
     diff2 = BgpRouteDiff(fieldName="localPreference", oldValue="old", newValue="new")
     assert diff1._repr_html_() == "Nm: old --> new"
     assert diff2._repr_html_() == "Local Preference: old --> new"
+
+
+def testBgpSessionPropertiesDeserialization():
+    localAs = 22
+    remoteAs = 33
+    localIp = "2.2.2.2"
+    remoteIp = "3.3.3.3"
+    dct = {
+        "localAs": localAs,
+        "remoteAs": remoteAs,
+        "localIp": localIp,
+        "remoteIp": remoteIp,
+    }
+    properties = BgpSessionProperties.from_dict(dct)
+    assert properties.localAs == localAs
+    assert properties.remoteAs == remoteAs
+    assert properties.localIp == localIp
+    assert properties.remoteIp == remoteIp
 
 
 def testNextHopCannotInstantiate():
