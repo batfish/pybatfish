@@ -65,7 +65,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "pybatfish"
-copyright = "2016-2022, The Batfish Open Source Project"
+copyright = "2016-2024, The Batfish Open Source Project"
 author = "The Batfish Open Source Project"
 
 # The version info for the project you're documenting, acts as replacement for
