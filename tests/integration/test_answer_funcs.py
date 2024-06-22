@@ -11,22 +11,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-
+import typing
 from os.path import abspath, dirname, join, pardir, realpath
 
 import pytest
 
-from pybatfish.client.commands import (
-    bf_delete_network,
-    bf_get_work_status,
-    bf_init_snapshot,
-    bf_session,
-    bf_set_network,
-)
+from pybatfish.client.session import Session
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.exception import BatfishException
-from pybatfish.question import bfq
-from pybatfish.question.question import load_questions
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -35,54 +27,56 @@ TEST_NETWORK_TR = "ref_network_tr"
 
 
 @pytest.fixture(scope="module")
-def network():
-    load_questions()
-    try:
-        bf_delete_network(TEST_NETWORK)
-    except Exception:
-        pass
-    bf_set_network(TEST_NETWORK)
-    yield bf_init_snapshot(join(_this_dir, "snapshot"), name="snapshot")
-    bf_delete_network(TEST_NETWORK)
+def bf() -> Session:
+    return Session()
 
 
 @pytest.fixture(scope="module")
-def traceroute_network():
-    load_questions()
+def network(bf: Session) -> typing.Generator[str, None, None]:
     try:
-        bf_delete_network(TEST_NETWORK_TR)
+        bf.delete_network(TEST_NETWORK)
     except Exception:
         pass
-    bf_set_network(TEST_NETWORK_TR)
-    yield bf_init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
-    bf_delete_network(TEST_NETWORK_TR)
+    bf.set_network(TEST_NETWORK)
+    yield bf.init_snapshot(join(_this_dir, "snapshot"), name="snapshot")
+    bf.delete_network(TEST_NETWORK)
 
 
-def test_answer_background(network):
-    """Expect a GUID when running in background, which can be fed to bf_get_work_status."""
-    work_item_id = bfq.ipOwners().answer(background=True)
-    bf_get_work_status(work_item_id)
+@pytest.fixture(scope="module")
+def traceroute_network(bf: Session) -> typing.Generator[str, None, None]:
+    try:
+        bf.delete_network(TEST_NETWORK_TR)
+    except Exception:
+        pass
+    bf.set_network(TEST_NETWORK_TR)
+    yield bf.init_snapshot(join(_this_dir, "tracert_snapshot"), name="snapshot_tracert")
+    bf.delete_network(TEST_NETWORK_TR)
 
 
-def test_answer_foreground(network):
+def test_answer_background(bf: Session, network: str) -> None:
+    """Expect a GUID when running in background, which can be fed to bf.get_work_status."""
+    work_item_id = bf.q.ipOwners().answer(background=True)  # type: ignore
+    bf.get_work_status(work_item_id)
+
+
+def test_answer_foreground(bf: Session, network: str) -> None:
     """Expect an answer that is valid JSON when run in foreground."""
-    bfq.ipOwners().answer()
+    bf.q.ipOwners().answer()  # type: ignore
 
 
-def test_answer_fail(network):
+def test_answer_fail(bf: Session, network: str) -> None:
     """Expect a BatfishException with searchFilters specifying a non-existant filter."""
     with pytest.raises(BatfishException) as err:
-        bfq.searchFilters(filters="undefined").answer().frame()
+        bf.q.searchFilters(filters="undefined").answer().frame()  # type: ignore
     assert "Work terminated abnormally" in str(err.value)
 
 
-def test_answer_traceroute(traceroute_network):
-    bf_session.additional_args = {"debugflags": "traceroute"}
+def test_answer_traceroute(bf: Session, traceroute_network: str) -> None:
     answer = (
-        bfq.traceroute(
+        bf.q.traceroute(  # type: ignore
             startLocation="hop1", headers=HeaderConstraints(dstIps="1.0.0.2")
         )
-        .answer()
+        .answer(extra_args={"debugflags": "traceroute"})
         .frame()
     )
     list_traces = answer.iloc[0]["Traces"]

@@ -227,14 +227,16 @@ class RoleMapping(DataModelElement):
         role name that was obtained from the node name to a canonical role name
     """
 
-    name = attr.ib(type=str)
+    name = attr.ib(
+        type=Optional[str],
+        validator=attr.validators.optional(attr.validators.instance_of(str)),
+    )
     regex = attr.ib(type=str)
-    roleDimensionGroups = attr.ib(type=Dict[str, int])
+    roleDimensionGroups = attr.ib(type=Dict[str, List[int]])
     canonicalRoleNames = attr.ib(type=Dict[str, Dict[str, str]], factory=dict)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> RoleMapping
+    def from_dict(cls, json_dict: Dict) -> "RoleMapping":
         return RoleMapping(
             json_dict.get("name", None),
             json_dict["regex"],
