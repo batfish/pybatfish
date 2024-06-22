@@ -39,17 +39,13 @@ from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
 from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, VariableType
 from pybatfish.datamodel.answer import Answer  # noqa: F401
 from pybatfish.exception import QuestionValidationException
-from pybatfish.question import bfq
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session  # noqa: F401
 
 # A set of tags across all questions
-_tags = set()  # type: Set[str]
 _VALID_VARIABLE_NAME_REGEX = re.compile(r"^\w+$")
-
-__all__ = ["list_questions", "list_tags", "load_dir_questions", "load_questions"]
 
 
 @attr.s(frozen=True)
@@ -292,21 +288,6 @@ class Questions:
             _install_questions(_load_remote_questions_templates(self._session), self)
 
 
-def list_questions(tags=None, question_module="pybatfish.question.bfq"):
-    # type: (Optional[Iterable[str]], str) -> List[Dict[str, Union[str, Set]]]
-    """List available questions.
-
-    :param tags: if not `None`, only list questions with given tags.
-        See :py:func:`list_tags` for a list of tags given currently loaded questions.
-    :param question_module: which module to load the questions from. By default,
-        :py:mod:`pybatfish.question.bfq` is used.
-
-    :returns: a list of questions, where each question is represented as a dict
-        containing "name", "description", and "tags".
-    """
-    return _list_questions(tags, sys.modules[question_module])
-
-
 def _list_questions(tags, obj):
     # type: (Optional[Iterable[str]], object) -> List[Dict[str, Union[str, Set]]]
     """List questions in the specified object, optionally filtering on supplied tags."""
@@ -333,12 +314,6 @@ def _list_questions(tags, obj):
             }
         )
     return matching_questions
-
-
-def list_tags():
-    # type: () -> Set[str]
-    """List tags across all available questions."""
-    return _tags
 
 
 def _install_questions_in_module(
@@ -390,15 +365,6 @@ def _load_questions_from_dir(question_dir, session):
         )
     )
     return questions
-
-
-def load_dir_questions(questionDir, session, moduleName=bfq.__name__):
-    # type: (str, Session, str) -> Iterable[str]
-    """Load question templates from a directory on disk and install them in the given module."""
-    # Find all files with questions in them.
-    questions = _load_questions_from_dir(questionDir, session)
-    _install_questions_in_module(questions.items(), moduleName)
-    return questions.keys()
 
 
 def _load_question_disk(question_path, session):
@@ -454,7 +420,6 @@ def _load_question_dict(question, session):
 
     # Extract question tags
     tags = sorted(map(str, instance_data.get("tags", [])))
-    _tags.update(tags)
 
     # Validate question variables
     ivars = instance_data.get("variables", {})
@@ -599,48 +564,6 @@ def _build_allowed_values(var_data):
     if old_values_dict:
         return [AllowedValue(v) for v in old_values_dict]
     return None
-
-
-def load_questions(
-    question_dir=None, from_server=False, module_name=bfq.__name__, session=None
-):
-    # type: (Optional[str], bool, str, Optional[Session]) -> None
-    """Load questions from directory or batfish service.
-
-    :param question_dir: Load questions from this local directory instead of
-        remote questions from the batfish service.
-    :type question_dir: str
-    :param from_server: if true or `question_dir` is None, load questions from
-        service.
-    :type from_server: bool
-    :param module_name: the name of the module where questions should be loaded.
-        Default is :py:mod:`pybatfish.question.bfq`
-    :param session: Batfish session to load questions from
-    :type session: :class:`~pybatfish.client.session.Session`
-    """
-    if not session:
-        from pybatfish.client.commands import bf_session
-
-        s = bf_session
-    else:
-        s = session
-    s.q.load(directory=question_dir)
-    new_names = set()  # type: Set[str]
-    if not question_dir or from_server:
-        remote_questions = _load_remote_questions_templates(s)
-        _install_questions_in_module(remote_questions, module_name)
-        new_names |= {name for name, q in remote_questions}
-    if question_dir:
-        local_questions = load_dir_questions(
-            question_dir, session=s, moduleName=module_name
-        )
-        over_written_questions = len(set(local_questions) & new_names)
-        if over_written_questions > 0:
-            logging.getLogger(__name__).info(
-                "Overwrote {over_written_questions} remote question(s) with local question(s)".format(
-                    over_written_questions=over_written_questions
-                )
-            )
 
 
 def _load_remote_questions_templates(session):

@@ -13,12 +13,10 @@
 #   limitations under the License.
 import inspect
 import json
-import os
-from unittest.mock import patch
 
 import pytest
 
-from pybatfish.client.session import _PYBF_USE_DEPRECATED_WORKMGR_V1_ENV, Session
+from pybatfish.client.session import Session
 from pybatfish.datamodel import Assertion, AssertionType
 from pybatfish.exception import QuestionValidationException
 from pybatfish.question.question import (
@@ -29,13 +27,7 @@ from pybatfish.question.question import (
     _load_questions_from_dir,
     _process_variables,
     _validate,
-    list_questions,
-    load_questions,
 )
-
-with patch.dict(os.environ, {_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV: "0"}):
-    from pybatfish.client.commands import bf_session
-
 
 TEST_QUESTION_NAME = "testQuestionName"
 TEST_QUESTION_DICT = {
@@ -335,19 +327,12 @@ def test_load_dir_questions(tmpdir, session):
     assert list(loaded.keys()) == [TEST_QUESTION_NAME]
 
 
-def test_list_questions(tmpdir, session):
+def test_list_questions(tmpdir):
     dir = tmpdir.mkdir("questions")
     dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    load_questions(question_dir=dir.strpath, session=session)
-    names = [q["name"] for q in list_questions()]
-    assert names == [TEST_QUESTION_NAME]
-
-
-def test_list_questions_default_session(tmpdir):
-    dir = tmpdir.mkdir("questions")
-    dir.join(TEST_QUESTION_NAME + ".json").write(json.dumps(TEST_QUESTION_DICT))
-    load_questions(question_dir=dir.strpath)
-    names = [q["name"] for q in bf_session.q.list()]
+    bf = Session(load_questions=False)
+    bf.q.load(directory=dir.strpath)
+    names = [q["name"] for q in bf.q.list()]
     assert names == [TEST_QUESTION_NAME]
 
 

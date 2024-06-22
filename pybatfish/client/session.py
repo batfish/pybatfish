@@ -517,6 +517,9 @@ class Session:
             raise ValueError("Network to be deleted must be supplied")
         restv2helper.delete_network(self, name)
 
+    def delete_network_object(self, key: str) -> None:
+        restv2helper.delete_network_object(self, key)
+
     def delete_node_role_dimension(self, dimension: str) -> None:
         """
         Deletes the definition of the given role dimension for the active network.
@@ -547,6 +550,10 @@ class Session:
         if name is None:
             raise ValueError("Snapshot to be deleted must be supplied")
         restv2helper.delete_snapshot(self, name, self.network)
+
+    def delete_snapshot_object(self, key: str, snapshot: Optional[str] = None) -> None:
+        """Deletes the snapshot object with specified key."""
+        restv2helper.delete_snapshot_object(self, key, snapshot)
 
     def extract_facts(
         self,
@@ -750,6 +757,16 @@ class Session:
             protocol, self.host, self.port_v2, self._base_uri_v2
         )
 
+    def get_network_object_stream(self, key: str) -> Any:
+        """Returns a binary stream of the content of the network object with specified key."""
+        return restv2helper.get_network_object(self, key)
+
+    def get_network_object_text(self, key: str, encoding: str = "utf-8") -> str:
+        """Returns the text content of the network object with specified key."""
+        with self.get_network_object_stream(key) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
+
     def get_node_role_dimension(
         self, dimension: str, inferred: bool = False
     ) -> NodeRoleDimension:
@@ -822,8 +839,36 @@ class Session:
         else:
             raise ValueError(
                 "snapshot must be either provided or set using "
-                "set_snapshot (e.g. bf_session.set_snapshot('NAME')"
+                "set_snapshot (e.g. bf.set_snapshot('NAME')"
             )
+
+    def get_snapshot_input_object_stream(
+        self, key: str, snapshot: Optional[str] = None
+    ) -> Any:
+        """Returns a binary stream of the content of the snapshot input object with specified key."""
+        return restv2helper.get_snapshot_input_object(self, key, snapshot)
+
+    def get_snapshot_input_object_text(
+        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
+    ) -> str:
+        """Returns the text content of the snapshot input object with specified key."""
+        with self.get_snapshot_input_object_stream(key, snapshot) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
+
+    def get_snapshot_object_stream(
+        self, key: str, snapshot: Optional[str] = None
+    ) -> Any:
+        """Returns a binary stream of the content of the snapshot object with specified key."""
+        return restv2helper.get_snapshot_object(self, key, snapshot)
+
+    def get_snapshot_object_text(
+        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
+    ) -> str:
+        """Returns the text content of the snapshot object with specified key."""
+        with self.get_snapshot_object_stream(key, snapshot) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
 
     def get_url(self, resource: str) -> str:
         """
@@ -1066,6 +1111,9 @@ class Session:
         """
         restv2helper.put_reference_book(self, book)
 
+    def put_network_object(self, key: str, data: Any) -> None:
+        restv2helper.put_network_object(self, key, data)
+
     def put_node_role_dimension(self, dimension: NodeRoleDimension) -> None:
         """
         Put a role dimension in the active network.
@@ -1087,6 +1135,9 @@ class Session:
         :type node_roles_data: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
         """
         restv2helper.put_node_roles(self, node_roles_data)
+
+    def put_snapshot_object(self, key: str, data: Any) -> None:
+        restv2helper.put_snapshot_object(self, key, data, self.snapshot)
 
     def set_network(
         self, name: str | None = None, prefix: str = Options.default_network_prefix

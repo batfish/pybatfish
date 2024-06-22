@@ -326,8 +326,9 @@ def get_snapshot_input_object(session, key, snapshot=None):
     return _get_stream(session, url_tail, {CoordConstsV2.QP_KEY: key})
 
 
-def get_snapshot_object(session, key, snapshot=None):
-    # type: (Session, Text, Optional[Text]) -> Any
+def get_snapshot_object(
+    session: "Session", key: str, snapshot: Optional[str] = None
+) -> Any:
     """Gets extended object with given key for the current snapshot."""
     url_tail = "/{}/{}/{}/{}/{}".format(
         CoordConstsV2.RSC_NETWORKS,
@@ -341,7 +342,7 @@ def get_snapshot_object(session, key, snapshot=None):
 
 def get_node_role_dimension(session, dimension):
     # type: (Session, str) -> Dict
-    """Gets the defintion of the given node role dimension for the active network."""
+    """Gets the definition of the given node role dimension for the active network."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
     if not dimension:
