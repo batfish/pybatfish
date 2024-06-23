@@ -16,11 +16,10 @@
 from typing import TYPE_CHECKING, Any, Dict, Optional, Union
 
 from pybatfish.client import restv2helper
-from pybatfish.client.consts import CoordConsts
 from pybatfish.datamodel.answer import Answer
 from pybatfish.util import get_uuid
 
-from . import resthelper, workhelper
+from . import workhelper
 from .options import Options
 
 if TYPE_CHECKING:
@@ -40,17 +39,7 @@ def _bf_answer_obj(
         question_name = Options.default_question_prefix + "_" + get_uuid()
 
     # Upload the question
-    if session.use_deprecated_workmgr_v1():
-        json_data = workhelper.get_data_upload_question(
-            session,
-            question_name,
-            question_str,
-        )
-        resthelper.get_json_response(
-            session, CoordConsts.SVC_RSC_UPLOAD_QUESTION, json_data
-        )
-    else:
-        restv2helper.upload_question(session, question_name, question_str)
+    restv2helper.upload_question(session, question_name, question_str)
 
     # Answer the question
     work_item = workhelper.get_workitem_answer(

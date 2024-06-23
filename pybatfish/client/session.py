@@ -37,7 +37,7 @@ import pkg_resources
 from deprecated import deprecated
 from requests import HTTPError
 
-from pybatfish.client import resthelper, restv2helper, workhelper
+from pybatfish.client import restv2helper, workhelper
 from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
 from pybatfish.client.asserts import (
     assert_filter_denies,
@@ -344,8 +344,6 @@ class Session:
     :ivar port_v2: The additional port of batfish service (9996 by default)
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
-    :ivar use_deprecated_workmgr_v1: Whether to use WorkMgrV1 instead of V2 for calls added in API
-                                     version 2.1.0. See help(Session.use_deprecated_workmgr_v1).
     """
 
     def __init__(
@@ -357,12 +355,9 @@ class Session:
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
-        use_deprecated_workmgr_v1: bool | None = None,
     ):
         # Coordinator args
         self.host: str = host
-        self.port_v1: int = port_v1
-        self._base_uri_v1: str = CoordConsts.SVC_CFG_WORK_MGR
         self.port_v2: int = port_v2
         self._base_uri_v2: str = CoordConsts.SVC_CFG_WORK_MGR2
         self.ssl: bool = ssl
@@ -386,13 +381,6 @@ class Session:
         # Auto-load question templates
         if load_questions:
             self.q.load()
-
-        self._use_deprecated_workmgr_v1: bool | None = use_deprecated_workmgr_v1
-        if self._use_deprecated_workmgr_v1 is None:
-            use_v1_env = os.environ.get(_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV)
-            if use_v1_env:
-                self._use_deprecated_workmgr_v1 = bool(int(use_v1_env))
-        # if still None, will be set upon first query
 
     # Support old property names
     @property
@@ -434,16 +422,6 @@ class Session:
     @deprecated(reason="Use the new host field instead")
     def coordinatorHost(self, val):
         self.host = val
-
-    @property
-    @deprecated(reason="Use the new port_v1 field instead")
-    def coordinatorPort(self):
-        return self.port_v1
-
-    @coordinatorPort.setter
-    @deprecated(reason="Use the new port_v1 field instead")
-    def coordinatorPort(self, val):
-        self.port_v1 = val
 
     @property
     @deprecated(reason="Use the new port_v2 field instead")
@@ -742,13 +720,6 @@ class Session:
         else:
             return Answer(ans)
 
-    def get_base_url(self) -> str:
-        """Generate the base URL for connecting to Batfish coordinator."""
-        protocol = "https" if self.ssl else "http"
-        return "{}://{}:{}{}".format(
-            protocol, self.host, self.port_v1, self._base_uri_v1
-        )
-
     def get_base_url2(self) -> str:
         """Generate the base URL for V2 of the coordinator APIs."""
         protocol = "https" if self.ssl else "http"
@@ -869,15 +840,6 @@ class Session:
             ret: str = stream.read().decode(encoding)
             return ret
 
-    def get_url(self, resource: str) -> str:
-        """
-        Get URL for the specified resource.
-
-        :param resource: URI of the requested resource
-        :type resource: str
-        """
-        return f"{self.get_base_url()}/{resource}"
-
     def get_work_status(self, work_item):
         """Get the status for the specified work item."""
         self._check_network()
@@ -978,13 +940,7 @@ class Session:
         return ss_name
 
     def __init_snapshot_from_io(self, name: str, fd: IO) -> None:
-        if self.use_deprecated_workmgr_v1():
-            json_data = workhelper.get_data_upload_snapshot(self, name, fd)
-            resthelper.get_json_response(
-                self, CoordConsts.SVC_RSC_UPLOAD_SNAPSHOT, json_data
-            )
-        else:
-            restv2helper.upload_snapshot(self, name, fd)
+        restv2helper.upload_snapshot(self, name, fd)
 
     def __init_snapshot_from_file(self, name: str, file_to_send: str) -> None:
         tmp_file_name: str | None = None
@@ -1075,13 +1031,6 @@ class Session:
         :rtype: dict
         """
         self._check_network()
-
-        if self.use_deprecated_workmgr_v1():
-            json_data = workhelper.get_data_list_incomplete_work(self)
-            response = resthelper.get_json_response(
-                self, CoordConsts.SVC_RSC_LIST_INCOMPLETE_WORK, json_data
-            )
-            return response
         statuses = restv2helper.list_incomplete_work(self)
         return {CoordConsts.SVC_KEY_WORK_LIST: json.dumps(statuses)}
 
@@ -1167,24 +1116,8 @@ class Session:
             if e.response is None or e.response.status_code != 404:
                 raise BatfishException("Unknown error accessing network", e)
 
-        if self.use_deprecated_workmgr_v1():
-            json_data = workhelper.get_data_init_network(self, name)
-            json_response = resthelper.get_json_response(
-                self, CoordConsts.SVC_RSC_INIT_NETWORK, json_data
-            )
-
-            network_name = json_response.get(CoordConsts.SVC_KEY_NETWORK_NAME)
-            if network_name is None:
-                raise BatfishException(
-                    "Network initialization failed. Server response: {}".format(
-                        json_response
-                    )
-                )
-        else:
-            restv2helper.init_network(self, name)
-            network_name = name
-
-        self.network = str(network_name)
+        restv2helper.init_network(self, name)
+        self.network = str(name)
         return self.network
 
     def set_snapshot(self, name: str | None = None, index: int | None = None) -> str:
@@ -1331,21 +1264,6 @@ class Session:
         if max_suggestions and max_suggestions < 0:
             raise ValueError("max_suggestions cannot be negative")
         self._check_network()
-        if self.use_deprecated_workmgr_v1():
-            json_data = workhelper.get_data_auto_complete(
-                self, completion_type, query, max_suggestions
-            )
-            response = resthelper.get_json_response(
-                self, CoordConsts.SVC_RSC_AUTO_COMPLETE, json_data
-            )
-            if CoordConsts.SVC_KEY_SUGGESTIONS in response:
-                suggestions = [
-                    AutoCompleteSuggestion.from_dict(json.loads(suggestion))
-                    for suggestion in response[CoordConsts.SVC_KEY_SUGGESTIONS]
-                ]
-                return suggestions
-
-            raise BatfishException(f"Unexpected response: {response}.")
         response = restv2helper.auto_complete(
             self, completion_type, query, max_suggestions
         )
@@ -1359,33 +1277,6 @@ class Session:
                 "No results, but snapshot is not set. You might get results if you first call <session>.set_snapshot"
             )
         return results
-
-    def use_deprecated_workmgr_v1(self) -> bool:
-        """Whether to use WorkMgrV1 instead of v2 for API calls added in API version 2.1.0
-
-        WorkMgrV1 is deprecated, and will be removed from backend Batfish in the near future.
-
-        The decision to use old WorkMgrV1 calls instead of their ported versions in API version
-        2.1.0 is made as follows:
-
-        If use_deprecated_workmgr_v1=True is passed to Session(): use V1
-        Else if use_deprecated_workmgr_v1=False is passed to Session(): use V2
-        Else:
-          If pybf_use_deprecated_workmgr_v1=1 is set in the environment: use V1
-          Else if pybf_use_deprecated_workmgr_v1=0 is set in the environment: use V2
-          Else:
-            If result of backend version query for API version is >= 2.1.0: use V2
-            Else (no api version returned or api version < 2.1.0): use V1
-        """
-        if self._use_deprecated_workmgr_v1 is None:
-            self._use_deprecated_workmgr_v1 = not self._backend_supports_exclusive_v2()
-        return self._use_deprecated_workmgr_v1
-
-    def _backend_supports_exclusive_v2(self) -> bool:
-        v2_api_version = restv2helper.get_api_version(self)
-        return not _version_less_than(
-            _version_to_tuple(str(v2_api_version)), _version_to_tuple("2.1.0")
-        )
 
 
 def _text_with_platform(text: str, platform: str | None) -> str:
@@ -1425,6 +1316,3 @@ def _version_less_than(version: tuple[int, ...], min_version: tuple[int, ...]) -
         return version < min_version
     # Dev version is considered newer than any version
     return False
-
-
-_PYBF_USE_DEPRECATED_WORKMGR_V1_ENV = "pybf_use_deprecated_workmgr_v1"

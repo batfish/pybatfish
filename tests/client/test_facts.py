@@ -51,7 +51,7 @@ class MockQuestion(QuestionBase):
 
 def test_get_facts_questions():
     """Test that get facts calls the right questions, passing through the right args."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     nodes = "foo"
     with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
         bf.q, "interfaceProperties", create=True
@@ -86,7 +86,7 @@ def test_get_facts_questions():
 
 def test_get_facts_questions_specific_snapshot():
     """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     nodes = "foo"
     with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
         bf.q, "interfaceProperties", create=True
