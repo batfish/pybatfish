@@ -14,19 +14,15 @@
 from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
-from deprecated import deprecated
 
 from .primitives import DataModelElement, Interface
 
 __all__ = [
     "AddressGroup",
     "InterfaceGroup",
-    "NodeRole",
-    "NodeRoleDimension",
     "NodeRolesData",
     "ReferenceBook",
     "ReferenceLibrary",
-    "RoleDimensionMapping",
     "RoleMapping",
 ]
 
@@ -113,105 +109,6 @@ class InterfaceGroup(DataModelElement):
             json_dict["name"],
             [Interface.from_dict(d) for d in json_dict.get("interfaces", [])],
         )
-
-
-@deprecated(reason="Use the new RoleDimensionMapping class instead")
-@attr.s(frozen=True)
-class NodeRole(DataModelElement):
-    """
-    Information about a node role.
-
-    :ivar name: Name of the node role.
-    :ivar regex: A regular expression over node names to describe nodes that
-        belong to this role. The regular expression must be a
-        valid **Java** regex.
-    """
-
-    name = attr.ib(type=str)
-    regex = attr.ib(type=str)
-
-    @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> NodeRole
-        return NodeRole(json_dict["name"], json_dict["regex"])
-
-
-def _make_node_roles(value):
-    # type: (Any) -> List[NodeRole]
-    return _make_typed_list(value, NodeRole)
-
-
-@deprecated
-@attr.s(frozen=True)
-class RoleDimensionMapping(DataModelElement):
-    """
-    Information about a role dimension mapping.
-
-    :ivar regex: A regular expression over node names to describe nodes that
-        belong to this role. The regular expression must be a valid **Java**
-        regex.
-    :ivar groups: A list of group numbers (integers) that identify the role
-        name for a given node name (default value is [1]).
-    :ivar canonicalRoleNames: A map from Java regexes over role names determined
-        from the groups to a canonical set of role names for this dimension
-        (default value is {}).
-    """
-
-    regex = attr.ib(type=str)
-    groups = attr.ib(type=List[int], default=[1])
-    canonicalRoleNames = attr.ib(type=Dict[str, str], default={})
-
-    @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> RoleDimensionMapping
-        return RoleDimensionMapping(
-            json_dict["regex"],
-            json_dict.get("groups", [1]),
-            json_dict.get("canonicalRoleNames", {}),
-        )
-
-
-def _make_role_dimension_mappings(value):
-    # type: (Any) -> List[RoleDimensionMapping]
-    return _make_typed_list(value, RoleDimensionMapping)
-
-
-@deprecated
-@attr.s(frozen=True)
-class NodeRoleDimension(DataModelElement):
-    """
-    Information about a node role dimension.
-
-    :ivar name: Name of the node role dimension.
-    :ivar roles: The list of :py:class:`NodeRole` objects in this dimension (deprecated).
-    :ivar roleDimensionMappings: The list of :py:class:`RoleDimensionMapping` objects
-        in this dimension.
-    """
-
-    name = attr.ib(type=str)
-    roles = attr.ib(type=List[NodeRole], factory=list, converter=_make_node_roles)
-    roleDimensionMappings = attr.ib(
-        type=List[RoleDimensionMapping],
-        factory=list,
-        converter=_make_role_dimension_mappings,
-    )
-
-    @classmethod
-    def from_dict(cls, json_dict):
-        # type: (Dict) -> NodeRoleDimension
-        return NodeRoleDimension(
-            json_dict["name"],
-            [NodeRole.from_dict(d) for d in json_dict.get("roles", [])],
-            [
-                RoleDimensionMapping.from_dict(d)
-                for d in json_dict.get("roleDimensionMappings", [])
-            ],
-        )
-
-
-def _make_node_role_dimensions(value):
-    # type: (Any) -> List[NodeRoleDimension]
-    return _make_typed_list(value, NodeRoleDimension)
 
 
 @attr.s(frozen=True)

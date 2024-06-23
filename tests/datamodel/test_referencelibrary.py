@@ -22,12 +22,9 @@ from pybatfish.datamodel import Interface
 from pybatfish.datamodel.referencelibrary import (
     AddressGroup,
     InterfaceGroup,
-    NodeRole,
-    NodeRoleDimension,
     NodeRolesData,
     ReferenceBook,
     ReferenceLibrary,
-    RoleDimensionMapping,
     RoleMapping,
 )
 
@@ -145,58 +142,6 @@ def test_interfacegroup_construction_list():
 
     assert group.name == "g1"
     assert group.interfaces == [interface]
-
-
-def test_noderoledimension_construction_empty():
-    """Check that we construct empty node role dimension properly."""
-    empty = NodeRoleDimension("g1", roleDimensionMappings=[])
-
-    assert NodeRoleDimension("g1") == empty
-    assert NodeRoleDimension("g1", roles=None) == empty
-    assert NodeRoleDimension("g1", roleDimensionMappings=None) == empty
-
-
-def test_noderoledimension_construction():
-    """Check that we throw an error when node role dimension is built with wrong type."""
-    with pytest.raises(ValueError):
-        NodeRoleDimension("g1", roles="i1")
-    with pytest.raises(ValueError):
-        NodeRoleDimension("book1", roles=["ag", NodeRole("a", "b")])
-    with pytest.raises(ValueError):
-        NodeRoleDimension("g1", roleDimensionMappings="i1")
-    with pytest.raises(ValueError):
-        NodeRoleDimension(
-            "book1", roleDimensionMappings=["ag", RoleDimensionMapping("a", "b", "c")]
-        )
-
-
-def test_noderoledimension_construction_item():
-    """Check that we construct node role dimension when sub-props are not a list."""
-    role = NodeRole("a", "b")
-    dimension1 = NodeRoleDimension("g1", roles=[role])
-    assert NodeRoleDimension("g1", roles=role) == dimension1
-
-    rdMap = RoleDimensionMapping("a", [], {})
-    dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
-    assert NodeRoleDimension("g1", roleDimensionMappings=rdMap) == dimension2
-
-
-def test_noderoledimension_construction_list():
-    """Check that we construct interface groups where sub-props are lists."""
-    role = NodeRole("a", "b")
-    dimension1 = NodeRoleDimension("g1", roles=[role])
-    assert dimension1.name == "g1"
-    assert dimension1.roles == [role]
-
-    rdMap = RoleDimensionMapping("a", [], {})
-    dimension2 = NodeRoleDimension("g1", roleDimensionMappings=[rdMap])
-    assert dimension2.name == "g1"
-    assert dimension2.roleDimensionMappings == [rdMap]
-
-    dimension3 = NodeRoleDimension("g1", roles=[role], roleDimensionMappings=[rdMap])
-    assert dimension3.name == "g1"
-    assert dimension3.roles == [role]
-    assert dimension3.roleDimensionMappings == [rdMap]
 
 
 def test_noderolesdata_construction_empty():
@@ -410,13 +355,6 @@ def test_referencelibrary_deser_interfacegroups():
     assert len(reference_library.books[0].interfaceGroups) == 2
     assert reference_library.books[0].interfaceGroups[0].name == "g1"
     assert len(reference_library.books[0].interfaceGroups[0].interfaces) == 2
-
-
-def test_roledimensionmapping_default_values():
-    """Check the default values for role dimension mappings."""
-    rdMap = RoleDimensionMapping("a")
-    assert rdMap.groups == [1]
-    assert rdMap.canonicalRoleNames == {}
 
 
 def test_noderolesdata():

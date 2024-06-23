@@ -34,7 +34,6 @@ from typing import (  # noqa: F401
 )
 
 import pkg_resources
-from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import restv2helper, workhelper
@@ -58,7 +57,6 @@ from pybatfish.datamodel import (
     AutoCompleteSuggestion,
     HeaderConstraints,
     Interface,
-    NodeRoleDimension,
     NodeRolesData,
     ReferenceBook,
     ReferenceLibrary,
@@ -382,77 +380,6 @@ class Session:
         if load_questions:
             self.q.load()
 
-    # Support old property names
-    @property
-    @deprecated(reason="Use the new additional_args field instead")
-    def additionalArgs(self):
-        return self.additional_args
-
-    @additionalArgs.setter
-    @deprecated(reason="Use the new additional_args field instead")
-    def additionalArgs(self, val):
-        self.additional_args = val
-
-    @property
-    @deprecated(reason="Use the new api_key field instead")
-    def apiKey(self):
-        return self.api_key
-
-    @apiKey.setter
-    @deprecated(reason="Use the new api_key field instead")
-    def apiKey(self, val):
-        self.api_key = val
-
-    @property
-    @deprecated(reason="Use the new snapshot field instead")
-    def baseSnapshot(self):
-        return self.snapshot
-
-    @baseSnapshot.setter
-    @deprecated(reason="Use the new snapshot field instead")
-    def baseSnapshot(self, val):
-        self.snapshot = val
-
-    @property
-    @deprecated(reason="Use the new host field instead")
-    def coordinatorHost(self):
-        return self.host
-
-    @coordinatorHost.setter
-    @deprecated(reason="Use the new host field instead")
-    def coordinatorHost(self, val):
-        self.host = val
-
-    @property
-    @deprecated(reason="Use the new port_v2 field instead")
-    def coordinatorPort2(self):
-        return self.port_v2
-
-    @coordinatorPort2.setter
-    @deprecated(reason="Use the new port_v2 field instead")
-    def coordinatorPort2(self, val):
-        self.port_v2 = val
-
-    @property
-    @deprecated(reason="Use the new ssl field instead")
-    def useSsl(self):
-        return self.ssl
-
-    @useSsl.setter
-    @deprecated(reason="Use the new ssl field instead")
-    def useSsl(self, val):
-        self.ssl = val
-
-    @property
-    @deprecated(reason="Use the new verify_ssl_certs field instead")
-    def verifySslCerts(self):
-        return self.verify_ssl_certs
-
-    @verifySslCerts.setter
-    @deprecated(reason="Use the new verify_ssl_certs field instead")
-    def verifySslCerts(self, val):
-        self.verify_ssl_certs = val
-
     @classmethod
     def get_session_types(cls) -> dict[str, Callable]:
         """Get a dict of possible session types mapping their names to session classes."""
@@ -736,29 +663,6 @@ class Session:
         with self.get_network_object_stream(key) as stream:
             ret: str = stream.read().decode(encoding)
             return ret
-
-    def get_node_role_dimension(
-        self, dimension: str, inferred: bool = False
-    ) -> NodeRoleDimension:
-        """
-        Returns the definition of the given node role dimension for the active network or inferred definition for the active snapshot.
-
-        :param dimension: name of the node role dimension to fetch
-        :type dimension: str
-        :param inferred: whether to fetch active snapshot's inferred node role dimension
-        :type inferred: bool
-
-        :return: the definition of the given node role dimension for the active network, or inferred definition for the active snapshot if inferred=True.
-        :rtype: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
-        """
-        if inferred:
-            self._check_snapshot()
-            return NodeRoleDimension.from_dict(
-                restv2helper.get_snapshot_inferred_node_role_dimension(self, dimension)
-            )
-        return NodeRoleDimension.from_dict(
-            restv2helper.get_node_role_dimension(self, dimension)
-        )
 
     def get_node_roles(self, inferred: bool = False) -> NodeRolesData:
         """
@@ -1062,19 +966,6 @@ class Session:
     def put_network_object(self, key: str, data: Any) -> None:
         """Puts data as the network object with specified key."""
         restv2helper.put_network_object(self, key, data)
-
-    def put_node_role_dimension(self, dimension: NodeRoleDimension) -> None:
-        """
-        Put a role dimension in the active network.
-
-        Overwrites the old dimension if one of the same name already exists.
-
-        Individual role dimension mappings within the dimension must have a valid (java) regex.
-
-        :param dimension: The NodeRoleDimension object for the dimension to add
-        :type dimension: :class:`~pybatfish.datamodel.referencelibrary.NodeRoleDimension`
-        """
-        restv2helper.put_node_role_dimension(self, dimension)
 
     def put_node_roles(self, node_roles_data: NodeRolesData) -> None:
         """
