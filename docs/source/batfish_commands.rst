@@ -34,6 +34,3 @@ Reference Library
 .. .. autofunction:: get_node_role_dimension
 .. .. autofunction:: delete_node_role_dimension
 
-Diagnostics
------------
-.. autofunction:: upload_diagnostics

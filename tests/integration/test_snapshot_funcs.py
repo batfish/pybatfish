@@ -18,7 +18,6 @@ from os.path import abspath, dirname, join, pardir, realpath
 import pytest
 from requests import HTTPError
 
-from pybatfish.client._diagnostics import get_snapshot_parse_status
 from pybatfish.client.consts import BfConsts
 from pybatfish.client.session import Session
 from pybatfish.datamodel import Interface
@@ -84,17 +83,6 @@ def test_init_snapshot_no_crash(bf: Session, network: str) -> None:
     finally:
         # cleanup
         bf.delete_snapshot(uid)
-
-
-def test_get_snapshot_file_status(
-    bf: Session, network: str, file_status_snapshot: str
-) -> None:
-    """Confirm we get correct init info statuses for example snapshot."""
-    statuses = get_snapshot_parse_status(bf)
-    assert statuses == {
-        "configs/unrecognized.cfg": "PARTIALLY_UNRECOGNIZED",
-        "configs/recognized.cfg": "PASSED",
-    }
 
 
 def test_fork_snapshot(bf: Session, network: str, example_snapshot: str) -> None:

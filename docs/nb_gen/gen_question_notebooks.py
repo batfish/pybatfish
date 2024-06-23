@@ -398,7 +398,6 @@ def main() -> None:
     logging.getLogger("pybatfish").setLevel(logging.WARN)
 
     session = Session()
-    session.enable_diagnostics = False
     question_class_map = get_name_to_qclass(session)
 
     # get the questions list and associated data to generate the docs
