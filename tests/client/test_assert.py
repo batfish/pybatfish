@@ -98,7 +98,7 @@ class MockQuestion(QuestionBase):
 def test_filter_denies():
     """Confirm filter-denies assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "searchFilters", create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
@@ -126,7 +126,7 @@ def test_filter_denies():
 def test_filter_denies_from_session():
     """Confirm filter-denies assert passes and fails as expected when called from a session."""
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "searchFilters", create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
@@ -154,7 +154,7 @@ def test_filter_denies_from_session():
 def test_filter_has_no_unreachable_lines():
     """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when specifying a session."""
     filters = "filter1"
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "filterLineReachability", create=True
     ) as filterLineReachability:
@@ -173,7 +173,7 @@ def test_filter_has_no_unreachable_lines():
 def test_filter_has_no_unreachable_lines_from_session():
     """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when called from a session."""
     filters = "filter1"
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "filterLineReachability", create=True
     ) as filterLineReachability:
@@ -192,7 +192,7 @@ def test_filter_has_no_unreachable_lines_from_session():
 def test_filter_permits():
     """Confirm filter-permits assert passes and fails as expected when specifying a session."""
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "searchFilters", create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
@@ -217,7 +217,7 @@ def test_filter_permits():
 def test_filter_permits_from_session():
     """Confirm filter-permits assert passes and fails as expected when called from a session."""
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "searchFilters", create=True) as mock_search_filters:
         # Test success
         mock_search_filters.return_value = MockQuestion()
@@ -243,7 +243,7 @@ def test_flows_fail():
     """Confirm flows-fail assert passes and fails as expected when specifying a session."""
     startLocation = "node1"
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "reachability", create=True) as reachability:
         # Test success
         reachability.return_value = MockQuestion()
@@ -271,7 +271,7 @@ def test_flows_fail_from_session():
     """Confirm flows-fail assert passes and fails as expected when called from a session."""
     startLocation = "node1"
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "reachability", create=True) as reachability:
         # Test success
         reachability.return_value = MockQuestion()
@@ -299,7 +299,7 @@ def test_flows_succeed():
     """Confirm flows-succeed assert passes and fails as expected when specifying a session."""
     startLocation = "node1"
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "reachability", create=True) as reachability:
         # Test success
         reachability.return_value = MockQuestion()
@@ -327,7 +327,7 @@ def test_flows_succeed_from_session():
     """Confirm flows-succeed assert passes and fails as expected when called from a session."""
     startLocation = "node1"
     headers = HeaderConstraints(srcIps="1.1.1.1")
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "reachability", create=True) as reachability:
         # Test success
         reachability.return_value = MockQuestion()
@@ -353,7 +353,7 @@ def test_flows_succeed_from_session():
 
 def test_no_incompatible_bgp_sessions():
     """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "bgpSessionCompatibility", create=True
     ) as bgpSessionCompatibility:
@@ -381,7 +381,7 @@ def test_no_incompatible_bgp_sessions():
 
 def test_no_incompatible_bgp_sessions_from_session():
     """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "bgpSessionCompatibility", create=True
     ) as bgpSessionCompatibility:
@@ -409,7 +409,7 @@ def test_no_incompatible_bgp_sessions_from_session():
 
 def test_no_incompatible_ospf_sessions():
     """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "ospfSessionCompatibility", create=True
     ) as ospfSessionCompatibility:
@@ -441,7 +441,7 @@ def test_no_incompatible_ospf_sessions():
 
 def test_no_incompatible_ospf_sessions_from_session():
     """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "ospfSessionCompatibility", create=True
     ) as ospfSessionCompatibility:
@@ -473,7 +473,7 @@ def test_no_incompatible_ospf_sessions_from_session():
 
 def test_no_unestablished_bgp_sessions():
     """Confirm no-uncompatible-bgp-sessions assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "bgpSessionStatus", create=True) as bgpSessionStatus:
         # Test success
         bgpSessionStatus.return_value = MockQuestion()
@@ -499,7 +499,7 @@ def test_no_unestablished_bgp_sessions():
 
 def test_no_unestablished_bgp_sessions_from_session():
     """Confirm no-uncompatible-bgp-sessions assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "bgpSessionStatus", create=True) as bgpSessionStatus:
         # Test success
         bgpSessionStatus.return_value = MockQuestion()
@@ -525,7 +525,7 @@ def test_no_unestablished_bgp_sessions_from_session():
 
 def test_no_undefined_references():
     """Confirm no-undefined-references assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "undefinedReferences", create=True) as undefinedReferences:
         # Test success
         undefinedReferences.return_value = MockQuestion()
@@ -541,7 +541,7 @@ def test_no_undefined_references():
 
 def test_no_undefined_references_from_session():
     """Confirm no-undefined-references assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "undefinedReferences", create=True) as undefinedReferences:
         # Test success
         undefinedReferences.return_value = MockQuestion()
@@ -557,7 +557,7 @@ def test_no_undefined_references_from_session():
 
 def test_no_duplicate_router_ids_ospf():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "ospfProcessConfiguration", create=True
     ) as ospfProcessConfiguration:
@@ -590,7 +590,7 @@ def test_no_duplicate_router_ids_ospf():
 
 def test_no_duplicate_router_ids_bgp():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "bgpProcessConfiguration", create=True
     ) as bgpProcessConfiguration:
@@ -623,7 +623,7 @@ def test_no_duplicate_router_ids_bgp():
 
 def test_no_duplicate_router_ids_from_session():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(
         bf.q, "bgpProcessConfiguration", create=True
     ) as bgpProcessConfiguration:
@@ -656,7 +656,7 @@ def test_no_duplicate_router_ids_from_session():
 
 def test_no_forwarding_loops():
     """Confirm no-forwarding-loops assert passes and fails as expected when specifying a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "detectLoops", create=True) as detectLoops:
         # Test success
         detectLoops.return_value = MockQuestion()
@@ -672,7 +672,7 @@ def test_no_forwarding_loops():
 
 def test_no_forwarding_loops_from_session():
     """Confirm no-forwarding-loops assert passes and fails as expected when called from a session."""
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "detectLoops", create=True) as detectLoops:
         # Test success
         detectLoops.return_value = MockQuestion()
@@ -689,7 +689,7 @@ def test_no_forwarding_loops_from_session():
 def test_get_question_object():
     """Confirm _get_question_object identifies the correct question object based on the specified session and the questions it contains."""
     # Session contains the question we're searching for
-    bf = Session(load_questions=False, use_deprecated_workmgr_v1=False)
+    bf = Session(load_questions=False)
     with patch.object(bf.q, "qName", create=True):
         assert bf.q == _get_question_object(bf, "qName")
 

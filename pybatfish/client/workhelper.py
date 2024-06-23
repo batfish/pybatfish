@@ -29,7 +29,7 @@ from dateutil.tz import tzlocal
 from pybatfish.client.consts import BfConsts, CoordConsts, CoordConstsV2, WorkStatusCode
 from pybatfish.exception import BatfishException
 
-from . import resthelper, restv2helper
+from . import restv2helper
 from .workitem import WorkItem  # noqa: F401
 
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
@@ -149,16 +149,6 @@ def execute(work_item, session, background=False, extra_args=None):
 
 
 def queue_work(session: "Session", work_item: WorkItem) -> Dict[str, Any]:
-    if session.use_deprecated_workmgr_v1():
-        json_data = {
-            CoordConsts.SVC_KEY_WORKITEM: work_item.to_json(),
-            CoordConsts.SVC_KEY_API_KEY: session.api_key,
-        }
-        # Submit the work item
-        response = resthelper.get_json_response(
-            session, CoordConsts.SVC_RSC_QUEUE_WORK, json_data
-        )
-        return response
     restv2helper.queue_work(session, work_item)
     return {"result": True}
 
@@ -338,22 +328,6 @@ def get_workitem_parse(session, snapshot):
 
 
 def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
-    if session.use_deprecated_workmgr_v1():
-        json_data = {
-            CoordConsts.SVC_KEY_API_KEY: session.api_key,
-            CoordConsts.SVC_KEY_WORKID: w_item_id,
-        }
-        answer = resthelper.get_json_response(
-            session, CoordConsts.SVC_RSC_GET_WORKSTATUS, json_data
-        )
-
-        if CoordConsts.SVC_KEY_WORKSTATUS in answer:
-            return answer
-        else:
-            raise BatfishException(
-                "Expected key (%s) not found in status check response: %s"
-                % (CoordConsts.SVC_KEY_WORKSTATUS, answer)
-            )
     answer = restv2helper.get_work_status(session, w_item_id)
     return {
         CoordConsts.SVC_KEY_WORKSTATUS: answer.get(CoordConstsV2.PROP_WORK_STATUS_CODE),
