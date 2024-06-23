@@ -93,7 +93,6 @@ setup(
     install_requires=[
         "attrs>=18.1.0",
         "deepdiff",
-        "deprecated",
         "netconan>=0.12.0",
         "pandas",
         "python-dateutil",
@@ -129,7 +128,6 @@ setup(
             "sphinx-notfound-page",
             "sphinx_rtd_theme",
             "types-decorator",
-            "types-Deprecated",
             "types-python-dateutil",
             "types-pytz",
             "types-PyYAML",

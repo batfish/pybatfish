@@ -223,20 +223,6 @@ def test_get_snapshot_input_object(
     assert bf.get_snapshot_input_object_text("other_dir/other_file") == "hello"
 
 
-def test_get_snapshot_node_role_dimension(
-    bf: Session, network: str, roles_snapshot: str
-) -> None:
-    bf.set_network(network)
-    bf.set_snapshot(roles_snapshot)
-    mapping = RoleMapping(
-        name="mapping", regex="regex", roleDimensionGroups={"dim1": [1]}
-    )
-    node_roles = NodeRolesData(roleDimensionOrder=["dim1"], roleMappings=[mapping])
-    bf.put_node_roles(node_roles)
-    # should not crash
-    bf.get_node_role_dimension("dim1")
-
-
 def test_get_snapshot_node_roles(
     bf: Session, network: str, roles_snapshot: str
 ) -> None:

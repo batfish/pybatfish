@@ -31,15 +31,10 @@ from urllib3 import Retry
 
 import pybatfish
 from pybatfish.client.consts import CoordConsts, CoordConstsV2
-from pybatfish.datamodel.referencelibrary import (
-    NodeRoleDimension,
-    NodeRolesData,
-    ReferenceBook,
-)
 from pybatfish.settings.issues import IssueConfig  # noqa: F401
 from pybatfish.util import BfJsonEncoder
 
-from ..datamodel import VariableType
+from ..datamodel import NodeRolesData, ReferenceBook, VariableType
 from .options import Options
 from .workitem import WorkItem
 
@@ -508,22 +503,7 @@ def put_network_object(session, key, data):
     _put_stream(session, url_tail, data, {CoordConstsV2.QP_KEY: key})
 
 
-def put_node_role_dimension(session, dimension):
-    # type: (Session, NodeRoleDimension) -> None
-    """Adds a new node role dimension to the active network."""
-    if not session.network:
-        raise ValueError("Network must be set to add node role dimension")
-    url_tail = "/{}/{}/{}/{}".format(
-        CoordConstsV2.RSC_NETWORKS,
-        session.network,
-        CoordConstsV2.RSC_NODE_ROLES,
-        dimension.name,
-    )
-    _put_json(session, url_tail, dimension)
-
-
-def put_node_roles(session, node_roles_data):
-    # type: (Session, NodeRolesData) -> None
+def put_node_roles(session: "Session", node_roles_data: NodeRolesData) -> None:
     """Writes the definitions of node roles for the active network. Completely replaces any existing definitions."""
     if not session.network:
         raise ValueError("Network must be set to get node roles")
@@ -533,8 +513,7 @@ def put_node_roles(session, node_roles_data):
     return _put_json(session, url_tail, node_roles_data)
 
 
-def put_reference_book(session, book):
-    # type: (Session, ReferenceBook) -> None
+def put_reference_book(session: "Session", book: ReferenceBook) -> None:
     """Put a reference book to the active network."""
     if not session.network:
         raise ValueError("Network must be set to add reference book")

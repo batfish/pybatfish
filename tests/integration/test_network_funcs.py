@@ -24,10 +24,8 @@ from pybatfish.client.options import Options
 from pybatfish.client.session import Session
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
 from pybatfish.datamodel.referencelibrary import (
-    NodeRoleDimension,
     NodeRolesData,
     ReferenceBook,
-    RoleDimensionMapping,
     RoleMapping,
 )
 from tests.common_util import requires_bf
@@ -93,20 +91,6 @@ def test_list_networks(bf: Session) -> None:
         bf.delete_network(name)
 
 
-@requires_bf("2019.12.07")
-def test_add_node_role_dimension(bf: Session) -> None:
-    network_name = "n1"
-    dim_name = "d1"
-    try:
-        bf.set_network(network_name)
-        rdMap = RoleDimensionMapping("a", [1], {})
-        dim = NodeRoleDimension(dim_name, roleDimensionMappings=[rdMap])
-        bf.put_node_role_dimension(dim)
-        assert bf.get_node_role_dimension(dim_name) == dim
-    finally:
-        bf.delete_network(network_name)
-
-
 def test_add_node_roles_data(bf: Session) -> None:
     network_name = "n1"
     try:
@@ -128,57 +112,6 @@ def test_get_network_object(bf: Session, network: str) -> None:
     # object should exist after being placed
     bf.put_network_object("new_object", "goodbye")
     assert bf.get_network_object_text("new_object") == "goodbye"
-
-
-def test_get_node_role_dimension(bf: Session) -> None:
-    network_name = "n1"
-    try:
-        bf.set_network(network_name)
-        dim_name = "d1"
-        with raises(HTTPError, match="404"):
-            bf.get_node_role_dimension(dim_name)
-    finally:
-        bf.delete_network(network_name)
-
-
-@requires_bf("2019.12.07")
-def test_delete_node_role_dimension(bf: Session) -> None:
-    network_name = "n1"
-    try:
-        bf.set_network(network_name)
-        dim_name = "d1"
-        mapping = RoleDimensionMapping(regex="(regex)")
-        dim = NodeRoleDimension(name=dim_name, roleDimensionMappings=[mapping])
-        bf.put_node_role_dimension(dim)
-        # should not crash
-        bf.get_node_role_dimension(dim_name)
-        bf.delete_node_role_dimension(dim_name)
-        # dimension should no longer exist
-        with raises(HTTPError, match="404"):
-            bf.get_node_role_dimension(dim_name)
-        # second delete should fail
-        with raises(HTTPError, match="404"):
-            bf.delete_node_role_dimension(dim_name)
-
-    finally:
-        bf.delete_network(network_name)
-
-
-@requires_bf("2019.12.07")
-def test_put_node_role_dimension(bf: Session) -> None:
-    network_name = "n1"
-    try:
-        bf.set_network(network_name)
-        dim_name = "d1"
-        mapping = RoleDimensionMapping(regex="(regex)")
-        dim = NodeRoleDimension(dim_name, roleDimensionMappings=[mapping])
-        bf.put_node_role_dimension(dim)
-        assert bf.get_node_role_dimension(dim_name) == dim
-        # put again to check for idempotence
-        bf.put_node_role_dimension(dim)
-        assert bf.get_node_role_dimension(dim_name) == dim
-    finally:
-        bf.delete_network(network_name)
 
 
 def test_put_node_roles(bf: Session) -> None:
