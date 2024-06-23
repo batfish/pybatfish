@@ -38,7 +38,6 @@ from deprecated import deprecated
 from requests import HTTPError
 
 from pybatfish.client import resthelper, restv2helper, workhelper
-from pybatfish.client._diagnostics import upload_diagnostics, warn_on_snapshot_failure
 from pybatfish.client._facts import get_facts, load_facts, validate_facts, write_facts
 from pybatfish.client.asserts import (
     assert_filter_denies,
@@ -383,7 +382,6 @@ class Session:
 
         self.elapsed_delay: int = 5
         self.stale_timeout: int = 5
-        self.enable_diagnostics: bool = False
 
         # Auto-load question templates
         if load_questions:
@@ -1234,54 +1232,6 @@ class Session:
         )
         return self.snapshot
 
-    def upload_diagnostics(
-        self,
-        dry_run: bool = True,
-        netconan_config: str | None = None,
-        contact_info: str | None = None,
-        proxy: str | None = None,
-    ) -> str:
-        """
-        Fetch, anonymize, and optionally upload snapshot diagnostics information.
-
-        This runs a series of diagnostic questions on the current snapshot
-        (including collecting parsing and conversion information).
-
-        The information collected is anonymized with
-        `Netconan <https://github.com/intentionet/netconan>`_ which either
-        anonymizes passwords and IP addresses (default) or uses the settings in
-        the provided `netconan_config`.
-
-        The anonymous information is then either saved locally (if `dry_run` is
-        True) or uploaded to Batfish developers (if `dry_run` is False).  The
-        uploaded information will be accessible only to Batfish developers and will
-        be used to help diagnose any issues you encounter.
-
-        If `contact_info` is supplied (e.g. email address), Batfish developers may
-        contact you if they have follow-up questions or to update you when the
-        issues you encountered are resolved.
-
-        :param dry_run: if True, upload is skipped and the anonymized files will be stored locally for review. If False, anonymized files will be uploaded to the Batfish developers
-        :type dry_run: bool
-        :param netconan_config: path to Netconan configuration file
-        :type netconan_config: str
-        :param contact_info: optional contact info associated with this upload
-        :type contact_info: str
-        :param proxy: a proxy URL to use when uploading data.
-        :return: location of anonymized files (local directory if doing dry run, otherwise upload ID)
-        :rtype: str
-        """
-        metadata = {}
-        if contact_info:
-            metadata["contact_info"] = contact_info
-        return upload_diagnostics(
-            self,
-            metadata=metadata,
-            dry_run=dry_run,
-            netconan_config=netconan_config,
-            proxy=proxy,
-        )
-
     def validate_facts(
         self, expected_facts: str, snapshot: str | None = None
     ) -> dict[str, Any]:
@@ -1343,15 +1293,11 @@ class Session:
                     ss=name, status=status, log=init_log
                 )
             )
-        else:
-            self.snapshot = name
-            logging.getLogger(__name__).info(
-                "Default snapshot is now set to %s", self.snapshot
-            )
-            if self.enable_diagnostics:
-                warn_on_snapshot_failure(self)
-
-            return self.snapshot
+        self.snapshot = name
+        logging.getLogger(__name__).info(
+            "Default snapshot is now set to %s", self.snapshot
+        )
+        return self.snapshot
 
     def auto_complete(
         self,
