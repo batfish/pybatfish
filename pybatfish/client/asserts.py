@@ -41,7 +41,6 @@ from pybatfish.exception import (
     BatfishAssertWarning,
     BatfishException,
 )
-from pybatfish.question import bfq
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session
@@ -117,7 +116,7 @@ def _subdict(d, keys):
 
 def _get_duplicate_router_ids(
     question_name: str,
-    session: Optional["Session"] = None,
+    session: "Session",
     snapshot: Optional[str] = None,
     ignore_same_node: bool = False,
 ) -> DataFrame:
@@ -372,6 +371,10 @@ def assert_filter_denies(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     :return: True if the assertion passes
     """
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
 
     kwargs = dict(filters=filters, headers=headers, action="permit")
@@ -415,6 +418,10 @@ def assert_filter_has_no_unreachable_lines(
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(filters=filters)
 
@@ -459,6 +466,10 @@ def assert_filter_permits(
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(filters=filters, headers=headers, action="deny")
     if startLocation is not None:
@@ -498,6 +509,10 @@ def assert_flows_fail(
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(
         pathConstraints=PathConstraints(startLocation=startLocation),
@@ -539,6 +554,10 @@ def assert_flows_succeed(
     :return: True if the assertion passes
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(
         pathConstraints=PathConstraints(startLocation=startLocation),
@@ -585,6 +604,10 @@ def assert_no_incompatible_bgp_sessions(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict()  # type: Dict
     if status is not None:
@@ -642,6 +665,10 @@ def assert_no_incompatible_ospf_sessions(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
     if nodes is not None:
@@ -691,6 +718,10 @@ def assert_no_unestablished_bgp_sessions(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict(status="NOT_ESTABLISHED")
     if nodes is not None:
@@ -728,6 +759,10 @@ def assert_no_undefined_references(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     df = (
         _get_question_object(session, "undefinedReferences")
@@ -766,6 +801,10 @@ def assert_no_duplicate_router_ids(
     :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     kwargs = dict()  # type: Dict
     if nodes is not None:
@@ -818,6 +857,10 @@ def assert_no_forwarding_loops(
         Valid options are 'table' and 'records' (each row is a key-value pairs).
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
+    if session is None:
+        raise ValueError(
+            "Session must be provided. Preferably, use Session.asserts rather than this function"
+        )
 
     df = (
         _get_question_object(session, "detectLoops")
@@ -835,20 +878,11 @@ def assert_no_forwarding_loops(
     return True
 
 
-def _get_question_object(session, name):
-    # type: (Optional[Session], str) -> Any
+def _get_question_object(session: "Session", name: str) -> Any:
     """
     Get the question object corresponding to the specified question name.
-
-    First searches the specified session, but falls back to bfq if it contains
-    the question and specified session does not.
     """
-    # If no session was specified or it doesn't have the specified question
-    # (e.g. questions were loaded with load_questions()), use bfq for reverse
-    # compatibility
-    if session and hasattr(session.q, name):
+    if hasattr(session.q, name):
         return session.q
-    elif hasattr(bfq, name):
-        return bfq
     else:
         raise BatfishException(f"{name} question was not found")

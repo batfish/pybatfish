@@ -15,25 +15,22 @@
 
 import pytest
 
-from pybatfish.client.commands import (
-    bf_fork_snapshot,
-    bf_init_snapshot,
-    bf_session,
-    bf_set_network,
-)
+from pybatfish.client.session import Session
+
+session = Session(load_questions=False)
 
 
 def test_network_validation():
     with pytest.raises(ValueError):
-        bf_set_network("foo/bar")
+        session.set_network("foo/bar")
 
 
 def test_snapshot_validation():
-    bf_session.network = "testnet"
+    session.network = "testnet"
     with pytest.raises(ValueError):
-        bf_init_snapshot("x", name="foo/bar")
+        session.init_snapshot("x", name="foo/bar")
 
 
 def test_fork_snapshot_validation():
     with pytest.raises(ValueError):
-        bf_fork_snapshot(base_name="x", name="foo/bar")
+        session.fork_snapshot(base_name="x", name="foo/bar")

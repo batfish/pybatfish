@@ -11,6 +11,3 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from .question import list_questions, list_tags, load_dir_questions, load_questions
-
-__all__ = ["list_questions", "list_tags", "load_dir_questions", "load_questions"]

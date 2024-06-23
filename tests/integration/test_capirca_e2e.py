@@ -17,14 +17,7 @@ from os.path import abspath, dirname, realpath
 
 from pytest import fixture
 
-from pybatfish.client.asserts import assert_filter_denies, assert_filter_permits
 from pybatfish.client.capirca import create_reference_book, init_snapshot_from_acl
-from pybatfish.client.commands import (
-    bf_delete_network,
-    bf_get_reference_book,
-    bf_put_reference_book,
-    bf_set_network,
-)
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints
 
@@ -32,24 +25,24 @@ _this_dir = abspath(dirname(realpath(__file__)))
 
 
 @fixture(scope="module")
-def session():
+def bf() -> Session:
     s = Session()
     return s
 
 
 @fixture(scope="module")
-def network(session):
-    name = bf_set_network()
+def network(bf):
+    name = bf.set_network()
     yield name
     # cleanup
-    bf_delete_network(name)
+    bf.delete_network(name)
 
 
-def test_create_reference_book(session, network):
+def test_create_reference_book(bf, network):
     book = create_reference_book(os.path.join(_this_dir, "capirca", "defs"))
-    bf_put_reference_book(book)
+    bf.put_reference_book(book)
 
-    getbook = bf_get_reference_book("capirca")
+    getbook = bf.get_reference_book("capirca")
     # TODO: can this just be book equality? Right now, books are implemented
     #  with contents that are lists, and converting to set broke a bunch of
     #  tests that expect those lists to be indexable.
@@ -59,17 +52,15 @@ def test_create_reference_book(session, network):
     )
 
 
-def test_init_snapshot_from_acl(session, network):
+def test_init_snapshot_from_acl(bf: Session, network: str) -> None:
     defs = os.path.join(_this_dir, "capirca", "defs")
     pol = os.path.join(_this_dir, "capirca", "test.pol")
-    ss = init_snapshot_from_acl(
-        session, pol, defs, platform="cisco", filename="some_cfg"
-    )
+    ss = init_snapshot_from_acl(bf, pol, defs, platform="cisco", filename="some_cfg")
 
     ssh = HeaderConstraints(applications="ssh")
     dns = HeaderConstraints(applications="dns")
     http = HeaderConstraints(applications="http")
 
-    assert_filter_permits("some_acl", ssh, snapshot=ss, session=session)
-    assert_filter_permits("some_acl", dns, snapshot=ss, session=session)
-    assert_filter_denies("some_acl", http, snapshot=ss, session=session)
+    bf.asserts.assert_filter_permits("some_acl", ssh, snapshot=ss)
+    bf.asserts.assert_filter_permits("some_acl", dns, snapshot=ss)
+    bf.asserts.assert_filter_denies("some_acl", http, snapshot=ss)

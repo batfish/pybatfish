@@ -12,32 +12,14 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import typing
 from os.path import abspath, dirname, join, realpath
+from typing import Optional, Sequence
 
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
 
-from pybatfish.client.commands import (
-    bf_add_node_role_dimension,
-    bf_auto_complete,
-    bf_delete_network,
-    bf_delete_node_role_dimension,
-    bf_get_node_role_dimension,
-    bf_get_node_roles,
-    bf_get_reference_book,
-    bf_init_snapshot,
-    bf_list_networks,
-    bf_put_node_role_dimension,
-    bf_put_node_roles,
-    bf_put_reference_book,
-    bf_set_network,
-)
 from pybatfish.client.consts import CoordConsts
-from pybatfish.client.extended import (
-    bf_delete_network_object,
-    bf_get_network_object_text,
-    bf_put_network_object,
-)
 from pybatfish.client.options import Options
 from pybatfish.client.session import Session
 from pybatfish.datamodel.primitives import AutoCompleteSuggestion, VariableType
@@ -54,202 +36,206 @@ from tests.conftest import COMPLETION_TYPES
 _this_dir = abspath(dirname(realpath(__file__)))
 
 
+@fixture(scope="module")
+def bf() -> Session:
+    return Session()
+
+
 @fixture()
-def network():
-    name = bf_set_network()
+def network(bf: Session) -> typing.Generator[str, None, None]:
+    name = bf.set_network()
     yield name
     # cleanup
-    bf_delete_network(name)
+    bf.delete_network(name)
 
 
-@fixture(scope="module")
-def session():
-    s = Session()
-    return s
-
-
-def test_list_incomplete_works(session):
+def test_list_incomplete_works(bf: Session) -> None:
     """Test that list_incomplete_works succeeds"""
     network = "test_list_incomplete_works"
-    session.set_network(network)
+    bf.set_network(network)
     try:
         # Cannot reliably leave incomplete work, so just check the call succeeds
-        ans = session.list_incomplete_works()
+        ans = bf.list_incomplete_works()
         assert isinstance(ans, dict)
         assert CoordConsts.SVC_KEY_WORK_LIST in ans
         assert isinstance(ans[CoordConsts.SVC_KEY_WORK_LIST], str)
     finally:
-        session.delete_network(network)
+        bf.delete_network(network)
 
 
-def test_delete_network_object(network):
-    bf_put_network_object("new_object", "goodbye")
-    bf_delete_network_object("new_object")
+def test_delete_network_object(bf: Session, network: str) -> None:
+    bf.put_network_object("new_object", "goodbye")
+    bf.delete_network_object("new_object")
     # the object should be non-existent now
     with raises(HTTPError, match="404"):
-        bf_get_network_object_text("new_object")
+        bf.get_network_object_text("new_object")
 
 
-def test_set_network():
+def test_set_network(bf: Session, network: str) -> None:
     try:
-        assert bf_set_network("foobar") == "foobar"
+        assert bf.set_network("foobar") == "foobar"
     finally:
-        bf_delete_network("foobar")
+        bf.delete_network("foobar")
 
-    name = bf_set_network()
+    name = bf.set_network()
     try:
         assert name.startswith(Options.default_network_prefix)
     finally:
-        bf_delete_network(name)
+        bf.delete_network(name)
 
 
-def test_list_networks():
+def test_list_networks(bf: Session) -> None:
+    name = "n1"
     try:
-        name = bf_set_network()
-        assert name in bf_list_networks()
+        bf.set_network(name)
+        assert name in bf.list_networks()
     finally:
-        bf_delete_network(name)
+        bf.delete_network(name)
 
 
 @requires_bf("2019.12.07")
-def test_add_node_role_dimension(session):
+def test_add_node_role_dimension(bf: Session) -> None:
+    network_name = "n1"
+    dim_name = "d1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
-        dim_name = "d1"
+        bf.set_network(network_name)
         rdMap = RoleDimensionMapping("a", [1], {})
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[rdMap])
-        bf_add_node_role_dimension(dim)
-        assert bf_get_node_role_dimension(dim_name) == dim
+        bf.put_node_role_dimension(dim)
+        assert bf.get_node_role_dimension(dim_name) == dim
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
-def test_add_node_roles_data():
+def test_add_node_roles_data(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         mappings = [
             RoleMapping("mapping1", "(.*)-(.*)", {"type": [1], "index": [2]}, {})
         ]
         roles_data = NodeRolesData(None, ["type", "index"], mappings)
-        bf_put_node_roles(roles_data)
-        assert bf_get_node_roles() == roles_data
+        bf.put_node_roles(roles_data)
+        assert bf.get_node_roles() == roles_data
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
-def test_get_network_object(network):
+def test_get_network_object(bf: Session, network: str) -> None:
     # non-existent object should yield 404
     with raises(HTTPError, match="404"):
-        bf_get_network_object_text("missing_object")
+        bf.get_network_object_text("missing_object")
     # object should exist after being placed
-    bf_put_network_object("new_object", "goodbye")
-    assert bf_get_network_object_text("new_object") == "goodbye"
+    bf.put_network_object("new_object", "goodbye")
+    assert bf.get_network_object_text("new_object") == "goodbye"
 
 
-def test_get_node_role_dimension():
+def test_get_node_role_dimension(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         dim_name = "d1"
         with raises(HTTPError, match="404"):
-            bf_get_node_role_dimension(dim_name)
+            bf.get_node_role_dimension(dim_name)
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
 @requires_bf("2019.12.07")
-def test_delete_node_role_dimension(session):
+def test_delete_node_role_dimension(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         dim_name = "d1"
         mapping = RoleDimensionMapping(regex="(regex)")
         dim = NodeRoleDimension(name=dim_name, roleDimensionMappings=[mapping])
-        bf_add_node_role_dimension(dim)
+        bf.put_node_role_dimension(dim)
         # should not crash
-        bf_get_node_role_dimension(dim_name)
-        bf_delete_node_role_dimension(dim_name)
+        bf.get_node_role_dimension(dim_name)
+        bf.delete_node_role_dimension(dim_name)
         # dimension should no longer exist
         with raises(HTTPError, match="404"):
-            bf_get_node_role_dimension(dim_name)
+            bf.get_node_role_dimension(dim_name)
         # second delete should fail
         with raises(HTTPError, match="404"):
-            bf_delete_node_role_dimension(dim_name)
+            bf.delete_node_role_dimension(dim_name)
 
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
 @requires_bf("2019.12.07")
-def test_put_node_role_dimension(session):
+def test_put_node_role_dimension(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         dim_name = "d1"
         mapping = RoleDimensionMapping(regex="(regex)")
         dim = NodeRoleDimension(dim_name, roleDimensionMappings=[mapping])
-        bf_put_node_role_dimension(dim)
-        assert bf_get_node_role_dimension(dim_name) == dim
+        bf.put_node_role_dimension(dim)
+        assert bf.get_node_role_dimension(dim_name) == dim
         # put again to check for idempotence
-        bf_put_node_role_dimension(dim)
-        assert bf_get_node_role_dimension(dim_name) == dim
+        bf.put_node_role_dimension(dim)
+        assert bf.get_node_role_dimension(dim_name) == dim
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
-def test_put_node_roles():
+def test_put_node_roles(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         mapping = RoleMapping(
             name="mapping", regex="(regex)", roleDimensionGroups={"dim1": [1]}
         )
         node_roles = NodeRolesData(
             defaultDimension="dim1", roleDimensionOrder=["dim1"], roleMappings=[mapping]
         )
-        bf_put_node_roles(node_roles)
-        assert bf_get_node_roles() == node_roles
+        bf.put_node_roles(node_roles)
+        assert bf.get_node_roles() == node_roles
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
-def test_put_reference_book():
+def test_put_reference_book(bf: Session) -> None:
+    network_name = "n1"
     try:
-        network_name = "n1"
-        bf_set_network(network_name)
+        bf.set_network(network_name)
         book_name = "b1"
         book = ReferenceBook(book_name)
-        bf_put_reference_book(book)
-        assert bf_get_reference_book(book_name) == book
+        bf.put_reference_book(book)
+        assert bf.get_reference_book(book_name) == book
         # put again to check for idempotence
-        bf_put_reference_book(book)
-        assert bf_get_reference_book(book_name) == book
+        bf.put_reference_book(book)
+        assert bf.get_reference_book(book_name) == book
     finally:
-        bf_delete_network(network_name)
+        bf.delete_network(network_name)
 
 
-def auto_complete_tester(completion_types):
+def auto_complete_tester(bf: Session, completion_types: Sequence[VariableType]) -> None:
+    name = bf.set_network()
     try:
-        name = bf_set_network()
-        bf_init_snapshot(join(_this_dir, "snapshot"))
+        bf.init_snapshot(join(_this_dir, "snapshot"))
         for completion_type in completion_types:
-            suggestions = bf_auto_complete(completion_type, ".*")
+            suggestions = bf.auto_complete(completion_type, ".*")
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.
             # If a completion type is unsupported an error is thrown so this will test that no errors are thrown.
             if len(suggestions) > 0:
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
-        bf_delete_network(name)
+        bf.delete_network(name)
 
 
-def auto_complete_tester_session(session, completion_types, max_suggestions=None):
+def auto_complete_tester_session(
+    bf: Session,
+    completion_types: Sequence[VariableType],
+    max_suggestions: Optional[int] = None,
+) -> None:
+    name = bf.set_network()
     try:
-        name = session.set_network()
-        session.init_snapshot(join(_this_dir, "snapshot"))
+        bf.init_snapshot(join(_this_dir, "snapshot"))
         for completion_type in completion_types:
-            suggestions = session.auto_complete(
+            suggestions = bf.auto_complete(
                 completion_type, ".*", max_suggestions=max_suggestions
             )
             if max_suggestions:
@@ -259,35 +245,35 @@ def auto_complete_tester_session(session, completion_types, max_suggestions=None
             if len(suggestions) > 0:
                 assert isinstance(suggestions[0], AutoCompleteSuggestion)
     finally:
-        session.delete_network(name)
+        bf.delete_network(name)
 
 
-def test_auto_complete():
-    auto_complete_tester(COMPLETION_TYPES)
+def test_auto_complete(bf: Session) -> None:
+    auto_complete_tester(bf, COMPLETION_TYPES)
 
 
-def test_auto_complete_session(session):
-    auto_complete_tester_session(session, COMPLETION_TYPES)
+def test_auto_complete_session(bf: Session) -> None:
+    auto_complete_tester_session(bf, COMPLETION_TYPES)
 
 
 @requires_bf("2022.08.17")
-def test_auto_complete_limited_session(session):
-    auto_complete_tester_session(session, COMPLETION_TYPES, max_suggestions=1)
+def test_auto_complete_limited_session(bf: Session) -> None:
+    auto_complete_tester_session(bf, COMPLETION_TYPES, max_suggestions=1)
 
 
 @requires_bf("2021.07.09")
-def test_auto_complete_bgp_route_status_spec(session):
+def test_auto_complete_bgp_route_status_spec(bf: Session) -> None:
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
-    auto_complete_tester_session(session, [VariableType.BGP_ROUTE_STATUS_SPEC])
+    auto_complete_tester_session(bf, [VariableType.BGP_ROUTE_STATUS_SPEC])
 
 
 @requires_bf("2022.08.17")
-def test_auto_complete_limited_bgp_route_status_spec(session):
+def test_auto_complete_limited_bgp_route_status_spec(bf: Session) -> None:
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
     auto_complete_tester_session(
-        session, [VariableType.BGP_ROUTE_STATUS_SPEC], max_suggestions=1
+        bf, [VariableType.BGP_ROUTE_STATUS_SPEC], max_suggestions=1
     )

@@ -118,7 +118,7 @@ class Asserts:
 
         A filter line is considered unreachable if it will never match a packet,
         e.g., because its match condition is empty or covered completely by those of
-        prior lines."
+        prior lines.
 
         :param filters: the specification for the filter (filterSpec) to check
         :param soft: whether this assertion is soft (i.e., generates a warning but
@@ -224,7 +224,7 @@ class Asserts:
             not a failure)
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
-        :param ignore_same_node whether to ignore duplicate router-ids on the same node
+        :param ignore_same_node: whether to ignore duplicate router-ids on the same node.
         """
         return assert_no_duplicate_router_ids(
             snapshot,
@@ -517,6 +517,10 @@ class Session:
             raise ValueError("Network to be deleted must be supplied")
         restv2helper.delete_network(self, name)
 
+    def delete_network_object(self, key: str) -> None:
+        """Deletes the network object with specified key."""
+        restv2helper.delete_network_object(self, key)
+
     def delete_node_role_dimension(self, dimension: str) -> None:
         """
         Deletes the definition of the given role dimension for the active network.
@@ -547,6 +551,10 @@ class Session:
         if name is None:
             raise ValueError("Snapshot to be deleted must be supplied")
         restv2helper.delete_snapshot(self, name, self.network)
+
+    def delete_snapshot_object(self, key: str, snapshot: Optional[str] = None) -> None:
+        """Deletes the snapshot object with specified key."""
+        restv2helper.delete_snapshot_object(self, key, snapshot)
 
     def extract_facts(
         self,
@@ -602,7 +610,7 @@ class Session:
         :type base_name: str
         :param name: name of the snapshot to initialize
         :type name: str
-        :param overwrite: whether or not to overwrite an existing snapshot with the
+        :param overwrite: whether to overwrite an existing snapshot with the
             same name
         :type overwrite: bool
         :param deactivate_interfaces: list of interfaces to deactivate in new snapshot
@@ -750,6 +758,16 @@ class Session:
             protocol, self.host, self.port_v2, self._base_uri_v2
         )
 
+    def get_network_object_stream(self, key: str) -> Any:
+        """Returns a binary stream of the content of the network object with specified key."""
+        return restv2helper.get_network_object(self, key)
+
+    def get_network_object_text(self, key: str, encoding: str = "utf-8") -> str:
+        """Returns the text content of the network object with specified key."""
+        with self.get_network_object_stream(key) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
+
     def get_node_role_dimension(
         self, dimension: str, inferred: bool = False
     ) -> NodeRoleDimension:
@@ -758,7 +776,7 @@ class Session:
 
         :param dimension: name of the node role dimension to fetch
         :type dimension: str
-        :param inferred: whether or not to fetch active snapshot's inferred node role dimension
+        :param inferred: whether to fetch active snapshot's inferred node role dimension
         :type inferred: bool
 
         :return: the definition of the given node role dimension for the active network, or inferred definition for the active snapshot if inferred=True.
@@ -777,7 +795,7 @@ class Session:
         """
         Returns the definitions of node roles for the active network or inferred roles for the active snapshot.
 
-        :param inferred: whether or not to fetch the active snapshot's inferred node roles
+        :param inferred: whether to fetch the active snapshot's inferred node roles
         :type inferred: bool
 
         :return: the definitions of node roles for the active network, or inferred definitions for the active snapshot if inferred=True.
@@ -822,8 +840,36 @@ class Session:
         else:
             raise ValueError(
                 "snapshot must be either provided or set using "
-                "set_snapshot (e.g. bf_session.set_snapshot('NAME')"
+                "set_snapshot (e.g. bf.set_snapshot('NAME')"
             )
+
+    def get_snapshot_input_object_stream(
+        self, key: str, snapshot: Optional[str] = None
+    ) -> Any:
+        """Returns a binary stream of the content of the snapshot input object with specified key."""
+        return restv2helper.get_snapshot_input_object(self, key, snapshot)
+
+    def get_snapshot_input_object_text(
+        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
+    ) -> str:
+        """Returns the text content of the snapshot input object with specified key."""
+        with self.get_snapshot_input_object_stream(key, snapshot) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
+
+    def get_snapshot_object_stream(
+        self, key: str, snapshot: Optional[str] = None
+    ) -> Any:
+        """Returns a binary stream of the content of the snapshot object with specified key."""
+        return restv2helper.get_snapshot_object(self, key, snapshot)
+
+    def get_snapshot_object_text(
+        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
+    ) -> str:
+        """Returns the text content of the snapshot object with specified key."""
+        with self.get_snapshot_object_stream(key, snapshot) as stream:
+            ret: str = stream.read().decode(encoding)
+            return ret
 
     def get_url(self, resource: str) -> str:
         """
@@ -857,7 +903,7 @@ class Session:
         :type upload: str
         :param name: name of the snapshot to initialize
         :type name: str
-        :param overwrite: whether or not to overwrite an existing snapshot with the
+        :param overwrite: whether to overwrite an existing snapshot with the
            same name
         :type overwrite: bool
         :param extra_args: extra arguments to control snapshot processing:
@@ -914,7 +960,7 @@ class Session:
             i.e., "cisco-nx", "arista", "f5", or "cisco-xr" for above examples.
             See https://www.shrubbery.net/rancid/man/router.db.5.html
         :type platform: str
-        :param overwrite: whether or not to overwrite an existing snapshot with
+        :param overwrite: whether to overwrite an existing snapshot with
            the same name.
         :type overwrite: bool
         :param extra_args: extra arguments to be passed to the parse command
@@ -1066,6 +1112,10 @@ class Session:
         """
         restv2helper.put_reference_book(self, book)
 
+    def put_network_object(self, key: str, data: Any) -> None:
+        """Puts data as the network object with specified key."""
+        restv2helper.put_network_object(self, key, data)
+
     def put_node_role_dimension(self, dimension: NodeRoleDimension) -> None:
         """
         Put a role dimension in the active network.
@@ -1087,6 +1137,10 @@ class Session:
         :type node_roles_data: :class:`~pybatfish.datamodel.referencelibrary.NodeRolesData`
         """
         restv2helper.put_node_roles(self, node_roles_data)
+
+    def put_snapshot_object(self, key: str, data: Any) -> None:
+        """Puts data as the snapshot object with specified key."""
+        restv2helper.put_snapshot_object(self, key, data, self.snapshot)
 
     def set_network(
         self, name: str | None = None, prefix: str = Options.default_network_prefix
@@ -1264,7 +1318,7 @@ class Session:
 
         :param name: name of the snapshot to initialize
         :type name: str
-        :param background: whether or not to run the task in the background
+        :param background: whether to run the task in the background
         :type background: bool
         :param extra_args: extra arguments to be passed to the parse command.
         :type extra_args: dict
