@@ -14,6 +14,7 @@
 
 import datetime
 import json
+import logging
 from unittest.mock import patch
 
 import pytest
@@ -138,7 +139,8 @@ def test_print_workstatus_fresh_task(caplog):
             ],
         }
     )
-    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
+    with caplog.at_level(logging.DEBUG):
+        _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar".format(
@@ -170,7 +172,8 @@ def test_print_workstatus_fresh_task_subtasks(caplog):
             ],
         }
     )
-    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
+    with caplog.at_level(logging.DEBUG):
+        _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar 1 / 2.".format(
@@ -202,7 +205,8 @@ def test_print_workstatus_old_task(caplog):
             ],
         }
     )
-    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
+    with caplog.at_level(logging.DEBUG):
+        _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar. (1y27d13:16:39 elapsed)".format(
@@ -234,7 +238,8 @@ def test_print_workstatus_old_task_subtasks(caplog):
             ],
         }
     )
-    _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
+    with caplog.at_level(logging.DEBUG):
+        _print_work_status_helper(session, workStatus, taskDetails, nowFunction)
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar 1 / 2. (1y27d13:16:39 elapsed)".format(
