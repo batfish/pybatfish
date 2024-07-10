@@ -21,4 +21,4 @@ __name__ = "pybatfish"
 
 __url__ = "https://github.com/batfish/pybatfish"
 
-__version__ = "0.36.0"
+__version__ = "2024.07.10.1530"
