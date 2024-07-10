@@ -211,6 +211,7 @@ def test_get_snapshot_inferred_node_roles(
     assert len(bf.get_node_roles(inferred=True).roleMappings) > 0
 
 
+@requires_bf("2024.07.01")
 def test_get_snapshot_input_object(
     bf: Session, network: str, example_snapshot: str
 ) -> None:
@@ -242,7 +243,7 @@ def test_get_snapshot_node_roles(
     assert snapshot_node_roles.roleDimensionOrder[0] == dimension_name
 
 
-@requires_bf("2019.10.28")
+@requires_bf("2024.07.01")
 def test_delete_snapshot_object(
     bf: Session, network: str, example_snapshot: str
 ) -> None:
@@ -257,6 +258,7 @@ def test_delete_snapshot_object(
         bf.get_snapshot_object_text("new_object")
 
 
+@requires_bf("2024.07.01")
 def test_get_snapshot_object(bf: Session, network: str, example_snapshot: str) -> None:
     bf.set_network(network)
     bf.set_snapshot(example_snapshot)
