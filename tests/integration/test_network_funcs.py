@@ -61,6 +61,7 @@ def test_list_incomplete_works(bf: Session) -> None:
         bf.delete_network(network)
 
 
+@requires_bf("2024.07.01")
 def test_delete_network_object(bf: Session, network: str) -> None:
     bf.put_network_object("new_object", "goodbye")
     bf.delete_network_object("new_object")
@@ -105,6 +106,7 @@ def test_add_node_roles_data(bf: Session) -> None:
         bf.delete_network(network_name)
 
 
+@requires_bf("2024.07.01")
 def test_get_network_object(bf: Session, network: str) -> None:
     # non-existent object should yield 404
     with raises(HTTPError, match="404"):
