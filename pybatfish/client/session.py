@@ -338,8 +338,8 @@ class Session:
     """Keeps session configuration needed to connect to a Batfish server.
 
     :ivar host: The host of the batfish service
-    :ivar port_v1: The port batfish service is running on (9997 by default)
-    :ivar port_v2: The additional port of batfish service (9996 by default)
+    :ivar port: The port batfish service is running on (9996 by default if not set)
+    :ivar port_v2: Legacy alias for port
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
     """
@@ -347,8 +347,11 @@ class Session:
     def __init__(
         self,
         host: str = Options.coordinator_host,
+        port: Optional[int] = None,
+        # port v1 is deprecated
         port_v1: int = Options.coordinator_work_port,
-        port_v2: int = Options.coordinator_work_v2_port,
+        # port v2 is a backwards-compatible, but deprecated alias for port
+        port_v2: Optional[int] = None,
         ssl: bool = Options.use_ssl,
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
@@ -356,7 +359,12 @@ class Session:
     ):
         # Coordinator args
         self.host: str = host
-        self.port_v2: int = port_v2
+        if port is not None:
+            self.port_v2 = port
+        elif port_v2 is not None:
+            self.port_v2 = port_v2
+        else:
+            self.port_v2 = Options.coordinator_work_v2_port
         self._base_uri_v2: str = CoordConsts.SVC_CFG_WORK_MGR2
         self.ssl: bool = ssl
         self.verify_ssl_certs: bool = verify_ssl_certs
