@@ -92,3 +92,18 @@ def test_auto_complete_invalid_max_suggestions():
     s = Session(load_questions=False)
     with pytest.raises(ValueError):
         s.auto_complete(VariableType.BGP_ROUTE_STATUS_SPEC, "foo", -1)
+
+
+def test_default_port():
+    s = Session(load_questions=False)
+    assert s.port_v2 == 9996
+
+
+def test_port_set():
+    s = Session(port=8888, port_v2=1111, load_questions=False)
+    assert s.port_v2 == 8888
+
+
+def test_port_v2_set():
+    s = Session(port_v2=8888, load_questions=False)
+    assert s.port_v2 == 8888
