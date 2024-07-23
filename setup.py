@@ -93,7 +93,6 @@ setup(
     install_requires=[
         "attrs>=18.1.0",
         "deepdiff",
-        "netconan>=0.12.0",
         "pandas",
         "python-dateutil",
         "PyYAML",
