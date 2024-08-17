@@ -9,7 +9,7 @@ Getting started with Batfish is easy. First, pull and run the latest ``allinone`
 .. code-block :: bash
 
     docker pull batfish/allinone
-    docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
+    docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9996:9996 batfish/allinone
 
 Then, install Pybatfish using ``pip``:
 
@@ -29,7 +29,7 @@ In order to upgrade to the latest Docker container, issue these commands on the 
     docker stop batfish
     docker rm batfish
     docker pull batfish/allinone
-    docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9997:9997 -p 9996:9996 batfish/allinone
+    docker run --name batfish -v batfish-data:/data -p 8888:8888 -p 9996:9996 batfish/allinone
 
 To upgrade Pybatfish, use the same command as above:
 
