@@ -120,11 +120,11 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - name: Download bf JAR
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: bf_questions
       - name: Run tests
@@ -169,11 +169,11 @@ jobs:
         with:
           python-version: 3.9
       - name: Download bf JAR
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4.1.7
         with:
           name: bf_questions
       - name: Run tests
