@@ -47,9 +47,10 @@ Each subfolder in this folder should correspond to an AWS account. If you want t
 then this level of hierarchy may be skipped.
 
 The configuration files for a region should be the JSON output of the following API calls:
-  * For EC2: `describe_addresses`, `describe_availability_zones`, `describe_customer_gateways`, `describe_internet_gateways`, `describe_network_acls`, `describe_network_interfaces`, `describe_instances`, `describe_route_tables`, `describe_security_groups`, `describe_subnets`, `describe_vpc_endpoints`, `describe_vpcs`, `describe_vpn_connections`, `describe_vpn_gateways`
+  * For EC2: `describe_addresses`, `describe_availability_zones`, `describe_customer_gateways`, `describe_instances`, `describe_internet_gateways`, `describe_nat_gateways`, `describe_network_acls`, `describe_network_interfaces`, `describe_prefix_lists`, `describe_route_tables`, `describe_security_groups`, `describe_subnets`, `describe_tags`, `describe_transit_gateway_attachments`, `describe_transit_gateway_route_tables`, `describe_transit_gateway_vpc_attachments`, `describe_transit_gateways`, `describe_vpc_endpoints`, `describe_vpc_peering_connections`, `describe_vpcs`, `describe_vpn_connections`, `describe_vpn_gateways`
   * For ES: `describe_elasticsearch_domains`
   * For RDS: `describe_db_instances`
+  * For ELBv2 `describe_listeners`, `describe_load_balancer_attributes`, `describe_load_balancers`, `describe_target_groups`, `describe_target_health`
 
 This output can be collected using the [AWS CLI](https://docs.aws.amazon.com/cli/latest/reference/index.html#cli-aws)
 or the [boto3 Python SDK](https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/index.html).
