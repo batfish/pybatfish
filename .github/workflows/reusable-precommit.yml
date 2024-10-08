@@ -71,12 +71,12 @@ jobs:
           cp -r questions/{stable,experimental} ${QUESTION_DIR}
           tar -czf questions.tgz -C ${TMP_DIR} questions
       - name: Upload JAR
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bf_jar
           path: allinone.jar
       - name: Upload questions
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: bf_questions
           path: questions.tgz
@@ -120,11 +120,11 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
       - name: Download bf JAR
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bf_questions
       - name: Run tests
@@ -169,11 +169,11 @@ jobs:
         with:
           python-version: 3.9
       - name: Download bf JAR
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: bf_questions
       - name: Run tests
