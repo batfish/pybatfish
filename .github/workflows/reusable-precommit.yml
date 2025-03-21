@@ -37,7 +37,7 @@ jobs:
           python-version: 3.9
       - name: Run checks
         run: |
-          pip install --upgrade pip wheel
+          pip install --upgrade pip wheel 'setuptools>=77.0.1'
           pip install -e .[dev]
           mypy pybatfish tests
   bf_build:
