@@ -209,3 +209,22 @@ jobs:
         with:
           name: docs
           path: docs/build/html
+  readthedocs_build:
+    runs-on: ubuntu-22.04 # Match ReadTheDocs OS
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.9 # Match ReadTheDocs Python version
+      - name: Build docs in ReadTheDocs-like environment
+        run: |
+          sudo apt update -qq
+          sudo apt -qq install -y pandoc
+          export READTHEDOCS_OUTPUT=../../RTDOUT
+          # The remaining commands are copied direct from readthedocs.org build logs
+          # We may need to update them if RTD changes what it does.
+          python -m pip install --upgrade --no-cache-dir pip setuptools
+          python -m pip install --upgrade --no-cache-dir sphinx
+          python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir .[dev]
+          cd docs/source ## This command is not copied, but it seems that RTD switches directories invisible at some point
+          python -m sphinx -T -W --keep-going -b html -d _build/doctrees -D language=en . $READTHEDOCS_OUTPUT/html
