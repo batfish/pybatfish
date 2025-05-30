@@ -29,13 +29,13 @@ jobs:
           webhook-type: incoming-webhook
           payload: |
             {
-              "text": "*Precommit Workflow Failed on Master Branch*",
+              "text": "*Pybatfish precommit workflow failed*",
               "blocks": [
                 {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": "*Precommit Workflow Failed on Master Branch*"
+                    "text": "*Pybatfish precommit workflow failed*"
                   }
                 },
                 {
@@ -52,7 +52,7 @@ jobs:
                       "type": "button",
                       "text": {
                         "type": "plain_text",
-                        "text": "View Workflow Run"
+                        "text": "View Workflow Run in GitHub Actions"
                       },
                       "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
                     }
