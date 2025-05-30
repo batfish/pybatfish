@@ -63,8 +63,8 @@ class BgpRoute(DataModelElement):
     communities = attr.ib(type=list, default=[])
     localPreference = attr.ib(type=int, default=0)
     metric = attr.ib(type=int, default=0)
-    nextHopIp = attr.ib(type=str, default=None)
-    sourceProtocol = attr.ib(type=str, default=None)
+    nextHopIp = attr.ib(type=Optional[str], default=None)
+    sourceProtocol = attr.ib(type=Optional[str], default=None)
     tag = attr.ib(type=int, default=0)
     weight = attr.ib(type=int, default=0)
 

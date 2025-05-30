@@ -13,7 +13,7 @@
 #   limitations under the License.
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Any, Dict, List  # noqa: F401
+from typing import Any, Dict, List, Optional  # noqa: F401
 
 import attr
 from pandas.core.indexes.frozen import FrozenList
@@ -174,8 +174,8 @@ class AutoCompleteSuggestion(DataModelElement):
     :ivar text: The actual suggested text
     """
 
-    description = attr.ib(type=str)
-    hint = attr.ib(type=str)
+    description = attr.ib(type=Optional[str])
+    hint = attr.ib(type=Optional[str])
     insertion_index = attr.ib(type=int)
     is_partial = attr.ib(type=bool)
     rank = attr.ib(type=int)
