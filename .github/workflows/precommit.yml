@@ -5,15 +5,58 @@ on:
     branches:
       - master
   schedule:
-    - cron: '0 15-23 * * *'  # 8AM to 4PM Pacific; daily
-    - cron: '0 0-1 * * *'    # 5PM to 6PM Pacific; daily
-
+    - cron: "0 15-23 * * *" # 8AM to 4PM Pacific; daily
+    - cron: "0 0-1 * * *" # 5PM to 6PM Pacific; daily
 
 jobs:
   precommit:
     uses: ./.github/workflows/reusable-precommit.yml
     with:
-      batfish_repo: 'batfish/batfish'
-      batfish_ref: 'master'
+      batfish_repo: "batfish/batfish"
+      batfish_ref: "master"
     secrets:
       PYBATFISH_CODECOV_TOKEN: ${{ secrets.PYBATFISH_CODECOV_TOKEN }}
+
+  notify-slack-on-failure:
+    needs: precommit
+    if: ${{ failure() && (github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/master')) }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification on failure
+        uses: slackapi/slack-github-action@v2.1.0
+        with:
+          webhook: ${{ secrets.PYBATFISH_BUILD_FAILURE_SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            {
+              "text": "*Precommit Workflow Failed on Master Branch*",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*Precommit Workflow Failed on Master Branch*"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "The precommit workflow has failed on the master branch.\n*Trigger:* ${{ github.event_name == 'schedule' && 'Scheduled run' || 'Push to master' }}\n*Repository:* ${{ github.repository }}\n*Commit:* ${{ github.sha }}"
+                  }
+                },
+                {
+                  "type": "actions",
+                  "elements": [
+                    {
+                      "type": "button",
+                      "text": {
+                        "type": "plain_text",
+                        "text": "View Workflow Run"
+                      },
+                      "url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                    }
+                  ]
+                }
+              ]
+            }
