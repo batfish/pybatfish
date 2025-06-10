@@ -33,7 +33,6 @@ from typing import (  # noqa: F401
     Union,
 )
 
-import pkg_resources
 from requests import HTTPError
 
 from pybatfish.client import restv2helper, workhelper
@@ -391,10 +390,14 @@ class Session:
     @classmethod
     def get_session_types(cls) -> dict[str, Callable]:
         """Get a dict of possible session types mapping their names to session classes."""
-        return {
-            entry_point.name: entry_point.load()
-            for entry_point in pkg_resources.iter_entry_points("batfish_session")
-        }
+        import sys
+        from importlib.metadata import entry_points
+
+        if sys.version_info < (3, 10):
+            eps = entry_points().get("batfish_session", [])
+        else:
+            eps = entry_points(group="batfish_session")
+        return {ep.name: ep.load() for ep in eps}
 
     @classmethod
     def get(cls, type_: str = "bf", **params: Any) -> Session:
