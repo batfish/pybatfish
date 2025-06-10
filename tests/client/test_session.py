@@ -14,7 +14,6 @@
 #   limitations under the License.
 from unittest.mock import patch
 
-import pkg_resources
 import pytest
 
 from pybatfish.client.session import Session
@@ -35,11 +34,21 @@ def test_get_session_types():
     dummy_session_type = "dummy"
     dummy_session_module = "dummy_session_module"
 
-    # Add in a dummy entry point in addition to installed entry_points
-    entry_points = [i for i in pkg_resources.iter_entry_points("batfish_session")] + [
-        MockEntryPoint(dummy_session_type, dummy_session_module)
-    ]
-    with patch.object(pkg_resources, "iter_entry_points", return_value=entry_points):
+    import sys
+    from importlib.metadata import entry_points
+
+    if sys.version_info < (3, 10):
+        eps = list(entry_points().get("batfish_session", [])) + [
+            MockEntryPoint(dummy_session_type, dummy_session_module)
+        ]
+        mock_eps = {"batfish_session": eps}
+    else:
+        eps = entry_points(group="batfish_session")
+        mock_eps = list(eps) + [
+            MockEntryPoint(dummy_session_type, dummy_session_module)
+        ]
+
+    with patch("importlib.metadata.entry_points", return_value=mock_eps):
         session_types = Session.get_session_types()
 
     # Confirm both the base and our mock types show up
