@@ -355,6 +355,8 @@ class Session:
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        proxies=None,
+        timeout: Optional[int] = 30,
     ):
         # Coordinator args
         self.host: str = host
@@ -382,6 +384,8 @@ class Session:
 
         self.elapsed_delay: int = 5
         self.stale_timeout: int = 5
+        self.proxies = proxies
+        self.timeout = timeout
 
         # Auto-load question templates
         if load_questions:
