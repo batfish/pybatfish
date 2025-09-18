@@ -48,9 +48,7 @@ def test_link_fragment_deserialization():
 
     assert isinstance(fragment, LinkFragment)
     assert fragment.text == "aaa"
-    assert fragment.vendorStructureId == VendorStructureId(
-        "some-config", "some-type", "some-name"
-    )
+    assert fragment.vendorStructureId == VendorStructureId("some-config", "some-type", "some-name")
 
 
 def test_trace_element_deserialization():
@@ -72,9 +70,7 @@ def test_trace_element_deserialization():
     trace_element = TraceElement.from_dict(trace_element_dict)
     assert len(trace_element.fragments) == 3
     assert trace_element.fragments[0] == TextFragment("aaa")
-    assert trace_element.fragments[1] == LinkFragment(
-        "bbb", VendorStructureId("aa", "bb", "cc")
-    )
+    assert trace_element.fragments[1] == LinkFragment("bbb", VendorStructureId("aa", "bb", "cc"))
     assert trace_element.fragments[2] == TextFragment("ccc")
 
 

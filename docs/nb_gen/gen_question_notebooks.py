@@ -1,11 +1,11 @@
-# coding: utf-8
 import inspect
 import logging
 from collections import namedtuple
+from collections.abc import Mapping
 from copy import deepcopy
 from os.path import abspath, dirname, realpath
 from pathlib import Path
-from typing import Any, List, Mapping, Set, Tuple
+from typing import Any
 
 import nbformat
 import pandas as pd
@@ -15,7 +15,7 @@ from nbformat import NotebookNode
 from yaml import safe_load
 
 from pybatfish.client.session import Session
-from pybatfish.datamodel import *  # noqa: F401
+from pybatfish.datamodel import *
 from pybatfish.question.question import QuestionMeta
 
 from .doc_tables import gen_input_table, gen_output_table, get_desc_and_params
@@ -49,7 +49,7 @@ def load_questions_yaml(fpath: Path) -> Mapping[str, Any]:
     return safe_load(fpath.read_bytes())
 
 
-def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNode:
+def generate_category_toc(question_list: list[Mapping[str, Any]]) -> NotebookNode:
     """Generates table of contents for a question category page."""
     toc_lines = []
 
@@ -62,131 +62,61 @@ def generate_category_toc(question_list: List[Mapping[str, Any]]) -> NotebookNod
     return nbformat.v4.new_markdown_cell("\n".join(toc_lines))
 
 
-def generate_result_examination(cells: List[NotebookNode], question_type: str) -> None:
+def generate_result_examination(cells: list[NotebookNode], question_type: str) -> None:
     """Generate notebook cells that expain how to interpret results returned from a given question (depending on question type)."""
     if question_type == "basic":
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Print the first 5 rows of the returned Dataframe"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Print the first 5 rows of the returned Dataframe"))
         cells.append(nbformat.v4.new_code_cell("result.head(5)"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Print the first row of the returned Dataframe"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Print the first row of the returned Dataframe"))
         cells.append(nbformat.v4.new_code_cell("result.iloc[0]"))
 
     elif question_type == "no-result":
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Print the first 5 rows of the returned Dataframe"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Print the first 5 rows of the returned Dataframe"))
         cells.append(nbformat.v4.new_code_cell("result.head(5)"))
     elif question_type == "singleflow":
         cells.append(nbformat.v4.new_markdown_cell("Retrieving the flow definition"))
         cells.append(nbformat.v4.new_code_cell("result.Flow"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Retrieving the detailed Trace information")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the detailed Trace information"))
         cells.append(nbformat.v4.new_code_cell("len(result.Traces)"))
         cells.append(nbformat.v4.new_code_cell("result.Traces[0]"))
         cells.append(nbformat.v4.new_markdown_cell("Evaluating the first Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Traces[0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the disposition of the first Trace"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the disposition of the first Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Traces[0][0].disposition"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Retrieving the first hop of the first Trace")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the first hop of the first Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Traces[0][0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Retrieving the last hop of the first Trace")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the last hop of the first Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Traces[0][0][-1]"))
 
     elif question_type == "dualflow":
-        cells.append(
-            nbformat.v4.new_markdown_cell("Retrieving the Forward flow definition")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the Forward flow definition"))
         cells.append(nbformat.v4.new_code_cell("result.Forward_Flow"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the detailed Forward Trace information"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the detailed Forward Trace information"))
         cells.append(nbformat.v4.new_code_cell("len(result.Forward_Traces)"))
         cells.append(nbformat.v4.new_code_cell("result.Forward_Traces[0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Evaluating the first Forward Trace")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Evaluating the first Forward Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Forward_Traces[0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the disposition of the first Forward Trace"
-            )
-        )
-        cells.append(
-            nbformat.v4.new_code_cell("result.Forward_Traces[0][0].disposition")
-        )
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the first hop of the first Forward Trace"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the disposition of the first Forward Trace"))
+        cells.append(nbformat.v4.new_code_cell("result.Forward_Traces[0][0].disposition"))
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the first hop of the first Forward Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Forward_Traces[0][0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the last hop of the first Forward Trace"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the last hop of the first Forward Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Forward_Traces[0][0][-1]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Retrieving the Return flow definition")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the Return flow definition"))
         cells.append(nbformat.v4.new_code_cell("result.Reverse_Flow"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the detailed Return Trace information"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the detailed Return Trace information"))
         cells.append(nbformat.v4.new_code_cell("len(result.Reverse_Traces)"))
         cells.append(nbformat.v4.new_code_cell("result.Reverse_Traces[0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell("Evaluating the first Reverse Trace")
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Evaluating the first Reverse Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Reverse_Traces[0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the disposition of the first Reverse Trace"
-            )
-        )
-        cells.append(
-            nbformat.v4.new_code_cell("result.Reverse_Traces[0][0].disposition")
-        )
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the first hop of the first Reverse Trace"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the disposition of the first Reverse Trace"))
+        cells.append(nbformat.v4.new_code_cell("result.Reverse_Traces[0][0].disposition"))
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the first hop of the first Reverse Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Reverse_Traces[0][0][0]"))
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Retrieving the last hop of the first Reverse Trace"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Retrieving the last hop of the first Reverse Trace"))
         cells.append(nbformat.v4.new_code_cell("result.Reverse_Traces[0][0][-1]"))
     elif question_type == "diff":
-        cells.append(
-            nbformat.v4.new_markdown_cell(
-                "Print the first 5 rows of the returned Dataframe"
-            )
-        )
+        cells.append(nbformat.v4.new_markdown_cell("Print the first 5 rows of the returned Dataframe"))
         cells.append(nbformat.v4.new_code_cell("result.head(5)"))
 
     else:
@@ -197,12 +127,12 @@ def generate_code_for_question(
     question_data: Mapping[str, Any],
     question_class_map: Mapping[str, QuestionMeta],
     session: Session,
-) -> List[NotebookNode]:
+) -> list[NotebookNode]:
     """Generate notebook cells for a single question."""
     question_type = question_data.get("type", "basic")
     if question_type == "skip":
         return []
-    cells: List[NotebookNode] = []
+    cells: list[NotebookNode] = []
     pybf_name = question_data["pybf_name"]
     if pybf_name not in question_class_map:
         raise KeyError(f"Unknown pybf question: {pybf_name}")
@@ -218,18 +148,9 @@ def generate_code_for_question(
     # creating the var bf as the BF session object so that the notebooks
     # can use bf. calls, but the notebook generation code will use
     # session.
-    bf = session  # noqa: F401
 
-    cells.append(
-        nbformat.v4.new_code_cell(
-            f"bf.set_network('{NETWORK_NAME}')", metadata=metadata_hide
-        )
-    )
-    cells.append(
-        nbformat.v4.new_code_cell(
-            f"bf.set_snapshot('{snapshot_name}')", metadata=metadata_hide
-        )
-    )
+    cells.append(nbformat.v4.new_code_cell(f"bf.set_network('{NETWORK_NAME}')", metadata=metadata_hide))
+    cells.append(nbformat.v4.new_code_cell(f"bf.set_snapshot('{snapshot_name}')", metadata=metadata_hide))
     description, long_description, params = get_desc_and_params(q_class)
     # Section header which is the question name
     cells.append(nbformat.v4.new_markdown_cell(f"##### {question_data.get('name')}"))
@@ -252,13 +173,11 @@ def generate_code_for_question(
     column_metadata = eval(expression).metadata.column_metadata
 
     # Code cell to execute question
-    cells.append(nbformat.v4.new_code_cell("result = {}.frame()".format(expression)))
+    cells.append(nbformat.v4.new_code_cell(f"result = {expression}.frame()"))
     cells.append(nbformat.v4.new_markdown_cell("###### **Return Value**"))
 
     # generate table describing the output of the query
-    cells.append(
-        nbformat.v4.new_markdown_cell(gen_output_table(column_metadata, pybf_name))
-    )
+    cells.append(nbformat.v4.new_markdown_cell(gen_output_table(column_metadata, pybf_name)))
 
     generate_result_examination(cells, question_type)
 
@@ -266,16 +185,14 @@ def generate_code_for_question(
 
 
 def generate_code_for_questions(
-    question_list: List[Mapping[str, Any]],
+    question_list: list[Mapping[str, Any]],
     question_class_map: Mapping[str, QuestionMeta],
     session: Session,
-) -> List[NotebookNode]:
+) -> list[NotebookNode]:
     """Generate notebook cells for all questions in a single question category."""
-    cells: List[NotebookNode] = []
+    cells: list[NotebookNode] = []
     for question_data in question_list:
-        cells.extend(
-            generate_code_for_question(question_data, question_class_map, session)
-        )
+        cells.extend(generate_code_for_question(question_data, question_class_map, session))
     return cells
 
 
@@ -290,7 +207,7 @@ def generate_notebook(
 
     # Initialize list for cells that will be added.
     # Copying the cells from base notebook, so can just replace the value in the end
-    cells: List[NotebookNode] = deepcopy(nb["cells"])
+    cells: list[NotebookNode] = deepcopy(nb["cells"])
     description = "#### {}".format(category["description"])
     cells.append(nbformat.v4.new_markdown_cell(description))
     cells.append(nbformat.v4.new_markdown_cell(category["introduction"]))
@@ -300,9 +217,7 @@ def generate_notebook(
     cells.append(generate_category_toc(question_list))
 
     # Creates the documentation for each question
-    cells.extend(
-        generate_code_for_questions(question_list, question_class_map, session)
-    )
+    cells.extend(generate_code_for_questions(question_list, question_class_map, session))
 
     # overwrite the cells with the fully populated list
     nb["cells"] = cells
@@ -314,7 +229,7 @@ def execute_notebook(nb: NotebookNode, name: str) -> NotebookNode:
 
     .. warning:: Will modify the passed in notebook.
     """
-    logging.info("Executing Notebook for {} category of questions".format(name))
+    logging.info(f"Executing Notebook for {name} category of questions")
 
     # Execute the notebook and write to file
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
@@ -350,9 +265,7 @@ def generate_all_notebooks(
 def get_name_to_qclass(session: Session) -> Mapping[str, QuestionMeta]:
     """Return a map from question name to its pybf MetaClass"""
     # get a map from question name to class
-    question_class_map = {
-        name: member for name, member in inspect.getmembers(session.q, inspect.isclass)
-    }
+    question_class_map = {name: member for name, member in inspect.getmembers(session.q, inspect.isclass)}
     if "__class__" in question_class_map:
         del question_class_map["__class__"]  # don't need this member
     return question_class_map
@@ -360,24 +273,22 @@ def get_name_to_qclass(session: Session) -> Mapping[str, QuestionMeta]:
 
 def init_snapshots(question_categories: Mapping, session: Session) -> None:
     """Initialize all snapshots needed for generating question notebooks."""
-    snapshot_set: Set[Tuple[str, str]] = collect_snapshots(question_categories)
+    snapshot_set: set[tuple[str, str]] = collect_snapshots(question_categories)
 
     logging.info("Initializing snapshots")
     for snapshot_config in progressbar.progressbar(snapshot_set):
         snapshot_path = _DOC_DIR / snapshot_config.path
-        session.init_snapshot(
-            str(snapshot_path), name=snapshot_config.name, overwrite=True
-        )
+        session.init_snapshot(str(snapshot_path), name=snapshot_config.name, overwrite=True)
 
 
-def collect_snapshots(question_categories: Mapping) -> Set[Tuple[str, str]]:
+def collect_snapshots(question_categories: Mapping) -> set[tuple[str, str]]:
     """Collect all snapshots needed for generating question notebooks.
 
     Returns each snapshot as tuple of (name, filepath)
     """
     # collect list of snapshots that need to be initialized
     ss = namedtuple("ss", ["name", "path"])
-    snapshot_set: Set[Tuple[str, str]] = set()
+    snapshot_set: set[tuple[str, str]] = set()
     for category in question_categories["categories"]:
         for question in category["questions"]:
             snapshot = question.get("snapshot", _example_snapshot_config)

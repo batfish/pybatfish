@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,7 +22,7 @@ from pybatfish.client.session import Session
 
 def _version_to_tuple(version):
     """Convert version string N(.N)* to a tuple of ints."""
-    return tuple((int(i) for i in version.split(".")))
+    return tuple(int(i) for i in version.split("."))
 
 
 def _get_pybf_version():
@@ -55,12 +54,10 @@ def skip_old_version(bf_version, min_version):
     """Skip this pytest test if specified (or inferred) Pybf/Bf version is below supplied, minimum required version."""
     min_version_tuple = _version_to_tuple(min_version)
     if _version_less_than(_version_to_tuple(bf_version), min_version_tuple):
-        pytest.skip("Batfish version too low ({} < {})".format(bf_version, min_version))
+        pytest.skip(f"Batfish version too low ({bf_version} < {min_version})")
     pybf_version = _get_pybf_version()
     if _version_less_than(_version_to_tuple(pybf_version), min_version_tuple):
-        pytest.skip(
-            "Pybatfish version too low ({} < {})".format(pybf_version, min_version)
-        )
+        pytest.skip(f"Pybatfish version too low ({pybf_version} < {min_version})")
 
 
 def get_bf_version(session):

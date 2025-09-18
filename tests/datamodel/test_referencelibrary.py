@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """Tests for reference library."""
-
-from __future__ import absolute_import, print_function
 
 import pytest
 
@@ -52,9 +49,7 @@ def test_addressgroup_construction_badtype():
 def test_addressgroup_construction_item():
     """Check that we construct address groups when sub-props are not a list."""
     assert AddressGroup("g1", addresses="ag") == AddressGroup("g1", addresses=["ag"])
-    assert AddressGroup("g1", childGroupNames="ag") == AddressGroup(
-        "g1", childGroupNames=["ag"]
-    )
+    assert AddressGroup("g1", childGroupNames="ag") == AddressGroup("g1", childGroupNames=["ag"])
 
 
 def test_addressgroup_construction_list():
@@ -123,9 +118,7 @@ def test_interfacegroup_construction_badtype():
     with pytest.raises(ValueError):
         InterfaceGroup("g1", interfaces="i1")
     with pytest.raises(ValueError):
-        InterfaceGroup(
-            "book1", interfaces=["ag", Interface(hostname="h1", interface="i1")]
-        )
+        InterfaceGroup("book1", interfaces=["ag", Interface(hostname="h1", interface="i1")])
 
 
 def test_interfacegroup_construction_item():
@@ -165,37 +158,25 @@ def test_noderolesdata_construction_badtype():
 def test_noderolesdata_construction_item():
     """Check that we construct node role data when sub-props are not a list."""
     dimension = "dim"
-    expected = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[]
-    )
-    actual = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=dimension, roleMappings=[]
-    )
+    expected = NodeRolesData(defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[])
+    actual = NodeRolesData(defaultDimension=None, roleDimensionOrder=dimension, roleMappings=[])
     assert actual == expected
 
     mapping = RoleMapping(None, "", {}, {})
-    expected = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping]
-    )
-    actual = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=[], roleMappings=mapping
-    )
+    expected = NodeRolesData(defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping])
+    actual = NodeRolesData(defaultDimension=None, roleDimensionOrder=[], roleMappings=mapping)
     assert actual == expected
 
 
 def test_noderolesdata_construction_list():
     """Check that we construct node role data where sub-props are lists."""
     dimension = "dim"
-    data = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[]
-    )
+    data = NodeRolesData(defaultDimension=None, roleDimensionOrder=[dimension], roleMappings=[])
 
     assert data.roleDimensionOrder == [dimension]
 
     mapping = RoleMapping(None, "", {}, {})
-    data = NodeRolesData(
-        defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping]
-    )
+    data = NodeRolesData(defaultDimension=None, roleDimensionOrder=[], roleMappings=[mapping])
 
     assert data.roleMappings == [mapping]
 

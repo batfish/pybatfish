@@ -21,20 +21,16 @@ fails.
 
 import operator
 import warnings
-from typing import (  # noqa: F401
+from typing import (
     TYPE_CHECKING,
     Any,
-    Dict,
-    Iterable,
-    List,
     Optional,
-    Union,
 )
 
 from deepdiff import DeepDiff
 from pandas import DataFrame
 
-from pybatfish.datamodel import HeaderConstraints, PathConstraints  # noqa: F401
+from pybatfish.datamodel import PathConstraints
 from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.exception import (
     BatfishAssertException,
@@ -101,9 +97,7 @@ def assert_num_results(answer, num, soft=False):
     else:
         raise TypeError("Unrecognized answer type")
     if not actual == num:
-        err_text = "Expected {} results, found: {}\nFull answer:\n{}".format(
-            num, actual, answer
-        )
+        err_text = f"Expected {num} results, found: {actual}\nFull answer:\n{answer}"
         return _raise_common(err_text, soft)
     return True
 
@@ -117,7 +111,7 @@ def _subdict(d, keys):
 def _get_duplicate_router_ids(
     question_name: str,
     session: "Session",
-    snapshot: Optional[str] = None,
+    snapshot: str | None = None,
     ignore_same_node: bool = False,
 ) -> DataFrame:
     """Helper function to get rows with duplicate router IDs for a given protocol.
@@ -127,20 +121,14 @@ def _get_duplicate_router_ids(
     :param snapshot: Snapshot on which to ask the question
     :param ignore_same_node: whether to ignore duplicate router-ids on the same node
     """
-    df = (
-        getattr(_get_question_object(session, question_name), question_name)()
-        .answer(snapshot)
-        .frame()
-    )
+    df = getattr(_get_question_object(session, question_name), question_name)().answer(snapshot).frame()
     if ignore_same_node:
-        return df.groupby("Router_ID").filter(
-            lambda x: x["Node"].nunique() > 1 and x["Node"].nunique() != len(x)
-        )
+        return df.groupby("Router_ID").filter(lambda x: x["Node"].nunique() > 1 and x["Node"].nunique() != len(x))
     else:
         return df[df.duplicated(["Router_ID"], keep=False)].sort_values(["Router_ID"])
 
 
-def _is_dict_match(actual: Dict[str, Any], expected: Dict[str, Any]) -> bool:
+def _is_dict_match(actual: dict[str, Any], expected: dict[str, Any]) -> bool:
     """Matches two dictionaries. `expected` can be a subset of `actual`."""
     diff = DeepDiff(
         _subdict(actual, expected.keys()),
@@ -171,14 +159,12 @@ def _format_df(df, df_format):
     elif df_format == "records":
         return str(df.to_dict(orient="records"))
     else:
-        raise ValueError(
-            f"Unknown df_format {df_format}. Should be 'table' or 'records'"
-        )
+        raise ValueError(f"Unknown df_format {df_format}. Should be 'table' or 'records'")
 
 
 def assert_has_route(
-    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, Any]]]]],
-    expected_route: Dict[str, Any],
+    routes: DataFrame | dict[str, dict[str, list[dict[str, Any]]]],
+    expected_route: dict[str, Any],
     node: str,
     vrf: str = "default",
     soft: bool = False,
@@ -200,17 +186,15 @@ def assert_has_route(
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
 
     if isinstance(routes, DataFrame):
-        return _assert_has_route_dataframe_routes(
-            routes, expected_route, node, vrf, soft
-        )
-    elif isinstance(routes, Dict):
+        return _assert_has_route_dataframe_routes(routes, expected_route, node, vrf, soft)
+    elif isinstance(routes, dict):
         return _assert_has_route_dict_routes(routes, expected_route, node, vrf, soft)
 
     raise TypeError("'routes' is neither a Pandas DataFrame nor a dictionary")
 
 
 def _assert_has_route_dataframe_routes(
-    routes: DataFrame, expected_route: Dict[str, Any], node: str, vrf: str, soft: bool
+    routes: DataFrame, expected_route: dict[str, Any], node: str, vrf: str, soft: bool
 ) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
@@ -220,20 +204,15 @@ def _assert_has_route_dataframe_routes(
     if len(vrf_routes) == 0:
         raise BatfishAssertException(f"No VRF: {vrf} on node {node}")
 
-    if not any(
-        _is_dict_match(actual_route, expected_route)
-        for actual_route in vrf_routes.to_dict(orient="records")
-    ):
-        err_text = "No route matches for {} on node {}, VRF {}".format(
-            expected_route, node, vrf
-        )
+    if not any(_is_dict_match(actual_route, expected_route) for actual_route in vrf_routes.to_dict(orient="records")):
+        err_text = f"No route matches for {expected_route} on node {node}, VRF {vrf}"
         return _raise_common(err_text, soft)
     return True
 
 
 def _assert_has_route_dict_routes(
-    routes: Dict[str, Dict[str, List[Dict[str, Any]]]],
-    expected_route: Dict[str, Any],
+    routes: dict[str, dict[str, list[dict[str, Any]]]],
+    expected_route: dict[str, Any],
     node: str,
     vrf: str,
     soft: bool,
@@ -248,19 +227,15 @@ def _assert_has_route_dict_routes(
     except KeyError:
         raise BatfishAssertException(f"No VRF: {vrf} on node {node}")
 
-    if not any(
-        _is_dict_match(actual_route, expected_route) for actual_route in vrf_routes
-    ):
-        err_text = "No route matches for {} on node {}, VRF {}".format(
-            expected_route, node, vrf
-        )
+    if not any(_is_dict_match(actual_route, expected_route) for actual_route in vrf_routes):
+        err_text = f"No route matches for {expected_route} on node {node}, VRF {vrf}"
         return _raise_common(err_text, soft)
     return True
 
 
 def assert_has_no_route(
-    routes: Union[DataFrame, Dict[str, Dict[str, List[Dict[str, Any]]]]],
-    expected_route: Dict[str, Any],
+    routes: DataFrame | dict[str, dict[str, list[dict[str, Any]]]],
+    expected_route: dict[str, Any],
     node: str,
     vrf: str = "default",
     soft: bool = False,
@@ -284,17 +259,15 @@ def assert_has_no_route(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if isinstance(routes, DataFrame):
-        return _assert_has_no_route_dataframe_routes(
-            routes, expected_route, node, vrf, soft
-        )
-    elif isinstance(routes, Dict):
+        return _assert_has_no_route_dataframe_routes(routes, expected_route, node, vrf, soft)
+    elif isinstance(routes, dict):
         return _assert_has_no_route_dict_routes(routes, expected_route, node, vrf, soft)
 
     raise TypeError("'routes' is neither a Pandas DataFrame nor a dictionary")
 
 
 def _assert_has_no_route_dataframe_routes(
-    routes: DataFrame, expected_route: Dict[str, Any], node: str, vrf: str, soft: bool
+    routes: DataFrame, expected_route: dict[str, Any], node: str, vrf: str, soft: bool
 ) -> bool:
     node_routes = routes[routes["Node"] == node]
     if len(node_routes) == 0:
@@ -306,11 +279,7 @@ def _assert_has_no_route_dataframe_routes(
         warnings.warn(f"No VRF: {vrf} on node {node}", category=BatfishAssertWarning)
         return True
 
-    all_matches = [
-        route
-        for route in vrf_routes.to_dict(orient="records")
-        if _is_dict_match(route, expected_route)
-    ]
+    all_matches = [route for route in vrf_routes.to_dict(orient="records") if _is_dict_match(route, expected_route)]
     if all_matches:
         err_text = "Found route(s) that match, "
         f"when none were expected:\n{all_matches}"
@@ -319,8 +288,8 @@ def _assert_has_no_route_dataframe_routes(
 
 
 def _assert_has_no_route_dict_routes(
-    routes: Dict[str, Dict[str, List[Dict[str, Any]]]],
-    expected_route: Dict[str, Any],
+    routes: dict[str, dict[str, list[dict[str, Any]]]],
+    expected_route: dict[str, Any],
     node: str,
     vrf: str,
     soft: bool,
@@ -337,9 +306,7 @@ def _assert_has_no_route_dict_routes(
         warnings.warn(f"No VRF: {vrf} on node {node}", category=BatfishAssertWarning)
         return True
 
-    all_matches = [
-        route for route in vrf_routes if _is_dict_match(route, expected_route)
-    ]
+    all_matches = [route for route in vrf_routes if _is_dict_match(route, expected_route)]
     if all_matches:
         err_text = "Found route(s) that match, "
         f"when none were expected:\n{all_matches}"
@@ -356,7 +323,7 @@ def assert_filter_denies(
     session=None,
     df_format="table",
 ):
-    # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], Optional[Session], str) -> bool
+    # type: (str, HeaderConstraints, str|None, bool, str|None, Session|None, str) -> bool
     """
     Check if a filter (e.g., ACL) denies a specified set of flows.
 
@@ -372,35 +339,24 @@ def assert_filter_denies(
     :return: True if the assertion passes
     """
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
 
     kwargs = dict(filters=filters, headers=headers, action="permit")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
-    df = (
-        _get_question_object(session, "searchFilters")
-        .searchFilters(**kwargs)
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "searchFilters").searchFilters(**kwargs).answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found a flow that was permitted, when expected to be denied\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found a flow that was permitted, when expected to be denied\n{_format_df(df, df_format)}",
             soft,
         )
     return True
 
 
-def assert_filter_has_no_unreachable_lines(
-    filters, soft=False, snapshot=None, session=None, df_format="table"
-):
-    # type: (str, bool, Optional[str], Optional[Session], str) -> bool
+def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None, session=None, df_format="table"):
+    # type: (str, bool, str|None, Session|None, str) -> bool
     """
     Check that a filter (e.g. an ACL) has no unreachable lines.
 
@@ -419,9 +375,7 @@ def assert_filter_has_no_unreachable_lines(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(filters=filters)
 
@@ -433,9 +387,7 @@ def assert_filter_has_no_unreachable_lines(
     )
     if len(df) > 0:
         return _raise_common(
-            "Found unreachable filter line(s), when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found unreachable filter line(s), when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True
@@ -450,7 +402,7 @@ def assert_filter_permits(
     session=None,
     df_format="table",
 ):
-    # type: (str, HeaderConstraints, Optional[str], bool, Optional[str], Optional[Session], str) -> bool
+    # type: (str, HeaderConstraints, str|None, bool, str|None, Session|None, str) -> bool
     """
     Check if a filter (e.g., ACL) permits a specified set of flows.
 
@@ -467,34 +419,23 @@ def assert_filter_permits(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(filters=filters, headers=headers, action="deny")
     if startLocation is not None:
         kwargs.update(startLocation=startLocation)
 
-    df = (
-        _get_question_object(session, "searchFilters")
-        .searchFilters(**kwargs)
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "searchFilters").searchFilters(**kwargs).answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found a flow that was denied, when expected to be permitted\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found a flow that was denied, when expected to be permitted\n{_format_df(df, df_format)}",
             soft,
         )
     return True
 
 
-def assert_flows_fail(
-    startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"
-):
-    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session], str) -> bool
+def assert_flows_fail(startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"):
+    # type: (str, HeaderConstraints, bool, str|None, Session|None, str) -> bool
     """
     Check if the specified set of flows, denoted by starting locations and headers, fail.
 
@@ -510,9 +451,7 @@ def assert_flows_fail(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(
         pathConstraints=PathConstraints(startLocation=startLocation),
@@ -520,26 +459,17 @@ def assert_flows_fail(
         actions="success",
     )
 
-    df = (
-        _get_question_object(session, "reachability")
-        .reachability(**kwargs)
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "reachability").reachability(**kwargs).answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found a flow that succeed, when expected to fail\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found a flow that succeed, when expected to fail\n{_format_df(df, df_format)}",
             soft,
         )
     return True
 
 
-def assert_flows_succeed(
-    startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"
-):
-    # type: (str, HeaderConstraints, bool, Optional[str], Optional[Session], str) -> bool
+def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"):
+    # type: (str, HeaderConstraints, bool, str|None, Session|None, str) -> bool
     """
     Check if the specified set of flows, denoted by starting locations and headers, succeed.
 
@@ -555,9 +485,7 @@ def assert_flows_succeed(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(
         pathConstraints=PathConstraints(startLocation=startLocation),
@@ -565,17 +493,10 @@ def assert_flows_succeed(
         actions="failure",
     )
 
-    df = (
-        _get_question_object(session, "reachability")
-        .reachability(**kwargs)
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "reachability").reachability(**kwargs).answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found a flow that failed, when expected to succeed\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found a flow that failed, when expected to succeed\n{_format_df(df, df_format)}",
             soft,
         )
     return True
@@ -590,7 +511,7 @@ def assert_no_incompatible_bgp_sessions(
     session=None,
     df_format="table",
 ):
-    # type: (Optional[str], Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
+    # type: (str|None, str|None, str|None, str|None, bool, Session|None, str) -> bool
     """Assert that there are no incompatible BGP sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -605,9 +526,7 @@ def assert_no_incompatible_bgp_sessions(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict()  # type: Dict
     if status is not None:
@@ -628,17 +547,13 @@ def assert_no_incompatible_bgp_sessions(
     # unless user has provided status
     if status is None:
         ignored_statuses = ["UNIQUE_MATCH", "DYNAMIC_MATCH", "UNKNOWN_REMOTE"]
-        df = df_raw[
-            df_raw["Configured_Status"].apply(lambda x: x not in ignored_statuses)
-        ]
+        df = df_raw[df_raw["Configured_Status"].apply(lambda x: x not in ignored_statuses)]
     else:
         df = df_raw
 
     if len(df) > 0:
         return _raise_common(
-            "Found incompatible BGP session(s), when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found incompatible BGP session(s), when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True
@@ -652,7 +567,7 @@ def assert_no_incompatible_ospf_sessions(
     session=None,
     df_format="table",
 ):
-    # type: (Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
+    # type: (str|None, str|None, str|None, bool, Session|None, str) -> bool
     """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -666,9 +581,7 @@ def assert_no_incompatible_ospf_sessions(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(statuses=UNESTABLISHED_OSPF_SESSION_STATUS_SPEC)
     if nodes is not None:
@@ -684,9 +597,7 @@ def assert_no_incompatible_ospf_sessions(
     )
     if len(df) > 0:
         return _raise_common(
-            "Found OSPF session(s) that were not established, when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found OSPF session(s) that were not established, when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True
@@ -700,7 +611,7 @@ def assert_no_unestablished_bgp_sessions(
     session=None,
     df_format="table",
 ):
-    # type: (Optional[str], Optional[str], Optional[str], bool, Optional[Session], str) -> bool
+    # type: (str|None, str|None, str|None, bool, Session|None, str) -> bool
     """Assert that there are no BGP sessions that are compatible but not established.
 
     This assertion is run (only) for sessions that are compatible based on
@@ -719,9 +630,7 @@ def assert_no_unestablished_bgp_sessions(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict(status="NOT_ESTABLISHED")
     if nodes is not None:
@@ -729,26 +638,17 @@ def assert_no_unestablished_bgp_sessions(
     if remote_nodes is not None:
         kwargs.update(remoteNodes=remote_nodes)
 
-    df = (
-        _get_question_object(session, "bgpSessionStatus")
-        .bgpSessionStatus(**kwargs)
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "bgpSessionStatus").bgpSessionStatus(**kwargs).answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found compatible BGP session(s) that were not established, when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found compatible BGP session(s) that were not established, when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True
 
 
-def assert_no_undefined_references(
-    snapshot=None, soft=False, session=None, df_format="table"
-):
-    # type: (Optional[str], bool, Optional[Session], str) -> bool
+def assert_no_undefined_references(snapshot=None, soft=False, session=None, df_format="table"):
+    # type: (str|None, bool, Session|None, str) -> bool
     """Assert that there are no undefined references present in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
@@ -760,30 +660,21 @@ def assert_no_undefined_references(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
-    df = (
-        _get_question_object(session, "undefinedReferences")
-        .undefinedReferences()
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "undefinedReferences").undefinedReferences().answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found undefined reference(s), when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found undefined reference(s), when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True
 
 
 def assert_no_duplicate_router_ids(
-    snapshot: Optional[str] = None,
-    nodes: Optional[str] = None,
-    protocols: Optional[List[str]] = None,
+    snapshot: str | None = None,
+    nodes: str | None = None,
+    protocols: list[str] | None = None,
     soft: bool = False,
     session: Optional["Session"] = None,
     df_format: str = "table",
@@ -802,51 +693,35 @@ def assert_no_duplicate_router_ids(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
     kwargs = dict()  # type: Dict
     if nodes is not None:
         kwargs.update(nodes=nodes)
 
     supported_protocols = {"bgp", "ospf"}
-    protocols_to_fetch = (
-        supported_protocols if protocols is None else set(p.lower() for p in protocols)
-    )
+    protocols_to_fetch = supported_protocols if protocols is None else set(p.lower() for p in protocols)
     if not protocols_to_fetch.issubset(supported_protocols):
-        raise ValueError(
-            "Unsupported protocols supplied: {}".format(
-                protocols_to_fetch.difference(supported_protocols)
-            )
-        )
+        raise ValueError(f"Unsupported protocols supplied: {protocols_to_fetch.difference(supported_protocols)}")
     found_duplicates = False
     duplicate_results = ""
 
     for protocol in protocols_to_fetch:
-        df_duplicate = _get_duplicate_router_ids(
-            protocol + "ProcessConfiguration", session, snapshot, ignore_same_node
-        )
+        df_duplicate = _get_duplicate_router_ids(protocol + "ProcessConfiguration", session, snapshot, ignore_same_node)
         if not df_duplicate.empty:
             found_duplicates = True
-            duplicate_results += "{}: {}\n".format(
-                protocol.upper(), _format_df(df_duplicate, df_format)
-            )
+            duplicate_results += f"{protocol.upper()}: {_format_df(df_duplicate, df_format)}\n"
 
     if found_duplicates:
         return _raise_common(
-            "Found duplicate router-id(s), when none were expected\n{}".format(
-                duplicate_results
-            ),
+            f"Found duplicate router-id(s), when none were expected\n{duplicate_results}",
             soft,
         )
     return True
 
 
-def assert_no_forwarding_loops(
-    snapshot=None, soft=False, session=None, df_format="table"
-):
-    # type: (Optional[str], bool, Optional[Session], str) -> bool
+def assert_no_forwarding_loops(snapshot=None, soft=False, session=None, df_format="table"):
+    # type: (str|None, bool, Session|None, str) -> bool
     """Assert that there are no forwarding loops in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
@@ -858,21 +733,12 @@ def assert_no_forwarding_loops(
     """
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if session is None:
-        raise ValueError(
-            "Session must be provided. Preferably, use Session.asserts rather than this function"
-        )
+        raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
-    df = (
-        _get_question_object(session, "detectLoops")
-        .detectLoops()
-        .answer(snapshot)
-        .frame()
-    )
+    df = _get_question_object(session, "detectLoops").detectLoops().answer(snapshot).frame()
     if len(df) > 0:
         return _raise_common(
-            "Found forwarding loops, when none were expected\n{}".format(
-                _format_df(df, df_format)
-            ),
+            f"Found forwarding loops, when none were expected\n{_format_df(df, df_format)}",
             soft,
         )
     return True

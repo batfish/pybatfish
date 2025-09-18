@@ -13,21 +13,16 @@
 #   limitations under the License.
 """Contains Batfish commands that integrate with the Google Capirca library (https://github.com/google/capirca)."""
 
-
 import ipaddress
 import logging
 import os
-from typing import Any, Dict, Optional, Union  # noqa: F401
 
 try:
     from capirca.lib import naming, policy
 except ImportError:
-    logging.exception(
-        "Capirca must be installed to use the Pybatfish Capirca extensions"
-    )
+    logging.exception("Capirca must be installed to use the Pybatfish Capirca extensions")
     raise
 
-from pybatfish.client.session import Session  # noqa: F401
 from pybatfish.datamodel import AddressGroup, ReferenceBook
 
 __all__ = ["create_reference_book", "init_snapshot_from_acl"]
@@ -74,16 +69,10 @@ def _entry_to_group(name, items, definitions):
         logger.exception("error converting %s, creating empty group", name)
         return AddressGroup(name)
 
-    if any(
-        isinstance(c, (ipaddress.IPv6Address, ipaddress.IPv6Network)) for c in converted
-    ):
+    if any(isinstance(c, (ipaddress.IPv6Address, ipaddress.IPv6Network)) for c in converted):
         logger.warning("Skipping IPv6 addresses in %s", name)
 
-    converted_v4 = [
-        str(c)
-        for c in converted
-        if isinstance(c, (ipaddress.IPv4Address, ipaddress.IPv4Network))
-    ]
+    converted_v4 = [str(c) for c in converted if isinstance(c, (ipaddress.IPv4Address, ipaddress.IPv4Network))]
 
     converted_group = [c for c in converted if isinstance(c, str)]
 
@@ -129,17 +118,12 @@ def _get_acl_text(pol: policy.Policy, platform: str) -> str:
     elif platform == "paloalto":
         # from capirca.lib import paloaltofw
         # return str(paloaltofw.PaloAltoFW(pol, exp_info_weeks))
-        raise ValueError(
-            "Capirca generates Palo Alto ACLs in XML form, which Batfish does not yet parse"
-        )
+        raise ValueError("Capirca generates Palo Alto ACLs in XML form, which Batfish does not yet parse")
     else:
-        raise ValueError(
-            "Either Capirca or Pybatfish does not handle converting to ACLs in platform: "
-            + platform
-        )
+        raise ValueError("Either Capirca or Pybatfish does not handle converting to ACLs in platform: " + platform)
 
 
-def _init_definitions(definitions_or_path: Union[str, naming.Naming]) -> naming.Naming:
+def _init_definitions(definitions_or_path: str | naming.Naming) -> naming.Naming:
     if isinstance(definitions_or_path, naming.Naming):
         return definitions_or_path
 
@@ -156,7 +140,7 @@ def init_snapshot_from_acl(
     overwrite=False,
     extra_args=None,
 ):
-    # type: (Session, Union[str, policy.Policy], Union[str, naming.Naming], str, Optional[str], Optional[str], bool, Optional[Dict[str, Any]]) -> str
+    # type: (Session, Union[str, policy.Policy], Union[str, naming.Naming], str, str|None, str|None, bool, Optional[Dict[str, Any]]) -> str
     """
     Initialize a snapshot containing a single host with the given ACL.
 
@@ -198,9 +182,7 @@ def init_snapshot_from_acl(
         # config, disable optimization.
         optimize = False
 
-        pol = policy.ParsePolicy(
-            pol_text, definitions, base_dir=pol_dir, optimize=optimize
-        )
+        pol = policy.ParsePolicy(pol_text, definitions, base_dir=pol_dir, optimize=optimize)
 
     file_text = _get_acl_text(pol, platform)
 
@@ -228,9 +210,6 @@ def create_reference_book(definitions, book_name="capirca"):
     """
     definitions = _init_definitions(definitions)
 
-    groups = [
-        _entry_to_group(network.name, network.items, definitions)
-        for network in definitions.networks.values()
-    ]
+    groups = [_entry_to_group(network.name, network.items, definitions) for network in definitions.networks.values()]
 
     return ReferenceBook(name=book_name, addressGroups=groups)

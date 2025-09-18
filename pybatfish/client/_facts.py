@@ -14,15 +14,14 @@
 import os
 from collections.abc import Mapping
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, Optional, Text, Tuple  # noqa: F401
+from typing import TYPE_CHECKING
 
 import yaml
 
 from pybatfish.datamodel import ListWrapper
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
-    from pybatfish.datamodel.answer import TableAnswer  # noqa: F401
+    pass
 
 BATFISH_FACT_VERSION = "batfish_v0"
 
@@ -144,14 +143,9 @@ def validate_facts(expected, actual, verbose=False):
     expected_version = expected["version"]
     actual_version = actual["version"]
     if expected_version != actual_version:
-        return {
-            n: {"Version": {"expected": expected_version, "actual": actual_version}}
-            for n in expected_facts
-        }
+        return {n: {"Version": {"expected": expected_version, "actual": actual_version}} for n in expected_facts}
     for node in expected_facts:
-        res = _assert_dict_subset(
-            actual_facts.get(node, {}), expected_facts[node], verbose=verbose
-        )
+        res = _assert_dict_subset(actual_facts.get(node, {}), expected_facts[node], verbose=verbose)
         if res:
             failures[node] = res
     return failures
@@ -240,9 +234,7 @@ def _process_ospf_areas(node_dict, ospf_props):
         proc = r.pop("Process_ID")
         area = r.pop("Area")
 
-        _get_or_create_ospf_areas(node_dict, node, proc)[area] = {
-            "Area_Type": r.get("Area_Type")
-        }
+        _get_or_create_ospf_areas(node_dict, node, proc)[area] = {"Area_Type": r.get("Area_Type")}
 
 
 def _process_ospf_interfaces(node_dict, ospf_props):
@@ -294,11 +286,7 @@ def _get_or_create_ospf_processes(node_dict, node):
 
     If it or any of its parents does not already exist, create them.
     """
-    return (
-        node_dict.setdefault(node, {})
-        .setdefault("OSPF", {})
-        .setdefault("Processes", {})
-    )
+    return node_dict.setdefault(node, {}).setdefault("OSPF", {}).setdefault("Processes", {})
 
 
 def _process_interfaces(node_dict, iface_props):
@@ -388,9 +376,7 @@ def write_facts(output_directory, facts):
     # Write facts for each node in its own file
     for node in nodes:
         filepath = os.path.join(output_directory, f"{node}.yml")
-        node_facts = _encapsulate_nodes_facts(
-            {node: facts["nodes"][node]}, version_text
-        )
+        node_facts = _encapsulate_nodes_facts({node: facts["nodes"][node]}, version_text)
         _write_yaml_file(node_facts, filepath)
 
 
@@ -408,7 +394,7 @@ def _unencapsulate_facts(facts):
 
 
 def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict], bool) -> Dict[Text, Any]
+    # type: (Dict[Text, Any], Dict[Text, Any], Text, Dict|None, bool) -> Dict[Text, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested
@@ -425,9 +411,7 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
             diffs_out[key_name] = {"key_present": False, "expected": expected[k]}
         else:
             if isinstance(expected[k], Mapping):
-                _assert_dict_subset(
-                    actual[k], expected[k], key_name + ".", diffs_out, verbose=verbose
-                )
+                _assert_dict_subset(actual[k], expected[k], key_name + ".", diffs_out, verbose=verbose)
             else:
                 if expected[k] != actual[k] or verbose:
                     diffs_out[key_name] = {"expected": expected[k], "actual": actual[k]}

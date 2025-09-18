@@ -61,9 +61,7 @@ def test_execute_request_params():
 
     # Work item with additional args and extra args
     work_item = WorkItem(session)
-    witem = __execute_and_return_request_params(
-        work_item, session, extra_args={"TESTARG": "extra"}
-    )
+    witem = __execute_and_return_request_params(work_item, session, extra_args={"TESTARG": "extra"})
     assert witem.get("TESTARG") == "extra"
 
     # Confirm additional args not messed up
@@ -73,14 +71,10 @@ def test_execute_request_params():
 
 
 def test_format_elapsed_time():
-    delta1 = relativedelta(
-        years=7, months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1
-    )
+    delta1 = relativedelta(years=7, months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1)
     ref1 = "7y6m5d04:03:02"
     assert _format_elapsed_time(delta1) == ref1
-    delta2 = relativedelta(
-        months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1
-    )
+    delta2 = relativedelta(months=6, days=5, hours=4, minutes=3, seconds=2, microsecond=1)
     ref2 = "6m5d04:03:02"
     assert _format_elapsed_time(delta2) == ref2
     delta3 = relativedelta(days=5, hours=4, minutes=3, seconds=2, microsecond=1)
@@ -122,9 +116,10 @@ def test_print_timestamp():
 def test_print_workstatus_fresh_task(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(
-        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
-    )
+
+    def nowFunction(tzinfo):
+        return datetime.datetime(2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo)
+
     workStatus = "TEST"
     taskDetails = json.dumps(
         {
@@ -144,9 +139,7 @@ def test_print_workstatus_fresh_task(caplog):
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar".format(
-            obtained=_print_timestamp(
-                _parse_timestamp(json.loads(taskDetails)["obtained"])
-            )
+            obtained=_print_timestamp(_parse_timestamp(json.loads(taskDetails)["obtained"]))
         )
         in caplog.text
     )
@@ -155,9 +148,10 @@ def test_print_workstatus_fresh_task(caplog):
 def test_print_workstatus_fresh_task_subtasks(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(
-        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
-    )
+
+    def nowFunction(tzinfo):
+        return datetime.datetime(2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo)
+
     workStatus = "TEST"
     taskDetails = json.dumps(
         {
@@ -177,9 +171,7 @@ def test_print_workstatus_fresh_task_subtasks(caplog):
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar 1 / 2.".format(
-            obtained=_print_timestamp(
-                _parse_timestamp(json.loads(taskDetails)["obtained"])
-            )
+            obtained=_print_timestamp(_parse_timestamp(json.loads(taskDetails)["obtained"]))
         )
         in caplog.text
     )
@@ -188,9 +180,10 @@ def test_print_workstatus_fresh_task_subtasks(caplog):
 def test_print_workstatus_old_task(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(
-        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
-    )
+
+    def nowFunction(tzinfo):
+        return datetime.datetime(2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo)
+
     workStatus = "TEST"
     taskDetails = json.dumps(
         {
@@ -210,9 +203,7 @@ def test_print_workstatus_old_task(caplog):
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar. (1y27d13:16:39 elapsed)".format(
-            obtained=_print_timestamp(
-                _parse_timestamp(json.loads(taskDetails)["obtained"])
-            )
+            obtained=_print_timestamp(_parse_timestamp(json.loads(taskDetails)["obtained"]))
         )
         in caplog.text
     )
@@ -221,9 +212,10 @@ def test_print_workstatus_old_task(caplog):
 def test_print_workstatus_old_task_subtasks(caplog):
     session = Session(load_questions=False)
     session.stale_timeout = 5
-    nowFunction = lambda tzinfo: datetime.datetime(
-        2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo
-    )
+
+    def nowFunction(tzinfo):
+        return datetime.datetime(2017, 12, 20, 0, 0, 0, 0, tzinfo=tzinfo)
+
     workStatus = "TEST"
     taskDetails = json.dumps(
         {
@@ -243,9 +235,7 @@ def test_print_workstatus_old_task_subtasks(caplog):
     assert "status: TEST" in caplog.text
     assert (
         ".... {obtained} Fooing the bar 1 / 2. (1y27d13:16:39 elapsed)".format(
-            obtained=_print_timestamp(
-                _parse_timestamp(json.loads(taskDetails)["obtained"])
-            )
+            obtained=_print_timestamp(_parse_timestamp(json.loads(taskDetails)["obtained"]))
         )
         in caplog.text
     )

@@ -1,4 +1,3 @@
-# coding: utf-8
 import re
 from operator import itemgetter
 
@@ -35,9 +34,7 @@ def test_parameter_extraction(session: Session):
 
 
 def test_get_input_table_lines(session: Session):
-    lines = get_input_table_lines(
-        get_desc_and_params(session.q.nodeProperties)[2], "nodeProperties"
-    )
+    lines = get_input_table_lines(get_desc_and_params(session.q.nodeProperties)[2], "nodeProperties")
     # skip first two lines, markdown header
     assert re.match(r"nodes |[\w\s]+|nodeSpec|True|", lines[2])
     assert re.match(r"properties |[\w\s]+|nodeSpec|True|", lines[3])

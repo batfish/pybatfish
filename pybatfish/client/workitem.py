@@ -14,7 +14,7 @@
 
 
 import json
-from typing import TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
+from typing import TYPE_CHECKING, Any
 
 import pybatfish.util as batfishutils
 
@@ -31,10 +31,10 @@ class WorkItem:
 
     def __init__(self, session: "Session") -> None:
         self.id = batfishutils.get_uuid()  # type: str
-        self.network = session.network  # type: Optional[str]
+        self.network = session.network  # type: str|None
         self.requestParams = dict(session.additional_args)  # type: Dict
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         params = {
             "containerName": self.network,
             "id": self.id,

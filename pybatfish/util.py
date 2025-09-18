@@ -13,14 +13,15 @@
 #   limitations under the License.
 """Generic utility functions for pybatfish."""
 
-
 import os
 import string
 import tempfile
 import uuid
 import zipfile
-from collections.abc import Iterable, Mapping
-from typing import IO, Any, Sized, Union  # noqa: F401
+from collections.abc import (
+    Iterable,
+    Mapping,
+)
 
 import simplejson
 
@@ -79,9 +80,7 @@ def conditional_str(prefix, obj, suffix):
     Returns empty string if obj is not "truthy" (i.e., not None or empty
     container)
     """
-    return (
-        " ".join([prefix, str(obj), suffix]) if obj is not None and len(obj) > 0 else ""
-    )
+    return " ".join([prefix, str(obj), suffix]) if obj is not None and len(obj) > 0 else ""
 
 
 def get_uuid():
@@ -105,30 +104,16 @@ def validate_name(name, entity_type="snapshot"):
     _valid_chars = set(string.ascii_letters).union(string.digits).union(["-", "_"])
     try:
         if "/" in name:
-            raise ValueError(
-                f"{entity_type.capitalize()} name cannot contain slashes ('/')"
-            )
+            raise ValueError(f"{entity_type.capitalize()} name cannot contain slashes ('/')")
         if len(name) > _MAX_FILENAME_LEN:
-            raise ValueError(
-                "{} names cannot be longer than {} characters".format(
-                    entity_type.capitalize(), _MAX_FILENAME_LEN
-                )
-            )
+            raise ValueError(f"{entity_type.capitalize()} names cannot be longer than {_MAX_FILENAME_LEN} characters")
         if name.lower() in _reserved_words:
-            raise ValueError(
-                "'{}' is a reserved word. Please rename the {}".format(
-                    name, entity_type
-                )
-            )
+            raise ValueError(f"'{name}' is a reserved word. Please rename the {entity_type}")
         # Catch all:
         if set(str(name)).difference(_valid_chars):
             raise ValueError(f"{name} is not a valid name for {entity_type}")
     except (TypeError, AttributeError):
-        raise ValueError(
-            "{} name has the wrong type ({}), a string is expected".format(
-                entity_type.capitalize(), type(name)
-            )
-        )
+        raise ValueError(f"{entity_type.capitalize()} name has the wrong type ({type(name)}), a string is expected")
     return True
 
 
@@ -143,21 +128,11 @@ def validate_question_name(name):
     """
     try:
         if "/" in name:
-            raise QuestionValidationException(
-                "Question name cannot contain slashes ('/')"
-            )
+            raise QuestionValidationException("Question name cannot contain slashes ('/')")
         if len(name) > _MAX_FILENAME_LEN:
-            raise QuestionValidationException(
-                "Question name cannot be longer than {} characters".format(
-                    _MAX_FILENAME_LEN
-                )
-            )
+            raise QuestionValidationException(f"Question name cannot be longer than {_MAX_FILENAME_LEN} characters")
     except (TypeError, AttributeError):
-        raise QuestionValidationException(
-            "Question name has the wrong type ({}), a string is expected".format(
-                type(name)
-            )
-        )
+        raise QuestionValidationException(f"Question name has the wrong type ({type(name)}), a string is expected")
     return True
 
 
@@ -183,9 +158,10 @@ def zip_dir(dir_path, out_file):
                 # Zipped files must be from 1980 or later
                 # So copy any file older than that to a tempfile to bump the timestamp
                 if os.path.getmtime(filename) < _MIN_ZIP_TIMESTAMP:
-                    with tempfile.NamedTemporaryFile("w+b") as temp_file, open(
-                        filename, "rb"
-                    ) as file_src:
+                    with (
+                        tempfile.NamedTemporaryFile("w+b") as temp_file,
+                        open(filename, "rb") as file_src,
+                    ):
                         temp_file.write(file_src.read())
                         temp_file.flush()
                         zipWriter.write(temp_file.name, arcname)
@@ -210,10 +186,7 @@ def escape_name(s: str) -> str:
         f'"{s}"'
         if len(s) != 0
         and (
-            s.startswith('"')
-            or s.startswith("/")
-            or s[0].isdigit()
-            or any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)
+            s.startswith('"') or s.startswith("/") or s[0].isdigit() or any(s.find(c) > 0 for c in _NAME_SPECIAL_CHARS_)
         )
         else s
     )

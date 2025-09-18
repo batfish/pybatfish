@@ -12,7 +12,7 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Any, Dict, List, Optional  # noqa: F401
+from typing import Any
 
 import pandas
 
@@ -24,7 +24,7 @@ __all__ = ["ColumnMetadata", "TableAnswer", "Row", "TableMetadata"]
 class ColumnMetadata:
     """Metadata for a single column."""
 
-    def __init__(self, dictionary: Dict[str, Any]) -> None:
+    def __init__(self, dictionary: dict[str, Any]) -> None:
         if "name" not in dictionary:
             raise ValueError("Bad column metadata: 'name' not found")
         if "schema" not in dictionary:
@@ -94,11 +94,9 @@ class TableMetadata:
     (See :py:class:`~pybatfish.datamodel.answers.table.TableAnswer`)
     """
 
-    def __init__(self, dictionary: Dict[str, Any]):
-        self.column_metadata = [
-            ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])
-        ]
-        self.hints: Optional[Dict] = dictionary.get("displayHints")
+    def __init__(self, dictionary: dict[str, Any]):
+        self.column_metadata = [ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])]
+        self.hints: dict | None = dictionary.get("displayHints")
 
     def get_column_names(self):
         # type: () -> List[str]
@@ -108,20 +106,13 @@ class TableMetadata:
 def _rows_to_frame(table_metadata, rows):
     # type: (TableMetadata, List[Row]) -> pandas.DataFrame
     row_based = [
-        [
-            _parse_json_with_schema(cm.schema, row.get(cm.name))
-            for cm in table_metadata.column_metadata
-        ]
-        for row in rows
+        [_parse_json_with_schema(cm.schema, row.get(cm.name)) for cm in table_metadata.column_metadata] for row in rows
     ]
     column_names = table_metadata.get_column_names()
     # convert data to column format and force dtype=object on Series
     # This gets us consistent `None` values across columns -- no columns
     # are treated as numeric.
-    col_based = {
-        column_names[i]: pandas.Series(column, dtype="object")
-        for i, column in enumerate(zip(*row_based))
-    }
+    col_based = {column_names[i]: pandas.Series(column, dtype="object") for i, column in enumerate(zip(*row_based))}
     df = pandas.DataFrame.from_dict(col_based, orient="columns", dtype="object")
     # Re-index to:
     # 1. Force ordering of columns
@@ -134,6 +125,5 @@ def is_table_ans(d):
     """Check if a given dictionary represents a table answer."""
     return (
         "answerElements" in d
-        and d["answerElements"][0].get("class")
-        == "org.batfish.datamodel.table.TableAnswerElement"
+        and d["answerElements"][0].get("class") == "org.batfish.datamodel.table.TableAnswerElement"
     )
