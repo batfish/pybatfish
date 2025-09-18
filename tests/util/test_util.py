@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -83,12 +82,8 @@ def test_encoder_with_primitives():
     assert encoder.default([1, 2, "some_string"]) == [1, 2, "some_string"]
     assert encoder.default({1})
     assert encoder.default(None) is None
-    assert json.loads(json.dumps({"name": {"nested": "foo"}}, cls=BfJsonEncoder)) == {
-        "name": {"nested": "foo"}
-    }
-    assert json.loads(json.dumps([{"name": "value"}], cls=BfJsonEncoder)) == [
-        {"name": "value"}
-    ]
+    assert json.loads(json.dumps({"name": {"nested": "foo"}}, cls=BfJsonEncoder)) == {"name": {"nested": "foo"}}
+    assert json.loads(json.dumps([{"name": "value"}], cls=BfJsonEncoder)) == [{"name": "value"}]
 
 
 def test_encoder_with_datamodel_element():
@@ -97,13 +92,11 @@ def test_encoder_with_datamodel_element():
     iface = Interface(hostname="node", interface="iface")
     assert encoder.default(iface) == iface.dict()
 
-    assert json.loads(json.dumps({"name": {"nested": iface}}, cls=BfJsonEncoder)) == {
-        "name": {"nested": iface.dict()}
-    }
+    assert json.loads(json.dumps({"name": {"nested": iface}}, cls=BfJsonEncoder)) == {"name": {"nested": iface.dict()}}
 
 
 def test_encoder_invalid_input():
-    class NonSerializable(object):
+    class NonSerializable:
         x = 100
 
     with pytest.raises(TypeError):
@@ -154,7 +147,7 @@ def _assert_zip_contents(zip_file, file_sub_path, contents, tmpdir):
 
     assert os.path.exists(file_path)
 
-    with open(file_path, "r") as f:
+    with open(file_path) as f:
         assert f.read() == contents
 
 

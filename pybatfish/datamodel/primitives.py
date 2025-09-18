@@ -13,7 +13,7 @@
 #   limitations under the License.
 from abc import ABCMeta, abstractmethod
 from enum import Enum
-from typing import Any, Dict, List, Optional  # noqa: F401
+from typing import Any
 
 import attr
 from pandas.core.indexes.frozen import FrozenList
@@ -38,7 +38,7 @@ __all__ = [
 class DataModelElement:
     __metaclass__ = ABCMeta
 
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> dict[str, Any]:
         return attr.asdict(self, recurse=True)
 
     @classmethod
@@ -78,7 +78,7 @@ class Assertion(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Assertion
+        # type: (dict) -> Assertion
         return Assertion(AssertionType[json_dict["type"]], json_dict["expect"])
 
     def dict(self):
@@ -98,9 +98,7 @@ class VariableType(str, Enum):
     BGP_ROUTES = "bgpRoutes"  #: bgp routes
     BGP_ROUTE_CONSTRAINTS = "bgpRouteConstraints"  # bgp route constraints
     BGP_ROUTE_STATUS_SPEC = "bgpRouteStatusSpec"  # bgp route status
-    BGP_SESSION_COMPAT_STATUS_SPEC = (
-        "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
-    )
+    BGP_SESSION_COMPAT_STATUS_SPEC = "bgpSessionCompatStatusSpec"  #: bgp session compatibility statuses
     BGP_SESSION_PROPERTIES = "bgpSessionProperties"  #: bgp session properties
     BGP_SESSION_STATUS_SPEC = "bgpSessionStatusSpec"  #: bgp session statuses
     BGP_SESSION_TYPE_SPEC = "bgpSessionTypeSpec"  #: bgp session types
@@ -139,9 +137,7 @@ class VariableType(str, Enum):
     NODE_ROLE_DIMENSION_NAME = "nodeRoleDimensionName"  #: names of node role dimension
     NODE_ROLE_NAME = "nodeRoleName"  #: node role name
     NODE_SPEC = "nodeSpec"  #: node specifier
-    OSPF_INTERFACE_PROPERTY_SPEC = (
-        "ospfInterfacePropertySpec"  #: ospf interface properties
-    )
+    OSPF_INTERFACE_PROPERTY_SPEC = "ospfInterfacePropertySpec"  #: ospf interface properties
     OSPF_PROCESS_PROPERTY_SPEC = "ospfProcessPropertySpec"  #: ospf process properties
     OSPF_SESSION_STATUS_SPEC = "ospfSessionStatusSpec"  #: ospf session statuses
     PATH_CONSTRAINT = "pathConstraint"  #: path constraints
@@ -174,8 +170,8 @@ class AutoCompleteSuggestion(DataModelElement):
     :ivar text: The actual suggested text
     """
 
-    description = attr.ib(type=Optional[str])
-    hint = attr.ib(type=Optional[str])
+    description = attr.ib(type=str | None)
+    hint = attr.ib(type=str | None)
     insertion_index = attr.ib(type=int)
     is_partial = attr.ib(type=bool)
     rank = attr.ib(type=int)
@@ -185,7 +181,7 @@ class AutoCompleteSuggestion(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> AutoCompleteSuggestion
+        # type: (dict) -> AutoCompleteSuggestion
         return AutoCompleteSuggestion(
             json_dict.get("description", None),
             json_dict.get("hint", None),
@@ -219,7 +215,7 @@ class Interface(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Interface
+        # type: (dict) -> Interface
         return Interface(json_dict["hostname"], json_dict["interface"])
 
     def __str__(self):
@@ -256,7 +252,7 @@ class Edge(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Edge
+        # type: (dict) -> Edge
         return Edge(
             node1=json_dict["node1"],
             node1interface=json_dict["node1interface"],
@@ -266,15 +262,11 @@ class Edge(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{}:{} -> {}:{}".format(
-            self.node1, self.node1interface, self.node2, self.node2interface
-        )
+        return f"{self.node1}:{self.node1interface} -> {self.node2}:{self.node2interface}"
 
     def _repr_html_(self):
         # type: () -> str
-        return "{}:{} &rarr; {}:{}".format(
-            self.node1, self.node1interface, self.node2, self.node2interface
-        )
+        return f"{self.node1}:{self.node1interface} &rarr; {self.node2}:{self.node2interface}"
 
 
 @attr.s(frozen=True)
@@ -286,7 +278,7 @@ class FileLines(DataModelElement):
     """
 
     filename = attr.ib(type=str)
-    lines = attr.ib(type=List[int], factory=list)
+    lines = attr.ib(type=list[int], factory=list)
 
     def __str__(self):
         # type: () -> str
@@ -294,10 +286,8 @@ class FileLines(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> FileLines
-        return FileLines(
-            filename=json_dict["filename"], lines=json_dict.get("lines", [])
-        )
+        # type: (dict) -> FileLines
+        return FileLines(filename=json_dict["filename"], lines=json_dict.get("lines", []))
 
 
 @attr.s(frozen=True)
@@ -313,7 +303,7 @@ class IssueType(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> IssueType
+        # type: (dict) -> IssueType
         return IssueType(json_dict["major"], json_dict["minor"])
 
 
@@ -342,7 +332,7 @@ class Issue(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Issue
+        # type: (dict) -> Issue
         if "severity" not in json_dict:
             raise ValueError("'severity' not present in the Issue object")
         return Issue(

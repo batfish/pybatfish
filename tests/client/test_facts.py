@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -53,19 +52,15 @@ def test_get_facts_questions():
     """Test that get facts calls the right questions, passing through the right args."""
     bf = Session(load_questions=False)
     nodes = "foo"
-    with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
-        bf.q, "interfaceProperties", create=True
-    ) as mock_iface, patch.object(
-        bf.q, "bgpPeerConfiguration", create=True
-    ) as mock_peers, patch.object(
-        bf.q, "bgpProcessConfiguration", create=True
-    ) as mock_proc, patch.object(
-        bf.q, "ospfProcessConfiguration", create=True
-    ) as mock_ospf_proc, patch.object(
-        bf.q, "ospfAreaConfiguration", create=True
-    ) as mock_ospf_area, patch.object(
-        bf.q, "ospfInterfaceConfiguration", create=True
-    ) as mock_ospf_iface:
+    with (
+        patch.object(bf.q, "nodeProperties", create=True) as mock_node,
+        patch.object(bf.q, "interfaceProperties", create=True) as mock_iface,
+        patch.object(bf.q, "bgpPeerConfiguration", create=True) as mock_peers,
+        patch.object(bf.q, "bgpProcessConfiguration", create=True) as mock_proc,
+        patch.object(bf.q, "ospfProcessConfiguration", create=True) as mock_ospf_proc,
+        patch.object(bf.q, "ospfAreaConfiguration", create=True) as mock_ospf_area,
+        patch.object(bf.q, "ospfInterfaceConfiguration", create=True) as mock_ospf_iface,
+    ):
         mock_node.return_value = MockQuestion(MockTableAnswer)
         mock_iface.return_value = MockQuestion(MockTableAnswer)
         mock_proc.return_value = MockQuestion(MockTableAnswer)
@@ -88,19 +83,15 @@ def test_get_facts_questions_specific_snapshot():
     """Test that get facts calls the right questions, passing through the right args when a snapshot is specified."""
     bf = Session(load_questions=False)
     nodes = "foo"
-    with patch.object(bf.q, "nodeProperties", create=True) as mock_node, patch.object(
-        bf.q, "interfaceProperties", create=True
-    ) as mock_iface, patch.object(
-        bf.q, "bgpPeerConfiguration", create=True
-    ) as mock_peers, patch.object(
-        bf.q, "bgpProcessConfiguration", create=True
-    ) as mock_proc, patch.object(
-        bf.q, "ospfProcessConfiguration", create=True
-    ) as mock_ospf_proc, patch.object(
-        bf.q, "ospfAreaConfiguration", create=True
-    ) as mock_ospf_area, patch.object(
-        bf.q, "ospfInterfaceConfiguration", create=True
-    ) as mock_ospf_iface:
+    with (
+        patch.object(bf.q, "nodeProperties", create=True) as mock_node,
+        patch.object(bf.q, "interfaceProperties", create=True) as mock_iface,
+        patch.object(bf.q, "bgpPeerConfiguration", create=True) as mock_peers,
+        patch.object(bf.q, "bgpProcessConfiguration", create=True) as mock_proc,
+        patch.object(bf.q, "ospfProcessConfiguration", create=True) as mock_ospf_proc,
+        patch.object(bf.q, "ospfAreaConfiguration", create=True) as mock_ospf_area,
+        patch.object(bf.q, "ospfInterfaceConfiguration", create=True) as mock_ospf_iface,
+    ):
         # Setup mock answers for each underlying question
         mock_node_a = Mock(return_value=MockTableAnswer())
         mock_iface_a = Mock(return_value=MockTableAnswer())
@@ -208,9 +199,7 @@ def test_validate_facts_not_matching_version():
     assert len(res) == len(expected)
     for node in expected:
         # Make sure version mismatch details are in results details
-        assert res[node] == {
-            "Version": {"actual": version_actual, "expected": version_expected}
-        }
+        assert res[node] == {"Version": {"actual": version_actual, "expected": version_expected}}
 
 
 def test_validate_facts_not_matching_data():
@@ -295,9 +284,7 @@ def test_write_facts(tmpdir):
             node_facts_raw = yaml.safe_load(f.read())
             node_facts, node_version = _unencapsulate_facts(node_facts_raw)
             assert version == node_version, "Each file has the correct version"
-            assert (
-                node_facts.get(node) == nodes[node]
-            ), "Each file has the correct facts"
+            assert node_facts.get(node) == nodes[node], "Each file has the correct facts"
 
 
 def test_assert_dict_subset_equal():

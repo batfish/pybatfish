@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, Optional  # noqa: F401
 
 import attr
 
@@ -34,8 +33,8 @@ class IssueConfig:
 
     major = attr.ib(type=str)
     minor = attr.ib(type=str)
-    severity = attr.ib(type=Optional[int])
-    url = attr.ib(type=Optional[int])
+    severity = attr.ib(type=int | None)
+    url = attr.ib(type=int | None)
 
     def dict(self):
         """Return this issue config as a dictionary."""
@@ -43,7 +42,7 @@ class IssueConfig:
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> IssueConfig
+        # type: (dict) -> IssueConfig
         return IssueConfig(
             json_dict["major"],
             json_dict["minor"],

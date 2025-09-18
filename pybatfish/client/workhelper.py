@@ -13,14 +13,13 @@
 #   limitations under the License.
 """A collection of functions that execute RPCs against a Batfish server."""
 
-
 import datetime
 import json
 import logging
 import string
 import tempfile
 import time
-from typing import IO, TYPE_CHECKING, Any, Dict, Optional  # noqa: F401
+from typing import TYPE_CHECKING, Any
 
 from dateutil.parser import parse
 from dateutil.relativedelta import relativedelta
@@ -30,17 +29,17 @@ from pybatfish.client.consts import BfConsts, CoordConsts, CoordConstsV2, WorkSt
 from pybatfish.exception import BatfishException
 
 from . import restv2helper
-from .workitem import WorkItem  # noqa: F401
+from .workitem import WorkItem
 
 # Maximum log length to display on execution errors, so we don't overload user with a huge log string
 MAX_LOG_LENGTH = 64 * 1024
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish.client.session import Session
 
 
 def _batch_desc(json_batch):
-    # type: (Dict) -> str
+    # type: (dict) -> str
     """Get a string representation of the Batfish job batch."""
     description = json_batch.get("description", "").strip()  # type: str
     if json_batch["size"] > 0:
@@ -71,7 +70,7 @@ def _print_timestamp(timestamp):
 
 
 def execute(work_item, session, background=False, extra_args=None):
-    # type: (WorkItem, Session, bool, Optional[Dict[str, Any]]) -> Dict[str, Any]
+    # type: (WorkItem, Session, bool, Optional[dict[str, Any]]) -> dict[str, Any]
     """Submit a work item to Batfish.
 
     :param work_item: work to submit
@@ -93,9 +92,7 @@ def execute(work_item, session, background=False, extra_args=None):
 
     snapshot = work_item.requestParams.get(BfConsts.ARG_TESTRIG)
     if snapshot is None:
-        raise ValueError(
-            f"Work item {work_item.to_json()} does not include a snapshot name"
-        )
+        raise ValueError(f"Work item {work_item.to_json()} does not include a snapshot name")
 
     response = queue_work(session, work_item)
 
@@ -122,9 +119,7 @@ def execute(work_item, session, background=False, extra_args=None):
     # Handle fail conditions not producing logs
     if status in [WorkStatusCode.ASSIGNMENTERROR, WorkStatusCode.REQUEUEFAILURE]:
         raise BatfishException(
-            "Work finished with status {}\nwork_item: {}\ntask_details: {}".format(
-                status, work_item.to_json(), json.loads(task_details)
-            )
+            f"Work finished with status {status}\nwork_item: {work_item.to_json()}\ntask_details: {json.loads(task_details)}"
         )
 
     # Handle fail condition with logs
@@ -148,7 +143,7 @@ def execute(work_item, session, background=False, extra_args=None):
     return {"status": status}
 
 
-def queue_work(session: "Session", work_item: WorkItem) -> Dict[str, Any]:
+def queue_work(session: "Session", work_item: WorkItem) -> dict[str, Any]:
     restv2helper.queue_work(session, work_item)
     return {"result": True}
 
@@ -161,18 +156,16 @@ def _compute_batfish_answer_file_name(work_item):
 
 def _format_elapsed_time(delta):
     return "{years}{months}{days}{hours}:{minutes}:{seconds}".format(
-        years="%dy" % delta.years if delta.years else "",
-        months="%dm" % delta.months if delta.months else "",
-        days="%dd" % delta.days if delta.days else "",
-        hours="%02d" % delta.hours,
-        minutes="%02d" % delta.minutes,
-        seconds="%02d" % delta.seconds,
+        years=f"{delta.years}y" if delta.years else "",
+        months=f"{delta.months}m" if delta.months else "",
+        days=f"{delta.days}d" if delta.days else "",
+        hours=f"{delta.hours:02d}",
+        minutes=f"{delta.minutes:02d}",
+        seconds=f"{delta.seconds:02d}",
     )
 
 
-def get_data_upload_question(
-    session: "Session", question_name: str, question_json: str
-) -> Dict[str, Any]:
+def get_data_upload_question(session: "Session", question_name: str, question_json: str) -> dict[str, Any]:
     """Create the form parameters needed to upload the given question."""
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
@@ -231,7 +224,7 @@ def _get_data_get_question_templates(session):
 
 
 def get_data_get_answer(session, question_name, snapshot, reference_snapshot=None):
-    # type: (Session, str, str, Optional[str]) -> Dict
+    # type: (Session, str, str, str|None) -> dict
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
@@ -279,7 +272,7 @@ def get_data_list_testrigs(session, network):
 
 
 def get_data_upload_snapshot(session, snapshot, fd):
-    # type: (Session, str, IO) -> Dict
+    # type: (Session, str, IO) -> dict
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
@@ -290,7 +283,7 @@ def get_data_upload_snapshot(session, snapshot, fd):
 
 
 def get_workitem_answer(session, question_name, snapshot, reference_snapshot=None):
-    # type: (Session, str, str, Optional[str]) -> WorkItem
+    # type: (Session, str, str, str|None) -> WorkItem
     """Return the result of submitting a question as a WorkItem."""
     work_item = WorkItem(session)
 
@@ -327,7 +320,7 @@ def get_workitem_parse(session, snapshot):
     return w_item
 
 
-def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
+def get_work_status(w_item_id: str, session: "Session") -> dict[str, Any]:
     answer = restv2helper.get_work_status(session, w_item_id)
     return {
         CoordConsts.SVC_KEY_WORKSTATUS: answer.get(CoordConstsV2.PROP_WORK_STATUS_CODE),
@@ -337,17 +330,12 @@ def get_work_status(w_item_id: str, session: "Session") -> Dict[str, Any]:
 
 def _print_work_status(session, work_status, task_details):
     # type: (Session, WorkStatusCode, str) -> Any
-    return _print_work_status_helper(
-        session, work_status, task_details, datetime.datetime.now
-    )
+    return _print_work_status_helper(session, work_status, task_details, datetime.datetime.now)
 
 
 def _print_work_status_helper(session, work_status, task_details, now_function):
     logger = logging.getLogger(__name__)
-    if (
-        logger.getEffectiveLevel() == logging.INFO
-        or logger.getEffectiveLevel() == logging.DEBUG
-    ):
+    if logger.getEffectiveLevel() == logging.INFO or logger.getEffectiveLevel() == logging.DEBUG:
         logger.info(f"status: {work_status}")
 
         json_task = json.loads(task_details)
@@ -372,24 +360,12 @@ def _print_work_status_helper(session, work_status, task_details, now_function):
         # Only print info about finished batches in debug mode
         if logger.isEnabledFor(logging.DEBUG):
             for batch in batches[:-1]:
-                logger.debug(
-                    ".... {start} {batch}".format(
-                        start=task_start_time_str, batch=_batch_desc(batch)
-                    )
-                )
+                logger.debug(f".... {task_start_time_str} {_batch_desc(batch)}")
 
         lastbatch = batches[-1]
         total_time_str = ""
         if print_elapsed:
             total_time = relativedelta(now, task_start_time)
-            total_time_str = " ({total} elapsed)".format(
-                total=_format_elapsed_time(total_time)
-            )
+            total_time_str = f" ({_format_elapsed_time(total_time)} elapsed)"
 
-        logger.info(
-            ".... {start} {batch}{total}".format(
-                start=task_start_time_str,
-                batch=_batch_desc(lastbatch),
-                total=total_time_str,
-            )
-        )
+        logger.info(f".... {task_start_time_str} {_batch_desc(lastbatch)}{total_time_str}")

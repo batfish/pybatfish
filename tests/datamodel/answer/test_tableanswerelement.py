@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 """Tests for Table answers."""
-
-from __future__ import absolute_import, print_function
 
 from operator import attrgetter
 
@@ -70,20 +67,14 @@ def test_table_answer_element_deser():
 
 def test_table_answer_element_deser_no_rows():
     """Check deserialization creates empty table when no rows are present."""
-    answer = {
-        "answerElements": [
-            {"metadata": {"columnMetadata": [{"name": "col1", "schema": "Node"}]}}
-        ]
-    }
+    answer = {"answerElements": [{"metadata": {"columnMetadata": [{"name": "col1", "schema": "Node"}]}}]}
     table = TableAnswer(answer)
 
     assert len(table.metadata.column_metadata) == 1
     assert table.metadata.column_metadata[0].name == "col1"
     assert len(table.rows) == 0
     assert table.frame().empty
-    assert table.frame().columns == list(
-        map(attrgetter("name"), table.metadata.column_metadata)
-    )
+    assert table.frame().columns == list(map(attrgetter("name"), table.metadata.column_metadata))
 
 
 def test_table_answer_element_excluded_rows():
@@ -92,9 +83,7 @@ def test_table_answer_element_excluded_rows():
         "answerElements": [
             {
                 "metadata": {"columnMetadata": [{"name": "col1", "schema": "String"}]},
-                "excludedRows": [
-                    {"exclusionName": "myEx", "rows": [{"col1": "stringValue"}]}
-                ],
+                "excludedRows": [{"exclusionName": "myEx", "rows": [{"col1": "stringValue"}]}],
             }
         ]
     }
@@ -109,9 +98,7 @@ def test_table_answer_immutable_lists():
     answer = {
         "answerElements": [
             {
-                "metadata": {
-                    "columnMetadata": [{"name": "col1", "schema": "List<String>"}]
-                },
+                "metadata": {"columnMetadata": [{"name": "col1", "schema": "List<String>"}]},
                 "rows": [{"col1": ["e1", "e2", "e3"]}],
             }
         ]
@@ -157,18 +144,14 @@ def test_is_table_answer():
     answer = {
         "answerElements": [
             {
-                "metadata": {
-                    "columnMetadata": [{"name": "col1", "schema": "List<String>"}]
-                },
+                "metadata": {"columnMetadata": [{"name": "col1", "schema": "List<String>"}]},
                 "rows": [{"col1": ["e1", "e2", "e3"]}],
             }
         ]
     }
     assert not is_table_ans(answer)
     # Fix up metadata
-    answer["answerElements"][0][
-        "class"
-    ] = "org.batfish.datamodel.table.TableAnswerElement"
+    answer["answerElements"][0]["class"] = "org.batfish.datamodel.table.TableAnswerElement"
     assert is_table_ans(answer)
 
 

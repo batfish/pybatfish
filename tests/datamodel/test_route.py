@@ -249,26 +249,18 @@ def testNextHopInterfaceSerialization():
 
 
 def testNextHopInterfaceDeserialization():
-    assert NextHop.from_dict(
-        {"type": "interface", "interface": "foo"}
-    ) == NextHopInterface("foo")
-    assert NextHopInterface.from_dict(
-        {"type": "interface", "interface": "foo"}
-    ) == NextHopInterface("foo")
-    assert NextHopInterface.from_dict(
-        {"type": "interface", "interface": "foo", "ip": None}
-    ) == NextHopInterface("foo")
-    assert NextHopInterface.from_dict(
-        {"type": "interface", "interface": "foo", "ip": "1.1.1.1"}
-    ) == NextHopInterface("foo", "1.1.1.1")
+    assert NextHop.from_dict({"type": "interface", "interface": "foo"}) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict({"type": "interface", "interface": "foo"}) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict({"type": "interface", "interface": "foo", "ip": None}) == NextHopInterface("foo")
+    assert NextHopInterface.from_dict({"type": "interface", "interface": "foo", "ip": "1.1.1.1"}) == NextHopInterface(
+        "foo", "1.1.1.1"
+    )
 
 
 def testNextHopInterfaceStr():
     assert str(NextHopInterface("foo")) == "interface foo"
     assert str(NextHopInterface("foo bar")) == 'interface "foo bar"'
-    assert (
-        str(NextHopInterface("foo bar", "1.1.1.1")) == 'interface "foo bar" ip 1.1.1.1'
-    )
+    assert str(NextHopInterface("foo bar", "1.1.1.1")) == 'interface "foo bar" ip 1.1.1.1'
 
 
 def testNextHopIpSerialization():
@@ -307,12 +299,8 @@ def testNextHopVtepSerialization():
 
 
 def testNextHopVtepDeserialization():
-    assert NextHop.from_dict(
-        {"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}
-    ) == NextHopVtep(5, "1.1.1.1")
-    assert NextHopVtep.from_dict(
-        {"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}
-    ) == NextHopVtep(5, "1.1.1.1")
+    assert NextHop.from_dict({"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}) == NextHopVtep(5, "1.1.1.1")
+    assert NextHopVtep.from_dict({"type": "vtep", "vni": 5, "vtep": "1.1.1.1"}) == NextHopVtep(5, "1.1.1.1")
 
 
 def testNextHopVtepStr():

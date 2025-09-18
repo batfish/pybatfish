@@ -14,7 +14,6 @@
 
 import json
 import re
-from typing import Any, Dict, Optional  # noqa: F401
 
 from pybatfish.datamodel.acl import AclTrace, TraceTree, TraceTreeList
 from pybatfish.datamodel.flow import Flow, FlowTrace, Trace
@@ -33,18 +32,14 @@ class Answer(dict):
         return json.dumps(self, indent=2)
 
     def question_name(self):
-        # type: () -> Optional[str]
+        # type: () -> str|None
         """Return the name of the question that produced this answer."""
-        if (
-            "question" in self
-            and "instance" in self["question"]
-            and "instanceName" in self["question"]["instance"]
-        ):
+        if "question" in self and "instance" in self["question"] and "instanceName" in self["question"]["instance"]:
             return str(self["question"]["instance"]["instanceName"])
         return None
 
     def dict(self):
-        # type: () -> Dict
+        # type: () -> dict
         """A dictionary representation of the full answer."""
         return dict(self)
 
@@ -69,22 +64,14 @@ def _parse_json_with_schema(schema, json_object):
     # See if it's an iterable and we need to process it
     if _is_iterable_schema(schema):
         if not isinstance(json_object, list):
-            raise ValueError(
-                "Got non-list value for list/set schema {schema}. Value: {value}".format(
-                    schema=schema, value=json_object
-                )
-            )
+            raise ValueError(f"Got non-list value for list/set schema {schema}. Value: {json_object}")
         base_schema = _get_base_schema(schema)
 
         # Handle special iterable schemas that has a custom container class
         if base_schema == "TraceTree":
-            return TraceTreeList(
-                [TraceTree.from_dict(element) for element in json_object]
-            )
+            return TraceTreeList([TraceTree.from_dict(element) for element in json_object])
 
-        return ListWrapper(
-            [_parse_json_with_schema(base_schema, element) for element in json_object]
-        )
+        return ListWrapper([_parse_json_with_schema(base_schema, element) for element in json_object])
 
     # Handle "primitive" schemas
     if schema == "AclTrace":

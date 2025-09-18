@@ -103,16 +103,12 @@ def test_filter_denies():
         # Test success
         mock_search_filters.return_value = MockQuestion()
         assert_filter_denies("filter", headers, session=bf)
-        mock_search_filters.assert_called_with(
-            filters="filter", headers=headers, action="permit"
-        )
+        mock_search_filters.assert_called_with(filters="filter", headers=headers, action="permit")
         # Test failure; also test that startLocation is passed through
         mock_df = DataFrame.from_records([{"Flow": "found", "More": "data"}])
         mock_search_filters.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_denies(
-                "filter", headers, startLocation="Ethernet1", session=bf
-            )
+            assert_filter_denies("filter", headers, startLocation="Ethernet1", session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(
@@ -131,16 +127,12 @@ def test_filter_denies_from_session():
         # Test success
         mock_search_filters.return_value = MockQuestion()
         bf.asserts.assert_filter_denies("filter", headers)
-        mock_search_filters.assert_called_with(
-            filters="filter", headers=headers, action="permit"
-        )
+        mock_search_filters.assert_called_with(filters="filter", headers=headers, action="permit")
         # Test failure; also test that startLocation is passed through
         mock_df = DataFrame.from_records([{"Flow": "found", "More": "data"}])
         mock_search_filters.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            bf.asserts.assert_filter_denies(
-                "filter", headers, startLocation="Ethernet1"
-            )
+            bf.asserts.assert_filter_denies("filter", headers, startLocation="Ethernet1")
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(
@@ -155,9 +147,7 @@ def test_filter_has_no_unreachable_lines():
     """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when specifying a session."""
     filters = "filter1"
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "filterLineReachability", create=True
-    ) as filterLineReachability:
+    with patch.object(bf.q, "filterLineReachability", create=True) as filterLineReachability:
         # Test success
         filterLineReachability.return_value = MockQuestion()
         assert_filter_has_no_unreachable_lines(filters=filters, session=bf)
@@ -174,9 +164,7 @@ def test_filter_has_no_unreachable_lines_from_session():
     """Confirm filter-has-no-unreachable-lines assert passes and fails as expected when called from a session."""
     filters = "filter1"
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "filterLineReachability", create=True
-    ) as filterLineReachability:
+    with patch.object(bf.q, "filterLineReachability", create=True) as filterLineReachability:
         # Test success
         filterLineReachability.return_value = MockQuestion()
         bf.asserts.assert_filter_has_no_unreachable_lines(filters=filters)
@@ -197,16 +185,12 @@ def test_filter_permits():
         # Test success
         mock_search_filters.return_value = MockQuestion()
         assert_filter_permits("filter", headers, session=bf)
-        mock_search_filters.assert_called_with(
-            filters="filter", headers=headers, action="deny"
-        )
+        mock_search_filters.assert_called_with(filters="filter", headers=headers, action="deny")
         # Test failure; also test that startLocation is passed through
         mock_df = DataFrame.from_records([{"Flow": "found", "More": "data"}])
         mock_search_filters.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_filter_permits(
-                "filter", headers, startLocation="Ethernet1", session=bf
-            )
+            assert_filter_permits("filter", headers, startLocation="Ethernet1", session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(
@@ -222,16 +206,12 @@ def test_filter_permits_from_session():
         # Test success
         mock_search_filters.return_value = MockQuestion()
         bf.asserts.assert_filter_permits("filter", headers)
-        mock_search_filters.assert_called_with(
-            filters="filter", headers=headers, action="deny"
-        )
+        mock_search_filters.assert_called_with(filters="filter", headers=headers, action="deny")
         # Test failure; also test that startLocation is passed through
         mock_df = DataFrame.from_records([{"Flow": "found", "More": "data"}])
         mock_search_filters.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            bf.asserts.assert_filter_permits(
-                "filter", headers, startLocation="Ethernet1"
-            )
+            bf.asserts.assert_filter_permits("filter", headers, startLocation="Ethernet1")
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         mock_search_filters.assert_called_with(
@@ -354,70 +334,46 @@ def test_flows_succeed_from_session():
 def test_no_incompatible_bgp_sessions():
     """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "bgpSessionCompatibility", create=True
-    ) as bgpSessionCompatibility:
+    with patch.object(bf.q, "bgpSessionCompatibility", create=True) as bgpSessionCompatibility:
         # Test success
         bgpSessionCompatibility.return_value = MockQuestion()
-        assert_no_incompatible_bgp_sessions(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*", session=bf
-        )
-        bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status=".*"
-        )
+        assert_no_incompatible_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", status=".*", session=bf)
+        bgpSessionCompatibility.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status=".*")
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         bgpSessionCompatibility.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_no_incompatible_bgp_sessions(
-                nodes="nodes", remote_nodes="remote_nodes", status=".*", session=bf
-            )
+            assert_no_incompatible_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", status=".*", session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
-        bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status=".*"
-        )
+        bgpSessionCompatibility.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status=".*")
 
 
 def test_no_incompatible_bgp_sessions_from_session():
     """Confirm no-incompatible-bgp-sessions assert passes and fails as expected when called from a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "bgpSessionCompatibility", create=True
-    ) as bgpSessionCompatibility:
+    with patch.object(bf.q, "bgpSessionCompatibility", create=True) as bgpSessionCompatibility:
         # Test success
         bgpSessionCompatibility.return_value = MockQuestion()
-        bf.asserts.assert_no_incompatible_bgp_sessions(
-            nodes="nodes", remote_nodes="remote_nodes", status=".*"
-        )
-        bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status=".*"
-        )
+        bf.asserts.assert_no_incompatible_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", status=".*")
+        bgpSessionCompatibility.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status=".*")
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         bgpSessionCompatibility.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            bf.asserts.assert_no_incompatible_bgp_sessions(
-                nodes="nodes", remote_nodes="remote_nodes", status=".*"
-            )
+            bf.asserts.assert_no_incompatible_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", status=".*")
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
-        bgpSessionCompatibility.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status=".*"
-        )
+        bgpSessionCompatibility.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status=".*")
 
 
 def test_no_incompatible_ospf_sessions():
     """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "ospfSessionCompatibility", create=True
-    ) as ospfSessionCompatibility:
+    with patch.object(bf.q, "ospfSessionCompatibility", create=True) as ospfSessionCompatibility:
         # Test success
         ospfSessionCompatibility.return_value = MockQuestion()
-        assert_no_incompatible_ospf_sessions(
-            nodes="nodes", remote_nodes="remote_nodes", session=bf
-        )
+        assert_no_incompatible_ospf_sessions(nodes="nodes", remote_nodes="remote_nodes", session=bf)
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
             remoteNodes="remote_nodes",
@@ -427,9 +383,7 @@ def test_no_incompatible_ospf_sessions():
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         ospfSessionCompatibility.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_no_incompatible_ospf_sessions(
-                nodes="nodes", remote_nodes="remote_nodes", session=bf
-            )
+            assert_no_incompatible_ospf_sessions(nodes="nodes", remote_nodes="remote_nodes", session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         ospfSessionCompatibility.assert_called_with(
@@ -442,14 +396,10 @@ def test_no_incompatible_ospf_sessions():
 def test_no_incompatible_ospf_sessions_from_session():
     """Confirm no-incompatible-ospf-sessions assert passes and fails as expected when called from a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "ospfSessionCompatibility", create=True
-    ) as ospfSessionCompatibility:
+    with patch.object(bf.q, "ospfSessionCompatibility", create=True) as ospfSessionCompatibility:
         # Test success
         ospfSessionCompatibility.return_value = MockQuestion()
-        bf.asserts.assert_no_incompatible_ospf_sessions(
-            nodes="nodes", remote_nodes="remote_nodes"
-        )
+        bf.asserts.assert_no_incompatible_ospf_sessions(nodes="nodes", remote_nodes="remote_nodes")
         ospfSessionCompatibility.assert_called_with(
             nodes="nodes",
             remoteNodes="remote_nodes",
@@ -459,9 +409,7 @@ def test_no_incompatible_ospf_sessions_from_session():
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         ospfSessionCompatibility.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            bf.asserts.assert_no_incompatible_ospf_sessions(
-                nodes="nodes", remote_nodes="remote_nodes"
-            )
+            bf.asserts.assert_no_incompatible_ospf_sessions(nodes="nodes", remote_nodes="remote_nodes")
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
         ospfSessionCompatibility.assert_called_with(
@@ -477,24 +425,16 @@ def test_no_unestablished_bgp_sessions():
     with patch.object(bf.q, "bgpSessionStatus", create=True) as bgpSessionStatus:
         # Test success
         bgpSessionStatus.return_value = MockQuestion()
-        assert_no_unestablished_bgp_sessions(
-            nodes="nodes", remote_nodes="remote_nodes", session=bf
-        )
-        bgpSessionStatus.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
-        )
+        assert_no_unestablished_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", session=bf)
+        bgpSessionStatus.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED")
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         bgpSessionStatus.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            assert_no_unestablished_bgp_sessions(
-                nodes="nodes", remote_nodes="remote_nodes", session=bf
-            )
+            assert_no_unestablished_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes", session=bf)
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
-        bgpSessionStatus.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
-        )
+        bgpSessionStatus.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED")
 
 
 def test_no_unestablished_bgp_sessions_from_session():
@@ -503,24 +443,16 @@ def test_no_unestablished_bgp_sessions_from_session():
     with patch.object(bf.q, "bgpSessionStatus", create=True) as bgpSessionStatus:
         # Test success
         bgpSessionStatus.return_value = MockQuestion()
-        bf.asserts.assert_no_unestablished_bgp_sessions(
-            nodes="nodes", remote_nodes="remote_nodes"
-        )
-        bgpSessionStatus.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
-        )
+        bf.asserts.assert_no_unestablished_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes")
+        bgpSessionStatus.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED")
         # Test failure
         mock_df = DataFrame.from_records([{"Session": "found", "More": "data"}])
         bgpSessionStatus.return_value = MockQuestion(MockTableAnswer(mock_df))
         with pytest.raises(BatfishAssertException) as excinfo:
-            bf.asserts.assert_no_unestablished_bgp_sessions(
-                nodes="nodes", remote_nodes="remote_nodes"
-            )
+            bf.asserts.assert_no_unestablished_bgp_sessions(nodes="nodes", remote_nodes="remote_nodes")
         # Ensure found answer is printed
         assert mock_df.to_string() in str(excinfo.value)
-        bgpSessionStatus.assert_called_with(
-            nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED"
-        )
+        bgpSessionStatus.assert_called_with(nodes="nodes", remoteNodes="remote_nodes", status="NOT_ESTABLISHED")
 
 
 def test_no_undefined_references():
@@ -558,9 +490,7 @@ def test_no_undefined_references_from_session():
 def test_no_duplicate_router_ids_ospf():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "ospfProcessConfiguration", create=True
-    ) as ospfProcessConfiguration:
+    with patch.object(bf.q, "ospfProcessConfiguration", create=True) as ospfProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
             [
@@ -568,9 +498,7 @@ def test_no_duplicate_router_ids_ospf():
                 {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
-        ospfProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_unique)
-        )
+        ospfProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_unique))
         assert_no_duplicate_router_ids(session=bf, protocols=["ospf"])
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
@@ -579,9 +507,7 @@ def test_no_duplicate_router_ids_ospf():
                 {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
-        ospfProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_duplicate)
-        )
+        ospfProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_duplicate))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_no_duplicate_router_ids(session=bf, protocols=["ospf"])
         # Ensure found answer is printed
@@ -591,9 +517,7 @@ def test_no_duplicate_router_ids_ospf():
 def test_no_duplicate_router_ids_bgp():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when specifying a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "bgpProcessConfiguration", create=True
-    ) as bgpProcessConfiguration:
+    with patch.object(bf.q, "bgpProcessConfiguration", create=True) as bgpProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
             [
@@ -601,9 +525,7 @@ def test_no_duplicate_router_ids_bgp():
                 {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
-        bgpProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_unique)
-        )
+        bgpProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_unique))
         assert_no_duplicate_router_ids(session=bf, protocols=["bgp"])
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
@@ -612,9 +534,7 @@ def test_no_duplicate_router_ids_bgp():
                 {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
-        bgpProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_duplicate)
-        )
+        bgpProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_duplicate))
         with pytest.raises(BatfishAssertException) as excinfo:
             assert_no_duplicate_router_ids(session=bf, protocols=["bgp"])
         # Ensure found answer is printed
@@ -624,9 +544,7 @@ def test_no_duplicate_router_ids_bgp():
 def test_no_duplicate_router_ids_from_session():
     """Confirm no-duplicate-router-ids assert passes and fails as expected when called from a session."""
     bf = Session(load_questions=False)
-    with patch.object(
-        bf.q, "bgpProcessConfiguration", create=True
-    ) as bgpProcessConfiguration:
+    with patch.object(bf.q, "bgpProcessConfiguration", create=True) as bgpProcessConfiguration:
         # Test success
         mock_df_unique = DataFrame.from_records(
             [
@@ -634,9 +552,7 @@ def test_no_duplicate_router_ids_from_session():
                 {"Router_ID": "1.1.1.2", "VRF": "vrf2"},
             ]
         )
-        bgpProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_unique)
-        )
+        bgpProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_unique))
         bf.asserts.assert_no_duplicate_router_ids(protocols=["bgp"])
         # Test failure
         mock_df_duplicate = DataFrame.from_records(
@@ -645,9 +561,7 @@ def test_no_duplicate_router_ids_from_session():
                 {"Router_ID": "1.1.1.1", "VRF": "vrf2"},
             ]
         )
-        bgpProcessConfiguration.return_value = MockQuestion(
-            MockTableAnswer(mock_df_duplicate)
-        )
+        bgpProcessConfiguration.return_value = MockQuestion(MockTableAnswer(mock_df_duplicate))
         with pytest.raises(BatfishAssertException) as excinfo:
             bf.asserts.assert_no_duplicate_router_ids(protocols=["bgp"])
         # Ensure found answer is printed
@@ -717,9 +631,7 @@ def test_has_route_unsupported_type_routes():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
         assert_has_route("bad type", {}, "n1")
-    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(
-        excinfo.value
-    )
+    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(excinfo.value)
 
 
 def test_has_route_dataframe_routes():
@@ -791,9 +703,7 @@ def test_has_no_route_unsupported_type_routes():
     with pytest.raises(TypeError) as excinfo:
         # noinspection PyTypeChecker
         assert_has_no_route("bad type", {}, "n1")
-    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(
-        excinfo.value
-    )
+    assert "'routes' is neither a Pandas DataFrame nor a dictionary" in str(excinfo.value)
 
 
 def test_has_no_route_dataframe_routes():
