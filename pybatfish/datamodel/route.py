@@ -11,9 +11,11 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import builtins
 import json
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Text  # noqa: F401
+from collections.abc import Iterable
+from typing import Any
 
 import attr
 
@@ -63,14 +65,14 @@ class BgpRoute(DataModelElement):
     communities = attr.ib(type=list, default=[])
     localPreference = attr.ib(type=int, default=0)
     metric = attr.ib(type=int, default=0)
-    nextHopIp = attr.ib(type=Optional[str], default=None)
-    sourceProtocol = attr.ib(type=Optional[str], default=None)
+    nextHopIp = attr.ib(type=str | None, default=None)
+    sourceProtocol = attr.ib(type=str | None, default=None)
     tag = attr.ib(type=int, default=0)
     weight = attr.ib(type=int, default=0)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> BgpRoute
+        # type: (dict) -> BgpRoute
         return BgpRoute(
             json_dict["network"],
             json_dict["originatorIp"],
@@ -87,7 +89,7 @@ class BgpRoute(DataModelElement):
         )
 
     def dict(self):
-        # type: () -> Dict
+        # type: () -> dict
         return {
             # used to be needed for batfish jackson deserialization
             "class": "org.batfish.datamodel.questions.BgpRoute",
@@ -110,38 +112,38 @@ class BgpRoute(DataModelElement):
         return "<br>".join(self._repr_html_lines())
 
     def _repr_html_lines(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         lines = []
         lines.append(f"Network: {self.network}")
         lines.append(f"AS Path: {self.asPath}")
         # using a join on strings removes quotes around individual communities
-        lines.append("Communities: [%s]" % ", ".join(map(str, self.communities)))
-        lines.append("Local Preference: %s" % self.localPreference)
-        lines.append("Metric: %s" % self.metric)
-        lines.append("Next Hop IP: %s" % self.nextHopIp)
-        lines.append("Originator IP: %s" % self.originatorIp)
-        lines.append("Origin Type: %s" % self.originType)
-        lines.append("Protocol: %s" % self.protocol)
-        lines.append("Source Protocol: %s" % self.sourceProtocol)
-        lines.append("Tag: %s" % self.tag)
-        lines.append("Weight: %s" % self.weight)
+        lines.append("Communities: [{}]".format(", ".join(map(str, self.communities))))
+        lines.append(f"Local Preference: {self.localPreference}")
+        lines.append(f"Metric: {self.metric}")
+        lines.append(f"Next Hop IP: {self.nextHopIp}")
+        lines.append(f"Originator IP: {self.originatorIp}")
+        lines.append(f"Origin Type: {self.originType}")
+        lines.append(f"Protocol: {self.protocol}")
+        lines.append(f"Source Protocol: {self.sourceProtocol}")
+        lines.append(f"Tag: {self.tag}")
+        lines.append(f"Weight: {self.weight}")
         return lines
 
 
 # convert a list of strings into a single comma-separated string
 def _longspace_brc_converter(value):
-    # type: (Any) -> Optional[Text]
+    # type: (Any) -> None|str
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: Text
+        result = ",".join(value)  # type: str
         return result
     raise ValueError(f"Invalid value {value}")
 
 
 # convert a string into a singleton list
 def _string_list_brc_converter(value):
-    # type: (Any) -> Optional[List[Text]]
+    # type: (Any) -> None|list[str]
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, str):
@@ -164,20 +166,12 @@ class BgpRouteConstraints(DataModelElement):
     :ivar asPath: List of allowed and disallowed AS-path regexes
     """
 
-    prefix = attr.ib(
-        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
-    )
-    complementPrefix = attr.ib(default=None, type=Optional[bool])
-    localPreference = attr.ib(
-        default=None, type=Optional[str], converter=_longspace_brc_converter
-    )
-    med = attr.ib(default=None, type=Optional[str], converter=_longspace_brc_converter)
-    communities = attr.ib(
-        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
-    )
-    asPath = attr.ib(
-        default=None, type=Optional[List[str]], converter=_string_list_brc_converter
-    )
+    prefix = attr.ib(default=None, type=list[str] | None, converter=_string_list_brc_converter)
+    complementPrefix = attr.ib(default=None, type=bool | None)
+    localPreference = attr.ib(default=None, type=str | None, converter=_longspace_brc_converter)
+    med = attr.ib(default=None, type=str | None, converter=_longspace_brc_converter)
+    communities = attr.ib(default=None, type=list[str] | None, converter=_string_list_brc_converter)
+    asPath = attr.ib(default=None, type=list[str] | None, converter=_string_list_brc_converter)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -206,10 +200,8 @@ class BgpRouteDiff(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> BgpRouteDiff
-        return BgpRouteDiff(
-            json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"]
-        )
+        # type: (dict) -> BgpRouteDiff
+        return BgpRouteDiff(json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"])
 
     def _repr_html_(self):
         # type: () -> str
@@ -230,9 +222,7 @@ class BgpRouteDiff(DataModelElement):
         else:
             # by default, just capitalize the field name
             prettyFieldName = self.fieldName.capitalize()
-        return "{fieldName}: {oldValue} --> {newValue}".format(
-            fieldName=prettyFieldName, oldValue=self.oldValue, newValue=self.newValue
-        )
+        return f"{prettyFieldName}: {self.oldValue} --> {self.newValue}"
 
 
 @attr.s(frozen=True)
@@ -242,17 +232,12 @@ class BgpRouteDiffs(DataModelElement):
     :ivar diffs: The set of BgpRouteDiff objects.
     """
 
-    diffs = attr.ib(type=List[BgpRouteDiff])
+    diffs = attr.ib(type=list[BgpRouteDiff])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> BgpRouteDiffs
-        return BgpRouteDiffs(
-            [
-                BgpRouteDiff.from_dict(route_dict)
-                for route_dict in json_dict.get("diffs", [])
-            ]
-        )
+        # type: (dict) -> BgpRouteDiffs
+        return BgpRouteDiffs([BgpRouteDiff.from_dict(route_dict) for route_dict in json_dict.get("diffs", [])])
 
     def _repr_html_(self):
         # type: () -> str
@@ -278,7 +263,7 @@ class BgpSessionProperties(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> BgpSessionProperties
+        # type: (dict) -> BgpSessionProperties
         localAs = json_dict.get("localAs")
         remoteAs = json_dict.get("remoteAs")
         localIp = json_dict.get("localIp")
@@ -306,13 +291,9 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
         raise NotImplementedError("NextHop elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHop":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHop":
         if "type" not in json_dict:
-            raise ValueError(
-                "Unknown type of NextHop, missing the type property in: {}".format(
-                    json.dumps(json_dict)
-                )
-            )
+            raise ValueError(f"Unknown type of NextHop, missing the type property in: {json.dumps(json_dict)}")
         nh_type = json_dict["type"]
         if nh_type == "discard":
             return NextHopDiscard.from_dict(json_dict)
@@ -325,11 +306,7 @@ class NextHop(DataModelElement, metaclass=ABCMeta):
         elif nh_type == "vtep":
             return NextHopVtep.from_dict(json_dict)
         else:
-            raise ValueError(
-                "Unhandled NextHop type: {} in: {}".format(
-                    json.dumps(nh_type), json.dumps(json_dict)
-                )
-            )
+            raise ValueError(f"Unhandled NextHop type: {json.dumps(nh_type)} in: {json.dumps(json_dict)}")
 
 
 @attr.s(frozen=True)
@@ -343,14 +320,14 @@ class NextHopDiscard(NextHop):
         if value != "discard":
             raise ValueError('type must be "discard"')
 
-    def dict(self) -> Dict[str, Any]:
+    def dict(self) -> dict[str, Any]:
         return {"type": "discard"}
 
     def __str__(self) -> str:
         return "discard"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopDiscard":
+    def from_dict(cls, json_dict: builtins.dict[str, Any]) -> "NextHopDiscard":
         assert json_dict == {"type": "discard"}
         return NextHopDiscard()
 
@@ -363,7 +340,7 @@ class NextHopInterface(NextHop):
     """
 
     interface = attr.ib(type=str)
-    ip = attr.ib(type=Optional[str], default=None)
+    ip = attr.ib(type=str | None, default=None)
     type = attr.ib(type=str, default="interface")
 
     @type.validator
@@ -379,10 +356,8 @@ class NextHopInterface(NextHop):
         )
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopInterface":
-        assert set(json_dict.keys()) == {"type", "interface", "ip"} or set(
-            json_dict.keys()
-        ) == {"type", "interface"}
+    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopInterface":
+        assert set(json_dict.keys()) == {"type", "interface", "ip"} or set(json_dict.keys()) == {"type", "interface"}
         assert json_dict["type"] == "interface"
         interface = json_dict["interface"]
         ip = None
@@ -409,7 +384,7 @@ class NextHopIp(NextHop):
         return f"ip {self.ip}"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopIp":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopIp":
         assert set(json_dict.keys()) == {"type", "ip"}
         assert json_dict["type"] == "ip"
         ip = json_dict["ip"]
@@ -433,7 +408,7 @@ class NextHopVrf(NextHop):
         return f"vrf {escape_name(self.vrf)}"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVrf":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopVrf":
         assert set(json_dict.keys()) == {"type", "vrf"}
         assert json_dict["type"] == "vrf"
         vrf = json_dict["vrf"]
@@ -458,7 +433,7 @@ class NextHopVtep(NextHop):
         return f"vni {self.vni} vtep {self.vtep}"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "NextHopVtep":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopVtep":
         assert set(json_dict.keys()) == {"type", "vni", "vtep"}
         assert json_dict["type"] == "vtep"
         vni = json_dict["vni"]

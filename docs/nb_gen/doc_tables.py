@@ -1,6 +1,5 @@
-# coding: utf-8
 import inspect
-from typing import Any, List, Tuple
+from typing import Any
 
 from pybatfish.datamodel.answer.table import ColumnMetadata
 from pybatfish.question.question import QuestionMeta
@@ -8,7 +7,7 @@ from pybatfish.question.question import QuestionMeta
 from .schema import convert_schema
 
 
-def gen_output_table(col_data: List[ColumnMetadata], question_name: str) -> str:
+def gen_output_table(col_data: list[ColumnMetadata], question_name: str) -> str:
     """
     Converts the return values from answer's column metadata into a markdown table
     """
@@ -16,9 +15,7 @@ def gen_output_table(col_data: List[ColumnMetadata], question_name: str) -> str:
     return "\n".join(get_output_table_lines(col_data, question_name))
 
 
-def get_output_table_lines(
-    col_data: List[ColumnMetadata], question_name: str
-) -> List[str]:
+def get_output_table_lines(col_data: list[ColumnMetadata], question_name: str) -> list[str]:
     table_lines = ["Name | Description | Type", "--- | --- | ---"]
     for col in col_data:
         schema_type = convert_schema(col.schema, "output", question_name)
@@ -26,7 +23,7 @@ def get_output_table_lines(
     return table_lines
 
 
-def gen_input_table(parameters: List[Tuple[str, Any]], question_name: str) -> str:
+def gen_input_table(parameters: list[tuple[str, Any]], question_name: str) -> str:
     """
     Converts the input parameters from question class into a markdown table
     """
@@ -36,9 +33,7 @@ def gen_input_table(parameters: List[Tuple[str, Any]], question_name: str) -> st
     return "\n".join(get_input_table_lines(parameters, question_name))
 
 
-def get_input_table_lines(
-    parameters: List[Tuple[str, Any]], question_name: str
-) -> List[str]:
+def get_input_table_lines(parameters: list[tuple[str, Any]], question_name: str) -> list[str]:
     table_lines = [
         "Name | Description | Type | Optional | Default Value",
         "--- | --- | --- | --- | --- ",
@@ -54,15 +49,13 @@ def get_input_table_lines(
         if default_value:
             optional = True
 
-        table_lines.append(
-            f"{name} | {desc} | {schema_type} | {optional} | {default_value}"
-        )
+        table_lines.append(f"{name} | {desc} | {schema_type} | {optional} | {default_value}")
     return table_lines
 
 
 def get_desc_and_params(
     question_class: QuestionMeta,
-) -> Tuple[str, str, List[Tuple[str, Any]]]:
+) -> tuple[str, str, list[tuple[str, Any]]]:
     """
     Generates the description and parameter information for the question from its class.
     """

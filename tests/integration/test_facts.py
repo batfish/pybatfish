@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,13 +30,9 @@ _PREVIOUS_SNAPSHOT = "previous_snapshot"
 def session():
     s = Session()
     # Snapshot which can be referenced by name
-    other_name = s.init_snapshot(
-        join(_this_dir, "snapshots", "fact_snapshot2"), _PREVIOUS_SNAPSHOT
-    )
+    other_name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot2"), _PREVIOUS_SNAPSHOT)
     # Current snapshot
-    name = s.init_snapshot(
-        join(_this_dir, "snapshots", "fact_snapshot"), _CURRENT_SNAPSHOT
-    )
+    name = s.init_snapshot(join(_this_dir, "snapshots", "fact_snapshot"), _CURRENT_SNAPSHOT)
     yield s
     s.delete_snapshot(name)
     s.delete_snapshot(other_name)
@@ -47,45 +42,31 @@ def session():
 def test_extract_facts(tmpdir, session):
     """Test extraction of facts for the current snapshot with a basic config."""
     out_dir = tmpdir.join("output")
-    extracted_facts = session.extract_facts(
-        nodes="basic", output_directory=str(out_dir)
-    )
+    extracted_facts = session.extract_facts(nodes="basic", output_directory=str(out_dir))
 
     written_facts = load_facts(str(out_dir))
     expected_facts = load_facts(join(_this_dir, "facts", "expected_facts"))
 
-    assert (
-        validate_facts(expected_facts, extracted_facts) == {}
-    ), "Extracted facts match expected facts"
-    assert (
-        validate_facts(expected_facts, written_facts) == {}
-    ), "Written facts match expected facts"
+    assert validate_facts(expected_facts, extracted_facts) == {}, "Extracted facts match expected facts"
+    assert validate_facts(expected_facts, written_facts) == {}, "Written facts match expected facts"
 
 
 def test_extract_facts_specific_snapshot(tmpdir, session):
     """Test extraction of facts for a specific snapshot."""
     out_dir = tmpdir.join("output")
-    extracted_facts = session.extract_facts(
-        output_directory=str(out_dir), snapshot=_PREVIOUS_SNAPSHOT
-    )
+    extracted_facts = session.extract_facts(output_directory=str(out_dir), snapshot=_PREVIOUS_SNAPSHOT)
 
     written_facts = load_facts(str(out_dir))
     expected_facts = load_facts(join(_this_dir, "facts", "expected_facts2"))
 
-    assert (
-        validate_facts(expected_facts, extracted_facts) == {}
-    ), "Extracted facts match expected facts"
-    assert (
-        validate_facts(expected_facts, written_facts) == {}
-    ), "Written facts match expected facts"
+    assert validate_facts(expected_facts, extracted_facts) == {}, "Extracted facts match expected facts"
+    assert validate_facts(expected_facts, written_facts) == {}, "Written facts match expected facts"
 
 
 @requires_bf("2022.01.20")
 def test_validate_facts_matching(session):
     """Test validation of facts for the current snapshot against matching facts."""
-    validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, "facts", "expected_facts")
-    )
+    validation_results = session.validate_facts(expected_facts=join(_this_dir, "facts", "expected_facts"))
 
     assert validation_results == {}, "No differences between expected and actual facts"
 
@@ -102,10 +83,8 @@ def test_validate_facts_matching_specific_snapshot(session):
 
 def test_validate_facts_different(session):
     """Test validation of facts for the current snapshot against different facts."""
-    validation_results = session.validate_facts(
-        expected_facts=join(_this_dir, "facts", "unexpected_facts")
-    )
+    validation_results = session.validate_facts(expected_facts=join(_this_dir, "facts", "unexpected_facts"))
 
-    assert validation_results == {
-        "basic": {"DNS.DNS_Servers": {"actual": [], "expected": ["1.2.3.4"]}}
-    }, "Only DNS servers should be different between expected and actual facts"
+    assert validation_results == {"basic": {"DNS.DNS_Servers": {"actual": [], "expected": ["1.2.3.4"]}}}, (
+        "Only DNS servers should be different between expected and actual facts"
+    )

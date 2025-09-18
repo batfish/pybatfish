@@ -11,18 +11,19 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from __future__ import annotations
+
 import os
 from collections.abc import Mapping
 from copy import deepcopy
-from typing import TYPE_CHECKING, Any, Dict, Optional, Text, Tuple  # noqa: F401
+from typing import TYPE_CHECKING, Any
 
 import yaml
 
-from pybatfish.datamodel import ListWrapper
-
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
-    from pybatfish.datamodel.answer import TableAnswer  # noqa: F401
+    from pybatfish.client.session import Session
+from pybatfish.datamodel import ListWrapper
+from pybatfish.datamodel.answer import TableAnswer
 
 BATFISH_FACT_VERSION = "batfish_v0"
 
@@ -46,11 +47,10 @@ NODE_PROPERTIES_REORG = dict(
         ("TACACS_Servers", "TACACS"),
         ("TACACS_Source_Interface", "TACACS"),
     ]
-)  # type: Dict[Text, Text]
+)  # type: dict[str, str]
 
 
-def get_facts(session, nodes_specifier="/.*/", snapshot=None):
-    # type: (Session, Text, Optional[Text]) -> Dict[Text, Any]
+def get_facts(session: Session, nodes_specifier: str = "/.*/", snapshot: str | None = None) -> dict[str, Any]:
     """
     Get snapshot facts from the specified session for nodes matching the nodes specifier.
 
@@ -101,9 +101,9 @@ def get_facts(session, nodes_specifier="/.*/", snapshot=None):
 
 
 def load_facts(input_directory):
-    # type: (Text) -> Dict[Text, Any]
+    # type: (str) -> dict[str, Any]
     """Load facts from text files in the specified directory."""
-    out = {"version": None, "nodes": {}}  # type: Dict[Text, Any]
+    out = {"version": None, "nodes": {}}  # type: dict[str, Any]
     out_nodes = out["nodes"]
 
     files = os.listdir(input_directory)
@@ -133,7 +133,7 @@ def load_facts(input_directory):
 
 
 def validate_facts(expected, actual, verbose=False):
-    # type: (Dict[Text, Any], Dict[Text, Any], bool) -> Dict[Text, Any]
+    # type: (dict[str, Any], dict[str, Any], bool) -> dict[str, Any]
     """Return a map of node to non-matching facts based on the difference between the expected and actual facts supplied.
 
     If the `verbose` flag is set, matching facts are returned in addition-to non-matching facts.
@@ -144,14 +144,9 @@ def validate_facts(expected, actual, verbose=False):
     expected_version = expected["version"]
     actual_version = actual["version"]
     if expected_version != actual_version:
-        return {
-            n: {"Version": {"expected": expected_version, "actual": actual_version}}
-            for n in expected_facts
-        }
+        return {n: {"Version": {"expected": expected_version, "actual": actual_version}} for n in expected_facts}
     for node in expected_facts:
-        res = _assert_dict_subset(
-            actual_facts.get(node, {}), expected_facts[node], verbose=verbose
-        )
+        res = _assert_dict_subset(actual_facts.get(node, {}), expected_facts[node], verbose=verbose)
         if res:
             failures[node] = res
     return failures
@@ -166,7 +161,7 @@ def _process_facts(
     ospf_area,
     ospf_iface,
 ):
-    # type: (TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer) -> Dict[Text, Any]
+    # type: (TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer, TableAnswer) -> dict[str, Any]
     """Process properties answers into a fact dict."""
     # out = {}
     out = _process_nodes(node_props)
@@ -181,9 +176,9 @@ def _process_facts(
 
 
 def _convert_listwrapper(dict_):
-    # type: (Mapping[Text, Any]) -> Dict[Text, Any]
+    # type: (Mapping[str, Any]) -> dict[str, Any]
     """Convert ListWrapper objects in the specified dict into plain lists."""
-    out = {}  # type: Dict[Text, Any]
+    out = {}  # type: dict[str, Any]
     for k in dict_:
         val = dict_[k]
         if isinstance(val, Mapping):
@@ -195,8 +190,7 @@ def _convert_listwrapper(dict_):
     return out
 
 
-def _process_bgp_processes(node_dict, bgp_proc_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+def _process_bgp_processes(node_dict: dict[str, Any], bgp_proc_props: TableAnswer) -> None:
     """Return fact dict with processed bgp process properties answer added to it."""
     bgp_proc_dict = bgp_proc_props.frame().to_dict(orient="records")
     for r in bgp_proc_dict:
@@ -207,7 +201,7 @@ def _process_bgp_processes(node_dict, bgp_proc_props):
 
 
 def _process_bgp_peers(node_dict, bgp_peer_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+    # type: (dict[str, Any], TableAnswer) -> None
     """Return fact dict with processed bgp peer properties answer added to it."""
     bgp_peer_dict = bgp_peer_props.frame().to_dict(orient="records")
     for r in bgp_peer_dict:
@@ -217,7 +211,7 @@ def _process_bgp_peers(node_dict, bgp_peer_props):
 
 
 def _process_ospf_processes(node_dict, ospf_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+    # type: (dict[str, Any], TableAnswer) -> None
     """Update fact dict with processed ospf process properties answer added to it."""
     ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
@@ -232,7 +226,7 @@ def _process_ospf_processes(node_dict, ospf_props):
 
 
 def _process_ospf_areas(node_dict, ospf_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+    # type: (dict[str, Any], TableAnswer) -> None
     """Update fact dict with processed ospf area properties answer added to it."""
     ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
@@ -240,13 +234,11 @@ def _process_ospf_areas(node_dict, ospf_props):
         proc = r.pop("Process_ID")
         area = r.pop("Area")
 
-        _get_or_create_ospf_areas(node_dict, node, proc)[area] = {
-            "Area_Type": r.get("Area_Type")
-        }
+        _get_or_create_ospf_areas(node_dict, node, proc)[area] = {"Area_Type": r.get("Area_Type")}
 
 
 def _process_ospf_interfaces(node_dict, ospf_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+    # type: (dict[str, Any], TableAnswer) -> None
     """Update fact dict with processed ospf interface properties answer added to it."""
     ospf_dict = ospf_props.frame().to_dict(orient="records")
     for r in ospf_dict:
@@ -266,7 +258,7 @@ def _process_ospf_interfaces(node_dict, ospf_props):
 
 
 def _get_or_create_ospf_interfaces(node_dict, node, process, area):
-    # type: (Dict[Text, Any], Text, Text, Text) -> Any
+    # type: (dict[str, Any], str, str, str) -> Any
     """
     Get the OSPF interfaces dict under the specified OSPF area and process on the specified node.
 
@@ -277,7 +269,7 @@ def _get_or_create_ospf_interfaces(node_dict, node, process, area):
 
 
 def _get_or_create_ospf_areas(node_dict, node, process):
-    # type: (Dict[Text, Any], Text, Text) -> Any
+    # type: (dict[str, Any], str, str) -> Any
     """
     Get the OSPF areas dict under the specified OSPF process on the specified node.
 
@@ -288,21 +280,17 @@ def _get_or_create_ospf_areas(node_dict, node, process):
 
 
 def _get_or_create_ospf_processes(node_dict, node):
-    # type: (Dict[Text, Any], Text) -> Any
+    # type: (dict[str, Any], str) -> Any
     """
     Get the OSPF processes dict under the specified node.
 
     If it or any of its parents does not already exist, create them.
     """
-    return (
-        node_dict.setdefault(node, {})
-        .setdefault("OSPF", {})
-        .setdefault("Processes", {})
-    )
+    return node_dict.setdefault(node, {}).setdefault("OSPF", {}).setdefault("Processes", {})
 
 
 def _process_interfaces(node_dict, iface_props):
-    # type: (Dict[Text, Any], TableAnswer) -> None
+    # type: (dict[str, Any], TableAnswer) -> None
     """Return fact dict with processed interface properties answer added to it."""
     iface_dict = iface_props.frame().to_dict(orient="records")
     for i in iface_dict:
@@ -315,7 +303,7 @@ def _process_interfaces(node_dict, iface_props):
 
 
 def _process_nodes(node_props):
-    # type: (TableAnswer) -> Dict[Text, Any]
+    # type: (TableAnswer) -> dict[str, Any]
     """Return fact dict corresponding to processed node properties answer."""
     out = {}
     node_dict = node_props.frame().to_dict(orient="records")
@@ -334,7 +322,7 @@ def _process_nodes(node_props):
 
 
 def _remove_constructed_names(dict_):
-    # type: (Dict[Text, Any]) -> None
+    # type: (dict[str, Any]) -> None
     """Remove names constructed by Batfish.
 
     Removes strings beginning with ~ from lists in the specified dict.
@@ -345,7 +333,7 @@ def _remove_constructed_names(dict_):
 
 
 def _add_interface(node_dict, iface_dict_in):
-    # type: (Dict[Text, Any], Dict[Text, Any]) -> None
+    # type: (dict[str, Any], dict[str, Any]) -> None
     """Update and add interface dict to the specified node dict."""
     if "Interfaces" not in node_dict:
         node_dict["Interfaces"] = {}
@@ -358,7 +346,7 @@ def _add_interface(node_dict, iface_dict_in):
 
 
 def _reorg_dict(dict, reorg_map):
-    # type: (Dict[Text, Any], Dict[Text, Text]) -> None
+    # type: (dict[str, Any], dict[str, str]) -> None
     """Reorganize top-level keys in the input dict based on the supplied reorg map."""
     for key in reorg_map:
         new_parent = reorg_map[key]
@@ -368,7 +356,7 @@ def _reorg_dict(dict, reorg_map):
 
 
 def _write_yaml_file(dict_, filepath):
-    # type: (Dict[Text, Any], Text) -> None
+    # type: (dict[str, Any], str) -> None
     with open(filepath, "w") as f:
         # default_flow_style=False dumps lists as hyphen lists instead of
         # square bracket lists
@@ -376,7 +364,7 @@ def _write_yaml_file(dict_, filepath):
 
 
 def write_facts(output_directory, facts):
-    # type: (Text, Dict[Text, Any]) -> None
+    # type: (str, dict[str, Any]) -> None
     """Write facts to YAML files in the supplied output directory."""
     nodes, version = _unencapsulate_facts(facts)
 
@@ -388,27 +376,24 @@ def write_facts(output_directory, facts):
     # Write facts for each node in its own file
     for node in nodes:
         filepath = os.path.join(output_directory, f"{node}.yml")
-        node_facts = _encapsulate_nodes_facts(
-            {node: facts["nodes"][node]}, version_text
-        )
+        node_facts = _encapsulate_nodes_facts({node: facts["nodes"][node]}, version_text)
         _write_yaml_file(node_facts, filepath)
 
 
 def _encapsulate_nodes_facts(nodes_facts, version):
-    # type: (Dict[Text, Any], Text) -> Dict[Text, Any]
+    # type: (dict[str, Any], str) -> dict[str, Any]
     """Format node(s) facts in final fact format (the way they are written to file)."""
     return {"nodes": nodes_facts, "version": version}
 
 
-def _unencapsulate_facts(facts):
-    # type: (Dict[Text, Any]) -> Tuple[Any, Optional[Any]]
+def _unencapsulate_facts(facts: dict[str, Any]) -> tuple[Any, Any | None]:
     """Extract node facts and version from final fact format."""
     assert "nodes" in facts, "No nodes present in parsed facts file(s)"
     return facts["nodes"], facts.get("version")
 
 
 def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
-    # type: (Dict[Text, Any], Dict[Text, Any], Text, Optional[Dict], bool) -> Dict[Text, Any]
+    # type: (dict[str, Any], dict[str, Any], str, dict|None, bool) -> dict[str, Any]
     """Assert that the expected dictionary is a subset of the actual dictionary.
 
     :param actual: the dictionary tested
@@ -416,7 +401,7 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
     :returns: if verbose=`False` returns dictionary of property name to non-matching expected and actual values, if verbose=`True` returns a dictionary of property name to expected and actual values for all checked values
     """
     if diffs is None:
-        diffs_out = {}  # type: Dict[Text, Any]
+        diffs_out = {}  # type: dict[str, Any]
     else:
         diffs_out = diffs
     for k in expected:
@@ -425,9 +410,7 @@ def _assert_dict_subset(actual, expected, prefix="", diffs=None, verbose=False):
             diffs_out[key_name] = {"key_present": False, "expected": expected[k]}
         else:
             if isinstance(expected[k], Mapping):
-                _assert_dict_subset(
-                    actual[k], expected[k], key_name + ".", diffs_out, verbose=verbose
-                )
+                _assert_dict_subset(actual[k], expected[k], key_name + ".", diffs_out, verbose=verbose)
             else:
                 if expected[k] != actual[k] or verbose:
                     diffs_out[key_name] = {"expected": expected[k], "actual": actual[k]}

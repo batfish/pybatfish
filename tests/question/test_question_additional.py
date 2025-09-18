@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 import pytest
 
@@ -28,7 +27,7 @@ from tests.conftest import COMPLETION_TYPES
 def testInvalidSubRange():
     subRange = "100, 200"
     actualResult = question._isSubRange(subRange)
-    expectMessage = "Invalid subRange: {}".format(subRange)
+    expectMessage = f"Invalid subRange: {subRange}"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -60,7 +59,7 @@ def testValidSubRange():
 def testInvalidIp():
     ip = "192.168.11"
     actualResult = question._isIp(ip)
-    expectMessage = "Invalid ip string: '{}'".format(ip)
+    expectMessage = f"Invalid ip string: '{ip}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -68,7 +67,7 @@ def testInvalidIp():
 def testInvalidIpAddressWithIndicator():
     ip = "INVALID_IP(100)"
     actualResult = question._isIp(ip)
-    expectMessage = "Invalid ip string: '{}'".format(ip)
+    expectMessage = f"Invalid ip string: '{ip}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -91,9 +90,7 @@ def testInvalidSegmentsIpAddress():
 def testInvalidSegmentRangeIpAddress():
     ipAddress = "192.168.11.256"
     actualResult = question._isIp(ipAddress)
-    expectMessage = (
-        "Ip segment is out of range 0-255: '256' in ip string: '192.168.11.256'"
-    )
+    expectMessage = "Ip segment is out of range 0-255: '256' in ip string: '192.168.11.256'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -101,9 +98,7 @@ def testInvalidSegmentRangeIpAddress():
 def testInvalidSegmentRangeIpAddress2():
     ipAddress = "192.168.11.-1"
     actualResult = question._isIp(ipAddress)
-    expectMessage = (
-        "Ip segment is out of range 0-255: '-1' in ip string: '192.168.11.-1'"
-    )
+    expectMessage = "Ip segment is out of range 0-255: '-1' in ip string: '192.168.11.-1'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -143,7 +138,7 @@ def testValidPrefix():
 def testInvalidPrefixRangeInput():
     prefixRange = "192.168.1.s/100:100:100"
     actualResult = question._isPrefixRange(prefixRange)
-    expectMessage = "Invalid PrefixRange string: '{}'".format(prefixRange)
+    expectMessage = f"Invalid PrefixRange string: '{prefixRange}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -151,11 +146,7 @@ def testInvalidPrefixRangeInput():
 def testInvalidPrefixInput():
     prefixRange = "192.168.1.s/100:100"
     actualResult = question._isPrefixRange(prefixRange)
-    expectMessage = (
-        "Invalid prefix string: '192.168.1.s/100' in prefix range string: '{}'".format(
-            prefixRange
-        )
-    )
+    expectMessage = f"Invalid prefix string: '192.168.1.s/100' in prefix range string: '{prefixRange}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -179,7 +170,7 @@ def testValidPrefixRange():
 def testInvalidIpWildcardWithColon():
     ipWildcard = "192.168.1.s:192.168.10.10:192"
     actualResult = question._isIpWildcard(ipWildcard)
-    expectMessage = "Invalid IpWildcard string: '{}'".format(ipWildcard)
+    expectMessage = f"Invalid IpWildcard string: '{ipWildcard}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -210,7 +201,7 @@ def testValidIpWildcardWithColon():
 def testInvalidIpWildcardWithSlash():
     ipWildcard = "192.168.1.s/192.168.10.10/192"
     actualResult = question._isIpWildcard(ipWildcard)
-    expectMessage = "Invalid IpWildcard string: '{}'".format(ipWildcard)
+    expectMessage = f"Invalid IpWildcard string: '{ipWildcard}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -226,9 +217,7 @@ def testInvalidStartIpWildcardWithSlash():
 def testInvalidEndIpWildcardWithSlash():
     ipWildcard = "192.168.1.1/s"
     actualResult = question._isIpWildcard(ipWildcard)
-    expectMessage = "Invalid prefix length: 's' in IpWildcard string: '{}'".format(
-        ipWildcard
-    )
+    expectMessage = f"Invalid prefix length: 's' in IpWildcard string: '{ipWildcard}'"
     assert not actualResult[0]
     assert expectMessage == actualResult[1]
 
@@ -278,9 +267,7 @@ def testValidIntegerValidateType():
 
 def testInvalidComparatorValidateType():
     result = question._validate_type("<==", "comparator")
-    expectMessage = (
-        "'<==' is not a known comparator. Valid options are: '<, <=, ==, >=, >, !='"
-    )
+    expectMessage = "'<==' is not a known comparator. Valid options are: '<, <=, ==, >=, >, !='"
     assert not result[0]
     assert expectMessage == result[1]
 
@@ -387,9 +374,7 @@ def testNonStringProtocolValidateType():
 
 def testInvalidProtocolValidateType():
     result = question._validate_type("TCPP", "protocol")
-    expectMessage = (
-        "'TCPP' is not a valid protocols. Valid options are: 'dns, ssh, tcp, udp'"
-    )
+    expectMessage = "'TCPP' is not a valid protocols. Valid options are: 'dns, ssh, tcp, udp'"
     assert not result[0]
     assert expectMessage == result[1]
 
@@ -437,9 +422,7 @@ def testValidCompletionTypes():
     }
     # TODO: simplify to COMPLETION_TYPES after VariableType.BGP_ROUTE_STATUS_SPEC is moved
     for completion_type in set(COMPLETION_TYPES + [VariableType.BGP_ROUTE_STATUS_SPEC]):
-        result = question._validate_type(
-            values.get(completion_type, ".*"), completion_type
-        )
+        result = question._validate_type(values.get(completion_type, ".*"), completion_type)
         assert result[0]
         assert result[1] is None
 

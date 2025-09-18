@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,9 +11,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-import io
 import re
-import sys
 from copy import deepcopy
 from os import remove, walk
 from os.path import abspath, dirname, join, pardir, realpath
@@ -104,9 +101,7 @@ def _assert_cell_no_errors(c):
     if c["cell_type"] != "code":
         return
     errors = [
-        "Error name: {}, Error Value: {}, trace: {}".format(
-            o["ename"], o["evalue"], "\n".join(o.get("traceback"))
-        )
+        "Error name: {}, Error Value: {}, trace: {}".format(o["ename"], o["evalue"], "\n".join(o.get("traceback")))
         for o in c["outputs"]
         if o["output_type"] == "error"
     ]
@@ -123,10 +118,6 @@ def _compare_data(original_data, executed_data):
     assert ("text/plain" in original_data) == ("text/plain" in executed_data)
     assert ("text/html" in original_data) == ("text/html" in executed_data)
 
-    if sys.version_info[:2] < (3, 6):
-        # Output is inconsistent across versions, so only test latest.
-        # (We still test the notebook runs without errors on all versions)
-        return
     if "text/plain" in original_data:
         _compare_data_str(original_data["text/plain"], executed_data["text/plain"])
     if "text/html" in original_data and "text/html" in executed_data:
@@ -137,9 +128,9 @@ def test_notebook_version_matrix():
     """Meta test to confirm notebook version matrix is valid."""
     # Make sure each version matrix entry corresponds to a notebook filename
     for k in notebook_min_versions:
-        assert k == ANY_NOTEBOOK or any(
-            k in name for name in notebook_files
-        ), "'{}' does not refer to any notebook filename".format(k)
+        assert k == ANY_NOTEBOOK or any(k in name for name in notebook_files), (
+            f"'{k}' does not refer to any notebook filename"
+        )
 
 
 def test_notebook_no_errors(bf_version, notebook, executed_notebook):
@@ -158,36 +149,24 @@ def test_notebook_output(bf_version, notebook, executed_notebook):
             assert cell["cell_type"] == executed_cell["cell_type"]
             if cell["cell_type"] == "code":
                 # Collecting all outputs of type "execute_result" as other output type may be undeterministic (like timestamps)
-                original_outputs = [
-                    o["data"]
-                    for o in cell["outputs"]
-                    if o["output_type"] in _check_cell_types
-                ]
+                original_outputs = [o["data"] for o in cell["outputs"] if o["output_type"] in _check_cell_types]
                 executed_outputs = [
-                    o["data"]
-                    for o in executed_cell["outputs"]
-                    if o["output_type"] in _check_cell_types
+                    o["data"] for o in executed_cell["outputs"] if o["output_type"] in _check_cell_types
                 ]
                 assert len(original_outputs) == len(executed_outputs)
-                for original_data, executed_data in zip(
-                    original_outputs, executed_outputs
-                ):
+                for original_data, executed_data in zip(original_outputs, executed_outputs):
                     _compare_data(original_data, executed_data)
     except AssertionError as e:
-        with io.open("{}.testout".format(filepath), "w", encoding="utf-8") as f:
+        with open(f"{filepath}.testout", "w", encoding="utf-8") as f:
             nbformat.write(executed_notebook, f)
-            pytest.fail(
-                "{} failed output validation:\n{}".format(filepath, e), pytrace=False
-            )
+            pytest.fail(f"{filepath} failed output validation:\n{e}", pytrace=False)
 
 
 def test_notebook_execution_count(notebook):
     _, nb = notebook
     code_cells = [cell for cell in nb["cells"] if cell["cell_type"] == "code"]
     for i, cell in enumerate(code_cells):
-        assert (
-            i + 1 == cell["execution_count"]
-        ), "Expected cell {} to have execution count {}".format(cell, i + 1)
+        assert i + 1 == cell["execution_count"], f"Expected cell {cell} to have execution count {i + 1}"
 
 
 def test_absolute_links(notebook):

@@ -34,9 +34,7 @@ def diff_properties(diff_frame, entity_type, key_columns, properties):
         for index, row in reference_only.iterrows():
             print(f"    {friendly_name(entity_type, row, key_columns)}")
     for index, row in both.iterrows():
-        print(
-            "\nDifferences for {}".format(friendly_name(entity_type, row, key_columns))
-        )
+        print(f"\nDifferences for {friendly_name(entity_type, row, key_columns)}")
         for property in properties:
             snapshot_setting = row[f"Snapshot_{property}"]
             reference_setting = row[f"Reference_{property}"]

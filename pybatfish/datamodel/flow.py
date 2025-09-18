@@ -14,7 +14,8 @@
 import json
 import re
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Sequence, Text  # noqa: F401
+from collections.abc import Iterable, Sequence
+from typing import Any
 
 import attr
 
@@ -51,7 +52,7 @@ __all__ = [
 
 
 def _optional_int(x):
-    # type: (Any) -> Optional[int]
+    # type: (Any) -> int|None
     if x is None:
         return None
     return int(x)
@@ -75,31 +76,31 @@ class Flow(DataModelElement):
 
     dscp = attr.ib(type=int, converter=int)
     dstIp = attr.ib(type=str, converter=str)
-    dstPort = attr.ib(type=Optional[int], converter=_optional_int)
+    dstPort = attr.ib(type=int | None, converter=_optional_int)
     ecn = attr.ib(type=int, converter=int)
     fragmentOffset = attr.ib(type=int, converter=int)
-    icmpCode = attr.ib(type=Optional[int], converter=_optional_int)
-    icmpVar = attr.ib(type=Optional[int], converter=_optional_int)
-    ingressInterface = attr.ib(type=Optional[str])
-    ingressNode = attr.ib(type=Optional[str])
-    ingressVrf = attr.ib(type=Optional[str])
+    icmpCode = attr.ib(type=int | None, converter=_optional_int)
+    icmpVar = attr.ib(type=int | None, converter=_optional_int)
+    ingressInterface = attr.ib(type=str | None)
+    ingressNode = attr.ib(type=str | None)
+    ingressVrf = attr.ib(type=str | None)
     ipProtocol = attr.ib(type=str)
     packetLength = attr.ib(type=str)
     srcIp = attr.ib(type=str, converter=str)
-    srcPort = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsAck = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsCwr = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsEce = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsFin = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsPsh = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsRst = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsSyn = attr.ib(type=Optional[int], converter=_optional_int)
-    tcpFlagsUrg = attr.ib(type=Optional[int], converter=_optional_int)
+    srcPort = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsAck = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsCwr = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsEce = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsFin = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsPsh = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsRst = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsSyn = attr.ib(type=int | None, converter=_optional_int)
+    tcpFlagsUrg = attr.ib(type=int | None, converter=_optional_int)
 
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "Flow":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "Flow":
         return Flow(
             json_dict["dscp"],
             json_dict["dstIp"],
@@ -129,44 +130,29 @@ class Flow(DataModelElement):
         # type: () -> str
         iface_str = self._iface_str()
         vrf_str = self._vrf_str()
-        return (
-            "start={node}{iface}{vrf} [{src}->{dst}"
-            " {ip_proto}{dscp}{ecn}{offset}{length}]".format(
-                node=self.ingressNode,
-                iface=iface_str,
-                vrf=vrf_str,
-                src=self._ip_port(self.srcIp, self.srcPort),
-                dst=self._ip_port(self.dstIp, self.dstPort),
-                ip_proto=self.get_ip_protocol_str(),
-                dscp=(f" dscp={self.dscp}" if self.dscp != 0 else ""),
-                ecn=(f" ecn={self.ecn}" if self.ecn != 0 else ""),
-                offset=(
-                    f" fragmentOffset={self.fragmentOffset}"
-                    if self.fragmentOffset != 0
-                    else ""
-                ),
-                length=(
-                    f" length={self.packetLength}"
-                    if self.packetLength != 512  # Batfish default
-                    else ""
-                ),
-            )
+        return "start={node}{iface}{vrf} [{src}->{dst} {ip_proto}{dscp}{ecn}{offset}{length}]".format(
+            node=self.ingressNode,
+            iface=iface_str,
+            vrf=vrf_str,
+            src=self._ip_port(self.srcIp, self.srcPort),
+            dst=self._ip_port(self.dstIp, self.dstPort),
+            ip_proto=self.get_ip_protocol_str(),
+            dscp=(f" dscp={self.dscp}" if self.dscp != 0 else ""),
+            ecn=(f" ecn={self.ecn}" if self.ecn != 0 else ""),
+            offset=(f" fragmentOffset={self.fragmentOffset}" if self.fragmentOffset != 0 else ""),
+            length=(
+                f" length={self.packetLength}"
+                if self.packetLength != 512  # Batfish default
+                else ""
+            ),
         )
 
     def _vrf_str(self):
-        vrf_str = (
-            f" vrf={self.ingressVrf}"
-            if self.ingressVrf not in ["default", None]
-            else ""
-        )
+        vrf_str = f" vrf={self.ingressVrf}" if self.ingressVrf not in ["default", None] else ""
         return vrf_str
 
     def _iface_str(self):
-        iface_str = (
-            f" interface={self.ingressInterface}"
-            if self.ingressInterface is not None
-            else ""
-        )
+        iface_str = f" interface={self.ingressInterface}" if self.ingressInterface is not None else ""
         return iface_str
 
     def get_flag_str(self):
@@ -210,9 +196,7 @@ class Flow(DataModelElement):
     def _has_ports(self):
         # type: () -> bool
         return (
-            self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"]
-            and self.srcPort is not None
-            and self.dstPort is not None
+            self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"] and self.srcPort is not None and self.dstPort is not None
         )
 
     def _repr_html_(self):
@@ -220,34 +204,30 @@ class Flow(DataModelElement):
         return "<br>".join(self._repr_html_lines())
 
     def _repr_html_lines(self):
-        # type: () -> List[str]
+        # type: () -> list[str]
         lines = []
-        lines.append(
-            "Start Location: {node}{iface}{vrf}".format(
-                node=self.ingressNode, iface=self._iface_str(), vrf=self._vrf_str()
-            )
-        )
-        lines.append("Src IP: %s" % self.srcIp)
+        lines.append(f"Start Location: {self.ingressNode}{self._iface_str()}{self._vrf_str()}")
+        lines.append(f"Src IP: {self.srcIp}")
         if self._has_ports():
             assert self.srcPort is not None
-            lines.append("Src Port: %d" % self.srcPort)
-        lines.append("Dst IP: %s" % self.dstIp)
+            lines.append(f"Src Port: {self.srcPort}")
+        lines.append(f"Dst IP: {self.dstIp}")
         if self._has_ports():
             assert self.dstPort is not None
-            lines.append("Dst Port: %d" % self.dstPort)
-        lines.append("IP Protocol: %s" % self.get_ip_protocol_str())
+            lines.append(f"Dst Port: {self.dstPort}")
+        lines.append(f"IP Protocol: {self.get_ip_protocol_str()}")
         if self.dscp != 0:
-            lines.append("DSCP: %s" % self.dscp)
+            lines.append(f"DSCP: {self.dscp}")
         if self.ecn != 0:
-            lines.append("ECN: %s" % self.ecn)
+            lines.append(f"ECN: {self.ecn}")
         if self.fragmentOffset != 0:
-            lines.append("Fragment Offset: %d" % self.fragmentOffset)
+            lines.append(f"Fragment Offset: {self.fragmentOffset}")
         if self.packetLength != 512:
-            lines.append("Packet Length: %s" % self.packetLength)
+            lines.append(f"Packet Length: {self.packetLength}")
         return lines
 
     def _ip_port(self, ip, port):
-        # type: (str, Optional[int]) -> str
+        # type: (str, int|None) -> str
         if self._has_ports():
             assert port is not None
             return f"{ip}:{port}"
@@ -270,16 +250,12 @@ class FlowDiff(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> FlowDiff
-        return FlowDiff(
-            json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"]
-        )
+        # type: (dict) -> FlowDiff
+        return FlowDiff(json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"])
 
     def __str__(self):
         # type: () -> str
-        return "{fieldName}: {oldValue} -> {newValue}".format(
-            fieldName=self.fieldName, oldValue=self.oldValue, newValue=self.newValue
-        )
+        return f"{self.fieldName}: {self.oldValue} -> {self.newValue}"
 
 
 @attr.s(frozen=True)
@@ -299,7 +275,7 @@ class FlowTrace(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> FlowTrace
+        # type: (dict) -> FlowTrace
         return FlowTrace(
             json_dict["disposition"],
             [FlowTraceHop.from_dict(hop) for hop in json_dict.get("hops", [])],
@@ -309,9 +285,7 @@ class FlowTrace(DataModelElement):
     def __str__(self):
         # type: () -> str
         return "{hops}\n{notes}".format(
-            hops="\n".join(
-                [f"{num} {hop}" for num, hop in enumerate(self.hops, start=1)]
-            ),
+            hops="\n".join([f"{num} {hop}" for num, hop in enumerate(self.hops, start=1)]),
             notes=self.notes,
         )
 
@@ -326,21 +300,13 @@ class FlowTrace(DataModelElement):
         return "{notes}<br>{hops}".format(
             notes=self.format_notes_html(),
             hops="<br><br>".join(
-                [
-                    "<strong>{num}</strong> {hop}".format(
-                        num=num, hop=hop._repr_html_()
-                    )
-                    for num, hop in enumerate(self.hops, start=1)
-                ]
+                [f"<strong>{num}</strong> {hop._repr_html_()}" for num, hop in enumerate(self.hops, start=1)]
             ),
         )
 
     def format_notes_html(self):
         # type: () -> str
-        return '<span style="color:{color}; text-weight:bold;">{notes}</span>'.format(
-            color=_get_color_for_disposition(self.disposition),
-            notes=escape_html(self.notes),
-        )
+        return f'<span style="color:{_get_color_for_disposition(self.disposition)}; text-weight:bold;">{escape_html(self.notes)}</span>'
 
 
 @attr.s(frozen=True)
@@ -353,12 +319,12 @@ class FlowTraceHop(DataModelElement):
     """
 
     edge = attr.ib(type=Edge)
-    routes = attr.ib(type=List[Any])
-    transformedFlow = attr.ib(type=Optional[Flow])
+    routes = attr.ib(type=list[Any])
+    transformedFlow = attr.ib(type=Flow | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> FlowTraceHop
+        # type: (dict) -> FlowTraceHop
         transformed_flow = json_dict.get("transformedFlow")
         return FlowTraceHop(
             Edge.from_dict(json_dict["edge"]),
@@ -368,9 +334,7 @@ class FlowTraceHop(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        ret_str = "{}\n    Route(s):\n    {}".format(
-            self.edge, "\n    ".join(self.routes)
-        )
+        ret_str = "{}\n    Route(s):\n    {}".format(self.edge, "\n    ".join(self.routes))
         if self.transformedFlow:
             ret_str += f"\n    Transformed flow: {self.transformedFlow}"
         return ret_str
@@ -380,13 +344,10 @@ class FlowTraceHop(DataModelElement):
         indent = "&nbsp;" * 4
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
-            routes=indent
-            + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
+            routes=indent + ("<br>" + indent).join([escape_html(r) for r in self.routes]),
         )
         if self.transformedFlow:
-            result += "<br>Transformed flow: {}".format(
-                self.transformedFlow._repr_html_()
-            )
+            result += f"<br>Transformed flow: {self.transformedFlow._repr_html_()}"
         return result
 
 
@@ -395,7 +356,7 @@ class SessionAction(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> SessionAction
+        # type: (dict) -> SessionAction
         action = json_dict.get("type")
         if action == "Accept":
             return Accept()
@@ -458,7 +419,7 @@ class ForwardOutInterface(SessionAction):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> ForwardOutInterface
+        # type: (dict) -> ForwardOutInterface
         next_hop = json_dict.get("nextHop", {})
         return ForwardOutInterface(
             next_hop.get("hostname", ""),
@@ -468,9 +429,7 @@ class ForwardOutInterface(SessionAction):
 
     def __str__(self):
         # type: () -> str
-        return "ForwardOutInterface(Next Hop: {}, Next Hop Interface: {}, Outgoing Interface: {})".format(
-            self.nextHopHostname, self.nextHopInterface, self.outgoingInterface
-        )
+        return f"ForwardOutInterface(Next Hop: {self.nextHopHostname}, Next Hop Interface: {self.nextHopInterface}, Outgoing Interface: {self.outgoingInterface})"
 
 
 @attr.s(frozen=True)
@@ -488,12 +447,12 @@ class SessionMatchExpr(DataModelElement):
     ipProtocol = attr.ib(type=str)
     srcIp = attr.ib(type=str)
     dstIp = attr.ib(type=str)
-    srcPort = attr.ib(type=Optional[int], default=None)
-    dstPort = attr.ib(type=Optional[int], default=None)
+    srcPort = attr.ib(type=int | None, default=None)
+    dstPort = attr.ib(type=int | None, default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> SessionMatchExpr
+        # type: (dict) -> SessionMatchExpr
         return SessionMatchExpr(
             json_dict.get("ipProtocol", ""),
             json_dict.get("srcIp", ""),
@@ -518,7 +477,7 @@ class SessionScope(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> SessionScope
+        # type: (dict) -> SessionScope
         if "incomingInterfaces" in json_dict:
             return IncomingSessionScope.from_dict(json_dict)
         elif "originatingVrf" in json_dict:
@@ -534,11 +493,11 @@ class IncomingSessionScope(SessionScope):
     :ivar incomingInterfaces: Interfaces where exiting traffic can cause a session to be established
     """
 
-    incomingInterfaces = attr.ib(type=List[str])
+    incomingInterfaces = attr.ib(type=list[str])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> IncomingSessionScope
+        # type: (dict) -> IncomingSessionScope
         return IncomingSessionScope(json_dict.get("incomingInterfaces", ""))
 
     def __str__(self):
@@ -558,7 +517,7 @@ class OriginatingSessionScope(SessionScope):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> OriginatingSessionScope
+        # type: (dict) -> OriginatingSessionScope
         return OriginatingSessionScope(json_dict.get("originatingVrf", ""))
 
     def __str__(self):
@@ -574,12 +533,12 @@ class ArpErrorStepDetail(DataModelElement):
     :ivar resolvedNexthopIp: Resolve next hop Ip address
     """
 
-    outputInterface = attr.ib(type=Optional[str])
-    resolvedNexthopIp = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=str | None)
+    resolvedNexthopIp = attr.ib(type=str | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> ArpErrorStepDetail
+        # type: (dict) -> ArpErrorStepDetail
         return ArpErrorStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("resolvedNexthopIp"),
@@ -603,12 +562,12 @@ class DeliveredStepDetail(DataModelElement):
     :ivar resolvedNexthopIp: Resolve next hop Ip address
     """
 
-    outputInterface = attr.ib(type=Optional[str])
-    resolvedNexthopIp = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=str | None)
+    resolvedNexthopIp = attr.ib(type=str | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> DeliveredStepDetail
+        # type: (dict) -> DeliveredStepDetail
         return DeliveredStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("resolvedNexthopIp"),
@@ -633,11 +592,11 @@ class EnterInputIfaceStepDetail(DataModelElement):
     """
 
     inputInterface = attr.ib(type=str)
-    inputVrf = attr.ib(type=Optional[str])
+    inputVrf = attr.ib(type=str | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> EnterInputIfaceStepDetail
+        # type: (dict) -> EnterInputIfaceStepDetail
         return EnterInputIfaceStepDetail(
             json_dict.get("inputInterface", {}).get("interface"),
             json_dict.get("inputVrf"),
@@ -658,11 +617,11 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     """
 
     outputInterface = attr.ib(type=str)
-    transformedFlow = attr.ib(type=Optional[str])
+    transformedFlow = attr.ib(type=str | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> ExitOutputIfaceStepDetail
+        # type: (dict) -> ExitOutputIfaceStepDetail
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("transformedFlow"),
@@ -684,7 +643,7 @@ class InboundStepDetail(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> InboundStepDetail
+        # type: (dict) -> InboundStepDetail
         return InboundStepDetail(json_dict.get("interface", ""))
 
     def __str__(self):
@@ -716,11 +675,11 @@ class MatchSessionStepDetail(DataModelElement):
     sessionScope = attr.ib(type=SessionScope)
     sessionAction = attr.ib(type=SessionAction)
     matchCriteria = attr.ib(type=SessionMatchExpr)
-    transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
+    transformation = attr.ib(type=list[FlowDiff] | None, factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> MatchSessionStepDetail
+        # type: (dict) -> MatchSessionStepDetail
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
@@ -744,9 +703,7 @@ class MatchSessionStepDetail(DataModelElement):
             f"Match Criteria: {self.matchCriteria}",
         ]
         if self.transformation:
-            strings.append(
-                "Transformation: [{}]".format(", ".join(map(str, self.transformation)))
-            )
+            strings.append("Transformation: [{}]".format(", ".join(map(str, self.transformation))))
         return ", ".join(strings)
 
 
@@ -759,13 +716,9 @@ class ForwardingDetail(DataModelElement, metaclass=ABCMeta):
         raise NotImplementedError("ForwardingDetail elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "ForwardingDetail":
+    def from_dict(cls, json_dict: dict) -> "ForwardingDetail":
         if "type" not in json_dict:
-            raise ValueError(
-                "Unknown type of ForwardingDetail, missing the type property in: {}".format(
-                    json.dumps(json_dict)
-                )
-            )
+            raise ValueError(f"Unknown type of ForwardingDetail, missing the type property in: {json.dumps(json_dict)}")
         fd_type = json_dict["type"]
         if fd_type == "DelegatedToNextVrf":
             return DelegatedToNextVrf.from_dict(json_dict)
@@ -776,11 +729,7 @@ class ForwardingDetail(DataModelElement, metaclass=ABCMeta):
         elif fd_type == "Discarded":
             return Discarded.from_dict(json_dict)
         else:
-            raise ValueError(
-                "Unhandled ForwardingDetail type: {} in: {}".format(
-                    json.dumps(fd_type), json.dumps(json_dict)
-                )
-            )
+            raise ValueError(f"Unhandled ForwardingDetail type: {json.dumps(fd_type)} in: {json.dumps(json_dict)}")
 
 
 @attr.s(frozen=True)
@@ -799,7 +748,7 @@ class DelegatedToNextVrf(ForwardingDetail):
         return f"Delegated to next VRF: {escape_name(self.nextVrf)}"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "DelegatedToNextVrf":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "DelegatedToNextVrf":
         assert set(json_dict.keys()) == {"type", "nextVrf"}
         assert json_dict["type"] == "DelegatedToNextVrf"
         next_vrf = json_dict["nextVrf"]
@@ -821,12 +770,10 @@ class ForwardedIntoVxlanTunnel(ForwardingDetail):
             raise ValueError('type must be "ForwardedIntoVxlanTunnel"')
 
     def __str__(self) -> str:
-        return "Forwarded into VXLAN tunnel with VNI: {vni} and VTEP: {vtep}".format(
-            vni=self.vni, vtep=self.vtep
-        )
+        return f"Forwarded into VXLAN tunnel with VNI: {self.vni} and VTEP: {self.vtep}"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "ForwardedIntoVxlanTunnel":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "ForwardedIntoVxlanTunnel":
         assert set(json_dict.keys()) == {"type", "vni", "vtep"}
         assert json_dict["type"] == "ForwardedIntoVxlanTunnel"
         vni = json_dict["vni"]
@@ -844,7 +791,7 @@ class ForwardedOutInterface(ForwardingDetail):
     """
 
     outputInterface = attr.ib(type=str)
-    resolvedNextHopIp = attr.ib(type=Optional[str], default=None)
+    resolvedNextHopIp = attr.ib(type=str | None, default=None)
     type = attr.ib(type=str, default="ForwardedOutInterface")
 
     @type.validator
@@ -854,17 +801,13 @@ class ForwardedOutInterface(ForwardingDetail):
 
     def __str__(self) -> str:
         return (
-            "Forwarded out interface: {iface} with resolved next-hop IP: {nhip}".format(
-                iface=escape_name(self.outputInterface), nhip=self.resolvedNextHopIp
-            )
+            f"Forwarded out interface: {escape_name(self.outputInterface)} with resolved next-hop IP: {self.resolvedNextHopIp}"
             if self.resolvedNextHopIp
-            else "Forwarded out interface: {iface}".format(
-                iface=escape_name(self.outputInterface)
-            )
+            else f"Forwarded out interface: {escape_name(self.outputInterface)}"
         )
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "ForwardedOutInterface":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "ForwardedOutInterface":
         assert set(json_dict.keys()) == {
             "type",
             "outputInterface",
@@ -895,7 +838,7 @@ class Discarded(ForwardingDetail):
         return "Discarded"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "Discarded":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "Discarded":
         assert json_dict == {"type": "Discarded"}
         return Discarded()
 
@@ -911,7 +854,7 @@ class OriginateStepDetail(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> OriginateStepDetail
+        # type: (dict) -> OriginateStepDetail
         return OriginateStepDetail(json_dict.get("originatingVrf", ""))
 
     def __str__(self):
@@ -926,31 +869,23 @@ class RouteInfo(DataModelElement):
     protocol = attr.ib(type=str)
     network = attr.ib(type=str)
     # TODO: make nextHop mandatory after sufficient period
-    nextHop = attr.ib(type=Optional[NextHop])
+    nextHop = attr.ib(type=NextHop | None)
     # nextHopIp populated only in absence of nextHop
     # TODO: remove nextHopIp after sufficient period
-    nextHopIp = attr.ib(type=Optional[str])
+    nextHopIp = attr.ib(type=str | None)
     admin = attr.ib(type=int)
     metric = attr.ib(type=int)
 
     def _old_str(self) -> str:
-        return "{protocol} (Network: {network}, Next Hop IP:{next_hop_ip})".format(
-            protocol=self.protocol,
-            network=self.network,
-            next_hop_ip=self.nextHopIp,
-        )
+        return f"{self.protocol} (Network: {self.network}, Next Hop IP:{self.nextHopIp})"
 
     def __str__(self) -> str:
         if not self.nextHop:
             return self._old_str()
-        return "{protocol} (Network: {network}, Next Hop: {next_hop})".format(
-            protocol=self.protocol,
-            network=self.network,
-            next_hop=str(self.nextHop),
-        )
+        return f"{self.protocol} (Network: {self.network}, Next Hop: {str(self.nextHop)})"
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "RouteInfo":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "RouteInfo":
         assert set(json_dict.keys()) - {"nextHop", "nextHopIp", "nextVrf"} == {
             "protocol",
             "network",
@@ -965,7 +900,7 @@ class RouteInfo(DataModelElement):
         next_hop_ip = None
         if "nextHop" in json_dict:
             next_hop_dict = json_dict.get("nextHop")
-            assert isinstance(next_hop_dict, Dict)
+            assert isinstance(next_hop_dict, dict)
             next_hop = NextHop.from_dict(next_hop_dict)
         else:
             # legacy
@@ -986,26 +921,26 @@ class RoutingStepDetail(DataModelElement):
     :ivar routes: List of routes which were considered to select the forwarding action
     """
 
-    routes = attr.ib(type=List[RouteInfo])
+    routes = attr.ib(type=list[RouteInfo])
     # TODO: make forwardingDetail mandatory after sufficient period
-    forwardingDetail = attr.ib(type=Optional[ForwardingDetail])
+    forwardingDetail = attr.ib(type=ForwardingDetail | None)
     # TODO: remove arpIp after sufficient period
-    arpIp = attr.ib(type=Optional[str])
+    arpIp = attr.ib(type=str | None)
     # TODO: remove outputInteface after sufficient period
-    outputInterface = attr.ib(type=Optional[str])
+    outputInterface = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "RoutingStepDetail":
+    def from_dict(cls, json_dict: dict) -> "RoutingStepDetail":
         routes = []
         routes_json_list = json_dict.get("routes", [])
-        assert isinstance(routes_json_list, List)
+        assert isinstance(routes_json_list, list)
         for route_json in routes_json_list:
-            assert isinstance(route_json, Dict)
+            assert isinstance(route_json, dict)
             routes.append(RouteInfo.from_dict(route_json))
         forwarding_detail = None
         if "forwardingDetail" in json_dict:
             forwarding_detail_json = json_dict.get("forwardingDetail")
-            assert isinstance(forwarding_detail_json, Dict)
+            assert isinstance(forwarding_detail_json, dict)
             forwarding_detail = ForwardingDetail.from_dict(forwarding_detail_json)
         arp_ip = json_dict.get("arpIp")
         if arp_ip is not None:
@@ -1027,9 +962,7 @@ class RoutingStepDetail(DataModelElement):
         if self.outputInterface is not None:
             output.append("Output Interface: " + self.outputInterface)
         if self.routes:
-            output.append(
-                "Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]"
-            )
+            output.append("Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]")
         return ", ".join(output)
 
     def __str__(self) -> str:
@@ -1037,9 +970,7 @@ class RoutingStepDetail(DataModelElement):
             return self._old_str()
         output = [str(self.forwardingDetail)]
         if self.routes:
-            output.append(
-                "Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]"
-            )
+            output.append("Routes: " + "[" + ",".join([str(route) for route in self.routes]) + "]")
         return ", ".join(output)
 
 
@@ -1056,11 +987,11 @@ class SetupSessionStepDetail(DataModelElement):
     sessionScope = attr.ib(type=SessionScope)
     sessionAction = attr.ib(type=SessionAction)
     matchCriteria = attr.ib(type=SessionMatchExpr)
-    transformation = attr.ib(type=Optional[List[FlowDiff]], factory=list)
+    transformation = attr.ib(type=list[FlowDiff] | None, factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> SetupSessionStepDetail
+        # type: (dict) -> SetupSessionStepDetail
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
@@ -1084,9 +1015,7 @@ class SetupSessionStepDetail(DataModelElement):
             f"Match Criteria: {self.matchCriteria}",
         ]
         if self.transformation:
-            strings.append(
-                "Transformation: [{}]".format(", ".join(map(str, self.transformation)))
-            )
+            strings.append("Transformation: [{}]".format(", ".join(map(str, self.transformation))))
         return ", ".join(strings)
 
 
@@ -1103,11 +1032,11 @@ class FilterStepDetail(DataModelElement):
     filter = attr.ib(type=str)
     filterType = attr.ib(type=str)
     inputInterface = attr.ib(type=str)
-    flow = attr.ib(type=Optional[Flow])
+    flow = attr.ib(type=Flow | None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> FilterStepDetail
+        # type: (dict) -> FilterStepDetail
         flowObj = json_dict.get("flow", {})
         return FilterStepDetail(
             json_dict.get("filter", ""),
@@ -1133,7 +1062,7 @@ class PolicyStepDetail(DataModelElement):
     policy = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict[str, Any]) -> "PolicyStepDetail":
+    def from_dict(cls, json_dict: dict[str, Any]) -> "PolicyStepDetail":
         return PolicyStepDetail(json_dict.get("policy", ""))
 
     def __str__(self) -> str:
@@ -1149,11 +1078,11 @@ class TransformationStepDetail(DataModelElement):
     """
 
     transformationType = attr.ib(type=str)
-    flowDiffs = attr.ib(type=List[FlowDiff])
+    flowDiffs = attr.ib(type=list[FlowDiff])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> TransformationStepDetail
+        # type: (dict) -> TransformationStepDetail
         return TransformationStepDetail(
             json_dict["transformationType"],
             [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
@@ -1182,7 +1111,7 @@ class Step(DataModelElement):
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Optional[Step]
+        # type: (dict) -> None|Step
 
         from_dicts = {
             "ArpError": ArpErrorStepDetail.from_dict,
@@ -1233,12 +1162,12 @@ class Hop(DataModelElement):
     """
 
     node = attr.ib(type=str)
-    steps = attr.ib(type=List[Step])
+    steps = attr.ib(type=list[Step])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Hop
-        steps = []  # type: List[Step]
+        # type: (dict) -> Hop
+        steps = []  # type: list[Step]
         for step in json_dict["steps"]:
             step_obj = Step.from_dict(step)
             if step_obj is not None:
@@ -1253,9 +1182,7 @@ class Hop(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "node: {node}\n  {steps}".format(
-            node=self.node, steps="\n  ".join(map(str, self.steps))
-        )
+        return "node: {node}\n  {steps}".format(node=self.node, steps="\n  ".join(map(str, self.steps)))
 
     def _repr_html_(self):
         # type: () -> str
@@ -1266,8 +1193,8 @@ class Hop(DataModelElement):
 
     @staticmethod
     def _get_routes_data(routes):
-        # type: (List[Dict]) -> List[str]
-        routes_str = []  # type: List[str]
+        # type: (list[dict]) -> list[str]
+        routes_str = []  # type: list[str]
         for route in routes:
             routes_str.append(
                 "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
@@ -1290,11 +1217,11 @@ class Trace(DataModelElement):
     """
 
     disposition = attr.ib(type=str)
-    hops = attr.ib(type=List[Hop])
+    hops = attr.ib(type=list[Hop])
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> Trace
+        # type: (dict) -> Trace
         return Trace(
             json_dict["disposition"],
             [Hop.from_dict(hop) for hop in json_dict.get("hops", [])],
@@ -1310,26 +1237,16 @@ class Trace(DataModelElement):
         # type: () -> str
         return "{disposition}\n{hops}".format(
             disposition=self.disposition,
-            hops="\n".join(
-                [f"{num}. {hop}" for num, hop in enumerate(self.hops, start=1)]
-            ),
+            hops="\n".join([f"{num}. {hop}" for num, hop in enumerate(self.hops, start=1)]),
         )
 
     def _repr_html_(self):
         # type: () -> str
-        disposition_span = '<span style="color:{color}; text-weight:bold;">{disposition}</span>'.format(
-            color=_get_color_for_disposition(self.disposition),
-            disposition=self.disposition,
-        )
+        disposition_span = f'<span style="color:{_get_color_for_disposition(self.disposition)}; text-weight:bold;">{self.disposition}</span>'
         return "{disposition_span}<br>{hops}".format(
             disposition_span=disposition_span,
             hops="<br>".join(
-                [
-                    "<strong>{num}</strong>. {hop}".format(
-                        num=num, hop=hop._repr_html_()
-                    )
-                    for num, hop in enumerate(self.hops, start=1)
-                ]
+                [f"<strong>{num}</strong>. {hop._repr_html_()}" for num, hop in enumerate(self.hops, start=1)]
             ),
         )
 
@@ -1453,7 +1370,7 @@ class MatchTcpFlags(DataModelElement):
 
     @staticmethod
     def match_established():
-        # type: () -> List[MatchTcpFlags]
+        # type: () -> list[MatchTcpFlags]
         """Return a list of match conditions matching an established flow (ACK or RST bit set).
 
         Other bits may take any value.
@@ -1462,17 +1379,13 @@ class MatchTcpFlags(DataModelElement):
 
     @staticmethod
     def match_not_established():
-        # type: () -> List[MatchTcpFlags]
+        # type: () -> list[MatchTcpFlags]
         """Return a list of match conditions matching a non-established flow.
 
         Meaning both ACK and RST bits are unset.
         Other bits may take any value.
         """
-        return [
-            MatchTcpFlags(
-                useAck=True, useRst=True, tcpFlags=TcpFlags(ack=False, rst=False)
-            )
-        ]
+        return [MatchTcpFlags(useAck=True, useRst=True, tcpFlags=TcpFlags(ack=False, rst=False))]
 
 
 def _get_color_for_disposition(disposition):
@@ -1485,7 +1398,7 @@ def _get_color_for_disposition(disposition):
 
 
 def _normalize_phc_intspace(value):
-    # type: (Any) -> Optional[Text]
+    # type: (Any) -> None|str
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, int):
@@ -1497,7 +1410,7 @@ def _normalize_phc_intspace(value):
 
 
 def _normalize_phc_list(value):
-    # type: (Any) -> Optional[List[Text]]
+    # type: (Any) -> None|list[str]
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, str):
@@ -1511,7 +1424,7 @@ def _normalize_phc_list(value):
 
 
 def _normalize_phc_tcpflags(value):
-    # type: (Any) -> Optional[List[MatchTcpFlags]]
+    # type: (Any) -> None|list[MatchTcpFlags]
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, MatchTcpFlags):
@@ -1520,11 +1433,11 @@ def _normalize_phc_tcpflags(value):
 
 
 def _normalize_phc_strings(value):
-    # type: (Any) -> Optional[Text]
+    # type: (Any) -> None|str
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: Text
+        result = ",".join(value)  # type: str
         return result
     raise ValueError(f"Invalid value {value}")
 
@@ -1574,37 +1487,19 @@ class HeaderConstraints(DataModelElement):
     """
 
     # Order params in likelihood of specification
-    srcIps = attr.ib(default=None, type=Optional[str])
-    dstIps = attr.ib(default=None, type=Optional[str])
-    srcPorts = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    dstPorts = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    ipProtocols = attr.ib(
-        default=None, type=Optional[List[str]], converter=_normalize_phc_list
-    )
-    applications = attr.ib(
-        default=None, type=Optional[List[str]], converter=_normalize_phc_list
-    )
-    icmpCodes = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    icmpTypes = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    ecns = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
-    dscps = attr.ib(default=None, type=Optional[str], converter=_normalize_phc_intspace)
-    packetLengths = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    fragmentOffsets = attr.ib(
-        default=None, type=Optional[str], converter=_normalize_phc_intspace
-    )
-    tcpFlags = attr.ib(
-        default=None, type=Optional[MatchTcpFlags], converter=_normalize_phc_tcpflags
-    )
+    srcIps = attr.ib(default=None, type=str | None)
+    dstIps = attr.ib(default=None, type=str | None)
+    srcPorts = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    dstPorts = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    ipProtocols = attr.ib(default=None, type=list[str] | None, converter=_normalize_phc_list)
+    applications = attr.ib(default=None, type=list[str] | None, converter=_normalize_phc_list)
+    icmpCodes = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    icmpTypes = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    ecns = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    dscps = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    packetLengths = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    fragmentOffsets = attr.ib(default=None, type=str | None, converter=_normalize_phc_intspace)
+    tcpFlags = attr.ib(default=None, type=MatchTcpFlags | None, converter=_normalize_phc_tcpflags)
 
     @classmethod
     def from_dict(cls, json_dict):
@@ -1672,10 +1567,10 @@ class PathConstraints(DataModelElement):
     :ivar forbiddenLocations: Node specification for where a flow is *not* allowed to transit
     """
 
-    startLocation = attr.ib(default=None, type=Optional[str])
-    endLocation = attr.ib(default=None, type=Optional[str])
-    transitLocations = attr.ib(default=None, type=Optional[str])
-    forbiddenLocations = attr.ib(default=None, type=Optional[str])
+    startLocation = attr.ib(default=None, type=str | None)
+    endLocation = attr.ib(default=None, type=str | None)
+    transitLocations = attr.ib(default=None, type=str | None)
+    forbiddenLocations = attr.ib(default=None, type=str | None)
 
     @classmethod
     def from_dict(cls, json_dict):
