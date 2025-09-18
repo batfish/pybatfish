@@ -14,14 +14,13 @@
 
 import re
 from io import StringIO
-from typing import Optional, Text  # noqa: F401
 
 from capirca.lib import naming, policy
 
 from pybatfish.client import capirca
 
 
-def _load_test_definitions(netstr: str, svcstr: Optional[str] = None) -> naming.Naming:
+def _load_test_definitions(netstr: str, svcstr: str | None = None) -> naming.Naming:
     """Parses a Capirca Naming from the given network and services strings."""
     defs = naming.Naming()
     if netstr:

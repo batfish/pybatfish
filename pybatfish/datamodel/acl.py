@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from typing import Dict, List, Optional  # noqa: F401
 
 import attr
 from pandas.core.indexes.frozen import FrozenList
@@ -38,11 +37,11 @@ class AclTraceEvent(DataModelElement):
     :ivar description: The description of the event
     """
 
-    description = attr.ib(type=Optional[str], default=None)
+    description = attr.ib(type=str | None, default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> AclTraceEvent
+        # type: (dict) -> AclTraceEvent
         return AclTraceEvent(json_dict.get("description"))
 
     def __str__(self):
@@ -57,20 +56,16 @@ class AclTrace(DataModelElement):
     :ivar events: A list of :py:class:`AclTraceEvent`
     """
 
-    events = attr.ib(type=List[AclTraceEvent], factory=list)
+    events = attr.ib(type=list[AclTraceEvent], factory=list)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> AclTrace
-        return AclTrace(
-            [AclTraceEvent.from_dict(event) for event in json_dict.get("events", [])]
-        )
+        # type: (dict) -> AclTrace
+        return AclTrace([AclTraceEvent.from_dict(event) for event in json_dict.get("events", [])])
 
     def __str__(self):
         # type: () -> str
-        return "\n".join(
-            str(event) for event in self.events if event.description is not None
-        )
+        return "\n".join(str(event) for event in self.events if event.description is not None)
 
 
 @attr.s(frozen=True)
@@ -87,7 +82,7 @@ class VendorStructureId(DataModelElement):
     structureName = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "VendorStructureId":
+    def from_dict(cls, json_dict: dict) -> "VendorStructureId":
         return VendorStructureId(
             filename=json_dict.get("filename", ""),
             structureType=json_dict.get("structureType", ""),
@@ -101,7 +96,7 @@ class Fragment(DataModelElement):
     """
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "Fragment":
+    def from_dict(cls, json_dict: dict) -> "Fragment":
         if json_dict["class"] == "org.batfish.datamodel.TraceElement$TextFragment":
             return TextFragment.from_dict(json_dict)
         elif json_dict["class"] == "org.batfish.datamodel.TraceElement$LinkFragment":
@@ -113,13 +108,13 @@ class Fragment(DataModelElement):
 class TextFragment(Fragment):
     """Represents a plain-text :py:class:`Fragment`.
 
-    :ivar text: Text content of the fragment
+    :ivar text: str content of the fragment
     """
 
     text = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "TextFragment":
+    def from_dict(cls, json_dict: dict) -> "TextFragment":
         return TextFragment(json_dict.get("text", ""))
 
     def __str__(self) -> str:
@@ -130,7 +125,7 @@ class TextFragment(Fragment):
 class LinkFragment(Fragment):
     """Represents a :py:class:`Fragment` that links to a vendor structure.
 
-    :ivar text: Text content of the fragment
+    :ivar text: str content of the fragment
     :ivar vendorStructureId: Link of the fragment
     """
 
@@ -138,7 +133,7 @@ class LinkFragment(Fragment):
     vendorStructureId = attr.ib(type=VendorStructureId)
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "LinkFragment":
+    def from_dict(cls, json_dict: dict) -> "LinkFragment":
         return LinkFragment(
             json_dict.get("text", ""),
             VendorStructureId.from_dict(json_dict.get("vendorStructureId", {})),
@@ -155,13 +150,11 @@ class TraceElement(DataModelElement):
     :ivar fragments: A list of :py:class:`Fragment` which describes an element of a trace
     """
 
-    fragments = attr.ib(type=List[Fragment])
+    fragments = attr.ib(type=list[Fragment])
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "TraceElement":
-        return TraceElement(
-            [Fragment.from_dict(f) for f in json_dict.get("fragments", [])]
-        )
+    def from_dict(cls, json_dict: dict) -> "TraceElement":
+        return TraceElement([Fragment.from_dict(f) for f in json_dict.get("fragments", [])])
 
     def __str__(self) -> str:
         return "".join(str(fragment) for fragment in self.fragments)
@@ -176,10 +169,10 @@ class TraceTree(DataModelElement):
     """
 
     traceElement = attr.ib(type=TraceElement)
-    children = attr.ib(type=List["TraceTree"])
+    children = attr.ib(type=list["TraceTree"])
 
     @classmethod
-    def from_dict(cls, json_dict: Dict) -> "TraceTree":
+    def from_dict(cls, json_dict: dict) -> "TraceTree":
         return TraceTree(
             TraceElement.from_dict(json_dict.get("traceElement", {})),
             [TraceTree.from_dict(child) for child in json_dict.get("children", [])],

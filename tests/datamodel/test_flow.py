@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 from operator import attrgetter
 
@@ -235,9 +234,7 @@ def test_flow_trace_hop_no_transformed_flow():
             },
             "filterIn": None,
             "filterOut": None,
-            "routes": [
-                "StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1"
-            ],
+            "routes": ["StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1"],
             "transformedFlow": None,
         }
     )
@@ -252,9 +249,7 @@ def test_flow_trace_hop_no_transformed_flow():
             },
             "filterIn": None,
             "filterOut": None,
-            "routes": [
-                "StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1"
-            ],
+            "routes": ["StaticRoute<0.0.0.0/0,nhip:10.192.48.1,nhint:eth0>_fnhip:10.192.48.1"],
         }
     )
 
@@ -419,33 +414,21 @@ def test_str():
         "tcpFlagsUrg": 0,
     }
     # no ports
-    assert (
-        str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1->2.1.1.1 ipProtocol=168]"
-    )
+    assert str(Flow.from_dict(flow_dict)) == "start=ingress [5.5.1.1->2.1.1.1 ipProtocol=168]"
 
     # with ports
     flow_dict["ipProtocol"] = "TCP"
     flow_dict["dstPort"] = "80"
     flow_dict["srcPort"] = "800"
-    assert (
-        str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set)]"
-    )
+    assert str(Flow.from_dict(flow_dict)) == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set)]"
 
     # uncommon dscp
     flow_dict["dscp"] = "1"
-    assert (
-        str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1]"
-    )
+    assert str(Flow.from_dict(flow_dict)) == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1]"
 
     # uncommon ecn
     flow_dict["ecn"] = "1"
-    assert (
-        str(Flow.from_dict(flow_dict))
-        == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1]"
-    )
+    assert str(Flow.from_dict(flow_dict)) == "start=ingress [5.5.1.1:800->2.1.1.1:80 TCP (no flags set) dscp=1 ecn=1]"
 
     # uncommon fragment offset
     flow_dict["fragmentOffset"] = "1501"
@@ -610,12 +593,8 @@ def test_hop_repr_str():
             Step(
                 RoutingStepDetail(
                     [
-                        RouteInfo(
-                            "bgp", "1.1.1.1/24", NextHopIp("1.2.3.4"), None, 1, 1
-                        ),
-                        RouteInfo(
-                            "static", "1.1.1.2/24", NextHopIp("1.2.3.5"), None, 1, 1
-                        ),
+                        RouteInfo("bgp", "1.1.1.1/24", NextHopIp("1.2.3.4"), None, 1, 1),
+                        RouteInfo("static", "1.1.1.2/24", NextHopIp("1.2.3.5"), None, 1, 1),
                     ],
                     ForwardedOutInterface("iface1", "12.123.1.2"),
                     "12.123.1.2",
@@ -623,9 +602,7 @@ def test_hop_repr_str():
                 ),
                 "FORWARDED",
             ),
-            Step(
-                FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"
-            ),
+            Step(FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"),
             Step(ExitOutputIfaceStepDetail("out_iface1", None), "SENT_OUT"),
         ],
     )
@@ -655,9 +632,7 @@ def test_hop_repr_str_legacy():
                 ),
                 "FORWARDED",
             ),
-            Step(
-                FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"
-            ),
+            Step(FilterStepDetail("preSourceNat_filter", "PRENAT", "", ""), "PERMITTED"),
             Step(ExitOutputIfaceStepDetail("out_iface1", None), "SENT_OUT"),
         ],
     )
@@ -678,10 +653,7 @@ def test_only_routes_str_legacy():
         None,
     )
 
-    assert (
-        str(routingStepDetail)
-        == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
-    )
+    assert str(routingStepDetail) == "Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
 
 
 # TOOD: remove after sufficient period
@@ -692,10 +664,7 @@ def test_no_output_iface_str_legacy():
         "1.2.3.4",
         None,
     )
-    assert (
-        str(routingStepDetail)
-        == "ARP IP: 1.2.3.4, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
-    )
+    assert str(routingStepDetail) == "ARP IP: 1.2.3.4, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
 
 
 # TOOD: remove after sufficient period
@@ -707,8 +676,7 @@ def test_no_arp_ip_str_legacy():
         "iface1",
     )
     assert (
-        str(routingStepDetail)
-        == "Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
+        str(routingStepDetail) == "Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4)]"
     )
 
 
@@ -727,9 +695,7 @@ def test_match_tcp_generators():
     assert MatchTcpFlags.match_ack() == MatchTcpFlags(TcpFlags(ack=True), useAck=True)
     assert MatchTcpFlags.match_rst() == MatchTcpFlags(TcpFlags(rst=True), useRst=True)
     assert MatchTcpFlags.match_syn() == MatchTcpFlags(TcpFlags(syn=True), useSyn=True)
-    assert MatchTcpFlags.match_synack() == MatchTcpFlags(
-        TcpFlags(ack=True, syn=True), useAck=True, useSyn=True
-    )
+    assert MatchTcpFlags.match_synack() == MatchTcpFlags(TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
     assert len(MatchTcpFlags.match_established()) == 2
     assert MatchTcpFlags.match_established() == [
         MatchTcpFlags.match_ack(),
@@ -800,18 +766,13 @@ def test_flow_repr_html_start_location():
     assert "Start Location: ingressNode" in Flow.from_dict(flow_dict)._repr_html_lines()
 
     flow_dict["ingressVrf"] = "ingressVrf"
-    assert (
-        "Start Location: ingressNode vrf=ingressVrf"
-        in Flow.from_dict(flow_dict)._repr_html_lines()
-    )
+    assert "Start Location: ingressNode vrf=ingressVrf" in Flow.from_dict(flow_dict)._repr_html_lines()
 
     del flow_dict["ingressVrf"]
     flow_dict["ingressInterface"] = "ingressIface"
 
     flow = Flow.from_dict(flow_dict)
-    assert (
-        "Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines()
-    )
+    assert "Start Location: ingressNode interface=ingressIface" in flow._repr_html_lines()
 
 
 def test_flow_str_ports():
@@ -875,9 +836,7 @@ def test_SetupSessionStepDetail_from_dict():
         "sessionScope": {"incomingInterfaces": ["reth0.6"]},
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
-        "transformation": [
-            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
-        ],
+        "transformation": [{"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}],
     }
     assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail(
         IncomingSessionScope(["reth0.6"]),
@@ -896,9 +855,7 @@ def test_SetupSessionStepDetail_from_dict_bw_compat():
         "incomingInterfaces": ["reth0.6"],
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
-        "transformation": [
-            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
-        ],
+        "transformation": [{"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}],
     }
     assert SetupSessionStepDetail.from_dict(d) == SetupSessionStepDetail(
         IncomingSessionScope(["reth0.6"]),
@@ -938,9 +895,7 @@ def test_MatchSessionStepDetail_from_dict():
         "sessionScope": {"incomingInterfaces": ["reth0.6"]},
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
-        "transformation": [
-            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
-        ],
+        "transformation": [{"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}],
     }
     assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
         IncomingSessionScope(["reth0.6"]),
@@ -959,9 +914,7 @@ def test_MatchSessionStepDetail_from_dict_bw_compat():
         "incomingInterfaces": ["reth0.6"],
         "sessionAction": {"type": "Accept"},
         "matchCriteria": {"ipProtocol": "ICMP", "srcIp": "2.2.2.2", "dstIp": "3.3.3.3"},
-        "transformation": [
-            {"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}
-        ],
+        "transformation": [{"fieldName": "srcIp", "oldValue": "2.2.2.2", "newValue": "1.1.1.1"}],
     }
     assert MatchSessionStepDetail.from_dict(d) == MatchSessionStepDetail(
         IncomingSessionScope(["reth0.6"]),
@@ -998,9 +951,7 @@ def test_MatchSessionStepDetail_str():
 
 def test_SessionMatchExpr_from_dict():
     d = {"ipProtocol": "ICMP", "srcIp": "1.1.1.1", "dstIp": "2.2.2.2"}
-    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
-        "ICMP", "1.1.1.1", "2.2.2.2"
-    )
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2")
     d = {
         "ipProtocol": "ICMP",
         "srcIp": "1.1.1.1",
@@ -1008,18 +959,14 @@ def test_SessionMatchExpr_from_dict():
         "srcPort": 1111,
         "dstPort": 2222,
     }
-    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr(
-        "ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222
-    )
+    assert SessionMatchExpr.from_dict(d) == SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222)
 
 
 def test_SessionMatchExpr_str():
     match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2")
     assert str(match) == "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2]"
     match = SessionMatchExpr("ICMP", "1.1.1.1", "2.2.2.2", 1111, 2222)
-    assert str(match) == (
-        "[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2, srcPort=1111, dstPort=2222]"
-    )
+    assert str(match) == ("[ipProtocol=ICMP, srcIp=1.1.1.1, dstIp=2.2.2.2, srcPort=1111, dstPort=2222]")
 
 
 def test_SessionScope_from_dict():
@@ -1049,9 +996,7 @@ def test_SessionAction_from_dict():
         "nextHop": {"hostname": "1.1.1.1", "interface": "iface1"},
         "outgoingInterface": "iface2",
     }
-    assert SessionAction.from_dict(d) == ForwardOutInterface(
-        "1.1.1.1", "iface1", "iface2"
-    )
+    assert SessionAction.from_dict(d) == ForwardOutInterface("1.1.1.1", "iface1", "iface2")
     with pytest.raises(ValueError):
         SessionAction.from_dict({"type": "NotAType"})
 
@@ -1168,12 +1113,8 @@ def testDelegatedToNextVrfSerialization():
 
 
 def testDelegatedToNextVrfDeserialization():
-    assert ForwardingDetail.from_dict(
-        {"type": "DelegatedToNextVrf", "nextVrf": "foo"}
-    ) == DelegatedToNextVrf("foo")
-    assert DelegatedToNextVrf.from_dict(
-        {"type": "DelegatedToNextVrf", "nextVrf": "foo"}
-    ) == DelegatedToNextVrf("foo")
+    assert ForwardingDetail.from_dict({"type": "DelegatedToNextVrf", "nextVrf": "foo"}) == DelegatedToNextVrf("foo")
+    assert DelegatedToNextVrf.from_dict({"type": "DelegatedToNextVrf", "nextVrf": "foo"}) == DelegatedToNextVrf("foo")
 
 
 def testDelegatedToNextVrfStr():
@@ -1244,10 +1185,7 @@ def testForwardedIntoVxlanTunnelDeserialization():
 
 
 def testForwardedIntoVxlanTunnelStr():
-    assert (
-        str(ForwardedIntoVxlanTunnel(5, "1.1.1.1"))
-        == "Forwarded into VXLAN tunnel with VNI: 5 and VTEP: 1.1.1.1"
-    )
+    assert str(ForwardedIntoVxlanTunnel(5, "1.1.1.1")) == "Forwarded into VXLAN tunnel with VNI: 5 and VTEP: 1.1.1.1"
 
 
 def testDiscardedSerialization():
@@ -1321,8 +1259,7 @@ def testRouteInfoStr():
 # TODO: remove after sufficient period
 def testRouteInfoStr_legacy():
     assert (
-        str(RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2))
-        == "tcp (Network: 1.1.1.1/32, Next Hop IP:2.2.2.2)"
+        str(RouteInfo("tcp", "1.1.1.1/32", None, "2.2.2.2", 1, 2)) == "tcp (Network: 1.1.1.1/32, Next Hop IP:2.2.2.2)"
     )
 
 

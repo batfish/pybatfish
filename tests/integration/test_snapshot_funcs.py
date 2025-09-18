@@ -52,9 +52,7 @@ def example_snapshot(bf: Session, network: str) -> typing.Generator[str, None, N
 
 
 @pytest.fixture()
-def file_status_snapshot(
-    bf: Session, network: str
-) -> typing.Generator[str, None, None]:
+def file_status_snapshot(bf: Session, network: str) -> typing.Generator[str, None, None]:
     bf.set_network(network)
     name = uuid.uuid4().hex
     bf.init_snapshot(join(_this_dir, "snapshot_file_status"), name)
@@ -101,26 +99,20 @@ def test_fork_snapshot(bf: Session, network: str, example_snapshot: str) -> None
         bf.delete_snapshot(name)
 
 
-def test_fork_snapshot_add_files(
-    bf: Session, network: str, example_snapshot: str
-) -> None:
+def test_fork_snapshot_add_files(bf: Session, network: str, example_snapshot: str) -> None:
     """Run fork snapshot command that adds files."""
     name = uuid.uuid4().hex
 
     bf.set_network(network)
     try:
         # Should succeed uploading a zip with a new file
-        bf.fork_snapshot(
-            base_name=example_snapshot, name=name, add_files=join(_this_dir, "fork")
-        )
+        bf.fork_snapshot(base_name=example_snapshot, name=name, add_files=join(_this_dir, "fork"))
 
     finally:
         bf.delete_snapshot(name)
 
 
-def test_fork_snapshot_bad_restore(
-    bf: Session, network: str, example_snapshot: str
-) -> None:
+def test_fork_snapshot_bad_restore(bf: Session, network: str, example_snapshot: str) -> None:
     """Run fork snapshot with invalid restore item."""
     fail_name = uuid.uuid4().hex
     node = "as2border1"
@@ -129,14 +121,10 @@ def test_fork_snapshot_bad_restore(
     # Should fail when trying to restore an item that was never deactivated
     # in base snapshot
     with pytest.raises(HTTPError):
-        bf.fork_snapshot(
-            base_name=example_snapshot, name=fail_name, restore_nodes=[node]
-        )
+        bf.fork_snapshot(base_name=example_snapshot, name=fail_name, restore_nodes=[node])
 
 
-def test_fork_snapshot_deactivate(
-    bf: Session, network: str, example_snapshot: str
-) -> None:
+def test_fork_snapshot_deactivate(bf: Session, network: str, example_snapshot: str) -> None:
     """Use fork snapshot to deactivate and restore items."""
     deactivate_name = uuid.uuid4().hex
     restore_name = uuid.uuid4().hex
@@ -202,9 +190,7 @@ def test_list_snapshots(bf: Session, network: str, example_snapshot: str) -> Non
     assert verbose[0][BfConsts.PROP_NAME] == example_snapshot
 
 
-def test_get_snapshot_inferred_node_roles(
-    bf: Session, network: str, roles_snapshot: str
-) -> None:
+def test_get_snapshot_inferred_node_roles(bf: Session, network: str, roles_snapshot: str) -> None:
     bf.set_network(network)
     bf.set_snapshot(roles_snapshot)
     # should not be empty
@@ -212,9 +198,7 @@ def test_get_snapshot_inferred_node_roles(
 
 
 @requires_bf("2024.07.01")
-def test_get_snapshot_input_object(
-    bf: Session, network: str, example_snapshot: str
-) -> None:
+def test_get_snapshot_input_object(bf: Session, network: str, example_snapshot: str) -> None:
     bf.set_network(network)
     bf.set_snapshot(example_snapshot)
     # non-existent input object should yield 404
@@ -224,18 +208,12 @@ def test_get_snapshot_input_object(
     assert bf.get_snapshot_input_object_text("other_dir/other_file") == "hello"
 
 
-def test_get_snapshot_node_roles(
-    bf: Session, network: str, roles_snapshot: str
-) -> None:
+def test_get_snapshot_node_roles(bf: Session, network: str, roles_snapshot: str) -> None:
     bf.set_network(network)
     bf.set_snapshot(roles_snapshot)
     dimension_name = "dim1"
-    mapping = RoleMapping(
-        name="mapping", regex="regex", roleDimensionGroups={dimension_name: [1]}
-    )
-    node_roles = NodeRolesData(
-        roleDimensionOrder=[dimension_name], roleMappings=[mapping]
-    )
+    mapping = RoleMapping(name="mapping", regex="regex", roleDimensionGroups={dimension_name: [1]})
+    node_roles = NodeRolesData(roleDimensionOrder=[dimension_name], roleMappings=[mapping])
     bf.put_node_roles(node_roles)
     # there should be 1 role dimension
     snapshot_node_roles = bf.get_node_roles()
@@ -244,9 +222,7 @@ def test_get_snapshot_node_roles(
 
 
 @requires_bf("2024.07.01")
-def test_delete_snapshot_object(
-    bf: Session, network: str, example_snapshot: str
-) -> None:
+def test_delete_snapshot_object(bf: Session, network: str, example_snapshot: str) -> None:
     bf.set_network(network)
     bf.set_snapshot(example_snapshot)
     # object should exist after being placed

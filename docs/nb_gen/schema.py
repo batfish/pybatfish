@@ -1,6 +1,4 @@
-# coding: utf-8
 import re
-from typing import Optional
 
 from inflection import dasherize, underscore
 
@@ -17,7 +15,7 @@ _BASE_TYPES = {
 _INPUT_TYPES = {
     "comparator": "str",
     "bgprouteconstraints": "pybatfish.datamodel.route.BgpRouteConstraints",
-    "bgproutes": "List[pybatfish.datamodel.route.BgpRoute]",
+    "bgproutes": "list[pybatfish.datamodel.route.BgpRoute]",
     "bgpsessionproperties": "pybatfish.datamodel.route.BgpSessionProperties",
     "edge": "pybatfish.datamodel.primitives.Edge",
     "integerspace": "str",
@@ -64,23 +62,21 @@ _SELF_DESCRIBING_CONVERSIONS = {
 }
 
 
-def convert_schema(value: str, usage: str, question_name: Optional[str] = None) -> str:
+def convert_schema(value: str, usage: str, question_name: str | None = None) -> str:
     """
     Converts the return values from question class into the appropriate type
     (as a link to the pybatfish datamodel or specifier description, if applicable)
     """
     allowed_usages = ["input", "output", "python"]
     if usage not in allowed_usages:
-        raise ValueError(
-            f"Invalid conversion type: {usage}, expected one of: {allowed_usages}"
-        )
+        raise ValueError(f"Invalid conversion type: {usage}, expected one of: {allowed_usages}")
 
     if value.startswith("Set<"):
         inner = value[4:-1]  # strip prefix and suffix ">"
-        return "Set of {}".format(convert_schema(inner, usage, question_name))
+        return f"Set of {convert_schema(inner, usage, question_name)}"
     elif value.startswith("List<") or value.startswith("List["):
         inner = value[5:-1]  # strip prefix and suffix ">"
-        return "List of {}".format(convert_schema(inner, usage, question_name))
+        return f"List of {convert_schema(inner, usage, question_name)}"
     elif value.lower() in _BASE_TYPES:
         return _BASE_TYPES[value.lower()]
     elif value.endswith("Spec"):
@@ -97,15 +93,11 @@ def convert_schema(value: str, usage: str, question_name: Optional[str] = None) 
         return f"[{text}](../datamodel.rst#{value})"
     elif value.lower() == "selfdescribing":
         if question_name is None:
-            raise ValueError(
-                "Converting selfdescribing schema requires a question name"
-            )
+            raise ValueError("Converting selfdescribing schema requires a question name")
         try:
             return _SELF_DESCRIBING_CONVERSIONS[question_name]
         except KeyError:
-            raise KeyError(
-                f"Error: unknown selfdescribing schema usage in question {question_name}"
-            )
+            raise KeyError(f"Error: unknown selfdescribing schema usage in question {question_name}")
     elif usage == "python":  # simple python type
         return value
     elif usage == "input":
