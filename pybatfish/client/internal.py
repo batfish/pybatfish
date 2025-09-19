@@ -13,7 +13,9 @@
 #   limitations under the License.
 """Contains internal functions for interacting with the Batfish service."""
 
-from typing import TYPE_CHECKING, Any, Dict, Optional, Union
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 from pybatfish.client import restv2helper
 from pybatfish.datamodel.answer import Answer
@@ -27,14 +29,14 @@ if TYPE_CHECKING:
 
 
 def _bf_answer_obj(
-    session: "Session",
+    session: Session,
     question_str: str,
     question_name: str,
     background: bool,
     snapshot: str,
-    reference_snapshot: Optional[str],
-    extra_args: Optional[Dict[str, Any]],
-) -> Union[Answer, str]:
+    reference_snapshot: str | None,
+    extra_args: dict[str, Any] | None,
+) -> Answer | str:
     if not question_name:
         question_name = Options.default_question_prefix + "_" + get_uuid()
 
@@ -42,9 +44,7 @@ def _bf_answer_obj(
     restv2helper.upload_question(session, question_name, question_str)
 
     # Answer the question
-    work_item = workhelper.get_workitem_answer(
-        session, question_name, snapshot, reference_snapshot
-    )
+    work_item = workhelper.get_workitem_answer(session, question_name, snapshot, reference_snapshot)
     workhelper.execute(work_item, session, background, extra_args)
 
     if background:
@@ -54,5 +54,5 @@ def _bf_answer_obj(
     return session.get_answer(question_name, snapshot, reference_snapshot)
 
 
-def _bf_get_question_templates(session: "Session", verbose: bool = False) -> Dict:
+def _bf_get_question_templates(session: Session, verbose: bool = False) -> dict:
     return restv2helper.get_question_templates(session, verbose)

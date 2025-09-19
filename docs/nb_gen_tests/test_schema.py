@@ -1,5 +1,4 @@
-# coding: utf-8
-from typing import Mapping, Set
+from collections.abc import Mapping
 
 import cerberus
 import pytest
@@ -22,22 +21,10 @@ def test_convert_schema():
         convert_schema("interface", "output")
         == "[Interface](../datamodel.rst#pybatfish.datamodel.primitives.Interface)"
     )
-    assert (
-        convert_schema("InterfaceSpec", "input")
-        == "[InterfaceSpec](../specifiers.md#interface-specifier)"
-    )
-    assert (
-        convert_schema("interfaceSpec", "input")
-        == "[InterfaceSpec](../specifiers.md#interface-specifier)"
-    )
-    assert (
-        convert_schema("InterfacesSpec", "input")
-        == "[InterfaceSpec](../specifiers.md#interface-specifier)"
-    )
-    assert (
-        convert_schema("ipSpaceSpec", "input")
-        == "[IpSpec](../specifiers.md#ip-specifier)"
-    )
+    assert convert_schema("InterfaceSpec", "input") == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    assert convert_schema("interfaceSpec", "input") == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    assert convert_schema("InterfacesSpec", "input") == "[InterfaceSpec](../specifiers.md#interface-specifier)"
+    assert convert_schema("ipSpaceSpec", "input") == "[IpSpec](../specifiers.md#ip-specifier)"
     assert (
         convert_schema("headerConstraint", "input")
         == "[HeaderConstraints](../datamodel.rst#pybatfish.datamodel.flow.HeaderConstraints)"
@@ -51,10 +38,7 @@ def test_convert_schema():
         == "List of [BgpRoute](../datamodel.rst#pybatfish.datamodel.route.BgpRoute)"
     )
     assert convert_schema("SelfDescribing", "output", "bgpPeerConfiguration") == "str"
-    assert (
-        convert_schema("NextHop", "output")
-        == "[NextHop](../datamodel.rst#pybatfish.datamodel.route.NextHop)"
-    )
+    assert convert_schema("NextHop", "output") == "[NextHop](../datamodel.rst#pybatfish.datamodel.route.NextHop)"
     with pytest.raises(ValueError):
         assert convert_schema("SelfDescribing", "output") == "str"
     with pytest.raises(KeyError):
@@ -88,9 +72,7 @@ def test_questions_yaml_schema(categories):
                 "schema": {
                     "name": {"type": "string", "required": True},
                     "description": {"type": "string"},  # human-readable category name
-                    "introduction": {
-                        "type": "string"
-                    },  # what the question category does
+                    "introduction": {"type": "string"},  # what the question category does
                     "questions": {
                         "type": "list",
                         "schema": {
@@ -129,14 +111,8 @@ def test_questions_yaml_schema(categories):
         raise AssertionError(v.errors)
 
 
-def q_names_from_categories(categories: Mapping) -> Set[str]:
-    return set(
-        [
-            question["pybf_name"]
-            for category in categories["categories"]
-            for question in category["questions"]
-        ]
-    )
+def q_names_from_categories(categories: Mapping) -> set[str]:
+    return set([question["pybf_name"] for category in categories["categories"] for question in category["questions"]])
 
 
 def test_all_questions_are_in_question_yaml(session: Session, categories: Mapping):
@@ -160,25 +136,17 @@ def test_all_questions_are_in_question_yaml(session: Session, categories: Mappin
         "comparePeerGroupPolicies",
         "compareRoutePolicies",
     }
-    session_qs = set(
-        [q["name"] for q in session.q.list() if q["name"] not in exclusions]
-    )
+    session_qs = set([q["name"] for q in session.q.list() if q["name"] not in exclusions])
     yaml_qs = q_names_from_categories(categories)
     undocumented = set(session_qs).difference(yaml_qs)
     if undocumented != set(xfail):
-        pytest.fail(
-            f"These questions are not documented: {undocumented}. Expected only these to be: {xfail}"
-        )
+        pytest.fail(f"These questions are not documented: {undocumented}. Expected only these to be: {xfail}")
     wrongly_documented = yaml_qs.intersection(exclusions)
     if wrongly_documented:
-        pytest.fail(
-            f"The following questions are documented but shouldn't be: {wrongly_documented}"
-        )
+        pytest.fail(f"The following questions are documented but shouldn't be: {wrongly_documented}")
 
 
-def test_all_questions_in_yaml_are_valid_questions(
-    session: Session, categories: Mapping
-):
+def test_all_questions_in_yaml_are_valid_questions(session: Session, categories: Mapping):
     session_qs = set([q["name"] for q in session.q.list()])
     yaml_qs = q_names_from_categories(categories)
     assert yaml_qs.issubset(session_qs)

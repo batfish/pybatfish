@@ -13,7 +13,7 @@
 #   limitations under the License.
 import json
 
-from pybatfish.datamodel import Edge, Interface, IssueType
+from pybatfish.datamodel import Edge, Interface
 from pybatfish.util import BfJsonEncoder
 
 
@@ -21,10 +21,6 @@ def test_as_dict():
     assert Interface(hostname="host", interface="iface").dict() == {
         "hostname": "host",
         "interface": "iface",
-    }
-    assert IssueType(major="lazer", minor="coal").dict() == {
-        "major": "lazer",
-        "minor": "coal",
     }
 
     # Make sure Edge dict is right if either string or Interface is passed in

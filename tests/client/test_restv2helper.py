@@ -42,7 +42,7 @@ BASE_URL = "base"
 
 class MockResponse(Response):
     def __init__(self, text):
-        super(MockResponse, self).__init__()
+        super().__init__()
         self._text = text
 
     @property
@@ -81,7 +81,7 @@ def test_check_response_status_ok():
 def test_delete(session: Session, request_session: Mock) -> None:
     """Make sure calls to _delete end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
+    target_url = f"{BASE_URL}{resource_url}"
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request
@@ -98,7 +98,7 @@ def test_delete(session: Session, request_session: Mock) -> None:
 def test_get(session: Session, request_session: Mock) -> None:
     """Make sure calls to _get end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
+    target_url = f"{BASE_URL}{resource_url}"
 
     # Regular session
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
@@ -114,9 +114,7 @@ def test_get(session: Session, request_session: Mock) -> None:
     )
 
     # Fast-failing session
-    with patch(
-        "pybatfish.client.restv2helper._requests_session_fail_fast", request_session
-    ):
+    with patch("pybatfish.client.restv2helper._requests_session_fail_fast", request_session):
         # Execute the request, specifying fast-failing behavior
         _get(session, resource_url, None, fail_fast=True)
     # Should pass through to the correct session
@@ -132,7 +130,7 @@ def test_get(session: Session, request_session: Mock) -> None:
 def test_post_json(session, request_session):
     """Make sure calls to _post of json end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
+    target_url = f"{BASE_URL}{resource_url}"
     obj = "foo"
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
@@ -152,7 +150,7 @@ def test_post_json(session, request_session):
 def test_post_stream(session, request_session):
     """Make sure calls to _post of stream end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
+    target_url = f"{BASE_URL}{resource_url}"
     with io.StringIO() as stream_data:
         with patch("pybatfish.client.restv2helper._requests_session", request_session):
             # Execute the request
@@ -173,7 +171,7 @@ def test_post_stream(session, request_session):
 def test_put(session, request_session):
     """Make sure calls to _put end up using the correct session."""
     resource_url = "/test/url"
-    target_url = "{base}{url}".format(base=BASE_URL, url=resource_url)
+    target_url = f"{BASE_URL}{resource_url}"
 
     with patch("pybatfish.client.restv2helper._requests_session", request_session):
         # Execute the request

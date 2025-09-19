@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 import pytest
 
@@ -36,9 +35,7 @@ TEXT_FRAGMENT = "org.batfish.datamodel.TraceElement$TextFragment"
 
 
 def test_trace_tree_no_children():
-    trace_tree_dict = {
-        "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]}
-    }
+    trace_tree_dict = {"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]}}
     trace_tree = TraceTree.from_dict(trace_tree_dict)
     assert len(trace_tree.children) == 0
     assert str(trace_tree) == "aaa"
@@ -67,16 +64,8 @@ def test_trace_tree_nested_children():
         "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
         "children": [
             {
-                "traceElement": {
-                    "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}]
-                },
-                "children": [
-                    {
-                        "traceElement": {
-                            "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}]
-                        }
-                    }
-                ],
+                "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}]},
+                "children": [{"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}]}}],
             },
             {"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"}]}},
         ],
@@ -109,39 +98,19 @@ def test_trace_tree_list_representation():
             "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "aaa"}]},
             "children": [
                 {
-                    "traceElement": {
-                        "fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}]
-                    },
-                    "children": [
-                        {
-                            "traceElement": {
-                                "fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}]
-                            }
-                        }
-                    ],
+                    "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "bbb"}]},
+                    "children": [{"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "ccc"}]}}],
                 },
-                {
-                    "traceElement": {
-                        "fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"}]
-                    }
-                },
+                {"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "ddd"}]}},
             ],
         },
         {
             "traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "eee"}]},
-            "children": [
-                {
-                    "traceElement": {
-                        "fragments": [{"class": TEXT_FRAGMENT, "text": "fff"}]
-                    }
-                }
-            ],
+            "children": [{"traceElement": {"fragments": [{"class": TEXT_FRAGMENT, "text": "fff"}]}}],
         },
     ]
     trace_tree_list = _parse_json_with_schema("List<TraceTree>", raw_trace_tree_list)
-    assert str(trace_tree_list) == "\n".join(
-        ["- aaa", "  - bbb", "    - ccc", "  - ddd", "- eee", "  - fff"]
-    )
+    assert str(trace_tree_list) == "\n".join(["- aaa", "  - bbb", "    - ccc", "  - ddd", "- eee", "  - fff"])
     html_text = trace_tree_list._repr_html_().replace(" ", "").replace("\n", "")
     assert html_text == "".join(
         [

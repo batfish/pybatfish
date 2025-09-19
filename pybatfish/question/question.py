@@ -13,36 +13,26 @@
 #   limitations under the License.
 """Defines Batfish questions and logic for loading them from disk or Batfish."""
 
-
 import json
 import logging
 import os
 import re
 import sys
+from collections.abc import Iterable
 from copy import deepcopy
 from inspect import getmembers
-from typing import (  # noqa: F401
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Iterable,
-    List,
-    Optional,
-    Set,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any
 
 import attr
 
 from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
 from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, VariableType
-from pybatfish.datamodel.answer import Answer  # noqa: F401
+from pybatfish.datamodel.answer.base import Answer
 from pybatfish.exception import QuestionValidationException
 from pybatfish.util import BfJsonEncoder, get_uuid, validate_question_name
 
 if TYPE_CHECKING:
-    from pybatfish.client.session import Session  # noqa: F401
+    from pybatfish.client.session import Session
 
 # A set of tags across all questions
 _VALID_VARIABLE_NAME_REGEX = re.compile(r"^\w+$")
@@ -53,11 +43,11 @@ class AllowedValue:
     """Describes a whitelisted value for a question parameter."""
 
     name = attr.ib(type=str)
-    description = attr.ib(type=Optional[str], default=None)
+    description = attr.ib(type=str | None, default=None)
 
     @classmethod
     def from_dict(cls, json_dict):
-        # type: (Dict) -> AllowedValue
+        # type: (dict) -> AllowedValue
         return AllowedValue(json_dict["name"], json_dict.get("description"))
 
     def __str__(self):
@@ -99,11 +89,7 @@ class QuestionMeta(type):
             allowed_kwargs.update(additional_kwargs)
             var_difference = set(kwargs.keys()).difference(allowed_kwargs)
             if var_difference:
-                raise QuestionValidationException(
-                    "Received unsupported parameters/variables: {}".format(
-                        var_difference
-                    )
-                )
+                raise QuestionValidationException(f"Received unsupported parameters/variables: {var_difference}")
             # Set question-specific parameters
             for var_name, var_value in kwargs.items():
                 if var_name not in additional_kwargs:
@@ -115,8 +101,7 @@ class QuestionMeta(type):
         # Merge constructor params with question variables
         params = [
             Parameter(name=param, kind=Parameter.KEYWORD_ONLY)
-            for param in dct.get("variables", [])
-            + [p for p in additional_kwargs if p not in ("kwargs", "self")]
+            for param in dct.get("variables", []) + [p for p in additional_kwargs if p not in ("kwargs", "self")]
         ]
         setattr(constructor, "__signature__", Signature(parameters=params))
         setattr(new_cls, "__init__", constructor)
@@ -141,13 +126,12 @@ class QuestionBase:
 
     def answer(
         self,
-        snapshot=None,
-        reference_snapshot=None,
-        include_one_table_keys=None,
-        background=False,
-        extra_args=None,
-    ):
-        # type: (Optional[str], Optional[str], Optional[bool], bool, Optional[Dict[str, Any]]) -> Union[str, Answer]
+        snapshot: str | None = None,
+        reference_snapshot: str | None = None,
+        include_one_table_keys: bool | None = None,
+        background: bool = False,
+        extra_args: dict[str, Any] | None = None,
+    ) -> str | Answer:
         """
         Ask and return the answer for this question.
 
@@ -172,9 +156,7 @@ class QuestionBase:
         session = self._session
         real_snapshot = session.get_snapshot(snapshot)
         if reference_snapshot is None and self.get_differential():
-            raise ValueError(
-                "reference_snapshot argument is required to answer a differential question"
-            )
+            raise ValueError("reference_snapshot argument is required to answer a differential question")
         _validate(self.dict())
         if include_one_table_keys is not None:
             self._set_include_one_table_keys(include_one_table_keys)
@@ -200,9 +182,7 @@ class QuestionBase:
 
         .. deprecated: 0.36.0
         """
-        return json.dumps(
-            self._dict, sort_keys=True, indent=2, cls=BfJsonEncoder, **kwargs
-        )
+        return json.dumps(self._dict, sort_keys=True, indent=2, cls=BfJsonEncoder, **kwargs)
 
     def get_description(self):
         """Return the short description of this question."""
@@ -250,8 +230,7 @@ class Questions:
     def __init__(self, session):
         self._session = session
 
-    def list_tags(self):
-        # type: () -> Set[str]
+    def list_tags(self) -> set[str]:
         """
         Get the tags for available questions.
 
@@ -260,8 +239,7 @@ class Questions:
         """
         return {t for q in self.list() for t in q.get("tags", [])}
 
-    def list(self, tags=None):
-        # type: (Optional[Iterable[str]]) -> List[Dict[str, Union[str, Set]]]
+    def list(self, tags: Iterable[str] | None = None) -> list[dict[str, str | set]]:
         """
         List available questions.
 
@@ -273,7 +251,7 @@ class Questions:
         return _list_questions(tags, self)
 
     def load(self, directory=None):
-        # type: (Optional[str]) -> None
+        # type: (str|None) -> None
         """
         Load questions from Batfish service or local directory.
 
@@ -281,28 +259,26 @@ class Questions:
         :type directory: str
         """
         if directory:
-            _install_questions(
-                _load_questions_from_dir(directory, self._session).items(), self
-            )
+            _install_questions(_load_questions_from_dir(directory, self._session).items(), self)
         else:
             _install_questions(_load_remote_questions_templates(self._session), self)
 
 
-def _list_questions(tags, obj):
-    # type: (Optional[Iterable[str]], object) -> List[Dict[str, Union[str, Set]]]
+def _list_questions(tags: Iterable[str] | None, obj: Any) -> list[dict[str, str | set]]:
     """List questions in the specified object, optionally filtering on supplied tags."""
+
     # Members of the module are (name,value) pairs so
     # x[1] in the lambda represents the value part.
     # Want members with value of type QuestionMeta
-    predicate = lambda x: isinstance(x[1], QuestionMeta)
+    def predicate(x):
+        return isinstance(x[1], QuestionMeta)
+
     question_functions = filter(predicate, getmembers(obj))
 
     matching_questions = []
-    desired_tags = set(map(str.lower, tags)) if tags else set()  # type: Set[str]
+    desired_tags: set[str] = set(map(str.lower, tags)) if tags else set()
     for name, question_func in question_functions:
-        if desired_tags and not desired_tags.intersection(
-            map(str.lower, question_func.tags)
-        ):
+        if desired_tags and not desired_tags.intersection(map(str.lower, question_func.tags)):
             # skip questions that don't have any desired tags
             continue
 
@@ -316,9 +292,7 @@ def _list_questions(tags, obj):
     return matching_questions
 
 
-def _install_questions_in_module(
-    questions: Iterable[Tuple[str, QuestionMeta]], module_name: str
-) -> None:
+def _install_questions_in_module(questions: Iterable[tuple[str, QuestionMeta]], module_name: str) -> None:
     """Install the given questions in the specified module."""
     module = sys.modules[module_name]
     for name, question_class in questions:
@@ -326,14 +300,13 @@ def _install_questions_in_module(
         setattr(module, name, question_class)
 
 
-def _install_questions(questions: Iterable[Tuple[str, QuestionMeta]], obj: Any) -> None:
+def _install_questions(questions: Iterable[tuple[str, QuestionMeta]], obj: Any) -> None:
     """Install the given questions in the specified object."""
     for name, question_class in questions:
         setattr(obj, name, question_class)
 
 
-def _load_questions_from_dir(question_dir, session):
-    # type: (str, Session) -> Dict[str, QuestionMeta]
+def _load_questions_from_dir(question_dir: str, session: "Session") -> dict[str, QuestionMeta]:
     logger = logging.getLogger(__name__)
     question_files = []
     for dirpath, dirnames, filenames in os.walk(question_dir):
@@ -341,11 +314,7 @@ def _load_questions_from_dir(question_dir, session):
             if filename.endswith(".json"):
                 question_files.append(os.path.join(dirpath, filename))
     if len(question_files) == 0:
-        logger.warning(
-            "WARNING: no .json files found in supplied question directory: {questionDir}".format(
-                questionDir=question_dir
-            )
-        )
+        logger.warning(f"WARNING: no .json files found in supplied question directory: {question_dir}")
         return {}
 
     questions = {}
@@ -354,34 +323,22 @@ def _load_questions_from_dir(question_dir, session):
             (qname, qclass) = _load_question_disk(questionFile, session)
             questions[qname] = qclass
         except Exception as err:
-            logger.error(
-                "Could not load question from {questionFile}:{err}".format(
-                    questionFile=questionFile, err=err
-                )
-            )
-    logger.info(
-        "Successfully loaded {numQuestions}/{numQuestionFiles} question(s) from local directory".format(
-            numQuestions=len(questions), numQuestionFiles=len(question_files)
-        )
-    )
+            logger.error(f"Could not load question from {questionFile}:{err}")
+    logger.info(f"Successfully loaded {len(questions)}/{len(question_files)} question(s) from local directory")
     return questions
 
 
-def _load_question_disk(question_path, session):
-    # type: (str, Session) -> Tuple[str, QuestionMeta]
+def _load_question_disk(question_path: str, session: "Session") -> tuple[str, QuestionMeta]:
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path) as question_file:
         question_dict = json.load(question_file)
     try:
         return _load_question_dict(question_dict, session)
     except QuestionValidationException as e:
-        raise QuestionValidationException(
-            f"Error loading question from {question_path}", e
-        )
+        raise QuestionValidationException(f"Error loading question from {question_path}", e)
 
 
-def _load_question_dict(question, session):
-    # type: (Dict[str, Any], Session) -> Tuple[str, QuestionMeta]
+def _load_question_dict(question: dict[str, Any], session: "Session") -> tuple[str, QuestionMeta]:
     """Create a question from a dictionary which contains a template.
 
     :return the name of the question
@@ -397,17 +354,13 @@ def _load_question_dict(question, session):
     # name validation
     given_question_name = instance_data.get("instanceName")
     if not given_question_name or not validate_question_name(given_question_name):
-        raise QuestionValidationException(
-            f"Invalid question name: {given_question_name}"
-        )
+        raise QuestionValidationException(f"Invalid question name: {given_question_name}")
     question_name = str(given_question_name)  # type: str
 
     # description validation
     question_description = instance_data.get("description", "").strip()  # type: str
     if not question_description:
-        raise QuestionValidationException(
-            f"Missing description for question '{question_name}'"
-        )
+        raise QuestionValidationException(f"Missing description for question '{question_name}'")
     if not question_description.endswith("."):
         question_description += "."
 
@@ -445,8 +398,9 @@ def _load_question_dict(question, session):
     return question_name, question_class
 
 
-def _process_variables(question_name, variables, ordered_variable_names):
-    # type: (str, Dict[str, Dict[str, Any]], List[str]) -> List[str]
+def _process_variables(
+    question_name: str, variables: dict[str, dict[str, Any]], ordered_variable_names: list[str]
+) -> list[str]:
     """Perform validation on question variables.
 
     :returns an ordered list of variable names
@@ -468,27 +422,19 @@ def _process_variables(question_name, variables, ordered_variable_names):
 
 
 def _validate_variable_data(question_name, var_name, var_data):
-    # type: (str, str, Dict[str, Any]) -> bool
+    # type: (str, str, dict[str, Any]) -> bool
     """Perform validation on variable metadata and fix style if necessary.
 
     :raises QuestionValidationException if metadata is invalid.
     """
     var_type = var_data.get("type", "").strip()
     if not var_type:
-        raise QuestionValidationException(
-            "Question {} is missing type for variable {}".format(
-                question_name, var_name
-            )
-        )
+        raise QuestionValidationException(f"Question {question_name} is missing type for variable {var_name}")
     var_data["type"] = var_type
 
     var_desc = var_data.get("description", "").strip()
     if not var_desc:
-        raise QuestionValidationException(
-            "Question {} is missing description for variable {}".format(
-                question_name, var_name
-            )
-        )
+        raise QuestionValidationException(f"Question {question_name} is missing description for variable {var_name}")
     if not var_desc.endswith("."):
         var_desc += "."
     var_data["description"] = var_desc
@@ -501,36 +447,29 @@ def _validate_variable_name(question_name, var_name):
     """Check if the variable name is valid."""
     if not re.match(_VALID_VARIABLE_NAME_REGEX, var_name):
         raise QuestionValidationException(
-            "Question {} has invalid variable name: {}. Only alphanumeric characters are allowed".format(
-                question_name, var_name
-            )
+            f"Question {question_name} has invalid variable name: {var_name}. Only alphanumeric characters are allowed"
         )
     return True
 
 
 def _has_valid_ordered_variable_names(ordered_variable_names, variables):
-    # type: (List[str], Dict[str, Dict[str, Any]]) -> bool
+    # type: (list[str], dict[str, dict[str, Any]]) -> bool
     """Check if ordered_variable_names is present and that it includes all instance variables."""
     if not ordered_variable_names:
         return False
-    return len(ordered_variable_names) == len(variables) and set(
-        ordered_variable_names
-    ) == set(variables.keys())
+    return len(ordered_variable_names) == len(variables) and set(ordered_variable_names) == set(variables.keys())
 
 
 def _compute_docstring(base_docstring, var_names, variables):
-    # type: (str, List[str], Dict[str, Any]) -> str
+    # type: (str, list[str], dict[str, Any]) -> str
     """Compute a docstring for a question, based on the variables."""
     if not variables:
         return base_docstring
-    return "\n".join(
-        [base_docstring, "\n"]
-        + [_compute_var_help(var, variables[var]) for var in var_names]
-    )
+    return "\n".join([base_docstring, "\n"] + [_compute_var_help(var, variables[var]) for var in var_names])
 
 
 def _compute_var_help(var_name, var_data):
-    # type: (str, Dict[str, Any]) -> str
+    # type: (str, dict[str, Any]) -> str
     """Create explanation of a single question variable."""
     # Variable help has 2 sections: param and type. Param section may include
     # optionally: required (inline), and allowed_values and/or default_value on
@@ -543,9 +482,7 @@ def _compute_var_help(var_name, var_data):
 
     allowed_values = _build_allowed_values(var_data)
     if allowed_values:
-        param_line += "    Allowed values:\n\n    * {}\n".format(
-            "\n    * ".join([str(v) for v in allowed_values])
-        )
+        param_line += "    Allowed values:\n\n    * {}\n".format("\n    * ".join([str(v) for v in allowed_values]))
 
     default_value = var_data.get("value")
     if default_value is not None:
@@ -566,8 +503,7 @@ def _build_allowed_values(var_data):
     return None
 
 
-def _load_remote_questions_templates(session):
-    # type: (Session) -> Set[Tuple[str, QuestionMeta]]
+def _load_remote_questions_templates(session: "Session") -> set[tuple[str, QuestionMeta]]:
     logger = logging.getLogger(__name__)
     num_questions = 0
     remote_questions = set()
@@ -578,11 +514,7 @@ def _load_remote_questions_templates(session):
             num_questions += 1
         except Exception as err:
             logger.error(f"Could not load question {key} : {err}")
-    logger.info(
-        "Successfully loaded {numQuestions} questions from remote".format(
-            numQuestions=num_questions
-        )
-    )
+    logger.info(f"Successfully loaded {num_questions} questions from remote")
     return remote_questions
 
 
@@ -600,11 +532,7 @@ def _validate(questionJson):
             if not optional:
                 if "value" not in variable:
                     valid = False
-                    errorMessage += (
-                        "   Missing value for mandatory parameter: '"
-                        + variableName
-                        + "'\n"
-                    )
+                    errorMessage += "   Missing value for mandatory parameter: '" + variableName + "'\n"
 
             # Now do some dynamic type-checking
             allowed_values = _build_allowed_values(variable)
@@ -618,9 +546,7 @@ def _validate(questionJson):
                 if isArray:
                     if not isinstance(value, list):
                         valid = False
-                        errorMessage += (
-                            "   Expected a list for parameter: '" + variableName + "'\n"
-                        )
+                        errorMessage += "   Expected a list for parameter: '" + variableName + "'\n"
                     else:
                         minElements = variable["minElements"]
                         if len(value) < minElements:
@@ -660,22 +586,14 @@ def _validate(questionJson):
                                         + str(minLength)
                                         + "\n"
                                     )
-                                elif (
-                                    allowed_values is not None
-                                    and valueElement
-                                    not in [v.name for v in allowed_values]
-                                ):
+                                elif allowed_values is not None and valueElement not in [
+                                    v.name for v in allowed_values
+                                ]:
                                     valid = False
-                                    errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
-                                        valueElement,
-                                        [v.name for v in allowed_values],
-                                        variableName,
-                                    )
+                                    errorMessage += f"   Value: '{valueElement}' is not among allowed values {[v.name for v in allowed_values]} of parameter: '{variableName}'\n"
 
                 else:
-                    typeValid, typeValidErrorMessage = _validate_type(
-                        value, variableType
-                    )
+                    typeValid, typeValidErrorMessage = _validate_type(value, variableType)
                     if not typeValid:
                         valid = False
                         if typeValidErrorMessage:
@@ -690,11 +608,7 @@ def _validate(questionJson):
                             )
                         else:
                             errorMessage += (
-                                "   Expected type: '"
-                                + variableType
-                                + "' for parameter: '"
-                                + variableName
-                                + "'\n"
+                                "   Expected type: '" + variableType + "' for parameter: '" + variableName + "'\n"
                             )
                     elif minLength and len(value) < minLength:
                         valid = False
@@ -707,21 +621,15 @@ def _validate(questionJson):
                             + str(minLength)
                             + "\n"
                         )
-                    elif allowed_values is not None and value not in [
-                        v.name for v in allowed_values
-                    ]:
+                    elif allowed_values is not None and value not in [v.name for v in allowed_values]:
                         valid = False
-                        errorMessage += "   Value: '{}' is not among allowed values {} of parameter: '{}'\n".format(
-                            value, [v.name for v in allowed_values], variableName
-                        )
+                        errorMessage += f"   Value: '{value}' is not among allowed values {[v.name for v in allowed_values]} of parameter: '{variableName}'\n"
     if not valid:
         raise QuestionValidationException(errorMessage)
     return True
 
 
-def _validate_type(
-    value: Any, expected_type: Union[str, VariableType]
-) -> Tuple[bool, Optional[str]]:
+def _validate_type(value: Any, expected_type: str | VariableType) -> tuple[bool, str | None]:
     """
     Check if the input `value` have contents that matches the requirements specified by `expectedType`.
 
@@ -740,9 +648,7 @@ def _validate_type(
         if value not in valid_comparators:
             return (
                 False,
-                "'{}' is not a known comparator. Valid options are: '{}'".format(
-                    value, ", ".join(valid_comparators)
-                ),
+                "'{}' is not a known comparator. Valid options are: '{}'".format(value, ", ".join(valid_comparators)),
             )
         return True, None
     elif expected_type == VariableType.INTEGER:
@@ -828,9 +734,7 @@ def _validate_type(
     elif expected_type == VariableType.QUESTION:
         return isinstance(value, QuestionBase), None
     elif expected_type == VariableType.BGP_ROUTES:
-        if not isinstance(value, list) or not all(
-            isinstance(r, BgpRoute) for r in value
-        ):
+        if not isinstance(value, list) or not all(isinstance(r, BgpRoute) for r in value):
             return False, f"A Batfish {expected_type.value} must be a list of BgpRoute"
         return True, None
     elif expected_type == VariableType.STRING:
@@ -843,21 +747,17 @@ def _validate_type(
         else:
             return (
                 False,
-                "A Batfish {} must either be a string or an integer".format(
-                    expected_type.value
-                ),
+                f"A Batfish {expected_type.value} must either be a string or an integer",
             )
     elif expected_type == VariableType.PROTOCOL:
         if not isinstance(value, str):
             return False, f"A Batfish {expected_type.value} must be a string"
         else:
             validProtocols = ["dns", "ssh", "tcp", "udp"]
-            if not value.lower() in validProtocols:
+            if value.lower() not in validProtocols:
                 return (
                     False,
-                    "'{}' is not a valid protocols. Valid options are: '{}'".format(
-                        value, ", ".join(validProtocols)
-                    ),
+                    "'{}' is not a valid protocols. Valid options are: '{}'".format(value, ", ".join(validProtocols)),
                 )
             return True, None
     elif expected_type == VariableType.IP_PROTOCOL:
@@ -885,14 +785,12 @@ def _validate_type(
         return True, None
     else:
         logging.getLogger(__name__).warning(
-            "WARNING: skipping validation for unknown argument type {}".format(
-                expected_type.value
-            )
+            f"WARNING: skipping validation for unknown argument type {expected_type.value}"
         )
         return True, None
 
 
-def _isJsonPath(value: Any) -> Tuple[bool, Optional[str]]:
+def _isJsonPath(value: Any) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid jsonPath.
 
@@ -920,7 +818,7 @@ def _isJsonPath(value: Any) -> Tuple[bool, Optional[str]]:
         return True, None
 
 
-def _isIp(value: str) -> Tuple[bool, Optional[str]]:
+def _isIp(value: str) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid IP address.
 
@@ -955,21 +853,17 @@ def _isIp(value: str) -> Tuple[bool, Optional[str]]:
             except ValueError:
                 return (
                     False,
-                    "Ip segment is not a number: '{}' in ip string: '{}'".format(
-                        segments, value
-                    ),
+                    f"Ip segment is not a number: '{segments}' in ip string: '{value}'",
                 )
             if not 0 <= segmentVal <= 255:
                 return (
                     False,
-                    "Ip segment is out of range 0-255: '{}' in ip string: '{}'".format(
-                        segments, value
-                    ),
+                    f"Ip segment is out of range 0-255: '{segments}' in ip string: '{value}'",
                 )
         return True, None
 
 
-def _isSubRange(value: str) -> Tuple[bool, Optional[str]]:
+def _isSubRange(value: str) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid subRange.
 
@@ -990,7 +884,7 @@ def _isSubRange(value: str) -> Tuple[bool, Optional[str]]:
     return True, None
 
 
-def _isPrefix(value: str) -> Tuple[bool, Optional[str]]:
+def _isPrefix(value: str) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid prefix.
 
@@ -1010,7 +904,7 @@ def _isPrefix(value: str) -> Tuple[bool, Optional[str]]:
     return _isIp(contents[0])
 
 
-def _isPrefixRange(value: str) -> Tuple[bool, Optional[str]]:
+def _isPrefixRange(value: str) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid prefix range.
 
@@ -1025,16 +919,14 @@ def _isPrefixRange(value: str) -> Tuple[bool, Optional[str]]:
     if not _isPrefix(contents[0])[0]:
         return (
             False,
-            "Invalid prefix string: '{}' in prefix range string: '{}'".format(
-                contents[0], value
-            ),
+            f"Invalid prefix string: '{contents[0]}' in prefix range string: '{value}'",
         )
     if len(contents) == 2:
         return _isSubRange(contents[1])
     return True, None
 
 
-def _isIpWildcard(value: str) -> Tuple[bool, Optional[str]]:
+def _isIpWildcard(value: str) -> tuple[bool, str | None]:
     """
     Check if the input string represents a valid ipWildCard.
 
@@ -1071,9 +963,7 @@ def _isIpWildcard(value: str) -> Tuple[bool, Optional[str]]:
             except ValueError:
                 return (
                     False,
-                    "Invalid prefix length: '{}' in IpWildcard string: '{}'".format(
-                        contents[1], value
-                    ),
+                    f"Invalid prefix length: '{contents[1]}' in IpWildcard string: '{value}'",
                 )
     else:
         return _isIp(value)

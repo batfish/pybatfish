@@ -79,10 +79,7 @@ def test_list_questions(session, questions):
     # Should have no questions to start with
     assert len(session.q.list()) == 0
 
-    qs = [
-        create_question(q.get("name"), session, q.get("description"), q.get("tags"))
-        for q in questions
-    ]
+    qs = [create_question(q.get("name"), session, q.get("description"), q.get("tags")) for q in questions]
     _install_questions(qs, session.q)
 
     # Make sure all questions show up when listing questions
