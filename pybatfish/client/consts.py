@@ -277,7 +277,6 @@ class CoordConstsV2:
     RSC_FORK = "fork"
     RSC_INFERRED_NODE_ROLES = "inferred_node_roles"
     RSC_INPUT = "input"
-    RSC_ISSUES = "issues"
     RSC_NETWORK = "network"
     RSC_NETWORKS = "networks"
     RSC_NODE_ROLES = "noderoles"

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -47,9 +46,7 @@ def test_create_reference_book(bf, network):
     #  with contents that are lists, and converting to set broke a bunch of
     #  tests that expect those lists to be indexable.
     assert getbook.name == book.name
-    assert set(g.name for g in getbook.addressGroups) == set(
-        g.name for g in book.addressGroups
-    )
+    assert set(g.name for g in getbook.addressGroups) == set(g.name for g in book.addressGroups)
 
 
 def test_init_snapshot_from_acl(bf: Session, network: str) -> None:

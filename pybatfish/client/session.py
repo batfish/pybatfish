@@ -20,17 +20,11 @@ import logging
 import os
 import tempfile
 import zipfile
+from collections.abc import Callable
 from io import SEEK_CUR, SEEK_SET
-from typing import (  # noqa: F401
+from typing import (
     IO,
     Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Text,
-    Tuple,
-    Union,
 )
 
 from requests import HTTPError
@@ -61,7 +55,7 @@ from pybatfish.datamodel import (
     ReferenceLibrary,
     VariableType,
 )
-from pybatfish.datamodel.answer import Answer, TableAnswer  # noqa: F401
+from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.datamodel.answer.table import is_table_ans
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import Questions
@@ -98,9 +92,7 @@ class Asserts:
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_denies(
-            filters, headers, startLocation, soft, snapshot, self.session, df_format
-        )
+        return assert_filter_denies(filters, headers, startLocation, soft, snapshot, self.session, df_format)
 
     def assert_filter_has_no_unreachable_lines(
         self,
@@ -124,9 +116,7 @@ class Asserts:
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_has_no_unreachable_lines(
-            filters, soft, snapshot, self.session, df_format
-        )
+        return assert_filter_has_no_unreachable_lines(filters, soft, snapshot, self.session, df_format)
 
     def assert_filter_permits(
         self,
@@ -150,9 +140,7 @@ class Asserts:
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_filter_permits(
-            filters, headers, startLocation, soft, snapshot, self.session, df_format
-        )
+        return assert_filter_permits(filters, headers, startLocation, soft, snapshot, self.session, df_format)
 
     def assert_flows_fail(
         self,
@@ -174,9 +162,7 @@ class Asserts:
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_flows_fail(
-            startLocation, headers, soft, snapshot, self.session, df_format
-        )
+        return assert_flows_fail(startLocation, headers, soft, snapshot, self.session, df_format)
 
     def assert_flows_succeed(
         self,
@@ -198,9 +184,7 @@ class Asserts:
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         :return: True if the assertion passes
         """
-        return assert_flows_succeed(
-            startLocation, headers, soft, snapshot, self.session, df_format
-        )
+        return assert_flows_succeed(startLocation, headers, soft, snapshot, self.session, df_format)
 
     def assert_no_duplicate_router_ids(
         self,
@@ -268,9 +252,7 @@ class Asserts:
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_incompatible_bgp_sessions(
-            nodes, remote_nodes, status, snapshot, soft, self.session, df_format
-        )
+        return assert_no_incompatible_bgp_sessions(nodes, remote_nodes, status, snapshot, soft, self.session, df_format)
 
     def assert_no_incompatible_ospf_sessions(
         self,
@@ -290,9 +272,7 @@ class Asserts:
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_incompatible_ospf_sessions(
-            nodes, remote_nodes, snapshot, soft, self.session, df_format
-        )
+        return assert_no_incompatible_ospf_sessions(nodes, remote_nodes, snapshot, soft, self.session, df_format)
 
     def assert_no_unestablished_bgp_sessions(
         self,
@@ -312,9 +292,7 @@ class Asserts:
         :param df_format: How to format the Dataframe content in the output message.
             Valid options are 'table' and 'records' (each row is a key-value pairs).
         """
-        return assert_no_unestablished_bgp_sessions(
-            nodes, remote_nodes, snapshot, soft, self.session, df_format
-        )
+        return assert_no_unestablished_bgp_sessions(nodes, remote_nodes, snapshot, soft, self.session, df_format)
 
     def assert_no_undefined_references(
         self,
@@ -348,11 +326,11 @@ class Session:
     def __init__(
         self,
         host: str = Options.coordinator_host,
-        port: Optional[int] = None,
+        port: int | None = None,
         # port v1 is deprecated
         port_v1: int = Options.coordinator_work_port,
         # port v2 is a backwards-compatible, but deprecated alias for port
-        port_v2: Optional[int] = None,
+        port_v2: int | None = None,
         ssl: bool = Options.use_ssl,
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
@@ -396,13 +374,9 @@ class Session:
     @classmethod
     def get_session_types(cls) -> dict[str, Callable]:
         """Get a dict of possible session types mapping their names to session classes."""
-        import sys
         from importlib.metadata import entry_points
 
-        if sys.version_info < (3, 10):
-            eps = entry_points().get("batfish_session", [])
-        else:
-            eps = entry_points(group="batfish_session")
+        eps = entry_points(group="batfish_session")
         return {ep.name: ep.load() for ep in eps}
 
     @classmethod
@@ -412,9 +386,7 @@ class Session:
         session_module = sessions.get(type_)
         if session_module is None:
             raise ValueError(
-                "Invalid session type. Specified type '{}' does not match any registered session type: {}".format(
-                    type_, set(sessions.keys())
-                )
+                f"Invalid session type. Specified type '{type_}' does not match any registered session type: {set(sessions.keys())}"
             )
         session: Session = session_module(**params)
         return session
@@ -472,7 +444,7 @@ class Session:
             raise ValueError("Snapshot to be deleted must be supplied")
         restv2helper.delete_snapshot(self, name, self.network)
 
-    def delete_snapshot_object(self, key: str, snapshot: Optional[str] = None) -> None:
+    def delete_snapshot_object(self, key: str, snapshot: str | None = None) -> None:
         """Deletes the snapshot object with specified key."""
         restv2helper.delete_snapshot_object(self, key, snapshot)
 
@@ -490,11 +462,11 @@ class Session:
         If an output directory is specified, facts for each node will be written to a separate YAML file in that directory.
 
         :param nodes: `NodeSpecifier <https://github.com/batfish/batfish/blob/master/questions/Parameters.md#node-specifier>`_, specifying which nodes to extract facts for.
-        :type nodes: Text
+        :type nodes: str
         :param output_directory: path to directory to write facts to
-        :type output_directory: Text
+        :type output_directory: str
         :param snapshot: name of the snapshot to extract facts for, defaults to the current snapshot
-        :type snapshot: Text
+        :type snapshot: str
         :return: facts about the specified nodes on the current network snapshot
         :rtype: dict
         """
@@ -503,11 +475,7 @@ class Session:
             if not os.path.exists(output_directory):
                 os.makedirs(output_directory)
             if os.path.isfile(output_directory):
-                raise ValueError(
-                    "Cannot write facts to file, must be a directory: {}".format(
-                        output_directory
-                    )
-                )
+                raise ValueError(f"Cannot write facts to file, must be a directory: {output_directory}")
             write_facts(output_directory, facts)
         return facts
 
@@ -549,7 +517,7 @@ class Session:
         :type extra_args: dict
 
         :return: name of initialized snapshot or None if the call fails
-        :rtype: Optional[str]
+        :rtype: str|None
         """
         ss_name = self._fork_snapshot(
             base_name,
@@ -590,12 +558,12 @@ class Session:
             else:
                 raise ValueError(
                     "A snapshot named "
-                    "{}"
+                    f"{name}"
                     " already exists in network "
-                    "{}"
+                    f"{self.network}"
                     ". "
                     "Use overwrite = True if you want to overwrite the "
-                    "existing snapshot".format(name, self.network)
+                    "existing snapshot"
                 )
 
         encoded_file = None
@@ -642,9 +610,7 @@ class Session:
         answer_dict = workhelper.execute(work_item, self, extra_args=extra_args)
         return str(answer_dict["status"].value)
 
-    def get_answer(
-        self, question: str, snapshot: str, reference_snapshot: str | None = None
-    ) -> Answer:
+    def get_answer(self, question: str, snapshot: str, reference_snapshot: str | None = None) -> Answer:
         """
         Get the answer for a previously asked question.
 
@@ -667,9 +633,7 @@ class Session:
     def get_base_url2(self) -> str:
         """Generate the base URL for V2 of the coordinator APIs."""
         protocol = "https" if self.ssl else "http"
-        return "{}://{}:{}{}".format(
-            protocol, self.host, self.port_v2, self._base_uri_v2
-        )
+        return f"{protocol}://{self.host}:{self.port_v2}{self._base_uri_v2}"
 
     def get_network_object_stream(self, key: str) -> Any:
         """Returns a binary stream of the content of the network object with specified key."""
@@ -693,9 +657,7 @@ class Session:
         """
         if inferred:
             self._check_snapshot()
-            return NodeRolesData.from_dict(
-                restv2helper.get_snapshot_inferred_node_roles(self)
-            )
+            return NodeRolesData.from_dict(restv2helper.get_snapshot_inferred_node_roles(self))
         return NodeRolesData.from_dict(restv2helper.get_node_roles(self))
 
     def get_reference_book(self, name: str) -> ReferenceBook:
@@ -711,12 +673,12 @@ class Session:
         """Returns the reference library for the active network."""
         return ReferenceLibrary.from_dict(restv2helper.get_reference_library(self))
 
-    def get_snapshot(self, snapshot: str | str | None = None) -> str:
+    def get_snapshot(self, snapshot: str | None = None) -> str:
         """
         Get the specified or active snapshot name.
 
         :param snapshot: if specified, this name is returned instead of active snapshot
-        :type snapshot: str or Text
+        :type snapshot: str or str
 
         :return: name of the active snapshot, or the specified snapshot if applicable
         :rtype: str
@@ -728,34 +690,23 @@ class Session:
         elif self.snapshot is not None:
             return self.snapshot
         else:
-            raise ValueError(
-                "snapshot must be either provided or set using "
-                "set_snapshot (e.g. bf.set_snapshot('NAME')"
-            )
+            raise ValueError("snapshot must be either provided or set using set_snapshot (e.g. bf.set_snapshot('NAME')")
 
-    def get_snapshot_input_object_stream(
-        self, key: str, snapshot: Optional[str] = None
-    ) -> Any:
+    def get_snapshot_input_object_stream(self, key: str, snapshot: str | None = None) -> Any:
         """Returns a binary stream of the content of the snapshot input object with specified key."""
         return restv2helper.get_snapshot_input_object(self, key, snapshot)
 
-    def get_snapshot_input_object_text(
-        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
-    ) -> str:
+    def get_snapshot_input_object_text(self, key: str, encoding: str = "utf-8", snapshot: str | None = None) -> str:
         """Returns the text content of the snapshot input object with specified key."""
         with self.get_snapshot_input_object_stream(key, snapshot) as stream:
             ret: str = stream.read().decode(encoding)
             return ret
 
-    def get_snapshot_object_stream(
-        self, key: str, snapshot: Optional[str] = None
-    ) -> Any:
+    def get_snapshot_object_stream(self, key: str, snapshot: str | None = None) -> Any:
         """Returns a binary stream of the content of the snapshot object with specified key."""
         return restv2helper.get_snapshot_object(self, key, snapshot)
 
-    def get_snapshot_object_text(
-        self, key: str, encoding: str = "utf-8", snapshot: Optional[str] = None
-    ) -> str:
+    def get_snapshot_object_text(self, key: str, encoding: str = "utf-8", snapshot: str | None = None) -> str:
         """Returns the text content of the snapshot object with specified key."""
         with self.get_snapshot_object_stream(key, snapshot) as stream:
             ret: str = stream.read().decode(encoding)
@@ -795,9 +746,7 @@ class Session:
         :return: name of initialized snapshot
         :rtype: str
         """
-        ss_name = self._init_snapshot(
-            upload, name=name, overwrite=overwrite, extra_args=extra_args
-        )
+        ss_name = self._init_snapshot(upload, name=name, overwrite=overwrite, extra_args=extra_args)
         assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
@@ -854,9 +803,7 @@ class Session:
             filename = "config"
 
         data = _create_in_memory_zip(text, filename, platform)
-        ss_name = self._init_snapshot(
-            data, name=snapshot_name, overwrite=overwrite, extra_args=extra_args
-        )
+        ss_name = self._init_snapshot(data, name=snapshot_name, overwrite=overwrite, extra_args=extra_args)
         assert isinstance(ss_name, str)  # Guaranteed since background=False
         return ss_name
 
@@ -907,25 +854,19 @@ class Session:
             else:
                 raise ValueError(
                     "A snapshot named "
-                    "{}"
+                    f"{name}"
                     " already exists in network "
-                    "{}"
+                    f"{self.network}"
                     ". "
                     "Use overwrite = True if you want to overwrite the "
-                    "existing snapshot".format(name, self.network)
+                    "existing snapshot"
                 )
 
         if isinstance(upload, str):
             self.__init_snapshot_from_file(name, upload)
         else:
-            seekable = (
-                hasattr(upload, "seek")
-                and hasattr(upload, "seekable")
-                and upload.seekable()
-            )
-            if (
-                seekable
-            ):  # else assume it's a zipfile, and rely on backend to say otherwise
+            seekable = hasattr(upload, "seek") and hasattr(upload, "seekable") and upload.seekable()
+            if seekable:  # else assume it's a zipfile, and rely on backend to say otherwise
                 old_pos = upload.seek(0, SEEK_CUR)
                 if not zipfile.is_zipfile(upload):
                     raise ValueError("The provided data is not a valid zip file")
@@ -997,9 +938,7 @@ class Session:
         """Puts data as the snapshot object with specified key."""
         restv2helper.put_snapshot_object(self, key, data, self.snapshot)
 
-    def set_network(
-        self, name: str | None = None, prefix: str = Options.default_network_prefix
-    ) -> str:
+    def set_network(self, name: str | None = None, prefix: str = Options.default_network_prefix) -> str:
         """
         Configure the network used for analysis.
 
@@ -1050,39 +989,27 @@ class Session:
         # Index specified, simply give the ith snapshot
         if index is not None:
             if not (-len(snapshots) <= index < len(snapshots)):
-                raise IndexError(
-                    f"Server has only {len(snapshots)} snapshots: {snapshots}"
-                )
+                raise IndexError(f"Server has only {len(snapshots)} snapshots: {snapshots}")
             self.snapshot = str(snapshots[index])
 
         # Name specified, make sure it exists.
         else:
             assert name is not None  # type-hint to Python
             if name not in snapshots:
-                raise ValueError(
-                    "No snapshot named "
-                    "{}"
-                    " was found in network "
-                    "{}"
-                    ": {}".format(name, self.network, snapshots)
-                )
+                raise ValueError(f"No snapshot named {name} was found in network {self.network}: {snapshots}")
             self.snapshot = name
 
-        logging.getLogger(__name__).info(
-            "Default snapshot is now set to %s", self.snapshot
-        )
+        logging.getLogger(__name__).info("Default snapshot is now set to %s", self.snapshot)
         return self.snapshot
 
-    def validate_facts(
-        self, expected_facts: str, snapshot: str | None = None
-    ) -> dict[str, Any]:
+    def validate_facts(self, expected_facts: str, snapshot: str | None = None) -> dict[str, Any]:
         """
         Return a dictionary of mismatched facts between the loaded expected facts and the actual facts.
 
         :param expected_facts: path to directory to read expected fact YAML files from
-        :type expected_facts: Text
+        :type expected_facts: str
         :param snapshot: name of the snapshot to validate facts for, defaults to the current snapshot
-        :type snapshot: Text
+        :type snapshot: str
         :return: facts about the specified nodes on the current network snapshot
         :rtype: dict
         """
@@ -1101,9 +1028,7 @@ class Session:
         if self.snapshot is None:
             raise ValueError("Snapshot is not set")
 
-    def _parse_snapshot(
-        self, name: str, background: bool, extra_args: dict[str, Any] | None
-    ) -> str | dict[str, str]:
+    def _parse_snapshot(self, name: str, background: bool, extra_args: dict[str, Any] | None) -> str | dict[str, str]:
         """
         Parse specified snapshot.
 
@@ -1115,12 +1040,10 @@ class Session:
         :type extra_args: dict
 
         :return: name of initialized snapshot, or JSON dictionary of task status if background=True
-        :rtype: Union[str, Dict]
+        :rtype: Union[str, dict]
         """
         work_item = workhelper.get_workitem_parse(self, name)
-        answer_dict = workhelper.execute(
-            work_item, self, background=background, extra_args=extra_args
-        )
+        answer_dict = workhelper.execute(work_item, self, background=background, extra_args=extra_args)
         if background:
             self.snapshot = name
             return answer_dict
@@ -1129,15 +1052,9 @@ class Session:
 
         if status != WorkStatusCode.TERMINATEDNORMALLY:
             init_log = restv2helper.get_work_log(self, name, work_item.id)
-            raise BatfishException(
-                "Initializing snapshot {ss} failed with status {status}\n{log}".format(
-                    ss=name, status=status, log=init_log
-                )
-            )
+            raise BatfishException(f"Initializing snapshot {name} failed with status {status}\n{init_log}")
         self.snapshot = name
-        logging.getLogger(__name__).info(
-            "Default snapshot is now set to %s", self.snapshot
-        )
+        logging.getLogger(__name__).info("Default snapshot is now set to %s", self.snapshot)
         return self.snapshot
 
     def auto_complete(
@@ -1172,9 +1089,7 @@ class Session:
         if max_suggestions and max_suggestions < 0:
             raise ValueError("max_suggestions cannot be negative")
         self._check_network()
-        response = restv2helper.auto_complete(
-            self, completion_type, query, max_suggestions
-        )
+        response = restv2helper.auto_complete(self, completion_type, query, max_suggestions)
         results = [
             AutoCompleteSuggestion.from_dict(suggestion)
             for suggestion in response.get(CoordConsts.SVC_KEY_SUGGESTIONS, [])

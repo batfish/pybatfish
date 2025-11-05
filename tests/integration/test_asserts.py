@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,18 +65,14 @@ def session_fail():
             "assert_flows_fail",
             {
                 "startLocation": "@enter(node[GigabitEthernet1/0])",
-                "headers": HeaderConstraints(
-                    srcIps="12.34.56.78", dstIps="1.0.1.0", ipProtocols=["TCP"]
-                ),
+                "headers": HeaderConstraints(srcIps="12.34.56.78", dstIps="1.0.1.0", ipProtocols=["TCP"]),
             },
         ),
         (
             "assert_flows_succeed",
             {
                 "startLocation": "@enter(node[GigabitEthernet1/0])",
-                "headers": HeaderConstraints(
-                    srcIps="2.0.1.0", dstIps="1.0.1.0", ipProtocols=["TCP"]
-                ),
+                "headers": HeaderConstraints(srcIps="2.0.1.0", dstIps="1.0.1.0", ipProtocols=["TCP"]),
             },
         ),
         ("assert_no_incompatible_bgp_sessions", {}),
@@ -116,18 +111,14 @@ def test_asserts_pass(session_pass, assert_func, params):
             "assert_flows_fail",
             {
                 "startLocation": "@enter(node[GigabitEthernet1/0])",
-                "headers": HeaderConstraints(
-                    srcIps="2.0.1.0", dstIps="1.0.1.0", ipProtocols=["TCP"]
-                ),
+                "headers": HeaderConstraints(srcIps="2.0.1.0", dstIps="1.0.1.0", ipProtocols=["TCP"]),
             },
         ),
         (
             "assert_flows_succeed",
             {
                 "startLocation": "@enter(node[GigabitEthernet1/0])",
-                "headers": HeaderConstraints(
-                    srcIps="12.34.56.78", dstIps="1.0.1.0", ipProtocols=["TCP"]
-                ),
+                "headers": HeaderConstraints(srcIps="12.34.56.78", dstIps="1.0.1.0", ipProtocols=["TCP"]),
             },
         ),
         ("assert_no_incompatible_bgp_sessions", {}),

@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,8 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 import typing
+from collections.abc import Sequence
 from os.path import abspath, dirname, join, realpath
-from typing import Optional, Sequence
 
 from pytest import fixture, raises
 from requests.exceptions import HTTPError
@@ -96,9 +95,7 @@ def test_add_node_roles_data(bf: Session) -> None:
     network_name = "n1"
     try:
         bf.set_network(network_name)
-        mappings = [
-            RoleMapping("mapping1", "(.*)-(.*)", {"type": [1], "index": [2]}, {})
-        ]
+        mappings = [RoleMapping("mapping1", "(.*)-(.*)", {"type": [1], "index": [2]}, {})]
         roles_data = NodeRolesData(None, ["type", "index"], mappings)
         bf.put_node_roles(roles_data)
         assert bf.get_node_roles() == roles_data
@@ -120,12 +117,8 @@ def test_put_node_roles(bf: Session) -> None:
     network_name = "n1"
     try:
         bf.set_network(network_name)
-        mapping = RoleMapping(
-            name="mapping", regex="(regex)", roleDimensionGroups={"dim1": [1]}
-        )
-        node_roles = NodeRolesData(
-            defaultDimension="dim1", roleDimensionOrder=["dim1"], roleMappings=[mapping]
-        )
+        mapping = RoleMapping(name="mapping", regex="(regex)", roleDimensionGroups={"dim1": [1]})
+        node_roles = NodeRolesData(defaultDimension="dim1", roleDimensionOrder=["dim1"], roleMappings=[mapping])
         bf.put_node_roles(node_roles)
         assert bf.get_node_roles() == node_roles
     finally:
@@ -164,15 +157,13 @@ def auto_complete_tester(bf: Session, completion_types: Sequence[VariableType]) 
 def auto_complete_tester_session(
     bf: Session,
     completion_types: Sequence[VariableType],
-    max_suggestions: Optional[int] = None,
+    max_suggestions: int | None = None,
 ) -> None:
     name = bf.set_network()
     try:
         bf.init_snapshot(join(_this_dir, "snapshot"))
         for completion_type in completion_types:
-            suggestions = bf.auto_complete(
-                completion_type, ".*", max_suggestions=max_suggestions
-            )
+            suggestions = bf.auto_complete(completion_type, ".*", max_suggestions=max_suggestions)
             if max_suggestions:
                 assert len(suggestions) <= max_suggestions
             # Not all completion types will have suggestions since this test snapshot only contains one empty config.
@@ -209,6 +200,4 @@ def test_auto_complete_limited_bgp_route_status_spec(bf: Session) -> None:
     """
     This type was newly added, so we test it separately. Move to conftest.py/COMPLETION_TYPES later.
     """
-    auto_complete_tester_session(
-        bf, [VariableType.BGP_ROUTE_STATUS_SPEC], max_suggestions=1
-    )
+    auto_complete_tester_session(bf, [VariableType.BGP_ROUTE_STATUS_SPEC], max_suggestions=1)

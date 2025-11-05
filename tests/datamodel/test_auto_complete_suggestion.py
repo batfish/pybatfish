@@ -12,7 +12,6 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-from __future__ import absolute_import, print_function
 
 import pytest
 
@@ -40,9 +39,7 @@ def test_auto_complete_suggestion_all_fields():
 
 
 def test_auto_complete_suggestion_no_optionals():
-    suggestion = AutoCompleteSuggestion.from_dict(
-        {"isPartial": True, "rank": 42, "text": "suggestion"}
-    )
+    suggestion = AutoCompleteSuggestion.from_dict({"isPartial": True, "rank": 42, "text": "suggestion"})
     assert suggestion.description is None
     assert suggestion.hint is None
     assert suggestion.insertion_index == 0

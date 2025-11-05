@@ -1,4 +1,3 @@
-# coding=utf-8
 #   Copyright 2018 The Batfish Open Source Project
 #
 #   Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,7 +19,7 @@ from pybatfish.client.session import Session
 from pybatfish.datamodel import VariableType
 
 
-class MockEntryPoint(object):
+class MockEntryPoint:
     def __init__(self, name, module_):
         self.name = name
         self.module = module_
@@ -34,19 +33,10 @@ def test_get_session_types():
     dummy_session_type = "dummy"
     dummy_session_module = "dummy_session_module"
 
-    import sys
     from importlib.metadata import entry_points
 
-    if sys.version_info < (3, 10):
-        eps = list(entry_points().get("batfish_session", [])) + [
-            MockEntryPoint(dummy_session_type, dummy_session_module)
-        ]
-        mock_eps = {"batfish_session": eps}
-    else:
-        eps = entry_points(group="batfish_session")
-        mock_eps = list(eps) + [
-            MockEntryPoint(dummy_session_type, dummy_session_module)
-        ]
+    eps = entry_points(group="batfish_session")
+    mock_eps = list(eps) + [MockEntryPoint(dummy_session_type, dummy_session_module)]
 
     with patch("importlib.metadata.entry_points", return_value=mock_eps):
         session_types = Session.get_session_types()
@@ -87,7 +77,7 @@ def test_get_session_bad():
         Session.get(type_=bogus_type)
     e_msg = str(e.value)
     assert "Invalid session type" in e_msg
-    assert "type '{}' does not match".format(bogus_type) in e_msg
+    assert f"type '{bogus_type}' does not match" in e_msg
 
 
 def test_session_api_key():

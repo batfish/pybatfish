@@ -2,24 +2,16 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.0.0
+    rev: v6.0.0
     hooks:
     - id: check-yaml
 
-  - repo: https://github.com/psf/black-pre-commit-mirror
-    rev: 23.11.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.13.0
     hooks:
-    - id: black
-
-  - repo: https://github.com/pycqa/isort
-    rev: 5.11.5
-    hooks:
-    - id: isort
-      args: ["--profile", "black", "--filter-files"]
- 
-  - repo: https://github.com/humitos/mirrors-autoflake
-    rev: v1.3
-    hooks:
-      - id: autoflake
-        args: ["--in-place", "--remove-all-unused-imports", "--remove-unused-variables"]
+    # Run the linter
+    - id: ruff-check
+      args: [--fix]
+    # Run the formatter
+    - id: ruff-format
 

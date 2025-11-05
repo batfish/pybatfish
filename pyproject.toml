@@ -37,6 +37,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 keywords = ["network", "configuration", "verification"]
 dependencies = [
@@ -63,7 +64,7 @@ capirca = [
     "absl-py>=0.8.0",
 ]
 dev = [
-    "black<23.11",
+    "ruff",
     "cerberus",
     "check-manifest",
     "coverage",
@@ -120,3 +121,27 @@ source-dir = "docs/source"
 all-files = true
 build-dir = "docs/build"
 warning-is-error = 1
+
+[tool.ruff]
+line-length = 120
+target-version = "py310"
+exclude = ["*.ipynb"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "UP", # pyupgrade
+]
+ignore = [
+    "F403",  # Star imports used in notebook generation
+    "E402",  # Import not at top (acceptable in sphinx conf.py)
+    "F822",  # Undefined name in __all__ (may be dynamically generated)
+    "E501",  # Long line length -> let the formatter do the right thing but don't lint what it leaves
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"

@@ -83,10 +83,7 @@ def test_validate_allowed_values():
     sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = (
-        "\n   Value: 'obsolete value' is not among allowed"
-        + " values ['v1'] of parameter: 'v'\n"
-    )
+    expected_message = "\n   Value: 'obsolete value' is not among allowed" + " values ['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable["value"] = "obsolete value"
         _validate(sample_question)
@@ -99,10 +96,7 @@ def test_validate_old_allowed_values():
     sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = (
-        "\n   Value: 'bad value' is not among allowed values "
-        + "['v1'] of parameter: 'v'\n"
-    )
+    expected_message = "\n   Value: 'bad value' is not among allowed values " + "['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable["value"] = "bad value"
         _validate(sample_question)
@@ -121,10 +115,7 @@ def test_validate_allowed_values_list():
     sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = (
-        "\n   Value: 'obsolete value' is not among allowed"
-        + " values ['v1'] of parameter: 'v'\n"
-    )
+    expected_message = "\n   Value: 'obsolete value' is not among allowed" + " values ['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable["value"][0] = "obsolete value"
         _validate(sample_question)
@@ -142,10 +133,7 @@ def test_validate_old_allowed_values_list():
     sample_question = {"instance": {"variables": {"v": variable}}}
     assert _validate(sample_question)
 
-    expected_message = (
-        "\n   Value: 'bad value' is not among allowed values "
-        + "['v1'] of parameter: 'v'\n"
-    )
+    expected_message = "\n   Value: 'bad value' is not among allowed values " + "['v1'] of parameter: 'v'\n"
     with pytest.raises(QuestionValidationException) as err:
         variable["value"][0] = "bad value"
         _validate(sample_question)
@@ -163,12 +151,7 @@ def test_compute_var_help_default_value_falsy():
         "type": "boolean",
         "value": False,
     }
-    expected_help = (
-        ":param v: Desc\n"
-        + "\n"
-        + "    Default value: ``False``\n"
-        + ":type v: boolean"
-    )
+    expected_help = ":param v: Desc\n" + "\n" + "    Default value: ``False``\n" + ":type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -222,12 +205,7 @@ def test_compute_var_help_with_old_allowed_values():
         "description": "variable description",
         "type": "boolean",
     }
-    expected_help = (
-        ":param v: variable description"
-        + "\n    Allowed values:\n"
-        + "\n    * v1"
-        + "\n:type v: boolean"
-    )
+    expected_help = ":param v: variable description" + "\n    Allowed values:\n" + "\n    * v1" + "\n:type v: boolean"
     assert _compute_var_help("v", var_data) == expected_help
 
 
@@ -268,24 +246,15 @@ def test_process_variables():
 
     # no ordered_variable_names returns variables in default order
     ordered_variable_names = []
-    assert (
-        _process_variables("foo", variables, ordered_variable_names)
-        == default_variables
-    )
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
 
     # invalid ordered_variable_names returns variables in default order
     ordered_variable_names = ["d", "c", "b"]
-    assert (
-        _process_variables("foo", variables, ordered_variable_names)
-        == default_variables
-    )
+    assert _process_variables("foo", variables, ordered_variable_names) == default_variables
 
     # valid ordered_variable_names returns ordered_variable_names
     ordered_variable_names = ["d", "c", "b", "a"]
-    assert (
-        _process_variables("foo", variables, ordered_variable_names)
-        == ordered_variable_names
-    )
+    assert _process_variables("foo", variables, ordered_variable_names) == ordered_variable_names
 
 
 def test_has_valid_ordered_variable_names():
@@ -351,7 +320,7 @@ def test_question_name(session):
     assert has_name.get_name() == "manually set"
 
     inferred_name = qclass()
-    assert inferred_name.get_name().startswith("__{}_".format(TEST_QUESTION_NAME))
+    assert inferred_name.get_name().startswith(f"__{TEST_QUESTION_NAME}_")
 
 
 def test_question_positional_args(session):
