@@ -71,12 +71,12 @@ jobs:
           cp -r questions/{stable,experimental} ${QUESTION_DIR}
           tar -czf questions.tgz -C ${TMP_DIR} questions
       - name: Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bf_jar
           path: allinone.jar
       - name: Upload questions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: bf_questions
           path: questions.tgz
@@ -205,7 +205,7 @@ jobs:
           make html
           popd
       - name: Upload docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: docs
           path: docs/build/html
