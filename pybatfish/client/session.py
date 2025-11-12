@@ -335,8 +335,8 @@ class Session:
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
-        proxies: Optional[Dict[str, str]] = None,
-        timeout: Optional[int] = 30,
+        proxies: dict[str, str] | None = None,
+        timeout: int = 30,
     ):
         # Coordinator args
         self.host: str = host
