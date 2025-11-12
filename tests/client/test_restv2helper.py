@@ -92,6 +92,8 @@ def test_delete(session: Session, request_session: Mock) -> None:
         headers=_get_headers(session),
         params=None,
         verify=session.verify_ssl_certs,
+        proxies=session.proxies,
+        timeout=session.timeout,
     )
 
 
@@ -111,6 +113,8 @@ def test_get(session: Session, request_session: Mock) -> None:
         params=None,
         stream=False,
         verify=session.verify_ssl_certs,
+        proxies=session.proxies,
+        timeout=session.timeout,
     )
 
     # Fast-failing session
@@ -124,6 +128,8 @@ def test_get(session: Session, request_session: Mock) -> None:
         params=None,
         stream=False,
         verify=session.verify_ssl_certs,
+        proxies=session.proxies,
+        timeout=session.timeout,
     )
 
 
@@ -144,6 +150,8 @@ def test_post_json(session, request_session):
         headers=_get_headers(session),
         params=None,
         verify=session.verify_ssl_certs,
+        proxies=session.proxies,
+        timeout=session.timeout,
     )
 
 
@@ -165,6 +173,8 @@ def test_post_stream(session, request_session):
             headers=expected_headers,
             params=None,
             verify=session.verify_ssl_certs,
+            proxies=session.proxies,
+            timeout=session.timeout,
         )
 
 
@@ -184,6 +194,8 @@ def test_put(session, request_session):
         headers=_get_headers(session),
         verify=session.verify_ssl_certs,
         params=None,
+        proxies=session.proxies,
+        timeout=session.timeout,
     )
 
 
