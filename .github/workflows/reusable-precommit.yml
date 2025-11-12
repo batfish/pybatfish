@@ -55,7 +55,7 @@ jobs:
           key: ${{runner.os}}-bazel-17-${{ hashFiles('.bazelversion', 'WORKSPACE', 'maven_install.json') }}-${{ needs.get_date.outputs.ymd }}
           restore-keys: |
             ${{runner.os}}-bazel-17-${{ hashFiles('.bazelversion', 'WORKSPACE', 'maven_install.json') }}-
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -112,7 +112,7 @@ jobs:
       - bf_build
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -161,7 +161,7 @@ jobs:
       - bf_build
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -188,7 +188,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
