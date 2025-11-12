@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Run checks
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Run checks
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python_version }}
       - name: Run tests
@@ -116,7 +116,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python_version }}
       - name: Download bf JAR
@@ -165,7 +165,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Download bf JAR
@@ -192,7 +192,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Build docs
@@ -213,7 +213,7 @@ jobs:
     runs-on: ubuntu-22.04 # Match ReadTheDocs OS
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10" # Match ReadTheDocs Python version
       - name: Build docs in ReadTheDocs-like environment
