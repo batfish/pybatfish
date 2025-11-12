@@ -56,6 +56,8 @@ def session() -> Session:
     s.get_base_url2.return_value = BASE_URL
     s.api_key = "0000"
     s.verify_ssl_certs = True
+    s.timeout = 30
+    s.proxies = None
     return s
 
 
