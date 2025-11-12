@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification on failure
-        uses: slackapi/slack-github-action@v2.1.0
+        uses: slackapi/slack-github-action@v2.1.1
         with:
           webhook: ${{ secrets.PYBATFISH_BUILD_FAILURE_SLACK_WEBHOOK_URL }}
           webhook-type: incoming-webhook
