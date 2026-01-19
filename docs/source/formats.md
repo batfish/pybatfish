@@ -59,6 +59,25 @@ An example script that packages AWS data into a Batfish snapshot is [here](https
 An example snapshot, which includes both physical and AWS configs, is [here](https://github.com/batfish/batfish/tree/master/networks/hybrid-cloud-aws).
 It is OK to have only AWS configs in a snapshot (without any physical device configs).
 
+### Azure
+
+Batfish is able to understand Azure configurations files (json) and build a phyisical network which tries to replicate as best as possible the behavior of Azure workflows. Please provides Azure configs in a folder named `azure_configs` right below the top-level snapshot folder.
+
+For now, Batfish supports **Azure resource JSON views only**.  
+**ARM templates are not supported.**
+
+When providing Azure resources to Batfish, make sure to use the **JSON view of each resource**, as returned by Azure.
+You can retrieve the required JSON in either of the following ways:
+
+- **Azure Portal**:  
+  Open the resource ➜ *Overview* ➜ *JSON view*
+
+- **Azure CLI**:
+  ```bash
+  az resource show --ids <resource-id> -o json
+  ```
+
+
 ### Cisco
 
 Batfish supports Cisco IOS, IOS-XE, IOS-XR, NX-OS, and ASA platforms. For each such device in the network, create a file in the `configs` folder. The content of the file should be the equivalent of the output of `show running-config` command on the device.
