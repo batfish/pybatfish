@@ -9,6 +9,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 * [A10](#a10)
 * [Arista](#arista)
 * [AWS](#aws)
+* [Azure](#azure)
 * [Cisco](#cisco)
 * [Check Point](#check-point)
 * [Cumulus Linux](#cumulus-linux)
@@ -77,6 +78,7 @@ You can retrieve the required JSON in either of the following ways:
   az resource show --ids <resource-id> -o json
   ```
 
+See example Azure snapshots in [this folder](https://github.com/batfish/batfish/tree/master/projects/batfish/src/test/resources/org/batfish/representation/azure). 
 
 ### Cisco
 
