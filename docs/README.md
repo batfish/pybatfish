@@ -38,11 +38,21 @@ Documentation is generated from multiple sources using sphinx (and its extension
 
    `python -m nb_gen`
 
-### Running tests, updating docs
+### Running tests
 
-1. Run `pytest docs`
-2. Some test failures will tell you what to do
-   (e.g., what symlinks to commit or will generate `*.testout` file to update the notebooks)
+1. Test doc generation notebooks: `pytest docs`
+2. Test public notebooks execution: `pytest --nbmake jupyter_notebooks/`
+3. Test notebook metadata: `pytest tests/test_notebooks.py`
+
+Some test failures will tell you what to do (e.g., what symlinks to commit).
+
+To update notebook outputs after making changes:
+```bash
+pytest --nbmake --overwrite jupyter_notebooks/
+python tests/strip_notebook_metadata.py jupyter_notebooks/*.ipynb
+```
+This executes all notebooks, updates outputs and execution counts, then strips
+environment-specific metadata (execution timestamps and Python version).
 
 ### Viewing locally
 

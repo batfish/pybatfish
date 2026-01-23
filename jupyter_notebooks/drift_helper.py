@@ -54,14 +54,14 @@ def diff_frames(snapshot_frame, reference_frame, entity_type):
         for index, row in snapshot_only.iterrows():
             print(
                 "    ",
-                friendly_name(entity_type, row, set(combined.columns) - {"_merge"}),
+                friendly_name(entity_type, row, [col for col in combined.columns if col != "_merge"]),
             )
     if len(reference_only) > 0:
         print(f"\n{entity_type}s only in reference")
         for index, row in reference_only.iterrows():
             print(
                 "    ",
-                friendly_name(entity_type, row, set(combined.columns) - {"_merge"}),
+                friendly_name(entity_type, row, [col for col in combined.columns if col != "_merge"]),
             )
     if len(snapshot_only) == 0 and len(reference_only) == 0:
         print(f"\n{entity_type}s are identical across the two snapshots")

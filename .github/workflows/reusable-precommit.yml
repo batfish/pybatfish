@@ -141,6 +141,11 @@ jobs:
           java -cp allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > batfish.log &
           pip install -e .[dev] -q
           pytest tests/integration
+          pytest --nbmake --nbmake-timeout=60 --overwrite jupyter_notebooks/
+          # Strip execution metadata and Python version before checking for changes
+          # These vary by environment and shouldn't cause CI failures
+          python tests/strip_notebook_metadata.py jupyter_notebooks/*.ipynb
+          git diff --exit-code jupyter_notebooks/ || (echo "ERROR: Notebook outputs are stale. Run 'pytest --nbmake --overwrite jupyter_notebooks/' and 'python tests/strip_notebook_metadata.py jupyter_notebooks/*.ipynb' locally, then commit the changes." && exit 1)
       - name: codecov
         # Let codecov upload fail - codecov goes down not infrequently.
         continue-on-error: true
