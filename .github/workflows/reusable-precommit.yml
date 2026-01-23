@@ -141,6 +141,9 @@ jobs:
           java -cp allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > batfish.log &
           pip install -e .[dev] -q
           pytest tests/integration
+          pytest --nbmake --nbmake-timeout=60 --overwrite jupyter_notebooks/
+          # Fail if notebooks have stale outputs (nbmake --overwrite modified them)
+          git diff --exit-code jupyter_notebooks/ || (echo "ERROR: Notebook outputs are stale. Run 'pytest --nbmake --overwrite jupyter_notebooks/' locally and commit the changes." && exit 1)
       - name: codecov
         # Let codecov upload fail - codecov goes down not infrequently.
         continue-on-error: true
