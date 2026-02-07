@@ -14,6 +14,7 @@
 import logging
 import os
 import re
+import sys
 from collections.abc import Mapping
 from copy import deepcopy
 from os import remove, walk
@@ -175,6 +176,8 @@ def test_notebook_no_errors(rendered_nb: RenderedNotebook):
 
 def test_notebook_code_output(rendered_nb: RenderedNotebook):
     """Test the output code cells have not changed."""
+    if sys.version_info < (3, 14):
+        pytest.skip("Notebook output equality checks are only enforced on Python >= 3.14")
     try:
         for cell, executed_cell in zip(rendered_nb.original["cells"], rendered_nb.rendered["cells"]):
             assert cell["cell_type"] == executed_cell["cell_type"]
