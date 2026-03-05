@@ -102,13 +102,6 @@ packages = {find = {exclude = ["contrib", "docs", "tests"]}}
 package-data = {"pybatfish" = ["py.typed"]}
 zip-safe = false
 
-[tool.pytest]
-testpaths = ["tests"]
-addopts = "--ignore tests/integration --cov=pybatfish"
-doctest_encoding = "utf8"
-doctest_optionflags = ["NORMALIZE_WHITESPACE", "ALLOW_UNICODE", "ALLOW_BYTES"]
-log_level = "INFO"
-
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "--ignore tests/integration --cov=pybatfish"

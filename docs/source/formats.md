@@ -9,6 +9,7 @@ Batfish supports the following vendors. Click on the corresponding link to learn
 * [A10](#a10)
 * [Arista](#arista)
 * [AWS](#aws)
+* [Azure](#azure)
 * [Cisco](#cisco)
 * [Check Point](#check-point)
 * [Cumulus Linux](#cumulus-linux)
@@ -58,6 +59,26 @@ An example script that packages AWS data into a Batfish snapshot is [here](https
 
 An example snapshot, which includes both physical and AWS configs, is [here](https://github.com/batfish/batfish/tree/master/networks/hybrid-cloud-aws).
 It is OK to have only AWS configs in a snapshot (without any physical device configs).
+
+### Azure
+
+Batfish is able to understand Azure configurations files (json) and build a phyisical network which tries to replicate as best as possible the behavior of Azure workflows. Please provides Azure configs in a folder named `azure_configs` right below the top-level snapshot folder.
+
+For now, Batfish supports **Azure resource JSON views only**.  
+**ARM templates are not supported.**
+
+When providing Azure resources to Batfish, make sure to use the **JSON view of each resource**, as returned by Azure.
+You can retrieve the required JSON in either of the following ways:
+
+- **Azure Portal**:  
+  Open the resource ➜ *Overview* ➜ *JSON view*
+
+- **Azure CLI**:
+  ```bash
+  az resource show --ids <resource-id> -o json
+  ```
+
+See example Azure snapshots in [this folder](https://github.com/batfish/batfish/tree/master/projects/batfish/src/test/resources/org/batfish/representation/azure). 
 
 ### Cisco
 

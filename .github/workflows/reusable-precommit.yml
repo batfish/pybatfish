@@ -20,8 +20,8 @@ jobs:
   format:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Run checks
@@ -31,8 +31,8 @@ jobs:
   mypy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Run checks
@@ -44,18 +44,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Batfish repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: ${{ inputs.batfish_repo }}
           ref: ${{ inputs.batfish_ref }}
       - name: Bazel cache
-        uses: actions/cache@v3
+        uses: actions/cache@v5
         with:
           path: "~/.cache/bazel"
           key: ${{runner.os}}-bazel-17-${{ hashFiles('.bazelversion', 'WORKSPACE', 'maven_install.json') }}-${{ needs.get_date.outputs.ymd }}
           restore-keys: |
             ${{runner.os}}-bazel-17-${{ hashFiles('.bazelversion', 'WORKSPACE', 'maven_install.json') }}-
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
@@ -71,20 +71,20 @@ jobs:
           cp -r questions/{stable,experimental} ${QUESTION_DIR}
           tar -czf questions.tgz -C ${TMP_DIR} questions
       - name: Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bf_jar
           path: allinone.jar
       - name: Upload questions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: bf_questions
           path: questions.tgz
   unit_tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python_version }}
       - name: Run tests
@@ -111,20 +111,20 @@ jobs:
     needs:
       - bf_build
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python_version }}
       - name: Download bf JAR
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bf_questions
       - name: Run tests
@@ -160,20 +160,20 @@ jobs:
     needs:
       - bf_build
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Download bf JAR
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bf_jar
       - name: Download questions
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: bf_questions
       - name: Run tests
@@ -187,12 +187,12 @@ jobs:
   build_docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v3
+      - uses: actions/checkout@v6
+      - uses: actions/setup-java@v5
         with:
           distribution: "temurin"
           java-version: "17"
-      - uses: actions/setup-python@v4
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10"
       - name: Build docs
@@ -205,15 +205,15 @@ jobs:
           make html
           popd
       - name: Upload docs
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: docs
           path: docs/build/html
   readthedocs_build:
     runs-on: ubuntu-22.04 # Match ReadTheDocs OS
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-python@v4
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
         with:
           python-version: "3.10" # Match ReadTheDocs Python version
       - name: Build docs in ReadTheDocs-like environment
