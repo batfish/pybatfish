@@ -1,0 +1,40 @@
+# Copyright 2018 The Batfish Open Source Project
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+"""Entry point for running the Batfish MCP server.
+
+Run with::
+
+    python -m pybatfish.mcp
+
+Or, after installing pybatfish with the ``mcp`` extra::
+
+    batfish-mcp
+
+Environment variables:
+
+* ``BATFISH_HOST`` — hostname of the Batfish server (default: ``localhost``).
+"""
+
+from pybatfish.mcp.server import create_server
+
+
+def main() -> None:
+    """Start the Batfish MCP server using stdio transport."""
+    server = create_server()
+    server.run(transport="stdio")
+
+
+if __name__ == "__main__":
+    main()
