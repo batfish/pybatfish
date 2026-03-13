@@ -63,7 +63,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
             "Most tools require a 'host' parameter (Batfish server hostname, defaults to "
             "the BATFISH_HOST environment variable or 'localhost'), a 'network' parameter "
             "(the network name in Batfish), and a 'snapshot' parameter (the snapshot name). "
-            "Start by listing networks or initialising a snapshot, then run analysis tools."
+            "Start by listing networks or initializing a snapshot, then run analysis tools."
         ),
     )
 
@@ -133,7 +133,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         overwrite: bool = False,
         host: str = "",
     ) -> str:
-        """Initialise a new snapshot from a local directory or zip file.
+        """Initialize a new snapshot from a local directory or zip file.
 
         The snapshot directory or zip file should contain device configuration
         files under a ``configs/`` sub-directory.
@@ -143,7 +143,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param snapshot_name: Optional name for the snapshot. Auto-generated if empty.
         :param overwrite: Whether to overwrite an existing snapshot with the same name.
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
-        :return: JSON object with the initialised snapshot name.
+        :return: JSON object with the initialized snapshot name.
         """
         host = host or os.environ.get("BATFISH_HOST", "localhost")
         bf = _get_session(host)
@@ -165,7 +165,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         overwrite: bool = False,
         host: str = "",
     ) -> str:
-        """Initialise a single-device snapshot from configuration text.
+        """Initialize a single-device snapshot from configuration text.
 
         Useful for quickly loading one device's configuration without needing
         a local file or zip archive.
@@ -178,7 +178,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
             If empty, the platform is inferred from the configuration header.
         :param overwrite: Whether to overwrite an existing snapshot with the same name.
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
-        :return: JSON object with the initialised snapshot name.
+        :return: JSON object with the initialized snapshot name.
         """
         host = host or os.environ.get("BATFISH_HOST", "localhost")
         bf = _get_session(host)
