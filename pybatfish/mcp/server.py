@@ -94,6 +94,44 @@ def _clear_session_cache() -> None:
         _session_cache.clear()
 
 
+def _resolve_host(host: str) -> str:
+    """Return the effective Batfish hostname.
+
+    Returns *host* if non-empty; otherwise falls back to the
+    ``BATFISH_HOST`` environment variable, and finally to ``'localhost'``.
+    """
+    return host or os.environ.get("BATFISH_HOST", "localhost")
+
+
+def _mgmt_session(host: str, network: str = "") -> Session:
+    """Return a lightweight management session (no question templates loaded).
+
+    Resolves the effective hostname, creates a **fresh uncached** session
+    (``load_questions=False`` bypasses the per-host cache), and optionally
+    calls :meth:`~Session.set_network` when *network* is provided.  Use this
+    for all tools that do **not** invoke Batfish questions (e.g.
+    ``list_networks``, ``delete_snapshot``).
+    """
+    bf = _get_session(_resolve_host(host), load_questions=False)
+    if network:
+        bf.set_network(network)
+    return bf
+
+
+def _analysis_session(host: str, network: str, snapshot: str) -> Session:
+    """Return a cached analysis session with network and snapshot set.
+
+    Resolves the effective hostname, fetches (or creates) the per-host cached
+    session that has question templates already loaded, then calls
+    :meth:`~Session.set_network` and :meth:`~Session.set_snapshot`.  Use this
+    for all tools that invoke Batfish questions.
+    """
+    bf = _get_session(_resolve_host(host))
+    bf.set_network(network)
+    bf.set_snapshot(snapshot)
+    return bf
+
+
 def _df_to_json(df: Any) -> str:
     """Convert a pandas DataFrame (or any value) to a JSON string."""
     if hasattr(df, "to_json"):
@@ -152,8 +190,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of network names.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
+        bf = _mgmt_session(host)
         return json.dumps(bf.list_networks())
 
     @mcp.tool()
@@ -164,8 +201,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object with the active network name.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
+        bf = _mgmt_session(host)
         name = bf.set_network(network)
         return json.dumps({"network": name})
 
@@ -177,8 +213,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object confirming deletion.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
+        bf = _mgmt_session(host)
         bf.delete_network(network)
         return json.dumps({"deleted": network})
 
@@ -194,9 +229,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of snapshot names.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
-        bf.set_network(network)
+        bf = _mgmt_session(host, network)
         return json.dumps(bf.list_snapshots())
 
     @mcp.tool()
@@ -219,9 +252,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object with the initialized snapshot name.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
+        bf = _mgmt_session(host, network)
         name = bf.init_snapshot(
             snapshot_path,
             name=snapshot_name or None,
@@ -254,9 +285,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object with the initialized snapshot name.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
+        bf = _mgmt_session(host, network)
         name = bf.init_snapshot_from_text(
             config_text,
             filename=filename,
@@ -275,9 +304,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object confirming deletion.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
-        bf.set_network(network)
+        bf = _mgmt_session(host, network)
         bf.delete_snapshot(snapshot)
         return json.dumps({"deleted": snapshot})
 
@@ -309,9 +336,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON object with the forked snapshot name.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host, load_questions=False)
-        bf.set_network(network)
+        bf = _mgmt_session(host, network)
 
         deactivate_nodes_list = [n.strip() for n in deactivate_nodes.split(",") if n.strip()] or None
         restore_nodes_list = [n.strip() for n in restore_nodes.split(",") if n.strip()] or None
@@ -364,10 +389,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of traceroute result rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         headers = _build_header_constraints(
             dst_ips=dst_ips,
@@ -410,10 +432,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of bidirectional traceroute result rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         headers = _build_header_constraints(
             dst_ips=dst_ips,
@@ -458,10 +477,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of reachability result rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         headers = _build_header_constraints(
             dst_ips=dst_ips,
@@ -504,10 +520,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of unreachable ACL/filter line rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if filters:
@@ -552,10 +565,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of matched flow rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         headers = _build_header_constraints(
             dst_ips=dst_ips,
@@ -604,10 +614,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of routing table rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -651,10 +658,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array showing route differences (added/removed routes).
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -696,10 +700,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of BGP session status rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -739,10 +740,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of BGP compatibility rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -776,10 +774,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of node property rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -809,10 +804,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of interface property rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -840,10 +832,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of IP ownership rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         result = bf.q.ipOwners(duplicatesOnly=duplicates_only).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
@@ -874,10 +863,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of filter difference rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if filters:
@@ -906,10 +892,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of undefined reference rows.
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         kwargs: dict[str, Any] = {}
         if nodes:
@@ -934,10 +917,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
         :return: JSON array of forwarding loop rows (empty if no loops found).
         """
-        host = host or os.environ.get("BATFISH_HOST", "localhost")
-        bf = _get_session(host)
-        bf.set_network(network)
-        bf.set_snapshot(snapshot)
+        bf = _analysis_session(host, network, snapshot)
 
         result = bf.q.detectLoops().answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)

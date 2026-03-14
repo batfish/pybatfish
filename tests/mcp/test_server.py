@@ -26,11 +26,14 @@ import pytest
 
 from pybatfish.datamodel import HeaderConstraints, Interface
 from pybatfish.mcp.server import (
+    _analysis_session,
     _build_header_constraints,
     _clear_session_cache,
     _df_to_json,
     _drop_legacy_nexthop_columns,
+    _mgmt_session,
     _parse_interfaces,
+    _resolve_host,
     create_server,
 )
 
@@ -214,7 +217,80 @@ class TestSessionCache:
         assert s1 is not s2
 
 
-class TestDropLegacyNexthopColumns:
+class TestResolveHost:
+    """Tests for the _resolve_host() helper."""
+
+    def test_returns_explicit_host(self):
+        assert _resolve_host("my-host") == "my-host"
+
+    def test_falls_back_to_env_var(self, monkeypatch):
+        monkeypatch.setenv("BATFISH_HOST", "env-host")
+        assert _resolve_host("") == "env-host"
+
+    def test_falls_back_to_localhost(self, monkeypatch):
+        monkeypatch.delenv("BATFISH_HOST", raising=False)
+        assert _resolve_host("") == "localhost"
+
+
+class TestMgmtSession:
+    """Tests for the _mgmt_session() helper."""
+
+    def test_creates_session_without_questions(self):
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.return_value = MagicMock()
+            _mgmt_session("localhost")
+        MockSession.assert_called_once_with(host="localhost", load_questions=False)
+
+    def test_sets_network_when_provided(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
+            _mgmt_session("localhost", "my-network")
+        mock_session.set_network.assert_called_once_with("my-network")
+
+    def test_skips_set_network_when_empty(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
+            _mgmt_session("localhost", "")
+        mock_session.set_network.assert_not_called()
+
+    def test_resolves_host_from_env(self, monkeypatch):
+        monkeypatch.setenv("BATFISH_HOST", "env-bf")
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.return_value = MagicMock()
+            _mgmt_session("")
+        MockSession.assert_called_once_with(host="env-bf", load_questions=False)
+
+
+class TestAnalysisSession:
+    """Tests for the _analysis_session() helper."""
+
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
+
+    def test_sets_network_and_snapshot(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
+            _analysis_session("localhost", "net1", "snap1")
+        mock_session.set_network.assert_called_once_with("net1")
+        mock_session.set_snapshot.assert_called_once_with("snap1")
+
+    def test_uses_load_questions_true(self):
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.return_value = MagicMock()
+            _analysis_session("localhost", "net1", "snap1")
+        MockSession.assert_called_once_with(host="localhost", load_questions=True)
+
+    def test_resolves_host_from_env(self, monkeypatch):
+        _clear_session_cache()
+        monkeypatch.setenv("BATFISH_HOST", "env-bf")
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.return_value = MagicMock()
+            _analysis_session("", "net1", "snap1")
+        MockSession.assert_called_once_with(host="env-bf", load_questions=True)
+
     def test_drops_known_legacy_columns(self):
         df = pd.DataFrame(
             [
