@@ -723,8 +723,13 @@ def create_server(name: str = "Batfish") -> FastMCP:
     ) -> str:
         """Check BGP session compatibility between peers.
 
-        Reports BGP sessions that are mis-configured or incompatible, including
-        issues with address families, authentication, and other parameters.
+        Returns the full BGP session compatibility table for the snapshot.
+        Each row represents a BGP session and includes its compatibility status
+        (e.g., UNIQUE_MATCH, NO_MATCH, DYNAMIC_MATCH) along with details about
+        address families, authentication, and other parameters.  Use the
+        *status* parameter to filter results to a specific compatibility status,
+        such as ``NO_MATCH`` or ``NO_LOCAL_AS``, when you are interested in only
+        mis-configured or incompatible sessions.
 
         :param network: Name of the network.
         :param snapshot: Name of the snapshot.
@@ -946,7 +951,17 @@ def create_server(name: str = "Batfish") -> FastMCP:
 
 
 def _parse_interfaces(interfaces_str: str) -> list[Interface]:
-    """Parse a comma-separated 'node[iface]' string into Interface objects."""
+    """Parse a comma-separated 'node[iface]' string into Interface objects.
+
+    Each token must follow the ``node[interface]`` format.  Bare node names
+    (e.g. ``"router1"`` without a bracketed interface) are rejected with a
+    :exc:`ValueError`; use the *deactivate_nodes* / *restore_nodes* parameters
+    for node-level operations instead.
+
+    :param interfaces_str: Comma-separated interface specifiers, e.g.
+        ``"r1[Gi0/0], r2[Ethernet1/1]"``.
+    :raises ValueError: If a token does not match the ``node[interface]`` format.
+    """
     result = []
     for item in interfaces_str.split(","):
         item = item.strip()
@@ -956,8 +971,10 @@ def _parse_interfaces(interfaces_str: str) -> list[Interface]:
             node, iface = item[:-1].split("[", 1)
             result.append(Interface(hostname=node.strip(), interface=iface.strip()))
         else:
-            # Treat the whole token as a node name with no specific interface
-            result.append(Interface(hostname=item, interface=""))
+            raise ValueError(
+                f"Invalid interface specifier {item!r}: expected 'node[interface]' format. "
+                "Use deactivate_nodes/restore_nodes for node-level operations."
+            )
     return result
 
 

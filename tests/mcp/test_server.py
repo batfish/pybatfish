@@ -22,6 +22,7 @@ from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
+import pytest
 
 from pybatfish.datamodel import HeaderConstraints, Interface
 from pybatfish.mcp.server import (
@@ -99,17 +100,20 @@ class TestParseInterfaces:
         assert result[0].hostname == "r1"
         assert result[1].hostname == "r2"
 
-    def test_node_without_interface(self):
-        result = _parse_interfaces("router1")
-        assert len(result) == 1
-        assert result[0].hostname == "router1"
-        assert result[0].interface == ""
+    def test_node_without_interface_raises(self):
+        """Bare node tokens (no [interface]) must raise ValueError."""
+        with pytest.raises(ValueError, match="node\\[interface\\]"):
+            _parse_interfaces("router1")
 
-    def test_mixed_entries(self):
-        result = _parse_interfaces("r1[Gi0/0], r2")
-        assert len(result) == 2
-        assert result[0].interface == "Gi0/0"
-        assert result[1].interface == ""
+    def test_mixed_entries_raises(self):
+        """Any bare node token in a list must raise ValueError."""
+        with pytest.raises(ValueError, match="node\\[interface\\]"):
+            _parse_interfaces("r1[Gi0/0], r2")
+
+    def test_invalid_format_error_message(self):
+        """ValueError message should include the bad token."""
+        with pytest.raises(ValueError, match="bare-node"):
+            _parse_interfaces("bare-node")
 
 
 class TestBuildHeaderConstraints:

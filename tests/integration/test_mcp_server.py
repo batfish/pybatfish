@@ -71,14 +71,19 @@ def network(mcp: FastMCP) -> typing.Generator[str, None, None]:
 
 @pytest.fixture(scope="module")
 def snapshot(mcp: FastMCP, network: str) -> typing.Generator[str, None, None]:
-    """Initialize a snapshot from the canonical integration test directory."""
+    """Initialize a snapshot from the tracert snapshot directory.
+
+    We use the tracert snapshot (which has real router configurations) rather
+    than the minimal ``snapshot`` directory, because some Batfish questions
+    (e.g. ``detect_loops``) require at least one interface to be present.
+    """
     snap_name = "mcp_snap_" + uuid.uuid4().hex[:8]
     _call_tool(
         mcp,
         "init_snapshot",
         {
             "network": network,
-            "snapshot_path": join(_this_dir, "snapshot"),
+            "snapshot_path": join(_this_dir, "tracert_snapshot"),
             "snapshot_name": snap_name,
         },
     )
