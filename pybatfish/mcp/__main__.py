@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Entry point for running the Batfish MCP server.
+"""Entry point for running the Batfish MCP server (Beta).
+
+.. warning::
+    This MCP server is currently in **beta**. The tool names, parameters, and
+    return formats may change in future releases without prior notice.
 
 Run with::
 

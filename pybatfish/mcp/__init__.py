@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""MCP (Model Context Protocol) server for Batfish.
+"""MCP (Model Context Protocol) server for Batfish (Beta).
+
+.. warning::
+    This MCP server is currently in **beta**. The tool names, parameters, and
+    return formats may change in future releases without prior notice.
 
 This package provides an official MCP server that exposes Batfish network
 analysis capabilities as MCP tools, enabling AI agents (such as Claude,

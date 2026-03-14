@@ -12,7 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Batfish MCP server implementation.
+"""Batfish MCP server implementation (Beta).
+
+.. warning::
+    This MCP server is currently in **beta**. The tool names, parameters, and
+    return formats may change in future releases without prior notice.
 
 Exposes Batfish network analysis capabilities as MCP (Model Context Protocol)
 tools, allowing AI agents to perform snapshot management, reachability
@@ -35,6 +39,21 @@ except ImportError as e:
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, Interface
 
+# Legacy next-hop column names that Batfish is deprecating.  The structured
+# ``Next_Hop`` column contains the same information in a richer format and
+# should be preferred.  We drop these from route results so that consumers
+# of this MCP server are not exposed to the deprecated columns.
+_LEGACY_NEXTHOP_COLUMNS: frozenset[str] = frozenset(
+    [
+        "Next_Hop_IP",
+        "Next_Hop_Interface",
+        "Next_Hop_Type",
+        "NextHopIp",
+        "NextHopInterface",
+        "NextHopType",
+    ]
+)
+
 
 def _get_session(host: str, load_questions: bool = True) -> Session:
     """Create a Batfish Session for the given host."""
@@ -44,12 +63,32 @@ def _get_session(host: str, load_questions: bool = True) -> Session:
 def _df_to_json(df: Any) -> str:
     """Convert a pandas DataFrame (or any value) to a JSON string."""
     if hasattr(df, "to_json"):
-        return df.to_json(orient="records", default_handler=str)
+        result: str | None = df.to_json(orient="records", default_handler=str)
+        return result or "[]"
     return json.dumps(df, default=str)
 
 
+def _drop_legacy_nexthop_columns(df: Any) -> Any:
+    """Drop deprecated next-hop columns from a routes DataFrame.
+
+    Keeps only the structured ``Next_Hop`` column and removes the legacy
+    ``Next_Hop_IP``, ``Next_Hop_Interface``, and ``Next_Hop_Type`` columns
+    (and their camelCase variants) that Batfish is deprecating.
+    """
+    if not hasattr(df, "columns"):
+        return df
+    cols_to_drop = [c for c in df.columns if c in _LEGACY_NEXTHOP_COLUMNS]
+    if cols_to_drop:
+        return df.drop(columns=cols_to_drop)
+    return df
+
+
 def create_server(name: str = "Batfish") -> FastMCP:
-    """Create and return a configured Batfish MCP server.
+    """Create and return a configured Batfish MCP server (Beta).
+
+    .. warning::
+        This MCP server is currently in **beta**. Tool names, parameters, and
+        return formats may change in future releases without prior notice.
 
     :param name: Name for the MCP server (default: "Batfish")
     :return: Configured FastMCP server instance
@@ -57,7 +96,8 @@ def create_server(name: str = "Batfish") -> FastMCP:
     mcp = FastMCP(
         name,
         instructions=(
-            "This server provides tools to interact with a Batfish network analysis service. "
+            "[BETA] This server provides tools to interact with a Batfish network analysis service. "
+            "Note: this MCP server is in beta — tool names and parameters may change in future releases. "
             "Use these tools to load network snapshots, run traceroutes, analyze reachability, "
             "inspect ACLs/firewall rules, query routing tables, and compare snapshots. "
             "Most tools require a 'host' parameter (Batfish server hostname, defaults to "
@@ -72,7 +112,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_list_networks(host: str = "") -> str:
+    def list_networks(host: str = "") -> str:
         """List all available networks on the Batfish server.
 
         :param host: Batfish server hostname. Defaults to BATFISH_HOST env var or 'localhost'.
@@ -83,7 +123,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps(bf.list_networks())
 
     @mcp.tool()
-    def bf_set_network(network: str, host: str = "") -> str:
+    def set_network(network: str, host: str = "") -> str:
         """Create or select a network on the Batfish server.
 
         :param network: Name of the network to create or select.
@@ -96,7 +136,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps({"network": name})
 
     @mcp.tool()
-    def bf_delete_network(network: str, host: str = "") -> str:
+    def delete_network(network: str, host: str = "") -> str:
         """Delete a network from the Batfish server.
 
         :param network: Name of the network to delete.
@@ -113,7 +153,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_list_snapshots(network: str, host: str = "") -> str:
+    def list_snapshots(network: str, host: str = "") -> str:
         """List all snapshots within a network.
 
         :param network: Name of the network.
@@ -126,7 +166,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps(bf.list_snapshots())
 
     @mcp.tool()
-    def bf_init_snapshot(
+    def init_snapshot(
         network: str,
         snapshot_path: str,
         snapshot_name: str = "",
@@ -156,7 +196,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps({"snapshot": name})
 
     @mcp.tool()
-    def bf_init_snapshot_from_text(
+    def init_snapshot_from_text(
         network: str,
         config_text: str,
         filename: str = "config",
@@ -193,7 +233,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps({"snapshot": name})
 
     @mcp.tool()
-    def bf_delete_snapshot(network: str, snapshot: str, host: str = "") -> str:
+    def delete_snapshot(network: str, snapshot: str, host: str = "") -> str:
         """Delete a snapshot from a network.
 
         :param network: Name of the network containing the snapshot.
@@ -208,7 +248,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         return json.dumps({"deleted": snapshot})
 
     @mcp.tool()
-    def bf_fork_snapshot(
+    def fork_snapshot(
         network: str,
         base_snapshot: str,
         new_snapshot: str = "",
@@ -261,7 +301,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_run_traceroute(
+    def run_traceroute(
         network: str,
         snapshot: str,
         start_location: str,
@@ -303,11 +343,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
             src_ports=src_ports,
             dst_ports=dst_ports,
         )
-        result = bf.q.traceroute(startLocation=start_location, headers=headers).answer().frame()
+        result = bf.q.traceroute(startLocation=start_location, headers=headers).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_run_bidirectional_traceroute(
+    def run_bidirectional_traceroute(
         network: str,
         snapshot: str,
         start_location: str,
@@ -349,11 +389,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
             src_ports=src_ports,
             dst_ports=dst_ports,
         )
-        result = bf.q.bidirectionalTraceroute(startLocation=start_location, headers=headers).answer().frame()
+        result = bf.q.bidirectionalTraceroute(startLocation=start_location, headers=headers).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_check_reachability(
+    def check_reachability(
         network: str,
         snapshot: str,
         src_locations: str = "",
@@ -403,7 +443,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if actions:
             kwargs["actions"] = actions
 
-        result = bf.q.reachability(**kwargs).answer().frame()
+        result = bf.q.reachability(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -411,7 +451,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_analyze_acl(
+    def analyze_acl(
         network: str,
         snapshot: str,
         filters: str = "",
@@ -441,11 +481,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if nodes:
             kwargs["nodes"] = nodes
 
-        result = bf.q.filterLineReachability(**kwargs).answer().frame()
+        result = bf.q.filterLineReachability(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_search_filters(
+    def search_filters(
         network: str,
         snapshot: str,
         filters: str = "",
@@ -499,7 +539,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if action:
             kwargs["action"] = action
 
-        result = bf.q.searchFilters(**kwargs).answer().frame()
+        result = bf.q.searchFilters(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -507,7 +547,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_get_routes(
+    def get_routes(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -517,6 +557,9 @@ def create_server(name: str = "Batfish") -> FastMCP:
         host: str = "",
     ) -> str:
         """Retrieve the routing table (RIB) from one or more devices.
+
+        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface, Next_Hop_Type)
+        are omitted from the results; use the structured Next_Hop column instead.
 
         :param network: Name of the Batfish network.
         :param snapshot: Name of the snapshot.
@@ -542,11 +585,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if protocols:
             kwargs["protocols"] = protocols
 
-        result = bf.q.routes(**kwargs).answer().frame()
+        result = _drop_legacy_nexthop_columns(bf.q.routes(**kwargs).answer().frame())  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_compare_routes(
+    def compare_routes(
         network: str,
         snapshot: str,
         reference_snapshot: str,
@@ -560,6 +603,9 @@ def create_server(name: str = "Batfish") -> FastMCP:
 
         Useful for validating that a configuration change produces the expected
         routing changes (and no unintended ones).
+
+        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface, Next_Hop_Type)
+        are omitted from the results; use the structured Next_Hop column instead.
 
         :param network: Name of the Batfish network.
         :param snapshot: Name of the candidate (new) snapshot.
@@ -586,7 +632,9 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if protocols:
             kwargs["protocols"] = protocols
 
-        result = bf.q.routes(**kwargs).answer(snapshot=snapshot, reference_snapshot=reference_snapshot).frame()
+        result = _drop_legacy_nexthop_columns(
+            bf.q.routes(**kwargs).answer(snapshot=snapshot, reference_snapshot=reference_snapshot).frame()  # type: ignore[attr-defined]
+        )
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -594,7 +642,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_get_bgp_session_status(
+    def get_bgp_session_status(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -627,11 +675,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if status:
             kwargs["status"] = status
 
-        result = bf.q.bgpSessionStatus(**kwargs).answer().frame()
+        result = bf.q.bgpSessionStatus(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_get_bgp_session_compatibility(
+    def get_bgp_session_compatibility(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -665,7 +713,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if status:
             kwargs["status"] = status
 
-        result = bf.q.bgpSessionCompatibility(**kwargs).answer().frame()
+        result = bf.q.bgpSessionCompatibility(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -673,7 +721,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_get_node_properties(
+    def get_node_properties(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -700,11 +748,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if properties:
             kwargs["properties"] = properties
 
-        result = bf.q.nodeProperties(**kwargs).answer().frame()
+        result = bf.q.nodeProperties(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_get_interface_properties(
+    def get_interface_properties(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -735,11 +783,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if properties:
             kwargs["properties"] = properties
 
-        result = bf.q.interfaceProperties(**kwargs).answer().frame()
+        result = bf.q.interfaceProperties(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_get_ip_owners(
+    def get_ip_owners(
         network: str,
         snapshot: str,
         duplicates_only: bool = False,
@@ -758,7 +806,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         bf.set_network(network)
         bf.set_snapshot(snapshot)
 
-        result = bf.q.ipOwners(duplicatesOnly=duplicates_only).answer().frame()
+        result = bf.q.ipOwners(duplicatesOnly=duplicates_only).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -766,7 +814,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     # -------------------------------------------------------------------------
 
     @mcp.tool()
-    def bf_compare_filters(
+    def compare_filters(
         network: str,
         snapshot: str,
         reference_snapshot: str,
@@ -774,7 +822,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         nodes: str = "",
         host: str = "",
     ) -> str:
-        """Compare ACL/firewall filter behaviour between two snapshots.
+        """Compare ACL/firewall filter behavior between two snapshots.
 
         Identifies flows that are treated differently (permitted vs. denied)
         between the candidate snapshot and the reference (baseline) snapshot.
@@ -798,11 +846,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if nodes:
             kwargs["nodes"] = nodes
 
-        result = bf.q.compareFilters(**kwargs).answer(snapshot=snapshot, reference_snapshot=reference_snapshot).frame()
+        result = bf.q.compareFilters(**kwargs).answer(snapshot=snapshot, reference_snapshot=reference_snapshot).frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_get_undefined_references(
+    def get_undefined_references(
         network: str,
         snapshot: str,
         nodes: str = "",
@@ -828,11 +876,11 @@ def create_server(name: str = "Batfish") -> FastMCP:
         if nodes:
             kwargs["nodes"] = nodes
 
-        result = bf.q.undefinedReferences(**kwargs).answer().frame()
+        result = bf.q.undefinedReferences(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()
-    def bf_detect_loops(
+    def detect_loops(
         network: str,
         snapshot: str,
         host: str = "",
@@ -852,7 +900,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         bf.set_network(network)
         bf.set_snapshot(snapshot)
 
-        result = bf.q.detectLoops().answer().frame()
+        result = bf.q.detectLoops().answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     return mcp
