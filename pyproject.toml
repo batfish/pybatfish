@@ -63,6 +63,9 @@ capirca = [
     "capirca",
     "absl-py>=0.8.0",
 ]
+mcp = [
+    "mcp>=1.23.0",
+]
 dev = [
     "ruff",
     "cerberus",
@@ -92,10 +95,14 @@ dev = [
     "types-simplejson",
     "capirca",
     "absl-py>=0.8.0",
+    "mcp>=1.23.0",
 ]
 
 [project.entry-points."batfish_session"]
 bf = "pybatfish.client.session:Session"
+
+[project.scripts]
+batfish-mcp = "pybatfish.mcp.__main__:main"
 
 [tool.setuptools]
 packages = {find = {exclude = ["contrib", "docs", "tests"]}}
