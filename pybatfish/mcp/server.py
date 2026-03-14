@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import os
+import threading
 from typing import Any
 
 try:
@@ -54,10 +55,43 @@ _LEGACY_NEXTHOP_COLUMNS: frozenset[str] = frozenset(
     ]
 )
 
+# Per-host Session cache.  Question templates are downloaded from the Batfish
+# service exactly once per host per process lifetime.  Tools that do not need
+# questions (e.g. list_networks, delete_snapshot) bypass this cache by
+# passing load_questions=False so they get a lightweight, ephemeral session.
+_session_cache: dict[str, Session] = {}
+_session_cache_lock = threading.Lock()
+
 
 def _get_session(host: str, load_questions: bool = True) -> Session:
-    """Create a Batfish Session for the given host."""
-    return Session(host=host, load_questions=load_questions)
+    """Return a Batfish Session for the given host.
+
+    When *load_questions* is ``True`` the session is retrieved from (or added
+    to) a process-level cache keyed by *host*, so that question templates are
+    downloaded from the Batfish service **at most once per process** rather
+    than on every tool call.
+
+    When *load_questions* is ``False`` a fresh, lightweight session is always
+    created and returned without consulting the cache.  Use this for
+    management operations that do not invoke Batfish questions.
+    """
+    if not load_questions:
+        return Session(host=host, load_questions=False)
+
+    with _session_cache_lock:
+        if host not in _session_cache:
+            _session_cache[host] = Session(host=host, load_questions=True)
+        return _session_cache[host]
+
+
+def _clear_session_cache() -> None:
+    """Clear the per-host session cache.
+
+    Intended for use in tests and in situations where the caller wants to
+    force question templates to be re-fetched from the Batfish service.
+    """
+    with _session_cache_lock:
+        _session_cache.clear()
 
 
 def _df_to_json(df: Any) -> str:

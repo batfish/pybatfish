@@ -26,6 +26,7 @@ import pandas as pd
 from pybatfish.datamodel import HeaderConstraints, Interface
 from pybatfish.mcp.server import (
     _build_header_constraints,
+    _clear_session_cache,
     _df_to_json,
     _drop_legacy_nexthop_columns,
     _parse_interfaces,
@@ -138,6 +139,75 @@ class TestBuildHeaderConstraints:
         assert "TCP" in hc.ipProtocols
         assert hc.srcPorts == "1024-65535"
         assert hc.dstPorts == "22"
+
+
+class TestSessionCache:
+    """Tests for the per-host session cache in _get_session."""
+
+    def setup_method(self):
+        """Clear the cache before each test to ensure isolation."""
+        _clear_session_cache()
+
+    def teardown_method(self):
+        """Clear the cache after each test."""
+        _clear_session_cache()
+
+    def test_session_with_load_questions_false_always_creates_new(self):
+        """load_questions=False must never populate or consult the cache."""
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.return_value = MagicMock()
+            from pybatfish.mcp.server import _get_session
+
+            _get_session("bf-host", load_questions=False)
+            _get_session("bf-host", load_questions=False)
+
+        # Session should be constructed twice — no caching
+        assert MockSession.call_count == 2
+        for call_args in MockSession.call_args_list:
+            assert call_args.kwargs.get("load_questions") is False
+
+    def test_session_with_load_questions_true_is_cached(self):
+        """load_questions=True must create Session only once for the same host."""
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session", return_value=mock_session) as MockSession:
+            from pybatfish.mcp.server import _get_session
+
+            s1 = _get_session("bf-host", load_questions=True)
+            s2 = _get_session("bf-host", load_questions=True)
+
+        # Session constructor called only once
+        assert MockSession.call_count == 1
+        # Both calls return the same cached object
+        assert s1 is s2
+
+    def test_different_hosts_get_different_cached_sessions(self):
+        """Each host gets its own independent cache entry."""
+        mock_a = MagicMock()
+        mock_b = MagicMock()
+        sessions = [mock_a, mock_b]
+        with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
+            from pybatfish.mcp.server import _get_session
+
+            sa = _get_session("host-a", load_questions=True)
+            sb = _get_session("host-b", load_questions=True)
+
+        assert MockSession.call_count == 2
+        assert sa is not sb
+
+    def test_clear_session_cache_forces_new_session(self):
+        """After _clear_session_cache(), the next call creates a fresh session."""
+        from pybatfish.mcp.server import _clear_session_cache, _get_session
+
+        mock_first = MagicMock()
+        mock_second = MagicMock()
+        sessions = [mock_first, mock_second]
+        with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
+            s1 = _get_session("bf-host", load_questions=True)
+            _clear_session_cache()
+            s2 = _get_session("bf-host", load_questions=True)
+
+        assert MockSession.call_count == 2
+        assert s1 is not s2
 
 
 class TestDropLegacyNexthopColumns:
@@ -324,9 +394,7 @@ class TestDeleteSnapshotTool:
         mock_session = MagicMock()
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(
-                server, "delete_snapshot", {"network": "net1", "snapshot": "snap1", "host": "localhost"}
-            )
+            data = _call_tool(server, "delete_snapshot", {"network": "net1", "snapshot": "snap1", "host": "localhost"})
         assert data == {"deleted": "snap1"}
         mock_session.delete_snapshot.assert_called_once_with("snap1")
 
