@@ -46,7 +46,7 @@ dependencies = [
     "pandas",
     "python-dateutil",
     "PyYAML",
-    "requests",
+    "requests[socks]>=2.32.5",
     "requests-toolbelt",
     "setuptools",
     "simplejson",
