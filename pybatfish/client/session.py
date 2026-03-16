@@ -319,6 +319,8 @@ class Session:
     :ivar port_v2: Legacy alias for port
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
+    :ivar proxies: A dictionary of proxies to use for the session. See `requests` documentation for details.
+    :ivar timeout: Timeout for requests in seconds (default is 30 seconds)
     """
 
     def __init__(
@@ -333,6 +335,8 @@ class Session:
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        proxies: dict[str, str] | None = None,
+        timeout: int = 30,
     ):
         # Coordinator args
         self.host: str = host
@@ -360,6 +364,8 @@ class Session:
 
         self.elapsed_delay: int = 5
         self.stale_timeout: int = 5
+        self.proxies = proxies
+        self.timeout = timeout
 
         # Auto-load question templates
         if load_questions:
