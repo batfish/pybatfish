@@ -28,8 +28,9 @@ import uuid
 from os.path import abspath, dirname, join, realpath
 from typing import Any
 
-import pybatfish
 import pytest
+
+import pybatfish
 
 # Prevent collection failure when the optional `mcp` dependency is not installed.
 # This must appear before any `mcp` imports so that pytest skips the module
