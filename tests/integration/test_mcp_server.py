@@ -22,16 +22,27 @@ from __future__ import annotations
 
 import asyncio
 import json
+import os
 import typing
 import uuid
 from os.path import abspath, dirname, join, realpath
 from typing import Any
 
+import pybatfish
 import pytest
-from mcp.server.fastmcp import FastMCP
-from mcp.types import TextContent
 
-from pybatfish.mcp.server import create_server
+# Prevent collection failure when the optional `mcp` dependency is not installed.
+# This must appear before any `mcp` imports so that pytest skips the module
+# gracefully instead of raising ModuleNotFoundError during collection.
+pytest.importorskip("mcp", reason="requires optional 'mcp' dependency (pip install pybatfish[mcp])")
+
+from mcp.server.fastmcp import FastMCP  # noqa: E402
+from mcp.types import TextContent  # noqa: E402
+
+from pybatfish.mcp.server import create_server  # noqa: E402
+from tests.common_util import skip_old_version  # noqa: E402
+
+_MCP_MIN_VERSION = "2026.3.16"
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -40,6 +51,13 @@ _this_dir = abspath(dirname(realpath(__file__)))
 # ---------------------------------------------------------------------------
 
 _MCP_NETWORK = "mcp_integration_test_network"
+
+
+@pytest.fixture(autouse=True)
+def _require_versions() -> None:
+    """Skip tests if Batfish or Pybatfish version predates MCP support."""
+    bf_version = os.environ.get("bf_version") or pybatfish.__version__
+    skip_old_version(bf_version=bf_version, min_version=_MCP_MIN_VERSION)
 
 
 def _call_tool(server: Any, tool_name: str, args: dict[str, Any]) -> Any:
