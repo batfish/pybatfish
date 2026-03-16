@@ -205,7 +205,7 @@ def test_get_routes_returns_list(mcp: FastMCP, network: str, snapshot: str) -> N
 def test_get_routes_no_legacy_nexthop_columns(mcp: FastMCP, network: str, snapshot: str) -> None:
     """get_routes must not include deprecated next-hop columns in results."""
     data = _call_tool(mcp, "get_routes", {"network": network, "snapshot": snapshot})
-    legacy_cols = {"Next_Hop_IP", "Next_Hop_Interface", "Next_Hop_Type", "NextHopIp", "NextHopInterface"}
+    legacy_cols = {"Next_Hop_IP", "Next_Hop_Interface", "NextHopIp", "NextHopInterface"}
     for row in data:
         for col in legacy_cols:
             assert col not in row, f"Deprecated column '{col}' found in routes result"

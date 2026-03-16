@@ -48,39 +48,28 @@ _LEGACY_NEXTHOP_COLUMNS: frozenset[str] = frozenset(
     [
         "Next_Hop_IP",
         "Next_Hop_Interface",
-        "Next_Hop_Type",
         "NextHopIp",
         "NextHopInterface",
-        "NextHopType",
     ]
 )
 
 # Per-host Session cache.  Question templates are downloaded from the Batfish
-# service exactly once per host per process lifetime.  Tools that do not need
-# questions (e.g. list_networks, delete_snapshot) bypass this cache by
-# passing load_questions=False so they get a lightweight, ephemeral session.
+# service exactly once per host per process lifetime, covering both management
+# and analysis operations.
 _session_cache: dict[str, Session] = {}
 _session_cache_lock = threading.Lock()
 
 
-def _get_session(host: str, load_questions: bool = True) -> Session:
-    """Return a Batfish Session for the given host.
+def _get_session(host: str) -> Session:
+    """Return the cached Batfish Session for the given host.
 
-    When *load_questions* is ``True`` the session is retrieved from (or added
-    to) a process-level cache keyed by *host*, so that question templates are
-    downloaded from the Batfish service **at most once per process** rather
-    than on every tool call.
-
-    When *load_questions* is ``False`` a fresh, lightweight session is always
-    created and returned without consulting the cache.  Use this for
-    management operations that do not invoke Batfish questions.
+    The session is retrieved from (or added to) a process-level cache keyed by
+    *host*, so that question templates are downloaded from the Batfish service
+    **at most once per process** rather than on every tool call.
     """
-    if not load_questions:
-        return Session(host=host, load_questions=False)
-
     with _session_cache_lock:
         if host not in _session_cache:
-            _session_cache[host] = Session(host=host, load_questions=True)
+            _session_cache[host] = Session(host=host)
         return _session_cache[host]
 
 
@@ -104,27 +93,26 @@ def _resolve_host(host: str) -> str:
 
 
 def _mgmt_session(host: str, network: str = "") -> Session:
-    """Return a lightweight management session (no question templates loaded).
+    """Return the cached session with an optional network set.
 
-    Resolves the effective hostname, creates a **fresh uncached** session
-    (``load_questions=False`` bypasses the per-host cache), and optionally
-    calls :meth:`~Session.set_network` when *network* is provided.  Use this
-    for all tools that do **not** invoke Batfish questions (e.g.
-    ``list_networks``, ``delete_snapshot``).
+    Resolves the effective hostname, fetches (or creates) the per-host cached
+    session, and optionally calls :meth:`~Session.set_network` when *network*
+    is provided.  Use this for tools that perform network or snapshot management
+    operations (e.g. ``list_networks``, ``init_snapshot``, ``delete_snapshot``).
     """
-    bf = _get_session(_resolve_host(host), load_questions=False)
+    bf = _get_session(_resolve_host(host))
     if network:
         bf.set_network(network)
     return bf
 
 
 def _analysis_session(host: str, network: str, snapshot: str) -> Session:
-    """Return a cached analysis session with network and snapshot set.
+    """Return the cached session with network and snapshot set.
 
     Resolves the effective hostname, fetches (or creates) the per-host cached
-    session that has question templates already loaded, then calls
-    :meth:`~Session.set_network` and :meth:`~Session.set_snapshot`.  Use this
-    for all tools that invoke Batfish questions.
+    session, then calls :meth:`~Session.set_network` and
+    :meth:`~Session.set_snapshot`.  Use this for all tools that invoke Batfish
+    questions.
     """
     bf = _get_session(_resolve_host(host))
     bf.set_network(network)
@@ -144,8 +132,8 @@ def _drop_legacy_nexthop_columns(df: Any) -> Any:
     """Drop deprecated next-hop columns from a routes DataFrame.
 
     Keeps only the structured ``Next_Hop`` column and removes the legacy
-    ``Next_Hop_IP``, ``Next_Hop_Interface``, and ``Next_Hop_Type`` columns
-    (and their camelCase variants) that Batfish is deprecating.
+    ``Next_Hop_IP`` and ``Next_Hop_Interface`` columns (and their camelCase
+    variants) that Batfish is deprecating.
     """
     if not hasattr(df, "columns"):
         return df
@@ -602,7 +590,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
     ) -> str:
         """Retrieve the routing table (RIB) from one or more devices.
 
-        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface, Next_Hop_Type)
+        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface)
         are omitted from the results; use the structured Next_Hop column instead.
 
         :param network: Name of the Batfish network.
@@ -645,7 +633,7 @@ def create_server(name: str = "Batfish") -> FastMCP:
         Useful for validating that a configuration change produces the expected
         routing changes (and no unintended ones).
 
-        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface, Next_Hop_Type)
+        Legacy next-hop columns (Next_Hop_IP, Next_Hop_Interface)
         are omitted from the results; use the structured Next_Hop column instead.
 
         :param network: Name of the Batfish network.

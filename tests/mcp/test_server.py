@@ -159,28 +159,14 @@ class TestSessionCache:
         """Clear the cache after each test."""
         _clear_session_cache()
 
-    def test_session_with_load_questions_false_always_creates_new(self):
-        """load_questions=False must never populate or consult the cache."""
-        with patch("pybatfish.mcp.server.Session") as MockSession:
-            MockSession.return_value = MagicMock()
-            from pybatfish.mcp.server import _get_session
-
-            _get_session("bf-host", load_questions=False)
-            _get_session("bf-host", load_questions=False)
-
-        # Session should be constructed twice — no caching
-        assert MockSession.call_count == 2
-        for call_args in MockSession.call_args_list:
-            assert call_args.kwargs.get("load_questions") is False
-
-    def test_session_with_load_questions_true_is_cached(self):
-        """load_questions=True must create Session only once for the same host."""
+    def test_session_is_cached(self):
+        """Session must be created only once for the same host."""
         mock_session = MagicMock()
         with patch("pybatfish.mcp.server.Session", return_value=mock_session) as MockSession:
             from pybatfish.mcp.server import _get_session
 
-            s1 = _get_session("bf-host", load_questions=True)
-            s2 = _get_session("bf-host", load_questions=True)
+            s1 = _get_session("bf-host")
+            s2 = _get_session("bf-host")
 
         # Session constructor called only once
         assert MockSession.call_count == 1
@@ -195,8 +181,8 @@ class TestSessionCache:
         with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
             from pybatfish.mcp.server import _get_session
 
-            sa = _get_session("host-a", load_questions=True)
-            sb = _get_session("host-b", load_questions=True)
+            sa = _get_session("host-a")
+            sb = _get_session("host-b")
 
         assert MockSession.call_count == 2
         assert sa is not sb
@@ -209,9 +195,9 @@ class TestSessionCache:
         mock_second = MagicMock()
         sessions = [mock_first, mock_second]
         with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
-            s1 = _get_session("bf-host", load_questions=True)
+            s1 = _get_session("bf-host")
             _clear_session_cache()
-            s2 = _get_session("bf-host", load_questions=True)
+            s2 = _get_session("bf-host")
 
         assert MockSession.call_count == 2
         assert s1 is not s2
@@ -235,11 +221,17 @@ class TestResolveHost:
 class TestMgmtSession:
     """Tests for the _mgmt_session() helper."""
 
-    def test_creates_session_without_questions(self):
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
+
+    def test_creates_cached_session(self):
         with patch("pybatfish.mcp.server.Session") as MockSession:
             MockSession.return_value = MagicMock()
             _mgmt_session("localhost")
-        MockSession.assert_called_once_with(host="localhost", load_questions=False)
+        MockSession.assert_called_once_with(host="localhost")
 
     def test_sets_network_when_provided(self):
         mock_session = MagicMock()
@@ -258,7 +250,17 @@ class TestMgmtSession:
         with patch("pybatfish.mcp.server.Session") as MockSession:
             MockSession.return_value = MagicMock()
             _mgmt_session("")
-        MockSession.assert_called_once_with(host="env-bf", load_questions=False)
+        MockSession.assert_called_once_with(host="env-bf")
+
+    def test_shares_cache_with_analysis_session(self):
+        """_mgmt_session and _analysis_session must return the same cached session."""
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session", return_value=mock_session) as MockSession:
+            s1 = _mgmt_session("localhost")
+            s2 = _analysis_session("localhost", "net1", "snap1")
+        # Session constructor called only once — both helpers share the cache
+        assert MockSession.call_count == 1
+        assert s1 is s2
 
 
 class TestAnalysisSession:
@@ -277,11 +279,11 @@ class TestAnalysisSession:
         mock_session.set_network.assert_called_once_with("net1")
         mock_session.set_snapshot.assert_called_once_with("snap1")
 
-    def test_uses_load_questions_true(self):
+    def test_creates_cached_session(self):
         with patch("pybatfish.mcp.server.Session") as MockSession:
             MockSession.return_value = MagicMock()
             _analysis_session("localhost", "net1", "snap1")
-        MockSession.assert_called_once_with(host="localhost", load_questions=True)
+        MockSession.assert_called_once_with(host="localhost")
 
     def test_resolves_host_from_env(self, monkeypatch):
         _clear_session_cache()
@@ -289,8 +291,10 @@ class TestAnalysisSession:
         with patch("pybatfish.mcp.server.Session") as MockSession:
             MockSession.return_value = MagicMock()
             _analysis_session("", "net1", "snap1")
-        MockSession.assert_called_once_with(host="env-bf", load_questions=True)
+        MockSession.assert_called_once_with(host="env-bf")
 
+
+class TestDropLegacyNexthopColumns:
     def test_drops_known_legacy_columns(self):
         df = pd.DataFrame(
             [
@@ -300,7 +304,6 @@ class TestAnalysisSession:
                     "Next_Hop": "ip 1.2.3.4",
                     "Next_Hop_IP": "1.2.3.4",
                     "Next_Hop_Interface": "GigabitEthernet0/0",
-                    "Next_Hop_Type": "ip",
                 }
             ]
         )
@@ -308,7 +311,6 @@ class TestAnalysisSession:
         assert "Next_Hop" in result.columns
         assert "Next_Hop_IP" not in result.columns
         assert "Next_Hop_Interface" not in result.columns
-        assert "Next_Hop_Type" not in result.columns
 
     def test_leaves_unrelated_columns_intact(self):
         df = pd.DataFrame([{"Node": "r1", "Network": "10.0.0.0/8", "Next_Hop": "ip 1.2.3.4"}])
@@ -360,7 +362,7 @@ class TestListNetworksTool:
         with patch(PATCH_TARGET, return_value=mock_session) as mock_get:
             server = create_server()
             _call_tool(server, "list_networks", {})
-        mock_get.assert_called_once_with("my-bf-host", load_questions=False)
+        mock_get.assert_called_once_with("my-bf-host")
 
 
 class TestSetNetworkTool:
@@ -617,7 +619,6 @@ class TestGetRoutesTool:
                     "Next_Hop": "ip 1.2.3.4",
                     "Next_Hop_IP": "1.2.3.4",
                     "Next_Hop_Interface": "GigabitEthernet0/0",
-                    "Next_Hop_Type": "ip",
                 }
             ]
         )
@@ -631,7 +632,6 @@ class TestGetRoutesTool:
         assert "Next_Hop" in data[0]
         assert "Next_Hop_IP" not in data[0]
         assert "Next_Hop_Interface" not in data[0]
-        assert "Next_Hop_Type" not in data[0]
 
     def test_filters_passed(self):
         mock_session = MagicMock()
