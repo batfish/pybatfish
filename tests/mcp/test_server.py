@@ -552,6 +552,78 @@ class TestRunTracerouteTool:
         assert len(data) == 1
         assert data[0]["Flow"] == "f1"
 
+    def test_optional_header_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.traceroute.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "run_traceroute",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "start_location": "router1",
+                    "dst_ips": "10.0.0.1",
+                    "src_ips": "192.168.0.1",
+                    "applications": "ssh",
+                    "ip_protocols": "TCP",
+                    "src_ports": "1024",
+                    "dst_ports": "22",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.traceroute.call_args[1]
+        assert call_kwargs["headers"].dstIps == "10.0.0.1"
+        assert call_kwargs["headers"].srcIps == "192.168.0.1"
+
+
+class TestRunBidirectionalTracerouteTool:
+    def test_returns_json_rows(self):
+        rows = [{"Forward_Flow": "f1", "Reverse_Flow": "f2"}]
+        mock_session = MagicMock()
+        mock_session.q.bidirectionalTraceroute.return_value = _make_answer_frame(rows)
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "run_bidirectional_traceroute",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "start_location": "router1",
+                    "dst_ips": "10.0.0.1",
+                    "host": "localhost",
+                },
+            )
+        assert len(data) == 1
+        assert data[0]["Forward_Flow"] == "f1"
+
+    def test_optional_header_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.bidirectionalTraceroute.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "run_bidirectional_traceroute",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "start_location": "router1",
+                    "dst_ips": "10.0.0.1",
+                    "src_ips": "192.168.0.1",
+                    "applications": "ssh",
+                    "ip_protocols": "TCP",
+                    "src_ports": "1024",
+                    "dst_ports": "22",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.bidirectionalTraceroute.call_args[1]
+        assert call_kwargs["headers"].dstIps == "10.0.0.1"
+        assert call_kwargs["headers"].srcIps == "192.168.0.1"
+
 
 class TestCheckReachabilityTool:
     def test_basic_call(self):
@@ -565,6 +637,26 @@ class TestCheckReachabilityTool:
                 {"network": "net1", "snapshot": "snap1", "dst_ips": "8.8.8.8", "host": "localhost"},
             )
         assert data[0]["Action"] == "ACCEPT"
+
+    def test_optional_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.reachability.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "check_reachability",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "src_locations": "router1",
+                    "actions": "DENIED_IN,DROP",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.reachability.call_args[1]
+        assert call_kwargs["pathConstraints"] == {"startLocation": "router1"}
+        assert call_kwargs["actions"] == "DENIED_IN,DROP"
 
 
 class TestAnalyzeAclTool:
@@ -580,6 +672,20 @@ class TestAnalyzeAclTool:
             )
         assert data[0]["Filter"] == "acl1"
 
+    def test_optional_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.filterLineReachability.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "analyze_acl",
+                {"network": "net1", "snapshot": "snap1", "filters": "acl1", "nodes": "r1", "host": "localhost"},
+            )
+        call_kwargs = mock_session.q.filterLineReachability.call_args[1]
+        assert call_kwargs["filters"] == "acl1"
+        assert call_kwargs["nodes"] == "r1"
+
 
 class TestSearchFiltersTool:
     def test_permit_action_passed(self):
@@ -594,6 +700,26 @@ class TestSearchFiltersTool:
             )
         call_kwargs = mock_session.q.searchFilters.call_args[1]
         assert call_kwargs["action"] == "PERMIT"
+
+    def test_optional_filters_and_nodes_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.searchFilters.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "search_filters",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "filters": "acl1",
+                    "nodes": "r1",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.searchFilters.call_args[1]
+        assert call_kwargs["filters"] == "acl1"
+        assert call_kwargs["nodes"] == "r1"
 
 
 class TestGetRoutesTool:
@@ -681,6 +807,36 @@ class TestCompareRoutesTool:
             )
         mock_answer_obj.answer.assert_called_once_with(snapshot="snap-new", reference_snapshot="snap-old")
 
+    def test_optional_filters_passed(self):
+        mock_frame_obj = MagicMock()
+        mock_frame_obj.frame.return_value = pd.DataFrame([])
+        mock_answer_obj = MagicMock()
+        mock_answer_obj.answer.return_value = mock_frame_obj
+        mock_session = MagicMock()
+        mock_session.q.routes.return_value = mock_answer_obj
+
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "compare_routes",
+                {
+                    "network": "net1",
+                    "snapshot": "snap-new",
+                    "reference_snapshot": "snap-old",
+                    "nodes": "r1",
+                    "vrfs": "default",
+                    "network_prefix": "10.0.0.0/8",
+                    "protocols": "bgp",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.routes.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["vrfs"] == "default"
+        assert call_kwargs["network"] == "10.0.0.0/8"
+        assert call_kwargs["protocols"] == "bgp"
+
 
 class TestGetBgpSessionStatusTool:
     def test_returns_bgp_rows(self):
@@ -694,6 +850,28 @@ class TestGetBgpSessionStatusTool:
                 {"network": "net1", "snapshot": "snap1", "host": "localhost"},
             )
         assert data[0]["Status"] == "ESTABLISHED"
+
+    def test_optional_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpSessionStatus.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_bgp_session_status",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "nodes": "r1",
+                    "remote_nodes": "r2",
+                    "status": "ESTABLISHED",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.bgpSessionStatus.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["remoteNodes"] == "r2"
+        assert call_kwargs["status"] == "ESTABLISHED"
 
 
 class TestGetBgpSessionCompatibilityTool:
@@ -709,6 +887,28 @@ class TestGetBgpSessionCompatibilityTool:
             )
         assert data[0]["Node"] == "r1"
 
+    def test_optional_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpSessionCompatibility.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_bgp_session_compatibility",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "nodes": "r1",
+                    "remote_nodes": "r2",
+                    "status": "UNIQUE_MATCH",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.bgpSessionCompatibility.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["remoteNodes"] == "r2"
+        assert call_kwargs["status"] == "UNIQUE_MATCH"
+
 
 class TestGetNodePropertiesTool:
     def test_returns_node_properties(self):
@@ -723,6 +923,19 @@ class TestGetNodePropertiesTool:
             )
         assert data[0]["Node"] == "r1"
 
+    def test_properties_param_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.nodeProperties.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_node_properties",
+                {"network": "net1", "snapshot": "snap1", "properties": "Hostname,NTP_Servers", "host": "localhost"},
+            )
+        call_kwargs = mock_session.q.nodeProperties.call_args[1]
+        assert call_kwargs["properties"] == "Hostname,NTP_Servers"
+
 
 class TestGetInterfacePropertiesTool:
     def test_returns_interface_properties(self):
@@ -736,6 +949,28 @@ class TestGetInterfacePropertiesTool:
                 {"network": "net1", "snapshot": "snap1", "host": "localhost"},
             )
         assert data[0]["Interface"] == "r1[Gi0/0]"
+
+    def test_optional_params_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.interfaceProperties.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_interface_properties",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "nodes": "r1",
+                    "interfaces": "Gi0/0",
+                    "properties": "Active,Description",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.interfaceProperties.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["interfaces"] == "Gi0/0"
+        assert call_kwargs["properties"] == "Active,Description"
 
 
 class TestGetIpOwnersTool:
@@ -787,6 +1022,32 @@ class TestCompareFiltersTool:
             )
         mock_answer_obj.answer.assert_called_once_with(snapshot="snap-new", reference_snapshot="snap-old")
 
+    def test_optional_params_passed(self):
+        mock_frame_obj = MagicMock()
+        mock_frame_obj.frame.return_value = pd.DataFrame([])
+        mock_answer_obj = MagicMock()
+        mock_answer_obj.answer.return_value = mock_frame_obj
+        mock_session = MagicMock()
+        mock_session.q.compareFilters.return_value = mock_answer_obj
+
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "compare_filters",
+                {
+                    "network": "net1",
+                    "snapshot": "snap-new",
+                    "reference_snapshot": "snap-old",
+                    "filters": "acl1",
+                    "nodes": "r1",
+                    "host": "localhost",
+                },
+            )
+        call_kwargs = mock_session.q.compareFilters.call_args[1]
+        assert call_kwargs["filters"] == "acl1"
+        assert call_kwargs["nodes"] == "r1"
+
 
 class TestGetUndefinedReferencesTool:
     def test_returns_reference_rows(self):
@@ -800,6 +1061,19 @@ class TestGetUndefinedReferencesTool:
                 {"network": "net1", "snapshot": "snap1", "host": "localhost"},
             )
         assert data[0]["Ref_Name"] == "acl-foo"
+
+    def test_nodes_param_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.undefinedReferences.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_undefined_references",
+                {"network": "net1", "snapshot": "snap1", "nodes": "r1", "host": "localhost"},
+            )
+        call_kwargs = mock_session.q.undefinedReferences.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
 
 
 class TestDetectLoopsTool:
