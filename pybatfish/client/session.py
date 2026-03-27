@@ -319,6 +319,14 @@ class Session:
     :ivar port_v2: Legacy alias for port
     :ivar ssl: Whether to use SSL when connecting to Batfish (False by default)
     :ivar api_key: Your API key
+    :ivar proxies: A dictionary of proxies to use for all requests. See the
+        `requests documentation <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`_
+        for details.
+    :ivar timeout: Timeout in seconds for all requests (default 30 seconds).
+        Pass ``None`` to disable the timeout and wait indefinitely.
+    :ivar request_kwargs: Additional keyword arguments forwarded to every
+        ``requests`` call.  Explicit parameters (``proxies``, ``timeout``)
+        take precedence over values provided here.
     """
 
     def __init__(
@@ -333,6 +341,9 @@ class Session:
         verify_ssl_certs: bool = Options.verify_ssl_certs,
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
+        proxies: dict[str, str] | None = None,
+        timeout: float | None = 30,
+        request_kwargs: dict[str, Any] | None = None,
     ):
         # Coordinator args
         self.host: str = host
@@ -360,10 +371,27 @@ class Session:
 
         self.elapsed_delay: int = 5
         self.stale_timeout: int = 5
+        self.proxies: dict[str, str] | None = proxies
+        self.timeout: float | None = timeout
+        self.request_kwargs: dict[str, Any] = request_kwargs or {}
 
         # Auto-load question templates
         if load_questions:
             self.q.load()
+
+    def _get_request_kwargs(self) -> dict[str, Any]:
+        """Return merged ``requests`` keyword arguments for HTTP calls.
+
+        Merge order (later values win):
+        1. Generic :attr:`request_kwargs` set on the session.
+        2. Explicit named parameters (:attr:`proxies`, :attr:`timeout`).
+        """
+        merged: dict[str, Any] = dict(self.request_kwargs)
+        if self.proxies is not None:
+            merged["proxies"] = self.proxies
+        if self.timeout is not None:
+            merged["timeout"] = self.timeout
+        return merged
 
     @classmethod
     def get_session_types(cls) -> dict[str, Callable]:

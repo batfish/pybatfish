@@ -56,6 +56,7 @@ def session() -> Session:
     s.get_base_url2.return_value = BASE_URL
     s.api_key = "0000"
     s.verify_ssl_certs = True
+    s._get_request_kwargs.return_value = {}
     return s
 
 
