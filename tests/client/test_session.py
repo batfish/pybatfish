@@ -157,4 +157,3 @@ def test_request_kwargs_explicit_params_override_generic():
     # Explicit timeout and proxies should win
     assert result["timeout"] == 10
     assert result["proxies"] == {"http": "http://proxy:8080"}
-
