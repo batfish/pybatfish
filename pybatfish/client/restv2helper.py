@@ -441,8 +441,7 @@ def _delete(session: Session, url_tail: str, params: dict[str, Any] | None = Non
         headers=_get_headers(session),
         params=params,
         verify=session.verify_ssl_certs,
-        timeout=session.timeout,
-        proxies=session.proxies,
+        **session._get_request_kwargs(),
     )
     _check_response_status(response)
 
@@ -463,8 +462,7 @@ def _get(
         params=params,
         stream=stream,
         verify=session.verify_ssl_certs,
-        timeout=session.timeout,
-        proxies=session.proxies,
+        **session._get_request_kwargs(),
     )
     _check_response_status(response)
     return response
@@ -525,8 +523,7 @@ def _post(
         headers=headers,
         params=params,
         verify=session.verify_ssl_certs,
-        timeout=session.timeout,
-        proxies=session.proxies,
+        **session._get_request_kwargs(),
     )
     _check_response_status(response)
     return None
@@ -550,8 +547,7 @@ def _put(session, url_tail, params=None, json=None, stream=None):
         headers=headers,
         verify=session.verify_ssl_certs,
         params=params,
-        timeout=session.timeout,
-        proxies=session.proxies,
+        **session._get_request_kwargs(),
     )
     _check_response_status(response)
     return None
