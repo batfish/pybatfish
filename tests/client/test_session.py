@@ -106,3 +106,54 @@ def test_port_set():
 def test_port_v2_set():
     s = Session(port_v2=8888, load_questions=False)
     assert s.port_v2 == 8888
+
+
+def test_request_kwargs_defaults():
+    """Confirm default request kwargs are empty with timeout=30."""
+    s = Session(load_questions=False)
+    assert s.proxies is None
+    assert s.timeout == 30
+    assert s.request_kwargs == {}
+    # Default: timeout is applied, proxies are not
+    assert s._get_request_kwargs() == {"timeout": 30}
+
+
+def test_request_kwargs_custom_timeout():
+    """Confirm custom timeout is passed through."""
+    s = Session(load_questions=False, timeout=60)
+    assert s._get_request_kwargs() == {"timeout": 60}
+
+
+def test_request_kwargs_timeout_none():
+    """Confirm timeout=None means no timeout kwarg is forwarded."""
+    s = Session(load_questions=False, timeout=None)
+    assert "timeout" not in s._get_request_kwargs()
+
+
+def test_request_kwargs_proxies():
+    """Confirm proxies are forwarded when set."""
+    proxies = {"http": "http://proxy:8080", "https": "http://proxy:8080"}
+    s = Session(load_questions=False, proxies=proxies)
+    result = s._get_request_kwargs()
+    assert result["proxies"] == proxies
+
+
+def test_request_kwargs_generic():
+    """Confirm generic request_kwargs are forwarded."""
+    s = Session(load_questions=False, timeout=None, request_kwargs={"verify": False})
+    result = s._get_request_kwargs()
+    assert result == {"verify": False}
+
+
+def test_request_kwargs_explicit_params_override_generic():
+    """Confirm explicit params take precedence over values in request_kwargs."""
+    s = Session(
+        load_questions=False,
+        timeout=10,
+        proxies={"http": "http://proxy:8080"},
+        request_kwargs={"timeout": 999, "proxies": {"http": "http://other:9090"}},
+    )
+    result = s._get_request_kwargs()
+    # Explicit timeout and proxies should win
+    assert result["timeout"] == 10
+    assert result["proxies"] == {"http": "http://proxy:8080"}
