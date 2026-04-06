@@ -632,6 +632,45 @@ class Session:
         answer_dict = workhelper.execute(work_item, self, extra_args=extra_args)
         return str(answer_dict["status"].value)
 
+    def answer_question(
+        self,
+        question_str: str,
+        question_name: str,
+        background: bool,
+        snapshot: str,
+        reference_snapshot: str | None,
+        extra_args: dict[str, Any] | None,
+    ) -> Answer | str:
+        """
+        Upload, execute, and return the answer for a question.
+
+        Subclasses can override this method to change how questions are
+        answered (e.g. to use a different backend).
+
+        :param question_str: JSON string representing the question
+        :param question_name: unique name for the question
+        :param background: if True, return immediately with work item ID
+        :param snapshot: snapshot on which to answer the question
+        :param reference_snapshot: reference snapshot for differential questions
+        :param extra_args: extra arguments to pass with the question
+        :return: Answer object, or work item ID string if background=True
+        """
+        if not question_name:
+            question_name = Options.default_question_prefix + "_" + get_uuid()
+
+        # Upload the question
+        restv2helper.upload_question(self, question_name, question_str)
+
+        # Answer the question
+        work_item = workhelper.get_workitem_answer(self, question_name, snapshot, reference_snapshot)
+        workhelper.execute(work_item, self, background, extra_args)
+
+        if background:
+            return work_item.id
+
+        # Get the answer
+        return self.get_answer(question_name, snapshot, reference_snapshot)
+
     def get_answer(self, question: str, snapshot: str, reference_snapshot: str | None = None) -> Answer:
         """
         Get the answer for a previously asked question.
