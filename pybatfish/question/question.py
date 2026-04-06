@@ -25,7 +25,7 @@ from typing import TYPE_CHECKING, Any
 
 import attr
 
-from pybatfish.client.internal import _bf_answer_obj, _bf_get_question_templates
+from pybatfish.client.internal import _bf_get_question_templates
 from pybatfish.datamodel import Assertion, AssertionType, BgpRoute, VariableType
 from pybatfish.datamodel.answer.base import Answer
 from pybatfish.exception import QuestionValidationException
@@ -160,8 +160,7 @@ class QuestionBase:
         _validate(self.dict())
         if include_one_table_keys is not None:
             self._set_include_one_table_keys(include_one_table_keys)
-        return _bf_answer_obj(
-            session=session,
+        return session.answer_question(
             question_str=self.json(),
             question_name=self.get_name(),
             background=background,

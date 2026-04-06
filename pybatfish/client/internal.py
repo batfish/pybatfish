@@ -15,43 +15,12 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from pybatfish.client import restv2helper
-from pybatfish.datamodel.answer import Answer
-from pybatfish.util import get_uuid
-
-from . import workhelper
-from .options import Options
 
 if TYPE_CHECKING:
     from pybatfish.client.session import Session
-
-
-def _bf_answer_obj(
-    session: Session,
-    question_str: str,
-    question_name: str,
-    background: bool,
-    snapshot: str,
-    reference_snapshot: str | None,
-    extra_args: dict[str, Any] | None,
-) -> Answer | str:
-    if not question_name:
-        question_name = Options.default_question_prefix + "_" + get_uuid()
-
-    # Upload the question
-    restv2helper.upload_question(session, question_name, question_str)
-
-    # Answer the question
-    work_item = workhelper.get_workitem_answer(session, question_name, snapshot, reference_snapshot)
-    workhelper.execute(work_item, session, background, extra_args)
-
-    if background:
-        return work_item.id
-
-    # get the answer
-    return session.get_answer(question_name, snapshot, reference_snapshot)
 
 
 def _bf_get_question_templates(session: Session, verbose: bool = False) -> dict:
