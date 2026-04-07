@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+from pathlib import Path
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -31,11 +32,23 @@ from pybatfish.mcp.server import (
     _clear_session_cache,
     _df_to_json,
     _drop_legacy_nexthop_columns,
+    _get_session,
+    _load_sessions_config,
     _mgmt_session,
     _parse_interfaces,
-    _resolve_host,
+    _register_session,
+    _session_configs,
     create_server,
 )
+
+# Path that does not exist, used to avoid loading ~/.batfish/sessions.json
+_NO_CONFIG = Path("/nonexistent/sessions.json")
+
+
+def _init_default_sessions() -> None:
+    """Load session configs from a nonexistent file to get the BATFISH_HOST/localhost default."""
+    _load_sessions_config(_NO_CONFIG)
+
 
 # ---------------------------------------------------------------------------
 # Helper factories
@@ -148,74 +161,74 @@ class TestBuildHeaderConstraints:
         assert hc.dstPorts == "22"
 
 
-class TestSessionCache:
-    """Tests for the per-host session cache in _get_session."""
+class TestSessionRegistry:
+    """Tests for the session registry and config loading."""
 
     def setup_method(self):
-        """Clear the cache before each test to ensure isolation."""
         _clear_session_cache()
 
     def teardown_method(self):
-        """Clear the cache after each test."""
         _clear_session_cache()
 
-    def test_session_is_cached(self):
-        """Session must be created only once for the same host."""
+    def test_default_session_from_env(self, monkeypatch):
+        monkeypatch.setenv("BATFISH_HOST", "env-host")
+        _init_default_sessions()
+        assert _session_configs["default"] == {"type": "bf", "params": {"host": "env-host"}}
+
+    def test_default_session_localhost(self, monkeypatch):
+        monkeypatch.delenv("BATFISH_HOST", raising=False)
+        _init_default_sessions()
+        assert _session_configs["default"]["params"]["host"] == "localhost"
+
+    def test_load_from_config_file(self, tmp_path):
+        config = {"prod": {"type": "bf", "params": {"host": "prod-host"}}}
+        config_file = tmp_path / "sessions.json"
+        config_file.write_text(json.dumps(config))
+        _load_sessions_config(config_file)
+        assert "prod" in _session_configs
+        assert _session_configs["prod"]["params"]["host"] == "prod-host"
+        # Default is still added
+        assert "default" in _session_configs
+
+    def test_config_file_overrides_default(self, tmp_path):
+        config = {"default": {"type": "bf", "params": {"host": "custom-host"}}}
+        config_file = tmp_path / "sessions.json"
+        config_file.write_text(json.dumps(config))
+        _load_sessions_config(config_file)
+        assert _session_configs["default"]["params"]["host"] == "custom-host"
+
+    def test_register_session_creates_and_caches(self):
         mock_session = MagicMock()
-        with patch("pybatfish.mcp.server.Session", return_value=mock_session) as MockSession:
-            from pybatfish.mcp.server import _get_session
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            result = _register_session("test", "bf", host="test-host")
+        assert result is mock_session
+        assert _session_configs["test"] == {"type": "bf", "params": {"host": "test-host"}}
 
-            s1 = _get_session("bf-host")
-            s2 = _get_session("bf-host")
+    def test_get_session_uses_session_get(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            result = _get_session("default")
+        MockSession.get.assert_called_once_with("bf", host="localhost")
+        assert result is mock_session
 
-        # Session constructor called only once
-        assert MockSession.call_count == 1
-        # Both calls return the same cached object
+    def test_get_session_caches(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            s1 = _get_session("default")
+            s2 = _get_session("default")
+        assert MockSession.get.call_count == 1
         assert s1 is s2
 
-    def test_different_hosts_get_different_cached_sessions(self):
-        """Each host gets its own independent cache entry."""
-        mock_a = MagicMock()
-        mock_b = MagicMock()
-        sessions = [mock_a, mock_b]
-        with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
-            from pybatfish.mcp.server import _get_session
-
-            sa = _get_session("host-a")
-            sb = _get_session("host-b")
-
-        assert MockSession.call_count == 2
-        assert sa is not sb
-
-    def test_clear_session_cache_forces_new_session(self):
-        """After _clear_session_cache(), the next call creates a fresh session."""
-        from pybatfish.mcp.server import _clear_session_cache, _get_session
-
-        mock_first = MagicMock()
-        mock_second = MagicMock()
-        sessions = [mock_first, mock_second]
-        with patch("pybatfish.mcp.server.Session", side_effect=sessions) as MockSession:
-            s1 = _get_session("bf-host")
-            _clear_session_cache()
-            s2 = _get_session("bf-host")
-
-        assert MockSession.call_count == 2
-        assert s1 is not s2
-
-
-class TestResolveHost:
-    """Tests for the _resolve_host() helper."""
-
-    def test_returns_explicit_host(self):
-        assert _resolve_host("my-host") == "my-host"
-
-    def test_falls_back_to_env_var(self, monkeypatch):
-        monkeypatch.setenv("BATFISH_HOST", "env-host")
-        assert _resolve_host("") == "env-host"
-
-    def test_falls_back_to_localhost(self, monkeypatch):
-        monkeypatch.delenv("BATFISH_HOST", raising=False)
-        assert _resolve_host("") == "localhost"
+    def test_get_session_unknown_raises(self):
+        _init_default_sessions()
+        with pytest.raises(ValueError, match="No session named"):
+            _get_session("nonexistent")
 
 
 class TestMgmtSession:
@@ -227,39 +240,39 @@ class TestMgmtSession:
     def teardown_method(self):
         _clear_session_cache()
 
-    def test_creates_cached_session(self):
+    def test_returns_session(self):
+        mock_session = MagicMock()
         with patch("pybatfish.mcp.server.Session") as MockSession:
-            MockSession.return_value = MagicMock()
-            _mgmt_session("localhost")
-        MockSession.assert_called_once_with(host="localhost")
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            result = _mgmt_session("default")
+        assert result is mock_session
 
     def test_sets_network_when_provided(self):
         mock_session = MagicMock()
-        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
-            _mgmt_session("localhost", "my-network")
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            _mgmt_session("default", "my-network")
         mock_session.set_network.assert_called_once_with("my-network")
 
     def test_skips_set_network_when_empty(self):
         mock_session = MagicMock()
-        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
-            _mgmt_session("localhost", "")
-        mock_session.set_network.assert_not_called()
-
-    def test_resolves_host_from_env(self, monkeypatch):
-        monkeypatch.setenv("BATFISH_HOST", "env-bf")
         with patch("pybatfish.mcp.server.Session") as MockSession:
-            MockSession.return_value = MagicMock()
-            _mgmt_session("")
-        MockSession.assert_called_once_with(host="env-bf")
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            _mgmt_session("default", "")
+        mock_session.set_network.assert_not_called()
 
     def test_shares_cache_with_analysis_session(self):
         """_mgmt_session and _analysis_session must return the same cached session."""
         mock_session = MagicMock()
-        with patch("pybatfish.mcp.server.Session", return_value=mock_session) as MockSession:
-            s1 = _mgmt_session("localhost")
-            s2 = _analysis_session("localhost", "net1", "snap1")
-        # Session constructor called only once — both helpers share the cache
-        assert MockSession.call_count == 1
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            s1 = _mgmt_session("default")
+            s2 = _analysis_session("default", "net1", "snap1")
+        assert MockSession.get.call_count == 1
         assert s1 is s2
 
 
@@ -274,24 +287,12 @@ class TestAnalysisSession:
 
     def test_sets_network_and_snapshot(self):
         mock_session = MagicMock()
-        with patch("pybatfish.mcp.server.Session", return_value=mock_session):
-            _analysis_session("localhost", "net1", "snap1")
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            _init_default_sessions()
+            _analysis_session("default", "net1", "snap1")
         mock_session.set_network.assert_called_once_with("net1")
         mock_session.set_snapshot.assert_called_once_with("snap1")
-
-    def test_creates_cached_session(self):
-        with patch("pybatfish.mcp.server.Session") as MockSession:
-            MockSession.return_value = MagicMock()
-            _analysis_session("localhost", "net1", "snap1")
-        MockSession.assert_called_once_with(host="localhost")
-
-    def test_resolves_host_from_env(self, monkeypatch):
-        _clear_session_cache()
-        monkeypatch.setenv("BATFISH_HOST", "env-bf")
-        with patch("pybatfish.mcp.server.Session") as MockSession:
-            MockSession.return_value = MagicMock()
-            _analysis_session("", "net1", "snap1")
-        MockSession.assert_called_once_with(host="env-bf")
 
 
 class TestDropLegacyNexthopColumns:
@@ -337,6 +338,12 @@ PATCH_TARGET = "pybatfish.mcp.server._get_session"
 
 
 class TestCreateServer:
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
+
     def test_returns_fastmcp_instance(self):
         from mcp.server.fastmcp import FastMCP
 
@@ -347,22 +354,61 @@ class TestCreateServer:
         server = create_server(name="MyBatfish")
         assert server.name == "MyBatfish"
 
+    def test_default_session_injection(self):
+        mock_session = MagicMock()
+        mock_session.list_networks.return_value = ["net1"]
+        server = create_server(default_session=mock_session)
+        data = _call_tool(server, "list_networks", {})
+        assert data == ["net1"]
+
+
+class TestRegisterSessionTool:
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
+
+    def test_registers_session(self):
+        mock_session = MagicMock()
+        with patch("pybatfish.mcp.server.Session") as MockSession:
+            MockSession.get.return_value = mock_session
+            server = create_server()
+            data = _call_tool(
+                server,
+                "register_session",
+                {"name": "test", "type": "bf", "params": '{"host": "test-host"}'},
+            )
+        assert data == {"registered": "test", "type": "bf"}
+
+
+class TestListSessionsTool:
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
+
+    def test_lists_sessions(self):
+        server = create_server()
+        data = _call_tool(server, "list_sessions", {})
+        assert "default" in data
+
 
 class TestListNetworksTool:
     def test_returns_network_list(self):
         mock_session = _make_session_mock(list_networks=["net1", "net2"])
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(server, "list_networks", {"host": "localhost"})
+            data = _call_tool(server, "list_networks", {})
         assert data == ["net1", "net2"]
 
-    def test_uses_env_host(self, monkeypatch):
-        monkeypatch.setenv("BATFISH_HOST", "my-bf-host")
+    def test_explicit_session_param(self):
         mock_session = _make_session_mock(list_networks=["net1"])
         with patch(PATCH_TARGET, return_value=mock_session) as mock_get:
             server = create_server()
-            _call_tool(server, "list_networks", {})
-        mock_get.assert_called_once_with("my-bf-host")
+            _call_tool(server, "list_networks", {"session": "default"})
+        mock_get.assert_called_once_with("default")
 
 
 class TestSetNetworkTool:
@@ -371,7 +417,7 @@ class TestSetNetworkTool:
         mock_session.set_network.return_value = "my-network"
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(server, "set_network", {"network": "my-network", "host": "localhost"})
+            data = _call_tool(server, "set_network", {"network": "my-network"})
         assert data == {"network": "my-network"}
 
 
@@ -380,7 +426,7 @@ class TestDeleteNetworkTool:
         mock_session = MagicMock()
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(server, "delete_network", {"network": "old-net", "host": "localhost"})
+            data = _call_tool(server, "delete_network", {"network": "old-net"})
         assert data == {"deleted": "old-net"}
         mock_session.delete_network.assert_called_once_with("old-net")
 
@@ -390,7 +436,7 @@ class TestListSnapshotsTool:
         mock_session = _make_session_mock(list_snapshots=["snap1", "snap2"])
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(server, "list_snapshots", {"network": "net1", "host": "localhost"})
+            data = _call_tool(server, "list_snapshots", {"network": "net1"})
         assert data == ["snap1", "snap2"]
 
 
@@ -403,7 +449,7 @@ class TestInitSnapshotTool:
             data = _call_tool(
                 server,
                 "init_snapshot",
-                {"network": "net1", "snapshot_path": "/path/to/snap", "host": "localhost"},
+                {"network": "net1", "snapshot_path": "/path/to/snap"},
             )
         assert data == {"snapshot": "my-snap"}
 
@@ -420,7 +466,6 @@ class TestInitSnapshotTool:
                     "snapshot_path": "/path",
                     "snapshot_name": "named-snap",
                     "overwrite": True,
-                    "host": "localhost",
                 },
             )
         mock_session.init_snapshot.assert_called_once_with("/path", name="named-snap", overwrite=True)
@@ -435,7 +480,7 @@ class TestInitSnapshotFromTextTool:
             data = _call_tool(
                 server,
                 "init_snapshot_from_text",
-                {"network": "net1", "config_text": "hostname router1", "host": "localhost"},
+                {"network": "net1", "config_text": "hostname router1"},
             )
         assert data == {"snapshot": "text-snap"}
 
@@ -451,7 +496,6 @@ class TestInitSnapshotFromTextTool:
                     "network": "net1",
                     "config_text": "config",
                     "platform": "arista",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.init_snapshot_from_text.call_args[1]
@@ -465,7 +509,7 @@ class TestInitSnapshotFromTextTool:
             _call_tool(
                 server,
                 "init_snapshot_from_text",
-                {"network": "net1", "config_text": "config", "host": "localhost"},
+                {"network": "net1", "config_text": "config"},
             )
         call_kwargs = mock_session.init_snapshot_from_text.call_args[1]
         assert call_kwargs["platform"] is None
@@ -476,7 +520,7 @@ class TestDeleteSnapshotTool:
         mock_session = MagicMock()
         with patch(PATCH_TARGET, return_value=mock_session):
             server = create_server()
-            data = _call_tool(server, "delete_snapshot", {"network": "net1", "snapshot": "snap1", "host": "localhost"})
+            data = _call_tool(server, "delete_snapshot", {"network": "net1", "snapshot": "snap1"})
         assert data == {"deleted": "snap1"}
         mock_session.delete_snapshot.assert_called_once_with("snap1")
 
@@ -490,7 +534,7 @@ class TestForkSnapshotTool:
             data = _call_tool(
                 server,
                 "fork_snapshot",
-                {"network": "net1", "base_snapshot": "base", "new_snapshot": "forked", "host": "localhost"},
+                {"network": "net1", "base_snapshot": "base", "new_snapshot": "forked"},
             )
         assert data == {"snapshot": "forked-snap"}
 
@@ -506,7 +550,6 @@ class TestForkSnapshotTool:
                     "network": "net1",
                     "base_snapshot": "base",
                     "deactivate_nodes": "r1,r2",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.fork_snapshot.call_args[1]
@@ -524,7 +567,6 @@ class TestForkSnapshotTool:
                     "network": "net1",
                     "base_snapshot": "base",
                     "deactivate_interfaces": "r1[Gi0/0]",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.fork_snapshot.call_args[1]
@@ -546,7 +588,6 @@ class TestRunTracerouteTool:
                     "snapshot": "snap1",
                     "start_location": "router1",
                     "dst_ips": "10.0.0.1",
-                    "host": "localhost",
                 },
             )
         assert len(data) == 1
@@ -570,7 +611,6 @@ class TestRunTracerouteTool:
                     "ip_protocols": "TCP",
                     "src_ports": "1024",
                     "dst_ports": "22",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.q.traceroute.call_args[1]
@@ -593,36 +633,10 @@ class TestRunBidirectionalTracerouteTool:
                     "snapshot": "snap1",
                     "start_location": "router1",
                     "dst_ips": "10.0.0.1",
-                    "host": "localhost",
                 },
             )
         assert len(data) == 1
         assert data[0]["Forward_Flow"] == "f1"
-
-    def test_optional_header_params_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.bidirectionalTraceroute.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "run_bidirectional_traceroute",
-                {
-                    "network": "net1",
-                    "snapshot": "snap1",
-                    "start_location": "router1",
-                    "dst_ips": "10.0.0.1",
-                    "src_ips": "192.168.0.1",
-                    "applications": "ssh",
-                    "ip_protocols": "TCP",
-                    "src_ports": "1024",
-                    "dst_ports": "22",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.bidirectionalTraceroute.call_args[1]
-        assert call_kwargs["headers"].dstIps == "10.0.0.1"
-        assert call_kwargs["headers"].srcIps == "192.168.0.1"
 
 
 class TestCheckReachabilityTool:
@@ -634,7 +648,7 @@ class TestCheckReachabilityTool:
             data = _call_tool(
                 server,
                 "check_reachability",
-                {"network": "net1", "snapshot": "snap1", "dst_ips": "8.8.8.8", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1", "dst_ips": "8.8.8.8"},
             )
         assert data[0]["Action"] == "ACCEPT"
 
@@ -651,7 +665,6 @@ class TestCheckReachabilityTool:
                     "snapshot": "snap1",
                     "src_locations": "router1",
                     "actions": "DENIED_IN,DROP",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.q.reachability.call_args[1]
@@ -668,23 +681,9 @@ class TestAnalyzeAclTool:
             data = _call_tool(
                 server,
                 "analyze_acl",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Filter"] == "acl1"
-
-    def test_optional_params_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.filterLineReachability.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "analyze_acl",
-                {"network": "net1", "snapshot": "snap1", "filters": "acl1", "nodes": "r1", "host": "localhost"},
-            )
-        call_kwargs = mock_session.q.filterLineReachability.call_args[1]
-        assert call_kwargs["filters"] == "acl1"
-        assert call_kwargs["nodes"] == "r1"
 
 
 class TestSearchFiltersTool:
@@ -696,30 +695,10 @@ class TestSearchFiltersTool:
             _call_tool(
                 server,
                 "search_filters",
-                {"network": "net1", "snapshot": "snap1", "action": "PERMIT", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1", "action": "PERMIT"},
             )
         call_kwargs = mock_session.q.searchFilters.call_args[1]
         assert call_kwargs["action"] == "PERMIT"
-
-    def test_optional_filters_and_nodes_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.searchFilters.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "search_filters",
-                {
-                    "network": "net1",
-                    "snapshot": "snap1",
-                    "filters": "acl1",
-                    "nodes": "r1",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.searchFilters.call_args[1]
-        assert call_kwargs["filters"] == "acl1"
-        assert call_kwargs["nodes"] == "r1"
 
 
 class TestGetRoutesTool:
@@ -731,7 +710,7 @@ class TestGetRoutesTool:
             data = _call_tool(
                 server,
                 "get_routes",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Node"] == "r1"
 
@@ -753,7 +732,7 @@ class TestGetRoutesTool:
             data = _call_tool(
                 server,
                 "get_routes",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert "Next_Hop" in data[0]
         assert "Next_Hop_IP" not in data[0]
@@ -774,7 +753,6 @@ class TestGetRoutesTool:
                     "vrfs": "default",
                     "network_prefix": "10.0.0.0/8",
                     "protocols": "bgp",
-                    "host": "localhost",
                 },
             )
         call_kwargs = mock_session.q.routes.call_args[1]
@@ -802,40 +780,9 @@ class TestCompareRoutesTool:
                     "network": "net1",
                     "snapshot": "snap-new",
                     "reference_snapshot": "snap-old",
-                    "host": "localhost",
                 },
             )
         mock_answer_obj.answer.assert_called_once_with(snapshot="snap-new", reference_snapshot="snap-old")
-
-    def test_optional_filters_passed(self):
-        mock_frame_obj = MagicMock()
-        mock_frame_obj.frame.return_value = pd.DataFrame([])
-        mock_answer_obj = MagicMock()
-        mock_answer_obj.answer.return_value = mock_frame_obj
-        mock_session = MagicMock()
-        mock_session.q.routes.return_value = mock_answer_obj
-
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "compare_routes",
-                {
-                    "network": "net1",
-                    "snapshot": "snap-new",
-                    "reference_snapshot": "snap-old",
-                    "nodes": "r1",
-                    "vrfs": "default",
-                    "network_prefix": "10.0.0.0/8",
-                    "protocols": "bgp",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.routes.call_args[1]
-        assert call_kwargs["nodes"] == "r1"
-        assert call_kwargs["vrfs"] == "default"
-        assert call_kwargs["network"] == "10.0.0.0/8"
-        assert call_kwargs["protocols"] == "bgp"
 
 
 class TestGetBgpSessionStatusTool:
@@ -847,31 +794,9 @@ class TestGetBgpSessionStatusTool:
             data = _call_tool(
                 server,
                 "get_bgp_session_status",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Status"] == "ESTABLISHED"
-
-    def test_optional_params_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.bgpSessionStatus.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "get_bgp_session_status",
-                {
-                    "network": "net1",
-                    "snapshot": "snap1",
-                    "nodes": "r1",
-                    "remote_nodes": "r2",
-                    "status": "ESTABLISHED",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.bgpSessionStatus.call_args[1]
-        assert call_kwargs["nodes"] == "r1"
-        assert call_kwargs["remoteNodes"] == "r2"
-        assert call_kwargs["status"] == "ESTABLISHED"
 
 
 class TestGetBgpSessionCompatibilityTool:
@@ -883,31 +808,9 @@ class TestGetBgpSessionCompatibilityTool:
             data = _call_tool(
                 server,
                 "get_bgp_session_compatibility",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Node"] == "r1"
-
-    def test_optional_params_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.bgpSessionCompatibility.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "get_bgp_session_compatibility",
-                {
-                    "network": "net1",
-                    "snapshot": "snap1",
-                    "nodes": "r1",
-                    "remote_nodes": "r2",
-                    "status": "UNIQUE_MATCH",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.bgpSessionCompatibility.call_args[1]
-        assert call_kwargs["nodes"] == "r1"
-        assert call_kwargs["remoteNodes"] == "r2"
-        assert call_kwargs["status"] == "UNIQUE_MATCH"
 
 
 class TestGetNodePropertiesTool:
@@ -919,22 +822,9 @@ class TestGetNodePropertiesTool:
             data = _call_tool(
                 server,
                 "get_node_properties",
-                {"network": "net1", "snapshot": "snap1", "nodes": "r1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1", "nodes": "r1"},
             )
         assert data[0]["Node"] == "r1"
-
-    def test_properties_param_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.nodeProperties.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "get_node_properties",
-                {"network": "net1", "snapshot": "snap1", "properties": "Hostname,NTP_Servers", "host": "localhost"},
-            )
-        call_kwargs = mock_session.q.nodeProperties.call_args[1]
-        assert call_kwargs["properties"] == "Hostname,NTP_Servers"
 
 
 class TestGetInterfacePropertiesTool:
@@ -946,31 +836,9 @@ class TestGetInterfacePropertiesTool:
             data = _call_tool(
                 server,
                 "get_interface_properties",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Interface"] == "r1[Gi0/0]"
-
-    def test_optional_params_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.interfaceProperties.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "get_interface_properties",
-                {
-                    "network": "net1",
-                    "snapshot": "snap1",
-                    "nodes": "r1",
-                    "interfaces": "Gi0/0",
-                    "properties": "Active,Description",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.interfaceProperties.call_args[1]
-        assert call_kwargs["nodes"] == "r1"
-        assert call_kwargs["interfaces"] == "Gi0/0"
-        assert call_kwargs["properties"] == "Active,Description"
 
 
 class TestGetIpOwnersTool:
@@ -982,7 +850,7 @@ class TestGetIpOwnersTool:
             data = _call_tool(
                 server,
                 "get_ip_owners",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["IP"] == "10.0.0.1"
 
@@ -994,7 +862,7 @@ class TestGetIpOwnersTool:
             _call_tool(
                 server,
                 "get_ip_owners",
-                {"network": "net1", "snapshot": "snap1", "duplicates_only": True, "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1", "duplicates_only": True},
             )
         mock_session.q.ipOwners.assert_called_once_with(duplicatesOnly=True)
 
@@ -1017,36 +885,9 @@ class TestCompareFiltersTool:
                     "network": "net1",
                     "snapshot": "snap-new",
                     "reference_snapshot": "snap-old",
-                    "host": "localhost",
                 },
             )
         mock_answer_obj.answer.assert_called_once_with(snapshot="snap-new", reference_snapshot="snap-old")
-
-    def test_optional_params_passed(self):
-        mock_frame_obj = MagicMock()
-        mock_frame_obj.frame.return_value = pd.DataFrame([])
-        mock_answer_obj = MagicMock()
-        mock_answer_obj.answer.return_value = mock_frame_obj
-        mock_session = MagicMock()
-        mock_session.q.compareFilters.return_value = mock_answer_obj
-
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "compare_filters",
-                {
-                    "network": "net1",
-                    "snapshot": "snap-new",
-                    "reference_snapshot": "snap-old",
-                    "filters": "acl1",
-                    "nodes": "r1",
-                    "host": "localhost",
-                },
-            )
-        call_kwargs = mock_session.q.compareFilters.call_args[1]
-        assert call_kwargs["filters"] == "acl1"
-        assert call_kwargs["nodes"] == "r1"
 
 
 class TestGetUndefinedReferencesTool:
@@ -1058,22 +899,9 @@ class TestGetUndefinedReferencesTool:
             data = _call_tool(
                 server,
                 "get_undefined_references",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Ref_Name"] == "acl-foo"
-
-    def test_nodes_param_passed(self):
-        mock_session = MagicMock()
-        mock_session.q.undefinedReferences.return_value = _make_answer_frame([])
-        with patch(PATCH_TARGET, return_value=mock_session):
-            server = create_server()
-            _call_tool(
-                server,
-                "get_undefined_references",
-                {"network": "net1", "snapshot": "snap1", "nodes": "r1", "host": "localhost"},
-            )
-        call_kwargs = mock_session.q.undefinedReferences.call_args[1]
-        assert call_kwargs["nodes"] == "r1"
 
 
 class TestDetectLoopsTool:
@@ -1085,7 +913,7 @@ class TestDetectLoopsTool:
             data = _call_tool(
                 server,
                 "detect_loops",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data[0]["Node"] == "r1"
 
@@ -1097,7 +925,7 @@ class TestDetectLoopsTool:
             data = _call_tool(
                 server,
                 "detect_loops",
-                {"network": "net1", "snapshot": "snap1", "host": "localhost"},
+                {"network": "net1", "snapshot": "snap1"},
             )
         assert data == []
 
@@ -1106,6 +934,8 @@ class TestToolListCompleteness:
     """Verify the server exposes the expected set of tools."""
 
     EXPECTED_TOOLS = {
+        "register_session",
+        "list_sessions",
         "list_networks",
         "set_network",
         "delete_network",
@@ -1130,6 +960,12 @@ class TestToolListCompleteness:
         "get_undefined_references",
         "detect_loops",
     }
+
+    def setup_method(self):
+        _clear_session_cache()
+
+    def teardown_method(self):
+        _clear_session_cache()
 
     def test_all_expected_tools_registered(self):
         server = create_server()

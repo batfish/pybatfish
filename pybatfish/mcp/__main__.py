@@ -26,17 +26,39 @@ Or, after installing pybatfish with the ``mcp`` extra::
 
     batfish-mcp
 
-Environment variables:
+Session configuration:
 
-* ``BATFISH_HOST`` — hostname of the Batfish server (default: ``localhost``).
+Sessions can be configured in ``~/.batfish/sessions.json``::
+
+    {
+        "default": {"type": "bf", "params": {"host": "localhost"}},
+        "other": {"type": "bf", "params": {"host": "batfish2.example.com"}}
+    }
+
+Precedence for the default session:
+
+1. ``"default"`` entry in the sessions config file (if present)
+2. ``BATFISH_HOST`` environment variable
+3. ``localhost``
 """
+
+import argparse
+from pathlib import Path
 
 from pybatfish.mcp.server import create_server
 
 
 def main() -> None:
     """Start the Batfish MCP server using stdio transport."""
-    server = create_server()
+    parser = argparse.ArgumentParser(description="Batfish MCP server (Beta)")
+    parser.add_argument(
+        "--sessions-config",
+        type=Path,
+        default=None,
+        help="Path to sessions JSON config file (default: ~/.batfish/sessions.json)",
+    )
+    args = parser.parse_args()
+    server = create_server(sessions_config=args.sessions_config)
     server.run(transport="stdio")
 
 
