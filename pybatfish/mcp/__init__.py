@@ -30,6 +30,9 @@ Usage::
 
     # Or run with a specific Batfish host:
     BATFISH_HOST=my-batfish-host python -m pybatfish.mcp
+
+    # Or configure sessions in ~/.batfish/sessions.json:
+    # {"default": {"type": "bf", "params": {"host": "localhost"}}}
 """
 
 from pybatfish.mcp.server import create_server
