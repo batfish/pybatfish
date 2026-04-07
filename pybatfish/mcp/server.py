@@ -412,6 +412,122 @@ def create_server(
         return json.dumps({"snapshot": name})
 
     # -------------------------------------------------------------------------
+    # Initialization diagnostics tools
+    # -------------------------------------------------------------------------
+
+    @mcp.tool()
+    def get_parse_warnings(
+        network: str,
+        snapshot: str,
+        aggregate_duplicates: bool = False,
+        session: str = "default",
+    ) -> str:
+        """Get warnings from parsing the snapshot configurations.
+
+        Reports lines that Batfish failed to recognize or features that are
+        not yet supported, helping identify configuration parsing gaps.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param aggregate_duplicates: Whether to aggregate duplicate warnings.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of parse warning rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if aggregate_duplicates:
+            kwargs["aggregateDuplicates"] = aggregate_duplicates
+
+        result = bf.q.parseWarning(**kwargs).answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_init_issues(
+        network: str,
+        snapshot: str,
+        session: str = "default",
+    ) -> str:
+        """Get issues encountered when processing the snapshot.
+
+        Reports errors and issues found during snapshot initialization,
+        including parse failures and vendor-independent model conversion errors.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of initialization issue rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        result = bf.q.initIssues().answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_file_parse_status(
+        network: str,
+        snapshot: str,
+        session: str = "default",
+    ) -> str:
+        """Get the parse status of each file in the snapshot.
+
+        For each configuration file, returns the host(s) produced and the
+        parse status: pass, fail, or partially parsed.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of file parse status rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        result = bf.q.fileParseStatus().answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_vi_conversion_status(
+        network: str,
+        snapshot: str,
+        session: str = "default",
+    ) -> str:
+        """Get the vendor-independent conversion status for each node.
+
+        For each node in the snapshot, returns whether conversion to the
+        vendor-independent model passed, failed, or completed with warnings.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of conversion status rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        result = bf.q.viConversionStatus().answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_vi_conversion_warnings(
+        network: str,
+        snapshot: str,
+        session: str = "default",
+    ) -> str:
+        """Get warnings from vendor-independent model conversion.
+
+        Lists warnings generated when converting configurations to Batfish's
+        vendor-independent model, such as unsupported features or unexpected
+        configuration patterns.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of conversion warning rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        result = bf.q.viConversionWarning().answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    # -------------------------------------------------------------------------
     # Reachability and traceroute tools
     # -------------------------------------------------------------------------
 
@@ -731,6 +847,92 @@ def create_server(
         )
         return _df_to_json(result)
 
+    @mcp.tool()
+    def get_bgp_rib(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        vrfs: str = "",
+        network_prefix: str = "",
+        prefix_match_type: str = "",
+        status: str = "",
+        session: str = "default",
+    ) -> str:
+        """Retrieve the BGP RIB (Routing Information Base) from devices.
+
+        Returns BGP-learned routes, including both best and non-best paths.
+        Legacy next-hop columns are omitted; use the structured Next_Hop
+        column instead.
+
+        :param network: Name of the Batfish network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param vrfs: VRF specifier to restrict results (optional).
+        :param network_prefix: Prefix to filter routes by (optional).
+        :param prefix_match_type: Prefix matching criterion: EXACT,
+            LONGEST_PREFIX_MATCH, LONGER_PREFIXES, or SHORTER_PREFIXES (optional).
+        :param status: BGP route status specifier to filter by (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of BGP RIB rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+        if vrfs:
+            kwargs["vrfs"] = vrfs
+        if network_prefix:
+            kwargs["network"] = network_prefix
+        if prefix_match_type:
+            kwargs["prefixMatchType"] = prefix_match_type
+        if status:
+            kwargs["status"] = status
+
+        result = _drop_legacy_nexthop_columns(bf.q.bgpRib(**kwargs).answer().frame())  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_evpn_rib(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        vrfs: str = "",
+        network_prefix: str = "",
+        prefix_match_type: str = "",
+        session: str = "default",
+    ) -> str:
+        """Retrieve the EVPN RIB (Routing Information Base) from devices.
+
+        Returns EVPN routes for specified VRF and node(s).
+        Legacy next-hop columns are omitted; use the structured Next_Hop
+        column instead.
+
+        :param network: Name of the Batfish network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param vrfs: VRF specifier to restrict results (optional).
+        :param network_prefix: Prefix to filter routes by (optional).
+        :param prefix_match_type: Prefix matching criterion: EXACT,
+            LONGEST_PREFIX_MATCH, LONGER_PREFIXES, or SHORTER_PREFIXES (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of EVPN RIB rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+        if vrfs:
+            kwargs["vrfs"] = vrfs
+        if network_prefix:
+            kwargs["network"] = network_prefix
+        if prefix_match_type:
+            kwargs["prefixMatchType"] = prefix_match_type
+
+        result = _drop_legacy_nexthop_columns(bf.q.evpnRib(**kwargs).answer().frame())  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
     # -------------------------------------------------------------------------
     # BGP tools
     # -------------------------------------------------------------------------
@@ -807,6 +1009,69 @@ def create_server(
             kwargs["status"] = status
 
         result = bf.q.bgpSessionCompatibility(**kwargs).answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_bgp_peer_configuration(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        properties: str = "",
+        session: str = "default",
+    ) -> str:
+        """Get configuration settings for BGP peerings.
+
+        Reports per-peer configuration settings for each configured BGP
+        peering. For process-wide settings, use get_bgp_process_configuration.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param properties: Regex to filter properties to include (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of BGP peer configuration rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+        if properties:
+            kwargs["properties"] = properties
+
+        result = bf.q.bgpPeerConfiguration(**kwargs).answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_bgp_process_configuration(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        properties: str = "",
+        session: str = "default",
+    ) -> str:
+        """Get configuration settings of BGP processes.
+
+        Reports process-wide configuration settings for each BGP process
+        on each node and VRF. For per-peer settings, use
+        get_bgp_peer_configuration.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param properties: Regex to filter properties to include (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of BGP process configuration rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+        if properties:
+            kwargs["properties"] = properties
+
+        result = bf.q.bgpProcessConfiguration(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     # -------------------------------------------------------------------------
@@ -955,6 +1220,73 @@ def create_server(
             kwargs["nodes"] = nodes
 
         result = bf.q.undefinedReferences(**kwargs).answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_defined_structures(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        names: str = "",
+        types: str = "",
+        filename: str = "",
+        session: str = "default",
+    ) -> str:
+        """List named structures defined in the network configurations.
+
+        Returns structures (ACLs, route-maps, prefix-lists, etc.) along
+        with the files and line numbers where they are defined.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param names: Regex to filter structure names (optional).
+        :param types: Regex to filter vendor-specific structure types (optional).
+        :param filename: Include only structures defined in this file (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of defined structure rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+        if names:
+            kwargs["names"] = names
+        if types:
+            kwargs["types"] = types
+        if filename:
+            kwargs["filename"] = filename
+
+        result = bf.q.definedStructures(**kwargs).answer().frame()  # type: ignore[attr-defined]
+        return _df_to_json(result)
+
+    @mcp.tool()
+    def get_unused_structures(
+        network: str,
+        snapshot: str,
+        nodes: str = "",
+        session: str = "default",
+    ) -> str:
+        """Find structures that are defined but never referenced.
+
+        Returns ACLs, route-maps, prefix-lists, and other named structures
+        that exist in the configuration but are not used, which may indicate
+        incomplete configuration changes or template artifacts.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param nodes: Node specifier to restrict results (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of unused structure rows.
+        """
+        bf = _analysis_session(session, network, snapshot)
+
+        kwargs: dict[str, Any] = {}
+        if nodes:
+            kwargs["nodes"] = nodes
+
+        result = bf.q.unusedStructures(**kwargs).answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
 
     @mcp.tool()

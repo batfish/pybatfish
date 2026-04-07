@@ -904,6 +904,295 @@ class TestGetUndefinedReferencesTool:
         assert data[0]["Ref_Name"] == "acl-foo"
 
 
+class TestGetParseWarningsTool:
+    def test_returns_warnings(self):
+        mock_session = MagicMock()
+        mock_session.q.parseWarning.return_value = _make_answer_frame(
+            [{"Filename": "configs/r1.cfg", "Line": 42, "Text": "unrecognized line"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_parse_warnings",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Filename"] == "configs/r1.cfg"
+
+    def test_aggregate_duplicates_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.parseWarning.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_parse_warnings",
+                {"network": "net1", "snapshot": "snap1", "aggregate_duplicates": True},
+            )
+        call_kwargs = mock_session.q.parseWarning.call_args[1]
+        assert call_kwargs["aggregateDuplicates"] is True
+
+
+class TestGetInitIssuesTool:
+    def test_returns_issues(self):
+        mock_session = MagicMock()
+        mock_session.q.initIssues.return_value = _make_answer_frame([{"Nodes": "r1", "Type": "Convert warning"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_init_issues",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Type"] == "Convert warning"
+
+
+class TestGetFileParseStatusTool:
+    def test_returns_file_status(self):
+        mock_session = MagicMock()
+        mock_session.q.fileParseStatus.return_value = _make_answer_frame(
+            [{"Filename": "configs/r1.cfg", "Status": "PASSED", "Nodes": "r1"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_file_parse_status",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Status"] == "PASSED"
+
+
+class TestGetViConversionStatusTool:
+    def test_returns_conversion_status(self):
+        mock_session = MagicMock()
+        mock_session.q.viConversionStatus.return_value = _make_answer_frame([{"Node": "r1", "Status": "PASSED"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_vi_conversion_status",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Status"] == "PASSED"
+
+
+class TestGetViConversionWarningsTool:
+    def test_returns_conversion_warnings(self):
+        mock_session = MagicMock()
+        mock_session.q.viConversionWarning.return_value = _make_answer_frame(
+            [{"Node": "r1", "Type": "UNIMPLEMENTED", "Comment": "unsupported feature"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_vi_conversion_warnings",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Type"] == "UNIMPLEMENTED"
+
+
+class TestGetBgpRibTool:
+    def test_returns_bgp_routes(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpRib.return_value = _make_answer_frame(
+            [{"Node": "r1", "Network": "10.0.0.0/8", "Next_Hop": "ip 1.2.3.4"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_bgp_rib",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Node"] == "r1"
+
+    def test_legacy_nexthop_columns_dropped(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpRib.return_value = _make_answer_frame(
+            [
+                {
+                    "Node": "r1",
+                    "Network": "10.0.0.0/8",
+                    "Next_Hop": "ip 1.2.3.4",
+                    "Next_Hop_IP": "1.2.3.4",
+                    "Next_Hop_Interface": "Gi0/0",
+                }
+            ]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_bgp_rib",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert "Next_Hop" in data[0]
+        assert "Next_Hop_IP" not in data[0]
+        assert "Next_Hop_Interface" not in data[0]
+
+    def test_filters_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpRib.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_bgp_rib",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "nodes": "r1",
+                    "network_prefix": "10.0.0.0/8",
+                    "prefix_match_type": "LONGEST_PREFIX_MATCH",
+                    "status": "BEST",
+                },
+            )
+        call_kwargs = mock_session.q.bgpRib.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["network"] == "10.0.0.0/8"
+        assert call_kwargs["prefixMatchType"] == "LONGEST_PREFIX_MATCH"
+        assert call_kwargs["status"] == "BEST"
+
+
+class TestGetEvpnRibTool:
+    def test_returns_evpn_routes(self):
+        mock_session = MagicMock()
+        mock_session.q.evpnRib.return_value = _make_answer_frame(
+            [{"Node": "r1", "Network": "10.0.0.0/8", "Next_Hop": "ip 1.2.3.4"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_evpn_rib",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Node"] == "r1"
+
+    def test_legacy_nexthop_columns_dropped(self):
+        mock_session = MagicMock()
+        mock_session.q.evpnRib.return_value = _make_answer_frame(
+            [
+                {
+                    "Node": "r1",
+                    "Next_Hop": "ip 1.2.3.4",
+                    "Next_Hop_IP": "1.2.3.4",
+                    "Next_Hop_Interface": "Gi0/0",
+                }
+            ]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_evpn_rib",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert "Next_Hop" in data[0]
+        assert "Next_Hop_IP" not in data[0]
+
+
+class TestGetBgpPeerConfigurationTool:
+    def test_returns_peer_config(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpPeerConfiguration.return_value = _make_answer_frame([{"Node": "r1", "Remote_AS": "65001"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_bgp_peer_configuration",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Node"] == "r1"
+
+    def test_filters_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpPeerConfiguration.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_bgp_peer_configuration",
+                {"network": "net1", "snapshot": "snap1", "nodes": "r1", "properties": "Remote.*"},
+            )
+        call_kwargs = mock_session.q.bgpPeerConfiguration.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["properties"] == "Remote.*"
+
+
+class TestGetBgpProcessConfigurationTool:
+    def test_returns_process_config(self):
+        mock_session = MagicMock()
+        mock_session.q.bgpProcessConfiguration.return_value = _make_answer_frame(
+            [{"Node": "r1", "Router_ID": "1.1.1.1"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_bgp_process_configuration",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Router_ID"] == "1.1.1.1"
+
+
+class TestGetDefinedStructuresTool:
+    def test_returns_structures(self):
+        mock_session = MagicMock()
+        mock_session.q.definedStructures.return_value = _make_answer_frame(
+            [{"Node": "r1", "Structure_Type": "extended ipv4 access-list", "Structure_Name": "acl1"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_defined_structures",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Structure_Name"] == "acl1"
+
+    def test_filters_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.definedStructures.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_defined_structures",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "nodes": "r1",
+                    "names": "acl.*",
+                    "types": "access-list",
+                    "filename": "configs/r1.cfg",
+                },
+            )
+        call_kwargs = mock_session.q.definedStructures.call_args[1]
+        assert call_kwargs["nodes"] == "r1"
+        assert call_kwargs["names"] == "acl.*"
+        assert call_kwargs["types"] == "access-list"
+        assert call_kwargs["filename"] == "configs/r1.cfg"
+
+
+class TestGetUnusedStructuresTool:
+    def test_returns_unused(self):
+        mock_session = MagicMock()
+        mock_session.q.unusedStructures.return_value = _make_answer_frame(
+            [{"Node": "r1", "Structure_Type": "route-map", "Structure_Name": "UNUSED_MAP"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_unused_structures",
+                {"network": "net1", "snapshot": "snap1"},
+            )
+        assert data[0]["Structure_Name"] == "UNUSED_MAP"
+
+
 class TestDetectLoopsTool:
     def test_returns_loop_rows(self):
         mock_session = MagicMock()
@@ -944,6 +1233,11 @@ class TestToolListCompleteness:
         "init_snapshot_from_text",
         "delete_snapshot",
         "fork_snapshot",
+        "get_parse_warnings",
+        "get_init_issues",
+        "get_file_parse_status",
+        "get_vi_conversion_status",
+        "get_vi_conversion_warnings",
         "run_traceroute",
         "run_bidirectional_traceroute",
         "check_reachability",
@@ -951,13 +1245,19 @@ class TestToolListCompleteness:
         "search_filters",
         "get_routes",
         "compare_routes",
+        "get_bgp_rib",
+        "get_evpn_rib",
         "get_bgp_session_status",
         "get_bgp_session_compatibility",
+        "get_bgp_peer_configuration",
+        "get_bgp_process_configuration",
         "get_node_properties",
         "get_interface_properties",
         "get_ip_owners",
         "compare_filters",
         "get_undefined_references",
+        "get_defined_structures",
+        "get_unused_structures",
         "detect_loops",
     }
 
