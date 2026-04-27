@@ -235,9 +235,10 @@ def execute_notebook(nb: NotebookNode, name: str) -> NotebookNode:
     ep = ExecutePreprocessor(timeout=600, kernel_name="python3")
     ep.preprocess(nb, {"metadata": {"path": _DOC_DIR}})
 
-    # Clear undesirable metadata from cells
+    # Clear undesirable metadata and non-deterministic fields from cells
     keep_metadata = {"nbsphinx"}
     for cell in nb.cells:
+        cell.pop("id", None)
         meta = cell.get("metadata", {})
         cell["metadata"] = {k: v for k, v in meta.items() if k in keep_metadata}
     return nb

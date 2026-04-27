@@ -128,9 +128,10 @@ def rendered_nb(request: Any, categories: Mapping[str, Any], session: Session, s
     ep = ExecutePreprocessor(timeout=60, allow_errors=True, kernel_name="python3")
     ep.preprocess(nb_to_execute, resources={"metadata": {"path": exec_path}})
 
-    # Clear undesirable metadata from cells
+    # Clear undesirable metadata and non-deterministic fields from cells
     keep_metadata = {"nbsphinx"}
     for cell in nb_to_execute.cells:
+        cell.pop("id", None)
         if "metadata" not in cell:
             continue
         meta = cell["metadata"]

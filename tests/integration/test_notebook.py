@@ -90,8 +90,9 @@ def executed_notebook(notebook):
         if len(outputs) != len(cell.get("outputs", [])):
             cell["outputs"] = outputs
 
-        # Clear metadata like execution timestamp
+        # Clear metadata like execution timestamp and non-deterministic fields
         for cell in nb.cells:
+            cell.pop("id", None)
             cell["metadata"] = {}
 
     return nb
