@@ -64,7 +64,7 @@ capirca = [
     "absl-py>=0.8.0",
 ]
 mcp = [
-    "mcp>=1.23.0",
+    "mcp>=1.23.0,<2.0.0",
 ]
 dev = [
     "ruff",
@@ -95,7 +95,7 @@ dev = [
     "types-simplejson",
     "capirca",
     "absl-py>=0.8.0",
-    "mcp>=1.23.0",
+    "mcp>=1.23.0,<2.0.0",
 ]
 
 [project.entry-points."batfish_session"]
