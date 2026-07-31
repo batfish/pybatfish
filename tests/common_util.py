@@ -11,10 +11,10 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+import functools
 import os
 
 import pytest
-from decorator import decorator
 
 import pybatfish
 from pybatfish.client.session import Session
@@ -80,7 +80,8 @@ def requires_bf(version):
     def function_decorator(func):
         # Inner 'decorator' accepts the target function
 
-        def wrapper(func, *args, **kwargs):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
             # Perform version validation and actually run the function
             bf_version = os.environ.get("bf_version")
             if not bf_version:
@@ -100,6 +101,6 @@ def requires_bf(version):
             skip_old_version(bf_version=bf_version, min_version=version)
             return func(*args, **kwargs)
 
-        return decorator(wrapper, func)
+        return wrapper
 
     return function_decorator
