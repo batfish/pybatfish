@@ -86,7 +86,6 @@ dev = [
     "sphinx>=1.8.0",
     "sphinx-notfound-page",
     "sphinx_rtd_theme",
-    "types-decorator",
     "types-python-dateutil",
     "types-pytz",
     "types-PyYAML",
