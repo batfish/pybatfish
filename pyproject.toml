@@ -18,7 +18,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pybatfish"
-version = "0.36.0"
+version = "2026.08.19.3660"
 description = "Python API and utilities for Batfish"
 readme = "README.md"
 requires-python = ">=3.10"
