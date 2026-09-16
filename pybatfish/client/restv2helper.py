@@ -48,8 +48,10 @@ _adapter = HTTPAdapter(
         connect=Options.max_retries_to_connect_to_coordinator,
         read=Options.max_retries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
-        # Retry on all calls, including POST
-        allowed_methods=None,
+        # Retry the default (idempotent) methods only: retrying a POST can
+        # duplicate the work it asked for, e.g. uploading a snapshot twice.
+        # Connect errors are retried for every method regardless, since the
+        # request never reached the service.
         status_forcelist=_STATUS_FORCELIST,
     )
 )
@@ -65,8 +67,7 @@ _adapter_fail_fast = HTTPAdapter(
         connect=Options.max_initial_tries_to_connect_to_coordinator,
         read=Options.max_initial_tries_to_connect_to_coordinator,
         backoff_factor=Options.request_backoff_factor,
-        # Retry on all calls, including POST
-        allowed_methods=None,
+        # See _adapter above: idempotent methods only.
         status_forcelist=_STATUS_FORCELIST,
     )
 )
@@ -198,7 +199,16 @@ def init_network(session: Session, new_network_name: str) -> None:
 
 def upload_snapshot(session: Session, snapshot_name: str, fd: IO) -> None:
     url_tail = f"/{CoordConstsV2.RSC_NETWORKS}/{session.network}/{CoordConstsV2.RSC_SNAPSHOTS}/{snapshot_name}"
-    _post(session, url_tail, None, stream=fd)
+    # Sending a snapshot takes as long as it takes; a session that did not ask
+    # for a timeout gets none here, since timing out mid-upload only leads to
+    # uploading the snapshot again.
+    _post(
+        session,
+        url_tail,
+        None,
+        stream=fd,
+        request_kwargs=session._get_request_kwargs(default_timeout=None),
+    )
 
 
 def get_network_object(session, key):
@@ -506,8 +516,12 @@ def _post(
     obj: Any,
     params: dict[str, Any] | None = None,
     stream: IO | None = None,
+    request_kwargs: dict[str, Any] | None = None,
 ) -> None:
     """Make an HTTP(s) POST request to Batfish coordinator.
+
+    :param request_kwargs: ``requests`` keyword arguments to use instead of the
+        session's own, e.g. to override its timeout for this call.
 
     :raises SSLError if SSL connection failed
     :raises ConnectionError if the coordinator is not available
@@ -516,6 +530,8 @@ def _post(
     headers = _get_headers(session)
     if stream:
         headers["Content-Type"] = "application/octet-stream"
+    if request_kwargs is None:
+        request_kwargs = session._get_request_kwargs()
     response = _requests_session.post(
         url,
         json=_encoder.default(obj) if obj is not None else None,
@@ -523,7 +539,7 @@ def _post(
         headers=headers,
         params=params,
         verify=session.verify_ssl_certs,
-        **session._get_request_kwargs(),
+        **request_kwargs,
     )
     _check_response_status(response)
     return None

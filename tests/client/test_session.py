@@ -157,3 +157,51 @@ def test_request_kwargs_explicit_params_override_generic():
     # Explicit timeout and proxies should win
     assert result["timeout"] == 10
     assert result["proxies"] == {"http": "http://proxy:8080"}
+
+
+def test_request_kwargs_timeout_used_when_param_unset():
+    """Confirm a timeout in request_kwargs is used when timeout is not passed."""
+    s = Session(load_questions=False, request_kwargs={"timeout": 300})
+    assert s.timeout == 300
+    assert s._get_request_kwargs()["timeout"] == 300
+
+
+def test_request_kwargs_timeout_none_used_when_param_unset():
+    """Confirm timeout=None in request_kwargs disables the timeout."""
+    s = Session(load_questions=False, request_kwargs={"timeout": None})
+    assert s.timeout is None
+    assert "timeout" not in s._get_request_kwargs()
+
+
+def test_request_kwargs_default_timeout_ignored_when_unset():
+    """Confirm callers can opt out of the default timeout, e.g. for uploads."""
+    s = Session(load_questions=False)
+    assert s.timeout == 30
+    assert "timeout" not in s._get_request_kwargs(default_timeout=None)
+
+
+def test_request_kwargs_default_timeout_not_used_when_timeout_set():
+    """Confirm an explicit timeout wins over the caller's default."""
+    s = Session(load_questions=False, timeout=60)
+    assert s._get_request_kwargs(default_timeout=None)["timeout"] == 60
+
+
+def test_request_kwargs_default_timeout_not_used_when_generic_timeout_set():
+    """Confirm a timeout in request_kwargs wins over the caller's default."""
+    s = Session(load_questions=False, request_kwargs={"timeout": 60})
+    assert s._get_request_kwargs(default_timeout=None)["timeout"] == 60
+
+
+def test_request_kwargs_default_timeout_not_used_when_timeout_assigned():
+    """Confirm a timeout assigned after construction wins over the caller's default."""
+    s = Session(load_questions=False)
+    s.timeout = 60
+    assert s._get_request_kwargs(default_timeout=None)["timeout"] == 60
+
+
+def test_request_kwargs_not_mutated():
+    """Confirm the caller's request_kwargs dict is not stored by reference."""
+    request_kwargs = {"verify": False}
+    s = Session(load_questions=False, request_kwargs=request_kwargs)
+    s.request_kwargs["timeout"] = 1
+    assert request_kwargs == {"verify": False}

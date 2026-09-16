@@ -18,6 +18,7 @@ from unittest.mock import Mock, patch
 import pytest
 import requests
 from requests import HTTPError, Response
+from urllib3.exceptions import ConnectTimeoutError, ReadTimeoutError
 
 from pybatfish.client import restv2helper
 from pybatfish.client.consts import CoordConsts
@@ -169,6 +170,30 @@ def test_post_stream(session, request_session):
         )
 
 
+def test_upload_snapshot_has_no_default_timeout(request_session):
+    """Confirm a snapshot upload is not subject to the session's default timeout."""
+    s = Session(load_questions=False)
+    s.network = "network"
+
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        with io.StringIO() as stream_data:
+            restv2helper.upload_snapshot(s, "snapshot", stream_data)
+
+    assert "timeout" not in request_session.post.call_args.kwargs
+
+
+def test_upload_snapshot_uses_explicit_timeout(request_session):
+    """Confirm a snapshot upload uses a timeout the session asked for."""
+    s = Session(load_questions=False, timeout=60)
+    s.network = "network"
+
+    with patch("pybatfish.client.restv2helper._requests_session", request_session):
+        with io.StringIO() as stream_data:
+            restv2helper.upload_snapshot(s, "snapshot", stream_data)
+
+    assert request_session.post.call_args.kwargs["timeout"] == 60
+
+
 def test_put(session, request_session):
     """Make sure calls to _put end up using the correct session."""
     resource_url = "/test/url"
@@ -200,8 +225,9 @@ def test_session_adapters():
     assert retries.total == Options.max_retries_to_connect_to_coordinator
     assert retries.connect == Options.max_retries_to_connect_to_coordinator
     assert retries.read == Options.max_retries_to_connect_to_coordinator
-    # All request types should be retried
-    assert not retries.allowed_methods
+    # Read and status retries are limited to idempotent methods
+    assert "GET" in retries.allowed_methods
+    assert "POST" not in retries.allowed_methods
 
 
 def test_fail_fast_session_adapters():
@@ -215,8 +241,28 @@ def test_fail_fast_session_adapters():
     assert retries.total == Options.max_initial_tries_to_connect_to_coordinator
     assert retries.connect == Options.max_initial_tries_to_connect_to_coordinator
     assert retries.read == Options.max_initial_tries_to_connect_to_coordinator
-    # All request types should be retried
-    assert not retries.allowed_methods
+    # Read and status retries are limited to idempotent methods
+    assert "GET" in retries.allowed_methods
+    assert "POST" not in retries.allowed_methods
+
+
+def test_post_is_not_retried_after_reaching_service():
+    """Confirm a POST that reached the service is not retried, but a failed connect is."""
+    retries = _adapter.max_retries
+
+    # A retryable status is retried for GET, but not for POST: the service may
+    # have acted on the request already.
+    assert retries.is_retry("GET", 503)
+    assert not retries.is_retry("POST", 503)
+
+    # Same for a read timeout, which is what a slow snapshot upload looks like.
+    read_error = ReadTimeoutError(None, "/", "read timed out")
+    with pytest.raises(ReadTimeoutError):
+        retries.increment(method="POST", error=read_error)
+    assert retries.increment(method="GET", error=read_error)
+
+    # A POST that never reached the service is still retried.
+    assert retries.increment(method="POST", error=ConnectTimeoutError())
 
 
 def test_get_api_version_old(session: Session, request_session: Mock) -> None:
