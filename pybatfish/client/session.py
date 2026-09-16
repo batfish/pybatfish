@@ -63,6 +63,19 @@ from pybatfish.util import get_uuid, validate_name, zip_dir
 
 from .options import Options
 
+#: Default timeout, in seconds, for requests to the Batfish service.
+_DEFAULT_TIMEOUT = 30
+
+
+class _Unset:
+    """Sentinel type distinguishing an unspecified argument from an explicit ``None``."""
+
+    def __repr__(self) -> str:
+        return "<unset>"
+
+
+_UNSET: Any = _Unset()
+
 
 class Asserts:
     """Class containing assertions for a given Session."""
@@ -323,10 +336,14 @@ class Session:
         `requests documentation <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`_
         for details.
     :ivar timeout: Timeout in seconds for all requests (default 30 seconds).
-        Pass ``None`` to disable the timeout and wait indefinitely.
+        Pass ``None`` to disable the timeout and wait indefinitely.  A timeout
+        set here also applies to snapshot uploads; when left unset, uploads
+        have no timeout, since the time to send a snapshot is bounded by its
+        size rather than by the responsiveness of the service.
     :ivar request_kwargs: Additional keyword arguments forwarded to every
         ``requests`` call.  Explicit parameters (``proxies``, ``timeout``)
-        take precedence over values provided here.
+        take precedence over values provided here, except that a ``timeout``
+        here is used when the ``timeout`` parameter is not passed at all.
     """
 
     def __init__(
@@ -342,7 +359,7 @@ class Session:
         api_key: str = CoordConsts.DEFAULT_API_KEY,
         load_questions: bool = True,
         proxies: dict[str, str] | None = None,
-        timeout: float | None = 30,
+        timeout: float | None = _UNSET,
         request_kwargs: dict[str, Any] | None = None,
     ):
         # Coordinator args
@@ -372,25 +389,47 @@ class Session:
         self.elapsed_delay: int = 5
         self.stale_timeout: int = 5
         self.proxies: dict[str, str] | None = proxies
-        self.timeout: float | None = timeout
-        self.request_kwargs: dict[str, Any] = request_kwargs or {}
+        self.request_kwargs: dict[str, Any] = dict(request_kwargs or {})
+        # A timeout in request_kwargs is folded into self.timeout, which is the
+        # only place a timeout is tracked from here on. Leave the sentinel in
+        # place when neither is given, so callers can tell that the timeout is
+        # a default they may ignore.
+        generic_timeout = self.request_kwargs.pop("timeout", _UNSET)
+        self._timeout: float | None = generic_timeout if timeout is _UNSET else timeout
 
         # Auto-load question templates
         if load_questions:
             self.q.load()
 
-    def _get_request_kwargs(self) -> dict[str, Any]:
+    @property
+    def timeout(self) -> float | None:
+        """Timeout in seconds for requests to the Batfish service."""
+        return _DEFAULT_TIMEOUT if self._timeout is _UNSET else self._timeout
+
+    @timeout.setter
+    def timeout(self, timeout: float | None) -> None:
+        self._timeout = timeout
+
+    def _get_request_kwargs(self, default_timeout: float | None = _DEFAULT_TIMEOUT) -> dict[str, Any]:
         """Return merged ``requests`` keyword arguments for HTTP calls.
 
         Merge order (later values win):
         1. Generic :attr:`request_kwargs` set on the session.
         2. Explicit named parameters (:attr:`proxies`, :attr:`timeout`).
+
+        A ``timeout`` in :attr:`request_kwargs` is resolved into
+        :attr:`timeout` at construction, so it is not masked here.
+
+        :param default_timeout: timeout to use when the session has no timeout
+            of its own. Pass ``None`` for calls whose duration is not a sign of
+            an unresponsive service, such as uploading a snapshot.
         """
         merged: dict[str, Any] = dict(self.request_kwargs)
         if self.proxies is not None:
             merged["proxies"] = self.proxies
-        if self.timeout is not None:
-            merged["timeout"] = self.timeout
+        timeout = default_timeout if self._timeout is _UNSET else self._timeout
+        if timeout is not None:
+            merged["timeout"] = timeout
         return merged
 
     @classmethod
