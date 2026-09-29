@@ -41,6 +41,7 @@ from pathlib import Path
 
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, Interface
+from pybatfish.datamodel.answer import TableAnswer
 
 # Legacy next-hop column names that Batfish is deprecating.  The structured
 # ``Next_Hop`` column contains the same information in a richer format and
@@ -175,6 +176,23 @@ def _drop_legacy_nexthop_columns(df: Any) -> Any:
     if cols_to_drop:
         return df.drop(columns=cols_to_drop)
     return df
+
+
+def _parse_json_object(value: str, param_name: str) -> dict[str, Any]:
+    """Parse a tool parameter that must be a JSON object; empty means ``{}``."""
+    if not value:
+        return {}
+    parsed = json.loads(value) if isinstance(value, str) else value
+    if not isinstance(parsed, dict):
+        raise ValueError(f"{param_name} must be a JSON object, got {value!r}")
+    return parsed
+
+
+def _json_default(value: Any) -> Any:
+    """JSON-encode sets as sorted lists and anything else as its string form."""
+    if isinstance(value, (set, frozenset)):
+        return sorted(value)
+    return str(value)
 
 
 def _rows_to_json(df: Any, max_rows: int = 0) -> str:
@@ -327,12 +345,14 @@ def create_server(
         """Report which Batfish service a session is connected to.
 
         Use this to distinguish between different Batfish builds or versions
-        that listen on the same host and port.
+        that listen on the same host and port. Builds from the same source
+        version report the same component versions; num_questions (the number
+        of question templates the service provides) can still differ.
 
         :param session: Named session to use (default: 'default').
         :return: JSON object with the session name and type, the pybatfish
-            Session class, host, and the component versions reported by the
-            service (e.g. {"Batfish": "...", "Z3": "..."}).
+            Session class, host, the component versions reported by the
+            service (e.g. {"Batfish": "...", "Z3": "..."}), and num_questions.
         """
         bf = _get_session(session)
         cfg = _session_configs.get(session, {})
@@ -343,6 +363,7 @@ def create_server(
                 "session_class": f"{type(bf).__module__}.{type(bf).__qualname__}",
                 "host": getattr(bf, "host", None),
                 "component_versions": bf.get_component_versions(),
+                "num_questions": len(bf.q.list()),
             },
             default=str,
         )
@@ -406,6 +427,7 @@ def create_server(
         snapshot_path: str,
         snapshot_name: str = "",
         overwrite: bool = False,
+        extra_args: str = "{}",
         session: str = "default",
     ) -> str:
         """Initialize a new snapshot from a local directory or zip file.
@@ -417,14 +439,21 @@ def create_server(
         :param snapshot_path: Local path to a snapshot directory or zip file.
         :param snapshot_name: Optional name for the snapshot. Auto-generated if empty.
         :param overwrite: Whether to overwrite an existing snapshot with the same name.
+        :param extra_args: JSON object of extra arguments passed to Batfish with
+            the snapshot processing work item (optional), e.g. '{"debugflags": "..."}'.
         :param session: Named session to use (default: 'default').
         :return: JSON object with the initialized snapshot name.
         """
         bf = _mgmt_session(session, network)
+        kwargs: dict[str, Any] = {}
+        parsed_extra_args = _parse_json_object(extra_args, "extra_args")
+        if parsed_extra_args:
+            kwargs["extra_args"] = parsed_extra_args
         name = bf.init_snapshot(
             snapshot_path,
             name=snapshot_name or None,
             overwrite=overwrite,
+            **kwargs,
         )
         return json.dumps({"snapshot": name})
 
@@ -436,6 +465,7 @@ def create_server(
         snapshot_name: str = "",
         platform: str = "",
         overwrite: bool = False,
+        extra_args: str = "{}",
         session: str = "default",
     ) -> str:
         """Initialize a single-device snapshot from configuration text.
@@ -450,16 +480,23 @@ def create_server(
         :param platform: RANCID platform string (e.g. 'cisco-nx', 'arista', 'juniper').
             If empty, the platform is inferred from the configuration header.
         :param overwrite: Whether to overwrite an existing snapshot with the same name.
+        :param extra_args: JSON object of extra arguments passed to Batfish with
+            the snapshot processing work item (optional), e.g. '{"debugflags": "..."}'.
         :param session: Named session to use (default: 'default').
         :return: JSON object with the initialized snapshot name.
         """
         bf = _mgmt_session(session, network)
+        kwargs: dict[str, Any] = {}
+        parsed_extra_args = _parse_json_object(extra_args, "extra_args")
+        if parsed_extra_args:
+            kwargs["extra_args"] = parsed_extra_args
         name = bf.init_snapshot_from_text(
             config_text,
             filename=filename,
             snapshot_name=snapshot_name or None,
             platform=platform or None,
             overwrite=overwrite,
+            **kwargs,
         )
         return json.dumps({"snapshot": name})
 
@@ -486,6 +523,7 @@ def create_server(
         restore_nodes: str = "",
         restore_interfaces: str = "",
         overwrite: bool = False,
+        extra_args: str = "{}",
         session: str = "default",
     ) -> str:
         """Fork an existing snapshot, optionally deactivating or restoring nodes/interfaces.
@@ -501,10 +539,16 @@ def create_server(
         :param restore_nodes: Comma-separated list of node names to restore.
         :param restore_interfaces: Comma-separated list of 'node[interface]' pairs to restore.
         :param overwrite: Whether to overwrite an existing snapshot with the same name.
+        :param extra_args: JSON object of extra arguments passed to Batfish with
+            the snapshot processing work item (optional), e.g. '{"debugflags": "..."}'.
         :param session: Named session to use (default: 'default').
         :return: JSON object with the forked snapshot name.
         """
         bf = _mgmt_session(session, network)
+        kwargs: dict[str, Any] = {}
+        parsed_extra_args = _parse_json_object(extra_args, "extra_args")
+        if parsed_extra_args:
+            kwargs["extra_args"] = parsed_extra_args
 
         deactivate_nodes_list = [n.strip() for n in deactivate_nodes.split(",") if n.strip()] or None
         restore_nodes_list = [n.strip() for n in restore_nodes.split(",") if n.strip()] or None
@@ -520,6 +564,7 @@ def create_server(
             deactivate_interfaces=deactivate_ifaces or None,
             restore_nodes=restore_nodes_list,
             restore_interfaces=restore_ifaces or None,
+            **kwargs,
         )
         return json.dumps({"snapshot": name})
 
@@ -546,7 +591,7 @@ def create_server(
         :return: JSON object with the snapshot name and the work status.
         """
         bf = _mgmt_session(session, network)
-        parsed_extra_args = json.loads(extra_args) if isinstance(extra_args, str) else extra_args
+        parsed_extra_args = _parse_json_object(extra_args, "extra_args")
         status = bf.generate_dataplane(snapshot=snapshot, extra_args=parsed_extra_args or None)
         return json.dumps({"snapshot": snapshot, "status": status})
 
@@ -1591,6 +1636,76 @@ def create_server(
 
         result = bf.q.detectLoops().answer().frame()  # type: ignore[attr-defined]
         return _df_to_json(result)
+
+    # -------------------------------------------------------------------------
+    # Generic question tools
+    # -------------------------------------------------------------------------
+
+    @mcp.tool()
+    def list_questions(
+        tags: str = "",
+        session: str = "default",
+    ) -> str:
+        """List the questions the connected Batfish service supports.
+
+        Includes questions that have no dedicated tool on this server. Run
+        them with run_question.
+
+        :param tags: Comma-separated tags; only list questions with these tags (optional).
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of {"name", "description", "tags"} objects.
+        """
+        bf = _get_session(session)
+        tag_list = [t.strip() for t in tags.split(",") if t.strip()] or None
+        return json.dumps(bf.q.list(tags=tag_list), default=_json_default)
+
+    @mcp.tool()
+    def run_question(
+        network: str,
+        snapshot: str,
+        question: str,
+        parameters: str = "{}",
+        reference_snapshot: str = "",
+        extra_args: str = "{}",
+        max_rows: int = 0,
+        session: str = "default",
+    ) -> str:
+        """Run any Batfish question by name.
+
+        Use this for questions without a dedicated tool. Use list_questions to
+        find question names.
+
+        :param network: Name of the network.
+        :param snapshot: Name of the snapshot.
+        :param question: Question name as listed by list_questions, e.g. 'nodeProperties'.
+        :param parameters: JSON object of question parameters, using Batfish's
+            parameter names, e.g. '{"nodes": "/leaf.*/"}' (optional).
+        :param reference_snapshot: Reference snapshot for differential questions (optional).
+        :param extra_args: JSON object of extra arguments passed to Batfish with the
+            question work item (optional).
+        :param max_rows: For table answers, maximum number of rows to return (optional).
+            When set, the result is a JSON object {"rows": [...], "total_rows": N,
+            "truncated": bool} instead of a bare array.
+        :param session: Named session to use (default: 'default').
+        :return: JSON array of answer rows for table answers; otherwise the
+            answer as a JSON object.
+        """
+        bf = _analysis_session(session, network, snapshot)
+        if question not in {q["name"] for q in bf.q.list()}:
+            raise ValueError(f"Unknown question {question!r}. Use list_questions to see available questions.")
+        question_class = getattr(bf.q, question)
+
+        answer_kwargs: dict[str, Any] = {"snapshot": snapshot}
+        if reference_snapshot:
+            answer_kwargs["reference_snapshot"] = reference_snapshot
+        parsed_extra_args = _parse_json_object(extra_args, "extra_args")
+        if parsed_extra_args:
+            answer_kwargs["extra_args"] = parsed_extra_args
+
+        answer = question_class(**_parse_json_object(parameters, "parameters")).answer(**answer_kwargs)
+        if isinstance(answer, TableAnswer):
+            return _rows_to_json(answer.frame(), max_rows)
+        return json.dumps(dict(answer), default=str)
 
     return mcp
 

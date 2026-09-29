@@ -341,3 +341,46 @@ def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
     assert layer3[0]["Remote_Interface"].startswith("hop2[")
     layer1 = _call_tool(mcp, "get_edges", {"network": network, "snapshot": snapshot, "edge_type": "layer1"})
     assert layer1 == []
+
+
+def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str) -> None:
+    """init_snapshot should accept extra_args."""
+    snap_name = "mcp_extra_args_snap_" + uuid.uuid4().hex[:8]
+    try:
+        result = _call_tool(
+            mcp,
+            "init_snapshot",
+            {
+                "network": network,
+                "snapshot_path": join(_this_dir, "tracert_snapshot"),
+                "snapshot_name": snap_name,
+                "extra_args": '{"debugflags": "traceroute"}',
+            },
+        )
+        assert result == {"snapshot": snap_name}
+    finally:
+        try:
+            _call_tool(mcp, "delete_snapshot", {"network": network, "snapshot": snap_name})
+        except Exception:
+            pass
+
+
+def test_list_questions_includes_traceroute(mcp: FastMCP) -> None:
+    """list_questions should list the service's questions."""
+    data = _call_tool(mcp, "list_questions", {"tags": "dataplane"})
+    assert "traceroute" in {q["name"] for q in data}
+
+
+def test_run_question(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """run_question should run a question by name with its parameters."""
+    data = _call_tool(
+        mcp,
+        "run_question",
+        {
+            "network": network,
+            "snapshot": snapshot,
+            "question": "nodeProperties",
+            "parameters": '{"nodes": "hop1", "properties": "Configuration_Format"}',
+        },
+    )
+    assert data == [{"Node": "hop1", "Configuration_Format": "CISCO_IOS"}]
