@@ -26,6 +26,7 @@ import pandas as pd
 import pytest
 
 from pybatfish.datamodel import HeaderConstraints, Interface
+from pybatfish.datamodel.answer import Answer, TableAnswer
 from pybatfish.datamodel.flow import (
     EnterInputIfaceStepDetail,
     ExitOutputIfaceStepDetail,
@@ -44,6 +45,7 @@ from pybatfish.mcp.server import (
     _load_sessions_config,
     _mgmt_session,
     _parse_interfaces,
+    _parse_json_object,
     _register_session,
     _rows_to_json,
     _session_configs,
@@ -215,6 +217,19 @@ class TestTracesDfToJson:
     def test_unknown_format_raises(self):
         with pytest.raises(ValueError, match="trace_format"):
             _traces_df_to_json(self._df(), ["Traces"], "bogus")
+
+
+class TestParseJsonObject:
+    def test_empty_is_empty_dict(self):
+        assert _parse_json_object("", "p") == {}
+        assert _parse_json_object("{}", "p") == {}
+
+    def test_parses_object(self):
+        assert _parse_json_object('{"debugflags": "x"}', "p") == {"debugflags": "x"}
+
+    def test_non_object_raises(self):
+        with pytest.raises(ValueError, match="p must be a JSON object"):
+            _parse_json_object("[1]", "p")
 
 
 class TestParseInterfaces:
@@ -517,6 +532,7 @@ class TestGetServerInfoTool:
         mock_session = MagicMock()
         mock_session.host = "bf-host"
         mock_session.get_component_versions.return_value = {"Batfish": "2026.1.0", "Z3": "4.8"}
+        mock_session.q.list.return_value = [{"name": "a"}, {"name": "b"}]
         with patch(PATCH_TARGET, return_value=mock_session) as mock_get:
             server = create_server()
             data = _call_tool(server, "get_server_info", {})
@@ -527,6 +543,7 @@ class TestGetServerInfoTool:
             "session_class": "unittest.mock.MagicMock",
             "host": "bf-host",
             "component_versions": {"Batfish": "2026.1.0", "Z3": "4.8"},
+            "num_questions": 2,
         }
 
 
@@ -605,6 +622,20 @@ class TestInitSnapshotTool:
             )
         mock_session.init_snapshot.assert_called_once_with("/path", name="named-snap", overwrite=True)
 
+    def test_passes_extra_args(self):
+        mock_session = MagicMock()
+        mock_session.init_snapshot.return_value = "snap"
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "init_snapshot",
+                {"network": "net1", "snapshot_path": "/path", "extra_args": '{"someSetting": true}'},
+            )
+        mock_session.init_snapshot.assert_called_once_with(
+            "/path", name=None, overwrite=False, extra_args={"someSetting": True}
+        )
+
 
 class TestInitSnapshotFromTextTool:
     def test_returns_snapshot_name(self):
@@ -635,6 +666,19 @@ class TestInitSnapshotFromTextTool:
             )
         call_kwargs = mock_session.init_snapshot_from_text.call_args[1]
         assert call_kwargs["platform"] == "arista"
+        assert "extra_args" not in call_kwargs
+
+    def test_passes_extra_args(self):
+        mock_session = MagicMock()
+        mock_session.init_snapshot_from_text.return_value = "snap"
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "init_snapshot_from_text",
+                {"network": "net1", "config_text": "config", "extra_args": '{"someSetting": true}'},
+            )
+        assert mock_session.init_snapshot_from_text.call_args[1]["extra_args"] == {"someSetting": True}
 
     def test_passes_none_platform_when_empty(self):
         mock_session = MagicMock()
@@ -706,6 +750,19 @@ class TestForkSnapshotTool:
             )
         call_kwargs = mock_session.fork_snapshot.call_args[1]
         assert call_kwargs["deactivate_interfaces"] == [Interface(hostname="r1", interface="Gi0/0")]
+        assert "extra_args" not in call_kwargs
+
+    def test_passes_extra_args(self):
+        mock_session = MagicMock()
+        mock_session.fork_snapshot.return_value = "forked"
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "fork_snapshot",
+                {"network": "net1", "base_snapshot": "base", "extra_args": '{"someSetting": true}'},
+            )
+        assert mock_session.fork_snapshot.call_args[1]["extra_args"] == {"someSetting": True}
 
 
 class TestGenerateDataplaneTool:
@@ -1581,6 +1638,105 @@ class TestDetectLoopsTool:
         assert data == []
 
 
+def _make_question_session(names: list[str]) -> MagicMock:
+    """Return a mock Session whose question list contains *names*."""
+    session = MagicMock()
+    session.q.list.return_value = [{"name": n, "description": f"{n} desc", "tags": {"b", "a"}} for n in names]
+    return session
+
+
+class TestListQuestionsTool:
+    def test_lists_questions(self):
+        mock_session = _make_question_session(["customCheck"])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(server, "list_questions", {})
+        assert data == [{"name": "customCheck", "description": "customCheck desc", "tags": ["a", "b"]}]
+        mock_session.q.list.assert_called_once_with(tags=None)
+
+    def test_tags_passed(self):
+        mock_session = _make_question_session([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(server, "list_questions", {"tags": "routing, dataplane"})
+        mock_session.q.list.assert_called_once_with(tags=["routing", "dataplane"])
+
+
+class TestRunQuestionTool:
+    def _table_answer(self, rows: list[dict[str, Any]]) -> MagicMock:
+        answer = MagicMock(spec=TableAnswer)
+        answer.frame.return_value = pd.DataFrame(rows)
+        return answer
+
+    def test_runs_table_question(self):
+        mock_session = _make_question_session(["customCheck"])
+        mock_session.q.customCheck.return_value.answer.return_value = self._table_answer([{"Node": "r1"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "run_question",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "question": "customCheck",
+                    "parameters": '{"nodes": "r1", "threshold": 3}',
+                },
+            )
+        assert data == [{"Node": "r1"}]
+        mock_session.set_snapshot.assert_called_once_with("snap1")
+        mock_session.q.customCheck.assert_called_once_with(nodes="r1", threshold=3)
+        mock_session.q.customCheck.return_value.answer.assert_called_once_with(snapshot="snap1")
+
+    def test_reference_snapshot_extra_args_and_max_rows(self):
+        mock_session = _make_question_session(["customCheck"])
+        mock_session.q.customCheck.return_value.answer.return_value = self._table_answer(
+            [{"Node": "r1"}, {"Node": "r2"}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "run_question",
+                {
+                    "network": "net1",
+                    "snapshot": "snap-new",
+                    "question": "customCheck",
+                    "reference_snapshot": "snap-old",
+                    "extra_args": '{"debugflags": "x"}',
+                    "max_rows": 1,
+                },
+            )
+        assert data == {"rows": [{"Node": "r1"}], "total_rows": 2, "truncated": True}
+        mock_session.q.customCheck.return_value.answer.assert_called_once_with(
+            snapshot="snap-new", reference_snapshot="snap-old", extra_args={"debugflags": "x"}
+        )
+
+    def test_non_table_answer_returned_as_object(self):
+        mock_session = _make_question_session(["customCheck"])
+        mock_session.q.customCheck.return_value.answer.return_value = Answer({"status": "SUCCESS", "summary": {}})
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "run_question",
+                {"network": "net1", "snapshot": "snap1", "question": "customCheck"},
+            )
+        assert data == {"status": "SUCCESS", "summary": {}}
+
+    @pytest.mark.parametrize("question", ["missingQuestion", "list", "load"])
+    def test_unknown_question_raises(self, question):
+        mock_session = _make_question_session(["customCheck"])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            with pytest.raises(Exception, match="Unknown question"):
+                _call_tool(
+                    server,
+                    "run_question",
+                    {"network": "net1", "snapshot": "snap1", "question": question},
+                )
+
+
 class TestToolListCompleteness:
     """Verify the server exposes the expected set of tools."""
 
@@ -1625,6 +1781,8 @@ class TestToolListCompleteness:
         "get_defined_structures",
         "get_unused_structures",
         "detect_loops",
+        "list_questions",
+        "run_question",
     }
 
     def setup_method(self):
