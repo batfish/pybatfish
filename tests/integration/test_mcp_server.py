@@ -252,3 +252,92 @@ def test_analyze_acl_returns_list(mcp: FastMCP, network: str, snapshot: str) -> 
     """analyze_acl should return a JSON array of unreachable ACL line rows."""
     data = _call_tool(mcp, "analyze_acl", {"network": network, "snapshot": snapshot})
     assert isinstance(data, list)
+
+
+def test_get_server_info_reports_batfish_version(mcp: FastMCP) -> None:
+    """get_server_info should include the Batfish component version."""
+    data = _call_tool(mcp, "get_server_info", {})
+    assert data["session"] == "default"
+    assert data["component_versions"]["Batfish"]
+
+
+def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """generate_dataplane should accept extra_args and complete normally."""
+    data = _call_tool(
+        mcp,
+        "generate_dataplane",
+        {"network": network, "snapshot": snapshot, "extra_args": '{"debugflags": "traceroute"}'},
+    )
+    assert data == {"snapshot": snapshot, "status": "TERMINATEDNORMALLY"}
+
+
+def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """run_traceroute with trace_format='structured' should return hops and steps."""
+    data = _call_tool(
+        mcp,
+        "run_traceroute",
+        {
+            "network": network,
+            "snapshot": snapshot,
+            "start_location": "hop1",
+            "dst_ips": "1.0.0.2",
+            "trace_format": "structured",
+            "max_traces": 1,
+        },
+    )
+    trace = data[0]["Traces"][0]
+    assert trace["disposition"] == "ACCEPTED"
+    assert [hop["node"] for hop in trace["hops"]] == ["hop1", "hop2"]
+    assert trace["hops"][-1]["steps"][-1]["action"] == "ACCEPTED"
+
+
+def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """run_bidirectional_traceroute with trace_format='summary' should return node paths."""
+    data = _call_tool(
+        mcp,
+        "run_bidirectional_traceroute",
+        {
+            "network": network,
+            "snapshot": snapshot,
+            "start_location": "hop1",
+            "dst_ips": "1.0.0.2",
+            "trace_format": "summary",
+        },
+    )
+    assert data[0]["Forward_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["hop1", "hop2"], "count": 1}]
+    assert data[0]["Reverse_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["hop2", "hop1"], "count": 1}]
+
+
+def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """get_routes with LONGEST_PREFIX_MATCH should find the covering connected route."""
+    data = _call_tool(
+        mcp,
+        "get_routes",
+        {
+            "network": network,
+            "snapshot": snapshot,
+            "nodes": "hop1",
+            "network_prefix": "1.0.0.2/32",
+            "prefix_match_type": "LONGEST_PREFIX_MATCH",
+            "max_rows": 10,
+        },
+    )
+    assert data["truncated"] is False
+    assert [row["Network"] for row in data["rows"]] == ["1.0.0.0/24"]
+
+
+def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """get_lpm_routes should return the longest-prefix-match route for an IP."""
+    data = _call_tool(
+        mcp, "get_lpm_routes", {"network": network, "snapshot": snapshot, "ip": "1.0.0.2", "nodes": "hop1"}
+    )
+    assert [row["Network"] for row in data] == ["1.0.0.0/24"]
+
+
+def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
+    """get_edges should list layer-3 edges and accept the layer1 edge type."""
+    layer3 = _call_tool(mcp, "get_edges", {"network": network, "snapshot": snapshot, "nodes": "hop1"})
+    assert len(layer3) == 1
+    assert layer3[0]["Remote_Interface"].startswith("hop2[")
+    layer1 = _call_tool(mcp, "get_edges", {"network": network, "snapshot": snapshot, "edge_type": "layer1"})
+    assert layer1 == []

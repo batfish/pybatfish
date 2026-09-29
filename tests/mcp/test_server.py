@@ -26,6 +26,14 @@ import pandas as pd
 import pytest
 
 from pybatfish.datamodel import HeaderConstraints, Interface
+from pybatfish.datamodel.flow import (
+    EnterInputIfaceStepDetail,
+    ExitOutputIfaceStepDetail,
+    Hop,
+    InboundStepDetail,
+    Step,
+    Trace,
+)
 from pybatfish.mcp.server import (
     _analysis_session,
     _build_header_constraints,
@@ -37,7 +45,11 @@ from pybatfish.mcp.server import (
     _mgmt_session,
     _parse_interfaces,
     _register_session,
+    _rows_to_json,
     _session_configs,
+    _structured_trace,
+    _summarize_traces,
+    _traces_df_to_json,
     create_server,
 )
 
@@ -73,6 +85,22 @@ def _make_session_mock(list_networks: list[str] | None = None, list_snapshots: l
     return session
 
 
+def _make_trace(disposition: str, nodes: list[str]) -> Trace:
+    """Return a Trace through *nodes*: each hop receives and transmits, the last accepts."""
+    hops = [
+        Hop(
+            node,
+            [
+                Step(EnterInputIfaceStepDetail("eth0", "default"), "RECEIVED"),
+                Step(ExitOutputIfaceStepDetail("eth1", None), "TRANSMITTED"),
+            ],
+        )
+        for node in nodes[:-1]
+    ]
+    hops.append(Hop(nodes[-1], [Step(InboundStepDetail("lo0"), "ACCEPTED")]))
+    return Trace(disposition, hops)
+
+
 def _call_tool(server: Any, tool_name: str, args: dict[str, Any]) -> Any:
     """Call an MCP tool and return the parsed JSON result from the first content item."""
     content, _meta = asyncio.run(server.call_tool(tool_name, args))
@@ -98,6 +126,95 @@ class TestDfToJson:
         df = pd.DataFrame()
         result = json.loads(_df_to_json(df))
         assert result == []
+
+
+class TestRowsToJson:
+    def test_no_limit_returns_array(self):
+        df = pd.DataFrame([{"a": 1}, {"a": 2}])
+        assert json.loads(_rows_to_json(df)) == [{"a": 1}, {"a": 2}]
+
+    def test_limit_truncates(self):
+        df = pd.DataFrame([{"a": 1}, {"a": 2}, {"a": 3}])
+        assert json.loads(_rows_to_json(df, 2)) == {
+            "rows": [{"a": 1}, {"a": 2}],
+            "total_rows": 3,
+            "truncated": True,
+        }
+
+    def test_limit_not_reached(self):
+        df = pd.DataFrame([{"a": 1}])
+        assert json.loads(_rows_to_json(df, 5)) == {"rows": [{"a": 1}], "total_rows": 1, "truncated": False}
+
+
+class TestStructuredTrace:
+    def test_converts_trace(self):
+        trace = _make_trace("ACCEPTED", ["r1", "r2"])
+        assert _structured_trace(trace) == {
+            "disposition": "ACCEPTED",
+            "hops": [
+                {
+                    "node": "r1",
+                    "steps": [
+                        {"action": "RECEIVED", "detail": "eth0"},
+                        {"action": "TRANSMITTED", "detail": "eth1"},
+                    ],
+                },
+                {"node": "r2", "steps": [{"action": "ACCEPTED", "detail": "lo0"}]},
+            ],
+        }
+
+    def test_skips_unknown_steps_and_empty_details(self):
+        # Step.from_dict returns None for unknown step types.
+        trace = Trace("DENIED_IN", [Hop("r1", [None, Step(None, "DENIED")])])
+        assert _structured_trace(trace) == {
+            "disposition": "DENIED_IN",
+            "hops": [{"node": "r1", "steps": [{"action": "DENIED", "detail": None}]}],
+        }
+
+
+class TestSummarizeTraces:
+    def test_counts_identical_paths_in_order(self):
+        traces = [
+            _make_trace("ACCEPTED", ["r1", "r2", "r4"]),
+            _make_trace("ACCEPTED", ["r1", "r3", "r4"]),
+            _make_trace("ACCEPTED", ["r1", "r2", "r4"]),
+            _make_trace("NO_ROUTE", ["r1", "r2", "r4"]),
+        ]
+        assert _summarize_traces(traces) == [
+            {"disposition": "ACCEPTED", "nodes": ["r1", "r2", "r4"], "count": 2},
+            {"disposition": "ACCEPTED", "nodes": ["r1", "r3", "r4"], "count": 1},
+            {"disposition": "NO_ROUTE", "nodes": ["r1", "r2", "r4"], "count": 1},
+        ]
+
+    def test_empty(self):
+        assert _summarize_traces([]) == []
+
+
+class TestTracesDfToJson:
+    def _df(self) -> pd.DataFrame:
+        return pd.DataFrame([{"Flow": "f1", "Traces": [_make_trace("ACCEPTED", ["r1", "r2"])] * 2, "TraceCount": 2}])
+
+    def test_text_uses_string_form(self):
+        data = json.loads(_traces_df_to_json(self._df(), ["Traces"], "text"))
+        assert data == json.loads(_df_to_json(self._df()))
+        assert data[0]["Traces"][0].startswith("ACCEPTED\n1. node: r1")
+
+    def test_structured(self):
+        data = json.loads(_traces_df_to_json(self._df(), ["Traces"], "structured"))
+        assert data[0]["Traces"][0] == _structured_trace(_make_trace("ACCEPTED", ["r1", "r2"]))
+        assert data[0]["TraceCount"] == 2
+
+    def test_summary(self):
+        data = json.loads(_traces_df_to_json(self._df(), ["Traces"], "summary"))
+        assert data[0]["Traces"] == [{"disposition": "ACCEPTED", "nodes": ["r1", "r2"], "count": 2}]
+
+    def test_missing_column_ignored(self):
+        data = json.loads(_traces_df_to_json(self._df(), ["Traces", "Reverse_Traces"], "summary"))
+        assert "Reverse_Traces" not in data[0]
+
+    def test_unknown_format_raises(self):
+        with pytest.raises(ValueError, match="trace_format"):
+            _traces_df_to_json(self._df(), ["Traces"], "bogus")
 
 
 class TestParseInterfaces:
@@ -395,6 +512,24 @@ class TestListSessionsTool:
         assert "default" in data
 
 
+class TestGetServerInfoTool:
+    def test_reports_versions_and_session(self):
+        mock_session = MagicMock()
+        mock_session.host = "bf-host"
+        mock_session.get_component_versions.return_value = {"Batfish": "2026.1.0", "Z3": "4.8"}
+        with patch(PATCH_TARGET, return_value=mock_session) as mock_get:
+            server = create_server()
+            data = _call_tool(server, "get_server_info", {})
+        mock_get.assert_called_once_with("default")
+        assert data == {
+            "session": "default",
+            "session_type": "bf",
+            "session_class": "unittest.mock.MagicMock",
+            "host": "bf-host",
+            "component_versions": {"Batfish": "2026.1.0", "Z3": "4.8"},
+        }
+
+
 class TestListNetworksTool:
     def test_returns_network_list(self):
         mock_session = _make_session_mock(list_networks=["net1", "net2"])
@@ -573,6 +708,36 @@ class TestForkSnapshotTool:
         assert call_kwargs["deactivate_interfaces"] == [Interface(hostname="r1", interface="Gi0/0")]
 
 
+class TestGenerateDataplaneTool:
+    def test_passes_extra_args(self):
+        mock_session = MagicMock()
+        mock_session.generate_dataplane.return_value = "TERMINATEDNORMALLY"
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "generate_dataplane",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "extra_args": '{"debugflags": "traceroute"}',
+                },
+            )
+        assert data == {"snapshot": "snap1", "status": "TERMINATEDNORMALLY"}
+        mock_session.set_network.assert_called_once_with("net1")
+        mock_session.generate_dataplane.assert_called_once_with(
+            snapshot="snap1", extra_args={"debugflags": "traceroute"}
+        )
+
+    def test_default_extra_args_is_none(self):
+        mock_session = MagicMock()
+        mock_session.generate_dataplane.return_value = "TERMINATEDNORMALLY"
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(server, "generate_dataplane", {"network": "net1", "snapshot": "snap1"})
+        mock_session.generate_dataplane.assert_called_once_with(snapshot="snap1", extra_args=None)
+
+
 class TestRunTracerouteTool:
     def test_returns_json_rows(self):
         rows = [{"Flow": "f1", "Traces": "t1"}]
@@ -616,6 +781,40 @@ class TestRunTracerouteTool:
         call_kwargs = mock_session.q.traceroute.call_args[1]
         assert call_kwargs["headers"].dstIps == "10.0.0.1"
         assert call_kwargs["headers"].srcIps == "192.168.0.1"
+        assert "maxTraces" not in call_kwargs
+
+    def test_max_traces_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.traceroute.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "run_traceroute",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "start_location": "router1",
+                    "dst_ips": "10.0.0.1",
+                    "max_traces": 4,
+                },
+            )
+        assert mock_session.q.traceroute.call_args[1]["maxTraces"] == 4
+
+    def test_trace_formats(self):
+        rows = [{"Flow": "f1", "Traces": [_make_trace("ACCEPTED", ["r1", "r2"])] * 3, "TraceCount": 3}]
+        mock_session = MagicMock()
+        mock_session.q.traceroute.return_value = _make_answer_frame(rows)
+        args = {"network": "net1", "snapshot": "snap1", "start_location": "router1", "dst_ips": "10.0.0.1"}
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            text = _call_tool(server, "run_traceroute", args)
+            structured = _call_tool(server, "run_traceroute", {**args, "trace_format": "structured"})
+            summary = _call_tool(server, "run_traceroute", {**args, "trace_format": "summary"})
+        assert text[0]["Traces"][0].startswith("ACCEPTED\n")
+        assert structured[0]["Traces"][0]["hops"][0]["node"] == "r1"
+        assert summary[0]["Traces"] == [{"disposition": "ACCEPTED", "nodes": ["r1", "r2"], "count": 3}]
+        assert summary[0]["TraceCount"] == 3
 
 
 class TestRunBidirectionalTracerouteTool:
@@ -637,6 +836,36 @@ class TestRunBidirectionalTracerouteTool:
             )
         assert len(data) == 1
         assert data[0]["Forward_Flow"] == "f1"
+
+    def test_summary_and_max_traces(self):
+        rows = [
+            {
+                "Forward_Flow": "f1",
+                "Forward_Traces": [_make_trace("ACCEPTED", ["r1", "r2"])],
+                "New_Sessions": [],
+                "Reverse_Flow": "f2",
+                "Reverse_Traces": [_make_trace("ACCEPTED", ["r2", "r1"])] * 2,
+            }
+        ]
+        mock_session = MagicMock()
+        mock_session.q.bidirectionalTraceroute.return_value = _make_answer_frame(rows)
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "run_bidirectional_traceroute",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "start_location": "router1",
+                    "dst_ips": "10.0.0.1",
+                    "trace_format": "summary",
+                    "max_traces": 2,
+                },
+            )
+        assert mock_session.q.bidirectionalTraceroute.call_args[1]["maxTraces"] == 2
+        assert data[0]["Forward_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["r1", "r2"], "count": 1}]
+        assert data[0]["Reverse_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["r2", "r1"], "count": 2}]
 
 
 class TestCheckReachabilityTool:
@@ -760,6 +989,40 @@ class TestGetRoutesTool:
         assert call_kwargs["vrfs"] == "default"
         assert call_kwargs["network"] == "10.0.0.0/8"
         assert call_kwargs["protocols"] == "bgp"
+        assert "prefixMatchType" not in call_kwargs
+
+    def test_prefix_match_type_passed(self):
+        mock_session = MagicMock()
+        mock_session.q.routes.return_value = _make_answer_frame([])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            _call_tool(
+                server,
+                "get_routes",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "network_prefix": "10.1.2.3/32",
+                    "prefix_match_type": "LONGEST_PREFIX_MATCH",
+                },
+            )
+        call_kwargs = mock_session.q.routes.call_args[1]
+        assert call_kwargs["network"] == "10.1.2.3/32"
+        assert call_kwargs["prefixMatchType"] == "LONGEST_PREFIX_MATCH"
+
+    def test_max_rows_truncates(self):
+        mock_session = MagicMock()
+        mock_session.q.routes.return_value = _make_answer_frame(
+            [{"Node": "r1", "Network": f"10.0.{i}.0/24", "Next_Hop_IP": "1.2.3.4"} for i in range(5)]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(server, "get_routes", {"network": "net1", "snapshot": "snap1", "max_rows": 2})
+        assert data == {
+            "rows": [{"Node": "r1", "Network": "10.0.0.0/24"}, {"Node": "r1", "Network": "10.0.1.0/24"}],
+            "total_rows": 5,
+            "truncated": True,
+        }
 
 
 class TestCompareRoutesTool:
@@ -783,6 +1046,26 @@ class TestCompareRoutesTool:
                 },
             )
         mock_answer_obj.answer.assert_called_once_with(snapshot="snap-new", reference_snapshot="snap-old")
+
+    def test_prefix_match_type_and_max_rows(self):
+        mock_session = MagicMock()
+        mock_session.q.routes.return_value = _make_answer_frame([{"Node": "r1"}, {"Node": "r2"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "compare_routes",
+                {
+                    "network": "net1",
+                    "snapshot": "snap-new",
+                    "reference_snapshot": "snap-old",
+                    "network_prefix": "10.0.0.0/8",
+                    "prefix_match_type": "LONGER_PREFIXES",
+                    "max_rows": 1,
+                },
+            )
+        assert mock_session.q.routes.call_args[1]["prefixMatchType"] == "LONGER_PREFIXES"
+        assert data == {"rows": [{"Node": "r1"}], "total_rows": 2, "truncated": True}
 
 
 class TestGetBgpSessionStatusTool:
@@ -865,6 +1148,48 @@ class TestGetIpOwnersTool:
                 {"network": "net1", "snapshot": "snap1", "duplicates_only": True},
             )
         mock_session.q.ipOwners.assert_called_once_with(duplicatesOnly=True)
+
+
+class TestGetEdgesTool:
+    def test_default_is_layer3(self):
+        mock_session = MagicMock()
+        mock_session.q.layer3Edges.return_value = _make_answer_frame([{"Interface": "r1[e1]"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(server, "get_edges", {"network": "net1", "snapshot": "snap1"})
+        assert data == [{"Interface": "r1[e1]"}]
+        mock_session.q.layer3Edges.assert_called_once_with()
+
+    @pytest.mark.parametrize(
+        ("edge_type", "question"),
+        [("layer1", "layer1Edges"), ("user_provided_layer1", "userProvidedLayer1Edges"), ("bgp", "bgpEdges")],
+    )
+    def test_edge_type_and_filters(self, edge_type, question):
+        mock_session = MagicMock()
+        getattr(mock_session.q, question).return_value = _make_answer_frame([{"Interface": "a"}, {"Interface": "b"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_edges",
+                {
+                    "network": "net1",
+                    "snapshot": "snap1",
+                    "edge_type": edge_type,
+                    "nodes": "/leaf.*/",
+                    "remote_nodes": "/spine.*/",
+                    "max_rows": 1,
+                },
+            )
+        getattr(mock_session.q, question).assert_called_once_with(nodes="/leaf.*/", remoteNodes="/spine.*/")
+        assert data == {"rows": [{"Interface": "a"}], "total_rows": 2, "truncated": True}
+
+    def test_unknown_edge_type_raises(self):
+        mock_session = MagicMock()
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            with pytest.raises(Exception, match="edge_type"):
+                _call_tool(server, "get_edges", {"network": "net1", "snapshot": "snap1", "edge_type": "layer2"})
 
 
 class TestCompareFiltersTool:
@@ -1094,6 +1419,43 @@ class TestGetEvpnRibTool:
         assert "Next_Hop_IP" not in data[0]
 
 
+class TestRibMaxRows:
+    @pytest.mark.parametrize(("tool", "question"), [("get_bgp_rib", "bgpRib"), ("get_evpn_rib", "evpnRib")])
+    def test_max_rows(self, tool, question):
+        mock_session = MagicMock()
+        getattr(mock_session.q, question).return_value = _make_answer_frame([{"Node": "r1"}, {"Node": "r2"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(server, tool, {"network": "net1", "snapshot": "snap1", "max_rows": 1})
+        assert data == {"rows": [{"Node": "r1"}], "total_rows": 2, "truncated": True}
+
+
+class TestGetLpmRoutesTool:
+    def test_returns_routes(self):
+        mock_session = MagicMock()
+        mock_session.q.lpmRoutes.return_value = _make_answer_frame(
+            [{"Node": "r1", "VRF": "default", "Ip": "10.0.0.1", "Network": "10.0.0.0/24", "Num_Routes": 1}]
+        )
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(server, "get_lpm_routes", {"network": "net1", "snapshot": "snap1", "ip": "10.0.0.1"})
+        assert data[0]["Network"] == "10.0.0.0/24"
+        mock_session.q.lpmRoutes.assert_called_once_with(ip="10.0.0.1")
+
+    def test_filters_and_max_rows(self):
+        mock_session = MagicMock()
+        mock_session.q.lpmRoutes.return_value = _make_answer_frame([{"Node": "r1"}])
+        with patch(PATCH_TARGET, return_value=mock_session):
+            server = create_server()
+            data = _call_tool(
+                server,
+                "get_lpm_routes",
+                {"network": "net1", "snapshot": "snap1", "ip": "10.0.0.1", "nodes": "r1", "vrfs": "v", "max_rows": 5},
+            )
+        mock_session.q.lpmRoutes.assert_called_once_with(ip="10.0.0.1", nodes="r1", vrfs="v")
+        assert data == {"rows": [{"Node": "r1"}], "total_rows": 1, "truncated": False}
+
+
 class TestGetBgpPeerConfigurationTool:
     def test_returns_peer_config(self):
         mock_session = MagicMock()
@@ -1225,6 +1587,7 @@ class TestToolListCompleteness:
     EXPECTED_TOOLS = {
         "register_session",
         "list_sessions",
+        "get_server_info",
         "list_networks",
         "set_network",
         "delete_network",
@@ -1233,6 +1596,7 @@ class TestToolListCompleteness:
         "init_snapshot_from_text",
         "delete_snapshot",
         "fork_snapshot",
+        "generate_dataplane",
         "get_parse_warnings",
         "get_init_issues",
         "get_file_parse_status",
@@ -1247,6 +1611,7 @@ class TestToolListCompleteness:
         "compare_routes",
         "get_bgp_rib",
         "get_evpn_rib",
+        "get_lpm_routes",
         "get_bgp_session_status",
         "get_bgp_session_compatibility",
         "get_bgp_peer_configuration",
@@ -1254,6 +1619,7 @@ class TestToolListCompleteness:
         "get_node_properties",
         "get_interface_properties",
         "get_ip_owners",
+        "get_edges",
         "compare_filters",
         "get_undefined_references",
         "get_defined_structures",
