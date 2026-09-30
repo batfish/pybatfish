@@ -40,8 +40,9 @@ pytest.importorskip("mcp", reason="requires optional 'mcp' dependency (pip insta
 from mcp.server.fastmcp import FastMCP  # noqa: E402
 from mcp.types import TextContent  # noqa: E402
 
+from pybatfish.client.session import Session  # noqa: E402
 from pybatfish.mcp.server import create_server  # noqa: E402
-from tests.common_util import skip_old_version  # noqa: E402
+from tests.common_util import requires_bf, skip_old_version  # noqa: E402
 
 _MCP_MIN_VERSION = "2026.3.16"
 
@@ -72,9 +73,15 @@ def _call_tool(server: Any, tool_name: str, args: dict[str, Any]) -> Any:
 
 
 @pytest.fixture(scope="module")
-def mcp() -> FastMCP:
+def bf() -> Session:
+    """Return a Batfish session."""
+    return Session()
+
+
+@pytest.fixture(scope="module")
+def mcp(bf: Session) -> FastMCP:
     """Return a configured MCP server instance."""
-    return create_server()
+    return create_server(default_session=bf)
 
 
 @pytest.fixture(scope="module")
@@ -254,14 +261,16 @@ def test_analyze_acl_returns_list(mcp: FastMCP, network: str, snapshot: str) -> 
     assert isinstance(data, list)
 
 
-def test_get_server_info_reports_batfish_version(mcp: FastMCP) -> None:
+@requires_bf("2026.9.29")
+def test_get_server_info_reports_batfish_version(mcp: FastMCP, bf: Session) -> None:
     """get_server_info should include the Batfish component version."""
     data = _call_tool(mcp, "get_server_info", {})
     assert data["session"] == "default"
     assert data["component_versions"]["Batfish"]
 
 
-def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """generate_dataplane should accept extra_args and complete normally."""
     data = _call_tool(
         mcp,
@@ -271,7 +280,8 @@ def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot
     assert data == {"snapshot": snapshot, "status": "TERMINATEDNORMALLY"}
 
 
-def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """run_traceroute with trace_format='structured' should return hops and steps."""
     data = _call_tool(
         mcp,
@@ -291,7 +301,8 @@ def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str) ->
     assert trace["hops"][-1]["steps"][-1]["action"] == "ACCEPTED"
 
 
-def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """run_bidirectional_traceroute with trace_format='summary' should return node paths."""
     data = _call_tool(
         mcp,
@@ -308,7 +319,8 @@ def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapsh
     assert data[0]["Reverse_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["hop2", "hop1"], "count": 1}]
 
 
-def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """get_routes with LONGEST_PREFIX_MATCH should find the covering connected route."""
     data = _call_tool(
         mcp,
@@ -326,7 +338,8 @@ def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: s
     assert [row["Network"] for row in data["rows"]] == ["1.0.0.0/24"]
 
 
-def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """get_lpm_routes should return the longest-prefix-match route for an IP."""
     data = _call_tool(
         mcp, "get_lpm_routes", {"network": network, "snapshot": snapshot, "ip": "1.0.0.2", "nodes": "hop1"}
@@ -334,7 +347,8 @@ def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str) -> None:
     assert [row["Network"] for row in data] == ["1.0.0.0/24"]
 
 
-def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_get_edges(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """get_edges should list layer-3 edges and accept the layer1 edge type."""
     layer3 = _call_tool(mcp, "get_edges", {"network": network, "snapshot": snapshot, "nodes": "hop1"})
     assert len(layer3) == 1
@@ -343,7 +357,8 @@ def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
     assert layer1 == []
 
 
-def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str) -> None:
+@requires_bf("2026.9.29")
+def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str, bf: Session) -> None:
     """init_snapshot should accept extra_args."""
     snap_name = "mcp_extra_args_snap_" + uuid.uuid4().hex[:8]
     try:
@@ -365,13 +380,15 @@ def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str) -> None:
             pass
 
 
-def test_list_questions_includes_traceroute(mcp: FastMCP) -> None:
+@requires_bf("2026.9.29")
+def test_list_questions_includes_traceroute(mcp: FastMCP, bf: Session) -> None:
     """list_questions should list the service's questions."""
     data = _call_tool(mcp, "list_questions", {"tags": "dataplane"})
     assert "traceroute" in {q["name"] for q in data}
 
 
-def test_run_question(mcp: FastMCP, network: str, snapshot: str) -> None:
+@requires_bf("2026.9.29")
+def test_run_question(mcp: FastMCP, network: str, snapshot: str, bf: Session) -> None:
     """run_question should run a question by name with its parameters."""
     data = _call_tool(
         mcp,
