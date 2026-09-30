@@ -44,6 +44,7 @@ from pybatfish.mcp.server import create_server  # noqa: E402
 from tests.common_util import skip_old_version  # noqa: E402
 
 _MCP_MIN_VERSION = "2026.3.16"
+_RECENT_MCP_MIN_VERSION = "2026.9.29"
 
 _this_dir = abspath(dirname(realpath(__file__)))
 
@@ -59,6 +60,13 @@ def _require_versions() -> None:
     """Skip tests if Batfish or Pybatfish version predates MCP support."""
     bf_version = os.environ.get("bf_version") or pybatfish.__version__
     skip_old_version(bf_version=bf_version, min_version=_MCP_MIN_VERSION)
+
+
+@pytest.fixture
+def _require_recent_versions() -> None:
+    """Skip tests if Batfish or Pybatfish predates the recent MCP tools."""
+    bf_version = os.environ.get("bf_version") or pybatfish.__version__
+    skip_old_version(bf_version=bf_version, min_version=_RECENT_MCP_MIN_VERSION)
 
 
 def _call_tool(server: Any, tool_name: str, args: dict[str, Any]) -> Any:
@@ -254,6 +262,7 @@ def test_analyze_acl_returns_list(mcp: FastMCP, network: str, snapshot: str) -> 
     assert isinstance(data, list)
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_get_server_info_reports_batfish_version(mcp: FastMCP) -> None:
     """get_server_info should include the Batfish component version."""
     data = _call_tool(mcp, "get_server_info", {})
@@ -261,6 +270,7 @@ def test_get_server_info_reports_batfish_version(mcp: FastMCP) -> None:
     assert data["component_versions"]["Batfish"]
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot: str) -> None:
     """generate_dataplane should accept extra_args and complete normally."""
     data = _call_tool(
@@ -271,6 +281,7 @@ def test_generate_dataplane_with_extra_args(mcp: FastMCP, network: str, snapshot
     assert data == {"snapshot": snapshot, "status": "TERMINATEDNORMALLY"}
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str) -> None:
     """run_traceroute with trace_format='structured' should return hops and steps."""
     data = _call_tool(
@@ -291,6 +302,7 @@ def test_run_traceroute_structured(mcp: FastMCP, network: str, snapshot: str) ->
     assert trace["hops"][-1]["steps"][-1]["action"] == "ACCEPTED"
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapshot: str) -> None:
     """run_bidirectional_traceroute with trace_format='summary' should return node paths."""
     data = _call_tool(
@@ -308,6 +320,7 @@ def test_run_bidirectional_traceroute_summary(mcp: FastMCP, network: str, snapsh
     assert data[0]["Reverse_Traces"] == [{"disposition": "ACCEPTED", "nodes": ["hop2", "hop1"], "count": 1}]
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: str) -> None:
     """get_routes with LONGEST_PREFIX_MATCH should find the covering connected route."""
     data = _call_tool(
@@ -326,6 +339,7 @@ def test_get_routes_longest_prefix_match(mcp: FastMCP, network: str, snapshot: s
     assert [row["Network"] for row in data["rows"]] == ["1.0.0.0/24"]
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str) -> None:
     """get_lpm_routes should return the longest-prefix-match route for an IP."""
     data = _call_tool(
@@ -334,6 +348,7 @@ def test_get_lpm_routes(mcp: FastMCP, network: str, snapshot: str) -> None:
     assert [row["Network"] for row in data] == ["1.0.0.0/24"]
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
     """get_edges should list layer-3 edges and accept the layer1 edge type."""
     layer3 = _call_tool(mcp, "get_edges", {"network": network, "snapshot": snapshot, "nodes": "hop1"})
@@ -343,6 +358,7 @@ def test_get_edges(mcp: FastMCP, network: str, snapshot: str) -> None:
     assert layer1 == []
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str) -> None:
     """init_snapshot should accept extra_args."""
     snap_name = "mcp_extra_args_snap_" + uuid.uuid4().hex[:8]
@@ -365,12 +381,14 @@ def test_init_snapshot_with_extra_args(mcp: FastMCP, network: str) -> None:
             pass
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_list_questions_includes_traceroute(mcp: FastMCP) -> None:
     """list_questions should list the service's questions."""
     data = _call_tool(mcp, "list_questions", {"tags": "dataplane"})
     assert "traceroute" in {q["name"] for q in data}
 
 
+@pytest.mark.usefixtures("_require_recent_versions")
 def test_run_question(mcp: FastMCP, network: str, snapshot: str) -> None:
     """run_question should run a question by name with its parameters."""
     data = _call_tool(
