@@ -208,7 +208,7 @@ jobs:
           name: docs
           path: docs/build/html
   readthedocs_build:
-    runs-on: ubuntu-22.04 # Match ReadTheDocs OS
+    runs-on: ubuntu-26.04 # Match ReadTheDocs OS
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
