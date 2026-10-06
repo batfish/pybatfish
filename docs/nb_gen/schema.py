@@ -21,6 +21,7 @@ _INPUT_TYPES = {
     "integerspace": "str",
     "ip": "str",
     "javaregex": "str",
+    "jsonobject": "dict",
     "headerconstraint": "pybatfish.datamodel.flow.HeaderConstraints",
     "node": "str",
     "pathconstraint": "pybatfish.datamodel.flow.PathConstraints",

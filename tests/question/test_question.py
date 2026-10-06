@@ -338,5 +338,28 @@ def test_question_params(session):
     assert parameters.keys() == {"var1", "question_name"}
 
 
+def test_json_object_question_serialization(session):
+    template = {
+        "parameterJsonObject": "${parameterJsonObject}",
+        "instance": {
+            "instanceName": TEST_QUESTION_NAME,
+            "description": "a test question",
+            "variables": {
+                "parameterJsonObject": {
+                    "description": "JSON object parameter",
+                    "type": "jsonObject",
+                }
+            },
+        },
+    }
+    value = {"string": "value", "nested": {"array": [1, True, None]}}
+    qname, qclass = _load_question_dict(template, session)
+
+    question = qclass(parameterJsonObject=value)
+
+    assert _validate(question.dict())
+    assert json.loads(question.json())["instance"]["variables"]["parameterJsonObject"]["value"] == value
+
+
 if __name__ == "__main__":
     pytest.main()

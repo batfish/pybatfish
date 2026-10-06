@@ -37,6 +37,7 @@ def test_convert_schema():
         convert_schema("bgproutes", "input")
         == "List of [BgpRoute](../datamodel.rst#pybatfish.datamodel.route.BgpRoute)"
     )
+    assert convert_schema("jsonObject", "input") == "dict"
     assert convert_schema("SelfDescribing", "output", "bgpPeerConfiguration") == "str"
     assert convert_schema("NextHop", "output") == "[NextHop](../datamodel.rst#pybatfish.datamodel.route.NextHop)"
     with pytest.raises(ValueError):

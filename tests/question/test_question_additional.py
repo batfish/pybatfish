@@ -318,6 +318,19 @@ def testInvalidJavaRegexValidateType():
     assert expectMessage == result[1]
 
 
+def testInvalidJsonObjectValidateType():
+    result = question._validate_type([{"key": "value"}], "jsonObject")
+    expectMessage = "A Batfish jsonObject must be a dictionary"
+    assert not result[0]
+    assert expectMessage == result[1]
+
+
+def testValidJsonObjectValidateType():
+    result = question._validate_type({"key": [1, True, None, {"nested": "value"}]}, "jsonObject")
+    assert result[0]
+    assert result[1] is None
+
+
 def testInvalidNonDictionaryJsonPathValidateType():
     result = question._validate_type(10, "jsonPath")
     expectMessage = "Expected a jsonPath dictionary with elements 'path' (string) and optional 'suffix' (boolean)"
