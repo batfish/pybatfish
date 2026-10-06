@@ -713,6 +713,10 @@ def _validate_type(value: Any, expected_type: str | VariableType) -> tuple[bool,
             return False, f"A Batfish {expected_type.value} must be a string"
         else:
             return _isIpWildcard(value)
+    elif expected_type == VariableType.JSON_OBJECT:
+        if not isinstance(value, dict):
+            return False, f"A Batfish {expected_type.value} must be a dictionary"
+        return True, None
     elif expected_type == VariableType.JSON_PATH:
         return _isJsonPath(value)
     elif expected_type == VariableType.LONG:

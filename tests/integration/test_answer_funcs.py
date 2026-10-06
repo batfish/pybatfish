@@ -19,6 +19,7 @@ import pytest
 from pybatfish.client.session import Session
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.exception import BatfishException
+from pybatfish.question.question import _load_question_dict
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -86,3 +87,30 @@ def test_answer_traceroute(bf: Session, traceroute_network: str) -> None:
     hops = trace.hops
     assert len(hops) == 2
     assert hops[-1].steps[-1].action == "ACCEPTED"
+
+
+def test_answer_json_object(bf: Session, traceroute_network: str) -> None:
+    template = {
+        "class": "org.batfish.question.traceroute.TracerouteQuestion",
+        "headers": "${headers}",
+        "startLocation": "${startLocation}",
+        "instance": {
+            "description": "Traceroute with a JSON object parameter.",
+            "instanceName": "tracerouteJsonObject",
+            "variables": {
+                "headers": {
+                    "description": "Packet header constraints",
+                    "type": "jsonObject",
+                },
+                "startLocation": {
+                    "description": "Location to start tracing from",
+                    "type": "locationSpec",
+                },
+            },
+        },
+    }
+    _, question_class = _load_question_dict(template, bf)
+
+    answer = question_class(startLocation="hop1", headers={"dstIps": "1.0.0.2"}).answer().frame()
+
+    assert answer.iloc[0]["Traces"][0].disposition == "ACCEPTED"
