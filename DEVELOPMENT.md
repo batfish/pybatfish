@@ -10,6 +10,21 @@ Run `pip install -e .[dev]`
 
 This installs all the development and test dependencies.
 
+### Repository layout
+
+- `pybatfish/client/` - `Session` and REST client for the Batfish service
+- `pybatfish/question/` - Question template loading and parameter
+  validation
+- `pybatfish/datamodel/` - Answer and primitive data types
+- `pybatfish/mcp/` - MCP server exposing Batfish as tools
+- `tests/` - Unit tests; `tests/integration/` needs a running service
+- `docs/` - Sphinx user docs (`docs/source`) and question doc
+  generation (`docs/nb_gen`)
+- `jupyter_notebooks/` - Public example notebooks, executed in tests
+
+New questions and question variable types usually need matching changes in
+the Batfish repo (`questions/` and the Java question classes).
+
 ### Running tests
 
 | Command | Needs Batfish service | What it covers |
