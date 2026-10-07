@@ -91,9 +91,7 @@ dev = [
     "types-requests",
     "types-setuptools",
     "types-simplejson",
-    "capirca",
-    "absl-py>=0.8.0",
-    "mcp>=1.23.0,<2.0.0",
+    "pybatfish[capirca,mcp]",
 ]
 
 [project.entry-points."batfish_session"]
