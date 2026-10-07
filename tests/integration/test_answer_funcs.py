@@ -20,6 +20,7 @@ from pybatfish.client.session import Session
 from pybatfish.datamodel.flow import HeaderConstraints
 from pybatfish.exception import BatfishException
 from pybatfish.question.question import _load_question_dict
+from tests.common_util import requires_bf
 
 _this_dir = abspath(dirname(realpath(__file__)))
 _root_dir = abspath(join(_this_dir, pardir, pardir))
@@ -89,6 +90,7 @@ def test_answer_traceroute(bf: Session, traceroute_network: str) -> None:
     assert hops[-1].steps[-1].action == "ACCEPTED"
 
 
+@requires_bf("2026.10.6")
 def test_answer_json_object(bf: Session, traceroute_network: str) -> None:
     template = {
         "class": "org.batfish.question.traceroute.TracerouteQuestion",
