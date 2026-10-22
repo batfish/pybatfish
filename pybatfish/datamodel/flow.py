@@ -1182,7 +1182,7 @@ class Hop(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "node: {node}\n  {steps}".format(node=self.node, steps="\n  ".join(map(str, self.steps)))
+        return "{node}: ({steps})".format(node=self.node, steps=", ".join(map(str, self.steps)))
 
     def _repr_html_(self):
         # type: () -> str
@@ -1235,9 +1235,9 @@ class Trace(DataModelElement):
 
     def __str__(self):
         # type: () -> str
-        return "{disposition}\n{hops}".format(
+        return "{disposition}: [{hops}]".format(
             disposition=self.disposition,
-            hops="\n".join([f"{num}. {hop}" for num, hop in enumerate(self.hops, start=1)]),
+            hops=", ".join(map(str, self.hops)),
         )
 
     def _repr_html_(self):

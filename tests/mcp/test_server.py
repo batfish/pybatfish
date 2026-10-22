@@ -199,7 +199,7 @@ class TestTracesDfToJson:
     def test_text_uses_string_form(self):
         data = json.loads(_traces_df_to_json(self._df(), ["Traces"], "text"))
         assert data == json.loads(_df_to_json(self._df()))
-        assert data[0]["Traces"][0].startswith("ACCEPTED\n1. node: r1")
+        assert data[0]["Traces"][0].startswith("ACCEPTED: [r1: (")
 
     def test_structured(self):
         data = json.loads(_traces_df_to_json(self._df(), ["Traces"], "structured"))
@@ -868,7 +868,7 @@ class TestRunTracerouteTool:
             text = _call_tool(server, "run_traceroute", args)
             structured = _call_tool(server, "run_traceroute", {**args, "trace_format": "structured"})
             summary = _call_tool(server, "run_traceroute", {**args, "trace_format": "summary"})
-        assert text[0]["Traces"][0].startswith("ACCEPTED\n")
+        assert text[0]["Traces"][0].startswith("ACCEPTED: [")
         assert structured[0]["Traces"][0]["hops"][0]["node"] == "r1"
         assert summary[0]["Traces"] == [{"disposition": "ACCEPTED", "nodes": ["r1", "r2"], "count": 3}]
         assert summary[0]["TraceCount"] == 3

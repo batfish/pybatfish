@@ -745,7 +745,7 @@ def create_server(
         :param src_ports: Source port(s) e.g. '1024-65535' (optional).
         :param dst_ports: Destination port(s) e.g. '22' (optional).
         :param trace_format: How to render each trace (default: 'text').
-            'text': preformatted string per trace ("ACCEPTED\\n1. node: ...").
+            'text': preformatted string per trace ("ACCEPTED: [node1: (...), ...]").
             'structured': {"disposition", "hops": [{"node", "steps": [{"action", "detail"}]}]}.
             'summary': {"disposition", "nodes": [...], "count"} per distinct path,
             counting identical disposition + node sequences among the returned traces.
@@ -803,7 +803,7 @@ def create_server(
         :param src_ports: Source port(s) (optional).
         :param dst_ports: Destination port(s) (optional).
         :param trace_format: How to render each trace (default: 'text').
-            'text': preformatted string per trace ("ACCEPTED\\n1. node: ...").
+            'text': preformatted string per trace ("ACCEPTED: [node1: (...), ...]").
             'structured': {"disposition", "hops": [{"node", "steps": [{"action", "detail"}]}]}.
             'summary': {"disposition", "nodes": [...], "count"} per distinct path,
             counting identical disposition + node sequences among the returned traces.

@@ -53,6 +53,7 @@ from pybatfish.datamodel.flow import (
     SetupSessionStepDetail,
     Step,
     TcpFlags,
+    Trace,
     TransformationStepDetail,
 )
 
@@ -608,9 +609,29 @@ def test_hop_repr_str():
     )
 
     assert (
-        str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
-        "  FORWARDED(Forwarded out interface: iface1 with resolved next-hop IP: 12.123.1.2, Routes: [bgp (Network: 1.1.1.1/24, Next Hop: ip 1.2.3.4),static (Network: 1.1.1.2/24, Next Hop: ip 1.2.3.5)])\n  "
-        "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+        str(hop) == "node1: (SENT_IN(in_iface1), "
+        "FORWARDED(Forwarded out interface: iface1 with resolved next-hop IP: 12.123.1.2, Routes: [bgp (Network: 1.1.1.1/24, Next Hop: ip 1.2.3.4),static (Network: 1.1.1.2/24, Next Hop: ip 1.2.3.5)]), "
+        "PERMITTED(preSourceNat_filter (PRENAT)), SENT_OUT(out_iface1))"
+    )
+
+
+def test_trace_str():
+    trace = Trace(
+        "ACCEPTED",
+        [
+            Hop(
+                "node1",
+                [
+                    Step(EnterInputIfaceStepDetail("in_iface1", "in_vrf1"), "RECEIVED"),
+                    Step(ExitOutputIfaceStepDetail("out_iface1", None), "TRANSMITTED"),
+                ],
+            ),
+            Hop("node2", [Step(EnterInputIfaceStepDetail("in_iface2", "in_vrf2"), "RECEIVED")]),
+        ],
+    )
+
+    assert str(trace) == (
+        "ACCEPTED: [node1: (RECEIVED(in_iface1), TRANSMITTED(out_iface1)), node2: (RECEIVED(in_iface2))]"
     )
 
 
@@ -638,9 +659,9 @@ def test_hop_repr_str_legacy():
     )
 
     assert (
-        str(hop) == "node: node1\n  SENT_IN(in_iface1)\n"
-        "  FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)])\n  "
-        "PERMITTED(preSourceNat_filter (PRENAT))\n  SENT_OUT(out_iface1)"
+        str(hop) == "node1: (SENT_IN(in_iface1), "
+        "FORWARDED(ARP IP: 12.123.1.2, Output Interface: iface1, Routes: [bgp (Network: 1.1.1.1/24, Next Hop IP:1.2.3.4),static (Network: 1.1.1.2/24, Next Hop IP:1.2.3.5)]), "
+        "PERMITTED(preSourceNat_filter (PRENAT)), SENT_OUT(out_iface1))"
     )
 
 
