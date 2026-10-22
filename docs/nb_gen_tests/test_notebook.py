@@ -137,6 +137,11 @@ def rendered_nb(request: Any, categories: Mapping[str, Any], session: Session, s
         meta = cell["metadata"]
         cell["metadata"] = {k: v for k, v in meta.items() if k in keep_metadata}
 
+    # Keep the original's kernel Python version so .testout files don't churn it.
+    orig_version = original_nb.metadata.get("language_info", {}).get("version")
+    if orig_version is not None and "language_info" in nb_to_execute.metadata:
+        nb_to_execute.metadata["language_info"]["version"] = orig_version
+
     return RenderedNotebook(path=nb_info.path, original=original_nb, rendered=nb_to_execute)
 
 
@@ -154,8 +159,9 @@ def _assert_cell_no_errors(c):
         pytest.fail("Found notebook errors: {}".format("\n".join(errors)))
 
 
-def _compare_data_str(text1, text2):
-    assert text1.splitlines() == text2.splitlines()
+def _compare_data_str(new_text, old_text):
+    # pytest marks the left side "+", so the diff reads old -> new.
+    assert new_text.splitlines() == old_text.splitlines()
 
 
 def _compare_data(original_data, executed_data):
@@ -163,9 +169,9 @@ def _compare_data(original_data, executed_data):
     assert ("text/html" in original_data) == ("text/html" in executed_data)
 
     if "text/plain" in original_data:
-        _compare_data_str(original_data["text/plain"], executed_data["text/plain"])
+        _compare_data_str(executed_data["text/plain"], original_data["text/plain"])
     if "text/html" in original_data and "text/html" in executed_data:
-        _compare_data_str(original_data["text/html"], executed_data["text/html"])
+        _compare_data_str(executed_data["text/html"], original_data["text/html"])
 
 
 def test_notebook_no_errors(rendered_nb: RenderedNotebook):

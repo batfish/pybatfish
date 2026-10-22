@@ -75,6 +75,7 @@ dev = [
     "mypy",
     "nbconvert",
     "nbsphinx",
+    "pre-commit",
     "progressbar2",
     "pytest>=4.2.0",
     "pytest-cov",

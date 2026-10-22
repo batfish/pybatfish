@@ -91,6 +91,7 @@ jobs:
         run: |
           pip install --upgrade pip wheel
           pip install -e .[dev]
+          echo "::group::pip freeze" && pip freeze && echo "::endgroup::"
           pytest tests
       - name: codecov
         # Let codecov upload fail - codecov goes down not infrequently.
@@ -139,6 +140,7 @@ jobs:
           )
           java -cp allinone.jar org.batfish.allinone.Main "${allinone_args[@]}" 2>&1 > batfish.log &
           pip install -e .[dev] -q
+          echo "::group::pip freeze" && pip freeze && echo "::endgroup::"
           pytest tests/integration
       - name: codecov
         # Let codecov upload fail - codecov goes down not infrequently.
@@ -180,6 +182,7 @@ jobs:
           java -cp allinone.jar org.batfish.allinone.Main -runclient false -coordinatorargs '-templatedirs questions -periodassignworkms=5' 2>&1 > batfish.log &
           pip install --upgrade pip setuptools wheel -q
           pip install -e .[dev] -q
+          echo "::group::pip freeze" && pip freeze && echo "::endgroup::"
           pytest docs
           pytest pybatfish --doctest-modules
   build_docs:
