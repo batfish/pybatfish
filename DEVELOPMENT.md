@@ -43,10 +43,26 @@ java -cp allinone.jar org.batfish.allinone.Main -runclient false \
 
 where `questions` is the `questions/` directory of the Batfish repo.
 
+To run the same service without building Batfish, download the JAR and
+questions from a recent `Pre-commit` workflow run:
+
+```
+gh run download <run-id> -R batfish/pybatfish -n bf_jar -n bf_questions
+tar -xzf bf_questions/questions.tgz
+java -cp bf_jar/allinone.jar org.batfish.allinone.Main -runclient false \
+  -coordinatorargs '-templatedirs questions -periodassignworkms=5'
+```
+
 `pytest docs` and `tests/integration/test_notebook.py` execute notebooks and
 compare outputs. On mismatch they write `*.testout` files next to the source;
 review the diff and copy the `.testout` over the original when the change in
-Batfish output is expected.
+Batfish output is expected. In the failure diff, `-` lines are the checked-in
+output and `+` lines are the new output.
+
+Notebook outputs can also change with no Batfish or Pybatfish commit, when a
+new release of an unpinned dependency (e.g., pandas) changes how answers
+render. CI logs the installed versions under a collapsed `pip freeze` group
+in each test job; compare them with the last passing run.
 
 ### Adding tests
 
@@ -108,8 +124,7 @@ CI runs `pre-commit run --all-files` and `mypy pybatfish tests`; see
 
 Optionally, you can install a pre-commit hook that will help with code formatting as well.
 
-1. `pip install pre-commit`
-2. `pre-commit install`
+Run `pre-commit install` (`pre-commit` is in the `dev` extra).
 
 This will allow execution of formatting/validation/cleanup before committing code.
 Commit will fail if you have badly formatted files. They will be fixed automatically. Add them, commit again.

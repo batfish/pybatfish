@@ -1182,6 +1182,7 @@ class Hop(DataModelElement):
 
     def __str__(self):
         # type: () -> str
+        # pandas renders this in DataFrame cells and escapes newlines, so keep it on one line.
         return "{node}: ({steps})".format(node=self.node, steps=", ".join(map(str, self.steps)))
 
     def _repr_html_(self):
@@ -1235,6 +1236,7 @@ class Trace(DataModelElement):
 
     def __str__(self):
         # type: () -> str
+        # pandas renders this in DataFrame cells and escapes newlines, so keep it on one line.
         return "{disposition}: [{hops}]".format(
             disposition=self.disposition,
             hops=", ".join(map(str, self.hops)),
