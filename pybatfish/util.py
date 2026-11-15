@@ -86,14 +86,12 @@ def conditional_str(prefix: str, obj: Sized | None, suffix: str) -> str:
     return " ".join([prefix, str(obj), suffix]) if obj is not None and len(obj) > 0 else ""
 
 
-def get_uuid():
-    # type: () -> str
+def get_uuid() -> str:
     """Generate and return a UUID as a string."""
     return str(uuid.uuid4())
 
 
-def validate_name(name, entity_type="snapshot"):
-    # type: (str, str) -> bool
+def validate_name(name: str, entity_type: str = "snapshot") -> bool:
     """Check if a given snapshot name is valid.
 
     :param name: name to check
@@ -120,8 +118,7 @@ def validate_name(name, entity_type="snapshot"):
     return True
 
 
-def validate_question_name(name):
-    # type: (str) -> bool
+def validate_question_name(name: str) -> bool:
     """Check if a question name is valid.
 
     :param name: question name

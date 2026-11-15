@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from __future__ import annotations
+
 from enum import Enum
 
 
@@ -103,8 +105,8 @@ class BfConsts:
     RELPATH_VENDOR_SPECIFIC_CONFIG_DIR = "vendor"
     RELPATH_Z3_DATA_PLANE_FILE = "dataplane.smt2"
 
-    SUFFIX_ANSWER_JSON_FILE = ".json"  # type: str
-    SUFFIX_LOG_FILE = ".log"  # type: str
+    SUFFIX_ANSWER_JSON_FILE: str = ".json"
+    SUFFIX_LOG_FILE: str = ".log"
 
     SVC_BASE_RSC = "/batfishservice"
     SVC_DEL_CONTAINER_RSC = "delcontainer"
@@ -133,8 +135,7 @@ class WorkStatusCode(str, Enum):
     UNASSIGNED = "UNASSIGNED"
 
     @staticmethod
-    def is_terminated(work_status_code):
-        # type: (WorkStatusCode) -> bool
+    def is_terminated(work_status_code: WorkStatusCode) -> bool:
         return work_status_code in [
             WorkStatusCode.ASSIGNMENTERROR,
             WorkStatusCode.REQUEUEFAILURE,

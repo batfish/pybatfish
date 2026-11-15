@@ -13,6 +13,8 @@
 #   limitations under the License.
 """Defines Batfish questions and logic for loading them from disk or Batfish."""
 
+from __future__ import annotations
+
 import json
 import logging
 import os
@@ -46,8 +48,7 @@ class AllowedValue:
     description = attr.ib(type=str | None, default=None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> AllowedValue
+    def from_dict(cls, json_dict: dict) -> AllowedValue:
         return AllowedValue(json_dict["name"], json_dict.get("description"))
 
     def __str__(self):
@@ -120,7 +121,7 @@ class QuestionMeta(type):
 class QuestionBase:
     """All questions inherit functionality from this class."""
 
-    def __init__(self, dictionary: dict, session: "Session"):
+    def __init__(self, dictionary: dict, session: Session):
         self._dict = deepcopy(dictionary)
         self._session = session
 
@@ -207,8 +208,7 @@ class QuestionBase:
         """Set if keys present in only table should be included when computing table diffs."""
         self._dict["includeOneTableKeys"] = include_one_table_keys
 
-    def set_assertion(self, assertion):
-        # type: (Assertion) -> QuestionBase
+    def set_assertion(self, assertion: Assertion) -> QuestionBase:
         """Set an assertion for a given question.
 
         Overwrites any previous assertions.
@@ -216,8 +216,7 @@ class QuestionBase:
         self._dict["assertion"] = assertion.dict()
         return self
 
-    def make_check(self):
-        # type: () -> QuestionBase
+    def make_check(self) -> QuestionBase:
         """Make this question a check which asserts that there are no results."""
         self.set_assertion(Assertion(AssertionType.COUNT_EQUALS, 0))
         return self
@@ -249,8 +248,7 @@ class Questions:
         """
         return _list_questions(tags, self)
 
-    def load(self, directory=None):
-        # type: (str|None) -> None
+    def load(self, directory: str | None = None) -> None:
         """
         Load questions from Batfish service or local directory.
 
@@ -305,7 +303,7 @@ def _install_questions(questions: Iterable[tuple[str, QuestionMeta]], obj: Any) 
         setattr(obj, name, question_class)
 
 
-def _load_questions_from_dir(question_dir: str, session: "Session") -> dict[str, QuestionMeta]:
+def _load_questions_from_dir(question_dir: str, session: Session) -> dict[str, QuestionMeta]:
     logger = logging.getLogger(__name__)
     question_files = []
     for dirpath, dirnames, filenames in os.walk(question_dir):
@@ -327,7 +325,7 @@ def _load_questions_from_dir(question_dir: str, session: "Session") -> dict[str,
     return questions
 
 
-def _load_question_disk(question_path: str, session: "Session") -> tuple[str, QuestionMeta]:
+def _load_question_disk(question_path: str, session: Session) -> tuple[str, QuestionMeta]:
     """Load a question template from disk and instantiate a new `:py:class:Question`."""
     with open(question_path) as question_file:
         question_dict = json.load(question_file)
@@ -337,7 +335,7 @@ def _load_question_disk(question_path: str, session: "Session") -> tuple[str, Qu
         raise QuestionValidationException(f"Error loading question from {question_path}", e)
 
 
-def _load_question_dict(question: dict[str, Any], session: "Session") -> tuple[str, QuestionMeta]:
+def _load_question_dict(question: dict[str, Any], session: Session) -> tuple[str, QuestionMeta]:
     """Create a question from a dictionary which contains a template.
 
     :return the name of the question
@@ -354,17 +352,17 @@ def _load_question_dict(question: dict[str, Any], session: "Session") -> tuple[s
     given_question_name = instance_data.get("instanceName")
     if not given_question_name or not validate_question_name(given_question_name):
         raise QuestionValidationException(f"Invalid question name: {given_question_name}")
-    question_name = str(given_question_name)  # type: str
+    question_name: str = str(given_question_name)
 
     # description validation
-    question_description = instance_data.get("description", "").strip()  # type: str
+    question_description: str = instance_data.get("description", "").strip()
     if not question_description:
         raise QuestionValidationException(f"Missing description for question '{question_name}'")
     if not question_description.endswith("."):
         question_description += "."
 
     # Extend description if we can
-    long_description = instance_data.get("longDescription", "").strip()  # type: str
+    long_description: str = instance_data.get("longDescription", "").strip()
     if long_description:
         if not long_description.endswith("."):
             long_description += "."
@@ -420,8 +418,7 @@ def _process_variables(
     return sorted(variables.keys(), key=__var_key)
 
 
-def _validate_variable_data(question_name, var_name, var_data):
-    # type: (str, str, dict[str, Any]) -> bool
+def _validate_variable_data(question_name: str, var_name: str, var_data: dict[str, Any]) -> bool:
     """Perform validation on variable metadata and fix style if necessary.
 
     :raises QuestionValidationException if metadata is invalid.
@@ -441,8 +438,7 @@ def _validate_variable_data(question_name, var_name, var_data):
     return True
 
 
-def _validate_variable_name(question_name, var_name):
-    # type: (str, str) -> bool
+def _validate_variable_name(question_name: str, var_name: str) -> bool:
     """Check if the variable name is valid."""
     if not re.match(_VALID_VARIABLE_NAME_REGEX, var_name):
         raise QuestionValidationException(
@@ -451,24 +447,21 @@ def _validate_variable_name(question_name, var_name):
     return True
 
 
-def _has_valid_ordered_variable_names(ordered_variable_names, variables):
-    # type: (list[str], dict[str, dict[str, Any]]) -> bool
+def _has_valid_ordered_variable_names(ordered_variable_names: list[str], variables: dict[str, dict[str, Any]]) -> bool:
     """Check if ordered_variable_names is present and that it includes all instance variables."""
     if not ordered_variable_names:
         return False
     return len(ordered_variable_names) == len(variables) and set(ordered_variable_names) == set(variables.keys())
 
 
-def _compute_docstring(base_docstring, var_names, variables):
-    # type: (str, list[str], dict[str, Any]) -> str
+def _compute_docstring(base_docstring: str, var_names: list[str], variables: dict[str, Any]) -> str:
     """Compute a docstring for a question, based on the variables."""
     if not variables:
         return base_docstring
     return "\n".join([base_docstring, "\n"] + [_compute_var_help(var, variables[var]) for var in var_names])
 
 
-def _compute_var_help(var_name, var_data):
-    # type: (str, dict[str, Any]) -> str
+def _compute_var_help(var_name: str, var_data: dict[str, Any]) -> str:
     """Create explanation of a single question variable."""
     # Variable help has 2 sections: param and type. Param section may include
     # optionally: required (inline), and allowed_values and/or default_value on
@@ -502,7 +495,7 @@ def _build_allowed_values(var_data):
     return None
 
 
-def _load_remote_questions_templates(session: "Session") -> set[tuple[str, QuestionMeta]]:
+def _load_remote_questions_templates(session: Session) -> set[tuple[str, QuestionMeta]]:
     logger = logging.getLogger(__name__)
     num_questions = 0
     remote_questions = set()

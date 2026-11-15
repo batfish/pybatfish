@@ -11,6 +11,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from __future__ import annotations
+
 import json
 import re
 from abc import abstractmethod
@@ -51,8 +53,7 @@ __all__ = [
 ]
 
 
-def _optional_int(x):
-    # type: (Any) -> int|None
+def _optional_int(x: Any) -> int | None:
     if x is None:
         return None
     return int(x)
@@ -100,7 +101,7 @@ class Flow(DataModelElement):
     IP_PROTOCOL_PATTERN = re.compile("^UNNAMED_([0-9]+)$", flags=re.IGNORECASE)
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "Flow":
+    def from_dict(cls, json_dict: dict[str, Any]) -> Flow:
         return Flow(
             json_dict["dscp"],
             json_dict["dstIp"],
@@ -126,8 +127,7 @@ class Flow(DataModelElement):
             json_dict.get("tcpFlagsUrg"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         iface_str = self._iface_str()
         vrf_str = self._vrf_str()
         return "start={node}{iface}{vrf} [{src}->{dst} {ip_proto}{dscp}{ecn}{offset}{length}]".format(
@@ -155,8 +155,7 @@ class Flow(DataModelElement):
         iface_str = f" interface={self.ingressInterface}" if self.ingressInterface is not None else ""
         return iface_str
 
-    def get_flag_str(self):
-        # type: () -> str
+    def get_flag_str(self) -> str:
         """
         Returns a print friendly version of all set TCP flags.
         """
@@ -181,8 +180,7 @@ class Flow(DataModelElement):
 
         return "-".join(flags) if len(flags) > 0 else "no flags set"
 
-    def get_ip_protocol_str(self):
-        # type: () -> str
+    def get_ip_protocol_str(self) -> str:
         """Returns a print-friendly version of IP protocol and any protocol-specific information (e.g., flags for TCP, type/code for ICMP."""
         match = self.IP_PROTOCOL_PATTERN.match(self.ipProtocol)
         if match:
@@ -193,18 +191,15 @@ class Flow(DataModelElement):
             return f"ICMP (type={self.icmpVar}, code={self.icmpCode})"
         return self.ipProtocol
 
-    def _has_ports(self):
-        # type: () -> bool
+    def _has_ports(self) -> bool:
         return (
             self.ipProtocol in ["TCP", "UDP", "DCCP", "SCTP"] and self.srcPort is not None and self.dstPort is not None
         )
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return "<br>".join(self._repr_html_lines())
 
-    def _repr_html_lines(self):
-        # type: () -> list[str]
+    def _repr_html_lines(self) -> list[str]:
         lines = []
         lines.append(f"Start Location: {self.ingressNode}{self._iface_str()}{self._vrf_str()}")
         lines.append(f"Src IP: {self.srcIp}")
@@ -226,8 +221,7 @@ class Flow(DataModelElement):
             lines.append(f"Packet Length: {self.packetLength}")
         return lines
 
-    def _ip_port(self, ip, port):
-        # type: (str, int|None) -> str
+    def _ip_port(self, ip: str, port: int | None) -> str:
         if self._has_ports():
             assert port is not None
             return f"{ip}:{port}"
@@ -249,12 +243,10 @@ class FlowDiff(DataModelElement):
     newValue = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> FlowDiff
+    def from_dict(cls, json_dict: dict) -> FlowDiff:
         return FlowDiff(json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"])
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"{self.fieldName}: {self.oldValue} -> {self.newValue}"
 
 
@@ -274,16 +266,14 @@ class FlowTrace(DataModelElement):
     notes = attr.ib(type=Any)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> FlowTrace
+    def from_dict(cls, json_dict: dict) -> FlowTrace:
         return FlowTrace(
             json_dict["disposition"],
             [FlowTraceHop.from_dict(hop) for hop in json_dict.get("hops", [])],
             json_dict.get("notes"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return "{hops}\n{notes}".format(
             hops="\n".join([f"{num} {hop}" for num, hop in enumerate(self.hops, start=1)]),
             notes=self.notes,
@@ -295,8 +285,7 @@ class FlowTrace(DataModelElement):
     def __getitem__(self, item):
         return self.hops[item]
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return "{notes}<br>{hops}".format(
             notes=self.format_notes_html(),
             hops="<br><br>".join(
@@ -304,8 +293,7 @@ class FlowTrace(DataModelElement):
             ),
         )
 
-    def format_notes_html(self):
-        # type: () -> str
+    def format_notes_html(self) -> str:
         return f'<span style="color:{_get_color_for_disposition(self.disposition)}; text-weight:bold;">{escape_html(self.notes)}</span>'
 
 
@@ -323,8 +311,7 @@ class FlowTraceHop(DataModelElement):
     transformedFlow = attr.ib(type=Flow | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> FlowTraceHop
+    def from_dict(cls, json_dict: dict) -> FlowTraceHop:
         transformed_flow = json_dict.get("transformedFlow")
         return FlowTraceHop(
             Edge.from_dict(json_dict["edge"]),
@@ -332,15 +319,13 @@ class FlowTraceHop(DataModelElement):
             Flow.from_dict(transformed_flow) if transformed_flow else None,
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         ret_str = "{}\n    Route(s):\n    {}".format(self.edge, "\n    ".join(self.routes))
         if self.transformedFlow:
             ret_str += f"\n    Transformed flow: {self.transformedFlow}"
         return ret_str
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         indent = "&nbsp;" * 4
         result = "{edge}<br>Route(s):<br>{routes}".format(
             edge=self.edge._repr_html_(),
@@ -355,8 +340,7 @@ class SessionAction(DataModelElement):
     """An action that a firewall session takes for return traffic matching the session."""
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> SessionAction
+    def from_dict(cls, json_dict: dict) -> SessionAction:
         action = json_dict.get("type")
         if action == "Accept":
             return Accept()
@@ -376,8 +360,7 @@ class Accept(SessionAction):
     originated.
     """
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return "Accept"
 
 
@@ -387,8 +370,7 @@ class PreNatFibLookup(SessionAction):
     on the FIB of the interface on which the return traffic is received before NAT is applied.
     """
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return "PreNatFibLookup"
 
 
@@ -398,8 +380,7 @@ class PostNatFibLookup(SessionAction):
     on the FIB of the interface on which the return traffic is received after NAT is applied.
     """
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return "PostNatFibLookup"
 
 
@@ -418,8 +399,7 @@ class ForwardOutInterface(SessionAction):
     outgoingInterface = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> ForwardOutInterface
+    def from_dict(cls, json_dict: dict) -> ForwardOutInterface:
         next_hop = json_dict.get("nextHop", {})
         return ForwardOutInterface(
             next_hop.get("hostname", ""),
@@ -427,8 +407,7 @@ class ForwardOutInterface(SessionAction):
             json_dict.get("outgoingInterface", ""),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"ForwardOutInterface(Next Hop: {self.nextHopHostname}, Next Hop Interface: {self.nextHopInterface}, Outgoing Interface: {self.outgoingInterface})"
 
 
@@ -451,8 +430,7 @@ class SessionMatchExpr(DataModelElement):
     dstPort = attr.ib(type=int | None, default=None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> SessionMatchExpr
+    def from_dict(cls, json_dict: dict) -> SessionMatchExpr:
         return SessionMatchExpr(
             json_dict.get("ipProtocol", ""),
             json_dict.get("srcIp", ""),
@@ -461,8 +439,7 @@ class SessionMatchExpr(DataModelElement):
             json_dict.get("dstPort"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         matchers = ["ipProtocol", "srcIp", "dstIp"]
         if self.srcPort is not None and self.dstPort is not None:
             matchers.extend(["srcPort", "dstPort"])
@@ -476,8 +453,7 @@ class SessionScope(DataModelElement):
     """
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> SessionScope
+    def from_dict(cls, json_dict: dict) -> SessionScope:
         if "incomingInterfaces" in json_dict:
             return IncomingSessionScope.from_dict(json_dict)
         elif "originatingVrf" in json_dict:
@@ -496,12 +472,10 @@ class IncomingSessionScope(SessionScope):
     incomingInterfaces = attr.ib(type=list[str])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> IncomingSessionScope
+    def from_dict(cls, json_dict: dict) -> IncomingSessionScope:
         return IncomingSessionScope(json_dict.get("incomingInterfaces", ""))
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return "Incoming Interfaces: [{}]".format(", ".join(self.incomingInterfaces))
 
 
@@ -516,12 +490,10 @@ class OriginatingSessionScope(SessionScope):
     originatingVrf = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> OriginatingSessionScope
+    def from_dict(cls, json_dict: dict) -> OriginatingSessionScope:
         return OriginatingSessionScope(json_dict.get("originatingVrf", ""))
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"Originating VRF: {self.originatingVrf}"
 
 
@@ -537,15 +509,13 @@ class ArpErrorStepDetail(DataModelElement):
     resolvedNexthopIp = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> ArpErrorStepDetail
+    def from_dict(cls, json_dict: dict) -> ArpErrorStepDetail:
         return ArpErrorStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("resolvedNexthopIp"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         detail_info = []
         if self.outputInterface:
             detail_info.append(f"Output Interface: {self.outputInterface}")
@@ -566,15 +536,13 @@ class DeliveredStepDetail(DataModelElement):
     resolvedNexthopIp = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> DeliveredStepDetail
+    def from_dict(cls, json_dict: dict) -> DeliveredStepDetail:
         return DeliveredStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("resolvedNexthopIp"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         detail_info = []
         if self.outputInterface:
             detail_info.append(f"Output Interface: {self.outputInterface}")
@@ -595,15 +563,13 @@ class EnterInputIfaceStepDetail(DataModelElement):
     inputVrf = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> EnterInputIfaceStepDetail
+    def from_dict(cls, json_dict: dict) -> EnterInputIfaceStepDetail:
         return EnterInputIfaceStepDetail(
             json_dict.get("inputInterface", {}).get("interface"),
             json_dict.get("inputVrf"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         str_output = str(self.inputInterface)
         return str_output
 
@@ -620,15 +586,13 @@ class ExitOutputIfaceStepDetail(DataModelElement):
     transformedFlow = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> ExitOutputIfaceStepDetail
+    def from_dict(cls, json_dict: dict) -> ExitOutputIfaceStepDetail:
         return ExitOutputIfaceStepDetail(
             json_dict.get("outputInterface", {}).get("interface"),
             json_dict.get("transformedFlow"),
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return str(self.outputInterface)
 
 
@@ -642,8 +606,7 @@ class InboundStepDetail(DataModelElement):
     interface = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> InboundStepDetail
+    def from_dict(cls, json_dict: dict) -> InboundStepDetail:
         return InboundStepDetail(json_dict.get("interface", ""))
 
     def __str__(self):
@@ -678,8 +641,7 @@ class MatchSessionStepDetail(DataModelElement):
     transformation = attr.ib(type=list[FlowDiff] | None, factory=list)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> MatchSessionStepDetail
+    def from_dict(cls, json_dict: dict) -> MatchSessionStepDetail:
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
@@ -695,8 +657,7 @@ class MatchSessionStepDetail(DataModelElement):
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         strings = [
             f"{self.sessionScope}",
             f"Action: {self.sessionAction}",
@@ -716,7 +677,7 @@ class ForwardingDetail(DataModelElement):
         raise NotImplementedError("ForwardingDetail elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: dict) -> "ForwardingDetail":
+    def from_dict(cls, json_dict: dict) -> ForwardingDetail:
         if "type" not in json_dict:
             raise ValueError(f"Unknown type of ForwardingDetail, missing the type property in: {json.dumps(json_dict)}")
         fd_type = json_dict["type"]
@@ -748,7 +709,7 @@ class DelegatedToNextVrf(ForwardingDetail):
         return f"Delegated to next VRF: {escape_name(self.nextVrf)}"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "DelegatedToNextVrf":
+    def from_dict(cls, json_dict: dict[str, Any]) -> DelegatedToNextVrf:
         assert set(json_dict.keys()) == {"type", "nextVrf"}
         assert json_dict["type"] == "DelegatedToNextVrf"
         next_vrf = json_dict["nextVrf"]
@@ -773,7 +734,7 @@ class ForwardedIntoVxlanTunnel(ForwardingDetail):
         return f"Forwarded into VXLAN tunnel with VNI: {self.vni} and VTEP: {self.vtep}"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "ForwardedIntoVxlanTunnel":
+    def from_dict(cls, json_dict: dict[str, Any]) -> ForwardedIntoVxlanTunnel:
         assert set(json_dict.keys()) == {"type", "vni", "vtep"}
         assert json_dict["type"] == "ForwardedIntoVxlanTunnel"
         vni = json_dict["vni"]
@@ -807,7 +768,7 @@ class ForwardedOutInterface(ForwardingDetail):
         )
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "ForwardedOutInterface":
+    def from_dict(cls, json_dict: dict[str, Any]) -> ForwardedOutInterface:
         assert set(json_dict.keys()) == {
             "type",
             "outputInterface",
@@ -838,7 +799,7 @@ class Discarded(ForwardingDetail):
         return "Discarded"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "Discarded":
+    def from_dict(cls, json_dict: dict[str, Any]) -> Discarded:
         assert json_dict == {"type": "Discarded"}
         return Discarded()
 
@@ -853,12 +814,10 @@ class OriginateStepDetail(DataModelElement):
     originatingVrf = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> OriginateStepDetail
+    def from_dict(cls, json_dict: dict) -> OriginateStepDetail:
         return OriginateStepDetail(json_dict.get("originatingVrf", ""))
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return str(self.originatingVrf)
 
 
@@ -885,7 +844,7 @@ class RouteInfo(DataModelElement):
         return f"{self.protocol} (Network: {self.network}, Next Hop: {str(self.nextHop)})"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "RouteInfo":
+    def from_dict(cls, json_dict: dict[str, Any]) -> RouteInfo:
         assert set(json_dict.keys()) - {"nextHop", "nextHopIp", "nextVrf"} == {
             "protocol",
             "network",
@@ -930,7 +889,7 @@ class RoutingStepDetail(DataModelElement):
     outputInterface = attr.ib(type=str | None)
 
     @classmethod
-    def from_dict(cls, json_dict: dict) -> "RoutingStepDetail":
+    def from_dict(cls, json_dict: dict) -> RoutingStepDetail:
         routes = []
         routes_json_list = json_dict.get("routes", [])
         assert isinstance(routes_json_list, list)
@@ -990,8 +949,7 @@ class SetupSessionStepDetail(DataModelElement):
     transformation = attr.ib(type=list[FlowDiff] | None, factory=list)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> SetupSessionStepDetail
+    def from_dict(cls, json_dict: dict) -> SetupSessionStepDetail:
 
         # backward compatibility: if sessionScope is missing, look for
         # incomingInterfaces instead
@@ -1007,8 +965,7 @@ class SetupSessionStepDetail(DataModelElement):
             [FlowDiff.from_dict(diff) for diff in json_dict.get("transformation", [])],
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         strings = [
             f"{self.sessionScope}",
             f"Action: {self.sessionAction}",
@@ -1035,8 +992,7 @@ class FilterStepDetail(DataModelElement):
     flow = attr.ib(type=Flow | None)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> FilterStepDetail
+    def from_dict(cls, json_dict: dict) -> FilterStepDetail:
         flowObj = json_dict.get("flow", {})
         return FilterStepDetail(
             json_dict.get("filter", ""),
@@ -1045,8 +1001,7 @@ class FilterStepDetail(DataModelElement):
             Flow.from_dict(flowObj) if flowObj else None,
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"{self.filter} ({self.filterType})"
 
 
@@ -1062,7 +1017,7 @@ class PolicyStepDetail(DataModelElement):
     policy = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "PolicyStepDetail":
+    def from_dict(cls, json_dict: dict[str, Any]) -> PolicyStepDetail:
         return PolicyStepDetail(json_dict.get("policy", ""))
 
     def __str__(self) -> str:
@@ -1081,15 +1036,13 @@ class TransformationStepDetail(DataModelElement):
     flowDiffs = attr.ib(type=list[FlowDiff])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> TransformationStepDetail
+    def from_dict(cls, json_dict: dict) -> TransformationStepDetail:
         return TransformationStepDetail(
             json_dict["transformationType"],
             [FlowDiff.from_dict(fd) for fd in json_dict.get("flowDiffs", [])],
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         if not self.flowDiffs:
             return self.transformationType
         return "{type} {diffs}".format(
@@ -1110,8 +1063,7 @@ class Step(DataModelElement):
     action = attr.ib(type=str, converter=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> None|Step
+    def from_dict(cls, json_dict: dict) -> None | Step:
 
         from_dicts = {
             "ArpError": ArpErrorStepDetail.from_dict,
@@ -1139,8 +1091,7 @@ class Step(DataModelElement):
         else:
             return Step(from_dicts[type](detail), action)
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         action_str = str(self.action)
         detail_str = str(self.detail) if self.detail else None
         if detail_str:
@@ -1148,8 +1099,7 @@ class Step(DataModelElement):
         else:
             return action_str
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return str(self)
 
 
@@ -1165,9 +1115,8 @@ class Hop(DataModelElement):
     steps = attr.ib(type=list[Step])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> Hop
-        steps = []  # type: list[Step]
+    def from_dict(cls, json_dict: dict) -> Hop:
+        steps: list[Step] = []
         for step in json_dict["steps"]:
             step_obj = Step.from_dict(step)
             if step_obj is not None:
@@ -1180,22 +1129,19 @@ class Hop(DataModelElement):
     def __getitem__(self, item):
         return self.steps[item]
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         # pandas renders this in DataFrame cells and escapes newlines, so keep it on one line.
         return "{node}: ({steps})".format(node=self.node, steps=", ".join(map(str, self.steps)))
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return "node: {node}<br>&nbsp;&nbsp;{steps}".format(
             node=self.node,
             steps="<br>&nbsp;&nbsp;".join([step._repr_html_() for step in self.steps]),
         )
 
     @staticmethod
-    def _get_routes_data(routes):
-        # type: (list[dict]) -> list[str]
-        routes_str = []  # type: list[str]
+    def _get_routes_data(routes: list[dict]) -> list[str]:
+        routes_str: list[str] = []
         for route in routes:
             routes_str.append(
                 "{protocol} [Network: {network}, Next Hop IP:{next_hop_ip}]".format(
@@ -1221,8 +1167,7 @@ class Trace(DataModelElement):
     hops = attr.ib(type=list[Hop])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> Trace
+    def from_dict(cls, json_dict: dict) -> Trace:
         return Trace(
             json_dict["disposition"],
             [Hop.from_dict(hop) for hop in json_dict.get("hops", [])],
@@ -1234,16 +1179,14 @@ class Trace(DataModelElement):
     def __getitem__(self, item):
         return self.hops[item]
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         # pandas renders this in DataFrame cells and escapes newlines, so keep it on one line.
         return "{disposition}: [{hops}]".format(
             disposition=self.disposition,
             hops=", ".join(map(str, self.hops)),
         )
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         disposition_span = f'<span style="color:{_get_color_for_disposition(self.disposition)}; text-weight:bold;">{self.disposition}</span>'
         return "{disposition_span}<br>{hops}".format(
             disposition_span=disposition_span,
@@ -1335,8 +1278,7 @@ class MatchTcpFlags(DataModelElement):
         )
 
     @staticmethod
-    def match_ack():
-        # type: () -> MatchTcpFlags
+    def match_ack() -> MatchTcpFlags:
         """Return match conditions checking that ACK bit is set.
 
         Other bits may take any value.
@@ -1344,8 +1286,7 @@ class MatchTcpFlags(DataModelElement):
         return MatchTcpFlags(TcpFlags(ack=True), useAck=True)
 
     @staticmethod
-    def match_rst():
-        # type: () -> MatchTcpFlags
+    def match_rst() -> MatchTcpFlags:
         """Return match conditions checking that RST bit is set.
 
         Other bits may take any value.
@@ -1353,8 +1294,7 @@ class MatchTcpFlags(DataModelElement):
         return MatchTcpFlags(TcpFlags(rst=True), useRst=True)
 
     @staticmethod
-    def match_syn():
-        # type: () -> MatchTcpFlags
+    def match_syn() -> MatchTcpFlags:
         """Return match conditions checking that the SYN bit is set.
 
         Other bits may take any value.
@@ -1362,8 +1302,7 @@ class MatchTcpFlags(DataModelElement):
         return MatchTcpFlags(TcpFlags(syn=True), useSyn=True)
 
     @staticmethod
-    def match_synack():
-        # type: () -> MatchTcpFlags
+    def match_synack() -> MatchTcpFlags:
         """Return match conditions checking that both the SYN and ACK bits are set.
 
         Other bits may take any value.
@@ -1371,8 +1310,7 @@ class MatchTcpFlags(DataModelElement):
         return MatchTcpFlags(TcpFlags(ack=True, syn=True), useAck=True, useSyn=True)
 
     @staticmethod
-    def match_established():
-        # type: () -> list[MatchTcpFlags]
+    def match_established() -> list[MatchTcpFlags]:
         """Return a list of match conditions matching an established flow (ACK or RST bit set).
 
         Other bits may take any value.
@@ -1380,8 +1318,7 @@ class MatchTcpFlags(DataModelElement):
         return [MatchTcpFlags.match_ack(), MatchTcpFlags.match_rst()]
 
     @staticmethod
-    def match_not_established():
-        # type: () -> list[MatchTcpFlags]
+    def match_not_established() -> list[MatchTcpFlags]:
         """Return a list of match conditions matching a non-established flow.
 
         Meaning both ACK and RST bits are unset.
@@ -1390,8 +1327,7 @@ class MatchTcpFlags(DataModelElement):
         return [MatchTcpFlags(useAck=True, useRst=True, tcpFlags=TcpFlags(ack=False, rst=False))]
 
 
-def _get_color_for_disposition(disposition):
-    # type: (str) -> str
+def _get_color_for_disposition(disposition: str) -> str:
     success_dispositions = {"ACCEPTED", "DELIVERED_TO_SUBNET", "EXITS_NETWORK"}
     if disposition in success_dispositions:
         return "#019612"
@@ -1399,8 +1335,7 @@ def _get_color_for_disposition(disposition):
         return "#7c020e"
 
 
-def _normalize_phc_intspace(value):
-    # type: (Any) -> None|str
+def _normalize_phc_intspace(value: Any) -> None | str:
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, int):
@@ -1411,8 +1346,7 @@ def _normalize_phc_intspace(value):
     raise ValueError(f"Invalid value {value}")
 
 
-def _normalize_phc_list(value):
-    # type: (Any) -> None|list[str]
+def _normalize_phc_list(value: Any) -> None | list[str]:
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, str):
@@ -1425,8 +1359,7 @@ def _normalize_phc_list(value):
     raise ValueError(f"Invalid value {value}")
 
 
-def _normalize_phc_tcpflags(value):
-    # type: (Any) -> None|list[MatchTcpFlags]
+def _normalize_phc_tcpflags(value: Any) -> None | list[MatchTcpFlags]:
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, MatchTcpFlags):
@@ -1434,12 +1367,11 @@ def _normalize_phc_tcpflags(value):
     raise ValueError(f"Invalid value {value}")
 
 
-def _normalize_phc_strings(value):
-    # type: (Any) -> None|str
+def _normalize_phc_strings(value: Any) -> None | str:
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: str
+        result: str = ",".join(value)
         return result
     raise ValueError(f"Invalid value {value}")
 
@@ -1521,8 +1453,7 @@ class HeaderConstraints(DataModelElement):
         )
 
     @classmethod
-    def of(cls, flow):
-        # type: (Flow) -> HeaderConstraints
+    def of(cls, flow: Flow) -> HeaderConstraints:
         """Create header constraints from an existing flow."""
         srcPorts = dstPorts = icmpCodes = icmpTypes = tcpFlags = None
         if flow._has_ports():
