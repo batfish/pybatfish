@@ -11,7 +11,7 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
-from abc import ABCMeta, abstractmethod
+from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any
 
@@ -33,9 +33,7 @@ __all__ = [
 
 
 @attr.s
-class DataModelElement:
-    __metaclass__ = ABCMeta
-
+class DataModelElement(ABC):
     def dict(self) -> dict[str, Any]:
         return attr.asdict(self, recurse=True)
 

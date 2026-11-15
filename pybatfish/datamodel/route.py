@@ -13,7 +13,7 @@
 #   limitations under the License.
 import builtins
 import json
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from collections.abc import Iterable
 from typing import Any
 
@@ -280,7 +280,7 @@ class BgpSessionProperties(DataModelElement):
         )
 
 
-class NextHop(DataModelElement, metaclass=ABCMeta):
+class NextHop(DataModelElement):
     """A next-hop of a route"""
 
     def _repr_html_(self) -> str:

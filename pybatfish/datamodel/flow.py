@@ -13,7 +13,7 @@
 #   limitations under the License.
 import json
 import re
-from abc import ABCMeta, abstractmethod
+from abc import abstractmethod
 from collections.abc import Iterable, Sequence
 from typing import Any
 
@@ -707,7 +707,7 @@ class MatchSessionStepDetail(DataModelElement):
         return ", ".join(strings)
 
 
-class ForwardingDetail(DataModelElement, metaclass=ABCMeta):
+class ForwardingDetail(DataModelElement):
     def _repr_html_(self) -> str:
         return escape_html(str(self))
 
