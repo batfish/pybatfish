@@ -13,6 +13,8 @@
 #   limitations under the License.
 
 
+from __future__ import annotations
+
 import json
 from typing import TYPE_CHECKING, Any
 
@@ -29,10 +31,10 @@ class WorkItem:
     This file mirrors WorkItem.java in the batfish-common-protocol module.
     """
 
-    def __init__(self, session: "Session") -> None:
-        self.id = batfishutils.get_uuid()  # type: str
-        self.network = session.network  # type: str|None
-        self.requestParams = dict(session.additional_args)  # type: dict
+    def __init__(self, session: Session) -> None:
+        self.id: str = batfishutils.get_uuid()
+        self.network: str | None = session.network
+        self.requestParams: dict = dict(session.additional_args)
 
     def to_dict(self) -> dict[str, Any]:
         params = {

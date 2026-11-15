@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from __future__ import annotations
+
 from typing import Any
 
 import pandas
@@ -59,8 +61,7 @@ class TableAnswer(Answer):
                 raise ValueError("Exclusion does not have 'exclusionName'")
             self.excluded_rows[exclusion["exclusionName"]] = exclusion.get("rows", [])
 
-    def excluded_frame(self, exclusion_name):
-        # type: (str) -> pandas.DataFrame
+    def excluded_frame(self, exclusion_name: str) -> pandas.DataFrame:
         """Return the excluded data for exclusion_name as a :py:class:`pandas.DataFrame`."""
         if exclusion_name not in self.excluded_rows:
             raise ValueError(f"Exclusion name {exclusion_name} does not exist")
@@ -79,8 +80,7 @@ class TableAnswer(Answer):
     def __str__(self):
         return str(self.table_data)
 
-    def __len__(self):
-        # type: () -> int
+    def __len__(self) -> int:
         return len(self.table_data)
 
 
@@ -98,13 +98,11 @@ class TableMetadata:
         self.column_metadata = [ColumnMetadata(column) for column in dictionary.get("columnMetadata", [])]
         self.hints: dict | None = dictionary.get("displayHints")
 
-    def get_column_names(self):
-        # type: () -> list[str]
+    def get_column_names(self) -> list[str]:
         return [cm.name for cm in self.column_metadata]
 
 
-def _rows_to_frame(table_metadata, rows):
-    # type: (TableMetadata, list[Row]) -> pandas.DataFrame
+def _rows_to_frame(table_metadata: TableMetadata, rows: list[Row]) -> pandas.DataFrame:
     row_based = [
         [_parse_json_with_schema(cm.schema, row.get(cm.name)) for cm in table_metadata.column_metadata] for row in rows
     ]
@@ -120,8 +118,7 @@ def _rows_to_frame(table_metadata, rows):
     return df.reindex(labels=column_names, axis="columns")
 
 
-def is_table_ans(d):
-    # type: (dict) -> bool
+def is_table_ans(d: dict) -> bool:
     """Check if a given dictionary represents a table answer."""
     return (
         "answerElements" in d

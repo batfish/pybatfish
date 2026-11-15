@@ -11,6 +11,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Any
@@ -73,8 +75,7 @@ class Assertion(DataModelElement):
     expect = attr.ib(type=Any)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> Assertion
+    def from_dict(cls, json_dict: dict) -> Assertion:
         return Assertion(AssertionType[json_dict["type"]], json_dict["expect"])
 
     def dict(self):
@@ -177,8 +178,7 @@ class AutoCompleteSuggestion(DataModelElement):
     DEFAULT_RANK = 0x7FFFFFFF
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> AutoCompleteSuggestion
+    def from_dict(cls, json_dict: dict) -> AutoCompleteSuggestion:
         return AutoCompleteSuggestion(
             json_dict.get("description", None),
             json_dict.get("hint", None),
@@ -211,21 +211,17 @@ class Interface(DataModelElement):
     interface = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> Interface
+    def from_dict(cls, json_dict: dict) -> Interface:
         return Interface(json_dict["hostname"], json_dict["interface"])
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"{escape_name(self.hostname)}[{escape_name(self.interface)}]"
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return f"{escape_html(self.__str__())}"
 
 
-def _interface_converter(val):
-    # type: (Any) -> str
+def _interface_converter(val: Any) -> str:
     if isinstance(val, Interface):
         return str(val.interface)
     else:
@@ -248,8 +244,7 @@ class Edge(DataModelElement):
     node2interface = attr.ib(type=str, converter=_interface_converter)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> Edge
+    def from_dict(cls, json_dict: dict) -> Edge:
         return Edge(
             node1=json_dict["node1"],
             node1interface=json_dict["node1interface"],
@@ -257,12 +252,10 @@ class Edge(DataModelElement):
             node2interface=json_dict["node2interface"],
         )
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"{self.node1}:{self.node1interface} -> {self.node2}:{self.node2interface}"
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return f"{self.node1}:{self.node1interface} &rarr; {self.node2}:{self.node2interface}"
 
 
@@ -277,20 +270,17 @@ class FileLines(DataModelElement):
     filename = attr.ib(type=str)
     lines = attr.ib(type=list[int], factory=list)
 
-    def __str__(self):
-        # type: () -> str
+    def __str__(self) -> str:
         return f"{self.filename}:{self.lines}"
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> FileLines
+    def from_dict(cls, json_dict: dict) -> FileLines:
         return FileLines(filename=json_dict["filename"], lines=json_dict.get("lines", []))
 
 
 class ListWrapper(FrozenList):
     """Helper list class that implements _repr_html_()."""
 
-    def _repr_html_(self):
-        # type: () -> str
-        result = "<br><br>".join([get_html(element) for element in self])  # type: str
+    def _repr_html_(self) -> str:
+        result: str = "<br><br>".join([get_html(element) for element in self])
         return result

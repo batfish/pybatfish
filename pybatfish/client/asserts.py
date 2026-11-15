@@ -146,8 +146,7 @@ def _is_dict_match(actual: dict[str, Any], expected: dict[str, Any]) -> bool:
     return _is_value_match(_subdict(actual, expected.keys()), expected)
 
 
-def _raise_common(err_text, soft=False):
-    # type: (str, bool) -> bool
+def _raise_common(err_text: str, soft: bool = False) -> bool:
     """Utility function for soft/hard exception raising."""
     __tracebackhide__ = operator.methodcaller("errisinstance", BatfishAssertException)
     if soft:
@@ -157,8 +156,7 @@ def _raise_common(err_text, soft=False):
         raise BatfishAssertException(err_text)
 
 
-def _format_df(df, df_format):
-    # type: (DataFrame, str) -> str
+def _format_df(df: DataFrame, df_format: str) -> str:
     """Utility function for stringifying the dataframe based on desired format."""
     if df_format == "table":
         return str(df.to_string())
@@ -360,8 +358,13 @@ def assert_filter_denies(
     return True
 
 
-def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None, session=None, df_format="table"):
-    # type: (str, bool, str|None, Session|None, str) -> bool
+def assert_filter_has_no_unreachable_lines(
+    filters: str,
+    soft: bool = False,
+    snapshot: str | None = None,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """
     Check that a filter (e.g. an ACL) has no unreachable lines.
 
@@ -399,15 +402,14 @@ def assert_filter_has_no_unreachable_lines(filters, soft=False, snapshot=None, s
 
 
 def assert_filter_permits(
-    filters,
-    headers,
-    startLocation=None,
-    soft=False,
-    snapshot=None,
-    session=None,
-    df_format="table",
-):
-    # type: (str, HeaderConstraints, str|None, bool, str|None, Session|None, str) -> bool
+    filters: str,
+    headers: HeaderConstraints,
+    startLocation: str | None = None,
+    soft: bool = False,
+    snapshot: str | None = None,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """
     Check if a filter (e.g., ACL) permits a specified set of flows.
 
@@ -439,8 +441,14 @@ def assert_filter_permits(
     return True
 
 
-def assert_flows_fail(startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"):
-    # type: (str, HeaderConstraints, bool, str|None, Session|None, str) -> bool
+def assert_flows_fail(
+    startLocation: str,
+    headers: HeaderConstraints,
+    soft: bool = False,
+    snapshot: str | None = None,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """
     Check if the specified set of flows, denoted by starting locations and headers, fail.
 
@@ -473,8 +481,14 @@ def assert_flows_fail(startLocation, headers, soft=False, snapshot=None, session
     return True
 
 
-def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None, session=None, df_format="table"):
-    # type: (str, HeaderConstraints, bool, str|None, Session|None, str) -> bool
+def assert_flows_succeed(
+    startLocation: str,
+    headers: HeaderConstraints,
+    soft: bool = False,
+    snapshot: str | None = None,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """
     Check if the specified set of flows, denoted by starting locations and headers, succeed.
 
@@ -508,15 +522,14 @@ def assert_flows_succeed(startLocation, headers, soft=False, snapshot=None, sess
 
 
 def assert_no_incompatible_bgp_sessions(
-    nodes=None,
-    remote_nodes=None,
-    status=None,
-    snapshot=None,
-    soft=False,
-    session=None,
-    df_format="table",
-):
-    # type: (str|None, str|None, str|None, str|None, bool, Session|None, str) -> bool
+    nodes: str | None = None,
+    remote_nodes: str | None = None,
+    status: str | None = None,
+    snapshot: str | None = None,
+    soft: bool = False,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """Assert that there are no incompatible BGP sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -533,7 +546,7 @@ def assert_no_incompatible_bgp_sessions(
     if session is None:
         raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
-    kwargs = dict()  # type: dict
+    kwargs: dict = dict()
     if status is not None:
         kwargs.update(status=status)
     if nodes is not None:
@@ -565,14 +578,13 @@ def assert_no_incompatible_bgp_sessions(
 
 
 def assert_no_incompatible_ospf_sessions(
-    nodes=None,
-    remote_nodes=None,
-    snapshot=None,
-    soft=False,
-    session=None,
-    df_format="table",
-):
-    # type: (str|None, str|None, str|None, bool, Session|None, str) -> bool
+    nodes: str | None = None,
+    remote_nodes: str | None = None,
+    snapshot: str | None = None,
+    soft: bool = False,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """Assert that there are no incompatible or unestablished OSPF sessions present in the snapshot.
 
     :param nodes: search sessions with specified nodes on one side of the sessions.
@@ -609,14 +621,13 @@ def assert_no_incompatible_ospf_sessions(
 
 
 def assert_no_unestablished_bgp_sessions(
-    nodes=None,
-    remote_nodes=None,
-    snapshot=None,
-    soft=False,
-    session=None,
-    df_format="table",
-):
-    # type: (str|None, str|None, str|None, bool, Session|None, str) -> bool
+    nodes: str | None = None,
+    remote_nodes: str | None = None,
+    snapshot: str | None = None,
+    soft: bool = False,
+    session: Session | None = None,
+    df_format: str = "table",
+) -> bool:
     """Assert that there are no BGP sessions that are compatible but not established.
 
     This assertion is run (only) for sessions that are compatible based on
@@ -652,8 +663,9 @@ def assert_no_unestablished_bgp_sessions(
     return True
 
 
-def assert_no_undefined_references(snapshot=None, soft=False, session=None, df_format="table"):
-    # type: (str|None, bool, Session|None, str) -> bool
+def assert_no_undefined_references(
+    snapshot: str | None = None, soft: bool = False, session: Session | None = None, df_format: str = "table"
+) -> bool:
     """Assert that there are no undefined references present in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion
@@ -700,7 +712,7 @@ def assert_no_duplicate_router_ids(
     if session is None:
         raise ValueError("Session must be provided. Preferably, use Session.asserts rather than this function")
 
-    kwargs = dict()  # type: dict
+    kwargs: dict = dict()
     if nodes is not None:
         kwargs.update(nodes=nodes)
 
@@ -725,8 +737,9 @@ def assert_no_duplicate_router_ids(
     return True
 
 
-def assert_no_forwarding_loops(snapshot=None, soft=False, session=None, df_format="table"):
-    # type: (str|None, bool, Session|None, str) -> bool
+def assert_no_forwarding_loops(
+    snapshot: str | None = None, soft: bool = False, session: Session | None = None, df_format: str = "table"
+) -> bool:
     """Assert that there are no forwarding loops in the snapshot.
 
     :param snapshot: the snapshot on which to check the assertion

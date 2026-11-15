@@ -40,10 +40,9 @@ if TYPE_CHECKING:
     from pybatfish.client.session import Session
 
 
-def _batch_desc(json_batch):
-    # type: (dict) -> str
+def _batch_desc(json_batch: dict) -> str:
     """Get a string representation of the Batfish job batch."""
-    description = json_batch.get("description", "").strip()  # type: str
+    description: str = json_batch.get("description", "").strip()
     if json_batch["size"] > 0:
         description = "{desc} {completed} / {size}".format(
             desc=description, completed=json_batch["completed"], size=json_batch["size"]
@@ -53,8 +52,7 @@ def _batch_desc(json_batch):
     return description
 
 
-def _parse_timestamp(timestamp_str):
-    # type: (str) -> datetime.datetime
+def _parse_timestamp(timestamp_str: str) -> datetime.datetime:
     """Convert the given Batfish date string into a printable local time."""
     try:
         # Attempt to parse a Unix timestamp in milliseconds
@@ -65,14 +63,14 @@ def _parse_timestamp(timestamp_str):
         return parse(timestamp_str)
 
 
-def _print_timestamp(timestamp):
-    # type: (datetime.datetime) -> str
+def _print_timestamp(timestamp: datetime.datetime) -> str:
     # Print the timestamp in the appropriate locale
     return timestamp.astimezone(tzlocal()).isoformat(sep=" ")
 
 
-def execute(work_item, session, background=False, extra_args=None):
-    # type: (WorkItem, Session, bool, None|dict[str, Any]) -> dict[str, Any]
+def execute(
+    work_item: WorkItem, session: Session, background: bool = False, extra_args: None | dict[str, Any] = None
+) -> dict[str, Any]:
     """Submit a work item to Batfish.
 
     :param work_item: work to submit
@@ -150,8 +148,7 @@ def queue_work(session: Session, work_item: WorkItem) -> dict[str, Any]:
     return {"result": True}
 
 
-def _compute_batfish_answer_file_name(work_item):
-    # type: (WorkItem) -> str
+def _compute_batfish_answer_file_name(work_item: WorkItem) -> str:
     """Return the answer filename as Batfish computes it."""
     return work_item.id + BfConsts.SUFFIX_ANSWER_JSON_FILE
 
@@ -225,8 +222,9 @@ def _get_data_get_question_templates(session):
     return json_data
 
 
-def get_data_get_answer(session, question_name, snapshot, reference_snapshot=None):
-    # type: (Session, str, str, str|None) -> dict
+def get_data_get_answer(
+    session: Session, question_name: str, snapshot: str, reference_snapshot: str | None = None
+) -> dict:
     json_data = {
         CoordConsts.SVC_KEY_API_KEY: session.api_key,
         CoordConsts.SVC_KEY_NETWORK_NAME: session.network,
@@ -283,8 +281,9 @@ def get_data_upload_snapshot(session: Session, snapshot: str, fd: IO) -> dict[st
     return json_data
 
 
-def get_workitem_answer(session, question_name, snapshot, reference_snapshot=None):
-    # type: (Session, str, str, str|None) -> WorkItem
+def get_workitem_answer(
+    session: Session, question_name: str, snapshot: str, reference_snapshot: str | None = None
+) -> WorkItem:
     """Return the result of submitting a question as a WorkItem."""
     work_item = WorkItem(session)
 
@@ -303,16 +302,14 @@ def get_workitem_answer(session, question_name, snapshot, reference_snapshot=Non
     return work_item
 
 
-def get_workitem_generate_dataplane(session, snapshot):
-    # type: (Session, str) -> WorkItem
+def get_workitem_generate_dataplane(session: Session, snapshot: str) -> WorkItem:
     w_item = WorkItem(session)
     w_item.requestParams[BfConsts.COMMAND_DUMP_DP] = ""
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
     return w_item
 
 
-def get_workitem_parse(session, snapshot):
-    # type: (Session, str) -> WorkItem
+def get_workitem_parse(session: Session, snapshot: str) -> WorkItem:
     w_item = WorkItem(session)
     w_item.requestParams[BfConsts.ARG_TESTRIG] = snapshot
     w_item.requestParams[BfConsts.COMMAND_PARSE_VENDOR_INDEPENDENT] = ""
@@ -329,8 +326,7 @@ def get_work_status(w_item_id: str, session: Session) -> dict[str, Any]:
     }
 
 
-def _print_work_status(session, work_status, task_details):
-    # type: (Session, WorkStatusCode, str) -> Any
+def _print_work_status(session: Session, work_status: WorkStatusCode, task_details: str) -> Any:
     return _print_work_status_helper(session, work_status, task_details, datetime.datetime.now)
 
 
