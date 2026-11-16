@@ -40,6 +40,8 @@ from pybatfish.client.asserts import (
 from pybatfish.client.session import Session
 from pybatfish.datamodel import HeaderConstraints, PathConstraints
 from pybatfish.datamodel.answer import TableAnswer
+from pybatfish.datamodel.primitives import ListWrapper
+from pybatfish.datamodel.route import NextHopIp
 from pybatfish.exception import (
     BatfishAssertException,
     BatfishAssertWarning,
@@ -625,6 +627,52 @@ def test_is_dict_match():
 
     # wrong value
     assert not _is_dict_match({"k1": "v1", "k2": "v2"}, {"k1": "v3"})
+
+    assert _is_dict_match({}, {"k1": None})
+
+
+@pytest.mark.parametrize(
+    "actual,expected,matched",
+    [
+        ([1, 2], [2, 1], True),
+        ([1, 1], [1], True),
+        ([1], [1, 1], True),
+        ([1, 2], [1, 3], False),
+        ([], [], True),
+        ([], [1], False),
+        ([1], [], False),
+        ((1, 2), (2, 1), True),
+        ([1, 2], (1, 2), False),
+        ({1, 2}, {2, 1}, True),
+        (frozenset({1, 2}), frozenset({2, 1}), True),
+        ({1}, {1.0}, False),
+        ({"a": [1, 2], "b": 3}, {"b": 3, "a": [2, 1]}, True),
+        ([{"a": [1, 2]}, {"b": 3}], [{"b": 3}, {"a": [2, 1]}], True),
+        ({"a": 1, "b": 2}, {"a": 1}, False),
+        (1, 1.0, False),
+        (True, 1, False),
+        (float("nan"), float("nan"), False),
+        (ListWrapper([1, 2]), ListWrapper([2, 1]), True),
+        (ListWrapper([1, 2]), [2, 1], False),
+        (NextHopIp("1.1.1.1"), NextHopIp("1.1.1.1"), True),
+        (NextHopIp("1.1.1.1"), NextHopIp("2.2.2.2"), False),
+    ],
+)
+def test_is_dict_match_values(actual, expected, matched):
+    assert _is_dict_match({"field": actual}, {"field": expected}) is matched
+
+
+def test_has_route_unordered_communities():
+    routes = DataFrame(
+        {
+            "Node": ["n1"],
+            "VRF": ["default"],
+            "Network": ["192.0.2.0/24"],
+            "Communities": [["1:1", "1:2"]],
+        }
+    )
+    assert_has_route(routes, {"Communities": ["1:2", "1:1"]}, "n1")
+    assert_has_no_route(routes, {"Communities": ["1:3"]}, "n1")
 
 
 def test_has_route_unsupported_type_routes():
