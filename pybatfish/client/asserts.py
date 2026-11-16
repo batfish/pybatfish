@@ -26,7 +26,6 @@ import warnings
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, Any
 
-from deepdiff import DeepDiff
 from pandas import DataFrame
 
 from pybatfish.datamodel import PathConstraints
@@ -125,16 +124,26 @@ def _get_duplicate_router_ids(
         return df[df.duplicated(["Router_ID"], keep=False)].sort_values(["Router_ID"])
 
 
+def _is_value_match(actual: Any, expected: Any) -> bool:
+    if actual is expected:
+        return True
+    if type(actual) is not type(expected):
+        return False
+    if isinstance(actual, dict):
+        return actual.keys() == expected.keys() and all(
+            _is_value_match(value, expected[key]) for key, value in actual.items()
+        )
+    if isinstance(actual, (list, tuple, set, frozenset)):
+        # Collection order and duplicate counts do not affect matching.
+        return all(any(_is_value_match(a, e) for e in expected) for a in actual) and all(
+            any(_is_value_match(a, e) for a in actual) for e in expected
+        )
+    return bool(actual == expected)
+
+
 def _is_dict_match(actual: dict[str, Any], expected: dict[str, Any]) -> bool:
     """Matches two dictionaries. `expected` can be a subset of `actual`."""
-    diff = DeepDiff(
-        _subdict(actual, expected.keys()),
-        expected,
-        ignore_order=True,
-        verbose_level=1,
-        view="text",
-    )
-    return not diff
+    return _is_value_match(_subdict(actual, expected.keys()), expected)
 
 
 def _raise_common(err_text, soft=False):
