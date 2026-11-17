@@ -11,6 +11,8 @@
 #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
+from __future__ import annotations
+
 import builtins
 import json
 from abc import abstractmethod
@@ -71,8 +73,7 @@ class BgpRoute(DataModelElement):
     weight = attr.ib(type=int, default=0)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> BgpRoute
+    def from_dict(cls, json_dict: dict) -> BgpRoute:
         return BgpRoute(
             json_dict["network"],
             json_dict["originatorIp"],
@@ -88,8 +89,7 @@ class BgpRoute(DataModelElement):
             json_dict.get("weight", 0),
         )
 
-    def dict(self):
-        # type: () -> dict
+    def dict(self) -> dict:
         return {
             # used to be needed for batfish jackson deserialization
             "class": "org.batfish.datamodel.questions.BgpRoute",
@@ -107,12 +107,10 @@ class BgpRoute(DataModelElement):
             "weight": self.weight,
         }
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return "<br>".join(self._repr_html_lines())
 
-    def _repr_html_lines(self):
-        # type: () -> list[str]
+    def _repr_html_lines(self) -> list[str]:
         lines = []
         lines.append(f"Network: {self.network}")
         lines.append(f"AS Path: {self.asPath}")
@@ -131,19 +129,17 @@ class BgpRoute(DataModelElement):
 
 
 # convert a list of strings into a single comma-separated string
-def _longspace_brc_converter(value):
-    # type: (Any) -> None|str
+def _longspace_brc_converter(value: Any) -> None | str:
     if value is None or isinstance(value, str):
         return value
     if isinstance(value, Iterable):
-        result = ",".join(value)  # type: str
+        result: str = ",".join(value)
         return result
     raise ValueError(f"Invalid value {value}")
 
 
 # convert a string into a singleton list
-def _string_list_brc_converter(value):
-    # type: (Any) -> None|list[str]
+def _string_list_brc_converter(value: Any) -> None | list[str]:
     if value is None or isinstance(value, list):
         return value
     elif isinstance(value, str):
@@ -199,12 +195,10 @@ class BgpRouteDiff(DataModelElement):
     newValue = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> BgpRouteDiff
+    def from_dict(cls, json_dict: dict) -> BgpRouteDiff:
         return BgpRouteDiff(json_dict["fieldName"], json_dict["oldValue"], json_dict["newValue"])
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         # special pretty printing for certain field names
         prettyNames = {
             "asPath": "AS Path",
@@ -235,12 +229,10 @@ class BgpRouteDiffs(DataModelElement):
     diffs = attr.ib(type=list[BgpRouteDiff])
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> BgpRouteDiffs
+    def from_dict(cls, json_dict: dict) -> BgpRouteDiffs:
         return BgpRouteDiffs([BgpRouteDiff.from_dict(route_dict) for route_dict in json_dict.get("diffs", [])])
 
-    def _repr_html_(self):
-        # type: () -> str
+    def _repr_html_(self) -> str:
         return "<br>".join(diff._repr_html_() for diff in self.diffs)
 
 
@@ -262,8 +254,7 @@ class BgpSessionProperties(DataModelElement):
     remoteIp = attr.ib(type=str)
 
     @classmethod
-    def from_dict(cls, json_dict):
-        # type: (dict) -> BgpSessionProperties
+    def from_dict(cls, json_dict: dict) -> BgpSessionProperties:
         localAs = json_dict.get("localAs")
         remoteAs = json_dict.get("remoteAs")
         localIp = json_dict.get("localIp")
@@ -291,7 +282,7 @@ class NextHop(DataModelElement):
         raise NotImplementedError("NextHop elements must implement __str__")
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHop":
+    def from_dict(cls, json_dict: dict[str, Any]) -> NextHop:
         if "type" not in json_dict:
             raise ValueError(f"Unknown type of NextHop, missing the type property in: {json.dumps(json_dict)}")
         nh_type = json_dict["type"]
@@ -327,7 +318,7 @@ class NextHopDiscard(NextHop):
         return "discard"
 
     @classmethod
-    def from_dict(cls, json_dict: builtins.dict[str, Any]) -> "NextHopDiscard":
+    def from_dict(cls, json_dict: builtins.dict[str, Any]) -> NextHopDiscard:
         assert json_dict == {"type": "discard"}
         return NextHopDiscard()
 
@@ -356,7 +347,7 @@ class NextHopInterface(NextHop):
         )
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopInterface":
+    def from_dict(cls, json_dict: dict[str, Any]) -> NextHopInterface:
         assert set(json_dict.keys()) == {"type", "interface", "ip"} or set(json_dict.keys()) == {"type", "interface"}
         assert json_dict["type"] == "interface"
         interface = json_dict["interface"]
@@ -384,7 +375,7 @@ class NextHopIp(NextHop):
         return f"ip {self.ip}"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopIp":
+    def from_dict(cls, json_dict: dict[str, Any]) -> NextHopIp:
         assert set(json_dict.keys()) == {"type", "ip"}
         assert json_dict["type"] == "ip"
         ip = json_dict["ip"]
@@ -408,7 +399,7 @@ class NextHopVrf(NextHop):
         return f"vrf {escape_name(self.vrf)}"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopVrf":
+    def from_dict(cls, json_dict: dict[str, Any]) -> NextHopVrf:
         assert set(json_dict.keys()) == {"type", "vrf"}
         assert json_dict["type"] == "vrf"
         vrf = json_dict["vrf"]
@@ -433,7 +424,7 @@ class NextHopVtep(NextHop):
         return f"vni {self.vni} vtep {self.vtep}"
 
     @classmethod
-    def from_dict(cls, json_dict: dict[str, Any]) -> "NextHopVtep":
+    def from_dict(cls, json_dict: dict[str, Any]) -> NextHopVtep:
         assert set(json_dict.keys()) == {"type", "vni", "vtep"}
         assert json_dict["type"] == "vtep"
         vni = json_dict["vni"]

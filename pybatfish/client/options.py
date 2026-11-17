@@ -13,22 +13,24 @@
 #   limitations under the License.
 
 
+from __future__ import annotations
+
 from pybatfish.client.consts import CoordConsts
 
 
 class Options:
     """Global options for pybatfish."""
 
-    coordinator_host = "localhost"  # type: str
-    coordinator_work_port = CoordConsts.SVC_CFG_WORK_PORT  # type: int
-    coordinator_work_v2_port = CoordConsts.SVC_CFG_WORK_V2_PORT  # type: int
-    use_ssl = not CoordConsts.SVC_CFG_WORK_SSL_DISABLE  # type: bool
+    coordinator_host: str = "localhost"
+    coordinator_work_port: int = CoordConsts.SVC_CFG_WORK_PORT
+    coordinator_work_v2_port: int = CoordConsts.SVC_CFG_WORK_V2_PORT
+    use_ssl: bool = not CoordConsts.SVC_CFG_WORK_SSL_DISABLE
     # This should only be false for local testing
-    verify_ssl_certs = True  # type: bool
+    verify_ssl_certs: bool = True
 
-    default_network_prefix = "pcp"  # type: str
-    default_question_prefix = "q"  # type: str
-    default_snapshot_prefix = "ss_"  # type: str
+    default_network_prefix: str = "pcp"
+    default_question_prefix: str = "q"
+    default_snapshot_prefix: str = "ss_"
 
     # Parameters for urllib3.Retry, see docs there for more info
     #
@@ -51,11 +53,11 @@ class Options:
     # 8 120 204.0
     # 9 120 324.0   # This sleep of 120s will never happen, would fail instead
     #
-    request_backoff_factor = 0.8  # type: float
+    request_backoff_factor: float = 0.8
     # Number of tries to connect to coordinator initially
     # We should fail fast initially in case connection is misconfigured
-    max_initial_tries_to_connect_to_coordinator = 3  # type: int
+    max_initial_tries_to_connect_to_coordinator: int = 3
     # Number of tries to communicate with coordinator after session setup
     # We should be forgiving if coordinator is unresponsive after setting up
     # a connection (e.g. GC)
-    max_retries_to_connect_to_coordinator = 10  # type: int
+    max_retries_to_connect_to_coordinator: int = 10

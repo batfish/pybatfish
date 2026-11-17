@@ -12,6 +12,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+from __future__ import annotations
+
 import json
 import re
 from typing import Any
@@ -32,21 +34,18 @@ class Answer(dict):
     def __str__(self):
         return json.dumps(self, indent=2)
 
-    def question_name(self):
-        # type: () -> str|None
+    def question_name(self) -> str | None:
         """Return the name of the question that produced this answer."""
         if "question" in self and "instance" in self["question"] and "instanceName" in self["question"]["instance"]:
             return str(self["question"]["instance"]["instanceName"])
         return None
 
-    def dict(self):
-        # type: () -> dict
+    def dict(self) -> dict:
         """A dictionary representation of the full answer."""
         return dict(self)
 
 
-def _get_base_schema(schema):
-    # type: (str) -> str
+def _get_base_schema(schema: str) -> str:
     """Return the underlying base schema for an iterable (list or set)."""
     match = re.match(_ITERABLE_SCHEMA_PATTERN, schema)
     if match:
@@ -109,7 +108,6 @@ def _parse_json_with_schema(schema: str, json_object: Any) -> Any:
     return json_object
 
 
-def _is_iterable_schema(schema):
-    # type: (str) -> bool
+def _is_iterable_schema(schema: str) -> bool:
     """Check if a given schema is an iterable/container schema."""
     return re.match(_ITERABLE_SCHEMA_PATTERN, schema) is not None
