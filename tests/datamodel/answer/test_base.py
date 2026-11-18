@@ -22,6 +22,7 @@ from pybatfish.datamodel.answer.base import (
     _is_iterable_schema,
     _parse_json_with_schema,
 )
+from pybatfish.datamodel.primitives import ListWrapper
 
 
 def test_get_display_value_self_describing_object():
@@ -39,6 +40,17 @@ def test_get_display_value_integer():
     assert _parse_json_with_schema("Integer", 0) == 0
     assert _parse_json_with_schema("Integer", -1) == -1
     assert _parse_json_with_schema("Integer", "-1") == -1
+
+
+def test_parse_iterable_schema() -> None:
+    """Check that nested lists/sets are parsed element-wise, preserving None."""
+    parsed = _parse_json_with_schema("List<Set<Integer>>", [["1", None], None])
+    assert parsed == [[1, None], None]
+    assert isinstance(parsed, ListWrapper)
+    assert isinstance(parsed[0], ListWrapper)
+
+    with pytest.raises(ValueError, match="non-list value"):
+        _parse_json_with_schema("List<Integer>", 1)
 
 
 def test_get_display_value_unknown_schema():

@@ -14,8 +14,10 @@
 
 from __future__ import annotations
 
+import functools
 import json
 import re
+from collections.abc import Callable
 from typing import Any
 
 from pybatfish.datamodel.acl import AclTrace, TraceTree, TraceTreeList
@@ -61,51 +63,52 @@ def _parse_json_with_schema(schema: str, json_object: Any) -> Any:
         return None
 
     # See if it's an iterable and we need to process it
-    if _is_iterable_schema(schema):
+    base_schema = _get_iterable_base_schema(schema)
+    if base_schema is not None:
         if not isinstance(json_object, list):
             raise ValueError(f"Got non-list value for list/set schema {schema}. Value: {json_object}")
-        base_schema = _get_base_schema(schema)
 
-        # Handle special iterable schemas that has a custom container class
+        # Handle special iterable schemas that have a custom container class
         if base_schema == "TraceTree":
             return TraceTreeList([TraceTree.from_dict(element) for element in json_object])
 
         return ListWrapper([_parse_json_with_schema(base_schema, element) for element in json_object])
 
-    # Handle "primitive" schemas
-    if schema == "AclTrace":
-        return AclTrace.from_dict(json_object)
-    if schema == "FileLines":
-        return FileLines.from_dict(json_object)
-    if schema == "Flow":
-        return Flow.from_dict(json_object)
-    if schema == "FlowTrace":
-        return FlowTrace.from_dict(json_object)
-    if schema == "Integer" or schema == "Long":
-        return int(json_object)
-    if schema == "Interface":
-        return Interface.from_dict(json_object)
-    if schema == "Ip":
-        return str(json_object)
-    if schema == "NextHop":
-        return NextHop.from_dict(json_object)
-    if schema == "Node":
-        return json_object["name"]
-    if schema == "BgpRoute":
-        return BgpRoute.from_dict(json_object)
-    if schema == "BgpRouteDiffs":
-        return BgpRouteDiffs.from_dict(json_object)
-    if schema == "Prefix":
-        return str(json_object)
-    if schema == "SelfDescribing":
-        return _parse_json_with_schema(json_object["schema"], json_object.get("value"))
-    if schema == "String":
-        return str(json_object)
-    if schema == "Trace":
-        return Trace.from_dict(json_object)
-    if schema == "TraceTree":
-        return TraceTree.from_dict(json_object)
-    return json_object
+    parser = _SCALAR_PARSERS.get(schema)
+    return json_object if parser is None else parser(json_object)
+
+
+# Cached because answers are parsed cell by cell and regex matching dominated.
+@functools.cache
+def _get_iterable_base_schema(schema: str) -> str | None:
+    """Return the element schema if schema is an iterable (list or set), else None."""
+    match = _ITERABLE_SCHEMA_PATTERN.match(schema)
+    return match.group(2) if match else None
+
+
+def _parse_self_describing(json_object: dict[str, Any]) -> Any:
+    return _parse_json_with_schema(json_object["schema"], json_object.get("value"))
+
+
+_SCALAR_PARSERS: dict[str, Callable[[Any], Any]] = {
+    "AclTrace": AclTrace.from_dict,
+    "BgpRoute": BgpRoute.from_dict,
+    "BgpRouteDiffs": BgpRouteDiffs.from_dict,
+    "FileLines": FileLines.from_dict,
+    "Flow": Flow.from_dict,
+    "FlowTrace": FlowTrace.from_dict,
+    "Integer": int,
+    "Interface": Interface.from_dict,
+    "Ip": str,
+    "Long": int,
+    "NextHop": NextHop.from_dict,
+    "Node": lambda json_object: json_object["name"],
+    "Prefix": str,
+    "SelfDescribing": _parse_self_describing,
+    "String": str,
+    "Trace": Trace.from_dict,
+    "TraceTree": TraceTree.from_dict,
+}
 
 
 def _is_iterable_schema(schema: str) -> bool:
