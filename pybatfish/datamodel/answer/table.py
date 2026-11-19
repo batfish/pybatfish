@@ -103,19 +103,14 @@ class TableMetadata:
 
 
 def _rows_to_frame(table_metadata: TableMetadata, rows: list[Row]) -> pandas.DataFrame:
-    row_based = [
-        [_parse_json_with_schema(cm.schema, row.get(cm.name)) for cm in table_metadata.column_metadata] for row in rows
-    ]
-    column_names = table_metadata.get_column_names()
-    # convert data to column format and force dtype=object on Series
-    # This gets us consistent `None` values across columns -- no columns
-    # are treated as numeric.
-    col_based = {column_names[i]: pandas.Series(column, dtype="object") for i, column in enumerate(zip(*row_based))}
-    df = pandas.DataFrame.from_dict(col_based, orient="columns", dtype="object")
-    # Re-index to:
-    # 1. Force ordering of columns
-    # 2. Set columns even if the dataframe is empty
-    return df.reindex(labels=column_names, axis="columns")
+    columns = {
+        cm.name: [_parse_json_with_schema(cm.schema, row.get(cm.name)) for row in rows]
+        for cm in table_metadata.column_metadata
+    }
+    # dtype=object gets us consistent `None` values across columns -- no
+    # columns are treated as numeric. Passing columns= forces column ordering
+    # and keeps the columns even when there are no rows.
+    return pandas.DataFrame(columns, columns=table_metadata.get_column_names(), dtype="object")
 
 
 def is_table_ans(d: dict) -> bool:

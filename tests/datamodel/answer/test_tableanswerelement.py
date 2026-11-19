@@ -75,6 +75,7 @@ def test_table_answer_element_deser_no_rows():
     assert len(table.rows) == 0
     assert table.frame().empty
     assert table.frame().columns == list(map(attrgetter("name"), table.metadata.column_metadata))
+    assert table.frame()["col1"].dtype == "object"
 
 
 def test_table_answer_element_excluded_rows():
