@@ -14,6 +14,8 @@
 import json
 import os
 import zipfile
+from io import BytesIO
+from pathlib import Path
 
 import pytest
 
@@ -180,11 +182,31 @@ def test_zip_dir_bad_file_time(tmpdir):
     in_file_path = os.path.join(in_dir_path, filename)
     zip_file = str(tmpdir.join("file.zip"))
 
-    # Set accessed and modified time of file we're about to zip to some time pre-1980
+    # Set accessed and modified time of the file and its directory to some time pre-1980
     _1960_01_01 = -315590400.0
     os.utime(in_file_path, (_1960_01_01, _1960_01_01))
+    os.utime(in_dir_path, (_1960_01_01, _1960_01_01))
 
     zip_dir(in_dir_path, zip_file)
 
     # Make sure the zip contains the file with the correct contents
     _assert_zip_contents(zip_file, os.path.join(dirname, filename), contents, tmpdir)
+    with zipfile.ZipFile(zip_file) as zf:
+        assert {info.date_time[0] for info in zf.infolist()} == {1980}
+
+
+def test_zip_dir_to_file_object(tmp_path: Path) -> None:
+    """Make sure zipping into an in-memory file object works."""
+    dirname = "dirname"
+    filename = "filename"
+    contents = "file contents"
+    in_dir = tmp_path / dirname
+    in_dir.mkdir()
+    in_dir_path = str(in_dir)
+    _make_config(in_dir_path, filename, contents)
+    buffer = BytesIO()
+
+    zip_dir(in_dir_path, buffer)
+
+    with zipfile.ZipFile(buffer) as zf:
+        assert zf.read(f"{dirname}/{filename}").decode() == contents

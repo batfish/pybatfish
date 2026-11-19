@@ -21,7 +21,7 @@ import os
 import tempfile
 import zipfile
 from collections.abc import Callable
-from io import SEEK_CUR, SEEK_SET
+from io import SEEK_CUR, SEEK_SET, BytesIO
 from typing import (
     IO,
     Any,
@@ -629,15 +629,19 @@ class Session:
 
         encoded_file = None
         if add_files is not None:
-            file_to_send = add_files
+            zip_bytes = None
             if os.path.isdir(add_files):
-                temp_zip_file = tempfile.NamedTemporaryFile()
-                zip_dir(add_files, temp_zip_file)
-                file_to_send = temp_zip_file.name
+                # The whole zip is base64-encoded into the request anyway, so
+                # build it in memory rather than in a temp file.
+                with BytesIO() as zip_buffer:
+                    zip_dir(add_files, zip_buffer)
+                    zip_bytes = zip_buffer.getvalue()
+            elif os.path.isfile(add_files):
+                with open(add_files, "rb") as f:
+                    zip_bytes = f.read()
 
-            if os.path.isfile(file_to_send):
-                with open(file_to_send, "rb") as f:
-                    encoded_file = base64.b64encode(f.read()).decode("ascii")
+            if zip_bytes is not None:
+                encoded_file = base64.b64encode(zip_bytes).decode("ascii")
 
         json_data = {
             "snapshotBase": base_name,
@@ -1212,8 +1216,6 @@ def _text_with_platform(text: str, platform: str | None) -> str:
 
 def _create_in_memory_zip(text: str, filename: str, platform: str | None) -> IO:
     """Creates an in-memory zip file for a single file snapshot."""
-    from io import BytesIO
-
     data = BytesIO()
     with zipfile.ZipFile(data, "w", zipfile.ZIP_DEFLATED, False) as zf:
         zipfilename = os.path.join("snapshot", "configs", filename)

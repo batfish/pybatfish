@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import os
 import string
-import tempfile
 import uuid
 import zipfile
 from collections.abc import (
@@ -34,10 +33,6 @@ from pybatfish.exception import QuestionValidationException
 # Max length of snapshot/question names.
 # Not 255 to accommodate potential folders/extensions, etc.
 _MAX_FILENAME_LEN = 150
-
-# Minimum timestamp supported by ZIP format
-# See issue https://bugs.python.org/issue34097
-_MIN_ZIP_TIMESTAMP = 315561600.0
 
 # Characters that must be escaped in name
 # Should be in sync with SPECIAL_CHARS in CommonParser.java
@@ -142,10 +137,12 @@ def zip_dir(dir_path: str, out_file: str | IO[bytes]) -> None:
 
     :param dir_path: path to the directory to be zipped up
     :type dir_path: str
-    :param out_file: path to the resulting zipfile
-    :type out_file: str
+    :param out_file: path to, or binary file object for, the resulting zipfile
+    :type out_file: str | IO[bytes]
     """
-    with zipfile.ZipFile(out_file, "w", zipfile.ZIP_DEFLATED) as zipWriter:
+    # strict_timestamps=False clamps pre-1980 mtimes, which the ZIP format
+    # cannot represent, to 1980-01-01 instead of raising.
+    with zipfile.ZipFile(out_file, "w", zipfile.ZIP_DEFLATED, strict_timestamps=False) as zipWriter:
         rel_root = os.path.abspath(os.path.join(dir_path, os.path.pardir))
 
         for root, _dirs, files in os.walk(dir_path):
@@ -153,19 +150,7 @@ def zip_dir(dir_path: str, out_file: str | IO[bytes]) -> None:
             for f in files:
                 filename = os.path.join(root, f)
                 arcname = os.path.join(os.path.relpath(root, rel_root), f)
-
-                # Zipped files must be from 1980 or later
-                # So copy any file older than that to a tempfile to bump the timestamp
-                if os.path.getmtime(filename) < _MIN_ZIP_TIMESTAMP:
-                    with (
-                        tempfile.NamedTemporaryFile("w+b") as temp_file,
-                        open(filename, "rb") as file_src,
-                    ):
-                        temp_file.write(file_src.read())
-                        temp_file.flush()
-                        zipWriter.write(temp_file.name, arcname)
-                else:
-                    zipWriter.write(filename, arcname)
+                zipWriter.write(filename, arcname)
 
 
 def escape_html(s: str) -> str:
